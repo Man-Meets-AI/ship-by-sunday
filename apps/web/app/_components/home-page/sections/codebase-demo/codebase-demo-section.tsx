@@ -50,7 +50,7 @@ export function CodebaseDemoSectionBlock({
 
 	return (
 		<section className="flex flex-col">
-			<div className="relative left-1/2 -mt-4 w-screen -translate-x-1/2 bg-[#111111] text-white sm:-mt-6 lg:-mt-8">
+			<div className="relative left-1/2 w-screen -translate-x-1/2 bg-[#111111] text-white">
 				<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-16 lg:pt-8">
 					<CodebaseDemoTopBar tone="dark" />
 					<ScrollReveal direction="none" className="flex flex-1">

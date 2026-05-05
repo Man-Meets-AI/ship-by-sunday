@@ -63,7 +63,10 @@ function RotatingPricingHeadline({
 			className="leading-none"
 		>
 			<span className="block font-heading-serif text-4xl font-normal italic leading-[0.9] sm:text-5xl lg:text-7xl">
-				{headline.prefix} {phraseNode}
+				{headline.prefix}
+			</span>
+			<span className="block font-heading-serif text-4xl font-normal italic leading-[0.9] sm:text-5xl lg:text-7xl">
+				{phraseNode}
 			</span>
 			<span className="block font-home-inter mt-1 text-xl font-normal text-foreground/70 sm:text-2xl lg:text-3xl">
 				{accent}

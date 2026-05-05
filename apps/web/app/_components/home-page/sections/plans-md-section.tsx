@@ -46,23 +46,23 @@ function MobilePlansMdSection({
 		<div className="space-y-12 px-6 py-16 sm:px-10 lg:hidden">
 			<div className="space-y-7">
 				<div className="leading-none">
-					<p className="font-heading-serif text-[4.75rem] tracking-normal italic">
+					<p className="font-heading-serif text-[clamp(3rem,14vw,4.75rem)] tracking-normal italic">
 						{plansMdSection.title}
 					</p>
-					<p className="font-heading-serif text-[2rem] tracking-normal">
+					<p className="font-heading-serif text-[clamp(1.5rem,6vw,2rem)] tracking-normal">
 						{plansMdSection.subtitleLead}
 					</p>
-					<p className="font-home-inter -mt-1 text-[3rem] leading-none font-bold tracking-normal">
+					<p className="font-home-inter -mt-1 text-[clamp(2rem,9vw,3rem)] leading-none font-bold tracking-normal">
 						{plansMdSection.subtitleEmphasis}
 					</p>
-					<p className="font-home-inter text-[1.6rem] leading-none font-normal tracking-normal">
+					<p className="font-home-inter text-[clamp(1.15rem,5vw,1.6rem)] leading-none font-normal tracking-normal">
 						{plansMdSection.subtitleTail}
 					</p>
 				</div>
 				<MobilePlanDocument callouts={plansMdSection.callouts} />
 			</div>
 
-			<p className="font-heading-serif max-w-[12ch] text-[3.1rem] leading-[0.92] tracking-normal">
+			<p className="font-heading-serif max-w-[12ch] text-[clamp(2rem,9vw,3.1rem)] leading-[0.92] tracking-normal">
 				{plansMdSection.tagline.lead}
 				<span className="italic">{plansMdSection.tagline.emphasis}</span>
 				{plansMdSection.tagline.tail}

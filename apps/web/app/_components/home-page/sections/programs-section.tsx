@@ -40,7 +40,7 @@ function ProgramsDesktopFrame({
 	readonly programsSection: ProgramsSection;
 }) {
 	return (
-		<div className="relative mx-auto hidden h-[1836px] w-[1440px] max-w-none xl:block">
+		<div className="relative mx-auto hidden h-[1836px] w-[1440px] max-w-none min-[1440px]:block">
 			<div className="absolute top-[89px] left-[283px] whitespace-nowrap">
 				<p
 					className="font-heading-serif text-[102px] leading-[0.95] font-normal italic"
@@ -262,7 +262,7 @@ function ProgramsMobileLayout({
 	readonly programsSection: ProgramsSection;
 }) {
 	return (
-		<div className="mx-auto flex w-full max-w-3xl flex-col gap-14 px-6 py-20 sm:px-12 xl:hidden">
+		<div className="mx-auto flex w-full max-w-3xl flex-col gap-14 px-6 py-20 sm:px-12 min-[1440px]:hidden">
 			<div className="space-y-8">
 				<div>
 					<p

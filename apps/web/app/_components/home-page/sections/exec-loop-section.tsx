@@ -82,15 +82,16 @@ export function ExecLoopSectionBlock({
 												{step.description}
 											</p>
 										</div>
-										{isSelected ? (
-											<span className="shrink-0 text-sm text-muted-foreground">
-												Selected
-											</span>
-										) : (
-											<span className="shrink-0 rounded-lg border border-foreground/20 px-4 py-1.5 text-sm font-medium text-foreground">
-												Select
-											</span>
-										)}
+										<span
+											className={cn(
+												"inline-flex w-24 shrink-0 items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium",
+												isSelected
+													? "border-foreground bg-foreground/10 text-foreground"
+													: "border-foreground/20 text-foreground",
+											)}
+										>
+											{isSelected ? "Selected" : "Select"}
+										</span>
 									</button>
 								);
 							})}

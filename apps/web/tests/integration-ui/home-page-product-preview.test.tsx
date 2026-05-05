@@ -233,6 +233,9 @@ describe("CodebaseDemoSectionBlock", () => {
 		expectPageTextNotToContain(
 			"An exec loop is the repeatable path from decision to agent run",
 		);
+		expect(
+			screen.getAllByRole("img", { name: "Founder portrait" }),
+		).toHaveLength(1);
 		expect(document.querySelector("#system")).toBeNull();
 	});
 

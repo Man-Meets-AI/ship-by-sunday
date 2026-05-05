@@ -1,11 +1,11 @@
 import { getHomePageRenderModel } from "@/app/_lib/home-page-render-model";
 
+import { CommonQuestionsSection } from "./sections/common-questions-section";
 import {
-	CommonQuestionsSection,
 	FooterSection,
 	PricingSectionBlock,
-	SocialProofSection,
-} from "./sections/closing-sections";
+} from "./sections/pricing-footer-sections";
+import { SocialProofSection } from "./sections/social-proof-section";
 import { HomeHeroSection } from "./sections/hero-sections";
 import { CodebaseDemoSectionBlock } from "./sections/codebase-demo/codebase-demo-section";
 import { DurabilitySectionBlock } from "./sections/durability-section";
@@ -21,7 +21,7 @@ export default async function HomePage() {
 
 	return (
 		<main className="overflow-x-clip bg-background text-foreground">
-			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pt-4 pb-12 sm:px-12 sm:pt-6 sm:pb-20 lg:pt-8">
+			<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pb-12 sm:px-12 sm:pb-20">
 				{shouldRenderProductPreview ? (
 					<CodebaseDemoSectionBlock
 						section={homePageRenderModel.productPreview.section}
@@ -32,10 +32,12 @@ export default async function HomePage() {
 						/>
 					</CodebaseDemoSectionBlock>
 				) : (
-					<HomePageIdeaContinuation
-						homePageRenderModel={homePageRenderModel}
-						heroVariant="lead"
-					/>
+					<div className="pt-4 sm:pt-6 lg:pt-8">
+						<HomePageIdeaContinuation
+							homePageRenderModel={homePageRenderModel}
+							heroVariant="lead"
+						/>
+					</div>
 				)}
 				{homePageRenderModel.socialProof.isEnabled ? (
 					<SocialProofSection
