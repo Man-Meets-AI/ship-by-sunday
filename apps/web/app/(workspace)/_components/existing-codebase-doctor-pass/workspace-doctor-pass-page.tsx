@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	CheckCircle2,
 	Circle,
@@ -13,9 +13,12 @@ import {
 } from "lucide-react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { toast } from "sonner";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
+import {
+	doctorPassDetailsPanelId,
+	doctorPassPreviewPanelId,
+} from "@/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-panels";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
 import {
 	showWorkspaceActionErrorToast,
@@ -37,9 +40,6 @@ type ApprovalState = "idle" | "approving" | "approved" | "errored";
 const workspaceDoctorPassToastIds = {
 	approvePreviewSuccess: "workspace-doctor-pass-approve-preview-success",
 	approvePreviewError: "workspace-doctor-pass-approve-preview-error",
-	runCompleted: "workspace-doctor-pass-run-completed",
-	runFailed: "workspace-doctor-pass-run-failed",
-	uploadCompleted: "workspace-doctor-pass-upload-completed",
 } as const;
 
 export function WorkspaceDoctorPassPage({
@@ -70,39 +70,6 @@ export function WorkspaceDoctorPassPage({
 	const canApprove =
 		doctorPassRun?.syncPreviewStatus === "ready" &&
 		Boolean(doctorPassRun.syncPreviewDigest);
-
-	useEffect(() => {
-		if (!doctorPassRun) {
-			return;
-		}
-		if (doctorPassRun.syncPreviewStatus === "uploaded") {
-			showWorkspaceActionSuccessToast({
-				id: `${workspaceDoctorPassToastIds.uploadCompleted}-${doctorPassRun._id}`,
-				title: "Findings uploaded.",
-			});
-			return;
-		}
-		if (doctorPassRun.syncPreviewStatus === "ready") {
-			showWorkspaceActionSuccessToast({
-				id: `${workspaceDoctorPassToastIds.runCompleted}-${doctorPassRun._id}`,
-				title: `Doctor Pass completed. Review ${formatCount(
-					doctorPassRun.syncPreviewFindingsCount ?? 0,
-					"finding",
-				)} before upload.`,
-			});
-			return;
-		}
-		if (
-			doctorPassRun.status === "failed" ||
-			doctorPassRun.status === "blocked"
-		) {
-			toast.error("Doctor Pass failed. View run details.", {
-				id: `${workspaceDoctorPassToastIds.runFailed}-${doctorPassRun._id}`,
-				duration: 6000,
-				position: "bottom-right",
-			});
-		}
-	}, [doctorPassRun]);
 
 	async function approveCurrentPreview() {
 		if (!doctorPassRun?.syncPreviewDigest || !canApprove) {
@@ -324,7 +291,9 @@ function StatusSummaryPanel({
 
 	return (
 		<section
+			id={doctorPassDetailsPanelId}
 			aria-labelledby="workspace-doctor-pass-summary-heading"
+			tabIndex={-1}
 			className="rounded-xl border border-border/60 bg-background p-5"
 		>
 			<div className="flex items-start gap-3">
@@ -430,7 +399,11 @@ function StepIcon({
 function PreviewPanel({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 	if (!doctorPassRun) {
 		return (
-			<section className="rounded-xl border border-border/60 bg-background p-5">
+			<section
+				id={doctorPassPreviewPanelId}
+				tabIndex={-1}
+				className="rounded-xl border border-border/60 bg-background p-5"
+			>
 				<div className="flex items-start gap-3">
 					<Upload className="mt-0.5 size-4 text-foreground" aria-hidden />
 					<div className="min-w-0">
@@ -453,7 +426,11 @@ function PreviewPanel({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 	}
 
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
+		<section
+			id={doctorPassPreviewPanelId}
+			tabIndex={-1}
+			className="rounded-xl border border-border/60 bg-background p-5"
+		>
 			<div className="flex items-start gap-3">
 				<FileJson className="mt-0.5 size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">

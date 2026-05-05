@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 
@@ -53,6 +54,7 @@ export function ExistingCodebaseSetupPage({
 	initialSetupState: WorkspaceSetupState;
 	initialRenderedAt: number;
 }) {
+	const router = useRouter();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const [lastMutationState, setLastMutationState] =
 		useState<WorkspaceSetupState | null>(null);
@@ -211,6 +213,10 @@ export function ExistingCodebaseSetupPage({
 				...(repositoryBindingId ? { repositoryBindingId } : {}),
 			});
 			showWorkspaceActionSuccessToast({
+				action: {
+					label: "Open Doctor Pass",
+					onClick: () => router.push(routeConfig.workspaceDoctorPass),
+				},
 				id: workspaceSetupToastIds.doctorPassSuccess,
 				title: "Doctor pass started",
 			});

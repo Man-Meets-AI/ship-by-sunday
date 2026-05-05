@@ -12,13 +12,17 @@ const preparePairingMock = vi.fn();
 const cancelPairingMock = vi.fn();
 const saveWorkspaceProjectMock = vi.fn();
 const startDoctorPassRunMock = vi.fn();
-const { reportClientErrorMock, toastErrorMock, toastSuccessMock } = vi.hoisted(
-	() => ({
+const {
+	reportClientErrorMock,
+	routerPushMock,
+	toastErrorMock,
+	toastSuccessMock,
+} = vi.hoisted(() => ({
 		reportClientErrorMock: vi.fn(),
+		routerPushMock: vi.fn(),
 		toastErrorMock: vi.fn(),
 		toastSuccessMock: vi.fn(),
-	}),
-);
+}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -45,6 +49,12 @@ vi.mock("next/link", () => ({
 			{children}
 		</a>
 	),
+}));
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
 }));
 
 vi.mock("convex/react", () => ({
@@ -204,6 +214,7 @@ describe("ExistingCodebaseSetupPage", () => {
 			syncPreviewStatus: "not_ready",
 		});
 		reportClientErrorMock.mockReset();
+		routerPushMock.mockReset();
 		toastErrorMock.mockReset();
 		toastSuccessMock.mockReset();
 		useMutationMock.mockImplementation((mutationRef: string) => {
@@ -428,11 +439,19 @@ describe("ExistingCodebaseSetupPage", () => {
 			runnerMode: "daemon",
 		});
 		expect(toastSuccessMock).toHaveBeenCalledWith("Doctor pass started", {
+			action: expect.objectContaining({
+				label: "Open Doctor Pass",
+			}),
 			id: "workspace-setup-doctor-pass-success",
 			description: undefined,
-			duration: 1800,
+			duration: 6000,
 			position: "bottom-right",
 		});
+		const toastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Doctor pass started",
+		)?.[1];
+		toastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/doctor-pass");
 	});
 
 	it("saves the default open destination through the workspace contract", async () => {

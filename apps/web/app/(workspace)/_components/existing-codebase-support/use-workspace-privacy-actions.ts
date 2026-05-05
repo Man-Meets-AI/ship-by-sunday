@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
@@ -45,6 +46,7 @@ export function useWorkspacePrivacyActions({
 	initialFindings: WorkspaceFindingDocument[];
 	now?: number;
 }) {
+	const router = useRouter();
 	const revokeRunner = useMutation(api.workspace.revokeWorkspaceRunner);
 	const markFindingsDeleted = useMutation(
 		api.workspace.markWorkspaceFindingsDeleted,
@@ -99,6 +101,10 @@ export function useWorkspacePrivacyActions({
 			});
 			setRevokeState("done");
 			showWorkspaceActionSuccessToast({
+				action: {
+					label: "Open Setup",
+					onClick: () => router.push(routeConfig.workspaceSetup),
+				},
 				id: workspacePrivacyToastIds.revokeRunnerSuccess,
 				title: "Runner revoked",
 				description: "Pair again from Setup to resume.",
@@ -143,6 +149,10 @@ export function useWorkspacePrivacyActions({
 			);
 			setDeleteState("done");
 			showWorkspaceActionSuccessToast({
+				action: {
+					label: "View findings",
+					onClick: () => router.push(routeConfig.workspaceFindings),
+				},
 				id: workspacePrivacyToastIds.deleteFindingsSuccess,
 				title: "Findings hidden",
 			});

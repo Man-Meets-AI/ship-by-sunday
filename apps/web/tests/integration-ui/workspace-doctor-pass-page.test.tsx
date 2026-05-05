@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,13 +7,17 @@ const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
 const useMutationMock = vi.fn();
 const approveSyncPreviewMock = vi.fn();
-const { reportClientErrorMock, toastErrorMock, toastSuccessMock } = vi.hoisted(
-	() => ({
+const {
+	reportClientErrorMock,
+	routerPushMock,
+	toastErrorMock,
+	toastSuccessMock,
+} = vi.hoisted(() => ({
 		reportClientErrorMock: vi.fn(),
+		routerPushMock: vi.fn(),
 		toastErrorMock: vi.fn(),
 		toastSuccessMock: vi.fn(),
-	}),
-);
+}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -28,6 +32,12 @@ vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
 	useMutation: (mutationRef: string) => useMutationMock(mutationRef),
 	useQuery: (queryRef: string, args: unknown) => useQueryMock(queryRef, args),
+}));
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
 }));
 
 vi.mock("sonner", () => ({
@@ -93,6 +103,7 @@ describe("WorkspaceDoctorPassPage", () => {
 			syncPreviewStatus: "approved",
 		});
 		reportClientErrorMock.mockReset();
+		routerPushMock.mockReset();
 		toastErrorMock.mockReset();
 		toastSuccessMock.mockReset();
 		useMutationMock.mockImplementation((mutationRef: string) => {
@@ -137,14 +148,6 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(
 			screen.getByTestId("workspace-doctor-pass-local-nav").textContent,
 		).toContain("Doctor Pass");
-		await waitFor(() => {
-			expect(toastSuccessMock).toHaveBeenCalledWith(
-				"Doctor Pass completed. Review 2 findings before upload.",
-				expect.objectContaining({
-					id: "workspace-doctor-pass-run-completed-doctorPassRuns_1",
-				}),
-			);
-		});
 
 		await user.click(
 			screen.getByRole("button", { name: /Approve findings upload/i }),
@@ -238,14 +241,6 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(
 			screen.getByRole("link", { name: "View runs" }).getAttribute("href"),
 		).toBe("/workspace/runs");
-		await waitFor(() => {
-			expect(toastSuccessMock).toHaveBeenCalledWith(
-				"Findings uploaded.",
-				expect.objectContaining({
-					id: "workspace-doctor-pass-upload-completed-doctorPassRuns_1",
-				}),
-			);
-		});
 	});
 
 	it("shows failed run status and next action", async () => {
@@ -280,13 +275,5 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(
 			screen.getByText(/Next action: rerun Doctor Pass locally/),
 		).toBeTruthy();
-		await waitFor(() => {
-			expect(toastErrorMock).toHaveBeenCalledWith(
-				"Doctor Pass failed. View run details.",
-				expect.objectContaining({
-					id: "workspace-doctor-pass-run-failed-doctorPassRuns_1",
-				}),
-			);
-		});
 	});
 });

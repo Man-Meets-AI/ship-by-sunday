@@ -15,6 +15,7 @@ const {
 	revokeManagedGithubMock,
 	revokeRunnerMock,
 	reportClientErrorMock,
+	routerPushMock,
 	toastErrorMock,
 	toastSuccessMock,
 } = vi.hoisted(() => ({
@@ -23,6 +24,7 @@ const {
 	revokeManagedGithubMock: vi.fn(),
 	revokeRunnerMock: vi.fn(),
 	reportClientErrorMock: vi.fn(),
+	routerPushMock: vi.fn(),
 	toastErrorMock: vi.fn(),
 	toastSuccessMock: vi.fn(),
 }));
@@ -56,6 +58,12 @@ vi.mock("convex/react", () => ({
 		}
 		throw new Error(`Unexpected mutation ${mutationRef}`);
 	},
+}));
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
 }));
 
 vi.mock("sonner", () => ({
@@ -174,6 +182,7 @@ describe("WorkspacePrivacyPage", () => {
 		revokeManagedGithubMock.mockReset();
 		revokeRunnerMock.mockReset();
 		reportClientErrorMock.mockReset();
+		routerPushMock.mockReset();
 		toastErrorMock.mockReset();
 		toastSuccessMock.mockReset();
 	});
@@ -367,12 +376,20 @@ describe("WorkspacePrivacyPage", () => {
 		});
 		await waitFor(() => {
 			expect(toastSuccessMock).toHaveBeenCalledWith("Runner revoked", {
+				action: expect.objectContaining({
+					label: "Open Setup",
+				}),
 				id: "workspace-privacy-revoke-runner-success",
 				description: "Pair again from Setup to resume.",
-				duration: 1800,
+				duration: 6000,
 				position: "bottom-right",
 			});
 		});
+		const revokeRunnerToastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Runner revoked",
+		)?.[1];
+		revokeRunnerToastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/setup");
 
 		await user.click(
 			screen.getByRole("button", { name: /Delete synced findings/i }),
@@ -383,12 +400,20 @@ describe("WorkspacePrivacyPage", () => {
 		});
 		await waitFor(() => {
 			expect(toastSuccessMock).toHaveBeenCalledWith("Findings hidden", {
+				action: expect.objectContaining({
+					label: "View findings",
+				}),
 				id: "workspace-privacy-delete-findings-success",
 				description: undefined,
-				duration: 1800,
+				duration: 6000,
 				position: "bottom-right",
 			});
 		});
+		const deleteFindingsToastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Findings hidden",
+		)?.[1];
+		deleteFindingsToastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/findings");
 
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("dangerously");
