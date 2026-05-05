@@ -65,8 +65,13 @@ export async function runBrokenAppTriageWorkflow({
 		throw new Error("Approved workflow run is not broken-app-triage.");
 	}
 
-	const { workflowRunId, branchName, profileName, writeLeaseExpiresAt } =
-		approvedWorkflowRun;
+	const {
+		workflowRunId,
+		branchName,
+		profileName,
+		writeLeaseId,
+		writeLeaseExpiresAt,
+	} = approvedWorkflowRun;
 	const localRunDirectoryRef = `.sbs/runs/${workflowRunId}`;
 	const localRunDirectory = path.join(repositoryRoot, localRunDirectoryRef);
 	assertSafeWorkflowRunId(workflowRunId);
@@ -80,6 +85,7 @@ export async function runBrokenAppTriageWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "write-lease",
@@ -98,6 +104,7 @@ export async function runBrokenAppTriageWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "dirty-state",
@@ -147,6 +154,7 @@ export async function runBrokenAppTriageWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "reproduction-command",
@@ -166,6 +174,7 @@ export async function runBrokenAppTriageWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "reproduction-command",
@@ -243,6 +252,7 @@ export async function runBrokenAppTriageWorkflow({
 			payload: {
 				eventType: "workflow.proof.completed",
 				workflowId: BROKEN_APP_TRIAGE_WORKFLOW_ID,
+				writeLeaseId,
 				proofStatus,
 				proofSummary,
 				touchedFileRefs: [],
@@ -348,6 +358,7 @@ async function blockWorkflow({
 	workflowRunId,
 	branchName,
 	profileName,
+	writeLeaseId,
 	localRunDirectoryRef,
 	localRunDirectory,
 	blockedStage,
@@ -360,6 +371,7 @@ async function blockWorkflow({
 	workflowRunId: string;
 	branchName: string;
 	profileName: string;
+	writeLeaseId: string;
 	localRunDirectoryRef: string;
 	localRunDirectory: string;
 	blockedStage: string;
@@ -411,6 +423,7 @@ async function blockWorkflow({
 			payload: {
 				eventType: "workflow.blocked",
 				workflowId: BROKEN_APP_TRIAGE_WORKFLOW_ID,
+				writeLeaseId,
 				blockedStage,
 				blockedReason,
 			},

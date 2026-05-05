@@ -29,7 +29,9 @@ function createCredential(): RunnerCredential {
 	};
 }
 
-function createMatureRepoAdoptionPacket(overrides: Record<string, unknown> = {}) {
+function createMatureRepoAdoptionPacket(
+	overrides: Record<string, unknown> = {},
+) {
 	return {
 		workflowRunId: "workflowRuns_mature",
 		workflowId: "mature-repo-adoption",
@@ -177,8 +179,7 @@ describe("workflow run API", () => {
 					rollbackNotes: "Delete the local observability branch after review.",
 					localWorkflowPacketRef:
 						".sbs/runs/workflowRuns_observability/workflow-packet.json",
-					localProofRef:
-						".sbs/runs/workflowRuns_observability/proof.json",
+					localProofRef: ".sbs/runs/workflowRuns_observability/proof.json",
 				}),
 		});
 

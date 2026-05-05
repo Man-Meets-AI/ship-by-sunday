@@ -162,6 +162,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "terminal-confirmation",
@@ -178,6 +179,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "approval-packet",
@@ -198,6 +200,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "approval-packet",
@@ -214,6 +217,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "write-lease",
@@ -232,6 +236,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "dirty-state",
@@ -260,6 +265,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "base-branch",
@@ -278,6 +284,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "branch",
@@ -321,6 +328,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "adoption-audit",
@@ -379,8 +387,16 @@ export async function runMatureRepoAdoptionWorkflow({
 		createdAt: now,
 	});
 	await writeJsonArtifact(repositoryRoot, auditRef, audit);
-	await writeTextArtifact(repositoryRoot, programRef, renderAdoptionProgram(audit));
-	await writeTextArtifact(repositoryRoot, execPlanRef, renderFirstExecPlan(audit));
+	await writeTextArtifact(
+		repositoryRoot,
+		programRef,
+		renderAdoptionProgram(audit),
+	);
+	await writeTextArtifact(
+		repositoryRoot,
+		execPlanRef,
+		renderFirstExecPlan(audit),
+	);
 
 	const { proofCommandResults, unexpectedTouchedFiles } =
 		await runProofCommands(repositoryRoot);
@@ -440,6 +456,7 @@ export async function runMatureRepoAdoptionWorkflow({
 			payload: {
 				eventType: "workflow.proof.completed",
 				workflowId: MATURE_REPO_ADOPTION_WORKFLOW_ID,
+				writeLeaseId,
 				proofStatus,
 				proofSummary,
 				touchedFileRefs: unexpectedTouchedFiles,
@@ -502,7 +519,11 @@ async function buildMatureRepoAdoptionAudit(
 	const ciRefs = repoRefs.filter(isCiRef);
 	const releaseRefs = repoRefs.filter(isReleaseRef);
 	const adoptionReadiness = [
-		buildReadiness("agent-instructions", "Agent instructions", agentInstructionRefs),
+		buildReadiness(
+			"agent-instructions",
+			"Agent instructions",
+			agentInstructionRefs,
+		),
 		buildReadiness("docs-spine", "Documentation spine", docsRefs),
 		buildReadiness("validation-map", "Validation commands", validationRefs),
 		buildReadiness("ci-release", "CI or release evidence", [
@@ -749,14 +770,20 @@ function isReleaseRef(ref: string) {
 	return lower.includes("release") || lower.includes("deploy");
 }
 
-async function checkoutOrCreateBranch(repositoryRoot: string, branchName: string) {
+async function checkoutOrCreateBranch(
+	repositoryRoot: string,
+	branchName: string,
+) {
 	const currentBranch = await runGit(repositoryRoot, [
 		"rev-parse",
 		"--abbrev-ref",
 		"HEAD",
 	]);
 	if (!currentBranch.succeeded) {
-		return { succeeded: false, blockedReason: "Unable to read current branch." };
+		return {
+			succeeded: false,
+			blockedReason: "Unable to read current branch.",
+		};
 	}
 	if (currentBranch.stdout.trim() === branchName) {
 		return { succeeded: true };
@@ -790,7 +817,8 @@ async function runProofCommands(repositoryRoot: string) {
 		["git", ["diff", "--check"]],
 	] as const;
 	const results: ProofCommandResult[] = [];
-	const unexpectedTouchedFiles = await listUnexpectedTouchedFiles(repositoryRoot);
+	const unexpectedTouchedFiles =
+		await listUnexpectedTouchedFiles(repositoryRoot);
 	for (const [command, args] of commands) {
 		const result = await runBoundedProcess({
 			command,
@@ -904,6 +932,7 @@ async function blockWorkflow({
 	workflowRunId,
 	branchName,
 	profileName,
+	writeLeaseId,
 	localRunDirectoryRef,
 	localRunDirectory,
 	blockedStage,
@@ -916,6 +945,7 @@ async function blockWorkflow({
 	workflowRunId: string;
 	branchName: string;
 	profileName: string;
+	writeLeaseId: string;
 	localRunDirectoryRef: string;
 	localRunDirectory: string;
 	blockedStage: string;
@@ -937,13 +967,13 @@ async function blockWorkflow({
 		createdArtifacts,
 		proofCommandsRun: [],
 		proofCommandResults: [],
-			blockedProof: [
-				{
-					stage: blockedStage,
-					reason: blockedReason,
-					nextApprovalRequired: true,
-				},
-			],
+		blockedProof: [
+			{
+				stage: blockedStage,
+				reason: blockedReason,
+				nextApprovalRequired: true,
+			},
+		],
 		rollbackInstructions:
 			"No source files were patched. Resolve the block and approve a fresh adoption workflow if needed.",
 		nextRecommendedWorkflow: NEXT_RECOMMENDED_WORKFLOW_ID,
@@ -970,6 +1000,7 @@ async function blockWorkflow({
 			payload: {
 				eventType: "workflow.blocked",
 				workflowId: MATURE_REPO_ADOPTION_WORKFLOW_ID,
+				writeLeaseId,
 				blockedStage,
 				blockedReason,
 			},
@@ -1012,18 +1043,25 @@ function assertSafeBranchName(branchName: string) {
 
 function assertApprovedProfile(profileName: string) {
 	if (profileName !== DEFAULT_PROFILE_NAME) {
-		throw new Error("Mature repo adoption requires the sbs-workspace-write profile.");
+		throw new Error(
+			"Mature repo adoption requires the sbs-workspace-write profile.",
+		);
 	}
 }
 
 function assertApprovedMatureRepoAdoptionPacket(
 	approvedWorkflowRun: ApprovedWorkflowRunPacket,
 ) {
-	if (approvedWorkflowRun.workflowVersion !== MATURE_REPO_ADOPTION_WORKFLOW_VERSION) {
+	if (
+		approvedWorkflowRun.workflowVersion !==
+		MATURE_REPO_ADOPTION_WORKFLOW_VERSION
+	) {
 		throw new Error("Mature repo adoption workflow version is not approved.");
 	}
 	if (approvedWorkflowRun.writeLeaseDurationMinutes !== 30) {
-		throw new Error("Mature repo adoption write lease duration is not approved.");
+		throw new Error(
+			"Mature repo adoption write lease duration is not approved.",
+		);
 	}
 	if (approvedWorkflowRun.dirtyStatePolicy !== "require_clean_worktree") {
 		throw new Error("Mature repo adoption requires a clean-worktree policy.");
@@ -1059,12 +1097,18 @@ function assertApprovedMatureRepoAdoptionPacket(
 		MATURE_REPO_ADOPTION_STOP_CONDITIONS,
 		"stop conditions",
 	);
-	if (approvedWorkflowRun.rollbackNotes !== MATURE_REPO_ADOPTION_ROLLBACK_NOTES) {
+	if (
+		approvedWorkflowRun.rollbackNotes !== MATURE_REPO_ADOPTION_ROLLBACK_NOTES
+	) {
 		throw new Error("Mature repo adoption rollback notes are not approved.");
 	}
 	const expectedWorkflowPacketRef = `.sbs/runs/${approvedWorkflowRun.workflowRunId}/workflow-packet.json`;
-	if (approvedWorkflowRun.localWorkflowPacketRef !== expectedWorkflowPacketRef) {
-		throw new Error("Mature repo adoption workflow packet ref is not approved.");
+	if (
+		approvedWorkflowRun.localWorkflowPacketRef !== expectedWorkflowPacketRef
+	) {
+		throw new Error(
+			"Mature repo adoption workflow packet ref is not approved.",
+		);
 	}
 	const expectedProofRef = `.sbs/runs/${approvedWorkflowRun.workflowRunId}/proof.json`;
 	if (approvedWorkflowRun.localProofRef !== expectedProofRef) {

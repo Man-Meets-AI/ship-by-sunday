@@ -35,9 +35,7 @@ export async function runWorkflowCommand(argv: string[]) {
 
 	const options = parseWorkflowCommandOptions(rest);
 	if (!options.workflowRunId) {
-		throw new Error(
-			`workflow ${workflowName} run requires --workflow-run-id.`,
-		);
+		throw new Error(`workflow ${workflowName} run requires --workflow-run-id.`);
 	}
 	const { repositoryRoot } = await resolveRepositoryRoot({
 		explicitRoot: options.repo,
@@ -96,13 +94,13 @@ export async function runWorkflowCommand(argv: string[]) {
 							approvedWorkflowRun,
 							confirmAdoptionAudit: options.confirmAdoptionAudit === true,
 						})
-			: await runSourceTruthWorkflow({
-					repositoryRoot,
-					state,
-					credential,
-					approvedWorkflowRun,
-					confirmLocalWrites: options.confirmLocalWrites === true,
-				});
+					: await runSourceTruthWorkflow({
+							repositoryRoot,
+							state,
+							credential,
+							approvedWorkflowRun,
+							confirmLocalWrites: options.confirmLocalWrites === true,
+						});
 
 	if (options.json) {
 		console.log(JSON.stringify(result, null, 2));
@@ -113,9 +111,7 @@ export async function runWorkflowCommand(argv: string[]) {
 		console.log(`Broken-app triage wrote ${result.localRunDirectoryRef}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
 	} else if (workflowName === "observability-debuggability") {
-		console.log(
-			`Observability workflow wrote ${result.localRunDirectoryRef}.`,
-		);
+		console.log(`Observability workflow wrote ${result.localRunDirectoryRef}.`);
 		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
 	} else if (workflowName === "mature-repo-adoption") {

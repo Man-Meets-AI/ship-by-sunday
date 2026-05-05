@@ -44,6 +44,10 @@ vi.mock(
 	}),
 );
 
+vi.mock("@/app/(workspace)/_components/workspace-fulfillment-choice", () => ({
+	WorkspaceFulfillmentChoice: () => <div>Workspace fulfillment choice</div>,
+}));
+
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
 		codebase: {
@@ -211,6 +215,62 @@ describe("workspace codebase, review, and setup routes", () => {
 				runnerMode: "daemon",
 			},
 		);
+	});
+
+	it("renders workspace choice only for unresolved paid access", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			fulfillmentTrack: "unspecified",
+		});
+
+		const { default: ChoiceRoutePage } =
+			await import("@/app/(workspace)/workspace/choose/page");
+
+		const markup = renderToStaticMarkup(await ChoiceRoutePage());
+
+		expect(markup).toContain("Workspace fulfillment choice");
+	});
+
+	it("renders workspace choice access recovery without paid access", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: false,
+			status: "no_access",
+		});
+
+		const { default: ChoiceRoutePage } =
+			await import("@/app/(workspace)/workspace/choose/page");
+
+		const markup = renderToStaticMarkup(await ChoiceRoutePage());
+
+		expect(markup).toContain("Access recovery");
+	});
+
+	it("redirects generated-codebase viewers away from workspace choice", async () => {
+		const { default: ChoiceRoutePage } =
+			await import("@/app/(workspace)/workspace/choose/page");
+
+		await expect(ChoiceRoutePage()).rejects.toThrow("redirect:/codebase");
+		expect(redirectMock).toHaveBeenCalledWith("/codebase");
+	});
+
+	it("redirects existing-codebase viewers away from workspace choice", async () => {
+		getServerProductAccessMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			fulfillmentTrack: "existing_codebase_doctor",
+		});
+
+		const { default: ChoiceRoutePage } =
+			await import("@/app/(workspace)/workspace/choose/page");
+
+		await expect(ChoiceRoutePage()).rejects.toThrow(
+			"redirect:/workspace/setup",
+		);
+		expect(redirectMock).toHaveBeenCalledWith("/workspace/setup");
 	});
 
 	it("redirects generated-codebase viewers away from existing-codebase setup", async () => {

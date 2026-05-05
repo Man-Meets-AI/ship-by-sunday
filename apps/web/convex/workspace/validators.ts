@@ -357,6 +357,7 @@ export const workspaceRunnerEventPayloadValidator = v.union(
 	v.object({
 		eventType: v.literal("workflow.proof.completed"),
 		workflowId: v.string(),
+		writeLeaseId: v.string(),
 		proofStatus: workflowProofStatusValidator,
 		proofSummary: v.string(),
 		touchedFileRefs: v.optional(v.array(v.string())),
@@ -369,6 +370,7 @@ export const workspaceRunnerEventPayloadValidator = v.union(
 	v.object({
 		eventType: v.literal("workflow.blocked"),
 		workflowId: v.string(),
+		writeLeaseId: v.string(),
 		blockedStage: v.string(),
 		blockedReason: v.string(),
 	}),

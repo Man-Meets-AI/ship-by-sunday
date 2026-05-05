@@ -62,15 +62,14 @@ async function runDaemonStart(argv: string[]) {
 
 	do {
 		await sendHeartbeat({ repositoryRoot, isGitRepository });
-			if (options.work) {
-				await claimAndRunNextWorkflow({
-					repositoryRoot,
-					confirmLocalWrites: options.confirmLocalWrites === true,
-					confirmObservabilityAudit:
-						options.confirmObservabilityAudit === true,
-					confirmAdoptionAudit: options.confirmAdoptionAudit === true,
-				});
-			}
+		if (options.work) {
+			await claimAndRunNextWorkflow({
+				repositoryRoot,
+				confirmLocalWrites: options.confirmLocalWrites === true,
+				confirmObservabilityAudit: options.confirmObservabilityAudit === true,
+				confirmAdoptionAudit: options.confirmAdoptionAudit === true,
+			});
+		}
 		if (options.once) {
 			break;
 		}

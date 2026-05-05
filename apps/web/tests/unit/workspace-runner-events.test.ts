@@ -386,6 +386,33 @@ describe("workspace runner events", () => {
 		).toBe("sha256:first-runner");
 	});
 
+	it("rejects pairing when the runner mode differs from the setup token", async () => {
+		const testContext = createWorkspaceTestCtx();
+		const projectResult = await createOrLoadWorkspaceProject._handler(
+			testContext.ctx as never,
+			{},
+		);
+		const setupState = await prepareWorkspaceSetupPairing._handler(
+			testContext.ctx as never,
+			{
+				projectId: projectResult.project._id,
+				runnerMode: "one_shot",
+			},
+		);
+
+		await expect(
+			bindWorkspaceRunnerByPairingToken._handler(testContext.ctx as never, {
+				pairingToken: setupState.pairingCommand?.token ?? "",
+				runnerCredentialHash: "sha256:runner-credential",
+				runnerMode: "daemon",
+			}),
+		).rejects.toThrow("runner mode");
+		expect(testContext.tables.workspaceRunnerBindings[0]).toMatchObject({
+			status: "pairing",
+			runnerMode: "one_shot",
+		});
+	});
+
 	it("derives sync preview state from doctor events", async () => {
 		const { ctx, project, runner } = await createProjectAndRunner();
 		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
@@ -1419,6 +1446,116 @@ describe("workspace runner events", () => {
 		);
 	});
 
+	it("rejects terminal workflow events after the approved write lease expires", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		const nowSpy = vi.spyOn(Date, "now").mockReturnValue(250_000);
+		const findingDocumentId = await createSourceTruthFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+				workflowId: "source-truth-agent-readiness",
+				workflowVersion: "v1",
+				branchName: "sbs/source-truth-readiness-20260504-2100",
+				profileName: "sbs-workspace-write",
+				writeLeaseDurationMinutes: 30,
+				expectedOutputs: ["source-truth workflow packet"],
+				allowedTouchTargets: ["AGENTS.md"],
+				disallowedTouchTargets: ["runtime app code"],
+				proofCommands: ["git status --short"],
+				syncPolicySummary: "Only structured proof metadata syncs.",
+				stopConditions: ["worktree dirty before writes"],
+				rollbackNotes: "Delete the local branch after review.",
+			},
+		);
+		nowSpy.mockReturnValue((workflowRun.writeLeaseExpiresAt ?? 0) + 1);
+
+		await expect(
+			ingestWorkspaceRunnerEvent._handler(ctx as never, {
+				eventId: "evt-expired-proof",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+				eventType: "workflow.proof.completed",
+				schemaVersion: "workspace.runner-event.v1",
+				createdAt: 251_000,
+				payload: {
+					eventType: "workflow.proof.completed",
+					workflowId: "source-truth-agent-readiness",
+					writeLeaseId: workflowRun.writeLeaseId,
+					proofStatus: "passed",
+					proofSummary: "Late proof should not mutate hosted state.",
+				},
+			}),
+		).rejects.toThrow("write lease has expired");
+		expect(tables.workspaceRunnerEvents).toHaveLength(0);
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "approved",
+			proofStatus: "not_started",
+		});
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			status: "needs_approval",
+		});
+	});
+
+	it("rejects terminal workflow events with a mismatched write lease id", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		const findingDocumentId = await createSourceTruthFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+				workflowId: "source-truth-agent-readiness",
+				workflowVersion: "v1",
+				branchName: "sbs/source-truth-readiness-20260504-2100",
+				profileName: "sbs-workspace-write",
+				expectedOutputs: ["source-truth workflow packet"],
+				allowedTouchTargets: ["AGENTS.md"],
+				disallowedTouchTargets: ["runtime app code"],
+				proofCommands: ["git status --short"],
+				syncPolicySummary: "Only structured proof metadata syncs.",
+				stopConditions: ["worktree dirty before writes"],
+				rollbackNotes: "Delete the local branch after review.",
+			},
+		);
+
+		await expect(
+			ingestWorkspaceRunnerEvent._handler(ctx as never, {
+				eventId: "evt-wrong-lease-proof",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+				eventType: "workflow.blocked",
+				schemaVersion: "workspace.runner-event.v1",
+				createdAt: 251_000,
+				payload: {
+					eventType: "workflow.blocked",
+					workflowId: "source-truth-agent-readiness",
+					writeLeaseId: "lease_wrong",
+					blockedStage: "proof",
+					blockedReason: "Forged blocked event.",
+				},
+			}),
+		).rejects.toThrow("write lease does not match");
+		expect(tables.workspaceRunnerEvents).toHaveLength(0);
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "approved",
+			proofStatus: "not_started",
+		});
+	});
+
 	it("claims runner-owned approved work even when other runners have older queue entries", async () => {
 		const { ctx, project, runner } = await createProjectAndRunner();
 		const otherRunner = await bindWorkspaceRunner._handler(ctx as never, {
@@ -1564,6 +1701,7 @@ describe("workspace runner events", () => {
 			payload: {
 				eventType: "workflow.proof.completed",
 				workflowId: "source-truth-agent-readiness",
+				writeLeaseId: workflowRun.writeLeaseId,
 				proofStatus: "passed",
 				proofSummary: "Late proof should not revive stopped work.",
 			},
@@ -1627,6 +1765,7 @@ describe("workspace runner events", () => {
 			payload: {
 				eventType: "workflow.proof.completed",
 				workflowId: "source-truth-agent-readiness",
+				writeLeaseId: workflowRun.writeLeaseId,
 				proofStatus: "passed",
 				proofSummary: "Source-truth workflow wrote local proof.",
 				touchedFileRefs: ["AGENTS.md"],
@@ -1722,6 +1861,7 @@ describe("workspace runner events", () => {
 				payload: {
 					eventType: "workflow.proof.completed",
 					workflowId: "source-truth-agent-readiness",
+					writeLeaseId: workflowRun.writeLeaseId,
 					proofStatus: "passed",
 					proofSummary: "Forged proof.",
 				},

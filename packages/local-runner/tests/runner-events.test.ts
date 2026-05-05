@@ -74,6 +74,7 @@ describe("runner events", () => {
 			payload: {
 				eventType: "workflow.blocked",
 				workflowId: "broken-app-triage",
+				writeLeaseId: "lease_workflowRuns_1",
 				blockedStage: "reproduction-command",
 				blockedReason:
 					"No approved read-only diagnostic command was available.",

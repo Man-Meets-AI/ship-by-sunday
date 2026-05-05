@@ -70,8 +70,7 @@ function createApprovedWorkflowRun(
 		rollbackNotes: "Delete the local observability branch after review.",
 		localWorkflowPacketRef:
 			".sbs/runs/workflowRuns_observability/workflow-packet.json",
-		localProofRef:
-			".sbs/runs/workflowRuns_observability/proof.json",
+		localProofRef: ".sbs/runs/workflowRuns_observability/proof.json",
 		...overrides,
 	};
 }
@@ -249,8 +248,8 @@ describe("observability debuggability workflow", () => {
 				eventType: "workflow.blocked",
 				workflowRunId: "workflowRuns_observability_blocked",
 			}),
-			]);
-		});
+		]);
+	});
 
 	it("writes blocked proof when terminal confirmation is missing", async () => {
 		const repositoryRoot = await createRepositoryWithObservabilitySignals();
@@ -296,9 +295,7 @@ describe("observability debuggability workflow", () => {
 		expect(result).toMatchObject({
 			status: "blocked",
 			proofStatus: "blocked",
-			blockedReason: expect.stringContaining(
-				"--confirm-observability-audit",
-			),
+			blockedReason: expect.stringContaining("--confirm-observability-audit"),
 		});
 		expect(branch).not.toBe("sbs/observability-debuggability-20260505-1002");
 		expect(proof.blockedProof[0]).toMatchObject({
@@ -353,7 +350,8 @@ describe("observability debuggability workflow", () => {
 		expect(result).toMatchObject({
 			status: "blocked",
 			proofStatus: "blocked",
-			blockedReason: "profileName must match the approved SBS workspace profile.",
+			blockedReason:
+				"profileName must match the approved SBS workspace profile.",
 		});
 		expect(branch).not.toBe("sbs/observability-debuggability-20260505-1003");
 		expect(proof.blockedProof[0]).toMatchObject({
@@ -364,7 +362,9 @@ describe("observability debuggability workflow", () => {
 	it("writes blocked proof when package metadata cannot be parsed", async () => {
 		const repositoryRoot = await createRepositoryWithObservabilitySignals();
 		await writeFile(path.join(repositoryRoot, "package.json"), "{ invalid\n");
-		await execFileAsync("git", ["add", "package.json"], { cwd: repositoryRoot });
+		await execFileAsync("git", ["add", "package.json"], {
+			cwd: repositoryRoot,
+		});
 		await execFileAsync("git", ["commit", "-m", "Break package metadata"], {
 			cwd: repositoryRoot,
 		});
@@ -406,4 +406,4 @@ describe("observability debuggability workflow", () => {
 			stage: "audit-scan",
 		});
 	});
-	});
+});

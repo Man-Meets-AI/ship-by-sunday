@@ -140,7 +140,10 @@ async function createMatureRepository() {
 		)}\n`,
 	);
 	await writeFile(path.join(repositoryRoot, "AGENTS.md"), "# Agents\n");
-	await writeFile(path.join(repositoryRoot, "docs", "ARCHITECTURE.md"), "# Arch\n");
+	await writeFile(
+		path.join(repositoryRoot, "docs", "ARCHITECTURE.md"),
+		"# Arch\n",
+	);
 	await writeFile(
 		path.join(repositoryRoot, ".github", "workflows", "ci.yml"),
 		"name: ci\n",
@@ -177,12 +180,7 @@ describe("mature repo adoption workflow", () => {
 		).stdout.trim();
 		const audit = JSON.parse(
 			await readFile(
-				path.join(
-					repositoryRoot,
-					".sbs",
-					"mature-repo",
-					"adoption-audit.json",
-				),
+				path.join(repositoryRoot, ".sbs", "mature-repo", "adoption-audit.json"),
 				"utf8",
 			),
 		);
@@ -318,7 +316,12 @@ describe("mature repo adoption workflow", () => {
 
 	it("fails proof when a post-checkout hook mutates runtime files", async () => {
 		const repositoryRoot = await createMatureRepository();
-		const hookPath = path.join(repositoryRoot, ".git", "hooks", "post-checkout");
+		const hookPath = path.join(
+			repositoryRoot,
+			".git",
+			"hooks",
+			"post-checkout",
+		);
 		await writeFile(
 			hookPath,
 			[
@@ -339,8 +342,7 @@ describe("mature repo adoption workflow", () => {
 				branchName: "sbs/mature-repo-adoption-20260505-1115",
 				localWorkflowPacketRef:
 					".sbs/runs/workflowRuns_dirty_after_checkout/workflow-packet.json",
-				localProofRef:
-					".sbs/runs/workflowRuns_dirty_after_checkout/proof.json",
+				localProofRef: ".sbs/runs/workflowRuns_dirty_after_checkout/proof.json",
 			}),
 			confirmAdoptionAudit: true,
 			fetchRunnerEvent: async () => new Response(null, { status: 200 }),

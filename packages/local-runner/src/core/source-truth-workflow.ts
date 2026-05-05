@@ -93,6 +93,7 @@ export async function runSourceTruthWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "write-lease",
@@ -111,6 +112,7 @@ export async function runSourceTruthWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "dirty-state",
@@ -138,6 +140,7 @@ export async function runSourceTruthWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "base-branch",
@@ -156,6 +159,7 @@ export async function runSourceTruthWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "branch",
@@ -317,6 +321,7 @@ export async function runSourceTruthWorkflow({
 			payload: {
 				eventType: "workflow.proof.completed",
 				workflowId: SOURCE_TRUTH_WORKFLOW_ID,
+				writeLeaseId,
 				proofStatus,
 				proofSummary,
 				touchedFileRefs: touchedFiles,
@@ -361,6 +366,7 @@ async function blockWorkflow({
 	workflowRunId,
 	branchName,
 	profileName,
+	writeLeaseId,
 	localRunDirectoryRef,
 	localRunDirectory,
 	blockedStage,
@@ -373,6 +379,7 @@ async function blockWorkflow({
 	workflowRunId: string;
 	branchName: string;
 	profileName: string;
+	writeLeaseId: string;
 	localRunDirectoryRef: string;
 	localRunDirectory: string;
 	blockedStage: string;
@@ -424,6 +431,7 @@ async function blockWorkflow({
 			payload: {
 				eventType: "workflow.blocked",
 				workflowId: SOURCE_TRUTH_WORKFLOW_ID,
+				writeLeaseId,
 				blockedStage,
 				blockedReason,
 			},

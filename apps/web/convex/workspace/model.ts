@@ -954,6 +954,34 @@ function requireWorkflowRunOwnedByRunner(
 	return workflowRun;
 }
 
+function requireWorkflowRunActiveLeaseForEvent(
+	workflowRun: Awaited<ReturnType<typeof requireWorkflowRun>>,
+	payload: WorkspaceRunnerEventPayload,
+) {
+	if (
+		payload.eventType !== "workflow.proof.completed" &&
+		payload.eventType !== "workflow.blocked"
+	) {
+		return;
+	}
+
+	if (
+		!workflowRun.writeLeaseId ||
+		payload.writeLeaseId !== workflowRun.writeLeaseId
+	) {
+		throw new ConvexError(
+			"Runner event write lease does not match workflow run",
+		);
+	}
+
+	if (
+		typeof workflowRun.writeLeaseExpiresAt !== "number" ||
+		Date.now() >= workflowRun.writeLeaseExpiresAt
+	) {
+		throw new ConvexError("Workflow write lease has expired");
+	}
+}
+
 function requireSupportedWorkflowRun(
 	workflowRun: Awaited<ReturnType<typeof requireWorkflowRun>>,
 ) {
@@ -1575,6 +1603,9 @@ export async function bindWorkspaceRunnerByPairingTokenHandler(
 		ctx,
 		args.pairingToken,
 	);
+	if (runnerBinding.runnerMode !== args.runnerMode) {
+		throw new ConvexError("Pairing token runner mode does not match");
+	}
 	await requireRunnerProject(ctx, runnerBinding);
 	const now = Date.now();
 
@@ -2653,6 +2684,7 @@ async function insertWorkspaceRunnerEvent(
 			args.workflowRunId,
 		);
 		requireWorkflowRunOwnedByRunner(workflowRun, args.runnerBinding);
+		requireWorkflowRunActiveLeaseForEvent(workflowRun, args.payload);
 		if ("workflowId" in args.payload) {
 			if (args.payload.workflowId !== workflowRun.workflowId) {
 				throw new ConvexError("Runner event workflow id does not match run");

@@ -196,7 +196,9 @@ function assertMatureRepoAdoptionPacket(packet: ApprovedWorkflowRunPacket) {
 		throw new Error("Mature repo adoption branch is not approved.");
 	}
 	if (packet.writeLeaseDurationMinutes !== 30) {
-		throw new Error("Mature repo adoption write lease duration is not approved.");
+		throw new Error(
+			"Mature repo adoption write lease duration is not approved.",
+		);
 	}
 	if (packet.dirtyStatePolicy !== "require_clean_worktree") {
 		throw new Error("Mature repo adoption requires a clean-worktree policy.");
@@ -236,7 +238,9 @@ function assertMatureRepoAdoptionPacket(packet: ApprovedWorkflowRunPacket) {
 		packet.localWorkflowPacketRef !==
 		`.sbs/runs/${packet.workflowRunId}/workflow-packet.json`
 	) {
-		throw new Error("Mature repo adoption workflow packet ref is not approved.");
+		throw new Error(
+			"Mature repo adoption workflow packet ref is not approved.",
+		);
 	}
 	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
 		throw new Error("Mature repo adoption proof ref is not approved.");

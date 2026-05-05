@@ -112,6 +112,7 @@ const eventPayloadFieldsByType: Record<
 	"workflow.proof.completed": new Set([
 		"eventType",
 		"workflowId",
+		"writeLeaseId",
 		"proofStatus",
 		"proofSummary",
 		"touchedFileRefs",
@@ -122,6 +123,7 @@ const eventPayloadFieldsByType: Record<
 	"workflow.blocked": new Set([
 		"eventType",
 		"workflowId",
+		"writeLeaseId",
 		"blockedStage",
 		"blockedReason",
 	]),

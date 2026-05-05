@@ -27,11 +27,7 @@ type ProofCommandResult = {
 };
 
 type ObservabilitySignal = {
-	kind:
-		| "file"
-		| "package_dependency"
-		| "package_script"
-		| "provider_reference";
+	kind: "file" | "package_dependency" | "package_script" | "provider_reference";
 	label: string;
 	repoRelativePath?: string;
 	status: "detected";
@@ -104,6 +100,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "terminal-confirmation",
@@ -120,6 +117,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "approval-packet",
@@ -140,6 +138,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "approval-packet",
@@ -156,6 +155,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "write-lease",
@@ -174,6 +174,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "dirty-state",
@@ -202,6 +203,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "base-branch",
@@ -220,6 +222,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "branch",
@@ -259,6 +262,7 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			branchName,
 			profileName,
+			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "audit-scan",
@@ -273,7 +277,12 @@ export async function runObservabilityDebuggabilityWorkflow({
 	)
 		? "passed"
 		: "failed";
-	const createdArtifacts = [workflowPacketRef, auditRef, proofRef, syncPreviewRef];
+	const createdArtifacts = [
+		workflowPacketRef,
+		auditRef,
+		proofRef,
+		syncPreviewRef,
+	];
 	const blockedProof = audit.capabilities
 		.filter((capability) => capability.status !== "detected")
 		.map((capability) => ({
@@ -375,12 +384,12 @@ export async function runObservabilityDebuggabilityWorkflow({
 		workflowRunId,
 		branchName,
 		profileName,
-			auditRef,
-			signalsCount: audit.signals.length,
-			capabilities: audit.capabilities,
-			diffSummary: await readGitDiffSummary(repositoryRoot),
-			touchedFiles: unexpectedTouchedFiles,
-			createdArtifacts,
+		auditRef,
+		signalsCount: audit.signals.length,
+		capabilities: audit.capabilities,
+		diffSummary: await readGitDiffSummary(repositoryRoot),
+		touchedFiles: unexpectedTouchedFiles,
+		createdArtifacts,
 		proofCommandsRun: proofCommandResults.map((result) => result.commandName),
 		proofCommandResults,
 		blockedProof,
@@ -392,11 +401,11 @@ export async function runObservabilityDebuggabilityWorkflow({
 	await writeJsonArtifact(repositoryRoot, syncPreviewRef, {
 		schemaVersion: "observability-debuggability-sync-preview.v1",
 		workflowId: OBSERVABILITY_WORKFLOW_ID,
-			workflowVersion: OBSERVABILITY_WORKFLOW_VERSION,
-			branchName,
-			profileName,
-			touchedFileRefs: unexpectedTouchedFiles,
-			createdArtifactRefs: createdArtifacts,
+		workflowVersion: OBSERVABILITY_WORKFLOW_VERSION,
+		branchName,
+		profileName,
+		touchedFileRefs: unexpectedTouchedFiles,
+		createdArtifactRefs: createdArtifacts,
 		signalSummaries: audit.signals.map(({ kind, label, repoRelativePath }) => ({
 			kind,
 			label,
@@ -431,11 +440,12 @@ export async function runObservabilityDebuggabilityWorkflow({
 			workflowRunId,
 			payload: {
 				eventType: "workflow.proof.completed",
-					workflowId: OBSERVABILITY_WORKFLOW_ID,
-					proofStatus,
-					proofSummary,
-					touchedFileRefs: unexpectedTouchedFiles,
-					createdArtifactRefs: createdArtifacts,
+				workflowId: OBSERVABILITY_WORKFLOW_ID,
+				writeLeaseId,
+				proofStatus,
+				proofSummary,
+				touchedFileRefs: unexpectedTouchedFiles,
+				createdArtifactRefs: createdArtifacts,
 				proofCommandResults: proofCommandResults.map(
 					({ commandName, status }) => ({
 						commandName,
@@ -460,10 +470,10 @@ export async function runObservabilityDebuggabilityWorkflow({
 		status: "proof_completed",
 		branchName,
 		profileName,
-			proofStatus,
-			localRunDirectoryRef,
-			touchedFiles: unexpectedTouchedFiles,
-			createdArtifacts,
+		proofStatus,
+		localRunDirectoryRef,
+		touchedFiles: unexpectedTouchedFiles,
+		createdArtifacts,
 		deliveredEvents: flushResult.delivered,
 		remainingEvents: flushResult.remaining,
 	};
@@ -518,7 +528,9 @@ async function collectObservabilitySignals(repositoryRoot: string) {
 		if (!isTextScanCandidate(lowerPath)) {
 			continue;
 		}
-		const contents = (await readFile(filePath, "utf8").catch(() => "")).toLowerCase();
+		const contents = (
+			await readFile(filePath, "utf8").catch(() => "")
+		).toLowerCase();
 		for (const provider of detectProviders(contents)) {
 			signals.push({
 				kind: "provider_reference",
@@ -564,7 +576,11 @@ async function collectPackageSignals(
 	}
 
 	for (const scriptName of Object.keys(parsed.scripts ?? {}).sort()) {
-		if (!/(observ|telemetry|sentry|posthog|datadog|newrelic|source.?map|trace|log)/i.test(scriptName)) {
+		if (
+			!/(observ|telemetry|sentry|posthog|datadog|newrelic|source.?map|trace|log)/i.test(
+				scriptName,
+			)
+		) {
 			continue;
 		}
 		signals.push({
@@ -613,11 +629,10 @@ async function collectCandidateFiles(repositoryRoot: string) {
 }
 
 function buildCapabilities(signals: ObservabilitySignal[]) {
-	const hasClientSignal = signals.some(
-		(signal) =>
-			/client|posthog|sentry|error-boundary|instrumentation-client/i.test(
-				`${signal.label} ${signal.repoRelativePath ?? ""}`,
-			),
+	const hasClientSignal = signals.some((signal) =>
+		/client|posthog|sentry|error-boundary|instrumentation-client/i.test(
+			`${signal.label} ${signal.repoRelativePath ?? ""}`,
+		),
 	);
 	const hasServerSignal = signals.some((signal) =>
 		/server|logger|logging|opentelemetry|instrumentation|sentry|datadog|new relic/i.test(
@@ -723,6 +738,7 @@ async function blockWorkflow({
 	workflowRunId,
 	branchName,
 	profileName,
+	writeLeaseId,
 	localRunDirectoryRef,
 	localRunDirectory,
 	blockedStage,
@@ -735,6 +751,7 @@ async function blockWorkflow({
 	workflowRunId: string;
 	branchName: string;
 	profileName: string;
+	writeLeaseId: string;
 	localRunDirectoryRef: string;
 	localRunDirectory: string;
 	blockedStage: string;
@@ -788,6 +805,7 @@ async function blockWorkflow({
 			payload: {
 				eventType: "workflow.blocked",
 				workflowId: OBSERVABILITY_WORKFLOW_ID,
+				writeLeaseId,
 				blockedStage,
 				blockedReason,
 			},

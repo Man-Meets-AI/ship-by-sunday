@@ -102,6 +102,7 @@ export type RunnerEventPayload =
 	| {
 			eventType: "workflow.proof.completed";
 			workflowId: string;
+			writeLeaseId: string;
 			proofStatus: "not_started" | "passed" | "failed" | "blocked";
 			proofSummary: string;
 			touchedFileRefs?: string[];
@@ -115,6 +116,7 @@ export type RunnerEventPayload =
 	| {
 			eventType: "workflow.blocked";
 			workflowId: string;
+			writeLeaseId: string;
 			blockedStage: string;
 			blockedReason: string;
 	  }
