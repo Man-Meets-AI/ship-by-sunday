@@ -23,6 +23,10 @@ export function CodebaseDemoLeverageHero({
 		leverageHero.sublineBody,
 		leverageHero.sublineEmphasis,
 	].join(" ");
+	const selectedOptionIndex = Math.max(
+		leverageHero.options.findIndex((option) => option.id === selectedOptionId),
+		0,
+	);
 
 	return (
 		<div className="flex flex-1 justify-center px-0 pt-[clamp(6rem,18vh,10rem)] pb-10 text-center lg:pt-[clamp(5rem,13vh,8rem)]">
@@ -50,8 +54,17 @@ export function CodebaseDemoLeverageHero({
 					<div
 						role="group"
 						aria-label={leverageHero.optionGroupLabel}
-						className="grid gap-0 lg:grid-cols-2"
+						className="relative grid gap-0 lg:grid-cols-2"
+						style={
+							{
+								"--leverage-toggle-index": selectedOptionIndex,
+							} as React.CSSProperties
+						}
 					>
+						<span
+							aria-hidden="true"
+							className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-[#f5f5f5] transition-transform duration-300 ease-out [transform:translateY(calc(var(--leverage-toggle-index)*100%))] lg:inset-y-0 lg:left-0 lg:h-full lg:w-1/2 lg:[transform:translateX(calc(var(--leverage-toggle-index)*100%))]"
+						/>
 						{leverageHero.options.map((option) => {
 							const isSelected = option.id === selectedOptionId;
 
@@ -62,10 +75,8 @@ export function CodebaseDemoLeverageHero({
 									aria-pressed={isSelected}
 									onClick={() => onSelectedOptionChange(option.id)}
 									className={cn(
-										"font-home-option-serif flex min-h-20 items-center justify-center px-5 py-4 text-center text-[1.75rem] leading-none font-normal text-[#111111] transition-colors duration-200 sm:min-h-24 sm:px-6 sm:text-[2rem] lg:min-h-[8.375rem] lg:whitespace-nowrap lg:text-[2.5rem]",
-										isSelected
-											? "bg-[#f5f5f5] lg:text-[2.75rem]"
-											: "bg-[#d9d9d9] hover:bg-[#e7e7e7]",
+										"font-home-option-serif relative z-10 flex min-h-20 items-center justify-center bg-transparent px-5 py-4 text-center text-[1.75rem] leading-tight font-normal text-[#111111] sm:min-h-24 sm:px-6 sm:text-[2rem] lg:min-h-[8.375rem] lg:whitespace-nowrap lg:text-[2.25rem] xl:text-[2.5rem]",
+										!isSelected && "hover:text-[#3d3d3d]",
 									)}
 								>
 									{option.label}

@@ -8,34 +8,32 @@
 	--product-muted: 82 82 82;
 	--product-accent: 17 17 17;
 	--product-shadow: 17 17 17;
-	--sbs-docs-shell-border: rgb(var(--product-border) / 0.14);
-	--sbs-docs-shell-border-strong: rgb(var(--product-border) / 0.24);
-	--sbs-docs-shell-shadow: 0 14px 32px rgb(var(--product-shadow) / 0.06);
+	--sbs-docs-shell-border: rgb(var(--product-border) / 0.08);
+	--sbs-docs-shell-border-strong: rgb(var(--product-border) / 0.14);
+	--sbs-docs-shell-shadow: 0 14px 32px rgb(var(--product-shadow) / 0.04);
 	--sbs-docs-panel-bg: rgb(var(--product-surface) / 0.96);
 	--sbs-docs-panel-muted-bg: rgb(var(--product-surface-strong) / 0.9);
 	--sbs-docs-navbar-bg: rgb(var(--product-surface) / 0.9);
-	--sbs-docs-grid-line: rgb(var(--product-border) / 0.045);
 	--sbs-docs-link: rgb(var(--product-accent));
 	--sbs-docs-navbar-height: 4.5rem;
 }
 
 html.dark {
 	--product-bg: 11 11 11;
-	--product-surface: 22 22 22;
-	--product-surface-strong: 31 31 31;
-	--product-surface-alt: 42 42 42;
-	--product-border: 255 255 255;
+	--product-surface: 35 35 35;
+	--product-surface-strong: 35 35 35;
+	--product-surface-alt: 53 53 53;
+	--product-border: 53 53 53;
 	--product-text: 246 246 246;
 	--product-muted: 178 178 178;
 	--product-accent: 246 246 246;
 	--product-shadow: 0 0 0;
-	--sbs-docs-shell-border: rgb(var(--product-border) / 0.24);
-	--sbs-docs-shell-border-strong: rgb(var(--product-border) / 0.42);
-	--sbs-docs-shell-shadow: 0 22px 50px rgb(0 0 0 / 0.28);
-	--sbs-docs-panel-bg: rgb(var(--product-surface) / 0.9);
-	--sbs-docs-panel-muted-bg: rgb(var(--product-surface-strong) / 0.92);
-	--sbs-docs-navbar-bg: rgb(var(--product-surface-strong) / 0.94);
-	--sbs-docs-grid-line: rgb(var(--product-border) / 0.07);
+	--sbs-docs-shell-border: #353535;
+	--sbs-docs-shell-border-strong: #353535;
+	--sbs-docs-shell-shadow: none;
+	--sbs-docs-panel-bg: #232323;
+	--sbs-docs-panel-muted-bg: #232323;
+	--sbs-docs-navbar-bg: rgb(11 11 11 / 0.85);
 }
 
 ::selection {
@@ -49,14 +47,7 @@ html[data-product-theme="dark"] {
 
 html[data-product-theme="light"] body,
 html[data-product-theme="dark"] body {
-	background:
-		linear-gradient(var(--sbs-docs-grid-line) 1px, transparent 1px),
-		linear-gradient(90deg, var(--sbs-docs-grid-line) 1px, transparent 1px),
-		rgb(var(--product-bg));
-	background-size:
-		100% 152px,
-		152px 100%,
-		auto;
+	background: rgb(var(--product-bg));
 	color: rgb(var(--product-text));
 }
 
@@ -96,7 +87,7 @@ html[data-product-theme] {
 
 .sbs-docs-sidebar {
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: 8px;
+	border-radius: var(--radius);
 	background: var(--sbs-docs-panel-muted-bg);
 	box-shadow: var(--sbs-docs-shell-shadow);
 	padding: 0.75rem;
@@ -116,7 +107,7 @@ html[data-product-theme] {
 	display: flex;
 	align-items: center;
 	min-height: 2.75rem;
-	border-radius: 8px;
+	border-radius: var(--radius);
 	padding: 0.55rem 0.7rem;
 	color: rgb(var(--product-muted));
 	font-size: 0.9rem;
@@ -181,7 +172,7 @@ html[data-product-theme] {
 	width: 100%;
 	margin-inline: auto;
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: 8px;
+	border-radius: var(--radius);
 	background: var(--sbs-docs-panel-bg);
 	box-shadow: var(--sbs-docs-shell-shadow);
 	padding: 1.5rem 1.5rem 3.25rem;
@@ -190,7 +181,7 @@ html[data-product-theme] {
 .sbs-docs-toc {
 	display: none;
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: 8px;
+	border-radius: var(--radius);
 	background: var(--sbs-docs-panel-muted-bg);
 	box-shadow: var(--sbs-docs-shell-shadow);
 	padding: 1rem;
@@ -317,7 +308,7 @@ html[data-product-theme] {
 
 .sbs-docs-prose pre {
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: 8px;
+	border-radius: var(--radius);
 	background: rgb(var(--product-surface-strong) / 0.94);
 	box-shadow: inset 0 1px 0 rgb(var(--product-border) / 0.08);
 	overflow-x: auto;
@@ -363,7 +354,7 @@ html[data-product-theme] {
 .sbs-docs-prose blockquote {
 	margin: 2rem 0;
 	border-left: 4px solid rgb(var(--product-accent) / 0.45);
-	border-radius: 8px;
+	border-radius: var(--radius);
 	background: rgb(var(--product-surface-strong) / 0.58);
 	padding: 1rem 1.25rem 1rem 1.1rem;
 	color: rgb(var(--product-text));
@@ -383,7 +374,7 @@ html[data-product-theme] {
 	width: 100%;
 	overflow-x: auto;
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: 8px;
+	border-radius: var(--radius);
 	background: rgb(var(--product-surface) / 0.8);
 	border-collapse: separate;
 	border-spacing: 0;
