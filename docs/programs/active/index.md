@@ -27,6 +27,6 @@ Inside that folder:
 
 Active Program folders:
 
-- None.
+- `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
 
 Completed Program packets live under `docs/programs/completed/`.
