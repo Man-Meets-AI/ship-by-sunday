@@ -43,7 +43,6 @@ export function WorkspacePrivacyPage({
 		canDeleteFindings,
 		canRevokeRunner,
 		deleteState,
-		feedbackMessage,
 		handleDeleteFindings,
 		handleRequestManagedGithub,
 		handleRevokeManagedGithub,
@@ -97,15 +96,6 @@ export function WorkspacePrivacyPage({
 						/>
 					</div>
 				</header>
-
-				{feedbackMessage ? (
-					<div
-						className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-foreground"
-						role="status"
-					>
-						{feedbackMessage}
-					</div>
-				) : null}
 
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<div className="grid gap-5">

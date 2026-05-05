@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,13 @@ const preparePairingMock = vi.fn();
 const cancelPairingMock = vi.fn();
 const saveWorkspaceProjectMock = vi.fn();
 const startDoctorPassRunMock = vi.fn();
+const { reportClientErrorMock, toastErrorMock, toastSuccessMock } = vi.hoisted(
+	() => ({
+		reportClientErrorMock: vi.fn(),
+		toastErrorMock: vi.fn(),
+		toastSuccessMock: vi.fn(),
+	}),
+);
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -44,6 +51,17 @@ vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
 	useMutation: (mutationRef: string) => useMutationMock(mutationRef),
 	useQuery: (queryRef: string, args: unknown) => useQueryMock(queryRef, args),
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		error: toastErrorMock,
+		success: toastSuccessMock,
+	},
+}));
+
+vi.mock("@/lib/observability/client-error-report", () => ({
+	reportClientError: reportClientErrorMock,
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -185,6 +203,9 @@ describe("ExistingCodebaseSetupPage", () => {
 			status: "running",
 			syncPreviewStatus: "not_ready",
 		});
+		reportClientErrorMock.mockReset();
+		toastErrorMock.mockReset();
+		toastSuccessMock.mockReset();
 		useMutationMock.mockImplementation((mutationRef: string) => {
 			if (mutationRef === "prepareWorkspaceSetupPairing") {
 				return preparePairingMock;
@@ -406,7 +427,12 @@ describe("ExistingCodebaseSetupPage", () => {
 			repositoryBindingId: "workspaceRepositoryBindings_1",
 			runnerMode: "daemon",
 		});
-		expect(await screen.findByText("Doctor pass started.")).toBeTruthy();
+		expect(toastSuccessMock).toHaveBeenCalledWith("Doctor pass started", {
+			id: "workspace-setup-doctor-pass-success",
+			description: undefined,
+			duration: 1800,
+			position: "bottom-right",
+		});
 	});
 
 	it("saves the default open destination through the workspace contract", async () => {
@@ -417,6 +443,43 @@ describe("ExistingCodebaseSetupPage", () => {
 
 		expect(saveWorkspaceProjectMock).toHaveBeenCalledWith({
 			defaultOpenDestination: "vscode",
+		});
+		expect(toastSuccessMock).toHaveBeenCalledWith("Open destination saved", {
+			id: "workspace-setup-open-destination-success",
+			description: "VS Code",
+			duration: 1800,
+			position: "bottom-right",
+		});
+	});
+
+	it("toasts and reports default open destination save failures", async () => {
+		const user = userEvent.setup();
+		const saveError = new Error("Open destination write failed");
+		saveWorkspaceProjectMock.mockRejectedValueOnce(saveError);
+		renderSetupPage();
+
+		await user.click(screen.getByRole("button", { name: /VS Code/i }));
+
+		expect(saveWorkspaceProjectMock).toHaveBeenCalledWith({
+			defaultOpenDestination: "vscode",
+		});
+		expect(toastErrorMock).toHaveBeenCalledWith(
+			"Open destination write failed",
+			{
+				id: "workspace-setup-open-destination-error",
+				duration: 6000,
+				position: "bottom-right",
+			},
+		);
+		expect(reportClientErrorMock).toHaveBeenCalledWith({
+			error: saveError,
+			pathname: "/workspace/setup",
+			code: "workspace_setup_open_destination_save_failed",
+			severity: "medium",
+			details: {
+				action: "Workspace setup open destination save failed",
+				defaultOpenDestination: "vscode",
+			},
 		});
 	});
 
@@ -438,6 +501,17 @@ describe("ExistingCodebaseSetupPage", () => {
 			projectId: "workspaceProjects_1",
 			runnerMode: "one_shot",
 			regenerate: true,
+		});
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith(
+				"One-shot pairing token ready",
+				{
+					id: "workspace-setup-pairing-success",
+					description: undefined,
+					duration: 1800,
+					position: "bottom-right",
+				},
+			);
 		});
 	});
 });

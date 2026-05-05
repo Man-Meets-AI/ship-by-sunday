@@ -7,6 +7,13 @@ const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
 const useMutationMock = vi.fn();
 const approveSyncPreviewMock = vi.fn();
+const { reportClientErrorMock, toastErrorMock, toastSuccessMock } = vi.hoisted(
+	() => ({
+		reportClientErrorMock: vi.fn(),
+		toastErrorMock: vi.fn(),
+		toastSuccessMock: vi.fn(),
+	}),
+);
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -21,6 +28,17 @@ vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
 	useMutation: (mutationRef: string) => useMutationMock(mutationRef),
 	useQuery: (queryRef: string, args: unknown) => useQueryMock(queryRef, args),
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		error: toastErrorMock,
+		success: toastSuccessMock,
+	},
+}));
+
+vi.mock("@/lib/observability/client-error-report", () => ({
+	reportClientError: reportClientErrorMock,
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -74,6 +92,9 @@ describe("WorkspaceDoctorPassPage", () => {
 			status: "sync_approved",
 			syncPreviewStatus: "approved",
 		});
+		reportClientErrorMock.mockReset();
+		toastErrorMock.mockReset();
+		toastSuccessMock.mockReset();
 		useMutationMock.mockImplementation((mutationRef: string) => {
 			if (mutationRef === "approveWorkspaceSyncPreview") {
 				return approveSyncPreviewMock;
@@ -106,11 +127,42 @@ describe("WorkspaceDoctorPassPage", () => {
 			doctorPassRunId: "doctorPassRuns_1",
 			previewDigest: "sha256:preview",
 		});
-		expect(
-			await screen.findByText(
-				"Sync preview approved. The local runner can upload findings now.",
-			),
-		).toBeTruthy();
+		expect(toastSuccessMock).toHaveBeenCalledWith("Sync preview approved", {
+			id: "workspace-doctor-pass-approve-preview-success",
+			description: "The local runner can upload findings now.",
+			duration: 1800,
+			position: "bottom-right",
+		});
+	});
+
+	it("toasts and reports approval failures", async () => {
+		const user = userEvent.setup();
+		const approvalError = new Error("Approval write failed");
+		approveSyncPreviewMock.mockRejectedValueOnce(approvalError);
+		render(
+			<WorkspaceDoctorPassPage
+				initialSyncPreviewState={createSyncPreviewState() as never}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /Approve sync preview/i }),
+		);
+
+		expect(toastErrorMock).toHaveBeenCalledWith("Approval write failed", {
+			id: "workspace-doctor-pass-approve-preview-error",
+			duration: 6000,
+			position: "bottom-right",
+		});
+		expect(reportClientErrorMock).toHaveBeenCalledWith({
+			error: approvalError,
+			pathname: "/workspace/doctor-pass",
+			code: "workspace_doctor_pass_sync_preview_approval_failed",
+			severity: "medium",
+			details: {
+				action: "approve_sync_preview",
+			},
+		});
 	});
 
 	it("shows the local runner command when no preview exists", () => {

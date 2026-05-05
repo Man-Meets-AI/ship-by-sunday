@@ -1,7 +1,7 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
 import type {
@@ -14,11 +14,17 @@ const {
 	requestManagedGithubMock,
 	revokeManagedGithubMock,
 	revokeRunnerMock,
+	reportClientErrorMock,
+	toastErrorMock,
+	toastSuccessMock,
 } = vi.hoisted(() => ({
 	markFindingsDeletedMock: vi.fn(),
 	requestManagedGithubMock: vi.fn(),
 	revokeManagedGithubMock: vi.fn(),
 	revokeRunnerMock: vi.fn(),
+	reportClientErrorMock: vi.fn(),
+	toastErrorMock: vi.fn(),
+	toastSuccessMock: vi.fn(),
 }));
 
 vi.mock("@/convex/_generated/api", () => ({
@@ -50,6 +56,17 @@ vi.mock("convex/react", () => ({
 		}
 		throw new Error(`Unexpected mutation ${mutationRef}`);
 	},
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		error: toastErrorMock,
+		success: toastSuccessMock,
+	},
+}));
+
+vi.mock("@/lib/observability/client-error-report", () => ({
+	reportClientError: reportClientErrorMock,
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -151,6 +168,16 @@ function createFinding(): WorkspaceFindingDocument {
 }
 
 describe("WorkspacePrivacyPage", () => {
+	beforeEach(() => {
+		markFindingsDeletedMock.mockReset();
+		requestManagedGithubMock.mockReset();
+		revokeManagedGithubMock.mockReset();
+		revokeRunnerMock.mockReset();
+		reportClientErrorMock.mockReset();
+		toastErrorMock.mockReset();
+		toastSuccessMock.mockReset();
+	});
+
 	it("renders local privacy boundaries and calls existing control mutations", async () => {
 		const user = userEvent.setup();
 		revokeRunnerMock.mockResolvedValue({});
@@ -296,11 +323,18 @@ describe("WorkspacePrivacyPage", () => {
 				proofBoundaries: true,
 			},
 		});
-		expect(
-			await screen.findByText(
-				"Managed GitHub concierge request recorded. No GitHub action runs until the next explicit approval.",
-			),
-		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith(
+				"Managed GitHub request recorded",
+				{
+					id: "workspace-privacy-request-managed-github-success",
+					description:
+						"No GitHub action runs until the next explicit approval.",
+					duration: 1800,
+					position: "bottom-right",
+				},
+			);
+		});
 		expect(screen.getByText(/Managed Github Requested/)).toBeTruthy();
 
 		await user.click(screen.getByRole("button", { name: /Revoke request/i }));
@@ -309,11 +343,17 @@ describe("WorkspacePrivacyPage", () => {
 			consentId: "managedGithubExecutionConsents_1",
 			reason: "Revoked from workspace privacy controls",
 		});
-		expect(
-			await screen.findByText(
-				"Managed GitHub request revoked. Concierge execution needs a new consent packet.",
-			),
-		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith(
+				"Managed GitHub request revoked",
+				{
+					id: "workspace-privacy-revoke-managed-github-success",
+					description: "Concierge execution needs a new consent packet.",
+					duration: 1800,
+					position: "bottom-right",
+				},
+			);
+		});
 		expect(
 			screen.getByRole("button", { name: /Request concierge review/i }),
 		).toBeTruthy();
@@ -325,11 +365,14 @@ describe("WorkspacePrivacyPage", () => {
 			runnerId: "workspaceRunnerBindings_1",
 			reason: "Revoked from workspace privacy controls",
 		});
-		expect(
-			await screen.findByText(
-				"Runner revoked. Pair again from Setup to resume.",
-			),
-		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith("Runner revoked", {
+				id: "workspace-privacy-revoke-runner-success",
+				description: "Pair again from Setup to resume.",
+				duration: 1800,
+				position: "bottom-right",
+			});
+		});
 
 		await user.click(
 			screen.getByRole("button", { name: /Delete synced findings/i }),
@@ -338,9 +381,14 @@ describe("WorkspacePrivacyPage", () => {
 			projectId: "workspaceProjects_1",
 			findingDocumentIds: ["codebaseFindings_1"],
 		});
-		expect(
-			await screen.findByText("Synced findings hidden from the workspace."),
-		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith("Findings hidden", {
+				id: "workspace-privacy-delete-findings-success",
+				description: undefined,
+				duration: 1800,
+				position: "bottom-right",
+			});
+		});
 
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("dangerously");
@@ -350,5 +398,48 @@ describe("WorkspacePrivacyPage", () => {
 		expect(visibleText).not.toContain("queue worker");
 		expect(visibleText).not.toContain("rerun ci now");
 		expect(visibleText).not.toContain("raw source uploaded");
+	});
+
+	it("toasts and reports privacy action failures", async () => {
+		const user = userEvent.setup();
+		const requestError = new Error("Managed GitHub request failed");
+		requestManagedGithubMock.mockRejectedValueOnce(requestError);
+
+		render(
+			<WorkspacePrivacyPage
+				initialSetupState={createSetupState()}
+				initialSyncPreviewState={createSyncPreviewState()}
+				initialManagedGithubState={{
+					consent: null,
+					auditEvents: [],
+				}}
+				initialFindings={[createFinding()]}
+				now={61_000}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /Request concierge review/i }),
+		);
+
+		await waitFor(() => {
+			expect(toastErrorMock).toHaveBeenCalledWith(
+				"Managed GitHub request failed",
+				{
+					id: "workspace-privacy-request-managed-github-error",
+					duration: 6000,
+					position: "bottom-right",
+				},
+			);
+		});
+		expect(reportClientErrorMock).toHaveBeenCalledWith({
+			error: requestError,
+			pathname: "/workspace/privacy",
+			code: "workspace_privacy_managed_github_request_failed",
+			severity: "medium",
+			details: {
+				action: "request_managed_github",
+			},
+		});
 	});
 });

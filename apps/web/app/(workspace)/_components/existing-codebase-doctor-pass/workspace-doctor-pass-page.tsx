@@ -7,8 +7,13 @@ import type { FunctionReturnType } from "convex/server";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import {
+	showWorkspaceActionErrorToast,
+	showWorkspaceActionSuccessToast,
+} from "@/app/(workspace)/_lib/workspace-action-feedback";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import { Button } from "@/components/ui/button";
+import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 
 type WorkspaceSyncPreviewState = FunctionReturnType<
@@ -16,6 +21,11 @@ type WorkspaceSyncPreviewState = FunctionReturnType<
 >;
 
 type ApprovalState = "idle" | "approving" | "approved" | "errored";
+
+const workspaceDoctorPassToastIds = {
+	approvePreviewSuccess: "workspace-doctor-pass-approve-preview-success",
+	approvePreviewError: "workspace-doctor-pass-approve-preview-error",
+} as const;
 
 export function WorkspaceDoctorPassPage({
 	initialSyncPreviewState,
@@ -26,7 +36,6 @@ export function WorkspaceDoctorPassPage({
 	const [lastMutationState, setLastMutationState] =
 		useState<WorkspaceSyncPreviewState | null>(null);
 	const [approvalState, setApprovalState] = useState<ApprovalState>("idle");
-	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 	const liveSyncPreviewState = useQuery(
 		api.workspace.getWorkspaceSyncPreviewState,
 		isAuthenticated && !isLoading ? {} : "skip",
@@ -51,7 +60,6 @@ export function WorkspaceDoctorPassPage({
 			return;
 		}
 		setApprovalState("approving");
-		setFeedbackMessage(null);
 		try {
 			const nextRun = await approveSyncPreview({
 				projectId: doctorPassRun.projectId,
@@ -62,16 +70,26 @@ export function WorkspaceDoctorPassPage({
 				doctorPassRun: nextRun,
 			});
 			setApprovalState("approved");
-			setFeedbackMessage(
-				"Sync preview approved. The local runner can upload findings now.",
-			);
+			showWorkspaceActionSuccessToast({
+				id: workspaceDoctorPassToastIds.approvePreviewSuccess,
+				title: "Sync preview approved",
+				description: "The local runner can upload findings now.",
+			});
 		} catch (error) {
 			setApprovalState("errored");
-			setFeedbackMessage(
-				error instanceof Error
-					? error.message
-					: "Unable to approve sync preview.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspaceDoctorPassToastIds.approvePreviewError,
+				error,
+				fallbackMessage: "Unable to approve sync preview.",
+				report: {
+					title: "Workspace doctor pass sync preview approval failed",
+					code: "workspace_doctor_pass_sync_preview_approval_failed",
+					pathname: routeConfig.workspaceDoctorPass,
+					details: {
+						action: "approve_sync_preview",
+					},
+				},
+			});
 		}
 	}
 
@@ -102,15 +120,6 @@ export function WorkspaceDoctorPassPage({
 					</div>
 					<RunStatusPanel doctorPassRun={doctorPassRun} />
 				</header>
-
-				{feedbackMessage ? (
-					<div
-						className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-foreground"
-						role="status"
-					>
-						{feedbackMessage}
-					</div>
-				) : null}
 
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<PreviewPanel doctorPassRun={doctorPassRun} />
