@@ -10,10 +10,8 @@ import { reportClientError } from "@/lib/observability/client-error-report";
 
 import {
 	buildSignInHref,
-	buildSsoCallbackHref,
 	getSessionTaskHref,
 	getSafeRedirectPath,
-	getSignInAuthError,
 } from "@/platform/auth/auth-route-utils";
 import type {
 	SignInStep,
@@ -121,7 +119,6 @@ export function useSignInFlow() {
 	const [selectedVerificationMethod, setSelectedVerificationMethod] =
 		useState<VerificationMethod | null>(null);
 	const [verificationCode, setVerificationCode] = useState("");
-	const [isStartingGoogle, setIsStartingGoogle] = useState(false);
 	const sentVerificationMethodRef = useRef<VerificationMethod | null>(null);
 
 	type SignInCompletionCandidate = {
@@ -132,8 +129,6 @@ export function useSignInFlow() {
 	};
 
 	const redirectPath = getSafeRedirectPath(searchParams.get("redirect_url"));
-	const authError = getSignInAuthError(searchParams.get("auth_error"));
-	const hasExplicitRedirect = searchParams.has("redirect_url");
 	const availableVerificationMethods = useMemo(
 		() => getAvailableVerificationMethods(signIn?.supportedSecondFactors),
 		[signIn?.supportedSecondFactors],
@@ -167,9 +162,7 @@ export function useSignInFlow() {
 		return { kind: "credentials" };
 	}, [activeVerificationMethod, resetStep, signIn]);
 
-	const isBusy = fetchStatus === "fetching" || isStartingGoogle;
-	const isColdDefaultVisit =
-		step.kind === "credentials" && !hasExplicitRedirect && !authError;
+	const isBusy = fetchStatus === "fetching";
 
 	useEffect(() => {
 		if (
@@ -206,16 +199,6 @@ export function useSignInFlow() {
 	useEffect(() => {
 		setVerificationCode("");
 	}, [activeVerificationMethod, step.kind]);
-
-	function clearTransientBanner() {
-		if (!authError) {
-			return;
-		}
-
-		startTransition(() => {
-			router.replace(buildSignInHref({ redirectPath }));
-		});
-	}
 
 	function getCompletionStatus(
 		candidate: SignInCompletionCandidate | null | undefined,
@@ -310,8 +293,6 @@ export function useSignInFlow() {
 	}
 
 	async function startOver() {
-		clearTransientBanner();
-
 		if (signIn) {
 			await signIn.reset();
 		}
@@ -333,7 +314,6 @@ export function useSignInFlow() {
 			return;
 		}
 
-		clearTransientBanner();
 		setResetStep(null);
 
 		const response = await signIn.password({
@@ -360,32 +340,7 @@ export function useSignInFlow() {
 		await finalizeSignIn(response);
 	}
 
-	async function startGoogleSignIn() {
-		if (!signIn) {
-			return;
-		}
-
-		clearTransientBanner();
-		setIsStartingGoogle(true);
-
-		try {
-			const response = await signIn.sso({
-				strategy: "oauth_google",
-				redirectUrl: redirectPath,
-				redirectCallbackUrl: buildSsoCallbackHref(redirectPath),
-			});
-
-			if (response.error) {
-				setIsStartingGoogle(false);
-			}
-		} catch {
-			setIsStartingGoogle(false);
-		}
-	}
-
 	async function startPasswordReset() {
-		clearTransientBanner();
-
 		if (signIn) {
 			await signIn.reset();
 		}
@@ -402,7 +357,6 @@ export function useSignInFlow() {
 			return;
 		}
 
-		clearTransientBanner();
 		await signIn.reset();
 
 		const createResponse = await signIn.create({
@@ -517,13 +471,11 @@ export function useSignInFlow() {
 	}
 
 	return {
-		authError,
 		availableVerificationMethods,
 		emailAddress,
 		emailError: errors.fields.identifier,
 		globalErrors: getRenderableErrors(errors.global ?? errors.raw),
 		isBusy,
-		isColdDefaultVisit,
 		isLoaded: Boolean(signIn),
 		newPassword,
 		password,
@@ -538,7 +490,6 @@ export function useSignInFlow() {
 		setVerificationCode,
 		resendVerificationCode,
 		selectVerificationMethod,
-		startGoogleSignIn,
 		startOver,
 		startPasswordReset,
 		submitNewPassword,

@@ -121,7 +121,6 @@ function createSignInMock(overrides?: Partial<Record<string, unknown>>) {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "needs_first_factor",
 			supportedSecondFactors: [],
 			finalize: vi.fn().mockResolvedValue({ error: null }),
@@ -179,9 +178,7 @@ describe("SignInPage", () => {
 		).toBeNull();
 		expect(screen.getByLabelText("Email")).toBeTruthy();
 		expect(screen.getByLabelText("Password")).toBeTruthy();
-		expect(
-			screen.getByRole("button", { name: "Continue with Google" }),
-		).toBeTruthy();
+		expect(screen.queryByRole("button", { name: /continue with/i })).toBeNull();
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 		expect(screen.queryByText(/create account/i)).toBeNull();
 		expect(screen.queryByText(/terms of service/i)).toBeNull();
@@ -247,7 +244,6 @@ describe("SignInPage", () => {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "needs_first_factor",
 			supportedSecondFactors: [],
 		};
@@ -302,7 +298,6 @@ describe("SignInPage", () => {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "complete",
 			supportedSecondFactors: [],
 		};
@@ -352,7 +347,6 @@ describe("SignInPage", () => {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "needs_first_factor",
 			supportedSecondFactors: [],
 		};
@@ -409,7 +403,6 @@ describe("SignInPage", () => {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "complete",
 			supportedSecondFactors: [],
 		};
@@ -433,56 +426,6 @@ describe("SignInPage", () => {
 		expect(pushMock).toHaveBeenCalledWith(
 			"/session-tasks/reset-password?redirect_url=%2Fsettings",
 		);
-	});
-
-	it("starts Google sign-in with the preserved redirect target", async () => {
-		useSearchParamsMock.mockReturnValue(
-			new URLSearchParams("redirect_url=%2Fmission"),
-		);
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
-			finalize: vi.fn().mockResolvedValue({ error: null }),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
-				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
-			status: "needs_first_factor",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
-		});
-
-		const user = userEvent.setup();
-		render(<SignInPage />);
-
-		await user.click(
-			screen.getByRole("button", { name: "Continue with Google" }),
-		);
-
-		expect(signIn.sso).toHaveBeenCalledWith({
-			redirectCallbackUrl: "/sso-callback?redirect_url=%2Fmission",
-			redirectUrl: "/mission",
-			strategy: "oauth_google",
-		});
 	});
 
 	it("signs out the pending session when Clerk returns an unknown task", async () => {
@@ -513,7 +456,6 @@ describe("SignInPage", () => {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "complete",
 			supportedSecondFactors: [],
 		};
@@ -559,7 +501,6 @@ describe("SignInPage", () => {
 				submitPassword: vi.fn().mockResolvedValue({ error: null }),
 				verifyCode: vi.fn().mockResolvedValue({ error: null }),
 			},
-			sso: vi.fn().mockResolvedValue({ error: null }),
 			status: "needs_first_factor",
 			supportedSecondFactors: [],
 		};
@@ -587,27 +528,5 @@ describe("SignInPage", () => {
 			identifier: "buyer@example.com",
 		});
 		expect(signIn.resetPasswordEmailCode.sendCode).toHaveBeenCalledTimes(1);
-	});
-
-	it("shows the purchase-required banner when Google sign-in is blocked", () => {
-		useSearchParamsMock.mockReturnValue(
-			new URLSearchParams("auth_error=purchase_required"),
-		);
-		const signInState = createSignInMock();
-		useSignInMock.mockReturnValue({
-			errors: signInState.errors,
-			fetchStatus: signInState.fetchStatus,
-			signIn: signInState.signIn,
-		});
-
-		render(<SignInPage />);
-
-		expect(
-			screen.getByText("Google sign-in is for purchased accounts."),
-		).toBeTruthy();
-		expect(
-			screen.queryByText("Google did not match a paid account."),
-		).toBeNull();
-		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 });

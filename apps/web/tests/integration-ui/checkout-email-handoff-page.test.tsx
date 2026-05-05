@@ -106,7 +106,7 @@ describe("CheckoutEmailHandoffPage", () => {
 			screen.getByRole("button", { name: "Send email code" }),
 		).toBeTruthy();
 		expect(screen.queryByLabelText("Create password")).toBeNull();
-		expect(screen.queryByText("Continue with Google")).toBeNull();
+		expect(screen.queryByText(/continue with/i)).toBeNull();
 		expect(screen.queryByText("Forgot your password?")).toBeNull();
 	});
 

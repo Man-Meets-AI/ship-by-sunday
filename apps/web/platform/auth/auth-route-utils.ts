@@ -1,15 +1,11 @@
 import { authViewConfig, routeConfig } from "@/config/product";
 
-export const ssoCallbackPath = "/sso-callback";
-
 export const sessionTaskUrls = {
 	"reset-password": "/session-tasks/reset-password",
 } as const;
 
 export type SessionTaskKey = keyof typeof sessionTaskUrls;
-export type SignInAuthError = "purchase_required";
 
-const authErrorParam = "auth_error";
 const redirectUrlParam = "redirect_url";
 const checkoutSessionIdParam = "session_id";
 
@@ -31,10 +27,8 @@ export function getPricingHref() {
 
 export function buildSignInHref({
 	redirectPath,
-	authError,
 }: {
 	redirectPath?: string | null;
-	authError?: SignInAuthError;
 } = {}) {
 	const params = new URLSearchParams();
 	const safeRedirectPath = redirectPath
@@ -43,10 +37,6 @@ export function buildSignInHref({
 
 	if (safeRedirectPath) {
 		params.set(redirectUrlParam, safeRedirectPath);
-	}
-
-	if (authError) {
-		params.set(authErrorParam, authError);
 	}
 
 	if (!params.size) {
@@ -144,18 +134,6 @@ export function buildCheckoutEmailHandoffHrefForSuccessRedirect(
 	});
 }
 
-export function buildSsoCallbackHref(redirectPath?: string | null) {
-	const safeRedirectPath = redirectPath
-		? getSafeRedirectPath(redirectPath)
-		: null;
-
-	if (!safeRedirectPath) {
-		return ssoCallbackPath;
-	}
-
-	return `${ssoCallbackPath}?${redirectUrlParam}=${encodeURIComponent(safeRedirectPath)}`;
-}
-
 export function getSessionTaskHref(
 	taskKey: string,
 	redirectPath?: string | null,
@@ -176,23 +154,6 @@ export function getSessionTaskHref(
 	return `${taskHref}?${redirectUrlParam}=${encodeURIComponent(safeRedirectPath)}`;
 }
 
-export function getBlockedGoogleSignInHref(redirectPath?: string | null) {
-	return buildSignInHref({
-		redirectPath,
-		authError: "purchase_required",
-	});
-}
-
 export function getTaskRedirectUrlComplete(redirectPath?: string | null) {
 	return getSafeRedirectPath(redirectPath);
-}
-
-export function getSignInAuthError(
-	rawValue: string | null,
-): SignInAuthError | null {
-	if (rawValue === "purchase_required") {
-		return rawValue;
-	}
-
-	return null;
 }

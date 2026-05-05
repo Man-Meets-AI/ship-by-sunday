@@ -8,7 +8,7 @@ import { AuthPageShell } from "../auth-page-shell";
 const checkoutEmailHandoffSupportPanel = {
 	bullets: [
 		"The code is sent to the exact email used during checkout.",
-		"No Google sign-in or password setup is used on this recovery path.",
+		"No social sign-in or password setup is used on this recovery path.",
 		"After verification, we return to the paid access handoff automatically.",
 	],
 	description:

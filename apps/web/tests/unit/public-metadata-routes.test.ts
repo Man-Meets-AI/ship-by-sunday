@@ -25,7 +25,6 @@ describe("public metadata routes", () => {
 				"/settings",
 				"/workspace",
 				"/checkout/",
-				"/sso-callback",
 				"/api/",
 			]),
 		);

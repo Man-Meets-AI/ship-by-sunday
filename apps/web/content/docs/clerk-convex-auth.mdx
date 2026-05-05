@@ -30,18 +30,18 @@ NEXT_PUBLIC_CONVEX_URL=
 
 1. Create a Clerk app.
 2. Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_FRONTEND_API_URL`.
-3. If you keep the starter’s custom login page, set `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` so Clerk OAuth callbacks resolve to the right route.
+3. If you keep the starter’s custom login page, set `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` so Clerk redirects resolve to the right route.
 4. Set the Clerk fallback redirect URLs to `/codebase` so direct visits to auth routes land in the codebase-first protected shell.
 5. Keep the Clerk frontend API domain consistent everywhere you wire auth.
 6. Set `CLERK_AUTHORIZED_PARTIES` to the trusted web origins that should be allowed to present Clerk session cookies.
-7. In every Clerk environment used by this app, enable email sign-in with an email verification code. The checkout handoff calls Clerk email OTP for the Stripe checkout email; it does not use Google or password setup on that route. Keep password sign-in enabled only if you still want the generic `/sign-in` password form to work outside checkout.
+7. In every Clerk environment used by this app, enable email sign-in with an email verification code. The checkout handoff calls Clerk email OTP for the Stripe checkout email. Keep password sign-in enabled only if you still want the generic `/sign-in` password form to work outside checkout.
+8. Disable social and OAuth provider strategies, including Google, in every Clerk environment for this app. The starter no longer ships a social sign-in button or OAuth callback route.
 
 The starter-owned auth routes are:
 
 - `/sign-in`: the branded Ship by Sunday sign-in surface
 - `/checkout/email-handoff`: the post-checkout email-code handoff for paid guest checkout
 - `/session-tasks/reset-password`: the Clerk reset-password task inside the same identity shell
-- `/sso-callback`: the OAuth callback completion route inside the same identity shell
 
 `/sign-up` is not a custom starter sign-up UI in this repo. Direct visits redirect to pricing, and legacy checkout links such as `/sign-up?session_id=...` redirect to `/checkout/email-handoff`.
 
@@ -54,6 +54,16 @@ The checkout email handoff depends on a Clerk Dashboard setting, not a new repo 
 - Callback routes: keep the app-owned sign-in URL at `/sign-in`; the checkout email-code flow itself stays on `/checkout/email-handoff` and returns to `/checkout/success?session_id=...`.
 - Verify: complete a paid test checkout while signed out, click the checkout-email handoff, and confirm Clerk sends a one-time code to the Stripe checkout email.
 - Missing setup looks like: the handoff page keeps the locked checkout email but Clerk cannot send or verify the email code, so the buyer cannot prove the paid email.
+
+## Social provider setup
+
+Social login is intentionally not part of this starter.
+
+- Where: Clerk Dashboard for each local, preview, and production Clerk application.
+- What: disable every social/OAuth strategy, especially Google.
+- Callback routes: none. This repo does not expose an OAuth callback page.
+- Verify: open `/sign-in` and confirm it shows only email, password, reset-password, and checkout email-code flows. Searching the active identity app should not find a social provider strategy.
+- Missing setup looks like: a stale provider configuration or copied OAuth link can send a user into a provider flow that the app no longer completes.
 
 ## The `convex` template is not optional
 
@@ -91,7 +101,7 @@ You are correctly wired when:
 
 - sign-in works
 - sign-in from a deep link returns the user to that exact page after auth or after any Clerk task
-- `/sign-in`, `/session-tasks/reset-password`, and `/sso-callback` all render cleanly in local smoke runs
+- `/sign-in` and `/session-tasks/reset-password` render cleanly in local smoke runs
 - `/checkout/email-handoff` sends a Clerk email code to the Stripe checkout email and returns to `/checkout/success`
 - protected routes can read server-side state
 - protected pages do not throw `Unauthorized` during the first client hydration pass

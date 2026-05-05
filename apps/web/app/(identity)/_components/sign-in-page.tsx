@@ -11,8 +11,6 @@ import { AuthPageShell } from "./auth-page-shell";
 export function SignInPage() {
 	const flow = useSignInFlow();
 	const content = getSignInPageContent({
-		authError: flow.authError,
-		isColdDefaultVisit: flow.isColdDefaultVisit,
 		step: flow.step,
 	});
 
@@ -20,7 +18,6 @@ export function SignInPage() {
 		<AuthPageShell title={content.title} description={content.description}>
 			{flow.step.kind === "credentials" ? (
 				<SignInCredentialsForm
-					authError={flow.authError}
 					emailAddress={flow.emailAddress}
 					emailError={flow.emailError}
 					globalErrors={flow.globalErrors}
@@ -30,7 +27,6 @@ export function SignInPage() {
 					passwordError={flow.passwordError}
 					setEmailAddress={flow.setEmailAddress}
 					setPassword={flow.setPassword}
-					startGoogleSignIn={flow.startGoogleSignIn}
 					startPasswordReset={flow.startPasswordReset}
 					submitPassword={flow.submitPassword}
 				/>

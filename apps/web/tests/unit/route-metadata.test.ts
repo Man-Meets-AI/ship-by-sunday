@@ -44,7 +44,6 @@ import { metadata as checkoutSuccessMetadata } from "@/app/checkout/success/page
 import { metadata as checkoutEmailHandoffMetadata } from "@/app/checkout/email-handoff/page";
 import { metadata as resetPasswordMetadata } from "@/app/(identity)/session-tasks/reset-password/page";
 import { metadata as signInMetadata } from "@/app/(identity)/sign-in/[[...sign-in]]/page";
-import { metadata as ssoCallbackMetadata } from "@/app/(identity)/sso-callback/page";
 
 function expectNoindexRobots(metadata: { robots?: unknown }) {
 	expect(metadata.robots).toMatchObject({
@@ -57,7 +56,6 @@ describe("route metadata", () => {
 	it("keeps identity and checkout recovery routes out of the public index", () => {
 		expectNoindexRobots(signInMetadata);
 		expectNoindexRobots(resetPasswordMetadata);
-		expectNoindexRobots(ssoCallbackMetadata);
 		expectNoindexRobots(checkoutSuccessMetadata);
 		expectNoindexRobots(checkoutEmailHandoffMetadata);
 	});

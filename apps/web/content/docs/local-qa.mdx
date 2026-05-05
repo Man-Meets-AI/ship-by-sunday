@@ -129,9 +129,7 @@ Run `bun run test:integration` from the repository root when the change touches 
 
 1. Open `/sign-in` with no query params and confirm the branded split shell renders with the quiet `See pricing` path.
 2. Open `/sign-in?redirect_url=%2Fsettings` and confirm the same shell renders but the pricing path is hidden because the route is in recovery mode.
-3. Open `/sign-in?auth_error=purchase_required` and confirm the Google purchase-required banner appears without reintroducing the pricing CTA.
-4. Open `/session-tasks/reset-password` and confirm the route keeps the same branded shell while leaving the Clerk reset form itself intact.
-5. Open `/sso-callback` and confirm the loading route uses the same shell language instead of a bare spinner page.
+3. Open `/session-tasks/reset-password` and confirm the route keeps the same branded shell while leaving the Clerk reset form itself intact.
 
 ### No-access flow
 
