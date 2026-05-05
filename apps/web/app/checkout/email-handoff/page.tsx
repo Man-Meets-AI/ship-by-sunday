@@ -11,7 +11,6 @@ import {
 } from "@/platform/auth/auth-route-utils";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
 import {
-	fulfillCheckoutSessionByEmail,
 	getCheckoutSessionForRecovery,
 	getStripeCheckoutSessionEmail,
 	isStripeCheckoutSessionForCourse,
@@ -62,18 +61,10 @@ export default async function Page({
 		return redirect(safeRedirectPath);
 	}
 
-	const fulfillmentResult = await fulfillCheckoutSessionByEmail(
-		sessionId,
-		"checkout.email_handoff.fulfillment",
-	);
-	if (fulfillmentResult.kind !== "fulfilled") {
-		return redirect(safeRedirectPath);
-	}
-
 	return (
 		<IdentityPageFrame>
 			<CheckoutEmailHandoffPage
-				checkoutEmail={fulfillmentResult.checkoutEmail || checkoutEmail}
+				checkoutEmail={checkoutEmail}
 				redirectPath={safeRedirectPath}
 			/>
 		</IdentityPageFrame>

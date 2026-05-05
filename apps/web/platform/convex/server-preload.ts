@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchQuery } from "convex/nextjs";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 import type { FunctionArgs, FunctionReference } from "convex/server";
 
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
@@ -14,4 +14,15 @@ export async function fetchAuthenticatedQuery<
 	}
 
 	return fetchQuery(query, args, { token: session.token });
+}
+
+export async function fetchAuthenticatedMutation<
+	Mutation extends FunctionReference<"mutation">,
+>(mutation: Mutation, args: FunctionArgs<Mutation>) {
+	const session = await getConvexServerSession();
+	if (!session.token) {
+		return null;
+	}
+
+	return fetchMutation(mutation, args, { token: session.token });
 }

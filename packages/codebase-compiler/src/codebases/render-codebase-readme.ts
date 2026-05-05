@@ -1,7 +1,7 @@
 import type { CanonicalProjectFacts } from "../canonical-project-definition/project-definition";
 import {
-	AGENT_READY_PACKS_LABEL,
 	BUILD_PACK_LABEL,
+	CODEBASE_MATERIALS_LABEL,
 	DESIGN_PACK_LABEL,
 	MARKETING_PACK_LABEL,
 	PROMPT_PACK_LABEL,
@@ -18,8 +18,8 @@ function isPlaceholderEmail(value: string | undefined) {
 	return !value || /@example\.com$/i.test(value);
 }
 
-function sanitizeInstallDestination(value: string) {
-	return value.replace(/\bCodebase\b/g, "generated repo");
+function formatInstallDestination(value: string) {
+	return value;
 }
 
 export function renderCodebaseReadme(
@@ -27,7 +27,7 @@ export function renderCodebaseReadme(
 ): RenderedCodebaseFile {
 	const deliveryLines = [
 		`Distribution model: ${facts.distribution_model}`,
-		`Install destination: ${sanitizeInstallDestination(facts.install_destination)}`,
+		`Install destination: ${formatInstallDestination(facts.install_destination)}`,
 		isPlaceholderDomain(facts.domain)
 			? "Domain: not set yet. Replace the placeholder before launch."
 			: `Domain: ${facts.domain}`,
@@ -39,7 +39,7 @@ export function renderCodebaseReadme(
 	return {
 		path: GENERATED_DOCS_README_PATH,
 		content: [
-			`# ${facts.product_name} ${AGENT_READY_PACKS_LABEL}`,
+			`# ${facts.product_name} ${CODEBASE_MATERIALS_LABEL}`,
 			"",
 			`${facts.product_summary}`,
 			"",
@@ -48,7 +48,7 @@ export function renderCodebaseReadme(
 				[
 					"Start with root `DESIGN.md` for the visual system.",
 					"Use `facts/project-definition.json` and `facts/design-system.json` when a tool or teammate needs machine-readable context.",
-					"Use the Design, Marketing, and Build packs as working guidance while you turn the starter into the shipped product.",
+					"Use the Design, Marketing, Build, and prompt materials as working guidance while you turn the Codebase into the shipped product.",
 				].join("\n"),
 			),
 			"",

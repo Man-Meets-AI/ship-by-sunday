@@ -88,13 +88,6 @@ export const bonusMissionLessonStatusValidator = v.union(
 	v.literal("opened"),
 	v.literal("completed"),
 );
-export const starterRepoAccessProvisioningStatusValidator = v.union(
-	v.literal("requested"),
-	v.literal("invited"),
-	v.literal("accepted"),
-	v.literal("failed"),
-);
-
 const artifactPreviewFields = {
 	artifactKey: v.string(),
 	artifactLabel: v.string(),
@@ -116,29 +109,6 @@ export const completedArtifactPreviewValidator = v.object({
 export const resumeDestinationReturnValidator = v.object({
 	destination: v.string(),
 	lessonKey: v.union(v.string(), v.null()),
-});
-
-export const starterRepoAccessPublicValidator = v.object({
-	githubUsername: v.string(),
-	status: starterRepoAccessProvisioningStatusValidator,
-	requestedAt: v.number(),
-	updatedAt: v.number(),
-	invitedAt: v.optional(v.number()),
-	acceptedAt: v.optional(v.number()),
-	lastError: v.optional(v.string()),
-});
-
-export const starterRepoAccessOperatorItemValidator = v.object({
-	clerkUserId: v.string(),
-	courseSlug: v.string(),
-	githubUsername: v.string(),
-	status: starterRepoAccessProvisioningStatusValidator,
-	requestedAt: v.number(),
-	updatedAt: v.number(),
-	invitedAt: v.optional(v.number()),
-	acceptedAt: v.optional(v.number()),
-	invitationId: v.optional(v.string()),
-	lastError: v.optional(v.string()),
 });
 
 export const missionLessonValidator = v.object({

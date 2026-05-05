@@ -9,14 +9,10 @@ import { homePageContent } from "@/app/_content/home-page";
 
 describe("home page content", () => {
 	it("anchors the public story around worker-ready agent loops and conversion", () => {
-		expect(productConfig.promise).toBe(
-			"Ship a real, durable product by Sunday",
-		);
+		expect(productConfig.promise).toBe("The agent doctor for web apps");
+		expect(productConfig.metadataDescription).toContain("web-app blockers");
 		expect(productConfig.metadataDescription).toContain(
-			"phone-started exec loops",
-		);
-		expect(productConfig.metadataDescription).toContain(
-			"codebases that convert",
+			"proof or blocked-proof reports",
 		);
 
 		const productPreviewSection = homePageContent.productPreviewSection;
@@ -76,31 +72,35 @@ describe("home page content", () => {
 			productPreviewSection.leverageHero.options.map((option) => option.label),
 		).toEqual(["I have a codebase already", "I have an idea for a product"]);
 		expect(productPreviewSection.codebaseBranch.intro).toContain(
-			"scan, audit & PR merge queue",
+			"private doctor pass through your local runner",
+		);
+		expect(productPreviewSection.codebaseBranch.privacyAnswer).toContain(
+			"does not push branches, open PRs, rerun CI, or share raw source",
 		);
 		expect(productPreviewSection.codebaseBranch.shippieImage).toEqual({
 			src: "/landing-page/shippie-loop.png",
 			alt: "Shippie",
 		});
 		expect(productPreviewSection.codebaseBranch.auditList.items).toEqual([
-			"DOCS Spine",
-			"Exec Plans Loop",
-			"Oxlint",
-			"Oxfmt",
-			"Design.md",
-			"Agents.md",
-			"Programs.md",
-			"Linting md files",
-			"Token efficient lookup",
-			"Low Hanging Fruit `/goal`",
+			"Machine Setup",
+			"Project Setup",
+			"Local runner pairing",
+			"Read-only probes",
+			"Top 9 findings",
+			"Sync preview approval",
+			"First loop approval",
+			"Proof or blocked proof",
+			"Managed GitHub consent only",
+			"Next recommendation",
 		]);
 
 		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
 
-		expect(homePageContent.hero.headlineLead).toBe("Ship codebases");
-		expect(homePageContent.hero.headlineTailHover).toBe("that convert");
+		expect(homePageContent.hero.headlineLead).toBe("Agent doctor");
+		expect(homePageContent.hero.headlineTailPrefix).toBe("for ");
+		expect(homePageContent.hero.headlineTailHover).toBe("web apps");
 		expect(homePageContent.hero.body).toBe(
-			"Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
+			"Ship by Sunday diagnoses blockers, ranks the highest-leverage fixes, runs the first approved AI worker loop, and ends with proof or a clear blocked-proof report.",
 		);
 		expect(homePageContent.hero.promoBanner).toEqual({
 			label: "Pilot Member",
@@ -112,6 +112,9 @@ describe("home page content", () => {
 		expect(
 			homePageContent.execLoopSection.steps.map((step) => step.label),
 		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
+		expect(
+			homePageContent.execLoopSection.steps.map((step) => step.description),
+		).not.toContain("Gets your code branched, built, and merged.");
 		expect(homePageContent.starterSystemSection.heading).toEqual({
 			ariaLabel: "A worker layer. Each hat, a trained role.",
 			lead: "A worker layer.",
@@ -197,8 +200,7 @@ describe("home page content", () => {
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 			}),
 			expect.objectContaining({
-				question:
-					"Can this help with Telegram, Discord, or phone-started agent loops?",
+				question: "Can this help my existing or broken app?",
 			}),
 			expect.objectContaining({
 				question: "What happens right after I pay?",
@@ -207,20 +209,20 @@ describe("home page content", () => {
 
 		expect(homePageContent.pricingSection.includes).toEqual(
 			expect.arrayContaining([
-				"Exec loop setup",
-				"Role-specific worker packets",
-				"Phone, Telegram, and Discord handoff pattern",
-				"Codex-ready code run path",
-				"Review and QA path",
-				"Fast Pass Walkthroughs",
+				"Generated codebase or private local doctor pass",
+				"Top 9 findings and first-loop recommendation",
+				"One approved AI worker loop",
+				"Proof or blocked-proof report",
+				"Local privacy and sync-safe report boundaries",
+				"Next recommendation after the loop",
 			]),
 		);
 		expect(homePageContent.pricingSection.originalPriceDisplay).toBe(
 			productConfig.priceDisplay,
 		);
 		expect(homePageContent.pricingSection.headline).toEqual({
-			prefix: "Ship a",
-			rotatingPhrases: ["real product", "new worker"],
+			prefix: "Run the",
+			rotatingPhrases: ["doctor pass", "first worker loop"],
 		});
 		expect(homePageContent.pricingSection.offerPriceDisplay).toBe(
 			productConfig.checkoutPriceDisplay,
@@ -230,7 +232,7 @@ describe("home page content", () => {
 			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
 		});
 		expect(homePageContent.pricingSection.ctaTitle).toBe(
-			"Build the worker layer",
+			"Generate my codebase",
 		);
 	});
 
@@ -240,7 +242,7 @@ describe("home page content", () => {
 			.join("\n");
 
 		expect(faqCopy).not.toContain("The guarantee is about clarity");
-		expect(faqCopy).toContain("exec loops");
-		expect(faqCopy).toContain("worker layer");
+		expect(faqCopy).toContain("agent doctor for web apps");
+		expect(faqCopy).toContain("private local doctor pass");
 	});
 });

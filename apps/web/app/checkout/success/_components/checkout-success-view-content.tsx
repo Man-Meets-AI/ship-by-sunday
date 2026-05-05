@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { routeConfig, timingConfig } from "@/config/product";
+import { timingConfig } from "@/config/product";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 
 import { CheckoutSuccessSurface } from "./checkout-success-view-surface";
@@ -39,11 +39,11 @@ export function CheckoutSuccessViewContent({
 		}
 
 		const timeout = window.setTimeout(() => {
-			router.replace(routeConfig.codebase);
+			router.replace(viewModel.primaryActionHref);
 		}, timingConfig.checkoutAutoRedirectMs);
 
 		return () => window.clearTimeout(timeout);
-	}, [canAutoRedirect, router, suppressRedirect]);
+	}, [canAutoRedirect, router, suppressRedirect, viewModel.primaryActionHref]);
 
 	useEffect(() => {
 		if (checkoutSessionState.kind !== "validated" || isAccessReady) {

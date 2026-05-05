@@ -11,22 +11,29 @@ import {
 	getStripeCheckoutDiscounts,
 	getStripeLineItem,
 } from "@/platform/billing/stripe";
+import {
+	getCheckoutIntentMetadata,
+	type CheckoutIntent,
+} from "@/platform/billing/checkout/checkout-intent";
 
 type BuildStripeCheckoutSessionCreateParamsInput = {
 	readonly appBaseUrl: string;
 	readonly clerkUserId: string | null;
+	readonly checkoutIntent: CheckoutIntent;
 	readonly customerEmail: string | null;
 };
 
 export function buildStripeCheckoutSessionCreateParams({
 	appBaseUrl,
 	clerkUserId,
+	checkoutIntent,
 	customerEmail,
 }: BuildStripeCheckoutSessionCreateParamsInput): Stripe.Checkout.SessionCreateParams {
 	const checkoutDiscounts = getStripeCheckoutDiscounts();
 	const checkoutMetadata = {
 		...(clerkUserId ? { clerkUserId } : {}),
 		courseSlug: productConfig.courseSlug,
+		...getCheckoutIntentMetadata(checkoutIntent),
 	};
 
 	return {
@@ -50,12 +57,14 @@ export function buildStripeCheckoutSessionCreateParams({
 export function buildStripeExpressCheckoutSessionCreateParams({
 	appBaseUrl,
 	clerkUserId,
+	checkoutIntent,
 	customerEmail,
 }: BuildStripeCheckoutSessionCreateParamsInput): Stripe.Checkout.SessionCreateParams {
 	const checkoutDiscounts = getStripeCheckoutDiscounts();
 	const checkoutMetadata = {
 		...(clerkUserId ? { clerkUserId } : {}),
 		courseSlug: productConfig.courseSlug,
+		...getCheckoutIntentMetadata(checkoutIntent),
 	};
 
 	return {

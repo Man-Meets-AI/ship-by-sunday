@@ -27,6 +27,7 @@ export default function robots(): MetadataRoute.Robots {
 					"/artifacts",
 					"/settings",
 					"/lesson/",
+					"/workspace",
 					"/checkout/",
 					"/sso-callback",
 					"/_next",

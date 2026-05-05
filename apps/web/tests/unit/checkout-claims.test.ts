@@ -96,6 +96,9 @@ describe("convex/checkoutClaims", () => {
 					paymentStatus: "paid",
 					stripeCustomerId: "cus_123",
 					stripePaymentIntentId: "pi_123",
+					buyerStartingPoint: "existing_codebase",
+					checkoutCtaId: "codebase_demo_existing",
+					fulfillmentTrack: "existing_codebase_doctor",
 					stripeEventId: "evt_123",
 					stripeEventType: "checkout.session.completed",
 				},
@@ -114,6 +117,9 @@ describe("convex/checkoutClaims", () => {
 				paymentStatus: "paid",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
 				stripeEventId: "evt_123",
 				stripeEventType: "checkout.session.completed",
 				status: "pending",
@@ -164,6 +170,9 @@ describe("convex/checkoutClaims", () => {
 				paymentStatus: "no_payment_required",
 				stripeCustomerId: "cus_456",
 				stripePaymentIntentId: "pi_456",
+				buyerStartingPoint: "unspecified",
+				checkoutCtaId: "unspecified",
+				fulfillmentTrack: "unspecified",
 				stripeEventId: "evt_456",
 				stripeEventType: "checkout.session.async_payment_succeeded",
 				updatedAt: 300,
@@ -200,6 +209,7 @@ describe("convex/checkoutClaims", () => {
 	});
 
 	it("claims a pending checkout for the same Clerk user and grants access", async () => {
+		const insert = vi.fn().mockResolvedValue("product_access_1");
 		const patch = vi.fn().mockResolvedValue(undefined);
 		const ctx = createCheckoutClaimsCtx({
 			pendingCheckoutClaim: {
@@ -208,8 +218,12 @@ describe("convex/checkoutClaims", () => {
 				checkoutEmailNormalized: "buyer@example.com",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
 				status: "pending",
 			},
+			insert,
 			patch,
 		});
 
@@ -233,6 +247,15 @@ describe("convex/checkoutClaims", () => {
 				claimedByClerkUserId: "user_123",
 				claimedAt: 500,
 				updatedAt: 500,
+			}),
+		);
+		expect(insert).toHaveBeenCalledWith(
+			"productAccessGrants",
+			expect.objectContaining({
+				clerkUserId: "user_123",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
 	});

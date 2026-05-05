@@ -8,9 +8,11 @@ import {
 } from "@/app/checkout/_components/checkout-button";
 import { ExpressCheckoutButton } from "@/app/checkout/_components/express-checkout-button";
 import { cn } from "@/lib/utils";
+import type { CheckoutIntentInput } from "@/platform/billing/checkout/checkout-intent";
 
 type HomePageCheckoutCtaProps = {
 	readonly label: string;
+	readonly checkoutIntent: CheckoutIntentInput;
 	readonly className?: string;
 	readonly testId?: string;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
@@ -23,6 +25,7 @@ const TALL_EXPRESS_CHECKOUT_BUTTON_HEIGHT = 55;
 
 export function HomePageCheckoutCta({
 	label,
+	checkoutIntent,
 	className,
 	testId,
 	onBeforeCheckout,
@@ -50,6 +53,7 @@ export function HomePageCheckoutCta({
 			<ExpressCheckoutButton
 				className={cn("w-full", isExpressCheckoutAvailable ? "" : "hidden")}
 				testId={testId ? `${testId}-express` : undefined}
+				checkoutIntent={checkoutIntent}
 				buttonHeight={expressButtonHeight}
 				onBeforeCheckout={onBeforeCheckout}
 				onAvailableChange={setIsExpressCheckoutAvailable}
@@ -58,6 +62,7 @@ export function HomePageCheckoutCta({
 			<div className={isExpressCheckoutAvailable ? "hidden" : ""}>
 				<CheckoutButton
 					label={label}
+					checkoutIntent={checkoutIntent}
 					className={className}
 					testId={testId}
 					onBeforeCheckout={onBeforeCheckout}

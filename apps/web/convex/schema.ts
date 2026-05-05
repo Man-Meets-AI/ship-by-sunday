@@ -13,6 +13,22 @@ import {
 	observabilitySeverityValidator,
 	observabilitySourceValidator,
 } from "./observability/validators";
+import {
+	codebaseFindingFields,
+	doctorPassRunFields,
+	managedGithubAuditEventFields,
+	managedGithubExecutionConsentFields,
+	workflowRunFields,
+	workspaceProjectFields,
+	workspaceRepositoryBindingFields,
+	workspaceRunnerBindingFields,
+	workspaceRunnerEventFields,
+} from "./workspace/validators";
+import {
+	checkoutBuyerStartingPointValidator,
+	checkoutCtaIdValidator,
+	checkoutFulfillmentTrackValidator,
+} from "./checkoutIntentValidators";
 
 const projectDefinitionFactValueValidator = v.union(
 	v.string(),
@@ -37,6 +53,9 @@ export default defineSchema({
 		stripeCustomerId: v.optional(v.string()),
 		stripeCheckoutSessionId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+		checkoutCtaId: v.optional(checkoutCtaIdValidator),
+		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 		grantedAt: v.number(),
 		updatedAt: v.number(),
 		revokedAt: v.optional(v.number()),
@@ -52,6 +71,9 @@ export default defineSchema({
 		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+		checkoutCtaId: v.optional(checkoutCtaIdValidator),
+		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 		stripeEventId: v.string(),
 		stripeEventType: v.string(),
 		status: v.union(v.literal("pending"), v.literal("claimed")),
@@ -67,6 +89,8 @@ export default defineSchema({
 			"status",
 			"updatedAt",
 		]),
+	// Deprecated: retained temporarily for historical private starter repository
+	// invite records. No live app or operator path writes this table.
 	starterRepoAccess: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),
@@ -110,6 +134,97 @@ export default defineSchema({
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index("by_clerk_user_id_and_product_key", ["clerkUserId", "productKey"]),
+	workspaceProjects: defineTable(workspaceProjectFields)
+		.index("by_clerk_user_id_and_status_and_updated_at", [
+			"clerkUserId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_clerk_user_id_and_updated_at", ["clerkUserId", "updatedAt"]),
+	workspaceRunnerBindings: defineTable(workspaceRunnerBindingFields)
+		.index("by_project_id_and_status_and_updated_at", [
+			"projectId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_project_id_and_updated_at", ["projectId", "updatedAt"])
+		.index("by_pairing_token", ["pairingToken"])
+		.index("by_runner_credential_hash", ["runnerCredentialHash"]),
+	workspaceRepositoryBindings: defineTable(workspaceRepositoryBindingFields)
+		.index("by_project_id_and_status_and_updated_at", [
+			"projectId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_runner_id_and_status_and_updated_at", [
+			"runnerId",
+			"status",
+			"updatedAt",
+		]),
+	doctorPassRuns: defineTable(doctorPassRunFields)
+		.index("by_project_id_and_status_and_started_at", [
+			"projectId",
+			"status",
+			"startedAt",
+		])
+		.index("by_project_id_and_started_at", ["projectId", "startedAt"])
+		.index("by_runner_id_and_started_at", ["runnerId", "startedAt"])
+		.index("by_runner_id_and_local_run_id", ["runnerId", "localRunId"]),
+	codebaseFindings: defineTable(codebaseFindingFields)
+		.index("by_project_id_and_status_and_rank", ["projectId", "status", "rank"])
+		.index("by_project_id_and_rank", ["projectId", "rank"])
+		.index("by_project_id_and_finding_id", ["projectId", "findingId"])
+		.index("by_doctor_pass_run_id_and_rank", ["doctorPassRunId", "rank"]),
+	workflowRuns: defineTable(workflowRunFields)
+		.index("by_project_id_and_status_and_created_at", [
+			"projectId",
+			"status",
+			"createdAt",
+		])
+		.index("by_project_id_and_created_at", ["projectId", "createdAt"])
+		.index("by_project_finding_workflow_status_created_at", [
+			"projectId",
+			"findingDocumentId",
+			"workflowId",
+			"status",
+			"createdAt",
+		])
+		.index("by_runner_id_and_status_and_created_at", [
+			"runnerId",
+			"status",
+			"createdAt",
+		])
+		.index("by_runner_id_and_created_at", ["runnerId", "createdAt"]),
+	workspaceRunnerEvents: defineTable(workspaceRunnerEventFields)
+		.index("by_event_id", ["eventId"])
+		.index("by_project_id_and_created_at", ["projectId", "createdAt"])
+		.index("by_project_id_and_event_type_and_created_at", [
+			"projectId",
+			"eventType",
+			"createdAt",
+		])
+		.index("by_runner_id_and_created_at", ["runnerId", "createdAt"])
+		.index("by_doctor_pass_run_id_and_created_at", [
+			"doctorPassRunId",
+			"createdAt",
+		])
+		.index("by_workflow_run_id_and_created_at", ["workflowRunId", "createdAt"]),
+	managedGithubExecutionConsents: defineTable(
+		managedGithubExecutionConsentFields,
+	)
+		.index("by_project_id_and_status_and_updated_at", [
+			"projectId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_project_id_and_updated_at", ["projectId", "updatedAt"])
+		.index("by_repository_binding_id_and_updated_at", [
+			"repositoryBindingId",
+			"updatedAt",
+		]),
+	managedGithubAuditEvents: defineTable(managedGithubAuditEventFields)
+		.index("by_project_id_and_created_at", ["projectId", "createdAt"])
+		.index("by_consent_id_and_created_at", ["consentId", "createdAt"]),
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

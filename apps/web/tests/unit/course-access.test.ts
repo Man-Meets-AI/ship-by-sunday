@@ -316,6 +316,7 @@ describe("product access server helpers", () => {
 				hasAccess: true,
 				clerkUserId: "user_123",
 				status: "granted",
+				fulfillmentTrack: "generated_codebase",
 			})
 			.mockResolvedValueOnce({
 				destination: "/design",
@@ -356,6 +357,7 @@ describe("product access server helpers", () => {
 			hasAccess: true,
 			clerkUserId: "user_123",
 			status: "granted",
+			fulfillmentTrack: "generated_codebase",
 		});
 
 		const { getServerResumeDestination } =
@@ -382,7 +384,78 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("relays the centralized post-review resume destination for granted viewers", async () => {
+	it("routes existing-codebase viewers to workspace setup before codebase resume", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+			fulfillmentTrack: "existing_codebase_doctor",
+		});
+
+		const { getServerResumeDestination } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerResumeDestination()).resolves.toEqual({
+			destination: "/workspace/setup",
+			kind: "existing_codebase_setup",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		});
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("routes unspecified fulfillment viewers to the path choice screen", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+			fulfillmentTrack: "unspecified",
+		});
+
+		const { getServerResumeDestination } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerResumeDestination()).resolves.toEqual({
+			destination: "/workspace/choose",
+			kind: "fulfillment_choice",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		});
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("routes legacy grants without fulfillment metadata to the path choice screen", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+		});
+
+		const { getServerResumeDestination } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerResumeDestination()).resolves.toEqual({
+			destination: "/workspace/choose",
+			kind: "fulfillment_choice",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		});
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("relays the centralized post-review resume destination for generated-codebase viewers", async () => {
 		getConvexServerSessionMock
 			.mockResolvedValueOnce({
 				userId: "user_123",
@@ -397,6 +470,7 @@ describe("product access server helpers", () => {
 				hasAccess: true,
 				clerkUserId: "user_123",
 				status: "granted",
+				fulfillmentTrack: "generated_codebase",
 			})
 			.mockResolvedValueOnce({
 				destination: "/lesson/product-review",

@@ -888,7 +888,7 @@ export const ceoLessons = [
 				label: "Project / folder name",
 				kind: "text",
 				required: true,
-				placeholder: "e.g. ship-by-sunday-starter or your app folder",
+				placeholder: "e.g. your app folder",
 				inputWidth: "wide",
 				artifactPreviewLabel: "Codex project",
 			},

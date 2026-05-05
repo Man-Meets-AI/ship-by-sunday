@@ -16,7 +16,10 @@ The repo-wide first hop is [docs/index.md](../index.md). Use this lane after the
 ## Current References
 
 - [linear.md](./linear.md)
+- [execution-surfaces.md](./execution-surfaces.md)
 - [observability.md](./observability.md)
+- [update-channel.md](./update-channel.md)
+- [workflow-packets.md](./workflow-packets.md)
 
 ## Review prompts
 

@@ -181,7 +181,10 @@ describe("convex/stripeWebhook", () => {
 					id: "cs_test_123",
 					client_reference_id: "user_123",
 					metadata: {
+						buyerStartingPoint: "existing_codebase",
+						checkoutCtaId: "codebase_demo_existing",
 						clerkUserId: "user_123",
+						fulfillmentTrack: "existing_codebase_doctor",
 					},
 					customer: "cus_123",
 					payment_intent: "pi_123",
@@ -213,6 +216,9 @@ describe("convex/stripeWebhook", () => {
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				buyerStartingPoint: "existing_codebase",
+				checkoutCtaId: "codebase_demo_existing",
+				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
 		expect(stripeConstructorArgs).toEqual([

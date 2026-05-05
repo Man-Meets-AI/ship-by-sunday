@@ -6,7 +6,7 @@ completed_at: 2026-05-03
 summary: Replace the post-payment generic auth recovery path with a checkout-email passwordless handoff that proves the paid email through Clerk.
 post_build_recap: Checkout success now uses an explicit checkout_email_handoff_required state, /checkout/email-handoff validates Stripe server-side and renders locked Clerk email OTP, /sign-up checkout links redirect there, checkout-success /sign-in and /sso-callback redirects avoid generic auth, and signed-out protected-route recovery with a paid pending checkout cookie prefers the email handoff.
 program_id: one-click-paid-access
-planning_brief: docs/programs/active/2026-05-02-one-click-paid-access/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-02-one-click-paid-access/planning-brief-2.md
 read_when:
   - Implementing post-payment passwordless auth after Stripe checkout.
   - Changing checkout success, sign-in, sign-up, SSO, or access-required recovery behavior.
@@ -202,7 +202,7 @@ Run these from the repo root after implementation:
     bun run --cwd apps/web vitest run tests/unit/checkout-session.test.ts tests/unit/checkout-email-handoff-route.test.ts tests/unit/sign-in-route.test.ts tests/unit/sign-up-route.test.ts tests/unit/sign-in-route-utils.test.ts tests/unit/course-access.test.ts tests/unit/release-scope.test.ts tests/unit/route-metadata.test.ts tests/unit/checkout-success-fixtures.test.ts tests/integration-ui/checkout-email-handoff-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/sso-callback-page.test.tsx tests/integration-ui/access-required-page.test.tsx tests/integration-ui/access-required-page.interactions.test.tsx
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md docs/programs/active/2026-05-02-one-click-paid-access apps/web/content/docs/stripe-checkout-webhook.mdx apps/web/content/docs/clerk-convex-auth.mdx apps/web/content/docs/how-the-starter-works.mdx apps/web/content/docs/test-the-buyer-journey.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-03-passwordless-checkout-email-handoff.md docs/programs/completed/2026-05-02-one-click-paid-access apps/web/content/docs/stripe-checkout-webhook.mdx apps/web/content/docs/clerk-convex-auth.mdx apps/web/content/docs/how-the-starter-works.mdx apps/web/content/docs/test-the-buyer-journey.mdx
     bun run format
     bun lint
     bun typecheck

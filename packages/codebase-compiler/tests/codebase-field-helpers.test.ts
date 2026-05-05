@@ -32,8 +32,7 @@ describe("codebase field helpers", () => {
 				problem_trigger:
 					"They need a clear codebase and repo handoff immediately.",
 				problem_severity: "8",
-				success_looks_like:
-					"A founder downloads a working codebase and repo zip.",
+				success_looks_like: "A founder downloads a working Codebase zip.",
 				core_flow: [
 					"Capture product facts",
 					"Unlock codebases",
@@ -102,8 +101,7 @@ describe("codebase field helpers", () => {
 				problem_trigger:
 					"They need a clear codebase and repo handoff immediately.",
 				problem_severity: "8",
-				success_looks_like:
-					"A founder downloads a working codebase and repo zip.",
+				success_looks_like: "A founder downloads a working Codebase zip.",
 				core_flow: [
 					"Capture product facts",
 					"Unlock codebases",
@@ -156,8 +154,7 @@ describe("codebase field helpers", () => {
 				problem_trigger:
 					"They need a clear codebase and repo handoff immediately.",
 				problem_severity: "8",
-				success_looks_like:
-					"A founder downloads a working codebase and repo zip.",
+				success_looks_like: "A founder downloads a working Codebase zip.",
 				core_flow: [
 					"Capture product facts",
 					"Unlock codebases",

@@ -1,3 +1,5 @@
+import type { CheckoutIntentInput } from "@/platform/billing/checkout/checkout-intent";
+
 export const PRODUCT_APP_ID = "ship-by-sunday" as const;
 export const PRODUCT_COURSE_SLUG = "ship-by-sunday" as const;
 
@@ -14,12 +16,6 @@ export const assetPaths = {
 
 export const brandColorConfig = {
 	whiteHex: "#FDFDFD",
-} as const;
-
-export const starterRepoConfig = {
-	owner: "ParkerRex",
-	repo: "ship-by-sunday-starter",
-	url: "https://github.com/ParkerRex/ship-by-sunday-starter",
 } as const;
 
 export const routeConfig = {
@@ -39,6 +35,13 @@ export const routeConfig = {
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
+	workspaceChoice: "/workspace/choose",
+	workspaceSetup: "/workspace/setup",
+	workspaceDoctorPass: "/workspace/doctor-pass",
+	workspaceFindings: "/workspace/findings",
+	workspaceLoops: "/workspace/loops",
+	workspaceRuns: "/workspace/runs",
+	workspacePrivacy: "/workspace/privacy",
 	pricingHash: "#pricing",
 } as const;
 
@@ -61,6 +64,7 @@ export type HomePageSectionName = (typeof homePageSectionOrder)[number];
 export type HomePageCtaTarget =
 	| {
 			readonly kind: "checkout";
+			readonly checkoutIntent: CheckoutIntentInput;
 	  }
 	| {
 			readonly kind: "link";
@@ -94,9 +98,17 @@ export const starterHomePageConfig = {
 	},
 	heroPrimaryCta: {
 		kind: "checkout",
+		checkoutIntent: {
+			buyerStartingPoint: "no_codebase",
+			checkoutCtaId: "hero_primary",
+		},
 	},
 	pricingPrimaryCta: {
 		kind: "checkout",
+		checkoutIntent: {
+			buyerStartingPoint: "no_codebase",
+			checkoutCtaId: "pricing_primary",
+		},
 	},
 } as const satisfies StarterHomePageConfig;
 
@@ -121,9 +133,9 @@ export const starterConfig = {
 	brand: {
 		name: "Ship by Sunday",
 		shortMark: "MMAI",
-		promise: "Ship a real, durable product by Sunday",
+		promise: "The agent doctor for web apps",
 		metadataDescription:
-			"Ship by Sunday helps technical founders turn phone-started exec loops into codebases that convert with worker packs, QA paths, and aligned repo guidance.",
+			"Ship by Sunday diagnoses web-app blockers, generates worker-ready codebases, runs approved AI worker loops, and returns proof or blocked-proof reports.",
 		images: {
 			founderProof: assetPaths.founderProof,
 			heroPreview: assetPaths.heroPreview,
@@ -145,7 +157,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Build the worker layer",
+		primaryCtaLabel: "Generate my codebase",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {
@@ -174,12 +186,10 @@ export const starterConfig = {
 	modules: {
 		docs: true,
 		course: true,
-		starterRepo: true,
 		observability: true,
 		codex: true,
 	},
 	homePage: starterHomePageConfig,
-	starterRepo: starterRepoConfig,
 } as const;
 
 const activePricingOffer = starterConfig.pricing.activeOffer
@@ -350,7 +360,6 @@ export const courseResourceConfig = {
 			href: "https://www.component.gallery",
 		},
 	],
-	starterRepo: starterRepoConfig,
 	/** Lesson 1.9 — Codex & skills orientation */
 	codexLesson: {
 		openaiSkillsPackZip:
@@ -364,7 +373,7 @@ export const courseResourceConfig = {
 		clerk: "https://dashboard.clerk.com/",
 		convex: "https://www.convex.dev/",
 		convexReferral: "https://convex.dev/referral/PARKER6190",
-		/** Deployments, env vars, and project keys for the starter template. */
+		/** Deployments, env vars, and project keys for the generated Codebase. */
 		convexDashboard: "https://dashboard.convex.dev/",
 		stripe: "https://dashboard.stripe.com/register",
 		/** Referenced in Build kickoff tooling copy (OpenAI Codex). */

@@ -1,0 +1,214 @@
+import type { RunnerCredential } from "../src/core/local-runner-home";
+import type { LocalProjectState } from "../src/core/local-project-state";
+import { claimApprovedWorkflowRun } from "../src/core/workflow-run-api";
+
+function createState(): LocalProjectState {
+	return {
+		schemaVersion: 1,
+		projectId: "workspaceProjects_1",
+		runnerId: "workspaceRunnerBindings_1",
+		runnerMode: "daemon",
+		apiBaseUrl: "https://example.com/",
+		eventEndpoint: "/api/workspace/runner/events",
+		repositoryDisplayName: "repo",
+		machineDisplayName: "Runner Test",
+		runnerVersion: "0.1.0",
+		pairedAt: 1,
+		updatedAt: 1,
+	};
+}
+
+function createCredential(): RunnerCredential {
+	return {
+		projectId: "workspaceProjects_1",
+		runnerId: "workspaceRunnerBindings_1",
+		runnerToken: "sbs_run_secret",
+		apiBaseUrl: "https://example.com/",
+		eventEndpoint: "/api/workspace/runner/events",
+		updatedAt: 1,
+	};
+}
+
+function createMatureRepoAdoptionPacket(
+	overrides: Record<string, unknown> = {},
+) {
+	return {
+		workflowRunId: "workflowRuns_mature",
+		workflowId: "mature-repo-adoption",
+		workflowVersion: "v1",
+		branchName: "sbs/mature-repo-adoption-20260505-1100",
+		profileName: "sbs-workspace-write",
+		writeLeaseId: "lease_workflowRuns_mature",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [
+			"mature repo adoption workflow packet",
+			"sync-safe repo convention audit",
+			"adoption Program packet draft",
+			"first child ExecPlan draft",
+			"local proof or blocked-proof summary",
+		],
+		allowedTouchTargets: [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/mature-repo/**",
+			"repo convention metadata only",
+		],
+		disallowedTouchTargets: [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"dependency locks",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"package scripts",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"Codex transcripts",
+		],
+		proofCommands: [
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+		],
+		syncPolicySummary:
+			"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.",
+		stopConditions: [
+			"worktree is dirty before branch creation",
+			"write lease expires before adoption audit starts",
+			"requested work needs generated-starter rewrites, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		],
+		rollbackNotes:
+			"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.",
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_mature/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_mature/proof.json",
+		...overrides,
+	};
+}
+
+describe("workflow run API", () => {
+	it("claims the next approved workflow packet from the worker queue", async () => {
+		const requests: unknown[] = [];
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async (url, init) => {
+				requests.push({
+					url: String(url),
+					hasAuthorization: JSON.stringify(init?.headers).includes(
+						"Bearer sbs_run_secret",
+					),
+					body: JSON.parse(String(init?.body)),
+				});
+				return Response.json({
+					workflowRunId: "workflowRuns_1",
+					workflowId: "source-truth-agent-readiness",
+					workflowVersion: "v1",
+					branchName: "sbs/source-truth-readiness-20260504-2100",
+					profileName: "sbs-workspace-write",
+					writeLeaseId: "lease_workflowRuns_1",
+					writeLeaseExpiresAt: 4_102_444_800_000,
+					writeLeaseDurationMinutes: 30,
+					dirtyStatePolicy: "require_clean_worktree",
+					expectedOutputs: ["source-truth workflow packet"],
+					allowedTouchTargets: ["AGENTS.md"],
+					disallowedTouchTargets: ["runtime app code"],
+					proofCommands: ["git status --short"],
+					syncPolicySummary: "Only structured proof metadata syncs.",
+					stopConditions: ["worktree dirty before writes"],
+					rollbackNotes: "Delete the local branch after review.",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_1/workflow-packet.json",
+					localProofRef: ".sbs/runs/workflowRuns_1/proof.json",
+				});
+			},
+		});
+
+		expect(workflowRun?.workflowRunId).toBe("workflowRuns_1");
+		expect(requests).toEqual([
+			expect.objectContaining({
+				url: "https://example.com/api/workspace/runner/workflow-runs/claim",
+				body: {
+					projectId: "workspaceProjects_1",
+					runnerId: "workspaceRunnerBindings_1",
+				},
+				hasAuthorization: true,
+			}),
+		]);
+	});
+
+	it("returns null when the worker queue has no approved job", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () => Response.json(null),
+		});
+
+		expect(workflowRun).toBeNull();
+	});
+
+	it("accepts observability workflow packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json({
+					workflowRunId: "workflowRuns_observability",
+					workflowId: "observability-debuggability",
+					workflowVersion: "v1",
+					branchName: "sbs/observability-debuggability-20260505-1000",
+					profileName: "sbs-workspace-write",
+					writeLeaseId: "lease_workflowRuns_observability",
+					writeLeaseExpiresAt: 4_102_444_800_000,
+					writeLeaseDurationMinutes: 30,
+					dirtyStatePolicy: "require_clean_worktree",
+					expectedOutputs: ["observability workflow packet"],
+					allowedTouchTargets: [".sbs/runs/<workflow-run-id>/**"],
+					disallowedTouchTargets: ["runtime app code"],
+					proofCommands: ["git status --short"],
+					syncPolicySummary: "Only structured proof metadata syncs.",
+					stopConditions: ["worktree dirty before writes"],
+					rollbackNotes: "Delete the local observability branch after review.",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_observability/workflow-packet.json",
+					localProofRef: ".sbs/runs/workflowRuns_observability/proof.json",
+				}),
+		});
+
+		expect(workflowRun?.workflowId).toBe("observability-debuggability");
+	});
+
+	it("accepts mature repo adoption workflow packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json(createMatureRepoAdoptionPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe("mature-repo-adoption");
+	});
+
+	it("rejects mature repo adoption workflow packets that omit disallowed authorities", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createMatureRepoAdoptionPacket({
+							disallowedTouchTargets: ["runtime app code"],
+						}),
+					),
+			}),
+		).rejects.toThrow("Mature repo adoption disallowed touch targets");
+	});
+});

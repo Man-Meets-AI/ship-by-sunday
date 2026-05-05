@@ -20,17 +20,24 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 		label,
 		className,
 		testId,
+		checkoutIntent,
 		onBeforeCheckout,
 	}: {
 		label: string;
 		className?: string;
 		testId?: string;
+		checkoutIntent?: {
+			buyerStartingPoint?: string;
+			checkoutCtaId?: string;
+		};
 		onBeforeCheckout?: () => void | Promise<void>;
 	}) => (
 		<button
 			type="button"
 			data-kind="checkout"
 			data-testid={testId}
+			data-buyer-starting-point={checkoutIntent?.buyerStartingPoint}
+			data-checkout-cta-id={checkoutIntent?.checkoutCtaId}
 			className={className}
 			onClick={() => void onBeforeCheckout?.()}
 		>
@@ -175,10 +182,31 @@ describe("CodebaseDemoSectionBlock", () => {
 		expect(ideaOption.getAttribute("aria-pressed")).toBe("false");
 		expect(screen.queryByTestId("codebase-demo-idea-branch")).toBeNull();
 		expect(screen.getByTestId("codebase-demo-codebase-branch")).toBeTruthy();
-		expect(screen.getByText(/scan, audit & PR merge queue/i)).toBeTruthy();
-		expect(screen.getByText("The Audit.")).toBeTruthy();
-		expect(screen.getByText("→ DOCS Spine")).toBeTruthy();
+		expect(screen.getAllByText(/private doctor pass/i).length).toBeGreaterThan(
+			0,
+		);
+		expect(
+			screen.getByRole("link", { name: "the audit" }).getAttribute("href"),
+		).toBe("#doctor-pass-audit");
+		expect(document.querySelector("#doctor-pass-audit")?.textContent).toContain(
+			"The Doctor Pass.",
+		);
+		expect(screen.getByText("The Doctor Pass.")).toBeTruthy();
+		expect(screen.getByText("→ Local runner pairing")).toBeTruthy();
 		expect(screen.queryByTestId("codebase-demo-checkout-cta")).toBeNull();
+		expect(
+			screen.getByTestId("codebase-demo-existing-checkout-cta"),
+		).toBeTruthy();
+		expect(
+			screen
+				.getByTestId("codebase-demo-existing-checkout-cta")
+				.getAttribute("data-buyer-starting-point"),
+		).toBe("existing_codebase");
+		expect(
+			screen
+				.getByTestId("codebase-demo-existing-checkout-cta")
+				.getAttribute("data-checkout-cta-id"),
+		).toBe("codebase_demo_existing");
 	});
 
 	it("keeps the shared homepage sections visible for the codebase starting point", async () => {
@@ -192,7 +220,7 @@ describe("CodebaseDemoSectionBlock", () => {
 		);
 
 		expect(screen.getByTestId("codebase-demo-codebase-branch")).toBeTruthy();
-		expectPageTextToContain("Ship codebases that convert");
+		expectPageTextToContain("Agent doctor for web apps");
 		expectPageTextToContain("How Workers Work.");
 		expectPageTextToContain("A worker layer. each hat, a trained role.");
 		expectPageTextToContain("Role packets");
@@ -200,7 +228,7 @@ describe("CodebaseDemoSectionBlock", () => {
 		expectPageTextToContain("startup scale to $73M/year");
 		expectPageTextToContain("PROGRAMS.md is not a bigger ExecPlan.");
 		expectPageTextToContain("Common Questions");
-		expectPageTextToContain("Ship a real product by Sunday");
+		expectPageTextToContain("Run the doctor pass by Sunday");
 		expectPageTextNotToContain("Exec Loops: OpenAI's Weapon of choice");
 		expectPageTextNotToContain(
 			"An exec loop is the repeatable path from decision to agent run",

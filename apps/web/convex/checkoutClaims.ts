@@ -1,8 +1,20 @@
 import { ConvexError, v } from "convex/values";
 
+import {
+	getResolvedCheckoutIntentFields,
+	normalizeCheckoutIntent,
+	type BuyerStartingPoint,
+	type CheckoutCtaId,
+	type FulfillmentTrack,
+} from "../platform/billing/checkout/checkout-intent";
 import { internalMutation, internalQuery } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { upsertProductAccessGrant } from "./access/model";
+import {
+	checkoutBuyerStartingPointValidator,
+	checkoutCtaIdValidator,
+	checkoutFulfillmentTrackValidator,
+} from "./checkoutIntentValidators";
 
 const pendingCheckoutClaimStatusValidator = v.union(
 	v.literal("pending"),
@@ -20,6 +32,9 @@ const pendingCheckoutClaimReturnValidator = v.union(
 		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+		checkoutCtaId: v.optional(checkoutCtaIdValidator),
+		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 		stripeEventId: v.string(),
 		stripeEventType: v.string(),
 		status: pendingCheckoutClaimStatusValidator,
@@ -158,6 +173,16 @@ async function getLatestCheckoutClaimByEmailRecord(
 	return matchingClaims[0] ?? null;
 }
 
+function getPendingCheckoutClaimIntentFields(
+	claim: {
+		buyerStartingPoint?: BuyerStartingPoint;
+		checkoutCtaId?: CheckoutCtaId;
+		fulfillmentTrack?: FulfillmentTrack;
+	} | null,
+) {
+	return normalizeCheckoutIntent(claim);
+}
+
 export const getPendingCheckoutClaimBySessionId = internalQuery({
 	args: {
 		stripeCheckoutSessionId: v.string(),
@@ -190,6 +215,9 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+		checkoutCtaId: v.optional(checkoutCtaIdValidator),
+		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
 		stripeEventId: v.string(),
 		stripeEventType: v.string(),
 	},
@@ -201,6 +229,9 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 			args.stripeCheckoutSessionId,
 		);
 		const checkoutEmailNormalized = normalizeCheckoutEmail(args.checkoutEmail);
+		const checkoutIntent = existingClaim
+			? getResolvedCheckoutIntentFields(existingClaim, args)
+			: getPendingCheckoutClaimIntentFields(args);
 
 		if (existingClaim) {
 			await ctx.db.patch(existingClaim._id, {
@@ -210,6 +241,9 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 				paymentStatus: args.paymentStatus,
 				stripeCustomerId: args.stripeCustomerId,
 				stripePaymentIntentId: args.stripePaymentIntentId,
+				buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+				checkoutCtaId: checkoutIntent.checkoutCtaId,
+				fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 				stripeEventId: args.stripeEventId,
 				stripeEventType: args.stripeEventType,
 				updatedAt: now,
@@ -228,6 +262,9 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 			paymentStatus: args.paymentStatus,
 			stripeCustomerId: args.stripeCustomerId,
 			stripePaymentIntentId: args.stripePaymentIntentId,
+			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+			checkoutCtaId: checkoutIntent.checkoutCtaId,
+			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			stripeEventId: args.stripeEventId,
 			stripeEventType: args.stripeEventType,
 			status: "pending",
@@ -288,6 +325,7 @@ export const claimPendingCheckoutClaim = internalMutation({
 			stripeCustomerId: existingClaim.stripeCustomerId,
 			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
+			...getPendingCheckoutClaimIntentFields(existingClaim),
 		});
 
 		if (existingClaim.status === "claimed") {
@@ -382,6 +420,7 @@ export const repairPaidCheckoutClaim = internalMutation({
 			stripeCustomerId: existingClaim.stripeCustomerId,
 			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
+			...getPendingCheckoutClaimIntentFields(existingClaim),
 		});
 
 		if (existingClaim.status === "claimed") {

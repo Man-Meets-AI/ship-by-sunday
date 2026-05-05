@@ -37,7 +37,6 @@ export type WorkspaceHomeModel = {
 	quickActions: WorkspaceHomeQuickAction[];
 	nextSteps: WorkspaceHomeStep[];
 	showCodexCard: boolean;
-	showStarterRepoCard: boolean;
 };
 
 const moduleCopy = {
@@ -48,10 +47,6 @@ const moduleCopy = {
 	course: {
 		label: "Course",
 		description: "Guided mission, lessons, and saved-work surfaces.",
-	},
-	starterRepo: {
-		label: "Starter repo access",
-		description: "Private starter repo invite and provisioning workflow.",
 	},
 	codex: {
 		label: "Codex",
@@ -84,18 +79,6 @@ export function buildWorkspaceHomeModel(
 			statusLabel: moduleFlags.course ? "Enabled" : "Starter mode",
 			...moduleCopy.course,
 		},
-		...(moduleFlags.starterRepo
-			? [
-					{
-						id: "starterRepo",
-						enabled: moduleFlags.starterRepo,
-						statusLabel: "Enabled",
-						actionHref: routeConfig.settings,
-						actionLabel: "Open settings",
-						...moduleCopy.starterRepo,
-					} satisfies WorkspaceHomeModuleState,
-				]
-			: []),
 		{
 			id: "codex",
 			enabled: moduleFlags.codex,
@@ -159,18 +142,6 @@ export function buildWorkspaceHomeModel(
 					},
 				]
 			: []),
-		...(moduleFlags.starterRepo
-			? [
-					{
-						id: "starter-repo",
-						title: "Claim starter repo access",
-						description:
-							"Provision or verify private starter repo access before handing the build base to a new operator.",
-						actionHref: routeConfig.settings,
-						actionLabel: "Review starter repo access",
-					},
-				]
-			: []),
 		...(moduleFlags.docs
 			? [
 					{
@@ -205,6 +176,5 @@ export function buildWorkspaceHomeModel(
 		quickActions,
 		nextSteps,
 		showCodexCard: moduleFlags.codex,
-		showStarterRepoCard: moduleFlags.starterRepo,
 	};
 }

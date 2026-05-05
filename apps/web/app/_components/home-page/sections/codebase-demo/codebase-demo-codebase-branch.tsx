@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 
+import { HomePagePrimaryCta } from "@/app/_components/home-page/sections/home-page-primary-cta";
 import type { HomePageContent } from "@/app/_content/home-page";
 
 type CodebaseBranchContent =
@@ -53,7 +54,10 @@ export function CodebaseDemoCodebaseBranch({
 						<p>{codebaseBranch.privacyAnswer}</p>
 					</div>
 				</article>
-				<div className="font-heading-serif mt-16 w-full max-w-[29.125rem] text-[#ececec] sm:mt-20">
+				<div
+					id="doctor-pass-audit"
+					className="font-heading-serif mt-16 w-full max-w-[29.125rem] scroll-mt-24 text-[#ececec] sm:mt-20"
+				>
 					<h2 className="text-[clamp(2.5rem,6vw,3.875rem)] leading-none font-normal tracking-[-0.04em]">
 						{codebaseBranch.auditList.title}
 					</h2>
@@ -62,6 +66,23 @@ export function CodebaseDemoCodebaseBranch({
 							<li key={item}>→ {item}</li>
 						))}
 					</ul>
+				</div>
+				<div className="mt-12 flex w-full max-w-[29.125rem] flex-col gap-3 sm:mt-14">
+					<HomePagePrimaryCta
+						target={{
+							kind: "checkout",
+							checkoutIntent: {
+								buyerStartingPoint: "existing_codebase",
+								checkoutCtaId: "codebase_demo_existing",
+							},
+						}}
+						label={codebaseBranch.cta.label}
+						testId="codebase-demo-existing-checkout-cta"
+						className="h-12 bg-[#ececec] px-6 text-base font-semibold text-[#111111] hover:bg-white disabled:bg-[#ececec] disabled:text-[#111111]"
+					/>
+					<p className="text-sm leading-6 text-[#a1a1a1]">
+						{codebaseBranch.cta.note}
+					</p>
 				</div>
 			</div>
 		</section>

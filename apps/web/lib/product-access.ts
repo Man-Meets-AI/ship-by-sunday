@@ -1,3 +1,9 @@
+import type {
+	BuyerStartingPoint,
+	CheckoutCtaId,
+	FulfillmentTrack,
+} from "@/platform/billing/checkout/checkout-intent";
+
 export type StoredProductAccessStatus =
 	| "granted"
 	| "pending"
@@ -41,5 +47,8 @@ export type ProductAccess = {
 	clerkUserId: string | null;
 	hasAccess: boolean;
 	status: ProductAccessStatus;
+	buyerStartingPoint?: BuyerStartingPoint;
+	checkoutCtaId?: CheckoutCtaId;
+	fulfillmentTrack?: FulfillmentTrack;
 	pendingCheckoutRecovery?: PaidCheckoutRecovery;
 };

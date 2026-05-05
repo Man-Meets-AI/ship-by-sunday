@@ -7,7 +7,7 @@ import {
 import { v } from "convex/values";
 
 import { PRODUCT_APP_ID } from "../../config/product";
-import { requireGrantedProductAccess } from "../access/model";
+import { requireGeneratedCodebaseProductAccess } from "../access/model";
 import type {
 	CodebaseMutationCtx,
 	CodebaseReadCtx,
@@ -70,7 +70,7 @@ function serializeProjectDefinition(projectDefinition: ProjectDefinitionDoc) {
 }
 
 export async function getProjectDefinitionHandler(ctx: CodebaseQueryCtx) {
-	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const clerkUserId = await requireGeneratedCodebaseProductAccess(ctx);
 	const projectDefinition = await getProjectDefinitionByClerkUserId(
 		ctx,
 		clerkUserId,
@@ -95,7 +95,7 @@ export async function saveProjectDefinitionFactsHandler(
 	ctx: CodebaseMutationCtx,
 	args: SaveProjectDefinitionFactsArgs,
 ) {
-	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const clerkUserId = await requireGeneratedCodebaseProductAccess(ctx);
 	const existingProjectDefinition = await getProjectDefinitionByClerkUserId(
 		ctx,
 		clerkUserId,

@@ -589,7 +589,7 @@ function buildBuildStageUnlockSummary(
 		? "Build started from the saved brief, storyboard, and rough screens, so implementation opened from a real handoff instead of another summary step."
 		: "";
 	const localEnvironment = localEnvironmentArtifact
-		? "The starter or repo is running locally, so Ship starts from a working baseline instead of a setup problem."
+		? "The Codebase or repo is running locally, so Ship starts from a working baseline instead of a setup problem."
 		: "";
 	const coreUx = coreUxArtifact
 		? "The core path works locally end to end, so Ship starts from a real product flow instead of a partial stub."

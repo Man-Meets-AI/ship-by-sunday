@@ -21,54 +21,49 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			pathPattern: "apps/web/**",
 			shippingMode: "ship-unchanged",
 			reason:
-				"Ship the tracked starter app by default, then narrow unsafe env, build-output, and machine-local files with explicit exceptions.",
+				"Ship the tracked Codebase app by default, then narrow unsafe env, build-output, and machine-local files with explicit exceptions.",
 		},
 		{
 			pathPattern: "packages/codebase-compiler/**",
 			shippingMode: "ship-unchanged",
-			reason: "Ship the tracked codebase compiler as part of the starter repo.",
+			reason:
+				"Ship the tracked codebase compiler as part of the customer Codebase.",
 		},
 		{
 			pathPattern: "docs/prompts/execplan*.md",
 			shippingMode: "ship-unchanged",
 			reason:
-				"Ship the ExecPlan prompt assets unchanged under repo-root docs/prompts.",
-		},
-		{
-			pathPattern: "docs/prompts/exec-plan*.md",
-			shippingMode: "ship-unchanged",
-			reason:
-				"Ship the current ExecPlan prompt assets unchanged under repo-root docs/prompts.",
+				"Ship the customer-facing ExecPlan prompt assets unchanged under repo-root docs/prompts. The no-hyphen execplan-* family is the generated Codebase prompt contract.",
 		},
 		{
 			pathPattern: ".agents/**",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship a customer-safe starter subset instead of the raw internal agent workspace.",
+				"Ship a customer-safe Codebase subset instead of the raw internal agent workspace.",
 		},
 		{
 			pathPattern: "AGENTS.md",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship generalized starter guidance instead of repo-specific operator rules.",
+				"Ship generalized Codebase guidance instead of repo-specific operator rules.",
 		},
 		{
 			pathPattern: "CLAUDE.md",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship generalized starter guidance instead of repo-specific operator rules.",
+				"Ship generalized Codebase guidance instead of repo-specific operator rules.",
 		},
 		{
 			pathPattern: "GEMINI.md",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship generalized starter guidance instead of repo-specific operator rules.",
+				"Ship generalized Codebase guidance instead of repo-specific operator rules.",
 		},
 		{
 			pathPattern: "docs/testing/**",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship generalized starter verification notes instead of internal test operations.",
+				"Ship generalized Codebase verification notes instead of internal test operations.",
 		},
 		{
 			pathPattern: ".github/workflows/**",
@@ -77,10 +72,34 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship inert workflow examples instead of live repo-specific automation.",
 		},
 		{
+			pathPattern: "docs/programs/PROGRAMS.md",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship a customer-safe Program contract for generated product work.",
+		},
+		{
+			pathPattern: "docs/programs/active/<generated-program>/**",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship only the generated customer's active Program packet, not internal Program archives.",
+		},
+		{
+			pathPattern: "docs/exec-plans/PLANS.md",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship a customer-safe ExecPlan contract for generated product work.",
+		},
+		{
+			pathPattern: "docs/exec-plans/active/<generated-plan>.md",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship only the generated customer's first active ExecPlan, not internal ExecPlan archives.",
+		},
+		{
 			pathPattern: "apps/web/.env.local.example",
 			shippingMode: "ship-unchanged",
 			reason:
-				"Keep the tracked local env template as a starter setup artifact.",
+				"Keep the tracked local env template as a Codebase setup artifact.",
 		},
 		{
 			pathPattern: "apps/web/.env.production",
@@ -92,19 +111,18 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			pathPattern: ".plans/**",
 			shippingMode: "exclude",
 			reason:
-				"Exclude legacy archived ExecPlans and compatibility shims from the shipped starter repo.",
+				"Exclude legacy archived ExecPlans and compatibility shims from the shipped Codebase.",
 		},
 		{
 			pathPattern: "docs/codex/**",
 			shippingMode: "exclude",
 			reason:
-				"Exclude legacy archived ExecPlans and compatibility shims from the shipped starter repo.",
+				"Exclude legacy archived ExecPlans and compatibility shims from the shipped Codebase.",
 		},
 		{
 			pathPattern: "docs/openai/**",
 			shippingMode: "exclude",
-			reason:
-				"Exclude internal source templates from the shipped starter repo.",
+			reason: "Exclude internal source templates from the shipped Codebase.",
 		},
 		{
 			pathPattern: "docs/PLANS.md",
@@ -116,13 +134,13 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			pathPattern: "docs/exec-plans/**",
 			shippingMode: "exclude",
 			reason:
-				"Do not ship the repo's ExecPlan contracts or active/completed plans inside a customer codebase snapshot.",
+				"Do not ship the repo's internal ExecPlan archive; generated operating-pack overrides are the only allowed customer ExecPlan files.",
 		},
 		{
 			pathPattern: "docs/programs/**",
 			shippingMode: "exclude",
 			reason:
-				"Do not ship internal Program contracts or active/completed Program packets inside a customer codebase snapshot.",
+				"Do not ship the repo's internal Program archive; generated operating-pack overrides are the only allowed customer Program files.",
 		},
 		{
 			pathPattern: "docs/prompts/program-*.md",
@@ -134,7 +152,7 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			pathPattern: "docs/ship-by-sunday/**",
 			shippingMode: "exclude",
 			reason:
-				"Exclude internal product-contract docs from the shipped starter repo.",
+				"Exclude internal product-contract docs from the shipped Codebase.",
 		},
 		{
 			pathPattern: ".codex/**",
@@ -145,43 +163,40 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 		{
 			pathPattern: "CHANGELOG.md",
 			shippingMode: "exclude",
-			reason:
-				"Exclude internal release history from the starter repo snapshot.",
+			reason: "Exclude internal release history from the Codebase snapshot.",
 		},
 		{
 			pathPattern: "docs/release-workflow.md",
 			shippingMode: "exclude",
 			reason:
-				"Exclude internal release workflow notes from the starter repo snapshot.",
+				"Exclude internal release workflow notes from the Codebase snapshot.",
 		},
 		{
 			pathPattern: ".impeccable.md",
 			shippingMode: "exclude",
-			reason:
-				"Exclude internal design-ops notes from the starter repo snapshot.",
+			reason: "Exclude internal design-ops notes from the Codebase snapshot.",
 		},
 		{
 			pathPattern: "skills-lock.json",
 			shippingMode: "exclude",
-			reason:
-				"Exclude local agent lock metadata from the starter repo snapshot.",
+			reason: "Exclude local agent lock metadata from the Codebase snapshot.",
 		},
 		{
 			pathPattern: "todo.md",
 			shippingMode: "exclude",
 			reason:
-				"Exclude internal task-tracking notes from the starter repo snapshot.",
+				"Exclude internal task-tracking notes from the Codebase snapshot.",
 		},
 		{
 			pathPattern: "tmp-blog-article.png",
 			shippingMode: "exclude",
 			reason:
-				"Exclude tracked temporary image artifacts from the starter repo snapshot.",
+				"Exclude tracked temporary image artifacts from the Codebase snapshot.",
 		},
 		{
 			pathPattern: "tmp-blog-article-mobile.png",
 			shippingMode: "exclude",
 			reason:
-				"Exclude tracked temporary image artifacts from the starter repo snapshot.",
+				"Exclude tracked temporary image artifacts from the Codebase snapshot.",
 		},
 	];

@@ -2,6 +2,7 @@ import type { CanonicalProjectDefinition } from "../canonical-project-definition
 import { GENERATED_DOCS_README_PATH } from "../generated-docs/generated-doc-paths";
 import type { RenderedCodebaseFile } from "../codebases/render-types";
 import { renderStarterBootstrapFile } from "./render-starter-bootstrap";
+import { renderStarterOperatingPackFiles } from "./render-starter-operating-pack";
 import { renderStarterProjectOnboardingFiles } from "./render-starter-project-onboarding";
 import { renderStarterSkillFiles } from "./render-starter-skills";
 import { buildStarterRootPackageJson } from "./starter-root-package-json";
@@ -15,6 +16,7 @@ export function renderTemplateOverrides(
 		renderStarterBootstrapFile(projectDefinition),
 		...renderStarterProjectOnboardingFiles(projectDefinition),
 		...renderStarterSkillFiles(),
+		...renderStarterOperatingPackFiles(projectDefinition),
 		{
 			path: "README.md",
 			content: [
@@ -24,11 +26,11 @@ export function renderTemplateOverrides(
 				"",
 				"## Start Here",
 				"",
-				"Open `START-HERE.md` first. It is the buyer-facing path from downloaded starter to real product work.",
+				"Open `START-HERE.md` first. It is the buyer-facing path from downloaded Codebase to real product work.",
 				"",
-				"Read `DESIGN.md` next. It is the generated design system and the visual source of truth for this starter.",
+				"Read `DESIGN.md` next. It is the generated design system and the visual source of truth for this Codebase.",
 				"",
-				`Open \`${GENERATED_DOCS_README_PATH}\` for the generated Design, Marketing, Build, and prompt materials that ship with this starter repo.`,
+				`Open \`${GENERATED_DOCS_README_PATH}\` for the generated Design, Marketing, Build, and prompt materials that ship with this Codebase.`,
 				"",
 				"## What This Repo Contains",
 				"",
@@ -36,19 +38,20 @@ export function renderTemplateOverrides(
 				"- `DESIGN.md` is the human-readable design system.",
 				"- `docs/facts/design-system.json` and `apps/web/config/generated-design-system.ts` are the machine-readable design snapshots.",
 				"- `docs/` contains the generated implementation packs and product facts.",
+				"- `docs/programs/` and `docs/exec-plans/` contain the generated operating pack for multi-slice agent work.",
 				"",
-				"## Starter Overrides",
+				"## Generated Codebase Overrides",
 				"",
-				"- `apps/web/config/product.ts` contains the generated starter product configuration.",
-				"- `apps/web/app/_content/home-page.ts` contains the generated homepage starter content.",
+				"- `apps/web/config/product.ts` contains the generated Codebase product configuration.",
+				"- `apps/web/app/_content/home-page.ts` contains the generated homepage Codebase content.",
 				"- `apps/web/config/generated-design-system.ts` contains the generated runtime design system.",
 				"",
 				"## First-Pass Checklist",
 				"",
 				"- [ ] Read `DESIGN.md` and confirm the generated design system is close enough to your intended product before changing UI code.",
-				"- [ ] Replace any remaining placeholder facts, especially domain, support email, and design references, so the starter stops reading like a fixture.",
+				"- [ ] Replace any remaining placeholder facts, especially domain, support email, and design references, so the Codebase stops reading like a fixture.",
 				"- [ ] Review `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts` for product name, promise, pricing, CTA copy, and homepage content.",
-				"- [ ] Decide whether you want to keep the internal codebase and review workflow in the starter. If not, remove those routes and the supporting compiler package deliberately instead of leaving dead surfaces around.",
+				"- [ ] Decide whether you want to keep the internal codebase and review workflow in this Codebase. If not, remove those routes and the supporting compiler package deliberately instead of leaving dead surfaces around.",
 				"- [ ] Run the app locally and verify the generated design system feels right on the homepage, protected shell, and any route you plan to keep.",
 				"- [ ] Run `bun run lint`, `bun run typecheck`, and the smallest relevant tests after your first customization pass.",
 				"",
@@ -58,11 +61,12 @@ export function renderTemplateOverrides(
 				"2. Run `bun run codex:skills:install` to install the vetted external Codex skills for Convex, Clerk, and Stripe.",
 				"3. Restart Codex if the new skills do not appear.",
 				"4. If you use Linear, run `$starter-linear-workflow` before implementation so your backlog, status workflow, and issue template are clear.",
-				"5. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
-				"6. Run `bun run dev` from the repo root once setup is stable.",
+				"5. Run `bun run agentic:check` to verify the generated Program and ExecPlan operating pack.",
+				"6. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
+				"7. Run `bun run dev` from the repo root once setup is stable.",
 				"",
 				"`bootstrap.sh` installs dependencies, prepares `apps/web/.env.local`, opens the official provider setup pages, and can apply the generated shadcn preset in `apps/web`.",
-				"The repo also ships starter-local Codex wrapper skills under `.agents/skills/` plus a one-command external skill installer.",
+				"The Codebase also ships local Codex wrapper skills under `.agents/skills/` plus a one-command external skill installer.",
 			].join("\n"),
 		},
 		{
@@ -86,7 +90,6 @@ export function renderTemplateOverrides(
 					modules: {
 						docs: true,
 						course: false,
-						starterRepo: false,
 						observability: true,
 						codex: true,
 					},

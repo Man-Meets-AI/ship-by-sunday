@@ -19,20 +19,20 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		name: "starter-core-setup",
 		path: ".agents/skills/starter-core-setup/SKILL.md",
 		description:
-			"Use when the buyer needs to boot this starter locally and understand the safe setup order before changing auth or billing.",
+			"Use when the buyer needs to boot this Codebase locally and understand the safe setup order before changing auth or billing.",
 		steps: [
 			"Read `START-HERE.md` first and keep to the prescribed order.",
 			"Treat `bun run bootstrap` as the first step. Confirm dependencies, `.env.local`, and the local docs surface before changing product code.",
 			"Read `apps/web/content/docs/local-setup.mdx` before suggesting deeper changes.",
 			"Before changing Next.js code, explicitly trigger `$starter-nextjs-in-this-repo`.",
-			"Keep auth and billing untouched until the starter boots cleanly.",
+			"Keep auth and billing untouched until the Codebase boots cleanly.",
 		],
 	},
 	{
 		name: "starter-auth-setup",
 		path: ".agents/skills/starter-auth-setup/SKILL.md",
 		description:
-			"Use when wiring Clerk and Convex auth for this starter. Follow the repo-local auth contract before touching billing or product code.",
+			"Use when wiring Clerk and Convex auth for this Codebase. Follow the repo-local auth contract before touching billing or product code.",
 		steps: [
 			"Read `START-HERE.md` and the auth step before making changes.",
 			"Read `apps/web/content/docs/clerk-convex-auth.mdx` and `apps/web/convex/_generated/ai/guidelines.md`.",
@@ -45,10 +45,10 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		name: "starter-linear-workflow",
 		path: ".agents/skills/starter-linear-workflow/SKILL.md",
 		description:
-			"Use when the buyer wants Linear to be the official backlog, status, and handoff surface for this starter before implementation begins.",
+			"Use when the buyer wants Linear to be the official backlog, status, and handoff surface for this Codebase before implementation begins.",
 		steps: [
 			"Read `START-HERE.md` and the Linear work tracker step before creating or changing issues.",
-			"Create or identify one Linear project for this product. Do not scatter starter work across unrelated projects.",
+			"Create or identify one Linear project for this product. Do not scatter Codebase work across unrelated projects.",
 			"Use Linear for backlog state, ownership, acceptance criteria, blockers, and work history. Use GitHub for code, branches, pull requests, and CI.",
 			"Create implementation issues with these sections: Problem, Outcome, Acceptance Criteria, Validation, and Source.",
 			"Use workflow states deliberately: Backlog, Ready, In Progress, In Review, Done, and Canceled.",
@@ -57,10 +57,23 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		],
 	},
 	{
+		name: "starter-operating-pack",
+		path: ".agents/skills/starter-operating-pack/SKILL.md",
+		description:
+			"Use when inspecting or updating this Codebase's generated Program and ExecPlan operating pack.",
+		steps: [
+			"Read `docs/programs/PROGRAMS.md` and `docs/exec-plans/PLANS.md` before changing Program or ExecPlan files.",
+			"Run `bun run agentic:check` before product implementation begins and after changing operating-pack files.",
+			"Use the Program under `docs/programs/active/` for multi-slice product truth.",
+			"Use the active ExecPlan under `docs/exec-plans/active/` for the next bounded implementation slice.",
+			"Do not copy private planning archives from another repo into this Codebase.",
+		],
+	},
+	{
 		name: "starter-billing-setup",
 		path: ".agents/skills/starter-billing-setup/SKILL.md",
 		description:
-			"Use when wiring Stripe for this starter after auth is stable. Preserve the shipped checkout and webhook contract until the paid handoff works end to end.",
+			"Use when wiring Stripe for this Codebase after auth is stable. Preserve the shipped checkout and webhook contract until the paid handoff works end to end.",
 		steps: [
 			"Read `START-HERE.md` and do not start billing work before auth is stable.",
 			"Read `apps/web/content/docs/stripe-checkout-webhook.mdx` and `apps/web/content/docs/local-qa.mdx`.",
@@ -73,34 +86,70 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		name: "starter-first-slice",
 		path: ".agents/skills/starter-first-slice/SKILL.md",
 		description:
-			"Use after the starter is stable and the buyer is ready to shape the real product. Start with identity, homepage, and the first real customer-visible slice.",
+			"Use after the Codebase is stable and the buyer is ready to shape the real product. Start with identity, homepage, and the first real customer-visible slice.",
 		steps: [
 			"Read `START-HERE.md` and confirm core setup, auth setup, billing setup, and verification are done first.",
 			"Start by updating `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts`.",
-			"Prefer `$copywriting`, `$frontend-design`, `$docs`, and `$testing-practices` as the first follow-on skills.",
+			"Prefer `$starter-product-copy`, `$starter-frontend-design`, and `$starter-docs-and-testing` as the first follow-on skills.",
 			"Keep auth and billing contracts stable until the product already feels like the buyer's product.",
+		],
+	},
+	{
+		name: "starter-product-copy",
+		path: ".agents/skills/starter-product-copy/SKILL.md",
+		description:
+			"Use when replacing generated product identity, homepage copy, CTA language, pricing copy, or positioning in this Codebase.",
+		steps: [
+			"Read `DESIGN.md`, `docs/facts/project-definition.json`, `apps/web/config/product.ts`, and `apps/web/app/_content/home-page.ts` before editing copy.",
+			"Keep claims aligned with the generated product facts until the buyer explicitly changes the product promise.",
+			"Update visible copy and the nearby source of truth together when the product identity changes.",
+			"Avoid changing auth, billing, or protected access behavior while doing copy work.",
+		],
+	},
+	{
+		name: "starter-frontend-design",
+		path: ".agents/skills/starter-frontend-design/SKILL.md",
+		description:
+			"Use when changing user-facing UI, layout, styling, theming, or component presentation in this Codebase.",
+		steps: [
+			"Read root `DESIGN.md` before changing user-facing UI.",
+			"Read `docs/facts/design-system.json` and `apps/web/config/generated-design-system.ts` for the machine-readable design snapshot.",
+			"Preserve the shipped design tokens and component conventions unless the buyer explicitly asks to redesign them.",
+			"Verify the changed UI with the smallest relevant test or browser check before handoff.",
+		],
+	},
+	{
+		name: "starter-docs-and-testing",
+		path: ".agents/skills/starter-docs-and-testing/SKILL.md",
+		description:
+			"Use when documenting a change, choosing validation commands, or recording proof in this Codebase.",
+		steps: [
+			"Read `docs/build/docs/readiness.md`, `docs/build/docs/review.md`, and `docs/testing/README.md` before choosing validation.",
+			"Run the narrowest relevant check first, then broaden to `bun run lint`, `bun run typecheck`, or `bun run build` when the changed surface requires it.",
+			"Record what changed, validation results, assumptions, and requirement-to-evidence notes in `docs/build/docs/documentation.md` when the build contract changes.",
+			"Keep proof notes concise and tied to observable user outcomes.",
 		],
 	},
 	{
 		name: "starter-nextjs-in-this-repo",
 		path: ".agents/skills/starter-nextjs-in-this-repo/SKILL.md",
 		description:
-			"Use when editing Next.js code in this starter. Read the installed Next.js docs in node_modules before changing framework behavior.",
+			"Use when editing Next.js code in this Codebase. Read the installed Next.js docs in node_modules before changing framework behavior.",
 		steps: [
 			"Read `AGENTS.md` first.",
 			"Read the relevant guide in `node_modules/next/dist/docs/` before changing Next.js code.",
-			"Treat the installed docs as the source of truth for this starter's Next.js version, not live upstream docs.",
+			"Treat the installed docs as the source of truth for this Codebase's Next.js version, not live upstream docs.",
 		],
 	},
 	{
 		name: "starter-convex-in-this-repo",
 		path: ".agents/skills/starter-convex-in-this-repo/SKILL.md",
 		description:
-			"Use when editing Convex code in this starter. Read the generated Convex guidelines before changing functions, schema, or HTTP actions.",
+			"Use when editing Convex code in this Codebase. Read the generated Convex guidelines before changing functions, schema, or HTTP actions.",
 		steps: [
 			"Read `AGENTS.md` first.",
 			"Read `apps/web/convex/_generated/ai/guidelines.md` before changing Convex code.",
-			"Treat the generated Convex guidance as version-coupled to this starter's installed Convex setup.",
+			"Treat the generated Convex guidance as version-coupled to this Codebase's installed Convex setup.",
 		],
 	},
 ];

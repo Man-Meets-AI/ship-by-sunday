@@ -1,5 +1,5 @@
 import { PRODUCT_APP_ID } from "../../config/product";
-import { requireGrantedProductAccess } from "../access/model";
+import { requireGeneratedCodebaseProductAccess } from "../access/model";
 import type {
 	CodebaseMutationCtx,
 	CodebaseQueryCtx,
@@ -36,7 +36,7 @@ export function serializeCodebaseWorkflowState(
 }
 
 export async function getCodebaseWorkflowStateHandler(ctx: CodebaseQueryCtx) {
-	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const clerkUserId = await requireGeneratedCodebaseProductAccess(ctx);
 	const workflowState = await getCodebaseWorkflowStateByClerkUserId(
 		ctx,
 		clerkUserId,
@@ -46,7 +46,7 @@ export async function getCodebaseWorkflowStateHandler(ctx: CodebaseQueryCtx) {
 }
 
 export async function unlockExecuteShipHandler(ctx: CodebaseMutationCtx) {
-	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const clerkUserId = await requireGeneratedCodebaseProductAccess(ctx);
 	const existingWorkflowState = await getCodebaseWorkflowStateByClerkUserId(
 		ctx,
 		clerkUserId,

@@ -4,8 +4,9 @@ import Stripe from "stripe";
 import { v } from "convex/values";
 
 import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
+import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
 import { internal } from "./_generated/api";
-import { action } from "./_generated/server";
+import { action, internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
 import { productAccessGrantResultValidator } from "./access/validators";
 import { normalizeCheckoutEmail } from "./checkoutClaims";
@@ -479,6 +480,10 @@ function getStripeIds(session: Stripe.Checkout.Session) {
 	};
 }
 
+function getSessionCheckoutIntentFields(session: Stripe.Checkout.Session) {
+	return readCheckoutIntentFromMetadata(session.metadata);
+}
+
 async function fulfillPaidCheckoutSessionByEmail({
 	ctx,
 	session,
@@ -518,6 +523,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 	}
 
 	const { stripeCustomerId, stripePaymentIntentId } = getStripeIds(session);
+	const checkoutIntent = getSessionCheckoutIntentFields(session);
 	await ctx.runMutation(
 		internal.checkoutClaims.upsertPendingCheckoutClaimFromStripe,
 		{
@@ -527,6 +533,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 			paymentStatus: session.payment_status,
 			stripeCustomerId,
 			stripePaymentIntentId,
+			...checkoutIntent,
 			stripeEventId,
 			stripeEventType,
 		},
@@ -665,7 +672,7 @@ function mapPendingClaimResult({
 	}
 }
 
-export const fulfillCheckoutSessionByEmail = action({
+export const fulfillCheckoutSessionByEmail = internalAction({
 	args: {
 		sessionId: v.string(),
 		stripeEventId: v.string(),
@@ -779,6 +786,7 @@ export const claimCheckoutSessionForViewer = action({
 						typeof session.payment_intent === "string"
 							? session.payment_intent
 							: undefined,
+					...getSessionCheckoutIntentFields(session),
 				});
 
 			return {
@@ -809,6 +817,7 @@ export const claimCheckoutSessionForViewer = action({
 					typeof session.payment_intent === "string"
 						? session.payment_intent
 						: undefined,
+				...getSessionCheckoutIntentFields(session),
 				stripeEventId: `claim:${session.id}`,
 				stripeEventType: "checkout.success.claim",
 			},

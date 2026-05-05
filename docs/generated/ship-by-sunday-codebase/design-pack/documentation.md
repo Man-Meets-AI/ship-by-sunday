@@ -181,6 +181,14 @@ If helpful, also record the external official references used for the work:
 - **Out of scope:** No homepage interactivity for Problem, Outcome, Setup, or Generated preview. No pre-auth Convex draft session. No free-form `theme_preset` editing on the public route. No Convex schema changes.
 - **Verification:** Focused unit and integration-ui packs for homepage content, render model, structured data, draft storage, demo behavior, primary CTA, checkout button, and post-checkout seeder. Repo-level `bun run --cwd apps/web lint`, `format:check`, `bun typecheck`, `bun lint`, `bun run format`, and `bun run --cwd apps/web build`. Manual browser proof at desktop and mobile viewports at `/?marketing=1`.
 
+## Shipped Note: Starter Repository Invite Flow Removal
+
+- **Date:** 2026-05-04
+- **Surface:** `/settings`, workspace home setup cards, and mission extras.
+- **Change:** Removed the private starter repository invite card, GitHub username form, pending invite status, and manual repository provisioning affordances from customer-visible app surfaces.
+- **Design direction:** Keep Settings operational and sparse. The remaining Settings surface focuses on Codex connection and account management, matching the current Codebase-first product contract.
+- **Out of scope:** The compiler's internal generated Codebase repo-generation machinery remains intact even where implementation names still contain "starter."
+
 ## Shipped Note: Figma Leverage Hero On The Public Homepage
 
 - **Date:** 2026-05-03
@@ -225,6 +233,42 @@ If helpful, also record the external official references used for the work:
 - **Design direction:** Keep the homepage story moving from the hero directly into the worker explanation without an intermediate editorial section.
 - **Out of scope:** No checkout behavior change, no pricing or structured-data change, and no external provider setup.
 - **Verification:** Focused homepage content, render-model, contract, and integration-ui coverage should assert the removed copy and retired anchor are no longer present.
+
+## Shipped Note: Commercial Doctor Pass Homepage Refresh
+
+- **Date:** 2026-05-05
+- **Surface:** `/` public homepage.
+- **Change:** Reframed the homepage around "Agent doctor for web apps" and refreshed the existing-codebase branch to describe the private local doctor pass, Top 9 findings, approved sync preview, first-loop approval, proof or blocked proof, and next recommendation. The branch no longer claims automatic GitHub connection, PR creation, CI reruns, raw-source sharing, or Codex app-server execution as the default existing-codebase path.
+- **Design direction:** Keep the Figma-derived two-option leverage hero and existing layout, but align the commercial copy with shipped proof: generated-codebase checkout for idea buyers, protected `/workspace/setup` doctor-pass onboarding for existing-codebase buyers, and managed GitHub as explicit concierge consent only.
+- **Out of scope:** No checkout behavior change, no new entitlement, no GitHub App setup, no provider token storage, no branch push or pull request automation, and no external setup requirement.
+- **Verification:** Focused homepage content, render-model, primary CTA, and product-preview integration-ui tests should assert the new language and preserved checkout intent.
+
+## Shipped Note: Workspace Execution Surfaces Privacy Panel
+
+- **Date:** 2026-05-05
+- **Surface:** `/workspace/privacy`.
+- **Change:** Added an execution-surfaces panel that summarizes `local_runner`, `codex_cloud_handoff`, `managed_github`, `generated_repo`, and `codex_app_server` as separate consent, storage, command, provider, PR, proof, sync, and failure boundaries.
+- **Design direction:** Keep the page operational and sparse, using the existing neutral workspace panel treatment. The panel explains authority boundaries without adding setup buttons, GitHub actions, source viewers, or hosted-execution controls.
+- **Out of scope:** No GitHub App setup, no provider token storage, no branch push, no pull request creation, no CI rerun, no raw-source sharing, no Codex app-server expansion, and no new external setup requirement.
+- **Verification:** Focused privacy read-model and integration-ui coverage should assert all five surfaces render and forbidden execution claims remain absent.
+
+## Shipped Note: Workspace Workflow Packet Contract Panel
+
+- **Date:** 2026-05-05
+- **Surface:** `/workspace/loops`.
+- **Change:** Added a workflow-packet contract panel that explains the shared loop contract: evidence and probes, customer bottleneck context, explicit execution surface, optional Codex interpretation, scoped write authority, proof delivery, structured sync, and revocation/stop behavior.
+- **Design direction:** Keep loops as a catalog and decision-support surface, not a runnable queue. The contract panel should clarify how approved findings become scoped packets without adding run buttons, hosted execution, provider setup, PR controls, or source-sharing UI.
+- **Out of scope:** No new workflow id, no executor change, no package install, no provider setup, no branch push, no pull request creation, no CI rerun, no raw-source or raw-log sharing, and no external setup requirement.
+- **Verification:** Focused loops read-model and integration-ui coverage should assert the contract rows render and forbidden execution claims remain absent.
+
+## Shipped Note: Mature Repo Adoption Workflow
+
+- **Date:** 2026-05-05
+- **Surface:** `/workspace/findings/[findingId]`, `/workspace/loops`, local runner workflow output.
+- **Change:** Added `mature-repo-adoption` as a local-runner workflow lane. Approved findings can now show a mature adoption packet command, and the runner writes sync-safe `.sbs` adoption audit, adoption Program draft, first ExecPlan draft, proof, and sync-preview artifacts.
+- **Design direction:** Keep mature adoption as a reviewable artifact overlay, not a generated-starter rewrite. UI copy should make the workflow feel conservative: preserve repo conventions, name blocked proof, and require later packets for any source, provider, PR, CI, or package changes.
+- **Out of scope:** No root docs mutation, no runtime source edit, no package install, no migration, no provider setup, no branch push, no pull request creation, no CI rerun, no raw-source or raw-log sharing, and no external setup requirement.
+- **Verification:** Focused finding, loops, Convex workflow, CLI, and local-runner workflow tests should prove the mature adoption lane writes only `.sbs` artifacts and preserves forbidden execution boundaries.
 
 ## Shipped Note: Figma Programs Section On The Public Homepage
 

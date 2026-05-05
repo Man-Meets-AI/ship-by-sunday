@@ -67,7 +67,14 @@ function renderView(
 				currentAccountEmail?: string;
 		  }
 		| { kind: "payment_pending"; sessionId: string; paymentStatus: string }
-		| { kind: "validated"; sessionId: string },
+		| {
+				kind: "validated";
+				sessionId: string;
+				fulfillmentTrack:
+					| "generated_codebase"
+					| "existing_codebase_doctor"
+					| "unspecified";
+		  },
 	options: {
 		initialProductAccess?: unknown;
 	} = {},
@@ -101,6 +108,7 @@ describe("CheckoutSuccessView", () => {
 		const markup = renderView({
 			kind: "validated",
 			sessionId: "cs_test_123",
+			fulfillmentTrack: "generated_codebase",
 		});
 
 		expect(markup).toContain("Finalizing access");
@@ -126,6 +134,7 @@ describe("CheckoutSuccessView", () => {
 		const markup = renderView({
 			kind: "validated",
 			sessionId: "cs_live_123",
+			fulfillmentTrack: "generated_codebase",
 		});
 
 		expect(markup).toContain("Opening workspace");
@@ -156,12 +165,53 @@ describe("CheckoutSuccessView", () => {
 			{
 				kind: "validated",
 				sessionId: "cs_preloaded_123",
+				fulfillmentTrack: "generated_codebase",
 			},
 			{ initialProductAccess: { hasAccess: true } },
 		);
 
 		expect(markup).toContain("Opening workspace");
 		expect(markup).toContain("Access ready");
+	});
+
+	it("routes existing-codebase fulfillment to setup", () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: true,
+		});
+
+		const markup = renderView({
+			kind: "validated",
+			sessionId: "cs_existing_123",
+			fulfillmentTrack: "existing_codebase_doctor",
+		});
+
+		expect(markup).toContain("Opening codebase setup");
+		expect(markup).toContain("Open setup");
+		expect(markup).toContain('href="/workspace/setup"');
+	});
+
+	it("routes legacy missing intent to the protected choice screen", () => {
+		useConvexAuthMock.mockReturnValue({
+			isAuthenticated: true,
+			isLoading: false,
+		});
+		useQueryMock.mockReturnValue({
+			hasAccess: true,
+		});
+
+		const markup = renderView({
+			kind: "validated",
+			sessionId: "cs_legacy_123",
+			fulfillmentTrack: "unspecified",
+		});
+
+		expect(markup).toContain("Opening fulfillment choice");
+		expect(markup).toContain("Choose path");
+		expect(markup).toContain('href="/workspace/choose"');
 	});
 
 	it("renders the email-handoff recovery path for a paid checkout email", () => {

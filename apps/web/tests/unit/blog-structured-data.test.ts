@@ -10,9 +10,9 @@ import {
 const blogPostFixture = {
 	title: "What Ship by Sunday does",
 	description:
-		"Ship by Sunday turns a rough product idea into product truth, agent-ready packs, and a starter path builders can keep using after the first weekend.",
+		"Ship by Sunday turns a rough product idea into product truth, an agent-ready Codebase, and a build path builders can keep using after the first weekend.",
 	summary:
-		"Ship by Sunday is a codebase-first shipping system: it captures the product truth, generates agent-ready packs, and gives builders a repo-shaped path for turning AI work into a real product.",
+		"Ship by Sunday is a codebase-first shipping system: it captures product truth, generates an agent-ready Codebase, and gives builders a durable path for turning AI work into a real product.",
 	publishedAt: "2026-04-27",
 	authorName: "Parker Rex",
 	authorRole: "Founder, Ship by Sunday",

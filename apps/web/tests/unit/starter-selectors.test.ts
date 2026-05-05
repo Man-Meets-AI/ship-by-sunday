@@ -8,7 +8,6 @@ describe("starter selectors", () => {
 			isStarterModuleEnabled("docs", {
 				docs: false,
 				course: true,
-				starterRepo: true,
 				observability: true,
 				codex: true,
 			}),
@@ -18,7 +17,6 @@ describe("starter selectors", () => {
 			isStarterModuleEnabled("course", {
 				docs: true,
 				course: false,
-				starterRepo: true,
 				observability: true,
 				codex: true,
 			}),

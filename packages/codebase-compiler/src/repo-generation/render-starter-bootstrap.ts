@@ -84,7 +84,7 @@ function renderStarterBootstrapContent(productName: string) {
 		"    return 0",
 		"  fi",
 		"",
-		'  warn "Bun is required before this starter can install dependencies."',
+		'  warn "Bun is required before this Codebase can install dependencies."',
 		'  note "Install Bun, then rerun this script: $BUN_INSTALL_DOCS_URL"',
 		'  if prompt_yes_no "Open the Bun installation guide now?" "Y"; then',
 		'    open_url "$BUN_INSTALL_DOCS_URL"',

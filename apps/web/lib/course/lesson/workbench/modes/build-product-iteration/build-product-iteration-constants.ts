@@ -7,11 +7,11 @@ export const BUILD_PRODUCT_ITERATION_FIELD_IDS = {
 } as const;
 
 export const BUILD_PRODUCT_ITERATION_SETUP_CHECKLIST_OPTIONS = [
-	"Linked paid product account (private starter / template access)",
+	"Opened the paid product workspace and generated Codebase handoff",
 	"Connected ChatGPT account in course settings",
 	"Pasted this lesson’s prompt into ChatGPT",
 	"Saved the response into brand + outputs below",
-	"Picked one starter idea",
+	"Picked one starting idea",
 	"Generated a first batch of posts",
 ] as const;
 

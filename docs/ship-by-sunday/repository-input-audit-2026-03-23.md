@@ -3,16 +3,18 @@
 Date: 2026-03-23
 Scope: planning only
 
+Retirement note, 2026-05-04: the private starter repository invite path described in this historical audit has been removed from the live product. Customers now receive the generated Codebase through `/review`, and the old `starterRepoAccess` table is retained only as deprecated historical storage.
+
 ## Executive summary
 
-The product has a real input system already, but it is fragmented. I found 21 active lesson surfaces with structured fields and 148 active lesson fields across CEO, Design, and Build, plus a small number of non-lesson input surfaces such as starter-repo access and local-only deploy secrets. The lesson system is well structured for capture and autosave, but most inputs stay lesson-local instead of being normalized once and reused downstream.
+The product has a real input system already, but it is fragmented. I found 21 active lesson surfaces with structured fields and 148 active lesson fields across CEO, Design, and Build, plus non-lesson input surfaces such as local-only deploy secrets. The lesson system is well structured for capture and autosave, but most inputs stay lesson-local instead of being normalized once and reused downstream.
 
-The strongest current coverage is early product-definition capture: problem, user, outcome, research, core flow, and some build/setup constraints. The weakest current coverage is design-spec quality, long-horizon execution quality, and final-codebase assembly. There is no active code path that turns student answers into one canonical design spec, one durable long-horizon file stack, or one combined repo codebase. Instead, the current product emits scattered artifacts: lesson previews, copied prompts, static PDFs, static starter-repo links, and a few local handoff codebases.
+The strongest current coverage is early product-definition capture: problem, user, outcome, research, core flow, and some build/setup constraints. The weakest current coverage is design-spec quality, long-horizon execution quality, and final-codebase assembly. There is no active code path that turns student answers into one canonical design spec, one durable long-horizon file stack, or one combined repo codebase. Instead, the product state audited here emitted scattered artifacts: lesson previews, copied prompts, static PDFs, legacy static starter-repo links, and a few local handoff codebases.
 
 Two major dormant assets exist and should shape the minimal-diff plan:
 
 1. The repo already has a generic prompt generation/import pipeline in `features/course/lesson/model/research-prompt.ts`, `features/course/lesson/workbench/shared/prompt-import-card.tsx`, and `app/api/codex/generate/route.ts`, but no active lesson definition currently sets `promptImport` or `briefAssembler` in `features/course/lesson/model/lessons/*` or `features/course/lesson/content/build.ts`.
-2. The new long-horizon durable-memory stack in `docs/codex_long_horizon_templates/` is strong and product-relevant, but it currently stands alone. The docs app serves `content/docs` via `features/docs/server/page-paths.ts`; the new folder is outside that tree and is not referenced by current app, lesson, starter-template, or download workflows.
+2. The new long-horizon durable-memory stack in `docs/codex_long_horizon_templates/` is strong and product-relevant, but it currently stands alone. The docs app serves `content/docs` via `features/docs/server/page-paths.ts`; the new folder is outside that tree and is not referenced by current app, lesson, generated-Codebase, or download workflows.
 
 The cleanest path is not a redesign. It is:
 
@@ -34,10 +36,10 @@ The cleanest path is not a redesign. It is:
 | Artifact and pinned-artifact reuse | Lesson `artifact` and `pinnedArtifacts` in lesson source files | `features/course/lesson/workbench/shared/artifact-context.tsx`, `artifact-preview-content.tsx`, `features/course/artifacts/components/*` | Completion gating consumes pinned artifacts in `completion.ts` | Returned from `convex/course/lessonState.ts` and `convex/course/artifacts.ts` | Preview assembly in `registry/artifacts.ts`; stage-bridge summaries in `stage-unlock.ts` |
 | Prompt resource generation | Prompt templates and parsers in `features/course/lesson/model/research-prompt.ts` | Active copy-prompt surface in `features/course/lesson/shells/index.tsx`, `shells/use-copy-prompt-resource-card.ts`, and `modes/competitor-research-light/competitor-research-prompt-section.tsx` | Prompt enablement is presence-based only (`getPromptTemplateState`) | No persistence unless a lesson uses `promptImport` | Generates `competitor_research`, `scope_boundary`, and `visual_direction_guide` prompts; only `competitor_research` is actively surfaced today |
 | Prompt import + Codex generation infrastructure | `features/course/lesson/workbench/shared/prompt-import-card.tsx`, `app/api/codex/generate/route.ts`, `features/codex/server/app-server.ts` | Would render inside lessons that set `promptImport` | Zod request validation in `app/api/codex/generate/route.ts` | Local pasted-response state in `prompt-import-card.tsx`; optional `codexRuns` logging in Convex | Current lesson source files do not set `promptImport`; pipeline exists but is dormant |
-| Starter template access | `features/starter-repo/components/starter-repo-access-form.tsx`, `features/starter-repo/components/starter-repo-access-card.tsx` | Mission / settings / build cards | Strong username validation in `features/starter-repo/lib/github-username.ts` and mutation validation in `convex/course/starterRepoAccess.ts` | `starterRepoAccess` table in `convex/schema.ts` | GitHub provisioning automation in `scripts/starter-repo-access.mjs` and `scripts/lib/starter-repo-access.mjs` |
-| Static doc-pack / starter links | `config/product.ts`, `features/course/lesson/model/resources.ts` | Welcome/build cards and resource links | None beyond link presence | Static config only | Exposes static PDFs and starter repo URL; not personalized from student inputs |
+| Retired private repository access | Removed from the live app on 2026-05-04; historical paths were `features/starter-repo/components/starter-repo-access-form.tsx` and `features/starter-repo/components/starter-repo-access-card.tsx` | No live customer rendering | Username validation and `convex/course/starterRepoAccess.ts` were removed | Deprecated inert `starterRepoAccess` table in `convex/schema.ts` | GitHub provisioning scripts were removed; do not reintroduce manual private-repository invites |
+| Static doc-pack links | `config/product.ts`, `features/course/lesson/model/resources.ts` | Welcome/build cards and resource links | None beyond link presence | Static config only | Exposes static PDFs; the retired repository URL is no longer part of delivery |
 | Deploy handoff | `features/course/lesson/content/build.ts` lesson 3.14 fields; local-only secrets in `features/course/lesson/workbench/modes/production-deploy-handoff/production-deploy-handoff-secrets-panel.tsx` | `production-deploy-handoff-workbench.tsx` | Required checklist/product/domain fields via completion logic | Product/domain save to `lessonStates`; secrets remain browser-local only | `production-deploy-handoff-readme-prompt-card.tsx` and `production-deploy-handoff-secrets-panel.tsx` build clipboard codebases |
-| New long-horizon templates folder | `docs/codex_long_horizon_templates/AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` | Not rendered in current app | Not referenced by app validation | Standalone files only | Not wired into docs routing, downloads, lesson resources, starter-template flow, or codebase assembly |
+| New long-horizon templates folder | `docs/codex_long_horizon_templates/AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` | Not rendered in current app | Not referenced by app validation | Standalone files only | Not wired into docs routing, downloads, lesson resources, generated-Codebase flow, or codebase assembly |
 
 ## What the product asks for today, exactly
 
@@ -126,7 +128,7 @@ Exact field inventory:
 - `build_product_iteration_setup_checklist`: Setup checklist [checklist; required]
 - `build_product_iteration_brand_strategy`: Brand strategy instructions [textarea; required]
 - `build_product_iteration_brand_design`: Brand design instructions [textarea; required]
-- `build_product_iteration_starter_idea`: Selected starter idea [textarea; required]
+- `build_product_iteration_starter_idea`: Selected starting idea [textarea; required]
 - `build_product_iteration_generated_posts`: Generated posts (v1 batch) [textarea; required]
 
 ### 3.4 Wire DB, Auth, and Payments (BUILD / build_ship_roadmap)
@@ -242,12 +244,12 @@ Exact field inventory:
 
 ### Non-lesson inputs
 
-1. Starter repo access
-   - Visible field: `githubUsername`
-   - Definition / render: `features/starter-repo/components/starter-repo-access-form.tsx`
-   - Validation: `features/starter-repo/lib/github-username.ts`, `convex/course/starterRepoAccess.ts`
-   - Storage: `starterRepoAccess` table in `convex/schema.ts`
-   - Consumption: starter-template access cards, GitHub invite script, mission/settings/build gating
+1. Retired starter repo access
+   - Visible field: none in the live app
+   - Historical field: `githubUsername`
+   - Current contract: customers receive the generated Codebase through `/review`, not a private GitHub repository invite
+   - Storage: the deprecated `starterRepoAccess` table remains only for historical records in `convex/schema.ts`
+   - Consumption: none; the removed access cards, GitHub invite scripts, and mission/settings/build gating are gone
 
 2. Production deploy secrets
    - Visible local-only fields: `cloudflareToken`, `stripeSecret`, `clerkKeys`
@@ -306,7 +308,7 @@ Status legend:
 | Codex/tooling readiness | `ceo_skills_setup_checklist`, `codex_project_folder_name`, `ceo_skills_workflow_stage` | CEO 1.9 | `features/course/lesson/model/lessons/ceo.ts` | Completion only | `lessonStates` | Mostly local orientation | Reusable workflow | Durable memory / tool setup | Partial | Keep as orientation, but this belongs more in template docs than in final product-brief model |
 | Core UX / core flow definition | `core_problem`, `core_audience`, `core_transformation`, `core_desired_outcome`, `core_must_have_features`, `core_named_screens` | Design 2.1 | `features/course/lesson/model/lessons/design.ts` | Completion only | `lessonStates` | Pinned artifacts and stage summaries | Section purpose, narrative, first flow composition | Scope and architecture intent | Covered | Keep; this is one of the strongest inputs in the product |
 | Brand path decision | `core_brand_path`, `core_brand_guide_notes` | Design 2.1 | `features/course/lesson/model/lessons/design.ts` | Completion only | `lessonStates` | Mostly local | Brand-asset readiness | Context / constraints | Partial | Keep the decision, but add explicit typography/color/layout/system fields instead of only notes |
-| Build environment readiness | `build_product_folder_name`, `build_setup_prereqs` | Build 3.0 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Local starter setup | None directly | Environment / bootstrap | Partial | Keep as onboarding metadata, but it should not be part of the final product-definition model |
+| Build environment readiness | `build_product_folder_name`, `build_setup_prereqs` | Build 3.0 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Local Codebase setup | None directly | Environment / bootstrap | Partial | Keep as onboarding metadata, but it should not be part of the final product-definition model |
 | Brand/voice outputs from AI iteration | `build_product_iteration_brand_strategy`, `build_product_iteration_brand_design`, `build_product_iteration_starter_idea`, `build_product_iteration_generated_posts` | Build 3.1 | `features/course/lesson/content/build.ts`, `build-product-iteration-constants.ts` | Completion only | `lessonStates` | Export markdown; later manual reuse | Brand direction, copy inputs | Not long-horizon-specific | Partial | Reframe as derived outputs from shared brief + design inputs, not as an isolated lesson silo |
 | Build/ship execution constraints | build phase, ship phase, service accounts, scope, domain, support email, logging, testers | Build 3.4 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Artifact preview only | Limited product UI / ops context | Constraints, dependencies, validation, rollout | Partial | Split into shared `launch_constraints`, `distribution`, `ops`, `testing`, `support` sections and reuse downstream |
 | Marketing site brief | product, audience, problem, pain, frequency, why matters, outcome, capability | Build 3.5 | `features/course/lesson/content/build.ts`, `codex-marketing-site-brief-block.tsx` | Completion only | `lessonStates` | Used only as manual brief fields beside static prompt | Narrative, copy discipline, CTA inputs | Prompt spec context | Partial | Stop re-entering these manually; derive them from shared product brief and only ask for missing marketing-specific nuance |
@@ -322,7 +324,7 @@ Status legend:
 | Production deploy context | deploy steps, product name, domain, success checks | Build 3.14 | `features/course/lesson/content/build.ts`, `production-deploy-handoff-context-fields-card.tsx` | Completion only | `lessonStates` | README prompt + context block | Not design-specific | Deploy/run/demo context | Partial | Keep, but fold into final repo codebase / launch codebase |
 | Production secrets | cloudflare token, stripe secret, clerk keys | Deploy secrets panel | `production-deploy-handoff-secrets-panel.tsx` | None | Browser-local only | Clipboard-only full codebase | N/A | Secrets / env handoff | Partial | Correctly local-only, but the workflow is ephemeral and not integrated with the final codebase |
 | Skill usage / tagged prompt | checklist, first tagged prompt | Build 3.16 | `features/course/lesson/content/build.ts` | Completion only | `lessonStates` | Artifact only | Reusable workflow extraction | Skills / reusable workflow | Partial | Keep as training support, not part of product-definition core |
-| Starter repo provisioning | `githubUsername` | Mission, settings, build cards | `features/starter-repo/components/starter-repo-access-form.tsx`, `convex/course/starterRepoAccess.ts`, `scripts/starter-repo-access.mjs` | Strong username validation | `starterRepoAccess` table | GitHub invite automation and template gating | N/A | Repo/codebase access | Covered | Keep exactly; this is one of the few non-lesson inputs with strong validation and real downstream effect |
+| Retired starter repo provisioning | Formerly `githubUsername`; no live customer input remains | None in the live app | Historical paths were `features/starter-repo/components/starter-repo-access-form.tsx`, `convex/course/starterRepoAccess.ts`, and `scripts/starter-repo-access.mjs` | Removed with the invite flow | Deprecated inert `starterRepoAccess` table | None; generated Codebase delivery now runs through `/review` | N/A | Repo/codebase access | Removed | Do not reintroduce manual private-repository invites; preserve generated Codebase delivery instead |
 | Prompt import / Codex generation | `templateId`, `prompt`, `lessonId`, `model`, pasted response | Dormant infrastructure | `prompt-import-card.tsx`, `app/api/codex/generate/route.ts`, `research-prompt.ts` | Zod request validation + parser validation | Local UI state plus `codexRuns` logging | Would populate structured fields automatically | Strong potential for design prompt import | Strong potential for long-horizon plan import | Missing in active workflow | Wire this before building new generation infrastructure |
 | Long-horizon durable-memory templates | `AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` templates | Standalone docs folder | `docs/codex_long_horizon_templates/*` | None | Files only | None today | Reusable design/build guidance indirectly | Directly maps to long-horizon durable-memory requirements | Missing in active workflow | Promote into starter/doc-pack workflow and link from active lessons/docs |
 
@@ -331,7 +333,7 @@ Status legend:
 Normalization approach:
 
 - The source doc has 107 individual checklist items in `docs/long-horizon-checklist.md`.
-- Many are process-only and should live in starter templates and repo guidance rather than student-facing questions.
+- Many are process-only and should live in generated templates and repo guidance rather than student-facing questions.
 - I normalized them into product-relevant requirement groups below.
 
 | Normalized long-horizon requirement | Current evidence | Coverage | Ask directly / derive / system-template | Notes |
@@ -489,7 +491,7 @@ Ask once, reuse everywhere:
    - asset availability: logo, wordmark, screenshots, Figma/Canva, content assets
 
 6. Technical context
-   - starter template path
+   - generated Codebase source path
    - stack flags
    - repo path
    - route/access model
@@ -539,7 +541,7 @@ Do not ask directly unless needed:
 - Repeated product/problem/outcome re-entry
 - Pinned artifacts shown, not normalized
 - Static prompt templates copied manually
-- Static PDFs and starter repo URL linked separately
+- Static PDFs linked separately; the retired repository URL is no longer part of delivery
 - No final codebase assembler
 
 ### After
@@ -577,7 +579,7 @@ Current wiring status:
 - It stands alone today.
 - I found no active references to `docs/codex_long_horizon_templates` in `app/`, `features/`, `convex/`, `content/`, `config/`, or `scripts/`.
 - The docs app resolves only `content/docs` through `features/docs/server/page-paths.ts`, so this folder is not part of the current docs-site routing.
-- Current static downloadable resources are only the PDFs and starter repo URL declared in `config/product.ts` and surfaced through `features/course/lesson/model/resources.ts` and starter-template cards.
+- Current static downloadable resources are only the PDFs surfaced through `features/course/lesson/model/resources.ts`; the retired repository URL and template cards are no longer part of delivery.
 
 Audit judgment:
 
@@ -650,7 +652,7 @@ Add generators for:
 4. `implement.md`
 5. `documentation.md`
 6. codebase manifest:
-   - starter repo URL
+   - generated Codebase handoff state
    - static PDF/doc resources
    - generated prompts
    - validation/run instructions

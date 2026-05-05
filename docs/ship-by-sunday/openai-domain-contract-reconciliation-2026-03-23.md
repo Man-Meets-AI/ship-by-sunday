@@ -4,6 +4,8 @@ Date: 2026-03-23
 Mode: Planning only
 Working source: [2026-03-23-openai-domain-ui-contracts.md](/Users/parkerrex/Projects/ship-by-sunday/.codex/plans/2026-03-23-openai-domain-ui-contracts.md)
 
+Retirement note, 2026-05-04: the private starter repository invite path has been removed from the live product. `starterRepo` is no longer a current intake source; customers receive the generated Codebase through `/review`.
+
 ## How To Use This File
 
 This is the working sheet for deciding what survives into the rebuilt funnel.
@@ -36,7 +38,7 @@ Each row from the domain-contract doc gets mapped to:
 - `1.4` / `1.5` / `1.6` = CEO foundation in [ceo.ts](/Users/parkerrex/Projects/ship-by-sunday/features/course/lesson/model/lessons/ceo.ts)
 - `2.1` = active Design intake in [design.ts](/Users/parkerrex/Projects/ship-by-sunday/features/course/lesson/model/lessons/design.ts)
 - `3.x` = build/marketing inputs in [build.ts](/Users/parkerrex/Projects/ship-by-sunday/features/course/lesson/content/build.ts)
-- `starterRepo` = GitHub username in [starter-repo-access-form.tsx](/Users/parkerrex/Projects/ship-by-sunday/features/starter-repo/components/starter-repo-access-form.tsx)
+- `starterRepo` = retired GitHub username intake, removed from the live product on 2026-05-04
 
 ---
 
@@ -97,7 +99,7 @@ Each row from the domain-contract doc gets mapped to:
 | `deliverables` | `build/docs/prompt.md` | `fact` | implied, not explicit | Missing | `add` | Need direct question. |
 | `successCriteria` | `build/docs/prompt.md`, `build/docs/plans.md` | `fact` | weak proxies in QA/deploy checklists | Missing | `add` | Major long-horizon blocker. |
 | `demoPlan` | `build/docs/prompt.md`, `build/docs/documentation.md` | `fact` | QA report and deploy checks only | Missing | `add` | Should be explicit. |
-| `setupPrerequisites` | `build/CHECKLIST.md`, `build/docs/implement.md` | `split` | `3.0`, `3.14`, starter repo access | Partial | `combine` | Keep core setup facts; generate the runbook steps. |
+| `setupPrerequisites` | `build/CHECKLIST.md`, `build/docs/implement.md` | `split` | `3.0`, `3.14`, generated Codebase handoff | Partial | `combine` | Keep core setup facts; generate the runbook steps. |
 | `architectureIntent` | `build/docs/plans.md` | `fact` | `3.10` plan affected areas + slice codebase | Partial | `combine` | Existing plan fragments can seed it. |
 | `milestonePlan` | `build/docs/plans.md` | `derived` | `3.8`/`3.10` fragments only | Partial | `add` | Should be generated from plan facts, not directly stored as many freeform fields. |
 | `workIsolationPlan` | `build/docs/plans.md` | `derived` | none | Missing | `add` | Repo execution rule, not student fact. |
@@ -120,7 +122,7 @@ Each row from the domain-contract doc gets mapped to:
 - distribution/install/AI promise from `3.10`
 - risks/dependencies from `3.10`
 - operational deploy context from `3.4` / `3.14`
-- starter repo username
+- generated Codebase handoff state
 
 ### Combine aggressively
 
