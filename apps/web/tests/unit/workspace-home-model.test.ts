@@ -7,7 +7,6 @@ describe("workspace home model", () => {
 		const model = buildWorkspaceHomeModel({
 			docs: true,
 			course: false,
-			starterRepo: false,
 			codex: true,
 			observability: true,
 		});
@@ -18,16 +17,10 @@ describe("workspace home model", () => {
 		expect(
 			model.modules.find((module) => module.id === "course")?.statusLabel,
 		).toBe("Starter mode");
-		expect(model.modules.some((module) => module.id === "starterRepo")).toBe(
-			false,
-		);
 		expect(model.quickActions.map((action) => action.label)).toEqual([
 			"Open settings",
 			"Open docs",
 		]);
 		expect(model.nextSteps.some((step) => step.id === "codex")).toBe(true);
-		expect(model.nextSteps.some((step) => step.id === "starter-repo")).toBe(
-			false,
-		);
 	});
 });

@@ -4,6 +4,8 @@ Date: 2026-03-23
 Mode: Planning only. No product code changed.
 Primary objective: audit every current product-definition, design, planning, implementation, scope, constraint, asset, and output-shaping input in the repo; compare it against `docs/long-horizon-checklist.md` and `docs/design-checklist.md`; recommend the minimum high-leverage path to complete coverage.
 
+Retirement note, 2026-05-04: the private starter repository invite path described in this historical audit has been removed from the live product. Customers now receive the generated Codebase through `/review`, and the old `starterRepoAccess` table is retained only as deprecated historical storage.
+
 ## Executive Summary
 
 The repo already has a coherent lesson-state engine, but it does not yet have a coherent input architecture.
@@ -23,7 +25,7 @@ Bottom line:
 - Current status for the target product outcome is:
   - Strong design spec generation: not supported yet.
   - Strong long-horizon implementation plan generation: partially supported.
-  - Strong repo codebase that combines starter template, doc pack, and build prompt: not supported yet.
+  - Strong repo codebase that combines generated Codebase handoff, doc pack, and build prompt: not supported yet.
 - The cleanest path is not a broad redesign. It is:
   1. formalize a shared foundation model from existing CEO + Design answers,
   2. fill the missing design inputs in the active Design flow,
@@ -42,10 +44,9 @@ Primary lesson definitions:
 - `features/course/lesson/model/contracts.ts`
 - `features/course/lesson/model/curriculum.ts`
 
-Operational non-lesson input:
-- `features/starter-repo/components/starter-repo-access-form.tsx`
-- `features/starter-repo/lib/github-username.ts`
-- `convex/course/starterRepoAccess.ts`
+Retired operational non-lesson input:
+- The former starter repository access form, GitHub username validator, and `convex/course/starterRepoAccess.ts` path were removed on 2026-05-04.
+- The `starterRepoAccess` table remains only as deprecated historical storage with no live readers or writers.
 
 ### 2. Route entry and rendering
 
@@ -176,7 +177,7 @@ Legend:
 | QA inputs and findings | `Testing preflight checklist`; `QA test prompt`; `QA report`; `Current step`; `Last issue`; `Scenario` | `3.12` | `features/course/lesson/content/build.ts`; `features/course/lesson/workbench/modes/checkout-qa-loop/*` | Checklist + presence only | `lessonStates.fieldValues` | No downstream parameterization | D7 | L5 | Partial | Keep, but make scenario drive prompt assembly and feed found issues into the deploy/handoff stack. |
 | Deploy context | `Product name`; `Domain`; deploy steps; success checks | `3.14` | `features/course/lesson/content/build.ts`; `features/course/lesson/workbench/modes/production-deploy-handoff/*` | Presence-only | `lessonStates.fieldValues` | Added to README prompt context | D5 | L4, L5 | Partial | Merge product/domain with earlier shared fields; keep steps as operational checklist. |
 | Deploy secrets codebase | `Cloudflare API token`; `Stripe live secret key`; `Clerk keys` | `3.14` | `features/course/lesson/workbench/modes/production-deploy-handoff/production-deploy-handoff-secrets-panel.tsx` | No persistence by design | Browser session only | Copy-only deploy codebase | N/A | L4, L5 | Partial | Keep ephemeral, but add explicit secure handoff guidance and resumability expectations outside persisted lesson state. |
-| Starter repo access | `GitHub username` | Mission, settings, build gates | `features/starter-repo/components/starter-repo-access-form.tsx`; `convex/course/starterRepoAccess.ts` | Strong client + server validation | `starterRepoAccess` table | Unlocks starter-template links in build lessons | N/A | L4 | Covered | Keep as a separate operational model. |
+| Retired starter repo access | Formerly `GitHub username`; no live customer input remains | None in the live app | Historical paths were `features/starter-repo/components/starter-repo-access-form.tsx` and `convex/course/starterRepoAccess.ts` | Removed with the invite flow | Deprecated inert `starterRepoAccess` table | None; generated Codebase delivery now runs through `/review` | N/A | L4 | Removed | Do not reintroduce manual private-repository invites; preserve generated Codebase delivery instead. |
 | Skill invocation habit | `Skill usage habit`; `Your first tagged prompt` | `3.16` | `features/course/lesson/content/build.ts`; `features/course/lesson/workbench/modes/skills-quickstart/*` | Checklist + presence only | `lessonStates.fieldValues` | No downstream reuse | N/A | L5 | Partial | Keep as onboarding, but do not confuse it with project-definition data. |
 | Durable-memory doc stack | No active runtime generation. Templates only: `AGENTS.md`, `CHECKLIST.md`, `docs/prompt.md`, `docs/plans.md`, `docs/implement.md`, `docs/documentation.md` | Docs only | `docs/codex_long_horizon_templates/*` | None | Not wired | None | N/A | L2, L3, L5 | Partial | Use these templates as the generated long-horizon output codebase. |
 | Hidden derived fields | `selected_problem_owner`; `selected_problem_statement`; `__objectiveChecklist`; `__fieldShapeVersion` | Cross-flow / system | `features/course/lesson/workbench/modes/candidate-problem-handoff-content.tsx`; `features/course/lesson/model/registry/shared.ts`; `features/course/lesson/model/registry/persistence.ts` | System-generated | `lessonStates.fieldValues` | Prompt builders, artifact compatibility, manual objective tracking | N/A | L5 | Covered | Keep, but formalize which ones are first-class derived outputs vs private plumbing. |
@@ -207,7 +208,7 @@ Legend:
 | Explicit goal, context, constraints, non-goals, done-when | Direct input | Partial | CEO/build lessons collect problem, outcome, flow, risks, dependencies, distribution, AI promise | No single spec surface for non-goals, done-when, deliverables, demo flow, rollback expectations | Add canonical shared spec fields and generate `docs/prompt.md`. |
 | Durable-memory docs stack | Derived/system | Partial | Templates exist in `docs/codex_long_horizon_templates/*` | Templates are not wired into lesson outputs or generated artifacts | Make the doc stack a generated output from structured state. |
 | Milestone planning, acceptance criteria, validation commands, rollback | Direct input + derived | Partial | `3.7`, `3.8`, `3.10` capture prompts, slices, risks, dependencies | No acceptance criteria, no validation commands, no rollback, no milestone statuses | Extend plan capture and generate `docs/plans.md`. |
-| Environment, setup, safety, access | Direct input + system | Partial | `3.0`, `3.4`, `3.14`, starter repo access | No sandbox/approval expectations, worktree strategy, forbidden-path rules, network policy | Keep most as system-generated guidance; add only product-specific setup constraints as inputs. |
+| Environment, setup, safety, access | Direct input + system | Partial | `3.0`, `3.4`, `3.14`, generated Codebase handoff | No sandbox/approval expectations, worktree strategy, forbidden-path rules, network policy | Keep most as system-generated guidance; add only product-specific setup constraints as inputs. |
 | Execution discipline and verification loop | Derived/system | Partial | QA loop, deploy checklist, skill habits | No generated stop-and-fix rule, no diff review, no lint/typecheck/build commands in outputs | Generate `docs/implement.md` and `docs/documentation.md` from plan + repo defaults. |
 | Thread/session hygiene and compaction | Process-only | Missing as product output | Not collected or generated | This should not be a student form; it should be system guidance | Put it in generated AGENTS/docs, not user-facing forms. |
 | Parallelism and isolation | Process-only | Missing as product output | Not collected or generated | Same as above | Put it in generated AGENTS/docs, not student forms. |
@@ -246,7 +247,7 @@ Highest-value missing inputs:
   - operator decision points
 - Final repo codebase requirements:
   - what files should be generated
-  - what the starter template must be customized with
+  - what the generated Codebase must be customized with
   - what the build prompt must include
 
 ### B. Weak or poorly placed questions
@@ -589,7 +590,7 @@ Validation:
 
 Goal:
 - Produce one codebase that combines:
-  - starter template access state
+  - generated Codebase handoff state
   - canonical design spec
   - long-horizon doc stack
   - assembled build prompt(s)
@@ -625,7 +626,7 @@ Validation:
   - if Figma round-trip is a real product promise, the live curriculum needs a Figma reference input.
   - if not, mark that part of the design checklist as systematically not applicable.
 - Repo codebase question:
-  - there is no current assembler that creates the user-requested “starter template + doc pack + build prompt” bundle.
+  - there is no current assembler that creates the user-requested “generated Codebase + doc pack + build prompt” bundle.
   - that needs an explicit product decision, not just more fields.
 
 ## Top 10 Highest-Leverage Changes
@@ -644,7 +645,7 @@ Validation:
 ## Direct Answers
 
 1. What do we ask for today, exactly?
-   We ask for a mix of CEO foundation, one core-flow sketch, scattered build-planning notes, marketing copy inputs, brand-kit inputs, UX handoff inputs, QA notes, deploy context, and starter-repo GitHub username. The canonical matrix above lists the active normalized groups and their raw labels.
+   We ask for a mix of CEO foundation, one core-flow sketch, scattered build-planning notes, marketing copy inputs, brand-kit inputs, UX handoff inputs, QA notes, and deploy context. The retired starter-repo GitHub username input is no longer part of the live product. The canonical matrix above lists the active normalized groups and their raw labels.
 
 2. Where in the repo is each input defined and used?
    Definitions live mainly in `features/course/lesson/model/lessons/start-here.ts`, `features/course/lesson/model/lessons/ceo.ts`, `features/course/lesson/model/lessons/design.ts`, and `features/course/lesson/content/build.ts`. Rendering is driven by `features/course/lesson/workbench/renderer.tsx` and mode-specific workbench files. Persistence runs through `features/course/lesson/hooks/use-lesson-state.ts`, `convex/course/lessonState.ts`, and `convex/schema.ts`. Consumers are concentrated in `features/course/lesson/model/research-prompt.ts`, build workbench cards, artifact preview builders, and deploy prompt cards.
@@ -656,7 +657,7 @@ Validation:
    `docs/design-checklist.md` requires a much fuller design brief than the live product currently captures: references, design-system direction, composition, imagery, copy discipline, motion, responsive verification, and optional Figma round-trip. `docs/long-horizon-checklist.md` requires explicit task/spec data, milestone planning, validation strategy, durable memory docs, and disciplined handoff. The normalized checklist matrix above separates direct-user-input requirements from derived/system requirements.
 
 5. What is fully covered, partially covered, missing, or not applicable?
-   Fully covered: starter-repo GitHub username, core problem context, outcome statement, basic planning-prompt controls. Partially covered: marketing brief, core flow, distribution/install/AI promise, implementation brief, QA notes, deploy context, brand inputs. Missing: scope boundary, success criteria, validation/demo plan, design references in the active Design block, visual direction, motion, token system, final doc-stack generation, and final repo-codebase assembly. Not applicable as student-form inputs: session hygiene, sandbox policy, compaction, worktrees, and similar process-only rules.
+   Fully covered: core problem context, outcome statement, basic planning-prompt controls. Removed: starter-repo GitHub username. Partially covered: marketing brief, core flow, distribution/install/AI promise, implementation brief, QA notes, deploy context, brand inputs. Missing: scope boundary, success criteria, validation/demo plan, design references in the active Design block, visual direction, motion, token system, final doc-stack generation, and final repo-codebase assembly. Not applicable as student-form inputs: session hygiene, sandbox policy, compaction, worktrees, and similar process-only rules.
 
 6. What is redundant, weakly named, poorly placed, or underused?
    Redundant: product name, domain, marketing brief, plan outputs, and implementation brief are recollected across multiple lessons. Poorly placed: design-defining inputs land in BUILD instead of DESIGN. Underused: `1.1` welcome brief, `1.6` research notes, `3.4` launch notes, `3.7` Codex output, `3.8` selected slice, `3.10` plan brief, much of `3.11` brand/source context. Weakly modeled: most lesson fields are just loose string ids in a generic `fieldValues` blob.

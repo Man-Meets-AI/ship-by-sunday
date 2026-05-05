@@ -170,7 +170,7 @@ export const startHereLessons = [
 					"Show how the sprint is structured (lessons, software layer, tools), where Product Strategy / UX / Coding show up, and how tooling fits—without drowning in vendor drama.",
 			},
 			actionCard: {
-				jobNow: "Keep the setup docs and starter repo one click away.",
+				jobNow: "Keep the setup docs and generated Codebase one click away.",
 				timebox: "5 minutes",
 				comeBackWith: "Docs and repo ready in your workspace.",
 			},

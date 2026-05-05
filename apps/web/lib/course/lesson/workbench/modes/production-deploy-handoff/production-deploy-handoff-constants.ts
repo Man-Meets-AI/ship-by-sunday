@@ -29,7 +29,7 @@ export const DEPLOY_SUCCESS_OPTIONS = [
 ] as const;
 
 /**
- * Instructor-facing README deploy prompt. Replace with exact starter README wording when finalized.
+ * Instructor-facing README deploy prompt. Replace with exact Codebase README wording when finalized.
  */
 export const README_DEPLOY_PROMPT = `Open the project README and follow the production deployment section step by step.
 

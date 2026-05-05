@@ -11,21 +11,12 @@ import {
 } from "@/components/ui/item";
 import { productConfig } from "@/config/product";
 import { MissionSectionLabel } from "@/app/(workspace)/_components/course/mission/components/mission/mission-section-label";
-import { isStarterModuleEnabled } from "@/config/starter-selectors";
-import { StarterRepoAccessCard } from "@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card";
 
 export function MissionExtrasRow() {
-	const starterRepoEnabled = isStarterModuleEnabled("starterRepo");
-
 	return (
 		<div className="space-y-3">
 			<MissionSectionLabel>Extras</MissionSectionLabel>
-			<div
-				className={`grid gap-4 ${starterRepoEnabled ? "sm:grid-cols-2" : ""}`}
-			>
-				{starterRepoEnabled ? (
-					<StarterRepoAccessCard surface="mission" />
-				) : null}
+			<div className="grid gap-4">
 				<BonusPlaylistItem />
 			</div>
 		</div>

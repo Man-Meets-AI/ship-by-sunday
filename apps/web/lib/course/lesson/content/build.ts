@@ -87,35 +87,35 @@ export const buildLessons = [
 			"user_statement",
 		],
 		intro:
-			"Clone the Ship by Sunday Starter into a named product folder, fill dev and prod env files, run the preview, and line up your day-one strategy notes for the next lesson.",
+			"Open the generated Codebase in a named product folder, fill dev and prod env files, run the preview, and line up your day-one strategy notes for the next lesson.",
 		helperText:
 			"Setup handoff—not a build lesson. Use the checklist and links on screen.",
 		lessonMeta: {
 			runtimeLabel: "~2 min video + setup",
-			goal: "Local starter running with env keys in place; strategy artifacts ready to reference.",
+			goal: "Generated Codebase running locally with env keys in place; strategy artifacts ready to reference.",
 			purpose:
-				"Surface template, accounts, env files, and clone commands in one place before you edit the marketing page.",
+				"Surface the Codebase handoff, accounts, env files, and setup commands in one place before you edit the marketing page.",
 		},
 		teachingPoints: [
-			"Name the product folder before you clone so paths stay consistent.",
+			"Name the product folder before you open or initialize the Codebase so paths stay consistent.",
 			"Keep dev keys in `.env.local` and production keys in `.env.production`—do not mix them.",
-			"Success for this step is a running default starter page, not custom marketing copy.",
+			"Success for this step is a running Codebase preview, not custom marketing copy.",
 		],
 		actionJobNow:
-			"Clone the template, paste Convex / Clerk / Stripe keys, run the dev server, confirm the default page loads.",
+			"Open the generated Codebase, paste Convex / Clerk / Stripe keys, run the dev server, confirm the default page loads.",
 		actionTimebox: "15–25 minutes",
 		actionComeBackWith:
 			"Initialized repo, completed env files, running local preview, strategy notes visible.",
 		workbenchPrompt:
-			"Work top to bottom: template → folder name → commands → checklist → env tabs.",
+			"Work top to bottom: Codebase handoff → folder name → commands → checklist → env tabs.",
 		workbenchEmptyState:
 			"Complete each checklist line when it is true on your machine.",
-		objectiveTitle: "Build 3.0 — Starter setup handoff",
+		objectiveTitle: "Build 3.0 — Codebase setup handoff",
 		winCondition:
 			"Product folder named, setup checklist complete, env keys captured, server running.",
 		checklist: [
 			"Watch the kickoff",
-			"Finish clone, env, and checklist on screen",
+			"Finish Codebase setup, env, and checklist on screen",
 			"Continue to Iterate with AI",
 		],
 		workbenchFields: [
@@ -126,7 +126,7 @@ export const buildLessons = [
 				required: true,
 				placeholder: "e.g. my-saas-name",
 				helpText:
-					"Use a short folder name with no spaces—this is the directory you clone into.",
+					"Use a short folder name with no spaces—this is the directory that holds the generated Codebase.",
 			},
 			{
 				id: "build_setup_prereqs",
@@ -135,7 +135,7 @@ export const buildLessons = [
 				required: true,
 				options: [
 					"Created the product folder on disk",
-					"Cloned or initialized the starter repo into that folder",
+					"Opened the generated Codebase or initialized your app in that folder",
 					"Opened `.env.local` in the editor",
 					"Opened `.env.production` in the editor",
 					"Opened Convex (dashboard) for keys",
@@ -149,7 +149,7 @@ export const buildLessons = [
 		workbenchSections: [
 			{
 				id: "setup_launchpad",
-				title: "Starter setup",
+				title: "Codebase setup",
 				layout: "stack",
 				fieldIds: ["build_product_folder_name", "build_setup_prereqs"],
 				completionLabel: "Setup checklist complete",
@@ -178,26 +178,26 @@ export const buildLessons = [
 			"Use Setup for accounts and checkboxes, Iteration workflow for the compressed loop, Outputs for the prompt and saved artifacts.",
 		lessonMeta: {
 			runtimeLabel: "~4 min video + outputs",
-			goal: "Linked product + ChatGPT paths, saved brand instructions, starter idea, and draft posts.",
+			goal: "Linked product + ChatGPT paths, saved brand instructions, starting idea, and draft posts.",
 			purpose:
 				"Make the paid product account and ChatGPT account explicit, surface the screenshot-first debug habit, and capture the missing ChatGPT response as durable fields.",
 		},
 		teachingPoints: [
-			"Paid template access is not the same login as this website—unlock it before treating the product as unblocked.",
+			"The generated Codebase handoff is the product source of truth—verify it locally before treating the product as unblocked.",
 			"Screenshots and error text beat long explanations when you are debugging with AI.",
 			"Save ChatGPT’s response as brand strategy + brand design instructions before you generate posts.",
 		],
 		actionJobNow:
-			"Complete the setup checklist, run the ChatGPT prompt, paste outputs, and capture starter idea + posts.",
+			"Complete the setup checklist, run the ChatGPT prompt, paste outputs, and capture starting idea + posts.",
 		actionTimebox: "25–45 minutes",
 		actionComeBackWith:
-			"Brand strategy instructions, brand design instructions, one starter idea, and a first batch of posts.",
+			"Brand strategy instructions, brand design instructions, one starting idea, and a first batch of posts.",
 		workbenchPrompt:
 			"Work through Setup, skim Iteration workflow, then fill Outputs when each block is real.",
 		workbenchEmptyState: "Start on the Setup tab and check off what is true.",
 		objectiveTitle: "Build 3.1 — Iterate with AI",
 		winCondition:
-			"Setup checklist done; brand strategy + design instructions saved; starter idea chosen; posts drafted.",
+			"Setup checklist done; brand strategy + design instructions saved; starting idea chosen; posts drafted.",
 		checklist: [
 			"Watch the walkthrough",
 			"Finish setup + outputs tabs",
@@ -232,7 +232,7 @@ export const buildLessons = [
 			},
 			{
 				id: BUILD_PRODUCT_ITERATION_FIELD_IDS.starterIdea,
-				label: "Selected starter idea",
+				label: "Selected starting idea",
 				kind: "textarea",
 				required: true,
 				rows: 4,
@@ -274,7 +274,7 @@ export const buildLessons = [
 		slug: "03-02-map-the-repo-and-starter",
 		order: 14,
 		block: "BUILD",
-		title: "Map the Repo and Starter",
+		title: "Map the Repo and Codebase",
 		shortTitle: "Repo",
 		prevLessonId: "3.1",
 		nextLessonId: "3.3",
@@ -289,14 +289,14 @@ export const buildLessons = [
 			"Use this screen as reference; you do not need to memorize every path.",
 		],
 		helperText:
-			"Orientation only: map the starter in VS Code and skim where scripts and providers connect.",
+			"Orientation only: map the Codebase in VS Code and skim where scripts and providers connect.",
 		winCondition:
-			"You know where routes, UI, backend, secrets, and scripts live in the starter.",
+			"You know where routes, UI, backend, secrets, and scripts live in the Codebase.",
 		intro:
-			"Ground yourself in the starter the same way you would scan a new repo in VS Code—folders, env files, and the scripts you will run all week.",
+			"Ground yourself in the Codebase the same way you would scan a new repo in VS Code—folders, env files, and the scripts you will run all week.",
 		lessonMeta: {
 			runtimeLabel: "~5 min + skim",
-			goal: "See how the starter is organized before you wire providers in the next lessons.",
+			goal: "See how the Codebase is organized before you wire providers in the next lessons.",
 			purpose:
 				"In-product cheat sheet for app/, components/, convex/, env files, AGENTS.md, and workspace scripts—lightweight reference, not a build step.",
 		},
@@ -750,7 +750,7 @@ export const buildLessons = [
 		workbench: "route_access_orientation",
 		fieldShapeVersion: 2,
 		intro:
-			"See how the starter splits marketing routes from protected product routes, where those folders live under app/, and how to ask Codex to explain paywall logic instead of guessing.",
+			"See how the Codebase splits marketing routes from protected product routes, where those folders live under app/, and how to ask Codex to explain paywall logic instead of guessing.",
 		helperText:
 			"Skim the route map and tabs, run the Codex prompt, then capture your own public vs protected plan—lightweight orientation only.",
 		lessonMeta: {

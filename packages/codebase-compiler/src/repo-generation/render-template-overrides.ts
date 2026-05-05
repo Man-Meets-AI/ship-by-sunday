@@ -86,7 +86,6 @@ export function renderTemplateOverrides(
 					modules: {
 						docs: true,
 						course: false,
-						starterRepo: false,
 						observability: true,
 						codex: true,
 					},

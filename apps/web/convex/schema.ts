@@ -87,6 +87,8 @@ export default defineSchema({
 			"status",
 			"updatedAt",
 		]),
+	// Deprecated: retained temporarily for historical private starter repository
+	// invite records. No live app or operator path writes this table.
 	starterRepoAccess: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

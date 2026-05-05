@@ -234,7 +234,7 @@ function getLessonSpecificCompletionMessage(
 			return "Paste or write the brand design instructions from ChatGPT.";
 		}
 		if (fieldId === "build_product_iteration_starter_idea") {
-			return "Name the single starter idea you are testing first.";
+			return "Name the single starting idea you are testing first.";
 		}
 		if (fieldId === "build_product_iteration_generated_posts") {
 			return "Add your first batch of generated posts.";

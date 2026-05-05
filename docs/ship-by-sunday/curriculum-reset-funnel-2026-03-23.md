@@ -317,7 +317,7 @@ Ask:
 - distribution model
 - install destination
 - AI promise
-- starter template usage
+- generated Codebase usage
 
 Output:
 - delivery model block

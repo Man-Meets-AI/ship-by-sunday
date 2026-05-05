@@ -6,7 +6,6 @@ This folder owns the app data and product-state backend for `Ship by Sunday`.
 
 - product access grants
 - Stripe webhook ingestion
-- starter repo access requests and provisioning state
 - lesson state and autosave
 - mission progress
 - artifact listing

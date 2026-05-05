@@ -120,7 +120,7 @@ const VIDEO_ASSET_JSON = `{
     "provider": "bunny",
     "libraryId": 619172,
     "videoId": "374f9017-6573-426e-b2d4-270cbf1f747e",
-    "title": "Map the Repo and Starter",
+    "title": "Map the Repo and Codebase",
     "durationLabel": "3m 29s"
   },
   "3.3": {

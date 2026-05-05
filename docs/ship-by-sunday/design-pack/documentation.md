@@ -181,6 +181,14 @@ If helpful, also record the external official references used for the work:
 - **Out of scope:** No homepage interactivity for Problem, Outcome, Setup, or Generated preview. No pre-auth Convex draft session. No free-form `theme_preset` editing on the public route. No Convex schema changes.
 - **Verification:** Focused unit and integration-ui packs for homepage content, render model, structured data, draft storage, demo behavior, primary CTA, checkout button, and post-checkout seeder. Repo-level `bun run --cwd apps/web lint`, `format:check`, `bun typecheck`, `bun lint`, `bun run format`, and `bun run --cwd apps/web build`. Manual browser proof at desktop and mobile viewports at `/?marketing=1`.
 
+## Shipped Note: Starter Repository Invite Flow Removal
+
+- **Date:** 2026-05-04
+- **Surface:** `/settings`, workspace home setup cards, and mission extras.
+- **Change:** Removed the private starter repository invite card, GitHub username form, pending invite status, and manual repository provisioning affordances from customer-visible app surfaces.
+- **Design direction:** Keep Settings operational and sparse. The remaining Settings surface focuses on Codex connection and account management, matching the current Codebase-first product contract.
+- **Out of scope:** The compiler's internal generated Codebase repo-generation machinery remains intact even where implementation names still contain "starter."
+
 ## Shipped Note: Figma Leverage Hero On The Public Homepage
 
 - **Date:** 2026-05-03

@@ -1,9 +1,4 @@
-import {
-	internalMutation,
-	internalQuery,
-	mutation,
-	query,
-} from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import {
 	listArtifactsArgs,
 	listArtifactsHandler,
@@ -44,58 +39,11 @@ import {
 	getResumeDestinationHandler,
 	getResumeDestinationReturns,
 } from "./course/mission";
-import {
-	getStarterRepoAccessArgs,
-	getStarterRepoAccessHandler,
-	getStarterRepoAccessReturns,
-	listStarterRepoAccessQueueArgs,
-	listStarterRepoAccessQueueHandler,
-	listStarterRepoAccessQueueReturns,
-	recordStarterRepoProvisioningResultArgs,
-	recordStarterRepoProvisioningResultHandler,
-	recordStarterRepoProvisioningResultReturns,
-	requestStarterRepoAccessArgs,
-	requestStarterRepoAccessHandler,
-	requestStarterRepoAccessReturns,
-	resetStarterRepoAccessArgs,
-	resetStarterRepoAccessHandler,
-	resetStarterRepoAccessReturns,
-} from "./course/starterRepoAccess";
 
 export const getResumeDestination = query({
 	args: getResumeDestinationArgs,
 	returns: getResumeDestinationReturns,
 	handler: getResumeDestinationHandler,
-});
-
-export const getStarterRepoAccess = query({
-	args: getStarterRepoAccessArgs,
-	returns: getStarterRepoAccessReturns,
-	handler: getStarterRepoAccessHandler,
-});
-
-export const requestStarterRepoAccess = mutation({
-	args: requestStarterRepoAccessArgs,
-	returns: requestStarterRepoAccessReturns,
-	handler: requestStarterRepoAccessHandler,
-});
-
-export const listStarterRepoAccessQueue = internalQuery({
-	args: listStarterRepoAccessQueueArgs,
-	returns: listStarterRepoAccessQueueReturns,
-	handler: listStarterRepoAccessQueueHandler,
-});
-
-export const recordStarterRepoProvisioningResult = internalMutation({
-	args: recordStarterRepoProvisioningResultArgs,
-	returns: recordStarterRepoProvisioningResultReturns,
-	handler: recordStarterRepoProvisioningResultHandler,
-});
-
-export const resetStarterRepoAccess = internalMutation({
-	args: resetStarterRepoAccessArgs,
-	returns: resetStarterRepoAccessReturns,
-	handler: resetStarterRepoAccessHandler,
 });
 
 export const getMissionState = query({

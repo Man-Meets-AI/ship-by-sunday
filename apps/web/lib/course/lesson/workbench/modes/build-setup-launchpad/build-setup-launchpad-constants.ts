@@ -5,25 +5,8 @@ export const BUILD_SETUP_PRODUCT_FOLDER_FIELD_ID = "build_product_folder_name";
 
 export const BUILD_SETUP_CHECKLIST_FIELD_ID = "build_setup_prereqs";
 
-export const BUILD_SETUP_STARTER_DESCRIPTION =
-	"Next.js + Convex + Clerk + Stripe starter—the repo the build walkthrough assumes.";
-
-export function buildSetupInstructorCommandsBlock(repoUrl: string): string {
-	return [
-		"# Copy the template into a fresh folder (replace YOUR_FOLDER)",
-		`git clone ${repoUrl} YOUR_FOLDER`,
-		"cd YOUR_FOLDER",
-		"",
-		"# Install deps",
-		"bun install",
-		"",
-		"# Copy env templates if the repo ships them, then fill keys from Convex / Clerk / Stripe",
-		"# Open .env.local for development and .env.production for production deploy keys",
-		"",
-		"# Run the app",
-		"bun run dev",
-	].join("\n");
-}
+export const BUILD_SETUP_CODEBASE_DESCRIPTION =
+	"Generated Next.js + Convex + Clerk + Stripe Codebase—the repo the build walkthrough assumes.";
 
 export const BUILD_SETUP_PROXY_ACCORDION_COPY = {
 	title: "About `proxy` (optional)",

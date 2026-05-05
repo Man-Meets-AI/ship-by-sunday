@@ -41,15 +41,6 @@ vi.mock(
 	}),
 );
 
-vi.mock(
-	"@/app/(workspace)/_components/starter-repo-access/starter-repo-access-card",
-	() => ({
-		StarterRepoAccessCard: () => (
-			<div data-card="starter-repo">Starter repo card</div>
-		),
-	}),
-);
-
 vi.mock("@/app/(workspace)/_components/settings-account-card", () => ({
 	SettingsAccountCard: () => <div data-card="account">Account card</div>,
 }));
@@ -90,7 +81,6 @@ describe("WorkspaceHomePage", () => {
 				model={buildWorkspaceHomeModel({
 					docs: true,
 					course: false,
-					starterRepo: false,
 					codex: true,
 					observability: true,
 				})}

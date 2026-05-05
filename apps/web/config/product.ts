@@ -18,12 +18,6 @@ export const brandColorConfig = {
 	whiteHex: "#FDFDFD",
 } as const;
 
-export const starterRepoConfig = {
-	owner: "ParkerRex",
-	repo: "ship-by-sunday-starter",
-	url: "https://github.com/ParkerRex/ship-by-sunday-starter",
-} as const;
-
 export const routeConfig = {
 	home: "/",
 	codebase: "/codebase",
@@ -192,12 +186,10 @@ export const starterConfig = {
 	modules: {
 		docs: true,
 		course: true,
-		starterRepo: true,
 		observability: true,
 		codex: true,
 	},
 	homePage: starterHomePageConfig,
-	starterRepo: starterRepoConfig,
 } as const;
 
 const activePricingOffer = starterConfig.pricing.activeOffer
@@ -368,7 +360,6 @@ export const courseResourceConfig = {
 			href: "https://www.component.gallery",
 		},
 	],
-	starterRepo: starterRepoConfig,
 	/** Lesson 1.9 — Codex & skills orientation */
 	codexLesson: {
 		openaiSkillsPackZip:
@@ -382,7 +373,7 @@ export const courseResourceConfig = {
 		clerk: "https://dashboard.clerk.com/",
 		convex: "https://www.convex.dev/",
 		convexReferral: "https://convex.dev/referral/PARKER6190",
-		/** Deployments, env vars, and project keys for the starter template. */
+		/** Deployments, env vars, and project keys for the generated Codebase. */
 		convexDashboard: "https://dashboard.convex.dev/",
 		stripe: "https://dashboard.stripe.com/register",
 		/** Referenced in Build kickoff tooling copy (OpenAI Codex). */
