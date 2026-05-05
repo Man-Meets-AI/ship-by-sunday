@@ -122,7 +122,9 @@ describe("CodebaseReviewPage", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("heading", { name: "Review" })).toBeTruthy();
+		expect(
+			screen.getByRole("heading", { level: 1, name: "Review" }),
+		).toBeTruthy();
 		expect(
 			screen.getByText("What you just got and where to go next"),
 		).toBeTruthy();
