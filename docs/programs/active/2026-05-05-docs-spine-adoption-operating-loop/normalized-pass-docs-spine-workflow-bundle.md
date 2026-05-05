@@ -14,7 +14,7 @@ read_when:
 
 `docs-spine-adoption` is a workflow bundle, not one prompt. It lives under the local-runner workflow system and owns a manifest, phases, schemas, prompt packets, renderers, proof commands, and tests.
 
-The bundle runs as a deterministic state machine. Scanner phases produce normalized JSON. Codex synthesis phases consume that JSON and return structured drafts with evidence refs. The workflow validates the outputs and applies approved files. Proof records command names, statuses, touched file refs, created artifacts, blocked proof, rollback notes, and the next recommended workflow.
+The bundle runs as a deterministic state machine. Scanner phases produce normalized JSON. Codex synthesis phases consume that JSON and return structured drafts with evidence refs. `docs-spine-adoption` validates and stores those local artifacts without applying files; `docs-spine-apply-and-proof` owns any later approved file application. Proof records command names, statuses, touched file refs, created artifacts, blocked proof, rollback notes, and the next recommended workflow.
 
 ## V1 Language Decision
 

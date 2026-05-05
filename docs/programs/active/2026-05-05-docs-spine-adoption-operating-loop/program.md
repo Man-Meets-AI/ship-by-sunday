@@ -117,7 +117,7 @@ This Program is active. Fill this section when the docs-spine adoption loop has 
 
 ## Validation and Acceptance
 
-Program-level acceptance requires a customer-approved `docs-spine-adoption` local-runner workflow that can install or update the docs spine in a mature repo on a local branch. The workflow must preserve repo conventions, produce local proof artifacts, sync only structured metadata, and run structural docs proof plus the repo-native broad gate when available.
+Program-level acceptance requires customer-approved local-runner workflows that can scan, draft, apply, and prove the docs spine in a mature repo. `docs-spine-adoption` owns `.sbs` scanner and draft artifacts; `docs-spine-apply-and-proof` owns any later approved repo file application. The workflows must preserve repo conventions, produce local proof artifacts, sync only structured metadata, and run structural docs proof plus the repo-native broad gate when available.
 
 For Arena CRM, acceptance means the workflow preserves `.codex/AGENTS.md` as canonical, keeps root `AGENTS.md` as a shim, installs Program and ExecPlan contracts, installs the first active Program and child ExecPlan, wires or documents markdown and planning lint proof without unsafe package-script mutation, runs or blocks honestly on `bun run gate`, and records proof under `.sbs/runs/<workflow-run-id>/`.
 

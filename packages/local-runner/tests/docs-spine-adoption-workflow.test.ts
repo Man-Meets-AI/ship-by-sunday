@@ -1,18 +1,14 @@
 import { execFile } from "node:child_process";
-import {
-	chmod,
-	mkdir,
-	readdir,
-	readFile,
-	symlink,
-	writeFile,
-} from "node:fs/promises";
+import { mkdir, readdir, readFile, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
 import type { RunnerCredential } from "../src/core/local-runner-home";
 import type { LocalProjectState } from "../src/core/local-project-state";
-import { runDocsSpineAdoptionWorkflow } from "../src/core/docs-spine-adoption-workflow";
+import {
+	parseGitStatusPathsForProof,
+	runDocsSpineAdoptionWorkflow,
+} from "../src/core/docs-spine-adoption-workflow";
 import type { ApprovedWorkflowRunPacket } from "../src/core/workflow-run-api";
 import { buildDocsSpineScannerBundle } from "../src/workflows/docs-spine-adoption/scanner";
 import {
@@ -238,9 +234,14 @@ describe("docs spine adoption workflow", () => {
 		});
 	});
 
-	it("creates a local branch and writes scaffold proof artifacts", async () => {
+	it("writes scaffold proof artifacts without changing the current branch", async () => {
 		const repositoryRoot = await createDocsSpineRepository();
 		const sentEvents: unknown[] = [];
+		const branchBefore = (
+			await execFileAsync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+				cwd: repositoryRoot,
+			})
+		).stdout.trim();
 
 		const result = await runDocsSpineAdoptionWorkflow({
 			repositoryRoot,
@@ -255,7 +256,7 @@ describe("docs spine adoption workflow", () => {
 			},
 		});
 
-		const branch = (
+		const branchAfter = (
 			await execFileAsync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
 				cwd: repositoryRoot,
 			})
@@ -302,7 +303,7 @@ describe("docs spine adoption workflow", () => {
 			branchName: "sbs/docs-spine-adoption-20260505-1200",
 			proofStatus: "passed",
 		});
-		expect(branch).toBe("sbs/docs-spine-adoption-20260505-1200");
+		expect(branchAfter).toBe(branchBefore);
 		expect(manifest).toMatchObject({
 			schemaVersion: "docs-spine-adoption-manifest.v1",
 			workflowId: "docs-spine-adoption",
@@ -341,6 +342,7 @@ describe("docs spine adoption workflow", () => {
 				".sbs/docs-spine-adoption/facts/source-truth-map.json",
 				".sbs/docs-spine-adoption/facts/command-proof-map.json",
 				".sbs/docs-spine-adoption/facts/quality-score-baseline.json",
+				".sbs/docs-spine-adoption/facts/parity-checklist.json",
 				".sbs/docs-spine-adoption/drafts/codex-synthesis-packet.json",
 				".sbs/docs-spine-adoption/drafts/quality-score-notes.json",
 			]),
@@ -360,6 +362,7 @@ describe("docs spine adoption workflow", () => {
 			".sbs/docs-spine-adoption/facts/docs-gap-report.json",
 			".sbs/docs-spine-adoption/facts/generated-surface-map.json",
 			".sbs/docs-spine-adoption/facts/instruction-surface-map.json",
+			".sbs/docs-spine-adoption/facts/parity-checklist.json",
 			".sbs/docs-spine-adoption/facts/performance-timings.json",
 			".sbs/docs-spine-adoption/facts/quality-score-baseline.json",
 			".sbs/docs-spine-adoption/facts/repo-facts.json",
@@ -507,7 +510,7 @@ describe("docs spine adoption workflow", () => {
 			status: "blocked",
 			proofStatus: "blocked",
 			blockedReason:
-				"docs-spine-adoption requires --confirm-docs-spine-adoption because it creates a local branch and .sbs docs-spine proof.",
+				"docs-spine-adoption requires --confirm-docs-spine-adoption because it writes local .sbs docs-spine proof artifacts.",
 		});
 		expect(proof.blockedProof).toEqual([
 			expect.objectContaining({
@@ -551,35 +554,38 @@ describe("docs spine adoption workflow", () => {
 		await expect(readdir(externalSbsTarget)).resolves.toEqual([]);
 	});
 
-	it("fails proof when a post-checkout hook mutates runtime files", async () => {
+	it("parses both sides of Git rename status for proof boundaries", () => {
+		expect(
+			parseGitStatusPathsForProof(
+				"R  src/runtime.ts -> .sbs/docs-spine-adoption/runtime.ts",
+			),
+		).toEqual(["src/runtime.ts", ".sbs/docs-spine-adoption/runtime.ts"]);
+	});
+
+	it("blocks with proof when scanner artifact generation fails", async () => {
 		const repositoryRoot = await createDocsSpineRepository();
-		const hookPath = path.join(
-			repositoryRoot,
-			".git",
-			"hooks",
-			"post-checkout",
-		);
 		await writeFile(
-			hookPath,
-			[
-				"#!/bin/sh",
-				"mkdir -p src",
-				"printf 'export const unsafe = true;\\n' > src/runtime.ts",
-				"",
-			].join("\n"),
+			path.join(repositoryRoot, "package.json"),
+			'{"scripts": {"lint": "echo ok"}',
 		);
-		await chmod(hookPath, 0o755);
+		await execFileAsync("git", ["add", "package.json"], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "Break package metadata"], {
+			cwd: repositoryRoot,
+		});
 
 		const result = await runDocsSpineAdoptionWorkflow({
 			repositoryRoot,
 			state: createState(),
 			credential: createCredential(),
 			approvedWorkflowRun: createApprovedWorkflowRun({
-				workflowRunId: "workflowRuns_dirty_after_checkout",
+				workflowRunId: "workflowRuns_artifact_generation_failed",
 				branchName: "sbs/docs-spine-adoption-20260505-1215",
 				localWorkflowPacketRef:
-					".sbs/runs/workflowRuns_dirty_after_checkout/workflow-packet.json",
-				localProofRef: ".sbs/runs/workflowRuns_dirty_after_checkout/proof.json",
+					".sbs/runs/workflowRuns_artifact_generation_failed/workflow-packet.json",
+				localProofRef:
+					".sbs/runs/workflowRuns_artifact_generation_failed/proof.json",
 			}),
 			confirmDocsSpineAdoption: true,
 			fetchRunnerEvent: async () => new Response(null, { status: 200 }),
@@ -590,7 +596,7 @@ describe("docs spine adoption workflow", () => {
 					repositoryRoot,
 					".sbs",
 					"runs",
-					"workflowRuns_dirty_after_checkout",
+					"workflowRuns_artifact_generation_failed",
 					"proof.json",
 				),
 				"utf8",
@@ -598,11 +604,17 @@ describe("docs spine adoption workflow", () => {
 		);
 
 		expect(result).toMatchObject({
-			status: "proof_completed",
-			proofStatus: "failed",
-			touchedFiles: ["src/runtime.ts"],
+			status: "blocked",
+			proofStatus: "blocked",
+			blockedReason:
+				"Docs spine adoption artifact generation failed before proof artifacts could be completed.",
 		});
-		expect(proof.touchedFiles).toEqual(["src/runtime.ts"]);
+		expect(proof.blockedProof).toEqual([
+			expect.objectContaining({
+				stage: "artifact-generation",
+				nextApprovalRequired: true,
+			}),
+		]);
 	});
 
 	it("blocks when the approved packet drifts from the docs spine contract", async () => {

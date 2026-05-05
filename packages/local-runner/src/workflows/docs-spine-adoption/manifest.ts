@@ -50,14 +50,14 @@ export const DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY =
 	"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.";
 
 export const DOCS_SPINE_ADOPTION_STOP_CONDITIONS = [
-	"worktree is dirty before branch creation",
+	"worktree is dirty before docs spine scaffold starts",
 	"write lease expires before docs spine scaffold starts",
 	"requested work needs docs application, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
 	"proof command fails",
 ] as const;
 
 export const DOCS_SPINE_ADOPTION_ROLLBACK_NOTES =
-	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the docs spine adoption branch after reviewing local proof.";
+	"Review the local .sbs docs-spine artifacts. Roll back by deleting the .sbs docs-spine run artifacts for this workflow run.";
 
 export const DOCS_SPINE_ADOPTION_PROVIDER_ACCESS_POLICY =
 	"Provider access is disabled. Missing provider setup, dashboard access, dependency installs, migrations, CI changes, branch pushes, and pull requests require a later explicit workflow packet.";
@@ -66,11 +66,11 @@ export const DOCS_SPINE_ADOPTION_PROOF_DELIVERY =
 	"Proof stays local under .sbs/runs/<workflow-run-id>/** and .sbs/docs-spine-adoption/**. Hosted sync receives only sync-safe proof metadata and artifact refs.";
 
 export const DOCS_SPINE_ADOPTION_REVOCATION_BEHAVIOR =
-	"Runner revocation, write lease expiry, dirty worktree, unsafe branch state, or work needing wider authority stops execution and writes blocked proof instead of escalating permissions.";
+	"Runner revocation, write lease expiry, dirty worktree, or work needing wider authority stops execution and writes blocked proof instead of escalating permissions.";
 
 export const DOCS_SPINE_ADOPTION_PHASES = [
 	"approval-packet",
-	"branch-and-lease-guard",
+	"lease-and-worktree-guard",
 	"manifest-scaffold",
 	"minimal-facts",
 	"scanner-facts",

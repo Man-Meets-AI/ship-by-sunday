@@ -180,6 +180,7 @@ const DOCS_SPINE_ADOPTION_REQUIRED_STATIC_ARTIFACT_REFS = [
 	".sbs/docs-spine-adoption/facts/generated-surface-map.json",
 	".sbs/docs-spine-adoption/facts/validation-surface-map.json",
 	".sbs/docs-spine-adoption/facts/performance-timings.json",
+	".sbs/docs-spine-adoption/facts/parity-checklist.json",
 	".sbs/docs-spine-adoption/drafts/codex-synthesis-packet.json",
 	".sbs/docs-spine-adoption/drafts/docs-index-draft.json",
 	".sbs/docs-spine-adoption/drafts/program-packet-draft.json",
@@ -205,13 +206,13 @@ const DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS = [
 const DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY =
 	"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.";
 const DOCS_SPINE_ADOPTION_STOP_CONDITIONS = [
-	"worktree is dirty before branch creation",
+	"worktree is dirty before docs spine scaffold starts",
 	"write lease expires before docs spine scaffold starts",
 	"requested work needs docs application, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
 	"proof command fails",
 ] as const;
 const DOCS_SPINE_ADOPTION_ROLLBACK_NOTES =
-	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the docs spine adoption branch after reviewing local proof.";
+	"Review the local .sbs docs-spine artifacts. Roll back by deleting the .sbs docs-spine run artifacts for this workflow run.";
 
 export const getWorkspaceProjectStateArgs = {
 	projectId: v.optional(v.id("workspaceProjects")),

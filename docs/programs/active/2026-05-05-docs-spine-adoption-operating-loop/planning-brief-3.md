@@ -12,7 +12,7 @@ read_when:
 
 The next implementation slice should turn deterministic scanner artifacts into bounded Codex synthesis packets. It should not apply generated Markdown to customer repos yet.
 
-The completed scanner slice writes repo facts, source-truth map, command-proof map, docs gap report, architecture signals, security signals, quality-score baseline, instruction-surface map, skill-trigger map, generated-surface map, validation-surface map, and performance timings under `.sbs/docs-spine-adoption/facts/**`.
+The completed scanner slice writes repo facts, source-truth map, command-proof map, docs gap report, architecture signals, security signals, quality-score baseline, instruction-surface map, skill-trigger map, generated-surface map, validation-surface map, parity checklist, and performance timings under `.sbs/docs-spine-adoption/facts/**`.
 
 This slice should define the prompt packet contracts, input artifact selection, redaction boundaries, output schemas, blocked states, and local artifact refs for Codex-generated drafts. Codex should consume scanner facts and produce structured local draft artifacts only. It must not receive raw source, raw logs, package script bodies, docs drafts for sync, secrets, local absolute paths, or full transcripts.
 

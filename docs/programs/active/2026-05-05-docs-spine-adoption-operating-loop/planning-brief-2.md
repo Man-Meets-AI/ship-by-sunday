@@ -12,7 +12,7 @@ read_when:
 
 The next implementation slice should populate the scanner and facts layer behind the completed `docs-spine-adoption` scaffold. It should not apply Markdown docs to a customer repo yet.
 
-The scaffold already owns workflow id/version, approval packet validation, CLI and daemon dispatch, local branch creation, `.sbs` artifact refs, proof JSON, sync preview metadata, and a minimal `repo-facts.json`. This slice should keep those contracts stable and expand the facts model through deterministic scanners.
+The scaffold already owns workflow id/version, approval packet validation, CLI and daemon dispatch, `.sbs` artifact refs, proof JSON, sync preview metadata, and a minimal `repo-facts.json`. This slice should keep those contracts stable and expand the facts model through deterministic scanners.
 
 Use `git ls-files` as the primary inventory source. Avoid broad filesystem crawling, dependency folders, generated folders, raw source sync, long log capture, package installs, migrations, provider CLIs, branch pushes, pull requests, and CI-affecting commands.
 

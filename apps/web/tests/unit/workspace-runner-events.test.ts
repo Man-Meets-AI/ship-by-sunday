@@ -323,13 +323,13 @@ function buildDocsSpineAdoptionApprovalArgs({
 		syncPolicySummary:
 			"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.",
 		stopConditions: [
-			"worktree is dirty before branch creation",
+			"worktree is dirty before docs spine scaffold starts",
 			"write lease expires before docs spine scaffold starts",
 			"requested work needs docs application, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
 			"proof command fails",
 		],
 		rollbackNotes:
-			"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the docs spine adoption branch after reviewing local proof.",
+			"Review the local .sbs docs-spine artifacts. Roll back by deleting the .sbs docs-spine run artifacts for this workflow run.",
 	};
 }
 

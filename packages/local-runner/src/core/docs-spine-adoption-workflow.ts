@@ -29,6 +29,7 @@ import { buildDocsSpineScannerBundle } from "../workflows/docs-spine-adoption/sc
 import type {
 	DocsSpineAdoptionManifest,
 	DocsSpineAdoptionProofCommandResult,
+	DocsSpineScannerArtifact,
 } from "../workflows/docs-spine-adoption/schemas";
 import { buildDocsSpineSynthesisArtifacts } from "../workflows/docs-spine-adoption/synthesis";
 
@@ -90,7 +91,7 @@ export async function runDocsSpineAdoptionWorkflow({
 			localRunDirectory,
 			blockedStage: "terminal-confirmation",
 			blockedReason:
-				"docs-spine-adoption requires --confirm-docs-spine-adoption because it creates a local branch and .sbs docs-spine proof.",
+				"docs-spine-adoption requires --confirm-docs-spine-adoption because it writes local .sbs docs-spine proof artifacts.",
 			fetchRunnerEvent,
 		});
 	}
@@ -201,26 +202,6 @@ export async function runDocsSpineAdoptionWorkflow({
 	}
 	const baseBranch = baseBranchResult.stdout.trim();
 
-	const branchResult = await checkoutOrCreateBranch(repositoryRoot, branchName);
-	if (!branchResult.succeeded) {
-		return await blockWorkflow({
-			repositoryRoot,
-			state,
-			credential,
-			workflowRunId,
-			branchName,
-			profileName,
-			writeLeaseId,
-			localRunDirectoryRef,
-			localRunDirectory,
-			blockedStage: "branch",
-			blockedReason:
-				branchResult.blockedReason ??
-				"Unable to prepare the approved docs spine adoption branch.",
-			fetchRunnerEvent,
-		});
-	}
-
 	const startEventResult = await sendRunnerEventDirect({
 		credential,
 		fetchRunnerEvent,
@@ -237,196 +218,242 @@ export async function runDocsSpineAdoptionWorkflow({
 		}),
 	});
 
-	const workflowPacketRef = `${localRunDirectoryRef}/workflow-packet.json`;
-	const proofRef = `${localRunDirectoryRef}/proof.json`;
-	const syncPreviewRef = `${localRunDirectoryRef}/sync-preview.json`;
-	const manifestRef = ".sbs/docs-spine-adoption/manifest.json";
-	const repoFactsRef = ".sbs/docs-spine-adoption/facts/repo-facts.json";
-	const scannerBundle = await buildDocsSpineScannerBundle({
-		repositoryRoot,
-		now,
-	});
-	const scannerArtifactRefs = scannerBundle.artifacts.map(
-		(scannerArtifact) => scannerArtifact.repoRelativePath,
-	);
-	const synthesisArtifacts = buildDocsSpineSynthesisArtifacts({
-		repoFacts: scannerBundle.repoFacts,
-		scannerArtifacts: scannerBundle.artifacts,
-		now,
-	});
-	const synthesisArtifactRefs = synthesisArtifacts.map(
-		(synthesisArtifact) => synthesisArtifact.repoRelativePath,
-	);
-	const createdArtifacts = [
-		workflowPacketRef,
-		manifestRef,
-		repoFactsRef,
-		...scannerArtifactRefs,
-		...synthesisArtifactRefs,
-		proofRef,
-		syncPreviewRef,
-	];
-
-	const repoFacts = scannerBundle.repoFacts;
-	const manifest = buildManifest(now);
-
-	await writeJsonArtifact(repositoryRoot, workflowRunId, workflowPacketRef, {
-		schemaVersion: "docs-spine-adoption-workflow-packet.v1",
-		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		workflowVersion: DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
-		projectId: state.projectId,
-		runnerId: state.runnerId,
-		profileName,
-		writeLeaseId,
-		writeLeaseExpiresAt,
-		baseBranch,
-		targetBranch: branchName,
-		dirtyStatePolicy: "require_clean_worktree",
-		inputs: {
-			approvedWorkflowRunId: workflowRunId,
-			customerBottleneckContext:
-				"Create the deterministic docs-spine adoption scaffold before scanner, synthesis, and apply slices.",
-		},
-		deterministicProbes: [
-			"package-manager-detection",
-			"package-script-inventory",
-			"instruction-surface-inventory",
-			"docs-spine-surface-inventory",
-			"validation-surface-inventory",
-		],
-		executionSurface: "local_runner",
-		codexInterpretation: "disabled for scaffold workflow",
-		codexWritePolicy: "disabled outside approved .sbs docs-spine artifacts",
-		localArtifacts: createdArtifacts,
-		allowedTouchTargets: DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
-		disallowedTouchTargets: DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
-		providerAccessPolicy: DOCS_SPINE_ADOPTION_PROVIDER_ACCESS_POLICY,
-		proofCommands: DOCS_SPINE_ADOPTION_PROOF_COMMANDS,
-		syncPolicy: DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY,
-		stopConditions: DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
-		approvalRequired: true,
-		expectedOutputs: DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS,
-		rollbackNotes: DOCS_SPINE_ADOPTION_ROLLBACK_NOTES,
-		proofDelivery: DOCS_SPINE_ADOPTION_PROOF_DELIVERY,
-		revocationBehavior: DOCS_SPINE_ADOPTION_REVOCATION_BEHAVIOR,
-		createdAt: now,
-	});
-	await writeJsonArtifact(repositoryRoot, workflowRunId, manifestRef, manifest);
-	await writeJsonArtifact(
-		repositoryRoot,
-		workflowRunId,
-		repoFactsRef,
-		repoFacts,
-	);
-	for (const scannerArtifact of scannerBundle.artifacts) {
-		await writeJsonArtifact(
+	try {
+		const workflowPacketRef = `${localRunDirectoryRef}/workflow-packet.json`;
+		const proofRef = `${localRunDirectoryRef}/proof.json`;
+		const syncPreviewRef = `${localRunDirectoryRef}/sync-preview.json`;
+		const manifestRef = ".sbs/docs-spine-adoption/manifest.json";
+		const repoFactsRef = ".sbs/docs-spine-adoption/facts/repo-facts.json";
+		const scannerBundle = await buildDocsSpineScannerBundle({
 			repositoryRoot,
-			workflowRunId,
-			scannerArtifact.repoRelativePath,
-			scannerArtifact.value,
+			now,
+		});
+		const scannerArtifactRefs = scannerBundle.artifacts.map(
+			(scannerArtifact) => scannerArtifact.repoRelativePath,
 		);
-	}
-	for (const synthesisArtifact of synthesisArtifacts) {
-		await writeJsonArtifact(
-			repositoryRoot,
-			workflowRunId,
-			synthesisArtifact.repoRelativePath,
-			synthesisArtifact.value,
+		const synthesisArtifacts = buildDocsSpineSynthesisArtifacts({
+			repoFacts: scannerBundle.repoFacts,
+			scannerArtifacts: scannerBundle.artifacts,
+			now,
+		});
+		const synthesisArtifactRefs = synthesisArtifacts.map(
+			(synthesisArtifact) => synthesisArtifact.repoRelativePath,
 		);
-	}
+		const parityChecklistRef =
+			DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS.parityChecklist;
+		const parityChecklist = buildParityChecklistArtifact(
+			scannerBundle.artifacts,
+			now,
+		);
+		const createdArtifacts = [
+			workflowPacketRef,
+			manifestRef,
+			repoFactsRef,
+			...scannerArtifactRefs,
+			parityChecklistRef,
+			...synthesisArtifactRefs,
+			proofRef,
+			syncPreviewRef,
+		];
 
-	const { proofCommandResults, unexpectedTouchedFiles } =
-		await runProofCommands(repositoryRoot, workflowRunId);
-	const proofStatus = proofCommandResults.every(
-		(result) => result.status === "passed",
-	)
-		? "passed"
-		: "failed";
-	const proofSummary =
-		proofStatus === "passed"
-			? "Docs spine adoption scaffold wrote only approved .sbs artifacts."
-			: "Docs spine adoption scaffold wrote local artifacts, but one or more proof commands failed.";
+		const repoFacts = scannerBundle.repoFacts;
+		const manifest = buildManifest(now);
 
-	await writeJsonArtifact(repositoryRoot, workflowRunId, proofRef, {
-		schemaVersion: "docs-spine-adoption-proof.v1",
-		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		workflowVersion: DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
-		workflowRunId,
-		branchName,
-		profileName,
-		manifestRef,
-		repoFactsRef,
-		diffSummary: await readGitDiffSummary(repositoryRoot),
-		touchedFiles: unexpectedTouchedFiles,
-		createdArtifacts,
-		proofCommandsRun: proofCommandResults.map((result) => result.commandName),
-		proofCommandResults,
-		blockedProof: repoFacts.blockedFacts.map((fact) => ({
-			stage: fact.factId,
-			reason: fact.reason,
-			nextApprovalRequired: fact.nextApprovalRequired,
-		})),
-		rollbackInstructions:
-			"Review the local .sbs docs-spine artifacts. To roll back, switch to the base branch and delete this local branch.",
-		nextRecommendedWorkflow: DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
-		createdAt: now,
-	});
-	await writeJsonArtifact(repositoryRoot, workflowRunId, syncPreviewRef, {
-		schemaVersion: "docs-spine-adoption-sync-preview.v1",
-		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		workflowVersion: DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
-		branchName,
-		profileName,
-		touchedFileRefs: unexpectedTouchedFiles,
-		createdArtifactRefs: createdArtifacts,
-		proofCommandResults: proofCommandResults.map(({ commandName, status }) => ({
-			commandName,
-			status,
-		})),
-		blockedProofCount: repoFacts.blockedFacts.length,
-		nextRecommendedWorkflowId: DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
-	});
-
-	const proofEventResult = await sendRunnerEventDirect({
-		credential,
-		fetchRunnerEvent,
-		event: createRunnerEvent({
+		await writeJsonArtifact(repositoryRoot, workflowRunId, workflowPacketRef, {
+			schemaVersion: "docs-spine-adoption-workflow-packet.v1",
+			workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+			workflowVersion: DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
 			projectId: state.projectId,
 			runnerId: state.runnerId,
-			workflowRunId,
-			payload: {
-				eventType: "workflow.proof.completed",
-				workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-				writeLeaseId,
-				proofStatus,
-				proofSummary,
-				touchedFileRefs: unexpectedTouchedFiles,
-				createdArtifactRefs: createdArtifacts,
-				proofCommandResults: proofCommandResults.map(
-					({ commandName, status }) => ({
-						commandName,
-						status,
-					}),
-				),
-				nextRecommendedWorkflowId:
-					DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
+			profileName,
+			writeLeaseId,
+			writeLeaseExpiresAt,
+			baseBranch,
+			targetBranch: branchName,
+			dirtyStatePolicy: "require_clean_worktree",
+			inputs: {
+				approvedWorkflowRunId: workflowRunId,
+				customerBottleneckContext:
+					"Create the deterministic docs-spine adoption scaffold before scanner, synthesis, and apply slices.",
 			},
-		}),
-	});
+			deterministicProbes: [
+				"package-manager-detection",
+				"package-script-inventory",
+				"instruction-surface-inventory",
+				"docs-spine-surface-inventory",
+				"validation-surface-inventory",
+			],
+			executionSurface: "local_runner",
+			codexInterpretation: "disabled for scaffold workflow",
+			codexWritePolicy: "disabled outside approved .sbs docs-spine artifacts",
+			localArtifacts: createdArtifacts,
+			allowedTouchTargets: DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
+			disallowedTouchTargets: DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+			providerAccessPolicy: DOCS_SPINE_ADOPTION_PROVIDER_ACCESS_POLICY,
+			proofCommands: DOCS_SPINE_ADOPTION_PROOF_COMMANDS,
+			syncPolicy: DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY,
+			stopConditions: DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
+			approvalRequired: true,
+			expectedOutputs: DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS,
+			rollbackNotes: DOCS_SPINE_ADOPTION_ROLLBACK_NOTES,
+			proofDelivery: DOCS_SPINE_ADOPTION_PROOF_DELIVERY,
+			revocationBehavior: DOCS_SPINE_ADOPTION_REVOCATION_BEHAVIOR,
+			createdAt: now,
+		});
+		await writeJsonArtifact(
+			repositoryRoot,
+			workflowRunId,
+			manifestRef,
+			manifest,
+		);
+		await writeJsonArtifact(
+			repositoryRoot,
+			workflowRunId,
+			repoFactsRef,
+			repoFacts,
+		);
+		for (const scannerArtifact of scannerBundle.artifacts) {
+			await writeJsonArtifact(
+				repositoryRoot,
+				workflowRunId,
+				scannerArtifact.repoRelativePath,
+				scannerArtifact.value,
+			);
+		}
+		await writeJsonArtifact(
+			repositoryRoot,
+			workflowRunId,
+			parityChecklistRef,
+			parityChecklist,
+		);
+		for (const synthesisArtifact of synthesisArtifacts) {
+			await writeJsonArtifact(
+				repositoryRoot,
+				workflowRunId,
+				synthesisArtifact.repoRelativePath,
+				synthesisArtifact.value,
+			);
+		}
 
-	return {
-		workflowRunId,
-		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		status: "proof_completed",
-		branchName,
-		profileName,
-		proofStatus,
-		localRunDirectoryRef,
-		touchedFiles: unexpectedTouchedFiles,
-		createdArtifacts,
-		deliveredEvents: startEventResult.delivered + proofEventResult.delivered,
-		remainingEvents: startEventResult.remaining + proofEventResult.remaining,
-	};
+		const { proofCommandResults, unexpectedTouchedFiles } =
+			await runProofCommands(repositoryRoot, workflowRunId);
+		const proofStatus = proofCommandResults.every(
+			(result) => result.status === "passed",
+		)
+			? "passed"
+			: "failed";
+		const proofSummary =
+			proofStatus === "passed"
+				? "Docs spine adoption scaffold wrote only approved .sbs artifacts."
+				: "Docs spine adoption scaffold wrote local artifacts, but one or more proof commands failed.";
+
+		await writeJsonArtifact(repositoryRoot, workflowRunId, proofRef, {
+			schemaVersion: "docs-spine-adoption-proof.v1",
+			workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+			workflowVersion: DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
+			workflowRunId,
+			branchName,
+			profileName,
+			manifestRef,
+			repoFactsRef,
+			diffSummary: await readGitDiffSummary(repositoryRoot),
+			touchedFiles: unexpectedTouchedFiles,
+			createdArtifacts,
+			proofCommandsRun: proofCommandResults.map((result) => result.commandName),
+			proofCommandResults,
+			blockedProof: repoFacts.blockedFacts.map((fact) => ({
+				stage: fact.factId,
+				reason: fact.reason,
+				nextApprovalRequired: fact.nextApprovalRequired,
+			})),
+			rollbackInstructions:
+				"Review the local .sbs docs-spine artifacts. To roll back, delete the .sbs docs-spine run artifacts for this workflow run.",
+			nextRecommendedWorkflow: DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
+			createdAt: now,
+		});
+		await writeJsonArtifact(repositoryRoot, workflowRunId, syncPreviewRef, {
+			schemaVersion: "docs-spine-adoption-sync-preview.v1",
+			workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+			workflowVersion: DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
+			branchName,
+			profileName,
+			touchedFileRefs: unexpectedTouchedFiles,
+			createdArtifactRefs: createdArtifacts,
+			proofCommandResults: proofCommandResults.map(
+				({ commandName, status }) => ({
+					commandName,
+					status,
+				}),
+			),
+			blockedProofCount: repoFacts.blockedFacts.length,
+			nextRecommendedWorkflowId:
+				DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
+		});
+
+		const proofEventResult = await sendRunnerEventDirect({
+			credential,
+			fetchRunnerEvent,
+			event: createRunnerEvent({
+				projectId: state.projectId,
+				runnerId: state.runnerId,
+				workflowRunId,
+				payload: {
+					eventType: "workflow.proof.completed",
+					workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+					writeLeaseId,
+					proofStatus,
+					proofSummary,
+					touchedFileRefs: unexpectedTouchedFiles,
+					createdArtifactRefs: createdArtifacts,
+					proofCommandResults: proofCommandResults.map(
+						({ commandName, status }) => ({
+							commandName,
+							status,
+						}),
+					),
+					nextRecommendedWorkflowId:
+						DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
+				},
+			}),
+		});
+
+		return {
+			workflowRunId,
+			workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+			status: "proof_completed",
+			branchName,
+			profileName,
+			proofStatus,
+			localRunDirectoryRef,
+			touchedFiles: unexpectedTouchedFiles,
+			createdArtifacts,
+			deliveredEvents: startEventResult.delivered + proofEventResult.delivered,
+			remainingEvents: startEventResult.remaining + proofEventResult.remaining,
+		};
+	} catch {
+		const blockedResult = await blockWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			workflowRunId,
+			branchName,
+			profileName,
+			writeLeaseId,
+			localRunDirectoryRef,
+			localRunDirectory,
+			blockedStage: "artifact-generation",
+			blockedReason:
+				"Docs spine adoption artifact generation failed before proof artifacts could be completed.",
+			fetchRunnerEvent,
+		});
+		return {
+			...blockedResult,
+			deliveredEvents:
+				startEventResult.delivered + blockedResult.deliveredEvents,
+			remainingEvents:
+				startEventResult.remaining + blockedResult.remainingEvents,
+		};
+	}
 }
 
 function buildManifest(now: number): DocsSpineAdoptionManifest {
@@ -450,45 +477,51 @@ function buildManifest(now: number): DocsSpineAdoptionManifest {
 	};
 }
 
-async function checkoutOrCreateBranch(
-	repositoryRoot: string,
-	branchName: string,
+function buildParityChecklistArtifact(
+	scannerArtifacts: DocsSpineScannerArtifact[],
+	now: number,
 ) {
-	const currentBranch = await runGit(repositoryRoot, [
-		"rev-parse",
-		"--abbrev-ref",
-		"HEAD",
-	]);
-	if (!currentBranch.succeeded) {
-		return {
-			succeeded: false,
-			blockedReason: "Unable to read current branch.",
-		};
+	const docsGapReport = scannerArtifacts.find(
+		(artifact) =>
+			artifact.repoRelativePath ===
+			DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS.docsGapReport,
+	);
+	const missingSurfaceIds = getStringArrayField(
+		docsGapReport?.value,
+		"missingSurfaceIds",
+	);
+	return {
+		schemaVersion: "docs-spine-parity-checklist.v1",
+		status: missingSurfaceIds.length ? "missing_surfaces" : "complete",
+		sourceArtifactRefs: [
+			DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS.docsGapReport,
+			DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS.validationSurfaceMap,
+		],
+		missingSurfaceIds,
+		privacyBoundary: {
+			rawSourceIncluded: false,
+			rawLogsIncluded: false,
+			packageScriptBodiesIncluded: false,
+			dependencyVersionsIncluded: false,
+			envValuesIncluded: false,
+			localAbsolutePathsIncluded: false,
+			codexTranscriptsIncluded: false,
+		},
+		createdAt: now,
+	};
+}
+
+function getStringArrayField(value: unknown, fieldName: string) {
+	if (!value || typeof value !== "object" || !(fieldName in value)) {
+		return [];
 	}
-	if (currentBranch.stdout.trim() === branchName) {
-		return { succeeded: true };
+	const fieldValue = (value as Record<string, unknown>)[fieldName];
+	if (!Array.isArray(fieldValue)) {
+		return [];
 	}
-	const existingLocalBranch = await runGit(repositoryRoot, [
-		"show-ref",
-		"--verify",
-		`refs/heads/${branchName}`,
-	]);
-	if (existingLocalBranch.succeeded) {
-		return {
-			succeeded: false,
-			blockedReason:
-				"Approved docs spine adoption branch already exists but is not checked out.",
-		};
-	}
-	const checkout = await runGit(repositoryRoot, ["checkout", "-b", branchName]);
-	if (!checkout.succeeded) {
-		return {
-			succeeded: false,
-			blockedReason:
-				"Unable to create the approved docs spine adoption branch.",
-		};
-	}
-	return { succeeded: true };
+	return fieldValue.filter(
+		(entry): entry is string => typeof entry === "string",
+	);
 }
 
 async function runProofCommands(repositoryRoot: string, workflowRunId: string) {
@@ -541,22 +574,29 @@ async function listUnexpectedTouchedFiles(
 	}
 	return result.stdout
 		.split(/\r?\n/)
-		.map(parseGitStatusPath)
+		.flatMap(parseGitStatusPathsForProof)
 		.filter((fileRef): fileRef is string => Boolean(fileRef))
 		.filter((fileRef) => !isAllowedLocalProofRef(fileRef, workflowRunId))
 		.sort();
 }
 
-function parseGitStatusPath(statusLine: string) {
+export function parseGitStatusPathsForProof(statusLine: string) {
 	if (statusLine.trim() === "") {
-		return null;
+		return [];
 	}
 	const rawPath = statusLine.slice(3).trim();
 	const renameSeparator = " -> ";
 	if (rawPath.includes(renameSeparator)) {
-		return rawPath.split(renameSeparator).at(-1)?.trim() ?? null;
+		return rawPath
+			.split(renameSeparator)
+			.map((fileRef) => cleanGitStatusPath(fileRef))
+			.filter((fileRef) => fileRef.length > 0);
 	}
-	return rawPath.replace(/^"|"$/g, "");
+	return [cleanGitStatusPath(rawPath)];
+}
+
+function cleanGitStatusPath(fileRef: string) {
+	return fileRef.trim().replace(/^"|"$/g, "");
 }
 
 function isAllowedLocalProofRef(fileRef: string, workflowRunId: string) {
