@@ -35,6 +35,22 @@ const workspaceFindingDetailToastIds = {
 	copyEvidenceRefSuccess: "workspace-finding-detail-copy-evidence-ref-success",
 } as const;
 
+type UnavailableWorkflowStatus =
+	| Exclude<WorkspaceFindingDetailModel["status"], "ready">
+	| "deleted";
+
+const unavailableWorkflowMessages = {
+	blocked:
+		"This finding is blocked. Resolve the blocker before starting a workflow.",
+	deleted:
+		"This finding is no longer available. Return to Findings and choose another item.",
+	done: "This finding already has completed proof. Review Runs before starting any deliberate rerun.",
+	needs_approval:
+		"This finding still needs approval. Approve the finding before starting a workflow.",
+	running:
+		"A workflow is already running for this finding. Review the current run state before starting another workflow.",
+} as const satisfies Record<UnavailableWorkflowStatus, string>;
+
 export function WorkspaceFindingDetailPage({
 	initialFindings,
 	findingRouteId,
@@ -90,7 +106,17 @@ export function WorkspaceFindingDetailPage({
 	}
 
 	async function approveWorkflow() {
-		if (!detail || !projectId || !activeRunnerId) {
+		if (!detail) {
+			return;
+		}
+
+		if (detail.status !== "ready") {
+			setActionError(getUnavailableWorkflowMessage(detail));
+			setActionState("error");
+			return;
+		}
+
+		if (!projectId || !activeRunnerId) {
 			setActionError(
 				"Pair an active local runner before creating the workflow.",
 			);
@@ -127,7 +153,7 @@ export function WorkspaceFindingDetailPage({
 			});
 			setActionState("approved");
 		} catch (error) {
-			setActionError(error instanceof Error ? error.message : String(error));
+			setActionError(getWorkflowRequestErrorMessage(error));
 			setActionState("error");
 		}
 	}
@@ -302,4 +328,34 @@ function FindingUnavailable() {
 			</Button>
 		</section>
 	);
+}
+
+function getUnavailableWorkflowMessage(detail: WorkspaceFindingDetailModel) {
+	if (detail.status === "ready") {
+		return null;
+	}
+	return unavailableWorkflowMessages[detail.status];
+}
+
+function getWorkflowRequestErrorMessage(error: unknown) {
+	const message = error instanceof Error ? error.message : String(error);
+	if (message.includes("Blocked findings cannot start workflows")) {
+		return unavailableWorkflowMessages.blocked;
+	}
+	if (
+		message.includes("Finding is deleted") ||
+		message.includes("Finding not found")
+	) {
+		return unavailableWorkflowMessages.deleted;
+	}
+	if (message.includes("paired workspace runner")) {
+		return "Pair an active local runner before creating the workflow.";
+	}
+	if (
+		message.includes("Workflow is not supported") ||
+		message.includes("Workflow must match")
+	) {
+		return "This workflow is unavailable for the selected finding. Refresh Findings and try again.";
+	}
+	return "Workflow request failed. Review the finding status and try again.";
 }

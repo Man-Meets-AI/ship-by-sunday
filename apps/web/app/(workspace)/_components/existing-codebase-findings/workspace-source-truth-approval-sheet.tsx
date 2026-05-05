@@ -44,9 +44,12 @@ export function WorkspaceSourceTruthApprovalSheet({
 }) {
 	const approval = detail.workflowApproval;
 	const canApprove = Boolean(projectId && activeRunnerId);
+	const approvalButtonDisabled =
+		!canApprove || actionState === "submitting" || actionState === "approved";
 	const isBrokenAppReadOnly = approval.workflowKind === "broken_app_readonly";
 	const isObservabilityAudit =
 		approval.workflowKind === "observability_debuggability";
+	const workflowActionState = getWorkflowActionState(detail);
 	const primaryCommand = approvedWorkflowRunCommand
 		? buildWorkflowCommand({
 				packageRunner: "bunx",
@@ -86,38 +89,37 @@ export function WorkspaceSourceTruthApprovalSheet({
 					/>
 				</div>
 
-				<div className="mt-4 grid gap-2">
-					<Button
-						type="button"
-						onClick={onApproveWorkflow}
-						disabled={!canApprove || actionState === "submitting"}
-						className="justify-center"
-					>
-						<GitBranchPlus className="size-4" aria-hidden />
-						{actionState === "submitting"
-							? "Creating workflow run"
-							: primaryActionLabel}
-					</Button>
-					<Button
-						type="button"
-						variant="outline"
-						className="justify-center"
-						onClick={onCopyEvidenceRef}
-					>
-						<Clipboard className="size-4" aria-hidden />
-						Copy local evidence ref
-					</Button>
-					<Button asChild variant="ghost" className="justify-center">
-						<Link href={routeConfig.workspaceFindings}>Not now</Link>
-					</Button>
-				</div>
+				{workflowActionState.kind === "ready" ? (
+					<div className="mt-4 grid gap-2">
+						<Button
+							type="button"
+							onClick={onApproveWorkflow}
+							disabled={approvalButtonDisabled}
+							className="justify-center"
+						>
+							<GitBranchPlus className="size-4" aria-hidden />
+							{getPrimaryButtonLabel({
+								actionState,
+								primaryActionLabel,
+							})}
+						</Button>
+						<SecondaryWorkflowActions onCopyEvidenceRef={onCopyEvidenceRef} />
+					</div>
+				) : (
+					<UnavailableWorkflowActionPanel
+						state={workflowActionState}
+						onCopyEvidenceRef={onCopyEvidenceRef}
+					/>
+				)}
 
-				{!canApprove ? (
+				{workflowActionState.kind === "ready" && !canApprove ? (
 					<SheetStatus tone="warning">
 						Pair an active local runner before creating the workflow branch.
 					</SheetStatus>
 				) : null}
-				{actionState === "error" && actionError ? (
+				{workflowActionState.kind === "ready" &&
+				actionState === "error" &&
+				actionError ? (
 					<SheetStatus tone="warning">{actionError}</SheetStatus>
 				) : null}
 				{actionState === "approved" && primaryCommand && fallbackCommand ? (
@@ -141,6 +143,132 @@ export function WorkspaceSourceTruthApprovalSheet({
 				) : null}
 			</section>
 		</aside>
+	);
+}
+
+type WorkflowActionState =
+	| { kind: "ready" }
+	| {
+			kind: "unavailable";
+			buttonLabel: string;
+			description: string;
+			reason: string | null;
+			title: string;
+	  };
+
+function getWorkflowActionState(
+	detail: WorkspaceFindingDetailModel,
+): WorkflowActionState {
+	switch (detail.status) {
+		case "ready":
+			return { kind: "ready" };
+		case "blocked":
+			return {
+				kind: "unavailable",
+				title: "Workflow blocked",
+				buttonLabel: "Workflow blocked",
+				description:
+					"This finding is blocked. Resolve the blocker before starting a workflow.",
+				reason: detail.blockedReason,
+			};
+		case "needs_approval":
+			return {
+				kind: "unavailable",
+				title: "Approval needed",
+				buttonLabel: "Waiting for approval",
+				description:
+					"This finding still needs approval. Approve the finding before starting a workflow.",
+				reason: detail.blockedReason,
+			};
+		case "running":
+			return {
+				kind: "unavailable",
+				title: "Workflow already running",
+				buttonLabel: "Workflow running",
+				description:
+					"A workflow is already running for this finding. Review the current run state before starting another workflow.",
+				reason: detail.blockedReason,
+			};
+		case "done":
+			return {
+				kind: "unavailable",
+				title: "Workflow completed",
+				buttonLabel: "Workflow completed",
+				description:
+					"This finding already has completed proof. Review Runs before starting any deliberate rerun.",
+				reason: detail.blockedReason,
+			};
+	}
+}
+
+function getPrimaryButtonLabel({
+	actionState,
+	primaryActionLabel,
+}: {
+	actionState: WorkflowApprovalActionState;
+	primaryActionLabel: string;
+}) {
+	if (actionState === "submitting") {
+		return "Creating workflow run";
+	}
+	if (actionState === "approved") {
+		return "Workflow run approved";
+	}
+	return primaryActionLabel;
+}
+
+function UnavailableWorkflowActionPanel({
+	state,
+	onCopyEvidenceRef,
+}: {
+	state: Extract<WorkflowActionState, { kind: "unavailable" }>;
+	onCopyEvidenceRef: () => void;
+}) {
+	return (
+		<div className="mt-4 grid gap-3">
+			<Button type="button" disabled className="justify-center">
+				<GitBranchPlus className="size-4" aria-hidden />
+				{state.buttonLabel}
+			</Button>
+			<div
+				className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2"
+				role="status"
+			>
+				<p className="text-sm font-medium text-foreground">{state.title}</p>
+				<p className="mt-1 text-sm leading-6 text-muted-foreground">
+					{state.description}
+				</p>
+				{state.reason ? (
+					<p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
+						Reason: {state.reason}
+					</p>
+				) : null}
+			</div>
+			<SecondaryWorkflowActions onCopyEvidenceRef={onCopyEvidenceRef} />
+		</div>
+	);
+}
+
+function SecondaryWorkflowActions({
+	onCopyEvidenceRef,
+}: {
+	onCopyEvidenceRef: () => void;
+}) {
+	return (
+		<>
+			<Button
+				type="button"
+				variant="outline"
+				className="justify-center"
+				onClick={onCopyEvidenceRef}
+			>
+				<Clipboard className="size-4" aria-hidden />
+				Copy local evidence ref
+			</Button>
+			<Button asChild variant="ghost" className="justify-center">
+				<Link href={routeConfig.workspaceFindings}>Not now</Link>
+			</Button>
+		</>
 	);
 }
 

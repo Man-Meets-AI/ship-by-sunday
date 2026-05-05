@@ -293,6 +293,27 @@ be approved before findings sync`; after browser approval, inserted and
   Expected: detail page explains the finding and any approval boundary.
   Failure: detail page crashes or exposes unsafe raw data.
 
+- [x] Finding workflow actions respect blocked/ready status.
+
+  Expected: findings with status `blocked` do not show active `Create branch`
+  or `Run workflow` actions, or those actions open a clear disabled-state
+  explanation before calling the backend. Findings with status `ready` can
+  request a workflow run only after the required approval boundary is explicit.
+  Failure: the UI lets a user click `Create branch` or `Run workflow` on a
+  blocked finding, appears to do nothing, and the server logs
+  `Blocked findings cannot start workflows`.
+  Observed: blocked finding detail page still rendered
+  `Create branch and run workflow`; clicking it produced a raw Convex error card
+  with request id `604cef4c0fefa456` and
+  `Blocked findings cannot start workflows`.
+  Addressed: blocked detail state now shows
+  `This finding is blocked. Resolve the blocker before starting a workflow.`,
+  includes the blocked reason when present, and does not render an active
+  workflow-start action. Focused validation covered blocked no-call behavior,
+  ready workflow request behavior, and sanitized backend rejection display with
+  `bun run --cwd apps/web test:integration:ui -- workspace-finding-detail-page.test.tsx`;
+  app typecheck also passed.
+
 - [ ] `/workspace/runs`
 
   Expected: doctor-pass and approved workflow history show clear statuses.
