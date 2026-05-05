@@ -34,7 +34,7 @@ export function DocsThemeToggle() {
 		<ThemeToggleButton
 			syncProductTheme
 			onResolvedThemeChange={persistDocsTheme}
-			className="border-border/60 bg-background/70 text-foreground hover:bg-muted"
+			className="size-9 border-transparent bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
 		/>
 	);
 }

@@ -260,7 +260,7 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain(
 			'href="/checkout/email-handoff?session_id=cs_handoff&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_handoff"',
 		);
-		expect(markup).not.toContain("Continue with Google");
+		expect(markup).not.toContain("Continue with");
 		expect(markup).not.toContain("Create account");
 	});
 

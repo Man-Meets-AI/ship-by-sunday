@@ -47,7 +47,6 @@ The auth bridge between public and protected surfaces uses three route-group scr
 - `/sign-in` for the branded sign-in UI
 - `/checkout/email-handoff` for the paid checkout email-code handoff
 - `/session-tasks/reset-password` for the Clerk reset-password task inside the same shell
-- `/sso-callback` for OAuth completion
 
 `/sign-up` is not a visible auth product surface in this repo. It redirects to pricing, except legacy checkout session links forward to `/checkout/email-handoff`.
 

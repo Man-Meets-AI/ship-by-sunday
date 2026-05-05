@@ -1,4 +1,3 @@
-import type { SignInAuthError } from "@/platform/auth/auth-route-utils";
 import type { SignInStep } from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 import { assertNever } from "@/lib/assert";
 
@@ -7,27 +6,7 @@ type SignInPageContent = {
 	title: string;
 };
 
-function getCredentialsContent({
-	authError,
-	isColdDefaultVisit,
-}: {
-	authError: SignInAuthError | null;
-	isColdDefaultVisit: boolean;
-}): SignInPageContent {
-	if (authError === "purchase_required") {
-		return {
-			description: "Use the account attached to your purchase to continue.",
-			title: "Sign in",
-		};
-	}
-
-	if (isColdDefaultVisit) {
-		return {
-			description: "Use the account attached to your purchase to continue.",
-			title: "Sign in",
-		};
-	}
-
+function getCredentialsContent(): SignInPageContent {
 	return {
 		description: "Use the account attached to your purchase to continue.",
 		title: "Sign in",
@@ -35,17 +14,13 @@ function getCredentialsContent({
 }
 
 export function getSignInPageContent({
-	authError,
-	isColdDefaultVisit,
 	step,
 }: {
-	authError: SignInAuthError | null;
-	isColdDefaultVisit: boolean;
 	step: SignInStep;
 }): SignInPageContent {
 	switch (step.kind) {
 		case "credentials":
-			return getCredentialsContent({ authError, isColdDefaultVisit });
+			return getCredentialsContent();
 		case "reset_request":
 			return {
 				description:

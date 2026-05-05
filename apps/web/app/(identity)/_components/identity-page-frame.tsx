@@ -6,8 +6,10 @@ export function IdentityPageFrame({ children }: { children: ReactNode }) {
 	return (
 		<main className="relative min-h-screen bg-background text-foreground tracking-normal">
 			<IdentityLayoutHeader />
-			<div className="flex min-h-screen items-center justify-center px-4 pb-10 pt-20 sm:px-6 lg:px-8">
-				{children}
+			<div className="flex min-h-screen items-center pb-10 pt-20">
+				<div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+					{children}
+				</div>
 			</div>
 		</main>
 	);

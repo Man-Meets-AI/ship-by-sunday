@@ -2,16 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { FieldDescription } from "@/components/ui/field";
-import { Separator } from "@/components/ui/separator";
-import { Spinner } from "@/components/ui/spinner";
-
-import { GoogleIcon } from "@/app/(identity)/_components/sign-in/google-icon";
 
 type SignInSecondaryActionsProps = {
 	isBusy: boolean;
 	isLoaded: boolean;
 	signUpHref?: string | null;
-	startGoogleSignIn: () => Promise<void>;
 	startPasswordReset: () => Promise<void>;
 };
 
@@ -19,57 +14,35 @@ export function SignInSecondaryActions({
 	isBusy,
 	isLoaded,
 	signUpHref,
-	startGoogleSignIn,
 	startPasswordReset,
 }: SignInSecondaryActionsProps) {
 	return (
-		<>
-			<div className="flex items-center gap-2">
-				<Separator className="flex-1" />
-				<span className="text-xs uppercase text-muted-foreground">or with</span>
-				<Separator className="flex-1" />
-			</div>
+		<div className="flex flex-col gap-2">
 			<Button
-				className="w-full"
-				variant="outline"
 				type="button"
+				variant="link"
+				size="sm"
+				className="h-auto justify-start px-0"
 				disabled={!isLoaded || isBusy}
-				onClick={() => void startGoogleSignIn()}
+				onClick={() => void startPasswordReset()}
 			>
-				{isBusy ? (
-					<Spinner data-icon="inline-start" />
-				) : (
-					<GoogleIcon data-icon="inline-start" aria-hidden />
-				)}
-				Continue with Google
+				Forgot your password?
 			</Button>
-			<div className="flex flex-col gap-2">
+			<FieldDescription>
+				New accounts are created only after checkout. Sign in with the email
+				tied to your purchased access.
+			</FieldDescription>
+			{signUpHref ? (
 				<Button
+					asChild
 					type="button"
 					variant="link"
 					size="sm"
 					className="h-auto justify-start px-0"
-					disabled={!isLoaded || isBusy}
-					onClick={() => void startPasswordReset()}
 				>
-					Forgot your password?
+					<a href={signUpHref}>Create the account for this checkout</a>
 				</Button>
-				<FieldDescription>
-					New accounts are created only after checkout. Use Google only if it is
-					already tied to your purchased access.
-				</FieldDescription>
-				{signUpHref ? (
-					<Button
-						asChild
-						type="button"
-						variant="link"
-						size="sm"
-						className="h-auto justify-start px-0"
-					>
-						<a href={signUpHref}>Create the account for this checkout</a>
-					</Button>
-				) : null}
-			</div>
-		</>
+			) : null}
+		</div>
 	);
 }

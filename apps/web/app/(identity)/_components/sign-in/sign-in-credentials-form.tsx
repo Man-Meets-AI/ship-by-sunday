@@ -8,10 +8,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { SignInBanners } from "@/app/(identity)/_components/sign-in/sign-in-banners";
 import { SignInCredentialFields } from "@/app/(identity)/_components/sign-in/sign-in-credential-fields";
 import { SignInSecondaryActions } from "@/app/(identity)/_components/sign-in/sign-in-secondary-actions";
-import type { SignInAuthError } from "@/platform/auth/auth-route-utils";
 
 type SignInCredentialsFormProps = {
-	authError: SignInAuthError | null;
 	emailAddress: string;
 	emailError: { message?: string } | null;
 	globalErrors: Array<{ message?: string }> | null;
@@ -22,13 +20,11 @@ type SignInCredentialsFormProps = {
 	setEmailAddress: (value: string) => void;
 	setPassword: (value: string) => void;
 	signUpHref?: string | null;
-	startGoogleSignIn: () => Promise<void>;
 	startPasswordReset: () => Promise<void>;
 	submitPassword: () => Promise<void>;
 };
 
 export function SignInCredentialsForm({
-	authError,
 	emailAddress,
 	emailError,
 	globalErrors,
@@ -39,7 +35,6 @@ export function SignInCredentialsForm({
 	setEmailAddress,
 	setPassword,
 	signUpHref,
-	startGoogleSignIn,
 	startPasswordReset,
 	submitPassword,
 }: SignInCredentialsFormProps) {
@@ -50,7 +45,7 @@ export function SignInCredentialsForm({
 
 	return (
 		<div className="flex flex-col gap-5">
-			<SignInBanners authError={authError} globalErrors={globalErrors} />
+			<SignInBanners globalErrors={globalErrors} />
 			<form className="flex flex-col gap-5" onSubmit={handleSubmit}>
 				<SignInCredentialFields
 					emailAddress={emailAddress}
@@ -71,7 +66,6 @@ export function SignInCredentialsForm({
 				isBusy={isBusy}
 				isLoaded={isLoaded}
 				signUpHref={signUpHref}
-				startGoogleSignIn={startGoogleSignIn}
 				startPasswordReset={startPasswordReset}
 			/>
 		</div>
