@@ -1165,6 +1165,46 @@ async function getLatestRepositoryBinding(
 	return repositoryBindings[0] ?? null;
 }
 
+async function upsertRepositoryBindingFromRunnerPairing(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		runnerId: WorkspaceRunnerBindingId;
+		repositoryDisplayName?: string;
+		now: number;
+	},
+) {
+	const displayName = args.repositoryDisplayName?.trim();
+	if (!displayName) {
+		return;
+	}
+
+	assertBoundedText(displayName, "repository displayName");
+
+	const existingRepositoryBinding = await getLatestRepositoryBinding(
+		ctx,
+		args.projectId,
+	);
+	const repositoryBindingPatch = {
+		runnerId: args.runnerId,
+		displayName,
+		updatedAt: args.now,
+	};
+
+	if (existingRepositoryBinding) {
+		await ctx.db.patch(existingRepositoryBinding._id, repositoryBindingPatch);
+		return;
+	}
+
+	await ctx.db.insert("workspaceRepositoryBindings", {
+		projectId: args.projectId,
+		status: "active" as const,
+		provider: "unknown" as const,
+		...repositoryBindingPatch,
+		createdAt: args.now,
+	});
+}
+
 async function getLatestDoctorPassRun(
 	ctx: WorkspaceReadCtx,
 	projectId: WorkspaceProjectId,
@@ -2402,19 +2442,27 @@ async function applyEventDerivedState(
 
 	switch (args.payload.eventType) {
 		case "runner.paired": {
-			await ctx.db.patch(args.runnerBinding._id, {
-				status:
-					args.payload.pairingStatus === "revoked"
-						? ("revoked" as const)
-						: ("paired" as const),
-				pairingStatus: args.payload.pairingStatus,
-				runnerMode: args.payload.runnerMode,
-				machineDisplayName: args.payload.machineDisplayName,
-				runnerVersion: args.payload.runnerVersion,
-				pairedAt: args.runnerBinding.pairedAt ?? args.createdAt,
-				lastEventAt: args.createdAt,
-				updatedAt: now,
-			});
+			await Promise.all([
+				ctx.db.patch(args.runnerBinding._id, {
+					status:
+						args.payload.pairingStatus === "revoked"
+							? ("revoked" as const)
+							: ("paired" as const),
+					pairingStatus: args.payload.pairingStatus,
+					runnerMode: args.payload.runnerMode,
+					machineDisplayName: args.payload.machineDisplayName,
+					runnerVersion: args.payload.runnerVersion,
+					pairedAt: args.runnerBinding.pairedAt ?? args.createdAt,
+					lastEventAt: args.createdAt,
+					updatedAt: now,
+				}),
+				upsertRepositoryBindingFromRunnerPairing(ctx, {
+					projectId: args.project._id,
+					runnerId: args.runnerBinding._id,
+					repositoryDisplayName: args.payload.repositoryDisplayName,
+					now,
+				}),
+			]);
 			return;
 		}
 		case "runner.heartbeat": {

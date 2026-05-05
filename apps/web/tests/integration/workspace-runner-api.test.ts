@@ -116,6 +116,45 @@ describe("workspace runner API", () => {
 		expect(JSON.stringify(mutationArgs)).not.toContain("sbs_run_secret");
 	});
 
+	it("passes sync-safe paired runner repository metadata to Convex", async () => {
+		fetchMutationMock.mockResolvedValue({
+			eventId: "evt-paired",
+			inserted: true,
+			eventDocumentId: "workspaceRunnerEvents_1",
+		});
+		const { POST } =
+			await import("../../app/api/workspace/runner/events/route");
+
+		const response = await POST(
+			createJsonRequest(
+				"https://example.com/api/workspace/runner/events",
+				{
+					eventId: "evt-paired",
+					projectId: "workspaceProjects_1",
+					runnerId: "workspaceRunnerBindings_1",
+					eventType: "runner.paired",
+					schemaVersion: "workspace.runner-event.v1",
+					createdAt: 1000,
+					payload: {
+						eventType: "runner.paired",
+						pairingStatus: "paired",
+						runnerMode: "daemon",
+						machineDisplayName: "Parker MacBook",
+						repositoryDisplayName: "ship-by-sunday",
+					},
+				},
+				{ Authorization: "Bearer sbs_run_secret" },
+			),
+		);
+		const [, mutationArgs] = fetchMutationMock.mock.calls[0];
+
+		expect(response.status).toBe(200);
+		expect(mutationArgs.payload).toMatchObject({
+			eventType: "runner.paired",
+			repositoryDisplayName: "ship-by-sunday",
+		});
+	});
+
 	it("rejects runner events without bearer credentials", async () => {
 		const { POST } =
 			await import("../../app/api/workspace/runner/events/route");

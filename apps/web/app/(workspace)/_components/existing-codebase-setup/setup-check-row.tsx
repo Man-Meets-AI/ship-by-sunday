@@ -45,10 +45,10 @@ export function SetupCheckRow({ row }: { row: SetupReadinessCheck }) {
 						<Button type="button" variant="outline" size="sm">
 							{row.localActionButton.label}
 						</Button>
-						<Button type="button" variant="ghost" size="sm">
+						<span className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-muted-foreground">
 							<RotateCcw className="size-3.5" aria-hidden />
 							{row.retryAction.label}
-						</Button>
+						</span>
 					</div>
 				) : null}
 				{row.status === "warning" ? (

@@ -287,6 +287,7 @@ export const workspaceRunnerEventPayloadValidator = v.union(
 		runnerMode: workspaceRunnerModeValidator,
 		machineDisplayName: v.optional(v.string()),
 		runnerVersion: v.optional(v.string()),
+		repositoryDisplayName: v.optional(v.string()),
 	}),
 	v.object({
 		eventType: v.literal("runner.heartbeat"),

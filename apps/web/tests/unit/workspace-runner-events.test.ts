@@ -352,6 +352,37 @@ describe("workspace runner events", () => {
 		);
 	});
 
+	it("creates a repository binding from the paired runner display name", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-runner-paired-repo",
+			projectId: project._id,
+			runnerId: runner._id,
+			eventType: "runner.paired",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 60_000,
+			payload: {
+				eventType: "runner.paired",
+				pairingStatus: "paired",
+				runnerMode: "daemon",
+				machineDisplayName: "Parker MacBook",
+				repositoryDisplayName: "ship-by-sunday",
+			},
+		});
+		const setupState = await getWorkspaceSetupState._handler(ctx as never, {
+			projectId: project._id,
+		});
+
+		expect(setupState.repositoryBinding).toMatchObject({
+			projectId: project._id,
+			runnerId: runner._id,
+			displayName: "ship-by-sunday",
+			provider: "unknown",
+			status: "active",
+		});
+	});
+
 	it("consumes setup pairing tokens after the first successful bind", async () => {
 		const testContext = createWorkspaceTestCtx();
 		vi.spyOn(Date, "now").mockReturnValue(110_000);

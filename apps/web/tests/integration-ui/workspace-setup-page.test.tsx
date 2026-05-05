@@ -202,7 +202,9 @@ describe("ExistingCodebaseSetupPage", () => {
 		});
 	});
 
-	it("renders the setup command, readiness sections, blockers, and privacy defaults", () => {
+	it("renders the setup command, readiness sections, blockers, and privacy defaults", async () => {
+		const user = userEvent.setup();
+
 		renderSetupPage();
 
 		expect(
@@ -213,6 +215,11 @@ describe("ExistingCodebaseSetupPage", () => {
 			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
 		).toBeTruthy();
 		expect(
+			screen.queryByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeNull();
+		expect(screen.queryByText("npx fallback")).toBeNull();
+		await user.click(screen.getByRole("radio", { name: "Use npm" }));
+		expect(
 			screen.getByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
 		).toBeTruthy();
 		expect(screen.getByText("runner detected")).toBeTruthy();
@@ -222,7 +229,9 @@ describe("ExistingCodebaseSetupPage", () => {
 		expect(screen.getByText("SBS Codex profiles are missing.")).toBeTruthy();
 		expect(screen.getAllByText("Why it blocks").length).toBeGreaterThan(0);
 		expect(screen.getAllByText("Preview diff").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("Retry check").length).toBeGreaterThan(0);
+		expect(
+			screen.getAllByText("Run setup check locally").length,
+		).toBeGreaterThan(0);
 		expect(screen.getByText("Raw source")).toBeTruthy();
 		expect(screen.getByText("Raw terminal logs")).toBeTruthy();
 		expect(screen.getByText("Codex transcripts")).toBeTruthy();
@@ -269,6 +278,11 @@ describe("ExistingCodebaseSetupPage", () => {
 				},
 				runnerBindings: [pairedRunner],
 				activeRunner: pairedRunner,
+				repositoryBinding: {
+					_id: "workspaceRepositoryBindings_1",
+					displayName: "customer-app",
+					provider: "unknown",
+				},
 				setupEvents: [
 					...requiredReadySetupEvents(),
 					completedSetupEvent({
@@ -294,6 +308,59 @@ describe("ExistingCodebaseSetupPage", () => {
 			).disabled,
 		).toBe(false);
 		expect(screen.getAllByText(/Warnings can remain visible/).length).toBe(2);
+		expect(screen.getAllByText("customer-app").length).toBeGreaterThan(0);
+		expect(
+			screen.queryByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeNull();
+		expect(screen.queryByText("npx fallback")).toBeNull();
+		expect(screen.queryByText("Regenerate token")).toBeNull();
+		expect(screen.queryByText("Use one-shot mode")).toBeNull();
+		expect(screen.queryByText("Paired runner")).toBeNull();
+		expect(screen.getByRole("button", { name: "Repair pairing" })).toBeTruthy();
+	});
+
+	it("shows repair commands as a single package-manager switcher", async () => {
+		const user = userEvent.setup();
+		const pairedRunner = {
+			_id: "workspaceRunnerBindings_1",
+			status: "paired" as const,
+			pairingStatus: "paired" as const,
+			runnerMode: "daemon" as const,
+			runnerLabel: "Local daemon",
+			machineDisplayName: "Parker MacBook",
+			machineHealthStatus: "warning" as const,
+			projectHealthStatus: "warning" as const,
+			lastHeartbeatAt: renderedAt - 20_000,
+		};
+
+		renderSetupPage(
+			createSetupState({
+				runnerBindings: [pairedRunner],
+				activeRunner: pairedRunner,
+				repositoryBinding: {
+					_id: "workspaceRepositoryBindings_1",
+					displayName: "customer-app",
+					provider: "unknown",
+					repositoryRoot: "/Users/parker/customer-app",
+				},
+				setupEvents: requiredReadySetupEvents(),
+			}),
+		);
+
+		expect(screen.getByText("Repair command")).toBeTruthy();
+		expect(
+			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeTruthy();
+		expect(screen.queryByText("npx repair fallback")).toBeNull();
+		expect(
+			screen.queryByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeNull();
+
+		await user.click(screen.getByRole("radio", { name: "Use npm" }));
+
+		expect(
+			screen.getByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeTruthy();
 	});
 
 	it("starts a doctor pass run when readiness has no blockers", async () => {
