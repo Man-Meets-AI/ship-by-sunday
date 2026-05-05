@@ -59,16 +59,26 @@ upload`, includes a visible stepper from local run through upload, and shows
   run completed, whether anything synced, what approval does, what command or
   button comes next, or where to confirm uploaded findings.
 
-- [ ] Verify approved Doctor Pass findings upload without digest drift.
+- [x] Verify approved Doctor Pass findings upload without digest drift.
 
   Expected: after the browser approves a sync preview, the local runner upload
   command succeeds for the same run id and writes `upload-result.json`. The
-  backend accepts the exact approved findings payload and moves the run to an
-  uploaded/findings-visible state.
+  backend accepts the exact approved findings payload using the canonical
+  approved-findings digest contract and moves the run to an
+  uploaded/findings-visible state. Object key order must not affect the digest,
+  and omitted optional object fields normalize the same as `undefined` optional
+  fields.
   Failure: upload fails with
   `Uploaded findings do not match approved preview` after approval. That means
   the runner and backend are not hashing the approved findings with the same
   canonical payload contract, even if the findings appear unchanged.
+  Addressed: fresh run `20260505T204201Z-56640b39` /
+  `m97djh73b8dda4jrd9yvgqy3xh8640qx` used preview digest
+  `sha256:51147b7880774d858d6d843c0182a2309a70e3e1fd1197c6ba9fc3126cc7ecef`;
+  after browser approval, manual upload succeeded with `insertedCount: 9`,
+  `patchedCount: 0`, wrote `upload-result.json`, and Convex showed
+  `status: findings_uploaded`, `syncPreviewStatus: uploaded`, and 9 uploaded
+  findings.
 
 - [x] Verify Doctor Pass Top 9 schema is accepted by Codex.
 

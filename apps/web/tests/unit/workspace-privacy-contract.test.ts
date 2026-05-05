@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createHash } from "node:crypto";
 
+import {
+	createApprovedFindingsDigest,
+	stableStringifyApprovedFindingsPayload,
+} from "@/convex/workspace/approved_findings_digest";
 import {
 	approveWorkspaceSyncPreview,
 	bindWorkspaceRunner,
@@ -11,10 +14,11 @@ import {
 	startWorkspaceDoctorPassRun,
 	syncApprovedCodebaseFindings,
 } from "@/convex/workspace";
+import { createApprovedFindingsDigest as createRunnerApprovedFindingsDigest } from "../../../../packages/local-runner/src/core/doctor-pass/approved-findings-digest";
 
 import { createWorkspaceTestCtx } from "./workspace-test-helpers";
 
-function createApprovedFindingsDigest({
+async function createPreviewDigest({
 	runId,
 	doctorPassRunId,
 	findings,
@@ -23,35 +27,11 @@ function createApprovedFindingsDigest({
 	doctorPassRunId: string;
 	findings: Array<typeof syncSafeFinding>;
 }) {
-	return `sha256:${createHash("sha256")
-		.update(
-			JSON.stringify({
-				schemaVersion: "doctor-pass-local.v1",
-				runId,
-				doctorPassRunId,
-				findings: findings.map((finding) => ({
-					findingId: finding.findingId,
-					rank: finding.rank,
-					status: finding.status,
-					title: finding.title,
-					category: finding.category,
-					severity: finding.severity,
-					confidence: finding.confidence,
-					buyerImpact: finding.buyerImpact,
-					blastRadius: finding.blastRadius,
-					proofPath: finding.proofPath,
-					proofability: finding.proofability,
-					permissionRequired: finding.permissionRequired,
-					recommendedWorkflowId: finding.recommendedWorkflowId,
-					whyThisNow: finding.whyThisNow,
-					evidenceRefs: finding.evidenceRefs,
-					blockedReason: finding.blockedReason,
-					syncSensitivity: finding.syncSensitivity,
-					localReportRef: finding.localReportRef,
-				})),
-			}),
-		)
-		.digest("hex")}`;
+	return await createApprovedFindingsDigest({
+		runId,
+		doctorPassRunId,
+		findings,
+	});
 }
 
 async function createApprovedDoctorPassRun({
@@ -79,7 +59,7 @@ async function createApprovedDoctorPassRun({
 			runnerMode: "daemon",
 		},
 	);
-	const previewDigest = createApprovedFindingsDigest({
+	const previewDigest = await createPreviewDigest({
 		runId,
 		doctorPassRunId: doctorPassRun._id,
 		findings: approvedFindings,
@@ -152,6 +132,75 @@ const syncSafeFinding = {
 describe("workspace privacy contract", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
+	});
+
+	it("uses the same canonical approved-findings digest as the local runner", async () => {
+		const runId = "run-canonical";
+		const doctorPassRunId = "doctor-run-canonical";
+		const reorderedFinding = {
+			localReportRef:
+				".sbs/reports/doctor-pass/run-canonical/source-truth-agent-readiness.json",
+			syncSensitivity: "low" as const,
+			blockedReason: undefined,
+			evidenceRefs: [
+				{
+					summary: "Repo instructions exist and can be audited.",
+					lineEnd: 40,
+					kind: "file" as const,
+					lineStart: 1,
+					repoRelativePath: "AGENTS.md",
+				},
+				{
+					summary: "Typecheck is a proof candidate.",
+					commandName: "bun run typecheck",
+					kind: "command" as const,
+				},
+			],
+			whyThisNow: "It improves every later local runner workflow.",
+			recommendedWorkflowId: "source-truth-agent-readiness",
+			permissionRequired: "docs_write" as const,
+			proofability: "clear" as const,
+			proofPath: "Review the local source-truth readiness report.",
+			blastRadius: "low" as const,
+			buyerImpact: "Future agent work can use a clearer command and proof map.",
+			confidence: 0.91,
+			severity: "high" as const,
+			category: "source_truth" as const,
+			title: "Source truth is ready for a first workflow",
+			status: "ready" as const,
+			rank: 1,
+			findingId: "finding-source-truth-readiness",
+		};
+
+		const backendDigest = await createApprovedFindingsDigest({
+			runId,
+			doctorPassRunId,
+			findings: [reorderedFinding],
+		});
+		const runnerDigest = createRunnerApprovedFindingsDigest({
+			runId,
+			doctorPassRunId,
+			findings: [reorderedFinding],
+		});
+		const missingBlockedReasonDigest = await createApprovedFindingsDigest({
+			runId,
+			doctorPassRunId,
+			findings: [syncSafeFinding],
+		});
+		const undefinedBlockedReasonDigest = await createApprovedFindingsDigest({
+			runId,
+			doctorPassRunId,
+			findings: [{ ...syncSafeFinding, blockedReason: undefined }],
+		});
+
+		expect(backendDigest).toBe(runnerDigest);
+		expect(missingBlockedReasonDigest).toBe(undefinedBlockedReasonDigest);
+		expect(
+			stableStringifyApprovedFindingsPayload({
+				z: 1,
+				a: { missing: undefined, value: "kept" },
+			}),
+		).toBe('{"a":{"value":"kept"},"z":1}');
 	});
 
 	it("syncs only approved structured findings and supports deletion markers", async () => {

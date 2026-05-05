@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createHash } from "node:crypto";
 
+import { createApprovedFindingsDigest } from "@/convex/workspace/approved_findings_digest";
 import {
 	bindWorkspaceRunner,
 	bindWorkspaceRunnerByPairingToken,
@@ -27,7 +27,7 @@ import {
 
 import { createWorkspaceTestCtx } from "./workspace-test-helpers";
 
-function createApprovedFindingsDigest({
+async function createPreviewDigest({
 	runId,
 	doctorPassRunId,
 	findings,
@@ -36,16 +36,13 @@ function createApprovedFindingsDigest({
 	doctorPassRunId: string;
 	findings: unknown[];
 }) {
-	return `sha256:${createHash("sha256")
-		.update(
-			JSON.stringify({
-				schemaVersion: "doctor-pass-local.v1",
-				runId,
-				doctorPassRunId,
-				findings,
-			}),
-		)
-		.digest("hex")}`;
+	return await createApprovedFindingsDigest({
+		runId,
+		doctorPassRunId,
+		findings: findings as Parameters<
+			typeof createApprovedFindingsDigest
+		>[0]["findings"],
+	});
 }
 
 async function createProjectAndRunner() {
@@ -627,7 +624,7 @@ describe("workspace runner events", () => {
 					runnerMode: "daemon",
 				},
 			);
-		const previewDigest = createApprovedFindingsDigest({
+		const previewDigest = await createPreviewDigest({
 			runId: "run-credential",
 			doctorPassRunId: startedRun.doctorPassRunId,
 			findings: [],

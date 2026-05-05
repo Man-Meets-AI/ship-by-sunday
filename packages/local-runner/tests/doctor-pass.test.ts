@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { runDoctorPassCommand } from "../src/commands/doctor-pass";
 import { writeLocalProjectState } from "../src/core/local-project-state";
 import { writeRunnerCredential } from "../src/core/local-runner-home";
+import { createApprovedFindingsDigest } from "../src/core/doctor-pass/approved-findings-digest";
 import { createTopNineOutputSchema } from "../src/core/doctor-pass/top-nine-schema";
 import { TOP_NINE_SCHEMA_VERSION } from "../src/core/doctor-pass/types";
 import { resolveRepositoryRoot } from "../src/core/repository-root";
@@ -46,6 +47,62 @@ describe("doctor-pass command", () => {
 		});
 		assertCodexStructuredOutputSchema(schema);
 		assertNoBareConstPropertySchema(schema);
+	});
+
+	it("canonicalizes approved findings digests across key order and optional fields", () => {
+		const finding = createDigestFinding();
+		const reorderedFinding = {
+			localReportRef:
+				".sbs/reports/doctor-pass/run-digest/source-truth-agent-readiness.json",
+			syncSensitivity: "low" as const,
+			blockedReason: undefined,
+			evidenceRefs: [
+				{
+					summary: "Repo instructions exist.",
+					kind: "file" as const,
+					repoRelativePath: "AGENTS.md",
+				},
+				{
+					summary: "Test script exists.",
+					commandName: "npm run test",
+					kind: "command" as const,
+				},
+			],
+			whyThisNow: "It improves every later workflow handoff.",
+			recommendedWorkflowId: "source-truth-agent-readiness",
+			permissionRequired: "docs_write" as const,
+			proofability: "clear" as const,
+			proofPath: "Review AGENTS.md and package scripts.",
+			blastRadius: "low" as const,
+			buyerImpact:
+				"The repo has instructions and proof scripts that can anchor later workflows.",
+			confidence: 0.9,
+			severity: "high" as const,
+			category: "source_truth" as const,
+			title: "Source truth readiness",
+			status: "ready" as const,
+			rank: 1,
+			findingId: "finding-source-truth-readiness",
+		};
+
+		const originalDigest = createApprovedFindingsDigest({
+			runId: "run-digest",
+			doctorPassRunId: "doctor-run-digest",
+			findings: [finding],
+		});
+		const reorderedDigest = createApprovedFindingsDigest({
+			runId: "run-digest",
+			doctorPassRunId: "doctor-run-digest",
+			findings: [reorderedFinding],
+		});
+		const undefinedOptionalDigest = createApprovedFindingsDigest({
+			runId: "run-digest",
+			doctorPassRunId: "doctor-run-digest",
+			findings: [{ ...finding, blockedReason: undefined }],
+		});
+
+		expect(reorderedDigest).toBe(originalDigest);
+		expect(undefinedOptionalDigest).toBe(originalDigest);
 	});
 
 	it("writes local artifacts, emits sync preview events, and uploads after approval", async () => {
@@ -617,6 +674,41 @@ function assertNoBareConstPropertySchema(schema: unknown) {
 			`${pathLabel} must not be a bare const schema`,
 		).not.toEqual(["const"]);
 	});
+}
+
+function createDigestFinding() {
+	return {
+		findingId: "finding-source-truth-readiness",
+		rank: 1,
+		status: "ready" as const,
+		title: "Source truth readiness",
+		category: "source_truth" as const,
+		severity: "high" as const,
+		confidence: 0.9,
+		buyerImpact:
+			"The repo has instructions and proof scripts that can anchor later workflows.",
+		blastRadius: "low" as const,
+		proofPath: "Review AGENTS.md and package scripts.",
+		proofability: "clear" as const,
+		permissionRequired: "docs_write" as const,
+		recommendedWorkflowId: "source-truth-agent-readiness",
+		whyThisNow: "It improves every later workflow handoff.",
+		evidenceRefs: [
+			{
+				kind: "file" as const,
+				repoRelativePath: "AGENTS.md",
+				summary: "Repo instructions exist.",
+			},
+			{
+				kind: "command" as const,
+				commandName: "npm run test",
+				summary: "Test script exists.",
+			},
+		],
+		syncSensitivity: "low" as const,
+		localReportRef:
+			".sbs/reports/doctor-pass/run-digest/source-truth-agent-readiness.json",
+	};
 }
 
 function visitPropertySchemas(

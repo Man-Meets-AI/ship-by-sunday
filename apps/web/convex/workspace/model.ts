@@ -7,6 +7,10 @@ import {
 	assertWorkspaceRunnerEventPayload,
 	getWorkspaceRunnerEventSchemaVersion,
 } from "./events";
+import {
+	APPROVED_FINDINGS_DIGEST_SCHEMA_VERSION,
+	createApprovedFindingsDigest,
+} from "./approved_findings_digest";
 import type {
 	CodebaseFindingInput,
 	CodebaseFindingId,
@@ -60,7 +64,8 @@ const DEFAULT_WORKSPACE_PROJECT_NAME = "Existing codebase workspace";
 const MAX_SYNCED_FINDINGS_PER_RUN = 9;
 const PAIRING_TOKEN_TTL_MS = 30 * 60 * 1000;
 const SETUP_EVENT_READ_LIMIT = 30;
-const DOCTOR_PASS_LOCAL_SCHEMA_VERSION = "doctor-pass-local.v1";
+const DOCTOR_PASS_LOCAL_SCHEMA_VERSION =
+	APPROVED_FINDINGS_DIGEST_SCHEMA_VERSION;
 const SOURCE_TRUTH_WORKFLOW_ID = "source-truth-agent-readiness";
 const OBSERVABILITY_WORKFLOW_ID = "observability-debuggability";
 const BROKEN_APP_TRIAGE_WORKFLOW_ID = "broken-app-triage";
@@ -3032,8 +3037,12 @@ async function syncFindingsForApprovedDoctorPassRun(
 	) {
 		throw new ConvexError("Approved sync preview digest does not match upload");
 	}
+	if (!doctorPassRun.localRunId) {
+		throw new ConvexError("Doctor pass run is missing its local run id");
+	}
 	const uploadDigest = await createApprovedFindingsDigest({
-		doctorPassRun,
+		runId: doctorPassRun.localRunId,
+		doctorPassRunId: doctorPassRun._id,
 		findings: args.findings,
 	});
 	if (uploadDigest !== args.previewDigest) {
@@ -3102,53 +3111,6 @@ async function syncFindingsForApprovedDoctorPassRun(
 		syncedAt: now,
 		insertedCount,
 		patchedCount,
-	};
-}
-
-async function createApprovedFindingsDigest({
-	doctorPassRun,
-	findings,
-}: {
-	doctorPassRun: Awaited<ReturnType<typeof requireDoctorPassRun>>;
-	findings: CodebaseFindingInput[];
-}) {
-	if (!doctorPassRun.localRunId) {
-		throw new ConvexError("Doctor pass run is missing its local run id");
-	}
-
-	const payload = {
-		schemaVersion: DOCTOR_PASS_LOCAL_SCHEMA_VERSION,
-		runId: doctorPassRun.localRunId,
-		doctorPassRunId: doctorPassRun._id,
-		findings: findings.map(normalizeFindingForPreviewDigest),
-	};
-	const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
-	const digest = await crypto.subtle.digest("SHA-256", encodedPayload);
-	return `sha256:${Array.from(new Uint8Array(digest))
-		.map((byte) => byte.toString(16).padStart(2, "0"))
-		.join("")}`;
-}
-
-function normalizeFindingForPreviewDigest(finding: CodebaseFindingInput) {
-	return {
-		findingId: finding.findingId,
-		rank: finding.rank,
-		status: finding.status,
-		title: finding.title,
-		category: finding.category,
-		severity: finding.severity,
-		confidence: finding.confidence,
-		buyerImpact: finding.buyerImpact,
-		blastRadius: finding.blastRadius,
-		proofPath: finding.proofPath,
-		proofability: finding.proofability,
-		permissionRequired: finding.permissionRequired,
-		recommendedWorkflowId: finding.recommendedWorkflowId,
-		whyThisNow: finding.whyThisNow,
-		evidenceRefs: finding.evidenceRefs,
-		blockedReason: finding.blockedReason,
-		syncSensitivity: finding.syncSensitivity,
-		localReportRef: finding.localReportRef,
 	};
 }
 
