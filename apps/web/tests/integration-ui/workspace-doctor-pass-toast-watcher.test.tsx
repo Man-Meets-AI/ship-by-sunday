@@ -4,17 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
-const {
-	routerPushMock,
-	toastErrorMock,
-	toastSuccessMock,
-	pathnameMock,
-} = vi.hoisted(() => ({
-	routerPushMock: vi.fn(),
-	toastErrorMock: vi.fn(),
-	toastSuccessMock: vi.fn(),
-	pathnameMock: vi.fn(),
-}));
+const { routerPushMock, toastErrorMock, toastSuccessMock, pathnameMock } =
+	vi.hoisted(() => ({
+		routerPushMock: vi.fn(),
+		toastErrorMock: vi.fn(),
+		toastSuccessMock: vi.fn(),
+		pathnameMock: vi.fn(),
+	}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {

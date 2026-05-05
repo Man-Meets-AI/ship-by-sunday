@@ -49,8 +49,7 @@ const unavailableWorkflowMessages = {
 		"This finding still needs approval. Approve the finding before starting a workflow.",
 	running:
 		"A workflow is already running for this finding. Review the current run state before starting another workflow.",
-	unsupported:
-		"This workflow is not available in the local runner yet.",
+	unsupported: "This workflow is not available in the local runner yet.",
 } as const satisfies Record<UnavailableWorkflowStatus | "unsupported", string>;
 
 export function WorkspaceFindingDetailPage({
