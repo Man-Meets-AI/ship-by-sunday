@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useMutation } from "convex/react";
 
@@ -17,6 +18,7 @@ import {
 	type WorkspaceFindingDetailModel,
 	type WorkspaceFindingDocument,
 } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import { showWorkspaceActionSuccessToast } from "@/app/(workspace)/_lib/workspace-action-feedback";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
@@ -28,6 +30,10 @@ type ApprovedWorkflowRunCommand = {
 	branchName: string;
 	profileName: string;
 };
+
+const workspaceFindingDetailToastIds = {
+	copyEvidenceRefSuccess: "workspace-finding-detail-copy-evidence-ref-success",
+} as const;
 
 export function WorkspaceFindingDetailPage({
 	initialFindings,
@@ -42,6 +48,7 @@ export function WorkspaceFindingDetailPage({
 	activeRunnerId: string | null;
 	approvalTimestamp: number;
 }) {
+	const router = useRouter();
 	const requestWorkflowRun = useMutation(
 		api.workspace.requestWorkspaceWorkflowRun,
 	);
@@ -71,6 +78,15 @@ export function WorkspaceFindingDetailPage({
 
 		await navigator.clipboard?.writeText(detail.copyEvidenceRef);
 		setActionState(approvedWorkflowRunCommand ? "approved" : "copied");
+		showWorkspaceActionSuccessToast({
+			action: {
+				label: "View runs",
+				onClick: () => router.push(routeConfig.workspaceRuns),
+			},
+			id: workspaceFindingDetailToastIds.copyEvidenceRefSuccess,
+			title: "Local evidence ref copied.",
+			description: "Use Runs to match this ref to the local report history.",
+		});
 	}
 
 	async function approveWorkflow() {

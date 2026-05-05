@@ -5,9 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
 
-const { requestWorkflowRunMock } = vi.hoisted(() => ({
-	requestWorkflowRunMock: vi.fn(),
-}));
+const { requestWorkflowRunMock, routerPushMock, toastSuccessMock } = vi.hoisted(
+	() => ({
+		requestWorkflowRunMock: vi.fn(),
+		routerPushMock: vi.fn(),
+		toastSuccessMock: vi.fn(),
+	}),
+);
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -24,8 +28,20 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
+}));
+
 vi.mock("convex/react", () => ({
 	useMutation: () => requestWorkflowRunMock,
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		success: toastSuccessMock,
+	},
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -90,6 +106,8 @@ function createFinding(
 describe("WorkspaceFindingDetailPage", () => {
 	beforeEach(() => {
 		requestWorkflowRunMock.mockReset();
+		routerPushMock.mockReset();
+		toastSuccessMock.mockReset();
 	});
 
 	it("renders decision content and bounded actions", async () => {
@@ -149,6 +167,24 @@ describe("WorkspaceFindingDetailPage", () => {
 		);
 		expect(writeTextMock).toHaveBeenCalledWith("AGENTS.md:1-40");
 		expect(screen.getByText("Local evidence ref copied.")).toBeTruthy();
+		expect(toastSuccessMock).toHaveBeenCalledWith(
+			"Local evidence ref copied.",
+			{
+				action: expect.objectContaining({
+					label: "View runs",
+				}),
+				id: "workspace-finding-detail-copy-evidence-ref-success",
+				description:
+					"Use Runs to match this ref to the local report history.",
+				duration: 6000,
+				position: "bottom-right",
+			},
+		);
+		const toastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Local evidence ref copied.",
+		)?.[1];
+		toastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/runs");
 
 		await user.click(
 			screen.getByRole("button", { name: /Create branch and run workflow/i }),
