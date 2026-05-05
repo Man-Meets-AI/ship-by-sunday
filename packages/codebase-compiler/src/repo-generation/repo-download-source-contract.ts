@@ -76,8 +76,11 @@ const excludedSnapshotPathFragments = [
 	"/.codex/",
 	"/.venv/",
 	"/coverage/",
+	"/docs/exec-plans/",
 	"/docs/openai/",
+	"/docs/programs/",
 	"docs/openai/",
+	"docs/exec-plans/",
 	"docs/programs/",
 	"docs/prompts/program-",
 	"/docs/ship-by-sunday/",
@@ -105,7 +108,14 @@ function isExcludedByPathSegment(relativePath: string) {
 	);
 }
 
-export function isExcludedSnapshotPath(relativePath: string) {
+export function isExcludedSnapshotPath(
+	relativePath: string,
+	allowedGeneratedPaths: ReadonlySet<string> = new Set(),
+) {
+	if (allowedGeneratedPaths.has(relativePath)) {
+		return false;
+	}
+
 	return (
 		isExcludedByPathSegment(relativePath) ||
 		excludedSnapshotFileSuffixes.some(

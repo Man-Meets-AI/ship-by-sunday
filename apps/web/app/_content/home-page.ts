@@ -211,40 +211,40 @@ const productPreviewSection = {
 			alt: "Shippie",
 		},
 		intro:
-			"We don't want to read your codebase. Thats for you and your team. We do want to start installing leverage in the form of a scan, audit & PR merge queue. You're going to work with Shippie. He's trained on every best practice under-the-sun from OpenAI. It's all he does.",
+			"Bring the app you already have. Ship by Sunday runs the private doctor pass through your local runner first: Shippie reads approved sync-safe reports, ranks the Top 9 findings, and keeps raw source, secrets, long logs, and Codex transcripts on your machine by default.",
 		auditLead: "You can read more about",
 		auditLinkLabel: "the audit",
 		auditHref: routeConfig.docs,
 		auditBody:
-			"if you want to, but its the fastest way for you to start getting real leverage in your codebase. End game is agentic loops, turn into true workers. So it's not just Shippie doing work. It's Shippie, and his friends. And eventually you making your own.",
-		todoIntro: "So in order to make these workers personalized to you..",
-		todoSetupLine: "we got a few to-dos.",
+			"if you want to, but the point is simple: diagnose the highest-leverage blocker, approve one bounded worker loop, and leave with proof or an honest blocked-proof report.",
+		todoIntro: "To start the private doctor pass,",
+		todoSetupLine: "we keep the setup concrete.",
 		todos: [
-			"Connect ChatGPT (no claude, I know I know...)",
-			"Let Shippie do his thing.",
-			"Connect your GitHub",
-			"PRs start happening",
+			"Complete Machine Setup and Project Setup",
+			"Pair the local runner inside your repo",
+			"Approve the sync preview for Top 9 findings",
+			"Choose the first recommended loop after diagnosis",
 		],
-		privacyQuestion: "Wait. What? I thought you we'rent reading our code?",
+		privacyQuestion: "Where does GitHub fit?",
 		privacyAnswer:
-			"Correct! By connecting ChatGPT, we use Codex's app server harness",
+			"Local mode does not push branches, open PRs, rerun CI, or share raw source. Concierge managed GitHub starts only after a separate visible consent packet names the repository, storage, PR authority, audit log, revocation, and proof boundaries.",
 		auditList: {
-			title: "The Audit.",
+			title: "The Doctor Pass.",
 			items: [
-				"DOCS Spine",
-				"Exec Plans Loop",
-				"Oxlint",
-				"Oxfmt",
-				"Design.md",
-				"Agents.md",
-				"Programs.md",
-				"Linting md files",
-				"Token efficient lookup",
-				"Low Hanging Fruit `/goal`",
+				"Machine Setup",
+				"Project Setup",
+				"Local runner pairing",
+				"Read-only probes",
+				"Top 9 findings",
+				"Sync preview approval",
+				"First loop approval",
+				"Proof or blocked proof",
+				"Managed GitHub consent only",
+				"Next recommendation",
 			],
 		},
 		cta: {
-			label: "Set up my codebase",
+			label: "Run my codebase doctor pass",
 			note: "Checkout brings you back to the protected setup entry for a sync-safe doctor pass.",
 		},
 	},
@@ -310,10 +310,10 @@ export const homePageContent = {
 		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
 		promoBanner,
-		headlineLead: "Ship codebases",
-		headlineTailPrefix: "",
-		headlineTailHover: "that convert",
-		body: "Ship by Sunday gives your agents the worker layer around Codex: exec loops, role packets, channel handoffs, and QA that feeds the next run.",
+		headlineLead: "Agent doctor",
+		headlineTailPrefix: "for ",
+		headlineTailHover: "web apps",
+		body: "Ship by Sunday diagnoses blockers, ranks the highest-leverage fixes, runs the first approved AI worker loop, and ends with proof or a clear blocked-proof report.",
 		primaryCta: marketingDisplayConfig.primaryCtaLabel,
 	},
 	socialProofSection: {
@@ -397,32 +397,31 @@ export const homePageContent = {
 			{
 				question: "Is this another course or another starter?",
 				answer:
-					"No. It is a worker-layer system for exec loops: decisions, role briefs, agent runs, and QA.",
+					"No. It is an agent doctor for web apps: diagnosis, ranked findings, a selected worker loop, and proof.",
 			},
 			{
 				question: "What do I actually get at the end?",
 				answer:
-					"Exec loops, worker role packets, channel handoff patterns, a QA path, and repo guidance your agents can reuse.",
+					"Generated-codebase buyers leave with a worker-ready repo. Existing-codebase buyers get a private doctor pass, Top 9 findings, one approved loop, proof or blocked proof, and the next recommendation.",
 			},
 			{
 				question: "Who is this for?",
 				answer:
-					"Technical founders who can get AI to code, but need phone-started loops and role-specific agents to ship work that converts.",
+					"Technical founders, indie SaaS builders, operators, and agencies who already use AI to code but need safer diagnosis, execution boundaries, and proof.",
 			},
 			{
 				question: "Why not just use ChatGPT, Claude, or Codex directly?",
 				answer:
-					"Use them. Ship by Sunday supplies the worker layer around them.",
+					"Use them. Ship by Sunday supplies the local runner, workflow packets, consent boundaries, and proof path around them.",
 			},
 			{
-				question:
-					"Can this help with Telegram, Discord, or phone-started agent loops?",
+				question: "Can this help my existing or broken app?",
 				answer:
-					"Yes. Ship by Sunday teaches the code-side worker layer those channels can reuse.",
+					"Yes. The existing-codebase path starts with a private local doctor pass and can route concrete failures into a read-only broken-app triage workflow before any patch is approved.",
 			},
 			{
 				question: "What happens right after I pay?",
-				answer: `You open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, compile the packs, and start the loop.`,
+				answer: `You choose the right protected path: start from an idea in the ${workspaceDisplayConfig.homeNoun}, or bring an existing app into setup for the local doctor pass.`,
 			},
 		],
 	},
@@ -431,7 +430,7 @@ export const homePageContent = {
 		steps: [
 			{
 				label: "Shippie",
-				description: "Gets your code branched, built, and merged.",
+				description: "Turns the diagnosis into one bounded loop with proof.",
 			},
 			{
 				label: "Healios",
@@ -578,8 +577,8 @@ export const homePageContent = {
 	},
 	pricingSection: {
 		headline: {
-			prefix: "Ship a",
-			rotatingPhrases: ["real product", "new worker"],
+			prefix: "Run the",
+			rotatingPhrases: ["doctor pass", "first worker loop"],
 		},
 		titleAccent: "by Sunday",
 		priceDisplay: productConfig.checkoutPriceDisplay,
@@ -591,14 +590,14 @@ export const homePageContent = {
 			productConfig.checkoutPriceDisplay,
 		offerBanner: pricingOfferBanner,
 		ctaTitle: marketingDisplayConfig.primaryCtaLabel,
-		trustLine: `After checkout, open the ${workspaceDisplayConfig.homeNoun}, lock the decisions, and build the first loop.`,
+		trustLine: `Start from an idea here. If you already have an app, choose the codebase path above for the protected doctor-pass setup.`,
 		includes: [
-			"Exec loop setup",
-			"Role-specific worker packets",
-			"Phone, Telegram, and Discord handoff pattern",
-			"Codex-ready code run path",
-			"Review and QA path",
-			"Fast Pass Walkthroughs",
+			"Generated codebase or private local doctor pass",
+			"Top 9 findings and first-loop recommendation",
+			"One approved AI worker loop",
+			"Proof or blocked-proof report",
+			"Local privacy and sync-safe report boundaries",
+			"Next recommendation after the loop",
 		],
 		bonus: {
 			title: "FREE BONUS: FULL TURBO",

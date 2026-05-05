@@ -2,6 +2,7 @@ import { readRunnerCredential } from "../core/local-runner-home";
 import { readLocalProjectState } from "../core/local-project-state";
 import { resolveRepositoryRoot } from "../core/repository-root";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
 import { resolveApprovedWorkflowRun } from "../core/workflow-run-api";
 
@@ -12,6 +13,7 @@ type WorkflowCommandOptions = {
 	branchName?: string;
 	profileName?: string;
 	confirmLocalWrites?: boolean;
+	confirmObservabilityAudit?: boolean;
 	confirmReadOnlyReproduction?: boolean;
 };
 
@@ -19,18 +21,19 @@ export async function runWorkflowCommand(argv: string[]) {
 	const [workflowName, action = "run", ...rest] = argv;
 	if (
 		(workflowName !== "source-truth-readiness" &&
+			workflowName !== "observability-debuggability" &&
 			workflowName !== "broken-app-triage") ||
 		action !== "run"
 	) {
 		throw new Error(
-			"Usage: ship-by-sunday workflow <source-truth-readiness|broken-app-triage> run --workflow-run-id <id>",
+			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage> run --workflow-run-id <id>",
 		);
 	}
 
 	const options = parseWorkflowCommandOptions(rest);
 	if (!options.workflowRunId) {
 		throw new Error(
-			"workflow source-truth-readiness run requires --workflow-run-id.",
+			`workflow ${workflowName} run requires --workflow-run-id.`,
 		);
 	}
 	const { repositoryRoot } = await resolveRepositoryRoot({
@@ -41,9 +44,7 @@ export async function runWorkflowCommand(argv: string[]) {
 		readRunnerCredential({ repositoryRoot }),
 	]);
 	if (!state || !credential) {
-		throw new Error(
-			"Run setup pair before workflow source-truth-readiness run.",
-		);
+		throw new Error(`Run setup pair before workflow ${workflowName} run.`);
 	}
 	const approvedWorkflowRun = await resolveApprovedWorkflowRun({
 		state,
@@ -75,6 +76,15 @@ export async function runWorkflowCommand(argv: string[]) {
 					confirmReadOnlyReproduction:
 						options.confirmReadOnlyReproduction === true,
 				})
+			: workflowName === "observability-debuggability"
+				? await runObservabilityDebuggabilityWorkflow({
+						repositoryRoot,
+						state,
+						credential,
+						approvedWorkflowRun,
+						confirmObservabilityAudit:
+							options.confirmObservabilityAudit === true,
+					})
 			: await runSourceTruthWorkflow({
 					repositoryRoot,
 					state,
@@ -90,6 +100,12 @@ export async function runWorkflowCommand(argv: string[]) {
 		console.log(`Local proof: ${result.localRunDirectoryRef}/proof.json.`);
 	} else if (workflowName === "broken-app-triage") {
 		console.log(`Broken-app triage wrote ${result.localRunDirectoryRef}.`);
+		console.log(`Proof status: ${result.proofStatus}.`);
+	} else if (workflowName === "observability-debuggability") {
+		console.log(
+			`Observability workflow wrote ${result.localRunDirectoryRef}.`,
+		);
+		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
 	} else {
 		console.log(`Source-truth workflow wrote ${result.localRunDirectoryRef}.`);
@@ -124,6 +140,8 @@ function parseWorkflowCommandOptions(argv: string[]): WorkflowCommandOptions {
 			index += 1;
 		} else if (arg === "--confirm-local-writes") {
 			options.confirmLocalWrites = true;
+		} else if (arg === "--confirm-observability-audit") {
+			options.confirmObservabilityAudit = true;
 		} else if (arg === "--confirm-read-only-reproduction") {
 			options.confirmReadOnlyReproduction = true;
 		} else {

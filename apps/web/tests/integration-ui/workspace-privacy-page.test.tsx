@@ -251,6 +251,21 @@ describe("WorkspacePrivacyPage", () => {
 		expect(screen.getByText("Raw terminal log sharing")).toBeTruthy();
 		expect(screen.getByText("Codex transcript sharing")).toBeTruthy();
 		expect(screen.getByText("Approval required")).toBeTruthy();
+		expect(screen.getByText("Execution surfaces")).toBeTruthy();
+		expect(screen.getByText("Local runner")).toBeTruthy();
+		expect(screen.getByText("Default active lane")).toBeTruthy();
+		expect(screen.getByText("Codex cloud handoff")).toBeTruthy();
+		expect(screen.getByText("Customer-owned handoff")).toBeTruthy();
+		expect(screen.getByText("Generated repo")).toBeTruthy();
+		expect(screen.getByText("Generated-codebase lane")).toBeTruthy();
+		expect(screen.getByText("Codex app server")).toBeTruthy();
+		expect(screen.getByText("Generation bridge only")).toBeTruthy();
+		expect(
+			screen.getByText("No GitHub action runs from consent alone"),
+		).toBeTruthy();
+		expect(
+			screen.getByText("No existing customer repository authority"),
+		).toBeTruthy();
 		expect(screen.getByText("sha256:preview")).toBeTruthy();
 		expect(
 			screen.getByText(".sbs/reports/doctor-pass/run-1/sync-preview.json"),
@@ -329,8 +344,11 @@ describe("WorkspacePrivacyPage", () => {
 
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("dangerously");
+		expect(visibleText).not.toContain("hidden github access");
+		expect(visibleText).not.toContain("push branch");
 		expect(visibleText).not.toContain("open pr");
 		expect(visibleText).not.toContain("queue worker");
 		expect(visibleText).not.toContain("rerun ci now");
+		expect(visibleText).not.toContain("raw source uploaded");
 	});
 });

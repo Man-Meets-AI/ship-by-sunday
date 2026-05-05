@@ -15,6 +15,7 @@ import {
 	type SetupCheckStatus,
 } from "../core/runner-events";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
 import { claimApprovedWorkflowRun } from "../core/workflow-run-api";
 import { collectSetupChecks } from "./setup-check";
@@ -25,6 +26,7 @@ type DaemonOptions = {
 	once?: boolean;
 	work?: boolean;
 	confirmLocalWrites?: boolean;
+	confirmObservabilityAudit?: boolean;
 	intervalMs: number;
 };
 
@@ -58,12 +60,14 @@ async function runDaemonStart(argv: string[]) {
 
 	do {
 		await sendHeartbeat({ repositoryRoot, isGitRepository });
-		if (options.work) {
-			await claimAndRunNextWorkflow({
-				repositoryRoot,
-				confirmLocalWrites: options.confirmLocalWrites === true,
-			});
-		}
+			if (options.work) {
+				await claimAndRunNextWorkflow({
+					repositoryRoot,
+					confirmLocalWrites: options.confirmLocalWrites === true,
+					confirmObservabilityAudit:
+						options.confirmObservabilityAudit === true,
+				});
+			}
 		if (options.once) {
 			break;
 		}
@@ -168,13 +172,20 @@ async function sendHeartbeat({
 async function claimAndRunNextWorkflow({
 	repositoryRoot,
 	confirmLocalWrites,
+	confirmObservabilityAudit,
 }: {
 	repositoryRoot: string;
 	confirmLocalWrites: boolean;
+	confirmObservabilityAudit: boolean;
 }) {
 	if (!confirmLocalWrites) {
 		throw new Error(
 			"daemon start --work requires --confirm-local-writes for approved queue jobs.",
+		);
+	}
+	if (!confirmObservabilityAudit) {
+		throw new Error(
+			"daemon start --work requires --confirm-observability-audit because the queue can claim observability audit jobs.",
 		);
 	}
 
@@ -211,6 +222,15 @@ async function claimAndRunNextWorkflow({
 			confirmLocalWrites,
 		});
 	}
+	if (approvedWorkflowRun.workflowId === "observability-debuggability") {
+		return await runObservabilityDebuggabilityWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmObservabilityAudit,
+		});
+	}
 	throw new Error(
 		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
 	);
@@ -231,6 +251,8 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.work = true;
 		} else if (arg === "--confirm-local-writes") {
 			options.confirmLocalWrites = true;
+		} else if (arg === "--confirm-observability-audit") {
+			options.confirmObservabilityAudit = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),

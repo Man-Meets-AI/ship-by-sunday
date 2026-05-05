@@ -62,7 +62,9 @@ const PAIRING_TOKEN_TTL_MS = 30 * 60 * 1000;
 const SETUP_EVENT_READ_LIMIT = 30;
 const DOCTOR_PASS_LOCAL_SCHEMA_VERSION = "doctor-pass-local.v1";
 const SOURCE_TRUTH_WORKFLOW_ID = "source-truth-agent-readiness";
+const OBSERVABILITY_WORKFLOW_ID = "observability-debuggability";
 const BROKEN_APP_TRIAGE_WORKFLOW_ID = "broken-app-triage";
+const OBSERVABILITY_PROFILE_NAME = "sbs-workspace-write";
 const DEFAULT_WORKFLOW_VERSION = "v1";
 const WORKFLOW_APPROVAL_SCHEMA_VERSION = "workspace.workflow-approval.v1";
 const DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES = 30;
@@ -77,6 +79,43 @@ const APPROVED_WORKFLOW_HISTORY_STATUSES = [
 	"blocked",
 	"canceled",
 ] as const;
+const OBSERVABILITY_EXPECTED_OUTPUTS = [
+	"observability workflow packet",
+	"sync-safe debuggability audit",
+	"provider setup and dashboard access blocked-proof notes",
+	"local proof or blocked-proof summary",
+	"next recommended workflow",
+] as const;
+const OBSERVABILITY_ALLOWED_TOUCH_TARGETS = [
+	".sbs/runs/<workflow-run-id> workflow artifacts",
+	".sbs/observability debuggability audit artifacts",
+	"repo-relative observability signal metadata only",
+] as const;
+const WORKFLOW_DISALLOWED_TOUCH_TARGETS = [
+	"runtime app code",
+	"environment files",
+	"dependency manifests",
+	"dependency locks",
+	"database migrations",
+	"provider configuration",
+	"generated folders",
+	"package scripts",
+] as const;
+const OBSERVABILITY_PROOF_COMMANDS = [
+	"git status --short",
+	"git diff --name-only",
+	"git diff --check",
+] as const;
+const WORKFLOW_SYNC_POLICY_SUMMARY =
+	"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.";
+const OBSERVABILITY_STOP_CONDITIONS = [
+	"worktree is dirty before branch creation",
+	"write lease expires before local audit starts",
+	"requested work needs runtime code, provider setup, dependencies, package scripts, CI, PRs, source maps, dashboards, or deployment proof",
+	"proof command fails",
+] as const;
+const OBSERVABILITY_ROLLBACK_NOTES =
+	"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the observability branch after reviewing local proof.";
 
 export const getWorkspaceProjectStateArgs = {
 	projectId: v.optional(v.id("workspaceProjects")),
@@ -385,6 +424,78 @@ function assertBoundedTextList(
 	values.forEach((value, index) => {
 		assertSyncSafeText(value, `${context}[${index}]`);
 	});
+}
+
+function assertExactTextList(
+	values: string[],
+	expectedValues: readonly string[],
+	context: string,
+) {
+	const matches =
+		values.length === expectedValues.length &&
+		values.every((value, index) => value === expectedValues[index]);
+	if (!matches) {
+		throw new ConvexError(
+			`${context} does not match the approved workflow packet`,
+		);
+	}
+}
+
+function assertObservabilityWorkflowApprovalPacket(args: {
+	profileName: string;
+	dirtyStatePolicy?: "require_clean_worktree" | "checkpoint_required";
+	expectedOutputs: string[];
+	allowedTouchTargets: string[];
+	disallowedTouchTargets: string[];
+	proofCommands: string[];
+	syncPolicySummary: string;
+	stopConditions: string[];
+	rollbackNotes: string;
+}) {
+	if (args.profileName !== OBSERVABILITY_PROFILE_NAME) {
+		throw new ConvexError("Observability profile name is not approved");
+	}
+	if (
+		args.dirtyStatePolicy !== undefined &&
+		args.dirtyStatePolicy !== "require_clean_worktree"
+	) {
+		throw new ConvexError("Observability requires a clean-worktree policy");
+	}
+	assertExactTextList(
+		args.expectedOutputs,
+		OBSERVABILITY_EXPECTED_OUTPUTS,
+		"Observability expectedOutputs",
+	);
+	assertExactTextList(
+		args.allowedTouchTargets,
+		OBSERVABILITY_ALLOWED_TOUCH_TARGETS,
+		"Observability allowedTouchTargets",
+	);
+	assertExactTextList(
+		args.disallowedTouchTargets,
+		WORKFLOW_DISALLOWED_TOUCH_TARGETS,
+		"Observability disallowedTouchTargets",
+	);
+	assertExactTextList(
+		args.proofCommands,
+		OBSERVABILITY_PROOF_COMMANDS,
+		"Observability proofCommands",
+	);
+	if (args.syncPolicySummary !== WORKFLOW_SYNC_POLICY_SUMMARY) {
+		throw new ConvexError(
+			"Observability syncPolicySummary does not match the approved workflow packet",
+		);
+	}
+	assertExactTextList(
+		args.stopConditions,
+		OBSERVABILITY_STOP_CONDITIONS,
+		"Observability stopConditions",
+	);
+	if (args.rollbackNotes !== OBSERVABILITY_ROLLBACK_NOTES) {
+		throw new ConvexError(
+			"Observability rollbackNotes does not match the approved workflow packet",
+		);
+	}
 }
 
 function normalizeWriteLeaseDurationMinutes(durationMinutes?: number) {
@@ -739,6 +850,7 @@ function requireSupportedWorkflowRun(
 ) {
 	if (
 		workflowRun.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
+		workflowRun.workflowId !== OBSERVABILITY_WORKFLOW_ID &&
 		workflowRun.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
@@ -1674,6 +1786,7 @@ export async function requestWorkspaceWorkflowRunHandler(
 	}
 	if (
 		args.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
+		args.workflowId !== OBSERVABILITY_WORKFLOW_ID &&
 		args.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
@@ -1703,6 +1816,28 @@ export async function requestWorkspaceWorkflowRunHandler(
 		throw new ConvexError(
 			"Broken-app triage only supports read-only Git diagnostics",
 		);
+	}
+	if (
+		args.workflowId === OBSERVABILITY_WORKFLOW_ID &&
+		args.proofCommands.some(
+			(command) =>
+				command !== "git status --short" &&
+				command !== "git diff --name-only" &&
+				command !== "git diff --check",
+		)
+	) {
+		throw new ConvexError(
+			"Observability debuggability only supports local Git proof commands",
+		);
+	}
+	if (
+		args.workflowId === OBSERVABILITY_WORKFLOW_ID &&
+		!/^sbs\/observability-debuggability-\d{8}-\d{4}$/.test(args.branchName)
+	) {
+		throw new ConvexError("Observability branch name is not approved");
+	}
+	if (args.workflowId === OBSERVABILITY_WORKFLOW_ID) {
+		assertObservabilityWorkflowApprovalPacket(args);
 	}
 
 	const existingWorkflowRun = await findActiveWorkflowRunByFinding(ctx, {

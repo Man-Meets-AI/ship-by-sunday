@@ -195,6 +195,47 @@ describe("workspace findings read model", () => {
 		);
 	});
 
+	it("builds observability debuggability as a bounded local audit", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-observability",
+					category: "observability",
+					title: "Production errors are opaque",
+					permissionRequired: "workspace_write",
+					recommendedWorkflowId: "observability-debuggability",
+				}),
+			],
+			"finding-observability",
+			new Date(2026, 4, 5, 10, 0).getTime(),
+		);
+
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "observability-debuggability",
+			workflowKind: "observability_debuggability",
+			workflowCommandName: "observability-debuggability",
+			confirmationFlag: "--confirm-observability-audit",
+			branchName: "sbs/observability-debuggability-20260505-1000",
+			profileName: "sbs-workspace-write",
+			proofCommands: [
+				"git status --short",
+				"git diff --name-only",
+				"git diff --check",
+			],
+		});
+		expect(detail?.workflowApproval.expectedOutputs).toContain(
+			"sync-safe debuggability audit",
+		);
+		expect(detail?.workflowApproval.allowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				".sbs/observability debuggability audit artifacts",
+			]),
+		);
+		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
+			"provider setup",
+		);
+	});
+
 	it("does not build detail state for deleted or missing findings", () => {
 		expect(
 			buildWorkspaceFindingDetailModel(

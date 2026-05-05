@@ -148,8 +148,24 @@ export type WorkspaceLoopCatalogRow = WorkflowCatalogDefinition & {
 	actionLabel: "Review finding" | null;
 };
 
+export type WorkspaceWorkflowPacketContractRow = {
+	id:
+		| "evidence"
+		| "context"
+		| "surface"
+		| "codex"
+		| "writes"
+		| "proof"
+		| "sync"
+		| "revocation";
+	label: string;
+	statusLabel: string;
+	description: string;
+};
+
 export type WorkspaceLoopsModel = {
 	rows: WorkspaceLoopCatalogRow[];
+	packetContractRows: WorkspaceWorkflowPacketContractRow[];
 	recommendedWorkflow: WorkspaceLoopCatalogRow | null;
 	findingBackedCount: number;
 };
@@ -262,6 +278,25 @@ export type WorkspacePrivacySharingRow = {
 	description: string;
 };
 
+export type WorkspaceExecutionSurfaceRow = {
+	id:
+		| "local_runner"
+		| "codex_cloud_handoff"
+		| "managed_github"
+		| "generated_repo"
+		| "codex_app_server";
+	label: string;
+	statusLabel: string;
+	consentLabel: string;
+	storageLabel: string;
+	commandAuthorityLabel: string;
+	providerAccessLabel: string;
+	prAuthorityLabel: string;
+	proofDeliveryLabel: string;
+	syncBoundaryLabel: string;
+	failureStateLabel: string;
+};
+
 export type WorkspaceManagedGithubBoundaryRow = {
 	id: string;
 	label: string;
@@ -298,6 +333,7 @@ export type WorkspacePrivacyModel = {
 	localReportRef: string | null;
 	structuredFindingsCountLabel: string;
 	sharingRows: WorkspacePrivacySharingRow[];
+	executionSurfaceRows: WorkspaceExecutionSurfaceRow[];
 	canRevokeRunner: boolean;
 	canDeleteSyncedFindings: boolean;
 	syncedFindingIds: string[];
@@ -323,9 +359,9 @@ const workflowDefinitions: WorkflowCatalogDefinition[] = [
 		category: "Reliability",
 		whenUseful:
 			"Production failures are hard to inspect or the app lacks useful traces.",
-		requiredPermission: "Workspace write or provider access",
+		requiredPermission: "Workspace write for local audit",
 		typicalProof:
-			"Error path evidence, dashboard link, and blocked-proof notes.",
+			"Sync-safe signal audit, proof artifact refs, and provider blocked-proof notes.",
 		riskLevel: "Medium",
 	},
 	{
@@ -495,11 +531,73 @@ export function buildWorkspaceLoopsModel({
 
 	return {
 		rows,
+		packetContractRows: buildWorkflowPacketContractRows(),
 		recommendedWorkflow:
 			rows.find((row) => row.status === "recommended") ?? null,
 		findingBackedCount: rows.filter((row) => row.relatedFindingCount > 0)
 			.length,
 	};
+}
+
+function buildWorkflowPacketContractRows(): WorkspaceWorkflowPacketContractRow[] {
+	return [
+		{
+			id: "evidence",
+			label: "Evidence and probes",
+			statusLabel: "Required",
+			description:
+				"Finding evidence, deterministic probes, and local report refs come before Codex judgment.",
+		},
+		{
+			id: "context",
+			label: "Customer bottleneck",
+			statusLabel: "Bounded text",
+			description:
+				"Customer urgency, reported failure, or selected finding context stays structured and sync-safe.",
+		},
+		{
+			id: "surface",
+			label: "Execution surface",
+			statusLabel: "Explicit",
+			description:
+				"Each packet names local runner, Codex cloud handoff, managed GitHub, generated repo, or app server boundaries.",
+		},
+		{
+			id: "codex",
+			label: "Codex interpretation",
+			statusLabel: "Optional",
+			description:
+				"Codex can interpret evidence or write only inside the approved packet and transcript policy.",
+		},
+		{
+			id: "writes",
+			label: "Write authority",
+			statusLabel: "Scoped",
+			description:
+				"Allowed and disallowed touch targets, branch target, profile, and write lease must be visible first.",
+		},
+		{
+			id: "proof",
+			label: "Proof delivery",
+			statusLabel: "Required",
+			description:
+				"Packets name proof commands, local proof refs, blocked-proof reasons, rollback, and next recommendation.",
+		},
+		{
+			id: "sync",
+			label: "Sync policy",
+			statusLabel: "Structured only",
+			description:
+				"Hosted state gets proof metadata, statuses, refs, and audit events, not raw source or full logs.",
+		},
+		{
+			id: "revocation",
+			label: "Revocation and stops",
+			statusLabel: "Stop safely",
+			description:
+				"Revoked runners, expired leases, missing providers, dirty worktrees, and refused approvals block with proof.",
+		},
+	];
 }
 
 export function buildWorkspacePrivacyModel({
@@ -548,6 +646,10 @@ export function buildWorkspacePrivacyModel({
 		localReportRef: formatLocalArtifactRef(doctorPassRun?.localReportRef),
 		structuredFindingsCountLabel: String(visibleFindings.length),
 		sharingRows: buildSharingRows(),
+		executionSurfaceRows: buildExecutionSurfaceRows({
+			runner,
+			managedGithubState,
+		}),
 		canRevokeRunner: Boolean(
 			project?._id && runner?._id && runner.status === "paired",
 		),
@@ -562,6 +664,110 @@ export function buildWorkspacePrivacyModel({
 		localReportDeletionNote:
 			"Local `.sbs/` reports stay on the customer machine. The browser can hide synced findings, but it cannot delete local files.",
 	};
+}
+
+function buildExecutionSurfaceRows({
+	runner,
+	managedGithubState,
+}: {
+	runner: WorkspacePrivacySetupState["activeRunner"];
+	managedGithubState: ManagedGithubExecutionState;
+}): WorkspaceExecutionSurfaceRow[] {
+	const localRunnerStatus =
+		runner?.status === "paired"
+			? "Default active lane"
+			: "Available after pairing";
+	const managedGithubStatus = managedGithubState.consent
+		? `Consent ${formatStatus(managedGithubState.consent.status).toLowerCase()}`
+		: "Consent packet only";
+
+	return [
+		{
+			id: "local_runner",
+			label: "Local runner",
+			statusLabel: localRunnerStatus,
+			consentLabel: "Pairing, sync preview, and workflow approval",
+			storageLabel: "Local `.sbs` artifacts; hosted structured state only",
+			commandAuthorityLabel:
+				"Approved workflow packets on the customer machine",
+			providerAccessLabel:
+				"Customer-owned local Git, Codex, gh, and provider CLIs",
+			prAuthorityLabel:
+				"Local branch only unless later handoff approval exists",
+			proofDeliveryLabel: "Local proof plus approved proof metadata sync",
+			syncBoundaryLabel:
+				"Findings, proof status, repo-relative refs, and next steps",
+			failureStateLabel:
+				"Dirty worktree, expired lease, or missing setup blocks locally",
+		},
+		{
+			id: "codex_cloud_handoff",
+			label: "Codex cloud handoff",
+			statusLabel: "Customer-owned handoff",
+			consentLabel: "Customer connects Codex cloud and selected repositories",
+			storageLabel: "SBS stores handoff packet and returned proof metadata",
+			commandAuthorityLabel: "Customer runs Codex cloud work outside SBS",
+			providerAccessLabel: "Customer-owned OpenAI and GitHub connector setup",
+			prAuthorityLabel: "No SBS branch, pull request, CI, or merge authority",
+			proofDeliveryLabel: "Customer returns proof links, refs, or summaries",
+			syncBoundaryLabel:
+				"Handoff status, checklist state, and customer-provided refs",
+			failureStateLabel:
+				"Missing connector, branch protection, or quota blocks handoff",
+		},
+		{
+			id: "managed_github",
+			label: "Managed GitHub",
+			statusLabel: managedGithubStatus,
+			consentLabel: "Premium concierge request plus later action approval",
+			storageLabel: "Consent, audit, proof metadata, and approved refs only",
+			commandAuthorityLabel: "No GitHub action runs from consent alone",
+			providerAccessLabel: "Selected GitHub repository only after approval",
+			prAuthorityLabel:
+				"Branch, pull request, and CI actions need separate approval",
+			proofDeliveryLabel:
+				"Structured proof metadata and approved branch or PR refs",
+			syncBoundaryLabel:
+				"Consent state, audit events, proof state, and approved refs",
+			failureStateLabel:
+				"Revocation, missing install, permissions, or proof failure blocks",
+		},
+		{
+			id: "generated_repo",
+			label: "Generated repo",
+			statusLabel: "Generated-codebase lane",
+			consentLabel:
+				"Customer enters generated-codebase review and download flow",
+			storageLabel: "Product facts, generated artifacts, and review readiness",
+			commandAuthorityLabel:
+				"Compiler builds owned templates, not customer repo commands",
+			providerAccessLabel:
+				"Customer configures providers after generated handoff",
+			prAuthorityLabel: "No existing customer repository authority",
+			proofDeliveryLabel:
+				"Review/download artifact and generated validator scripts",
+			syncBoundaryLabel:
+				"Generated repo files and customer-safe operating pack",
+			failureStateLabel:
+				"Missing entitlement or failed compiler proof blocks delivery",
+		},
+		{
+			id: "codex_app_server",
+			label: "Codex app server",
+			statusLabel: "Generation bridge only",
+			consentLabel: "Paid user connects ChatGPT/Codex inside the app",
+			storageLabel:
+				"Hashed-home Codex state, account status, and rate-limit snapshots",
+			commandAuthorityLabel: "In-app generation only, not existing-repo repair",
+			providerAccessLabel: "No GitHub or provider access by default",
+			prAuthorityLabel: "No branch, pull request, CI, or merge authority",
+			proofDeliveryLabel:
+				"Connection status, health, and generated-output behavior",
+			syncBoundaryLabel: "Account health and generation metadata only",
+			failureStateLabel:
+				"Disabled flag, startup failure, account issue, or rate limit blocks",
+		},
+	];
 }
 
 function buildManagedGithubModel({

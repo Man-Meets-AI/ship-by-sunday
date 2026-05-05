@@ -57,6 +57,19 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		],
 	},
 	{
+		name: "starter-operating-pack",
+		path: ".agents/skills/starter-operating-pack/SKILL.md",
+		description:
+			"Use when inspecting or updating this Codebase's generated Program and ExecPlan operating pack.",
+		steps: [
+			"Read `docs/programs/PROGRAMS.md` and `docs/exec-plans/PLANS.md` before changing Program or ExecPlan files.",
+			"Run `bun run agentic:check` before product implementation begins and after changing operating-pack files.",
+			"Use the Program under `docs/programs/active/` for multi-slice product truth.",
+			"Use the active ExecPlan under `docs/exec-plans/active/` for the next bounded implementation slice.",
+			"Do not copy private planning archives from another repo into this Codebase.",
+		],
+	},
+	{
 		name: "starter-billing-setup",
 		path: ".agents/skills/starter-billing-setup/SKILL.md",
 		description:

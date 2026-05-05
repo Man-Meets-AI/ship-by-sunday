@@ -13,6 +13,7 @@ import type {
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
 import { PrivacyActionPanel } from "./workspace-privacy-action-panel";
 import {
+	ExecutionSurfacesPanel,
 	ManagedGithubPanel,
 	PrivacySharingPanel,
 	PrivacyStatusPanel,
@@ -109,6 +110,7 @@ export function WorkspacePrivacyPage({
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<div className="grid gap-5">
 						<PrivacyStatusPanel privacyModel={privacyModel} />
+						<ExecutionSurfacesPanel rows={privacyModel.executionSurfaceRows} />
 						<PrivacySharingPanel rows={privacyModel.sharingRows} />
 						<PrivacySyncPreviewPanel privacyModel={privacyModel} />
 						<ManagedGithubPanel

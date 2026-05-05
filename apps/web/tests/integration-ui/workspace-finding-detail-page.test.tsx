@@ -255,4 +255,68 @@ describe("WorkspaceFindingDetailPage", () => {
 		expect(visibleText).toContain("does not patch source files");
 		expect(visibleText).not.toContain("open pr");
 	});
+
+	it("renders observability workflow with its own command and audit boundary", async () => {
+		const user = userEvent.setup();
+		requestWorkflowRunMock.mockResolvedValue({
+			_id: "workflowRuns_observability",
+			branchName: "sbs/observability-debuggability-20260505-1000",
+			profileName: "sbs-workspace-write; gh pr create",
+		});
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[
+					createFinding({
+						_id: "codebaseFindings_observability",
+						findingId: "finding-observability",
+						title: "Production errors are opaque",
+						category: "observability",
+						permissionRequired: "workspace_write",
+						recommendedWorkflowId: "observability-debuggability",
+					}),
+				]}
+				findingRouteId="finding-observability"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={new Date(2026, 4, 5, 10, 0).getTime()}
+			/>,
+		);
+
+		expect(screen.getByText("Observability Debuggability")).toBeTruthy();
+		expect(
+			screen.getByText("sbs/observability-debuggability-20260505-1000"),
+		).toBeTruthy();
+		expect(screen.getByText("sync-safe debuggability audit")).toBeTruthy();
+		expect(
+			screen.getByText(".sbs/observability debuggability audit artifacts"),
+		).toBeTruthy();
+
+		await user.click(
+			screen.getByRole("button", { name: /Run observability audit/i }),
+		);
+		expect(requestWorkflowRunMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				workflowId: "observability-debuggability",
+				branchName: "sbs/observability-debuggability-20260505-1000",
+				profileName: "sbs-workspace-write",
+			}),
+		);
+		expect(
+			await screen.findByText(
+				/bunx ship-by-sunday workflow observability-debuggability run/i,
+			),
+		).toBeTruthy();
+		expect(document.body.textContent).toContain(
+			"--confirm-observability-audit",
+		);
+		expect(document.body.textContent).toContain(
+			"--profile 'sbs-workspace-write; gh pr create'",
+		);
+
+		const visibleText = document.body.textContent?.toLowerCase() ?? "";
+		expect(visibleText).toContain("does not edit runtime code");
+		expect(visibleText).toContain("does not");
+		expect(visibleText).not.toContain("open pr");
+	});
 });

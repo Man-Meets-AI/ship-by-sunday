@@ -2,6 +2,7 @@ import type { CanonicalProjectDefinition } from "../canonical-project-definition
 import { GENERATED_DOCS_README_PATH } from "../generated-docs/generated-doc-paths";
 import type { RenderedCodebaseFile } from "../codebases/render-types";
 import { renderStarterBootstrapFile } from "./render-starter-bootstrap";
+import { renderStarterOperatingPackFiles } from "./render-starter-operating-pack";
 import { renderStarterProjectOnboardingFiles } from "./render-starter-project-onboarding";
 import { renderStarterSkillFiles } from "./render-starter-skills";
 import { buildStarterRootPackageJson } from "./starter-root-package-json";
@@ -15,6 +16,7 @@ export function renderTemplateOverrides(
 		renderStarterBootstrapFile(projectDefinition),
 		...renderStarterProjectOnboardingFiles(projectDefinition),
 		...renderStarterSkillFiles(),
+		...renderStarterOperatingPackFiles(projectDefinition),
 		{
 			path: "README.md",
 			content: [
@@ -36,6 +38,7 @@ export function renderTemplateOverrides(
 				"- `DESIGN.md` is the human-readable design system.",
 				"- `docs/facts/design-system.json` and `apps/web/config/generated-design-system.ts` are the machine-readable design snapshots.",
 				"- `docs/` contains the generated implementation packs and product facts.",
+				"- `docs/programs/` and `docs/exec-plans/` contain the generated operating pack for multi-slice agent work.",
 				"",
 				"## Generated Codebase Overrides",
 				"",
@@ -58,8 +61,9 @@ export function renderTemplateOverrides(
 				"2. Run `bun run codex:skills:install` to install the vetted external Codex skills for Convex, Clerk, and Stripe.",
 				"3. Restart Codex if the new skills do not appear.",
 				"4. If you use Linear, run `$starter-linear-workflow` before implementation so your backlog, status workflow, and issue template are clear.",
-				"5. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
-				"6. Run `bun run dev` from the repo root once setup is stable.",
+				"5. Run `bun run agentic:check` to verify the generated Program and ExecPlan operating pack.",
+				"6. Follow `START-HERE.md` in order: `$starter-core-setup`, then `$starter-auth-setup`, then `$starter-billing-setup`.",
+				"7. Run `bun run dev` from the repo root once setup is stable.",
 				"",
 				"`bootstrap.sh` installs dependencies, prepares `apps/web/.env.local`, opens the official provider setup pages, and can apply the generated shadcn preset in `apps/web`.",
 				"The Codebase also ships local Codex wrapper skills under `.agents/skills/` plus a one-command external skill installer.",

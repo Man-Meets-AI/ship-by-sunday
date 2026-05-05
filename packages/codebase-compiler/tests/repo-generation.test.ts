@@ -5,6 +5,7 @@ import {
 	materializeRepoSnapshot,
 	renderTemplateOverrides,
 } from "../src/server";
+import { buildOperatingPackPaths } from "../src/repo-generation/render-starter-operating-pack";
 
 const unresolvedCriticalPlaceholderPattern =
 	/\[(?! )[A-Z][^\]\n]*\]|\[[^\]\n]*\.\.\.[^\]\n]*\]/;
@@ -67,6 +68,23 @@ function extractSkillTriggers(content: string) {
 	);
 }
 
+function generatedOperatingPackPathSet(
+	operatingPackPaths: ReturnType<typeof buildOperatingPackPaths>,
+) {
+	return new Set([
+		"docs/programs/PROGRAMS.md",
+		"docs/programs/active/index.md",
+		"docs/programs/completed/index.md",
+		operatingPackPaths.activeProgramPath,
+		operatingPackPaths.planningBriefPath,
+		operatingPackPaths.currentPlanningBriefPath,
+		"docs/exec-plans/PLANS.md",
+		"docs/exec-plans/active/index.md",
+		"docs/exec-plans/completed/index.md",
+		operatingPackPaths.activeExecPlanPath,
+	]);
+}
+
 describe("repo generation", () => {
 	it("builds a repo manifest from the project definition", () => {
 		const manifest = buildRepoGenerationManifest(
@@ -100,9 +118,12 @@ describe("repo generation", () => {
 				"START-HERE.md",
 				"bootstrap.sh",
 				"scripts/install-codex-skills.sh",
+				"scripts/agentic/check-programs.mjs",
+				"scripts/agentic/check-exec-plans.mjs",
 				".agents/skills/starter-core-setup/SKILL.md",
 				".agents/skills/starter-auth-setup/SKILL.md",
 				".agents/skills/starter-linear-workflow/SKILL.md",
+				".agents/skills/starter-operating-pack/SKILL.md",
 				".agents/skills/starter-billing-setup/SKILL.md",
 				".agents/skills/starter-first-slice/SKILL.md",
 				".agents/skills/starter-product-copy/SKILL.md",
@@ -171,6 +192,15 @@ describe("repo generation", () => {
 		expect(packageJson.scripts["codex:skills:install"]).toBe(
 			"bash ./scripts/install-codex-skills.sh",
 		);
+		expect(packageJson.scripts["programs:lint"]).toBe(
+			"bun scripts/agentic/check-programs.mjs",
+		);
+		expect(packageJson.scripts["plans:lint"]).toBe(
+			"bun scripts/agentic/check-exec-plans.mjs",
+		);
+		expect(packageJson.scripts["agentic:check"]).toBe(
+			"bun run programs:lint && bun run plans:lint",
+		);
 		expect(packageJson.scripts["test:compiler"]).toBe(
 			"bun run --cwd packages/codebase-compiler test",
 		);
@@ -191,9 +221,9 @@ describe("repo generation", () => {
 	});
 
 	it("materializes a customer-safe repo snapshot", async () => {
-		const snapshotFiles = await materializeRepoSnapshot(
-			createCompleteProjectDefinition(),
-		);
+		const projectDefinition = createCompleteProjectDefinition();
+		const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
+		const snapshotFiles = await materializeRepoSnapshot(projectDefinition);
 		const snapshotPaths = snapshotFiles.map((file) => file.path);
 
 		expect(snapshotPaths).toEqual(
@@ -202,9 +232,12 @@ describe("repo generation", () => {
 				"START-HERE.md",
 				"bootstrap.sh",
 				"scripts/install-codex-skills.sh",
+				"scripts/agentic/check-programs.mjs",
+				"scripts/agentic/check-exec-plans.mjs",
 				".agents/skills/starter-core-setup/SKILL.md",
 				".agents/skills/starter-auth-setup/SKILL.md",
 				".agents/skills/starter-linear-workflow/SKILL.md",
+				".agents/skills/starter-operating-pack/SKILL.md",
 				".agents/skills/starter-billing-setup/SKILL.md",
 				".agents/skills/starter-product-copy/SKILL.md",
 				".agents/skills/starter-frontend-design/SKILL.md",
@@ -224,13 +257,30 @@ describe("repo generation", () => {
 				"docs/testing/README.md",
 				".agents/README.md",
 				".github/workflows/examples/basic-ci.example.yml",
+				"docs/programs/PROGRAMS.md",
+				"docs/programs/active/index.md",
+				"docs/programs/completed/index.md",
+				operatingPackPaths.activeProgramPath,
+				operatingPackPaths.planningBriefPath,
+				operatingPackPaths.currentPlanningBriefPath,
+				"docs/exec-plans/PLANS.md",
+				"docs/exec-plans/active/index.md",
+				"docs/exec-plans/completed/index.md",
+				operatingPackPaths.activeExecPlanPath,
 			]),
 		);
 		expect(snapshotPaths).not.toEqual(
-			expect.arrayContaining(["docs/PLANS.md", "docs/exec-plans/PLANS.md"]),
+			expect.arrayContaining([
+				"docs/PLANS.md",
+				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
+				"docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
+			]),
 		);
 		const forbiddenPaths = snapshotPaths.filter((path) =>
-			isExcludedSnapshotPath(path),
+			isExcludedSnapshotPath(
+				path,
+				generatedOperatingPackPathSet(operatingPackPaths),
+			),
 		);
 		const rootAgentGuide = snapshotFiles.find(
 			(file) => file.path === "AGENTS.md",
@@ -243,6 +293,7 @@ describe("repo generation", () => {
 		);
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
+		expect(rootAgentGuide?.content).toContain("bun run agentic:check");
 		expect(rootAgentGuide?.content).toContain(
 			"requirement-to-evidence checklist",
 		);
@@ -259,6 +310,61 @@ describe("repo generation", () => {
 			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
 		expect(forbiddenPaths).toEqual([]);
+	});
+
+	it("materializes an explicit generated operating pack with runnable script wiring", async () => {
+		const projectDefinition = createCompleteProjectDefinition();
+		const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
+		const snapshotFiles = await materializeRepoSnapshot(projectDefinition);
+		const packageJson = JSON.parse(
+			snapshotText(
+				snapshotFiles.find((file) => file.path === "package.json"),
+			) || "{}",
+		) as {
+			scripts?: Record<string, string>;
+		};
+		const snapshotPaths = new Set(snapshotFiles.map((file) => file.path));
+		const program = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === operatingPackPaths.activeProgramPath,
+			),
+		);
+		const execPlan = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === operatingPackPaths.activeExecPlanPath,
+			),
+		);
+		const startHere = snapshotText(
+			snapshotFiles.find((file) => file.path === "START-HERE.md"),
+		);
+
+		expect(snapshotPaths.has("scripts/agentic/check-programs.mjs")).toBe(true);
+		expect(snapshotPaths.has("scripts/agentic/check-exec-plans.mjs")).toBe(
+			true,
+		);
+		expect(packageJson.scripts?.["programs:lint"]).toBe(
+			"bun scripts/agentic/check-programs.mjs",
+		);
+		expect(packageJson.scripts?.["plans:lint"]).toBe(
+			"bun scripts/agentic/check-exec-plans.mjs",
+		);
+		expect(packageJson.scripts?.["agentic:check"]).toBe(
+			"bun run programs:lint && bun run plans:lint",
+		);
+		for (const scriptCommand of [
+			packageJson.scripts?.["programs:lint"],
+			packageJson.scripts?.["plans:lint"],
+		]) {
+			const scriptPath = scriptCommand?.replace(/^bun /, "") ?? "";
+			expect(snapshotPaths.has(scriptPath)).toBe(true);
+		}
+
+		expect(program).toContain("## Slice Ledger");
+		expect(program).toContain(operatingPackPaths.activeExecPlanPath);
+		expect(execPlan).toContain("### Test Commands");
+		expect(execPlan).toContain(operatingPackPaths.activeProgramPath);
+		expect(startHere).toContain("Check the generated operating pack");
+		expect(startHere).toContain("bun run agentic:check");
 	});
 
 	it("keeps every generated skill trigger backed by a shipped or installable skill", async () => {
@@ -301,6 +407,32 @@ describe("repo generation", () => {
 		expect(onboarding).not.toContain("$copywriting");
 		expect(onboarding).not.toContain("$frontend-design");
 		expect(onboarding).not.toContain("$testing-practices");
+	});
+
+	it("keeps generated ExecPlan prompt assets backed by the generated contract", async () => {
+		const snapshotFiles = await materializeRepoSnapshot(
+			createCompleteProjectDefinition(),
+		);
+		const snapshotPaths = new Set(snapshotFiles.map((file) => file.path));
+		const execPlanPromptFiles = snapshotFiles.filter((file) =>
+			file.path.startsWith("docs/prompts/execplan"),
+		);
+
+		expect(execPlanPromptFiles.map((file) => file.path).sort()).toEqual([
+			"docs/prompts/execplan-execution-loop.md",
+			"docs/prompts/execplan-grill.md",
+			"docs/prompts/execplan-outline-from-session.md",
+			"docs/prompts/execplan-writer.md",
+		]);
+		expect(snapshotPaths.has("docs/exec-plans/PLANS.md")).toBe(true);
+		expect(snapshotPaths.has("docs/prompts/exec-plan-writer.md")).toBe(false);
+		for (const promptFile of execPlanPromptFiles) {
+			const promptContent = snapshotText(promptFile);
+
+			if (promptContent.includes("docs/exec-plans/PLANS.md")) {
+				expect(snapshotPaths.has("docs/exec-plans/PLANS.md")).toBe(true);
+			}
+		}
 	});
 
 	it("materializes a build pack an agent can start from without chat history", async () => {

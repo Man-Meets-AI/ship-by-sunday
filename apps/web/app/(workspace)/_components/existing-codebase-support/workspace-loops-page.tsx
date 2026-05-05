@@ -10,7 +10,11 @@ import {
 	buildWorkspaceLoopsModel,
 	type WorkspaceRunHistoryState,
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
-import { EmptyLoops, WorkspaceLoopsCatalog } from "./workspace-loops-catalog";
+import {
+	EmptyLoops,
+	WorkflowPacketContractPanel,
+	WorkspaceLoopsCatalog,
+} from "./workspace-loops-catalog";
 import { WorkspaceSupportMetric } from "./workspace-support-shared";
 
 export function WorkspaceLoopsPage({
@@ -75,7 +79,10 @@ export function WorkspaceLoopsPage({
 				{initialFindings.length === 0 ? (
 					<EmptyLoops />
 				) : (
-					<WorkspaceLoopsCatalog rows={loopsModel.rows} />
+					<>
+						<WorkflowPacketContractPanel rows={loopsModel.packetContractRows} />
+						<WorkspaceLoopsCatalog rows={loopsModel.rows} />
+					</>
 				)}
 			</div>
 		</AppShell>

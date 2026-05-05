@@ -8,7 +8,10 @@ export const WORKFLOW_RUN_CLAIM_ENDPOINT =
 
 export type ApprovedWorkflowRunPacket = {
 	workflowRunId: string;
-	workflowId: "source-truth-agent-readiness" | "broken-app-triage";
+	workflowId:
+		| "source-truth-agent-readiness"
+		| "observability-debuggability"
+		| "broken-app-triage";
 	workflowVersion: string;
 	branchName: string;
 	profileName: string;
@@ -119,6 +122,7 @@ function assertApprovedWorkflowRunPacket(
 	}
 	if (
 		packet.workflowId !== "source-truth-agent-readiness" &&
+		packet.workflowId !== "observability-debuggability" &&
 		packet.workflowId !== "broken-app-triage"
 	) {
 		throw new Error("Approved workflow run is not supported.");

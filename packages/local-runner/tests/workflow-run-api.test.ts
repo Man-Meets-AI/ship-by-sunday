@@ -89,4 +89,36 @@ describe("workflow run API", () => {
 
 		expect(workflowRun).toBeNull();
 	});
+
+	it("accepts observability workflow packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json({
+					workflowRunId: "workflowRuns_observability",
+					workflowId: "observability-debuggability",
+					workflowVersion: "v1",
+					branchName: "sbs/observability-debuggability-20260505-1000",
+					profileName: "sbs-workspace-write",
+					writeLeaseId: "lease_workflowRuns_observability",
+					writeLeaseExpiresAt: 4_102_444_800_000,
+					writeLeaseDurationMinutes: 30,
+					dirtyStatePolicy: "require_clean_worktree",
+					expectedOutputs: ["observability workflow packet"],
+					allowedTouchTargets: [".sbs/runs/<workflow-run-id>/**"],
+					disallowedTouchTargets: ["runtime app code"],
+					proofCommands: ["git status --short"],
+					syncPolicySummary: "Only structured proof metadata syncs.",
+					stopConditions: ["worktree dirty before writes"],
+					rollbackNotes: "Delete the local observability branch after review.",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_observability/workflow-packet.json",
+					localProofRef:
+						".sbs/runs/workflowRuns_observability/proof.json",
+				}),
+		});
+
+		expect(workflowRun?.workflowId).toBe("observability-debuggability");
+	});
 });

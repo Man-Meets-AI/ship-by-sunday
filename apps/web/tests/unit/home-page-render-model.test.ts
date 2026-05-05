@@ -22,7 +22,7 @@ describe("home page render model", () => {
 		);
 		expect(
 			renderModel.productPreview.section.codebaseBranch.auditList.title,
-		).toBe("The Audit.");
+		).toBe("The Doctor Pass.");
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({
 			kind: "checkout",

@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { ArrowUpRight, ListChecks } from "lucide-react";
+import { ArrowUpRight, FileCheck2, ListChecks } from "lucide-react";
 
-import type { WorkspaceLoopCatalogRow } from "@/app/(workspace)/_lib/workspace-support-read-model";
+import type {
+	WorkspaceLoopCatalogRow,
+	WorkspaceWorkflowPacketContractRow,
+} from "@/app/(workspace)/_lib/workspace-support-read-model";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import {
@@ -38,6 +41,47 @@ export function WorkspaceLoopsCatalog({
 						<LoopRow key={row.id} row={row} />
 					))}
 				</div>
+			</div>
+		</section>
+	);
+}
+
+export function WorkflowPacketContractPanel({
+	rows,
+}: {
+	rows: WorkspaceWorkflowPacketContractRow[];
+}) {
+	return (
+		<section className="rounded-xl border border-border/60 bg-background p-5">
+			<div className="flex items-start gap-3">
+				<FileCheck2 className="mt-0.5 size-4 text-foreground" aria-hidden />
+				<div className="min-w-0">
+					<h2 className="text-base font-semibold text-foreground">
+						Workflow packet contract
+					</h2>
+					<p className="mt-2 text-sm leading-6 text-muted-foreground">
+						Every loop starts from approved finding evidence, a named execution
+						surface, scoped authority, and proof or blocked proof.
+					</p>
+				</div>
+			</div>
+			<div className="mt-4 grid gap-3 md:grid-cols-2">
+				{rows.map((row) => (
+					<div
+						key={row.id}
+						className="rounded-lg border border-border/60 bg-muted/20 p-3"
+					>
+						<div className="flex items-start justify-between gap-3">
+							<p className="font-medium text-foreground">{row.label}</p>
+							<p className="shrink-0 text-xs font-medium text-muted-foreground">
+								{row.statusLabel}
+							</p>
+						</div>
+						<p className="mt-2 text-sm leading-6 text-muted-foreground">
+							{row.description}
+						</p>
+					</div>
+				))}
 			</div>
 		</section>
 	);

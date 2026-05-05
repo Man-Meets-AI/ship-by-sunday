@@ -72,6 +72,30 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship inert workflow examples instead of live repo-specific automation.",
 		},
 		{
+			pathPattern: "docs/programs/PROGRAMS.md",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship a customer-safe Program contract for generated product work.",
+		},
+		{
+			pathPattern: "docs/programs/active/<generated-program>/**",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship only the generated customer's active Program packet, not internal Program archives.",
+		},
+		{
+			pathPattern: "docs/exec-plans/PLANS.md",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship a customer-safe ExecPlan contract for generated product work.",
+		},
+		{
+			pathPattern: "docs/exec-plans/active/<generated-plan>.md",
+			shippingMode: "ship-generalized",
+			reason:
+				"Ship only the generated customer's first active ExecPlan, not internal ExecPlan archives.",
+		},
+		{
 			pathPattern: "apps/web/.env.local.example",
 			shippingMode: "ship-unchanged",
 			reason:
@@ -110,13 +134,13 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			pathPattern: "docs/exec-plans/**",
 			shippingMode: "exclude",
 			reason:
-				"Do not ship the repo's ExecPlan contracts or active/completed plans inside a customer codebase snapshot.",
+				"Do not ship the repo's internal ExecPlan archive; generated operating-pack overrides are the only allowed customer ExecPlan files.",
 		},
 		{
 			pathPattern: "docs/programs/**",
 			shippingMode: "exclude",
 			reason:
-				"Do not ship internal Program contracts or active/completed Program packets inside a customer codebase snapshot.",
+				"Do not ship the repo's internal Program archive; generated operating-pack overrides are the only allowed customer Program files.",
 		},
 		{
 			pathPattern: "docs/prompts/program-*.md",

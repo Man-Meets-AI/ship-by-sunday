@@ -4,6 +4,9 @@ import { buildRepoGenerationManifest } from "./build-repo-generation-manifest";
 export const STARTER_ROOT_PACKAGE_SCRIPTS = {
 	bootstrap: "bash ./bootstrap.sh",
 	"codex:skills:install": "bash ./scripts/install-codex-skills.sh",
+	"programs:lint": "bun scripts/agentic/check-programs.mjs",
+	"plans:lint": "bun scripts/agentic/check-exec-plans.mjs",
+	"agentic:check": "bun run programs:lint && bun run plans:lint",
 	dev: "bun run --cwd apps/web dev",
 	"dev:core": "bun run --cwd apps/web dev:core",
 	"dev:web": "bun run --cwd apps/web dev:web",

@@ -223,7 +223,44 @@ describe("workspace support read model", () => {
 		).toMatchObject({
 			statusLabel: "available now",
 			relatedFindingTitle: "Observability proof is thin",
+			requiredPermission: "Workspace write for local audit",
+			typicalProof:
+				"Sync-safe signal audit, proof artifact refs, and provider blocked-proof notes.",
 		});
+		expect(model.packetContractRows).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "evidence",
+					label: "Evidence and probes",
+					statusLabel: "Required",
+				}),
+				expect.objectContaining({
+					id: "surface",
+					label: "Execution surface",
+					statusLabel: "Explicit",
+				}),
+				expect.objectContaining({
+					id: "writes",
+					label: "Write authority",
+					statusLabel: "Scoped",
+				}),
+				expect.objectContaining({
+					id: "proof",
+					label: "Proof delivery",
+					statusLabel: "Required",
+				}),
+				expect.objectContaining({
+					id: "sync",
+					label: "Sync policy",
+					statusLabel: "Structured only",
+				}),
+				expect.objectContaining({
+					id: "revocation",
+					label: "Revocation and stops",
+					statusLabel: "Stop safely",
+				}),
+			]),
+		);
 		expect(
 			model.rows.find((row) => row.id === "revenue-path-audit"),
 		).toMatchObject({
@@ -233,6 +270,10 @@ describe("workspace support read model", () => {
 
 		const renderedText = JSON.stringify(model).toLowerCase();
 		expect(renderedText).not.toContain("run loop");
+		expect(renderedText).not.toContain("push branch now");
+		expect(renderedText).not.toContain("open pr");
+		expect(renderedText).not.toContain("rerun ci now");
+		expect(renderedText).not.toContain("raw source uploaded");
 		expect(renderedText).not.toContain("export const runtime");
 	});
 
@@ -299,7 +340,56 @@ describe("workspace support read model", () => {
 				}),
 			]),
 		);
+		expect(model.executionSurfaceRows).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "local_runner",
+					label: "Local runner",
+					statusLabel: "Default active lane",
+					consentLabel: "Pairing, sync preview, and workflow approval",
+					storageLabel: "Local `.sbs` artifacts; hosted structured state only",
+					prAuthorityLabel:
+						"Local branch only unless later handoff approval exists",
+				}),
+				expect.objectContaining({
+					id: "codex_cloud_handoff",
+					label: "Codex cloud handoff",
+					providerAccessLabel:
+						"Customer-owned OpenAI and GitHub connector setup",
+					prAuthorityLabel:
+						"No SBS branch, pull request, CI, or merge authority",
+				}),
+				expect.objectContaining({
+					id: "managed_github",
+					label: "Managed GitHub",
+					statusLabel: "Consent packet only",
+					commandAuthorityLabel: "No GitHub action runs from consent alone",
+					providerAccessLabel: "Selected GitHub repository only after approval",
+				}),
+				expect.objectContaining({
+					id: "generated_repo",
+					label: "Generated repo",
+					providerAccessLabel:
+						"Customer configures providers after generated handoff",
+					prAuthorityLabel: "No existing customer repository authority",
+				}),
+				expect.objectContaining({
+					id: "codex_app_server",
+					label: "Codex app server",
+					commandAuthorityLabel:
+						"In-app generation only, not existing-repo repair",
+					syncBoundaryLabel: "Account health and generation metadata only",
+				}),
+			]),
+		);
 		expect(model.syncedFindingIds).toEqual(["codebaseFindings_1"]);
+
+		const renderedText = JSON.stringify(model).toLowerCase();
+		expect(renderedText).not.toContain("hidden github access");
+		expect(renderedText).not.toContain("push branch");
+		expect(renderedText).not.toContain("open pr");
+		expect(renderedText).not.toContain("run ci now");
+		expect(renderedText).not.toContain("raw source uploaded");
 	});
 
 	it("renders existing managed GitHub consent and audit without execution commands", () => {
@@ -371,6 +461,13 @@ describe("workspace support read model", () => {
 		expect(model.managedGithub.auditRows[0]).toMatchObject({
 			label: "Managed Github Requested: Customer requested concierge review.",
 			timestampLabel: "2026-05-04 21:30 UTC",
+		});
+		expect(
+			model.executionSurfaceRows.find((row) => row.id === "managed_github"),
+		).toMatchObject({
+			statusLabel: "Consent requested",
+			proofDeliveryLabel:
+				"Structured proof metadata and approved branch or PR refs",
 		});
 
 		const renderedText = JSON.stringify(model).toLowerCase();

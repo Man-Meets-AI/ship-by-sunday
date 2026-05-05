@@ -7,6 +7,7 @@ type OnboardingStep = {
 		| "boot-repo"
 		| "install-skills"
 		| "linear-workflow"
+		| "operating-pack"
 		| "core-setup"
 		| "auth-setup"
 		| "billing-setup"
@@ -118,6 +119,24 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 				label: "docs/build/docs/readiness.md",
 				path: "docs/build/docs/readiness.md",
 			},
+		],
+	},
+	{
+		id: "operating-pack",
+		title: "Check the generated operating pack",
+		internalPhase: "core",
+		customerAction: [
+			"Run `bun run agentic:check` from the repo root.",
+			"Open `docs/programs/active/` to see the generated Program packet.",
+			"Open `docs/exec-plans/active/` to see the first active ExecPlan.",
+			"Use the Program for multi-slice product truth and the ExecPlan for the next bounded implementation slice.",
+		],
+		agentPrompt:
+			"Inspect this Codebase's generated Program and active ExecPlan. Confirm the operating pack passes validation before we start product implementation.",
+		skillTriggers: ["$starter-operating-pack", "$starter-docs-and-testing"],
+		references: [
+			{ label: "docs/programs/PROGRAMS.md", path: "docs/programs/PROGRAMS.md" },
+			{ label: "docs/exec-plans/PLANS.md", path: "docs/exec-plans/PLANS.md" },
 		],
 	},
 	{
@@ -324,6 +343,7 @@ function renderSharedIntro(productName: string) {
 		"- `bun run codex:skills:install` if Node.js and `npx` are available",
 		"- restart Codex if the new skills do not appear",
 		"- `$starter-linear-workflow` if you use Linear to run the build",
+		"- `bun run agentic:check` to verify the generated Program and ExecPlan pack",
 		"- `$starter-core-setup`",
 		"- `$starter-auth-setup`",
 		"- `$starter-billing-setup`",

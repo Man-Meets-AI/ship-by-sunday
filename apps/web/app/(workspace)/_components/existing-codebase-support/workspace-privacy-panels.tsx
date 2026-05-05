@@ -1,7 +1,8 @@
-import { EyeOff, GitBranch } from "lucide-react";
+import { EyeOff, GitBranch, ShieldCheck } from "lucide-react";
 
 import {
 	buildWorkspacePrivacyModel,
+	type WorkspaceExecutionSurfaceRow,
 	type WorkspacePrivacySharingRow,
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,79 @@ export function PrivacySharingPanel({
 				))}
 			</div>
 		</section>
+	);
+}
+
+export function ExecutionSurfacesPanel({
+	rows,
+}: {
+	rows: WorkspaceExecutionSurfaceRow[];
+}) {
+	return (
+		<section className="rounded-xl border border-border/60 bg-background p-5">
+			<div className="flex items-start gap-3">
+				<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
+				<div className="min-w-0">
+					<h2 className="text-base font-semibold text-foreground">
+						Execution surfaces
+					</h2>
+					<p className="mt-2 text-sm leading-6 text-muted-foreground">
+						Each surface has a separate consent, storage, command, proof, and
+						sync boundary.
+					</p>
+				</div>
+			</div>
+			<div className="mt-4 divide-y divide-border/60">
+				{rows.map((row) => (
+					<div key={row.id} className="grid gap-3 py-4 first:pt-0">
+						<div className="grid gap-1 sm:grid-cols-[12rem_minmax(0,1fr)]">
+							<p className="font-medium text-foreground">{row.label}</p>
+							<p className="text-sm text-foreground">{row.statusLabel}</p>
+						</div>
+						<div className="grid gap-2 text-sm leading-6 text-muted-foreground sm:grid-cols-2">
+							<ExecutionSurfaceFact label="Consent" value={row.consentLabel} />
+							<ExecutionSurfaceFact label="Storage" value={row.storageLabel} />
+							<ExecutionSurfaceFact
+								label="Commands"
+								value={row.commandAuthorityLabel}
+							/>
+							<ExecutionSurfaceFact
+								label="Provider"
+								value={row.providerAccessLabel}
+							/>
+							<ExecutionSurfaceFact label="PR" value={row.prAuthorityLabel} />
+							<ExecutionSurfaceFact
+								label="Proof"
+								value={row.proofDeliveryLabel}
+							/>
+							<ExecutionSurfaceFact
+								label="Sync"
+								value={row.syncBoundaryLabel}
+							/>
+							<ExecutionSurfaceFact
+								label="Failure"
+								value={row.failureStateLabel}
+							/>
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+	);
+}
+
+function ExecutionSurfaceFact({
+	label,
+	value,
+}: {
+	label: string;
+	value: string;
+}) {
+	return (
+		<p>
+			<span className="font-medium text-foreground">{label}: </span>
+			{value}
+		</p>
 	);
 }
 

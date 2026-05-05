@@ -46,23 +46,23 @@ export function WorkspaceSourceTruthApprovalSheet({
 	const approval = detail.workflowApproval;
 	const canApprove = Boolean(projectId && activeRunnerId);
 	const isBrokenAppReadOnly = approval.workflowKind === "broken_app_readonly";
+	const isObservabilityAudit =
+		approval.workflowKind === "observability_debuggability";
 	const primaryCommand = approvedWorkflowRunCommand
 		? buildWorkflowCommand({
 				packageRunner: "bunx",
-				isBrokenAppReadOnly,
+				approval,
 				approvedWorkflowRunCommand,
 			})
 		: null;
 	const fallbackCommand = approvedWorkflowRunCommand
 		? buildWorkflowCommand({
 				packageRunner: "npx",
-				isBrokenAppReadOnly,
+				approval,
 				approvedWorkflowRunCommand,
 			})
 		: null;
-	const primaryActionLabel = isBrokenAppReadOnly
-		? "Run read-only diagnostics"
-		: "Create branch and run workflow";
+	const primaryActionLabel = getPrimaryActionLabel(approval.workflowKind);
 
 	return (
 		<aside className="grid gap-5 lg:sticky lg:top-20">
@@ -76,7 +76,9 @@ export function WorkspaceSourceTruthApprovalSheet({
 						<p className="mt-1 text-sm leading-6 text-muted-foreground">
 							{isBrokenAppReadOnly
 								? "Approve this bounded packet, then run read-only diagnostics locally before any patch is allowed."
-								: "Approve this bounded packet, then run the command locally to create the branch and proof."}
+								: isObservabilityAudit
+									? "Approve this bounded packet, then run the local observability audit without changing runtime code or provider setup."
+									: "Approve this bounded packet, then run the command locally to create the branch and proof."}
 						</p>
 					</div>
 				</div>
@@ -131,7 +133,9 @@ export function WorkspaceSourceTruthApprovalSheet({
 							<p className="text-sm leading-6 text-muted-foreground">
 								{isBrokenAppReadOnly
 									? "Run one of these in the paired repo. This command writes local .sbs proof only; it does not patch source files, push a branch, or open a PR."
-									: "Run one of these in the paired repo. No branch is pushed and no PR is opened by this command."}
+									: isObservabilityAudit
+										? "Run one of these in the paired repo. This command writes local .sbs audit proof only; it does not edit runtime code, configure providers, push a branch, or open a PR."
+										: "Run one of these in the paired repo. No branch is pushed and no PR is opened by this command."}
 							</p>
 						</div>
 						<CommandBlock command={primaryCommand} />
@@ -175,24 +179,52 @@ export function WorkspaceSourceTruthApprovalSheet({
 
 function buildWorkflowCommand({
 	packageRunner,
-	isBrokenAppReadOnly,
+	approval,
 	approvedWorkflowRunCommand,
 }: {
 	packageRunner: "bunx" | "npx";
-	isBrokenAppReadOnly: boolean;
+	approval: WorkspaceFindingDetailModel["workflowApproval"];
 	approvedWorkflowRunCommand: {
 		workflowRunId: string;
 		branchName: string;
 		profileName: string;
 	};
 }) {
-	const workflowName = isBrokenAppReadOnly
-		? "broken-app-triage"
-		: "source-truth-readiness";
-	const confirmationFlag = isBrokenAppReadOnly
-		? "--confirm-read-only-reproduction"
-		: "--confirm-local-writes";
-	return `${packageRunner} ship-by-sunday workflow ${workflowName} run --workflow-run-id ${approvedWorkflowRunCommand.workflowRunId} --branch-name ${approvedWorkflowRunCommand.branchName} --profile ${approvedWorkflowRunCommand.profileName} ${confirmationFlag}`;
+	return [
+		packageRunner,
+		"ship-by-sunday",
+		"workflow",
+		approval.workflowCommandName,
+		"run",
+		"--workflow-run-id",
+		approvedWorkflowRunCommand.workflowRunId,
+		"--branch-name",
+		approvedWorkflowRunCommand.branchName,
+		"--profile",
+		approvedWorkflowRunCommand.profileName,
+		approval.confirmationFlag,
+	]
+		.map(shellQuote)
+		.join(" ");
+}
+
+function shellQuote(value: string) {
+	if (/^[A-Za-z0-9_./:=@-]+$/.test(value)) {
+		return value;
+	}
+	return `'${value.replaceAll("'", "'\\''")}'`;
+}
+
+function getPrimaryActionLabel(
+	workflowKind: WorkspaceFindingDetailModel["workflowApproval"]["workflowKind"],
+) {
+	if (workflowKind === "broken_app_readonly") {
+		return "Run read-only diagnostics";
+	}
+	if (workflowKind === "observability_debuggability") {
+		return "Run observability audit";
+	}
+	return "Create branch and run workflow";
 }
 
 function ApprovalFact({

@@ -141,7 +141,13 @@ export type WorkspaceFindingDetailModel = WorkspaceFindingLedgerRow & {
 
 export type WorkspaceWorkflowApprovalModel = {
 	workflowId: string;
-	workflowKind: "source_truth" | "broken_app_readonly" | "generic";
+	workflowKind:
+		| "source_truth"
+		| "observability_debuggability"
+		| "broken_app_readonly"
+		| "generic";
+	workflowCommandName: string;
+	confirmationFlag: string;
 	workflowVersion: string;
 	branchName: string;
 	profileName: string;
@@ -475,6 +481,15 @@ function getExpectedOutputs(workflowId: string) {
 			"local proof or blocked-proof summary",
 		];
 	}
+	if (workflowId === "observability-debuggability") {
+		return [
+			"observability workflow packet",
+			"sync-safe debuggability audit",
+			"provider setup and dashboard access blocked-proof notes",
+			"local proof or blocked-proof summary",
+			"next recommended workflow",
+		];
+	}
 
 	return [
 		"scoped workflow packet",
@@ -498,6 +513,13 @@ function getAllowedTouchTargets(workflowId: string) {
 			".sbs/runs/<workflow-run-id> workflow artifacts",
 			".sbs/broken-app-triage diagnostics reports",
 			"repo-relative proof metadata only",
+		];
+	}
+	if (workflowId === "observability-debuggability") {
+		return [
+			".sbs/runs/<workflow-run-id> workflow artifacts",
+			".sbs/observability debuggability audit artifacts",
+			"repo-relative observability signal metadata only",
 		];
 	}
 
@@ -540,6 +562,8 @@ function buildWorkflowApprovalModel({
 	return {
 		workflowId,
 		workflowKind,
+		workflowCommandName: getWorkflowCommandName(workflowId),
+		confirmationFlag: getWorkflowConfirmationFlag(workflowId),
 		workflowVersion: "v1",
 		branchName: getWorkflowBranchName(workflowId, approvalTimestamp),
 		profileName:
@@ -554,10 +578,7 @@ function buildWorkflowApprovalModel({
 		proofCommands: getWorkflowProofCommands(workflowId),
 		syncPolicySummary,
 		stopConditions: getWorkflowStopConditions(workflowId),
-		rollbackNotes:
-			workflowKind === "broken_app_readonly"
-				? "This phase does not patch source files. Review the local diagnostics proof, then approve a separate patch workflow if the root cause is clear."
-				: "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the source-truth branch after reviewing local proof.",
+		rollbackNotes: getWorkflowRollbackNotes(workflowKind),
 		localWorkflowPacketRef: ".sbs/runs/<workflow-run-id>/workflow-packet.json",
 		localProofRef: ".sbs/runs/<workflow-run-id>/proof.json",
 	};
@@ -572,7 +593,27 @@ function getWorkflowKind(
 	if (workflowId === "broken-app-triage") {
 		return "broken_app_readonly";
 	}
+	if (workflowId === "observability-debuggability") {
+		return "observability_debuggability";
+	}
 	return "generic";
+}
+
+function getWorkflowCommandName(workflowId: string) {
+	if (workflowId === "source-truth-agent-readiness") {
+		return "source-truth-readiness";
+	}
+	return workflowId;
+}
+
+function getWorkflowConfirmationFlag(workflowId: string) {
+	if (workflowId === "broken-app-triage") {
+		return "--confirm-read-only-reproduction";
+	}
+	if (workflowId === "observability-debuggability") {
+		return "--confirm-observability-audit";
+	}
+	return "--confirm-local-writes";
 }
 
 function getWorkflowBranchName(workflowId: string, approvalTimestamp: number) {
@@ -603,6 +644,14 @@ function getWorkflowStopConditions(workflowId: string) {
 			"fix requires patching before a separate patch approval exists",
 		];
 	}
+	if (workflowId === "observability-debuggability") {
+		return [
+			"worktree is dirty before branch creation",
+			"write lease expires before local audit starts",
+			"requested work needs runtime code, provider setup, dependencies, package scripts, CI, PRs, source maps, dashboards, or deployment proof",
+			"proof command fails",
+		];
+	}
 
 	return [
 		"worktree is dirty before branch creation",
@@ -610,6 +659,18 @@ function getWorkflowStopConditions(workflowId: string) {
 		"requested edit leaves the approved docs and .sbs boundary",
 		"proof command fails",
 	];
+}
+
+function getWorkflowRollbackNotes(
+	workflowKind: WorkspaceWorkflowApprovalModel["workflowKind"],
+) {
+	if (workflowKind === "broken_app_readonly") {
+		return "This phase does not patch source files. Review the local diagnostics proof, then approve a separate patch workflow if the root cause is clear.";
+	}
+	if (workflowKind === "observability_debuggability") {
+		return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the observability branch after reviewing local proof.";
+	}
+	return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the source-truth branch after reviewing local proof.";
 }
 
 function formatBranchTimestamp(timestamp: number) {

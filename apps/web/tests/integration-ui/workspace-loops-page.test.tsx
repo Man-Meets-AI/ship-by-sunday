@@ -115,6 +115,16 @@ describe("WorkspaceLoopsPage", () => {
 		expect(screen.getByText("Workflow Proof Completed")).toBeTruthy();
 		expect(screen.getByText("Observability Debuggability")).toBeTruthy();
 		expect(screen.getByText("available now")).toBeTruthy();
+		expect(screen.getByText("Workflow packet contract")).toBeTruthy();
+		expect(screen.getByText("Evidence and probes")).toBeTruthy();
+		expect(screen.getByText("Customer bottleneck")).toBeTruthy();
+		expect(screen.getByText("Execution surface")).toBeTruthy();
+		expect(screen.getByText("Codex interpretation")).toBeTruthy();
+		expect(screen.getByText("Write authority")).toBeTruthy();
+		expect(screen.getByText("Proof delivery")).toBeTruthy();
+		expect(screen.getByText("Sync policy")).toBeTruthy();
+		expect(screen.getByText("Revocation and stops")).toBeTruthy();
+		expect(screen.getByText("Structured only")).toBeTruthy();
 		expect(screen.getByText("Revenue Path Audit")).toBeTruthy();
 		expect(screen.getAllByText("future").length).toBeGreaterThan(0);
 		expect(
@@ -129,6 +139,11 @@ describe("WorkspaceLoopsPage", () => {
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("run loop");
 		expect(visibleText).not.toContain("queue worker");
+		expect(visibleText).not.toContain("push branch now");
+		expect(visibleText).not.toContain("open pr");
+		expect(visibleText).not.toContain("rerun ci now");
+		expect(visibleText).not.toContain("raw source uploaded");
+		expect(visibleText).not.toContain("hosted execution enabled");
 		expect(visibleText).not.toContain("export const runtime");
 	});
 

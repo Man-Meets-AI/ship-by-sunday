@@ -21,6 +21,7 @@ function renderAssistantGuide(
 			"- For product build work, read `docs/build/docs/agent-handoff.md` first, then `docs/build/AGENTS.md`, `docs/build/docs/readiness.md`, `docs/build/docs/prompt.md`, `docs/build/docs/plans.md`, `docs/build/docs/implement.md`, and `docs/build/docs/review.md` before editing code.",
 			"- Treat `DESIGN.md` as the visual source of truth before changing layout, styling, theming, motion, or component presentation.",
 			"- Treat `docs/facts/project-definition.json` and `docs/build/docs/prompt.md` as the customer build contract; do not build from chat memory alone.",
+			"- Treat `docs/programs/` as the multi-slice product memory and `docs/exec-plans/` as the active slice plan. Run `bun run agentic:check` after changing either one.",
 			"- When using an AI coding or design tool, explicitly tell it to follow `DESIGN.md` and the generated design snapshot before it proposes UI changes.",
 			"- Use `bun` for JavaScript work and `uv` for Python utilities.",
 			"- Keep diffs scoped, rename vague identifiers, and separate UI rendering from stateful logic.",

@@ -133,9 +133,9 @@ export const starterConfig = {
 	brand: {
 		name: "Ship by Sunday",
 		shortMark: "MMAI",
-		promise: "Ship a real, durable product by Sunday",
+		promise: "The agent doctor for web apps",
 		metadataDescription:
-			"Ship by Sunday helps technical founders turn phone-started exec loops into codebases that convert with worker packs, QA paths, and aligned repo guidance.",
+			"Ship by Sunday diagnoses web-app blockers, generates worker-ready codebases, runs approved AI worker loops, and returns proof or blocked-proof reports.",
 		images: {
 			founderProof: assetPaths.founderProof,
 			heroPreview: assetPaths.heroPreview,
@@ -157,7 +157,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Build the worker layer",
+		primaryCtaLabel: "Generate my codebase",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {

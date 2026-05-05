@@ -8,6 +8,12 @@ describe("cli", () => {
 
 		expect(logSpy.mock.calls.join("\n")).toContain("setup pair <token>");
 		expect(logSpy.mock.calls.join("\n")).toContain("daemon start");
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"--work --confirm-local-writes --confirm-observability-audit",
+		);
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"workflow observability-debuggability run",
+		);
 		logSpy.mockRestore();
 	});
 });

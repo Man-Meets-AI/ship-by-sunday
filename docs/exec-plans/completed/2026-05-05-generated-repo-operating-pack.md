@@ -1,10 +1,10 @@
 ---
 title: Generated Repo Operating Pack
-status: active
+status: complete
 created_at: 2026-05-05
-completed_at: null
+completed_at: 2026-05-05
 summary: Ship a customer-safe Program and ExecPlan operating pack inside generated repos so agents can plan, validate, and resume product work without internal Ship by Sunday archives.
-post_build_recap: null
+post_build_recap: Generated repos now include customer-safe Program and ExecPlan contracts, an active Program packet, a first active ExecPlan, explicit operating-pack validation scripts, package-script wiring, onboarding references, and structural compiler proof.
 program_id: customer-agentic-operating-system
 planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md
 read_when:
@@ -27,10 +27,14 @@ Generated repos already include root agent guidance, Build Pack docs, prompt ass
 
 - [x] 2026-05-05 EDT: Read root and package instructions, `docs/programs/PROGRAMS.md`, `docs/exec-plans/PLANS.md`, the active Program next-slice section, `planning-brief-1.md`, and the completed source-contract ExecPlan before implementation.
 - [x] 2026-05-05 EDT: Confirmed this slice should build on the completed source-contract cleanup and must not copy internal active or completed Program or ExecPlan archives into customer repos.
+- [x] 2026-05-05 EDT: Added generated operating-pack files for `docs/programs/`, `docs/exec-plans/`, and `scripts/agentic/`, wired `programs:lint`, `plans:lint`, and `agentic:check` into generated root package scripts, and updated generated README, START-HERE, root assistant guidance, and starter skills.
+- [x] 2026-05-05 EDT: Added focused materialization tests for generated Program/ExecPlan output, script wiring, zip output, customer-safe exclusions, and START-HERE skill resolution.
+- [x] 2026-05-05 EDT: Ran a temporary materialized generated repo through `bun run agentic:check`; the generated `programs:lint` and `plans:lint` scripts both passed.
+- [x] 2026-05-05 EDT: Focused compiler tests, package checks, temporary generated-repo smoke, root format, root lint, root typecheck, plan lint, program lint, markdown metadata lint, and whitespace validation passed.
 
 ## Surprises & Discoveries
 
-No implementation discoveries have been recorded yet.
+- 2026-05-05 EDT: The customer-safe exclusion helper previously treated all `docs/exec-plans/active/*.md` paths the same. The operating pack now allows only the generated `YYYY-MM-DD-first-product-slice.md` plan pattern while continuing to exclude arbitrary internal active or completed ExecPlan archives.
 
 ## Decision Log
 
@@ -42,9 +46,15 @@ Decision: Make operating-pack validation explicit package scripts, not a hidden 
 Rationale: The Program explicitly says there must be no hidden `postinstall` mutation. Customers should opt into structural validation with visible commands such as `bun run agentic:check`.
 Date: 2026-05-05
 
+Decision: Ship a simple generated structural validator instead of copying the repo's internal lint scripts.
+Rationale: The internal linters validate Ship by Sunday's full planning ecosystem and prompt inventory. Generated repos need a smaller customer-owned validator that checks the generated Program and ExecPlan shape without depending on internal archives.
+Date: 2026-05-05
+
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the generated files, scripts, validation evidence, remaining risks, and the next Program slice.
+This plan is complete. Generated repos now ship a customer-safe operating pack without copying internal Ship by Sunday Program or ExecPlan archives. The pack includes `docs/programs/PROGRAMS.md`, a generated active Program packet, `docs/exec-plans/PLANS.md`, a generated first active ExecPlan, `scripts/agentic/check-programs.mjs`, `scripts/agentic/check-exec-plans.mjs`, and root package scripts for `programs:lint`, `plans:lint`, and `agentic:check`.
+
+The generated README, START-HERE, root assistant guides, and local wrapper skills now point customers toward the operating pack explicitly. A temporary materialized repo ran its generated `bun run agentic:check` successfully, proving the generated scripts work outside the source checkout.
 
 ## Context and Orientation
 
@@ -107,9 +117,9 @@ Run planning and repo validation before completion:
     bun run format
     bun lint
     bun typecheck
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-05-generated-repo-operating-pack.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-05-generated-repo-operating-pack.md docs/programs/active/2026-05-02-customer-agentic-operating-system
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md docs/programs/active/2026-05-02-customer-agentic-operating-system
     git diff --check
 
 ## Validation and Acceptance
@@ -121,16 +131,40 @@ Acceptance requires a generated customer repo to contain a customer-safe operati
 Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
 
     bun run --cwd packages/codebase-compiler test -- tests/repo-generation.test.ts tests/review-download-zip.test.ts tests/customer-safe-snapshot-contract.test.ts tests/codebase-renderers.test.ts
+    Passed. Test Files 4 passed; Tests 16 passed.
+
     bun run --cwd packages/codebase-compiler typecheck
+    Passed.
+
     bun run --cwd packages/codebase-compiler lint
+    Passed.
+
     bun run --cwd packages/codebase-compiler format:check
+    Passed.
+
+    bun codex-scripts/check-generated-operating-pack.mjs
+    Passed. The generated `bun run agentic:check` command reported `Program packet ok` and `ExecPlans ok`.
+
     bun run format
+    Passed.
+
     bun lint
+    Passed.
+
     bun typecheck
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-05-generated-repo-operating-pack.md
+    Passed and built the Next.js route manifest.
+
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md
+    Passed.
+
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-05-generated-repo-operating-pack.md docs/programs/active/2026-05-02-customer-agentic-operating-system
+    Passed.
+
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-generated-repo-operating-pack.md docs/programs/active/2026-05-02-customer-agentic-operating-system
+    Passed.
+
     git diff --check
+    Passed.
 
 ## Idempotence and Recovery
 

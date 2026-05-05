@@ -814,6 +814,175 @@ describe("workspace runner events", () => {
 		});
 	});
 
+	it("approves and resolves observability debuggability as a supported local audit workflow", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				runnerId: runner._id,
+				runnerMode: "daemon",
+			},
+		);
+		const findingDocumentId = await ctx.db.insert("codebaseFindings", {
+			projectId: project._id,
+			doctorPassRunId: doctorPassRun._id,
+			findingId: "finding-observability",
+			rank: 2,
+			status: "needs_approval",
+			title: "Production errors are opaque",
+			category: "observability",
+			severity: "high",
+			confidence: 0.84,
+			buyerImpact: "Production failures need a clearer evidence path.",
+			blastRadius: "low",
+			proofPath: "Review local observability audit proof.",
+			proofability: "partial",
+			permissionRequired: "workspace_write",
+			recommendedWorkflowId: "observability-debuggability",
+			whyThisNow:
+				"Source truth is ready and production failures are hard to inspect.",
+			evidenceRefs: [],
+			syncSensitivity: "low",
+			localReportRef:
+				".sbs/reports/doctor-pass/run-1/observability-debuggability.json",
+			createdAt: 1,
+			updatedAt: 1,
+		});
+
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+				workflowId: "observability-debuggability",
+				workflowVersion: "v1",
+				branchName: "sbs/observability-debuggability-20260505-1000",
+				profileName: "sbs-workspace-write",
+				expectedOutputs: [
+					"observability workflow packet",
+					"sync-safe debuggability audit",
+					"provider setup and dashboard access blocked-proof notes",
+					"local proof or blocked-proof summary",
+					"next recommended workflow",
+				],
+				allowedTouchTargets: [
+					".sbs/runs/<workflow-run-id> workflow artifacts",
+					".sbs/observability debuggability audit artifacts",
+					"repo-relative observability signal metadata only",
+				],
+				disallowedTouchTargets: [
+					"runtime app code",
+					"environment files",
+					"dependency manifests",
+					"dependency locks",
+					"database migrations",
+					"provider configuration",
+					"generated folders",
+					"package scripts",
+				],
+				proofCommands: [
+					"git status --short",
+					"git diff --name-only",
+					"git diff --check",
+				],
+				syncPolicySummary:
+					"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.",
+				stopConditions: [
+					"worktree is dirty before branch creation",
+					"write lease expires before local audit starts",
+					"requested work needs runtime code, provider setup, dependencies, package scripts, CI, PRs, source maps, dashboards, or deployment proof",
+					"proof command fails",
+				],
+				rollbackNotes:
+					"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the observability branch after reviewing local proof.",
+			},
+		);
+		const resolvedWorkflowRun =
+			await getWorkspaceWorkflowRunByCredential._handler(ctx as never, {
+				runnerCredentialHash: "sha256:runner-credential",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+			});
+
+		expect(resolvedWorkflowRun).toMatchObject({
+			workflowRunId: workflowRun._id,
+			workflowId: "observability-debuggability",
+			branchName: "sbs/observability-debuggability-20260505-1000",
+			profileName: "sbs-workspace-write",
+			proofCommands: [
+				"git status --short",
+				"git diff --name-only",
+				"git diff --check",
+			],
+		});
+	});
+
+	it("rejects observability approvals that drift from the shipped audit packet", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+				runnerId: runner._id,
+				runnerMode: "daemon",
+			},
+		);
+		const findingDocumentId = await ctx.db.insert("codebaseFindings", {
+			projectId: project._id,
+			doctorPassRunId: doctorPassRun._id,
+			findingId: "finding-observability",
+			rank: 2,
+			status: "needs_approval",
+			title: "Production errors are opaque",
+			category: "observability",
+			severity: "high",
+			confidence: 0.84,
+			buyerImpact: "Production failures need a clearer evidence path.",
+			blastRadius: "low",
+			proofPath: "Review local observability audit proof.",
+			proofability: "partial",
+			permissionRequired: "workspace_write",
+			recommendedWorkflowId: "observability-debuggability",
+			whyThisNow:
+				"Source truth is ready and production failures are hard to inspect.",
+			evidenceRefs: [],
+			syncSensitivity: "low",
+			localReportRef:
+				".sbs/reports/doctor-pass/run-1/observability-debuggability.json",
+			createdAt: 1,
+			updatedAt: 1,
+		});
+
+		await expect(
+			requestWorkspaceWorkflowRun._handler(ctx as never, {
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+				workflowId: "observability-debuggability",
+				workflowVersion: "v1",
+				branchName: "sbs/observability-debuggability-20260505-1000",
+				profileName: "sbs-workspace-write; gh pr create",
+				expectedOutputs: ["observability workflow packet"],
+				allowedTouchTargets: ["runtime app code"],
+				disallowedTouchTargets: ["environment files"],
+				proofCommands: [
+					"git status --short",
+					"git diff --name-only",
+					"git diff --check",
+				],
+				syncPolicySummary: "Only structured proof metadata syncs.",
+				stopConditions: ["worktree dirty before observability audit"],
+				rollbackNotes: "Delete the local observability branch after review.",
+			}),
+		).rejects.toThrow("Observability profile name is not approved");
+	});
+
 	it("rejects package-script commands in broken-app triage approvals", async () => {
 		const { ctx, project, runner } = await createProjectAndRunner();
 		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(

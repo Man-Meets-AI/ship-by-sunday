@@ -4,6 +4,30 @@ This is the canonical internal guide for the Ship by Sunday observability path. 
 
 The public docs intentionally stay short. This file keeps the full operational story in one place so a maintainer does not have to reconstruct the same `.convex.site` and incident-control rules from multiple pages.
 
+## Local Runner Debuggability Workflow
+
+Existing-codebase customers can approve the `observability-debuggability` workflow after source-truth readiness. This is a local audit and proof workflow, not provider setup or runtime instrumentation.
+
+The customer-visible commands are:
+
+```bash
+bunx ship-by-sunday workflow observability-debuggability run --workflow-run-id <id> --confirm-observability-audit
+npx ship-by-sunday workflow observability-debuggability run --workflow-run-id <id> --confirm-observability-audit
+```
+
+The workflow requires an approved workflow packet, a clean worktree, an unexpired write lease, the approved local branch name `sbs/observability-debuggability-<YYYYMMDD-HHMM>`, and the `sbs-workspace-write` profile. It creates local `.sbs` artifacts only:
+
+- `.sbs/runs/<workflow-run-id>/workflow-packet.json`
+- `.sbs/observability/debuggability-audit.json`
+- `.sbs/runs/<workflow-run-id>/proof.json`
+- `.sbs/runs/<workflow-run-id>/sync-preview.json`
+
+It may inspect repo-local file names, package names, package script names, and short provider identifiers to detect observability signals. It does not store source excerpts, command output, local absolute paths, screenshots, secrets, provider credentials, raw logs, or Codex transcripts.
+
+This workflow does not create or modify provider resources. Missing provider setup appears as blocked-proof metadata for a later approval. Any later implementation workflow must name the provider project, environment variable names, dashboard or alert destination, source-map or release policy, deployment proof command, rollback path, and exact customer approval boundary before it changes runtime code or provider settings.
+
+The workflow must not edit runtime app code, env files, dependency manifests, lockfiles, migrations, provider configuration, generated folders, or package scripts. It must not install dependencies, run provider CLIs, push branches, open PRs, rerun CI, upload source maps, share raw source, or share raw logs.
+
 ## PostHog Migration Contract
 
 Ship by Sunday uses PostHog as the primary owner for product analytics, pageviews, funnels, generic client exceptions, generic server exceptions, source-mapped stack traces, and privacy-reviewed session replay. Convex remains the product backend. It should not remain the long-term generic telemetry warehouse after PostHog proof exists.
