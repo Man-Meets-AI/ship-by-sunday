@@ -3310,12 +3310,7 @@ export async function getWorkspaceSyncPreviewStateHandler(
 
 	return {
 		doctorPassRun:
-			syncPreviewRuns.find(
-				(run) =>
-					run.syncPreviewStatus === "ready" ||
-					run.syncPreviewStatus === "approved" ||
-					run.syncPreviewStatus === "uploaded",
-			) ?? null,
+			syncPreviewRuns.find((run) => run.status !== "deleted") ?? null,
 	};
 }
 

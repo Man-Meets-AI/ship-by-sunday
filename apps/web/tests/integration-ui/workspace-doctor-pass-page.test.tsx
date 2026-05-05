@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -111,15 +111,34 @@ describe("WorkspaceDoctorPassPage", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("heading", { name: "Sync preview" })).toBeTruthy();
+		expect(
+			screen.getByRole("heading", { name: "Doctor Pass completed locally" }),
+		).toBeTruthy();
+		expect(
+			screen.getByText(
+				"The local runner inspected this repo and found 2 items.",
+			),
+		).toBeTruthy();
+		expect(screen.getByText("Raw source is not uploaded.")).toBeTruthy();
+		expect(
+			screen.getAllByText("Waiting for your approval.").length,
+		).toBeGreaterThan(0);
 		expect(screen.getByText("sha256:preview")).toBeTruthy();
 		expect(screen.getByText(/run-local\/sync-preview\.json/)).toBeTruthy();
 		expect(
 			screen.getByTestId("workspace-doctor-pass-local-nav").textContent,
 		).toContain("Doctor Pass");
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith(
+				"Doctor Pass completed. Review 2 findings before upload.",
+				expect.objectContaining({
+					id: "workspace-doctor-pass-run-completed-doctorPassRuns_1",
+				}),
+			);
+		});
 
 		await user.click(
-			screen.getByRole("button", { name: /Approve sync preview/i }),
+			screen.getByRole("button", { name: /Approve findings upload/i }),
 		);
 
 		expect(approveSyncPreviewMock).toHaveBeenCalledWith({
@@ -127,9 +146,9 @@ describe("WorkspaceDoctorPassPage", () => {
 			doctorPassRunId: "doctorPassRuns_1",
 			previewDigest: "sha256:preview",
 		});
-		expect(toastSuccessMock).toHaveBeenCalledWith("Sync preview approved", {
+		expect(toastSuccessMock).toHaveBeenCalledWith("Findings upload approved", {
 			id: "workspace-doctor-pass-approve-preview-success",
-			description: "The local runner can upload findings now.",
+			description: "Runner will upload automatically.",
 			duration: 1800,
 			position: "bottom-right",
 		});
@@ -146,7 +165,7 @@ describe("WorkspaceDoctorPassPage", () => {
 		);
 
 		await user.click(
-			screen.getByRole("button", { name: /Approve sync preview/i }),
+			screen.getByRole("button", { name: /Approve findings upload/i }),
 		);
 
 		expect(toastErrorMock).toHaveBeenCalledWith("Approval write failed", {
@@ -179,9 +198,81 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(
 			(
 				screen.getByRole("button", {
-					name: /Approve sync preview/i,
+					name: /Approve findings upload/i,
 				}) as HTMLButtonElement
 			).disabled,
 		).toBe(true);
+	});
+
+	it("shows uploaded next destinations", async () => {
+		render(
+			<WorkspaceDoctorPassPage
+				initialSyncPreviewState={
+					{
+						doctorPassRun: {
+							...createSyncPreviewState().doctorPassRun,
+							status: "findings_uploaded",
+							syncPreviewStatus: "uploaded",
+							findingsCount: 2,
+						},
+					} as never
+				}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("heading", { name: "Findings uploaded" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("link", { name: "View findings" }).getAttribute("href"),
+		).toBe("/workspace/findings");
+		expect(
+			screen.getByRole("link", { name: "View runs" }).getAttribute("href"),
+		).toBe("/workspace/runs");
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith(
+				"Findings uploaded.",
+				expect.objectContaining({
+					id: "workspace-doctor-pass-upload-completed-doctorPassRuns_1",
+				}),
+			);
+		});
+	});
+
+	it("shows failed run status and next action", async () => {
+		render(
+			<WorkspaceDoctorPassPage
+				initialSyncPreviewState={
+					{
+						doctorPassRun: {
+							...createSyncPreviewState().doctorPassRun,
+							status: "failed",
+							syncPreviewStatus: "not_ready",
+							syncPreviewDigest: undefined,
+							syncPreviewFindingsCount: undefined,
+							blockedReason: "Codex interpretation failed.",
+						},
+					} as never
+				}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("heading", { name: "Doctor Pass needs attention" }),
+		).toBeTruthy();
+		expect(
+			screen.getAllByText("Codex interpretation failed.").length,
+		).toBeGreaterThan(0);
+		expect(
+			screen.getByText(/Next action: rerun Doctor Pass locally/),
+		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastErrorMock).toHaveBeenCalledWith(
+				"Doctor Pass failed. View run details.",
+				expect.objectContaining({
+					id: "workspace-doctor-pass-run-failed-doctorPassRuns_1",
+				}),
+			);
+		});
 	});
 });

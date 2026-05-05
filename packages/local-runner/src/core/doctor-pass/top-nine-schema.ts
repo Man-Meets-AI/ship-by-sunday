@@ -6,12 +6,13 @@ export function createTopNineOutputSchema() {
 		additionalProperties: false,
 		required: ["schemaVersion", "summary", "findings"],
 		properties: {
-			schemaVersion: { const: TOP_NINE_SCHEMA_VERSION },
-			summary: { type: "string", minLength: 1 },
+			schemaVersion: {
+				type: "string",
+				const: TOP_NINE_SCHEMA_VERSION,
+			},
+			summary: { type: "string" },
 			findings: {
 				type: "array",
-				minItems: 0,
-				maxItems: 9,
 				items: {
 					type: "object",
 					additionalProperties: false,
@@ -31,17 +32,20 @@ export function createTopNineOutputSchema() {
 						"recommendedWorkflowId",
 						"whyThisNow",
 						"evidenceRefs",
+						"blockedReason",
 						"syncSensitivity",
 						"localReportRef",
 					],
 					properties: {
-						findingId: { type: "string", minLength: 1 },
-						rank: { type: "number", minimum: 1, maximum: 9 },
+						findingId: { type: "string" },
+						rank: { type: "number" },
 						status: {
+							type: "string",
 							enum: ["ready", "blocked", "needs_approval", "running", "done"],
 						},
-						title: { type: "string", minLength: 1 },
+						title: { type: "string" },
 						category: {
+							type: "string",
 							enum: [
 								"source_truth",
 								"setup",
@@ -56,13 +60,23 @@ export function createTopNineOutputSchema() {
 								"other",
 							],
 						},
-						severity: { enum: ["critical", "high", "medium", "low"] },
-						confidence: { type: "number", minimum: 0, maximum: 1 },
-						buyerImpact: { type: "string", minLength: 1 },
-						blastRadius: { enum: ["none", "low", "medium", "high"] },
-						proofPath: { type: "string", minLength: 1 },
-						proofability: { enum: ["clear", "partial", "blocked"] },
+						severity: {
+							type: "string",
+							enum: ["critical", "high", "medium", "low"],
+						},
+						confidence: { type: "number" },
+						buyerImpact: { type: "string" },
+						blastRadius: {
+							type: "string",
+							enum: ["none", "low", "medium", "high"],
+						},
+						proofPath: { type: "string" },
+						proofability: {
+							type: "string",
+							enum: ["clear", "partial", "blocked"],
+						},
 						permissionRequired: {
+							type: "string",
 							enum: [
 								"read_only",
 								"docs_write",
@@ -72,19 +86,79 @@ export function createTopNineOutputSchema() {
 								"managed_github",
 							],
 						},
-						recommendedWorkflowId: { type: "string", minLength: 1 },
-						whyThisNow: { type: "string", minLength: 1 },
+						recommendedWorkflowId: { type: "string" },
+						whyThisNow: { type: "string" },
 						evidenceRefs: {
 							type: "array",
-							maxItems: 20,
-							items: { type: "object" },
+							items: createEvidenceRefSchema(),
 						},
-						blockedReason: { type: "string" },
-						syncSensitivity: { enum: ["low", "medium", "high"] },
-						localReportRef: { type: "string", minLength: 1 },
+						blockedReason: {
+							type: ["string", "null"],
+						},
+						syncSensitivity: {
+							type: "string",
+							enum: ["low", "medium", "high"],
+						},
+						localReportRef: { type: "string" },
 					},
 				},
 			},
 		},
+	};
+}
+
+function createEvidenceRefSchema() {
+	return {
+		anyOf: [
+			{
+				type: "object",
+				additionalProperties: false,
+				required: [
+					"kind",
+					"repoRelativePath",
+					"lineStart",
+					"lineEnd",
+					"summary",
+				],
+				properties: {
+					kind: { type: "string", const: "file" },
+					repoRelativePath: { type: "string" },
+					lineStart: { type: ["number", "null"] },
+					lineEnd: { type: ["number", "null"] },
+					summary: { type: ["string", "null"] },
+				},
+			},
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["kind", "commandName", "summary"],
+				properties: {
+					kind: { type: "string", const: "command" },
+					commandName: { type: "string" },
+					summary: { type: ["string", "null"] },
+				},
+			},
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["kind", "artifactId", "localReportRef", "summary"],
+				properties: {
+					kind: { type: "string", const: "artifact" },
+					artifactId: { type: "string" },
+					localReportRef: { type: ["string", "null"] },
+					summary: { type: ["string", "null"] },
+				},
+			},
+			{
+				type: "object",
+				additionalProperties: false,
+				required: ["kind", "packageName", "summary"],
+				properties: {
+					kind: { type: "string", const: "package" },
+					packageName: { type: "string" },
+					summary: { type: ["string", "null"] },
+				},
+			},
+		],
 	};
 }

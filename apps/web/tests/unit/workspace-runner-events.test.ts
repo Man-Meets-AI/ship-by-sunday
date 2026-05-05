@@ -489,6 +489,44 @@ describe("workspace runner events", () => {
 		});
 	});
 
+	it("returns the latest failed doctor pass run for operator status", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const olderRun = await startWorkspaceDoctorPassRun._handler(ctx as never, {
+			projectId: project._id,
+			runnerId: runner._id,
+			runnerMode: "daemon",
+		});
+		await ctx.db.patch(olderRun._id, {
+			status: "findings_uploaded",
+			syncPreviewStatus: "uploaded",
+			startedAt: 10,
+		});
+		const latestRun = await startWorkspaceDoctorPassRun._handler(ctx as never, {
+			projectId: project._id,
+			runnerId: runner._id,
+			runnerMode: "daemon",
+		});
+		await ctx.db.patch(latestRun._id, {
+			status: "failed",
+			syncPreviewStatus: "not_ready",
+			blockedReason: "Codex interpretation failed.",
+			startedAt: 20,
+		});
+
+		const syncPreviewState = await getWorkspaceSyncPreviewState._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+			},
+		);
+
+		expect(syncPreviewState.doctorPassRun).toMatchObject({
+			_id: latestRun._id,
+			status: "failed",
+			blockedReason: "Codex interpretation failed.",
+		});
+	});
+
 	it("keeps sync preview approval on the user-owned approval mutation", async () => {
 		const { ctx, tables, project, runner } = await createProjectAndRunner();
 		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(

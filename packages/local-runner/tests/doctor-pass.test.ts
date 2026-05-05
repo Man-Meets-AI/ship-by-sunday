@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 import { runDoctorPassCommand } from "../src/commands/doctor-pass";
 import { writeLocalProjectState } from "../src/core/local-project-state";
 import { writeRunnerCredential } from "../src/core/local-runner-home";
+import { createTopNineOutputSchema } from "../src/core/doctor-pass/top-nine-schema";
+import { TOP_NINE_SCHEMA_VERSION } from "../src/core/doctor-pass/types";
 import { resolveRepositoryRoot } from "../src/core/repository-root";
 import {
 	createCodexHome,
@@ -34,6 +36,16 @@ describe("doctor-pass command", () => {
 		process.env.PATH = originalPath;
 		restoreEnv("SBS_RUNNER_HOME", originalRunnerHome);
 		restoreEnv("CODEX_HOME", originalCodexHome);
+	});
+
+	it("creates a Codex structured-output schema with typed property schemas", () => {
+		const schema = createTopNineOutputSchema();
+		expect(schema.properties.schemaVersion).toEqual({
+			type: "string",
+			const: TOP_NINE_SCHEMA_VERSION,
+		});
+		assertCodexStructuredOutputSchema(schema);
+		assertNoBareConstPropertySchema(schema);
 	});
 
 	it("writes local artifacts, emits sync preview events, and uploads after approval", async () => {
@@ -164,6 +176,12 @@ describe("doctor-pass command", () => {
 				"doctor-pass",
 				"run-test",
 			);
+			const schema = JSON.parse(
+				await readFile(
+					path.join(reportDirectory, "repo-doctor-top-nine.schema.json"),
+					"utf8",
+				),
+			);
 			const syncPreview = JSON.parse(
 				await readFile(path.join(reportDirectory, "sync-preview.json"), "utf8"),
 			) as { previewDigest: string };
@@ -171,6 +189,12 @@ describe("doctor-pass command", () => {
 				await readFile(path.join(reportDirectory, "findings.json"), "utf8"),
 			) as { findings: unknown[] };
 
+			expect(schema.properties.schemaVersion).toEqual({
+				type: "string",
+				const: TOP_NINE_SCHEMA_VERSION,
+			});
+			assertCodexStructuredOutputSchema(schema);
+			assertNoBareConstPropertySchema(schema);
 			expect(syncPreview.previewDigest).toMatch(/^sha256:/);
 			expect(findings.findings).toHaveLength(1);
 			expect(
@@ -531,4 +555,133 @@ function restoreEnv(name: string, value: string | undefined) {
 	} else {
 		process.env[name] = value;
 	}
+}
+
+function assertCodexStructuredOutputSchema(schema: unknown) {
+	const unsupportedKeywords = [
+		"minLength",
+		"maxLength",
+		"pattern",
+		"format",
+		"minimum",
+		"maximum",
+		"multipleOf",
+		"minItems",
+		"maxItems",
+		"patternProperties",
+		"allOf",
+		"not",
+		"dependentRequired",
+		"dependentSchemas",
+		"if",
+		"then",
+		"else",
+	];
+	visitSchemaNode(schema, "$", (node, pathLabel) => {
+		for (const keyword of unsupportedKeywords) {
+			expect(node, `${pathLabel} must not use ${keyword}`).not.toHaveProperty(
+				keyword,
+			);
+		}
+		if (node.type === "object") {
+			expect(node.additionalProperties, pathLabel).toBe(false);
+			const properties = readSchemaProperties(node, pathLabel);
+			const propertyNames = Object.keys(properties).sort();
+			expect(
+				[...readRequiredProperties(node, pathLabel)].sort(),
+				pathLabel,
+			).toEqual(propertyNames);
+		}
+	});
+	visitPropertySchemas(schema, "$", (propertySchema, pathLabel) => {
+		expect(propertySchema.type, `${pathLabel} must declare type`).toBeDefined();
+		if ("const" in propertySchema) {
+			expect(
+				propertySchema.type,
+				`${pathLabel} const must declare type`,
+			).toBeDefined();
+		}
+		if ("enum" in propertySchema) {
+			expect(
+				propertySchema.type,
+				`${pathLabel} enum must declare type`,
+			).toBeDefined();
+		}
+	});
+}
+
+function assertNoBareConstPropertySchema(schema: unknown) {
+	visitPropertySchemas(schema, "$", (propertySchema, pathLabel) => {
+		expect(
+			Object.keys(propertySchema).sort(),
+			`${pathLabel} must not be a bare const schema`,
+		).not.toEqual(["const"]);
+	});
+}
+
+function visitPropertySchemas(
+	schema: unknown,
+	pathLabel: string,
+	visit: (schema: Record<string, unknown>, pathLabel: string) => void,
+) {
+	visitSchemaNode(schema, pathLabel, (node, nodePathLabel) => {
+		const properties = isRecord(node.properties) ? node.properties : null;
+		if (!properties) {
+			return;
+		}
+		for (const [propertyName, propertySchema] of Object.entries(properties)) {
+			expect(isRecord(propertySchema), `${nodePathLabel}.${propertyName}`).toBe(
+				true,
+			);
+			visit(
+				propertySchema as Record<string, unknown>,
+				`${nodePathLabel}.${propertyName}`,
+			);
+		}
+	});
+}
+
+function visitSchemaNode(
+	schema: unknown,
+	pathLabel: string,
+	visit: (schema: Record<string, unknown>, pathLabel: string) => void,
+) {
+	expect(isRecord(schema), pathLabel).toBe(true);
+	const node = schema as Record<string, unknown>;
+	visit(node, pathLabel);
+	if (Array.isArray(node.anyOf)) {
+		node.anyOf.forEach((entry, index) =>
+			visitSchemaNode(entry, `${pathLabel}.anyOf[${index}]`, visit),
+		);
+	}
+	if (isRecord(node.properties)) {
+		for (const [propertyName, propertySchema] of Object.entries(
+			node.properties,
+		)) {
+			visitSchemaNode(propertySchema, `${pathLabel}.${propertyName}`, visit);
+		}
+	}
+	if (isRecord(node.items)) {
+		visitSchemaNode(node.items, `${pathLabel}.items`, visit);
+	}
+}
+
+function readSchemaProperties(
+	schema: Record<string, unknown>,
+	pathLabel: string,
+) {
+	expect(isRecord(schema.properties), `${pathLabel}.properties`).toBe(true);
+	return schema.properties as Record<string, unknown>;
+}
+
+function readRequiredProperties(
+	schema: Record<string, unknown>,
+	pathLabel: string,
+) {
+	expect(Array.isArray(schema.required), `${pathLabel}.required`).toBe(true);
+	return schema.required as string[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
