@@ -15,7 +15,7 @@ export function DurabilitySectionBlock({
 			<div className="grid gap-16 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-24">
 				<ScrollReveal>
 					<div className="space-y-3 lg:sticky lg:top-24 lg:h-fit">
-						<h2 className="text-balance text-4xl font-semibold leading-[0.92] tracking-tight sm:text-5xl lg:text-7xl">
+						<h2 className="text-balance font-heading-serif text-4xl font-normal italic leading-[0.92] sm:text-5xl lg:text-7xl">
 							{durabilitySection.title}
 						</h2>
 						<p className="max-w-xl text-pretty text-lg leading-snug text-muted-foreground sm:text-xl">
