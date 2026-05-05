@@ -5,9 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
 
-const { requestWorkflowRunMock } = vi.hoisted(() => ({
-	requestWorkflowRunMock: vi.fn(),
-}));
+const { requestWorkflowRunMock, routerPushMock, toastSuccessMock } = vi.hoisted(
+	() => ({
+		requestWorkflowRunMock: vi.fn(),
+		routerPushMock: vi.fn(),
+		toastSuccessMock: vi.fn(),
+	}),
+);
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -24,8 +28,20 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
+}));
+
 vi.mock("convex/react", () => ({
 	useMutation: () => requestWorkflowRunMock,
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		success: toastSuccessMock,
+	},
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -54,7 +70,7 @@ function createFinding(
 		_id: "codebaseFindings_1",
 		findingId: "finding-source-truth-readiness",
 		rank: 1,
-		status: "needs_approval",
+		status: "ready",
 		title: "Source truth needs the first workflow",
 		category: "source_truth",
 		severity: "high",
@@ -90,6 +106,8 @@ function createFinding(
 describe("WorkspaceFindingDetailPage", () => {
 	beforeEach(() => {
 		requestWorkflowRunMock.mockReset();
+		routerPushMock.mockReset();
+		toastSuccessMock.mockReset();
 	});
 
 	it("renders decision content and bounded actions", async () => {
@@ -128,6 +146,9 @@ describe("WorkspaceFindingDetailPage", () => {
 		expect(
 			screen.getByText("It improves every later local workflow."),
 		).toBeTruthy();
+		expect(
+			screen.getByRole("heading", { name: "Workflow bounds" }),
+		).toBeTruthy();
 		expect(screen.getByText("AGENTS.md:1-40")).toBeTruthy();
 		expect(screen.getByText("bun run typecheck")).toBeTruthy();
 		expect(screen.getByText("Source Truth Agent Readiness")).toBeTruthy();
@@ -148,7 +169,24 @@ describe("WorkspaceFindingDetailPage", () => {
 			screen.getByRole("button", { name: /Copy local evidence ref/i }),
 		);
 		expect(writeTextMock).toHaveBeenCalledWith("AGENTS.md:1-40");
-		expect(screen.getByText("Local evidence ref copied.")).toBeTruthy();
+		expect(screen.queryByText("Local evidence ref copied.")).toBeNull();
+		expect(toastSuccessMock).toHaveBeenCalledWith(
+			"Local evidence ref copied.",
+			{
+				action: expect.objectContaining({
+					label: "View runs",
+				}),
+				id: "workspace-finding-detail-copy-evidence-ref-success",
+				description: "Use Runs to match this ref to the local report history.",
+				duration: 6000,
+				position: "bottom-right",
+			},
+		);
+		const toastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Local evidence ref copied.",
+		)?.[1];
+		toastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/runs");
 
 		await user.click(
 			screen.getByRole("button", { name: /Create branch and run workflow/i }),
@@ -178,6 +216,238 @@ describe("WorkspaceFindingDetailPage", () => {
 		expect(visibleText).not.toContain("transcript");
 		expect(screen.queryByRole("button", { name: /Open PR/i })).toBeNull();
 		expect(screen.queryByRole("button", { name: /Queue worker/i })).toBeNull();
+	});
+
+	it("renders blocked findings as unavailable and never requests a workflow", async () => {
+		const user = userEvent.setup();
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, "clipboard", {
+			configurable: true,
+			value: { writeText: writeTextMock },
+		});
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[
+					createFinding({
+						status: "blocked",
+						blockedReason: "Codex auth is blocked on the paired machine.",
+					}),
+				]}
+				findingRouteId="finding-source-truth-readiness"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+			/>,
+		);
+
+		expect(
+			screen.getByText(
+				"This finding is blocked. Resolve the blocker before starting a workflow.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByText("Reason: Codex auth is blocked on the paired machine."),
+		).toBeTruthy();
+		expect(
+			screen.queryByRole("button", {
+				name: /Create branch and run workflow/i,
+			}),
+		).toBeNull();
+		const blockedWorkflowButton = screen.getByRole("button", {
+			name: /Workflow blocked/i,
+		}) as HTMLButtonElement;
+		expect(blockedWorkflowButton.disabled).toBe(true);
+
+		await user.click(
+			screen.getByRole("button", { name: /Copy local evidence ref/i }),
+		);
+
+		expect(writeTextMock).toHaveBeenCalledWith("AGENTS.md:1-40");
+		expect(requestWorkflowRunMock).not.toHaveBeenCalled();
+		expect(document.body.textContent).not.toContain("Request ID");
+		expect(document.body.textContent).not.toContain("ConvexError");
+	});
+
+	it("renders unsupported ready workflows as unavailable and never requests a workflow", async () => {
+		const user = userEvent.setup();
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, "clipboard", {
+			configurable: true,
+			value: { writeText: writeTextMock },
+		});
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[
+					createFinding({
+						findingId: "finding-proof-harness",
+						title: "Proof harness is missing",
+						category: "proof",
+						recommendedWorkflowId: "proof-harness",
+					}),
+				]}
+				findingRouteId="finding-proof-harness"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+			/>,
+		);
+
+		expect(screen.getByText("Proof Harness")).toBeTruthy();
+		expect(
+			screen.getByText(
+				"This workflow is not available in the local runner yet.",
+			),
+		).toBeTruthy();
+		expect(screen.getByText("Reason: proof-harness")).toBeTruthy();
+		expect(
+			screen.queryByRole("button", {
+				name: /Create branch and run workflow/i,
+			}),
+		).toBeNull();
+		const unavailableWorkflowButton = screen.getByRole("button", {
+			name: /Workflow unavailable/i,
+		}) as HTMLButtonElement;
+		expect(unavailableWorkflowButton.disabled).toBe(true);
+
+		await user.click(unavailableWorkflowButton);
+		await user.click(
+			screen.getByRole("button", { name: /Copy local evidence ref/i }),
+		);
+
+		expect(writeTextMock).toHaveBeenCalledWith("AGENTS.md:1-40");
+		expect(requestWorkflowRunMock).not.toHaveBeenCalled();
+		expect(document.body.textContent).not.toContain(
+			"workspace:requestWorkspaceWorkflowRun",
+		);
+		expect(document.body.textContent).not.toContain("ConvexError");
+	});
+
+	it("keeps non-ready workflow states from starting duplicate runs", () => {
+		const unavailableStates: Array<{
+			status: WorkspaceFindingDocument["status"];
+			buttonLabel: RegExp;
+			description: string;
+		}> = [
+			{
+				status: "needs_approval",
+				buttonLabel: /Waiting for approval/i,
+				description:
+					"This finding still needs approval. Approve the finding before starting a workflow.",
+			},
+			{
+				status: "running",
+				buttonLabel: /Workflow running/i,
+				description:
+					"A workflow is already running for this finding. Review the current run state before starting another workflow.",
+			},
+			{
+				status: "done",
+				buttonLabel: /Workflow completed/i,
+				description:
+					"This finding already has completed proof. Review Runs before starting any deliberate rerun.",
+			},
+		];
+
+		for (const unavailableState of unavailableStates) {
+			const { unmount } = render(
+				<WorkspaceFindingDetailPage
+					initialFindings={[
+						createFinding({
+							status: unavailableState.status,
+						}),
+					]}
+					findingRouteId="finding-source-truth-readiness"
+					projectId="workspaceProjects_1"
+					activeRunnerId="workspaceRunnerBindings_1"
+					approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+				/>,
+			);
+
+			expect(screen.getByText(unavailableState.description)).toBeTruthy();
+			expect(
+				screen.queryByRole("button", {
+					name: /Create branch and run workflow/i,
+				}),
+			).toBeNull();
+			const unavailableWorkflowButton = screen.getByRole("button", {
+				name: unavailableState.buttonLabel,
+			}) as HTMLButtonElement;
+			expect(unavailableWorkflowButton.disabled).toBe(true);
+			unmount();
+		}
+
+		expect(requestWorkflowRunMock).not.toHaveBeenCalled();
+	});
+
+	it("shows a friendly inline error when a workflow request is rejected", async () => {
+		const user = userEvent.setup();
+		requestWorkflowRunMock.mockRejectedValue(
+			new Error(
+				"[CONVEX M(workspace:requestWorkspaceWorkflowRun)] Uncaught ConvexError: Blocked findings cannot start workflows\nRequest ID: 604cef4c0fefa456",
+			),
+		);
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[createFinding()]}
+				findingRouteId="finding-source-truth-readiness"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /Create branch and run workflow/i }),
+		);
+
+		expect(
+			await screen.findByText(
+				"This finding is blocked. Resolve the blocker before starting a workflow.",
+			),
+		).toBeTruthy();
+		expect(document.body.textContent).not.toContain(
+			"workspace:requestWorkspaceWorkflowRun",
+		);
+		expect(document.body.textContent).not.toContain("ConvexError");
+		expect(document.body.textContent).not.toContain("604cef4c0fefa456");
+	});
+
+	it("shows a friendly inline error when the backend rejects an unsupported workflow", async () => {
+		const user = userEvent.setup();
+		requestWorkflowRunMock.mockRejectedValue(
+			new Error(
+				"[CONVEX M(workspace:requestWorkspaceWorkflowRun)] Uncaught ConvexError: Workflow is not supported by the local runner\nRequest ID: 134a84a54dedc72c",
+			),
+		);
+
+		render(
+			<WorkspaceFindingDetailPage
+				initialFindings={[createFinding()]}
+				findingRouteId="finding-source-truth-readiness"
+				projectId="workspaceProjects_1"
+				activeRunnerId="workspaceRunnerBindings_1"
+				approvalTimestamp={Date.UTC(2026, 4, 4, 21, 0)}
+			/>,
+		);
+
+		await user.click(
+			screen.getByRole("button", { name: /Create branch and run workflow/i }),
+		);
+
+		expect(
+			await screen.findByText(
+				"This workflow is not available in the local runner yet.",
+			),
+		).toBeTruthy();
+		expect(requestWorkflowRunMock).toHaveBeenCalledOnce();
+		expect(document.body.textContent).not.toContain(
+			"workspace:requestWorkspaceWorkflowRun",
+		);
+		expect(document.body.textContent).not.toContain("ConvexError");
+		expect(document.body.textContent).not.toContain("134a84a54dedc72c");
 	});
 
 	it("renders unavailable state for a missing finding", () => {

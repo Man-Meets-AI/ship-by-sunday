@@ -7,6 +7,7 @@ import {
 	writeLocalProjectState,
 } from "../src/core/local-project-state";
 import {
+	resolveLocalRunnerHome,
 	readRunnerCredential,
 	writeRunnerCredential,
 } from "../src/core/local-runner-home";
@@ -16,6 +17,21 @@ import {
 } from "./test-utils";
 
 describe("local runner state", () => {
+	it("uses the short SBS runner home by default", () => {
+		expect(
+			resolveLocalRunnerHome({ HOME: "/Users/tester" } as NodeJS.ProcessEnv),
+		).toBe(path.resolve("/Users/tester/.sbs/runner"));
+	});
+
+	it("falls back to the OS home directory when HOME is empty", () => {
+		const runnerHome = resolveLocalRunnerHome({
+			HOME: "",
+		} as NodeJS.ProcessEnv);
+
+		expect(runnerHome).not.toBe(path.resolve(".sbs/runner"));
+		expect(runnerHome.endsWith(path.join(".sbs", "runner"))).toBe(true);
+	});
+
 	it("keeps repo-local metadata separate from user-home credentials", async () => {
 		const repositoryRoot = await createTemporaryDirectory("sbs-runner-repo-");
 		const runnerHome = await createTemporaryDirectory("sbs-runner-home-");

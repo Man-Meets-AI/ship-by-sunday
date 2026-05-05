@@ -43,6 +43,7 @@ export type RunnerEventPayload =
 			runnerMode: "daemon" | "one_shot";
 			machineDisplayName?: string;
 			runnerVersion?: string;
+			repositoryDisplayName?: string;
 	  }
 	| {
 			eventType: "runner.heartbeat";

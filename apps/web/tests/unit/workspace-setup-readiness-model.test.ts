@@ -180,6 +180,98 @@ describe("workspace setup readiness model", () => {
 		});
 	});
 
+	it("uses latest runner check events by canonical check key", () => {
+		const pairedRunner = {
+			_id: "workspaceRunnerBindings_1",
+			status: "paired" as const,
+			pairingStatus: "paired" as const,
+			runnerMode: "daemon" as const,
+			runnerLabel: "Local daemon",
+			machineDisplayName: "Parker MacBook",
+			machineHealthStatus: "warning" as const,
+			projectHealthStatus: "warning" as const,
+			lastEventAt: now - 500,
+		};
+		const olderBlockedGithubAuth = completedSetupEvent({
+			scope: "machine",
+			checkKey: "github-auth",
+			status: "blocked",
+			summary: "GitHub CLI auth is missing.",
+		});
+		const newerReadyGithubAuth = completedSetupEvent({
+			scope: "machine",
+			checkKey: "github-auth",
+			status: "ready",
+			summary: "GitHub CLI auth is ready.",
+		});
+		newerReadyGithubAuth.createdAt = now - 100;
+		const codexAuthWarning = completedSetupEvent({
+			scope: "machine",
+			checkKey: "codex-auth",
+			status: "warning",
+			summary: "Codex auth has warnings.",
+		});
+		codexAuthWarning.createdAt = now - 100;
+		const codexConfigWarning = completedSetupEvent({
+			scope: "machine",
+			checkKey: "sbs-codex-config",
+			status: "warning",
+			summary: "Codex config has warnings.",
+		});
+		codexConfigWarning.createdAt = now - 100;
+		const dirtyStateWarning = completedSetupEvent({
+			scope: "project",
+			checkKey: "git-worktree-state",
+			status: "warning",
+			summary: "Git worktree has local changes.",
+		});
+		dirtyStateWarning.createdAt = now - 100;
+		const model = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				runnerBindings: [pairedRunner],
+				activeRunner: pairedRunner,
+				setupEvents: [
+					...requiredReadySetupEvents(),
+					olderBlockedGithubAuth,
+					newerReadyGithubAuth,
+					codexAuthWarning,
+					codexConfigWarning,
+					completedSetupEvent({
+						scope: "project",
+						checkKey: "git-repository",
+					}),
+					completedSetupEvent({
+						scope: "project",
+						checkKey: "git-origin",
+					}),
+					dirtyStateWarning,
+					completedSetupEvent({
+						scope: "project",
+						checkKey: "package-manager",
+					}),
+				],
+				pairingCommand: null,
+			}),
+			now,
+		);
+
+		expect(findRow(model, "gh_auth")).toMatchObject({
+			status: "ready",
+			summary: "GitHub CLI auth is ready.",
+		});
+		expect(findRow(model, "codex_auth").status).toBe("warning");
+		expect(findRow(model, "codex_config").status).toBe("warning");
+		expect(findRow(model, "dirty_state").status).toBe("warning");
+		expect(
+			model.sections.find((section) => section.id === "machine")?.status,
+		).toBe("warning");
+		expect(
+			model.sections.find((section) => section.id === "project")?.status,
+		).toBe("warning");
+		expect(model.doctorPassAction.disabled).toBe(false);
+		expect(model.doctorPassAction.disabledReason).toBeNull();
+	});
+
 	it("does not use section-level ready fallbacks for missing required checks", () => {
 		const pairedRunner = {
 			_id: "workspaceRunnerBindings_1",
@@ -222,7 +314,7 @@ describe("workspace setup readiness model", () => {
 		expect(findRow(model, "repo_root").status).toBe("ready");
 		expect(findRow(model, "gh_auth").status).toBe("blocked");
 		expect(findRow(model, "sbs_profiles").status).toBe("blocked");
-		expect(findRow(model, "read_only_mode").status).toBe("blocked");
+		expect(findRow(model, "read_only_mode").status).toBe("warning");
 		expect(model.doctorPassAction.disabled).toBe(true);
 	});
 
@@ -256,7 +348,7 @@ describe("workspace setup readiness model", () => {
 		expect(row.blocksBecause).toContain("read-only profile");
 		expect(row.localAction).toBe("Preview the SBS-managed profile diff.");
 		expect(row.localActionButton.label).toBe("Preview diff");
-		expect(row.retryAction.label).toBe("Retry check");
+		expect(row.retryAction.label).toBe("Run setup check locally");
 	});
 
 	it.each([

@@ -17,6 +17,10 @@ import {
 	sha256Digest,
 	writeJsonArtifact,
 } from "./artifacts";
+import {
+	createApprovedFindingsDigest,
+	normalizeFindingsForUpload,
+} from "./approved-findings-digest";
 import { runCodebaseIntakeProbe } from "./codebase-intake-probe";
 import { writeCodexSetupAudit } from "./codex-setup-audit";
 import { writeCommandProofMap } from "./command-proof-map";
@@ -436,46 +440,6 @@ function createSyncPreview({
 		...previewPayload,
 		previewDigest,
 	};
-}
-
-function createApprovedFindingsDigest({
-	runId,
-	doctorPassRunId,
-	findings,
-}: {
-	runId: string;
-	doctorPassRunId: string;
-	findings: DoctorFinding[];
-}) {
-	return sha256Digest({
-		schemaVersion: DOCTOR_PASS_ARTIFACT_SCHEMA_VERSION,
-		runId,
-		doctorPassRunId,
-		findings: normalizeFindingsForUpload(findings),
-	});
-}
-
-function normalizeFindingsForUpload(findings: DoctorFinding[]) {
-	return findings.map((finding) => ({
-		findingId: finding.findingId,
-		rank: finding.rank,
-		status: finding.status,
-		title: finding.title,
-		category: finding.category,
-		severity: finding.severity,
-		confidence: finding.confidence,
-		buyerImpact: finding.buyerImpact,
-		blastRadius: finding.blastRadius,
-		proofPath: finding.proofPath,
-		proofability: finding.proofability,
-		permissionRequired: finding.permissionRequired,
-		recommendedWorkflowId: finding.recommendedWorkflowId,
-		whyThisNow: finding.whyThisNow,
-		evidenceRefs: finding.evidenceRefs,
-		blockedReason: finding.blockedReason,
-		syncSensitivity: finding.syncSensitivity,
-		localReportRef: finding.localReportRef,
-	}));
 }
 
 async function writeRedactionReport({

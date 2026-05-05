@@ -47,13 +47,12 @@ export function AppShellLocalNavRail({
 			<div className="xl:hidden">{compactDisclosure}</div>
 			<aside
 				className={cn(
-					"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start",
-					collapsed ? "xl:pr-0" : "xl:border-r xl:border-border/60 xl:pr-6",
+					"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:pr-2",
 				)}
 			>
 				<div
 					className={cn(
-						"mb-2 hidden xl:flex",
+						"mb-3 hidden xl:flex",
 						collapsed ? "xl:justify-center" : "xl:justify-end",
 					)}
 				>
@@ -70,12 +69,12 @@ export function AppShellLocalNavRail({
 						aria-expanded={!collapsed}
 						aria-controls="app-shell-local-nav-content"
 						onClick={onToggleCollapsed}
-						className="size-7 shrink-0 rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground motion-reduce:transition-none"
+						className="size-6 shrink-0 rounded-md text-muted-foreground/70 hover:bg-foreground/[0.04] hover:text-foreground motion-reduce:transition-none"
 					>
 						{collapsed ? (
-							<ChevronRight className="size-4" aria-hidden />
+							<ChevronRight className="size-3.5" aria-hidden />
 						) : (
-							<ChevronLeft className="size-4" aria-hidden />
+							<ChevronLeft className="size-3.5" aria-hidden />
 						)}
 					</Button>
 				</div>

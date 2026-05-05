@@ -215,11 +215,20 @@ describe("workspace support read model", () => {
 					category: "other",
 					recommendedWorkflowId: "mature-repo-adoption",
 				}),
+				createFinding({
+					_id: "codebaseFindings_4",
+					findingId: "finding-docs-spine-adoption",
+					rank: 4,
+					status: "ready",
+					title: "Docs spine needs adoption",
+					category: "other",
+					recommendedWorkflowId: "docs-spine-adoption",
+				}),
 			],
 			workflowRuns: [createWorkflowRun()],
 		});
 
-		expect(model.findingBackedCount).toBe(3);
+		expect(model.findingBackedCount).toBe(4);
 		expect(model.recommendedWorkflow).toMatchObject({
 			id: "source-truth-agent-readiness",
 			statusLabel: "recommended",
@@ -284,6 +293,15 @@ describe("workspace support read model", () => {
 			requiredPermission: "Workspace write for local adoption audit",
 			typicalProof:
 				"Sync-safe convention audit, adoption Program packet, first ExecPlan draft, and blocked-proof notes.",
+		});
+		expect(
+			model.rows.find((row) => row.id === "docs-spine-adoption"),
+		).toMatchObject({
+			statusLabel: "available now",
+			relatedFindingTitle: "Docs spine needs adoption",
+			requiredPermission: "Workspace write for local docs-spine scaffold",
+			typicalProof:
+				"Docs-spine manifest, minimal repo facts, local proof, sync preview, and blocked parity facts.",
 		});
 
 		const renderedText = JSON.stringify(model).toLowerCase();

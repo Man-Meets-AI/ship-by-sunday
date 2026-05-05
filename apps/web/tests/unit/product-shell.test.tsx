@@ -193,8 +193,9 @@ describe("AppShell", () => {
 		expect(markup).toContain("Compact codebase rail");
 		expect(markup).toContain("Desktop codebase rail");
 		expect(markup).toContain(
-			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:border-r xl:border-border/60 xl:pr-6",
+			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:pr-2",
 		);
+		expect(markup).toContain('aria-label="Collapse local navigation"');
 		expect(markup).not.toContain("xl:rounded-xl");
 		expect(markup).not.toContain("xl:bg-background");
 		expect(markup).not.toContain("xl:p-4");

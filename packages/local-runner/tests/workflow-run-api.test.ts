@@ -1,6 +1,15 @@
 import type { RunnerCredential } from "../src/core/local-runner-home";
 import type { LocalProjectState } from "../src/core/local-project-state";
 import { claimApprovedWorkflowRun } from "../src/core/workflow-run-api";
+import {
+	DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS,
+	DOCS_SPINE_ADOPTION_PROOF_COMMANDS,
+	DOCS_SPINE_ADOPTION_ROLLBACK_NOTES,
+	DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
+	DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY,
+} from "../src/workflows/docs-spine-adoption/manifest";
 
 function createState(): LocalProjectState {
 	return {
@@ -90,6 +99,33 @@ function createMatureRepoAdoptionPacket(
 		localWorkflowPacketRef:
 			".sbs/runs/workflowRuns_mature/workflow-packet.json",
 		localProofRef: ".sbs/runs/workflowRuns_mature/proof.json",
+		...overrides,
+	};
+}
+
+function createDocsSpineAdoptionPacket(
+	overrides: Record<string, unknown> = {},
+) {
+	return {
+		workflowRunId: "workflowRuns_docs_spine",
+		workflowId: "docs-spine-adoption",
+		workflowVersion: "v1",
+		branchName: "sbs/docs-spine-adoption-20260505-1200",
+		profileName: "sbs-workspace-write",
+		writeLeaseId: "lease_workflowRuns_docs_spine",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [...DOCS_SPINE_ADOPTION_EXPECTED_OUTPUTS],
+		allowedTouchTargets: [...DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS],
+		disallowedTouchTargets: [...DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS],
+		proofCommands: [...DOCS_SPINE_ADOPTION_PROOF_COMMANDS],
+		syncPolicySummary: DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY,
+		stopConditions: [...DOCS_SPINE_ADOPTION_STOP_CONDITIONS],
+		rollbackNotes: DOCS_SPINE_ADOPTION_ROLLBACK_NOTES,
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_docs_spine/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_docs_spine/proof.json",
 		...overrides,
 	};
 }
@@ -197,6 +233,17 @@ describe("workflow run API", () => {
 		expect(workflowRun?.workflowId).toBe("mature-repo-adoption");
 	});
 
+	it("accepts docs spine adoption workflow packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json(createDocsSpineAdoptionPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe("docs-spine-adoption");
+	});
+
 	it("rejects mature repo adoption workflow packets that omit disallowed authorities", async () => {
 		await expect(
 			claimApprovedWorkflowRun({
@@ -210,5 +257,20 @@ describe("workflow run API", () => {
 					),
 			}),
 		).rejects.toThrow("Mature repo adoption disallowed touch targets");
+	});
+
+	it("rejects docs spine adoption workflow packets that omit disallowed authorities", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createDocsSpineAdoptionPacket({
+							disallowedTouchTargets: ["runtime app code"],
+						}),
+					),
+			}),
+		).rejects.toThrow("Docs spine adoption disallowed touch targets");
 	});
 });

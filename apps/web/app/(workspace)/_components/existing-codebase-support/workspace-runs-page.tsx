@@ -4,13 +4,13 @@ import { useMemo } from "react";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import { WorkspaceOperatorSummaryCard } from "@/app/(workspace)/_components/workspace-operator-summary-card";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import {
 	buildWorkspaceRunsModel,
 	type WorkspaceRunHistoryState,
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
 import { DoctorPassRuns, EmptyRuns } from "./workspace-runs-sections";
-import { WorkspaceSupportMetric } from "./workspace-support-shared";
 import { WorkflowRuns } from "./workspace-workflow-runs-section";
 
 export function WorkspaceRunsPage({
@@ -52,17 +52,10 @@ export function WorkspaceRunsPage({
 							controls or PR handoff.
 						</p>
 					</div>
-					<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<WorkspaceSupportMetric
-							label="Doctor passes"
-							value={runsModel.doctorPassRows.length}
-						/>
-						<WorkspaceSupportMetric
-							label="Workflows"
-							value={runsModel.workflowRows.length}
-						/>
-						<WorkspaceSupportMetric label="Total" value={runsModel.totalRuns} />
-					</div>
+					<WorkspaceOperatorSummaryCard
+						title="Runs summary"
+						rows={buildRunsSummaryRows(initialRunHistory, runsModel)}
+					/>
 				</header>
 
 				{runsModel.hasRuns ? (
@@ -76,4 +69,69 @@ export function WorkspaceRunsPage({
 			</div>
 		</AppShell>
 	);
+}
+
+function buildRunsSummaryRows(
+	runHistory: WorkspaceRunHistoryState,
+	runsModel: ReturnType<typeof buildWorkspaceRunsModel>,
+) {
+	const latestDoctorPassRun =
+		runHistory.doctorPassRuns.find((run) => run.status !== "deleted") ?? null;
+	const localRunId =
+		latestDoctorPassRun?.localRunId ??
+		getLocalRunId(latestDoctorPassRun?.localReportRef);
+
+	return [
+		{
+			label: "State",
+			value: runsModel.hasRuns ? "Runs recorded" : "No runs yet",
+		},
+		{ label: "Owner", value: runsModel.hasRuns ? "Human" : "Runner" },
+		{
+			label: "Next",
+			value: runsModel.hasRuns ? "Inspect run history" : "Run Doctor Pass",
+		},
+		{
+			label: "Doctor",
+			value: String(runsModel.doctorPassRows.length),
+			mono: true,
+		},
+		{
+			label: "Workflows",
+			value: String(runsModel.workflowRows.length),
+			mono: true,
+		},
+		{
+			label: "Total",
+			value: String(runsModel.totalRuns),
+			mono: true,
+		},
+		...(latestDoctorPassRun
+			? [
+					{
+						label: "Server run",
+						value: latestDoctorPassRun._id,
+						copyValue: latestDoctorPassRun._id,
+						mono: true,
+					},
+				]
+			: []),
+		...(localRunId
+			? [
+					{
+						label: "Local run",
+						value: localRunId,
+						copyValue: localRunId,
+						mono: true,
+					},
+				]
+			: []),
+	];
+}
+
+function getLocalRunId(localReportRef: string | undefined) {
+	const match = localReportRef?.match(
+		/^\.sbs\/reports\/doctor-pass\/([^/]+)\//,
+	);
+	return match?.[1] ?? null;
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { SidebarGroupLabel, SidebarSeparator } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { WorkspacePrimaryNavState } from "@/lib/workspace-navigation/build-primary-nav-model";
 import type {
@@ -12,19 +11,19 @@ import type {
 function getStateClassName(state: WorkspacePrimaryNavState) {
 	switch (state) {
 		case "active":
-			return "bg-muted/70 font-semibold text-foreground";
+			return "bg-foreground/[0.06] font-medium text-foreground before:absolute before:inset-y-1.5 before:left-0 before:w-[2px] before:rounded-full before:bg-foreground/70";
 		case "complete":
-			return "text-foreground/80 hover:bg-muted/60 hover:text-foreground";
+			return "text-foreground/85 hover:bg-foreground/[0.04] hover:text-foreground";
 		case "disabled":
-			return "cursor-not-allowed text-muted-foreground/35";
+			return "cursor-not-allowed text-muted-foreground/40";
 		default:
-			return "text-muted-foreground/80 hover:bg-muted/60 hover:text-foreground";
+			return "text-muted-foreground hover:bg-foreground/[0.04] hover:text-foreground";
 	}
 }
 
 function LocalNavItem({ item }: { item: WorkspaceLocalNavItem }) {
 	const itemClassName = cn(
-		"flex h-8 w-full min-w-0 items-center rounded-md px-2 text-left text-sm transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+		"relative flex h-8 w-full min-w-0 items-center rounded-md px-2.5 text-left text-sm transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
 		getStateClassName(item.state),
 	);
 
@@ -49,27 +48,24 @@ export function WorkspaceLocalNavRail({
 	model: WorkspaceLocalNavModel;
 }) {
 	return (
-		<div className="space-y-3">
-			{model.sections.map((section, index) => (
-				<section key={section.id} className="space-y-1">
-					<div className="space-y-0.5">
-						<SidebarGroupLabel className="px-2">
+		<div className="space-y-6">
+			{model.sections.map((section) => (
+				<section key={section.id} className="space-y-2">
+					<div className="space-y-1 px-2.5">
+						<h3 className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
 							{section.label}
-						</SidebarGroupLabel>
+						</h3>
 						{section.description ? (
-							<p className="px-2 text-xs leading-5 text-muted-foreground/60">
+							<p className="text-xs leading-5 text-muted-foreground/80">
 								{section.description}
 							</p>
 						) : null}
 					</div>
-					<div className="grid gap-1">
+					<div className="grid gap-0.5">
 						{section.items.map((item) => (
 							<LocalNavItem key={item.id} item={item} />
 						))}
 					</div>
-					{index < model.sections.length - 1 ? (
-						<SidebarSeparator className="my-1" />
-					) : null}
 				</section>
 			))}
 		</div>

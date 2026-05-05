@@ -82,6 +82,7 @@ type WorkspaceSetupRunnerBinding = {
 	runnerVersion?: string;
 	machineHealthStatus: "unknown" | "blocked" | "warning" | "ready";
 	projectHealthStatus: "unknown" | "blocked" | "warning" | "ready";
+	pairedAt?: number;
 	lastHeartbeatAt?: number;
 	lastEventAt?: number;
 	pairingTokenExpiresAt?: number;
@@ -186,7 +187,7 @@ type CheckDefinition = {
 
 const retryAction: SetupCheckAction = {
 	kind: "retry_check",
-	label: "Retry check",
+	label: "Run setup check locally",
 };
 
 const fixInTerminalAction: SetupCheckAction = {
@@ -402,7 +403,7 @@ const projectCheckDefinitions: CheckDefinition[] = [
 		id: "read_only_mode",
 		label: "Safe read-only mode",
 		scope: "project",
-		required: true,
+		required: false,
 		pendingCause: "The runner has not confirmed read-only execution yet.",
 		readySummary: "Read-only doctor-pass execution is available.",
 		warningCause: "Read-only mode is available with sandbox warnings.",
@@ -480,6 +481,27 @@ function normalizeBackendStatus(
 	return definition.required ? "blocked" : "warning";
 }
 
+function getCanonicalSetupCheckIds(checkKey: string) {
+	switch (checkKey) {
+		case "codex-auth":
+			return ["codex_auth"];
+		case "sbs-codex-config":
+			return ["sbs_profiles", "codex_config"];
+		case "github-auth":
+			return ["gh_auth"];
+		case "git-repository":
+			return ["repo_root"];
+		case "git-origin":
+			return ["git_remote"];
+		case "git-worktree-state":
+			return ["dirty_state"];
+		case "package-manager":
+			return ["package_manager"];
+		default:
+			return [checkKey];
+	}
+}
+
 function latestCompletedSetupEvents(state: WorkspaceSetupState) {
 	const latestEvents = new Map<string, WorkspaceSetupEvent>();
 
@@ -488,10 +510,35 @@ function latestCompletedSetupEvents(state: WorkspaceSetupState) {
 			continue;
 		}
 
-		const eventKey = `${event.payload.scope}:${event.payload.checkKey}`;
+		for (const checkId of getCanonicalSetupCheckIds(event.payload.checkKey)) {
+			const eventKey = `${event.payload.scope}:${checkId}`;
+			const current = latestEvents.get(eventKey);
+			if (!current || current.createdAt < event.createdAt) {
+				latestEvents.set(eventKey, event);
+			}
+		}
+	}
+
+	if (state.activeRunner?.status === "paired") {
+		const eventKey = "machine:daemon_health";
+		const createdAt =
+			state.activeRunner.lastEventAt ??
+			state.activeRunner.lastHeartbeatAt ??
+			state.activeRunner.pairedAt ??
+			0;
 		const current = latestEvents.get(eventKey);
-		if (!current || current.createdAt < event.createdAt) {
-			latestEvents.set(eventKey, event);
+		if (!current || current.createdAt < createdAt) {
+			latestEvents.set(eventKey, {
+				eventType: "setup.check.completed",
+				createdAt,
+				payload: {
+					eventType: "setup.check.completed",
+					scope: "machine",
+					checkKey: "daemon_health",
+					status: "ready",
+					summary: "The local runner is paired.",
+				},
+			});
 		}
 	}
 
@@ -642,6 +689,29 @@ function formatTokenExpiry(tokenExpiresAt: number | null, now: number) {
 	return `Pairing token expires in ${remainingMinutes} min.`;
 }
 
+function formatLastRunnerSync(timestamp: number | null, now: number) {
+	if (!timestamp) {
+		return "No runner checks synced yet";
+	}
+
+	const elapsedMs = Math.max(0, now - timestamp);
+	const elapsedMinutes = Math.floor(elapsedMs / 60_000);
+	if (elapsedMinutes < 1) {
+		return "just now";
+	}
+	if (elapsedMinutes < 60) {
+		return `${elapsedMinutes} min ago`;
+	}
+
+	const elapsedHours = Math.floor(elapsedMinutes / 60);
+	if (elapsedHours < 24) {
+		return `${elapsedHours} hr ago`;
+	}
+
+	const elapsedDays = Math.floor(elapsedHours / 24);
+	return `${elapsedDays} day${elapsedDays === 1 ? "" : "s"} ago`;
+}
+
 function getPairingLabel(status: WorkspaceSetupRunnerBinding["pairingStatus"]) {
 	switch (status) {
 		case "waiting":
@@ -708,7 +778,7 @@ function getRepositoryLabel(
 	repositoryBinding: WorkspaceSetupRepositoryBinding,
 ) {
 	if (!repositoryBinding) {
-		return "Repo root will appear after the runner verifies Project Setup.";
+		return "Pending Project Setup";
 	}
 
 	const remoteName = [
@@ -803,6 +873,16 @@ export function buildWorkspaceSetupReadinessModel(
 			expectedRepoRoot:
 				state.repositoryBinding?.displayName ??
 				"Run from the repo root you want diagnosed.",
+			repositoryLabel: getRepositoryLabel(state.repositoryBinding),
+			runnerModeLabel:
+				activeRunner?.runnerMode === "one_shot" ? "one-shot" : "daemon",
+			lastSyncedLabel: formatLastRunnerSync(
+				activeRunner?.lastEventAt ??
+					activeRunner?.lastHeartbeatAt ??
+					activeRunner?.pairedAt ??
+					null,
+				now,
+			),
 			daemonStatusLabel: getRunnerStatusLabel(daemonRunner, "daemon"),
 			oneShotStatusLabel: getRunnerStatusLabel(oneShotRunner, "one_shot"),
 			activeRunnerLabel:
@@ -810,8 +890,7 @@ export function buildWorkspaceSetupReadinessModel(
 				activeRunner?.runnerLabel ??
 				"No runner paired",
 			activeRunnerVersion: activeRunner?.runnerVersion ?? null,
-			canCancel:
-				Boolean(state.pairingCommand?.runnerId) && pairingStatus !== "paired",
+			canCancel: Boolean(state.pairingCommand?.runnerId),
 			cancelRunnerId: state.pairingCommand?.runnerId ?? null,
 		},
 		sections,
@@ -860,7 +939,6 @@ export function buildExistingCodebaseWorkspaceLocalNavModel(
 			{
 				id: "existing-codebase",
 				label: "Existing codebase",
-				description: "Setup, diagnosis, proof, and privacy.",
 				items: [
 					item("setup", "Setup", routeConfig.workspaceSetup, "available"),
 					item(

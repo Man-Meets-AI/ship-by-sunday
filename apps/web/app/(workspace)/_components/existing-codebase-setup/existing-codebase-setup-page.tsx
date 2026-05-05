@@ -1,16 +1,23 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import { WorkspaceOperatorSummaryCard } from "@/app/(workspace)/_components/workspace-operator-summary-card";
+import {
+	showWorkspaceActionErrorToast,
+	showWorkspaceActionSuccessToast,
+} from "@/app/(workspace)/_lib/workspace-action-feedback";
 import {
 	buildExistingCodebaseWorkspaceLocalNavModel,
 	buildWorkspaceSetupReadinessModel,
 	type WorkspaceDefaultOpenDestination,
 } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
+import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { SetupDoctorPassAction } from "./setup-doctor-pass-action";
 import { SetupOpenDestinationControl } from "./setup-open-destination-control";
@@ -30,6 +37,17 @@ type PendingAction =
 	| "doctor_pass"
 	| null;
 
+const workspaceSetupToastIds = {
+	pairingSuccess: "workspace-setup-pairing-success",
+	pairingError: "workspace-setup-pairing-error",
+	cancelPairingSuccess: "workspace-setup-cancel-pairing-success",
+	cancelPairingError: "workspace-setup-cancel-pairing-error",
+	openDestinationSuccess: "workspace-setup-open-destination-success",
+	openDestinationError: "workspace-setup-open-destination-error",
+	doctorPassSuccess: "workspace-setup-doctor-pass-success",
+	doctorPassError: "workspace-setup-doctor-pass-error",
+} as const;
+
 export function ExistingCodebaseSetupPage({
 	initialSetupState,
 	initialRenderedAt,
@@ -37,11 +55,11 @@ export function ExistingCodebaseSetupPage({
 	initialSetupState: WorkspaceSetupState;
 	initialRenderedAt: number;
 }) {
+	const router = useRouter();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const [lastMutationState, setLastMutationState] =
 		useState<WorkspaceSetupState | null>(null);
 	const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 	const projectId =
 		lastMutationState?.project?._id ?? initialSetupState.project?._id;
 	const liveSetupState = useQuery(
@@ -77,7 +95,6 @@ export function ExistingCodebaseSetupPage({
 		}
 
 		setPendingAction(action);
-		setFeedbackMessage(null);
 		try {
 			const nextState = await preparePairing({
 				projectId: setupState.project._id,
@@ -85,17 +102,27 @@ export function ExistingCodebaseSetupPage({
 				regenerate: true,
 			});
 			setLastMutationState(nextState as WorkspaceSetupState);
-			setFeedbackMessage(
-				runnerMode === "one_shot"
-					? "One-shot pairing token ready."
-					: "Pairing token regenerated.",
-			);
+			showWorkspaceActionSuccessToast({
+				id: workspaceSetupToastIds.pairingSuccess,
+				title:
+					runnerMode === "one_shot"
+						? "One-shot pairing token ready"
+						: "Pairing token regenerated",
+			});
 		} catch (error) {
-			setFeedbackMessage(
-				error instanceof Error
-					? error.message
-					: "Unable to prepare pairing token.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspaceSetupToastIds.pairingError,
+				error,
+				fallbackMessage: "Unable to prepare pairing token.",
+				report: {
+					title: "Workspace setup pairing preparation failed",
+					code: "workspace_setup_pairing_prepare_failed",
+					pathname: routeConfig.workspaceSetup,
+					details: {
+						runnerMode,
+					},
+				},
+			});
 		} finally {
 			setPendingAction(null);
 		}
@@ -108,18 +135,27 @@ export function ExistingCodebaseSetupPage({
 		}
 
 		setPendingAction("cancel");
-		setFeedbackMessage(null);
 		try {
 			const nextState = await cancelPairing({
 				projectId: setupState.project._id,
 				runnerId: cancelRunnerId,
 			});
 			setLastMutationState(nextState as WorkspaceSetupState);
-			setFeedbackMessage("Pairing canceled.");
+			showWorkspaceActionSuccessToast({
+				id: workspaceSetupToastIds.cancelPairingSuccess,
+				title: "Pairing canceled",
+			});
 		} catch (error) {
-			setFeedbackMessage(
-				error instanceof Error ? error.message : "Unable to cancel pairing.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspaceSetupToastIds.cancelPairingError,
+				error,
+				fallbackMessage: "Unable to cancel pairing.",
+				report: {
+					title: "Workspace setup pairing cancel failed",
+					code: "workspace_setup_pairing_cancel_failed",
+					pathname: routeConfig.workspaceSetup,
+				},
+			});
 		} finally {
 			setPendingAction(null);
 		}
@@ -129,16 +165,30 @@ export function ExistingCodebaseSetupPage({
 		defaultOpenDestination: WorkspaceDefaultOpenDestination,
 	) {
 		setPendingAction("open_destination");
-		setFeedbackMessage(null);
 		try {
 			await saveWorkspaceProject({ defaultOpenDestination });
-			setFeedbackMessage("Default open destination saved.");
+			showWorkspaceActionSuccessToast({
+				id: workspaceSetupToastIds.openDestinationSuccess,
+				title: "Open destination saved",
+				description:
+					model.openDestination.options.find(
+						(option) => option.value === defaultOpenDestination,
+					)?.label ?? defaultOpenDestination,
+			});
 		} catch (error) {
-			setFeedbackMessage(
-				error instanceof Error
-					? error.message
-					: "Unable to save open destination.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspaceSetupToastIds.openDestinationError,
+				error,
+				fallbackMessage: "Unable to save open destination.",
+				report: {
+					title: "Workspace setup open destination save failed",
+					code: "workspace_setup_open_destination_save_failed",
+					pathname: routeConfig.workspaceSetup,
+					details: {
+						defaultOpenDestination,
+					},
+				},
+			});
 		} finally {
 			setPendingAction(null);
 		}
@@ -154,7 +204,6 @@ export function ExistingCodebaseSetupPage({
 		}
 
 		setPendingAction("doctor_pass");
-		setFeedbackMessage(null);
 		try {
 			const runnerId = setupState.activeRunner?._id;
 			const repositoryBindingId = setupState.repositoryBinding?._id;
@@ -164,11 +213,28 @@ export function ExistingCodebaseSetupPage({
 				...(runnerId ? { runnerId } : {}),
 				...(repositoryBindingId ? { repositoryBindingId } : {}),
 			});
-			setFeedbackMessage("Doctor pass started.");
+			showWorkspaceActionSuccessToast({
+				action: {
+					label: "Open Doctor Pass",
+					onClick: () => router.push(routeConfig.workspaceDoctorPass),
+				},
+				id: workspaceSetupToastIds.doctorPassSuccess,
+				title: "Doctor pass started",
+			});
 		} catch (error) {
-			setFeedbackMessage(
-				error instanceof Error ? error.message : "Unable to start doctor pass.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspaceSetupToastIds.doctorPassError,
+				error,
+				fallbackMessage: "Unable to start doctor pass.",
+				report: {
+					title: "Workspace setup doctor pass start failed",
+					code: "workspace_setup_doctor_pass_start_failed",
+					pathname: routeConfig.workspaceSetup,
+					details: {
+						runnerMode: setupState.activeRunner?.runnerMode ?? "daemon",
+					},
+				},
+			});
 		} finally {
 			setPendingAction(null);
 		}
@@ -196,36 +262,23 @@ export function ExistingCodebaseSetupPage({
 							{model.subtitle}
 						</p>
 					</div>
-					<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Project</span>
-							<span className="truncate font-medium text-foreground">
-								{model.projectLabel}
-							</span>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Repository</span>
-							<span className="truncate font-medium text-foreground">
-								{model.repositoryLabel}
-							</span>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Runner</span>
-							<span className="truncate font-medium text-foreground">
-								{model.pairing.activeRunnerLabel}
-							</span>
-						</div>
-					</div>
+					<WorkspaceOperatorSummaryCard
+						title="Setup summary"
+						rows={[
+							{ label: "Project", value: model.projectLabel },
+							{ label: "Repository", value: model.repositoryLabel },
+							{ label: "Runner", value: model.pairing.activeRunnerLabel },
+							{ label: "State", value: model.pairing.statusLabel },
+							{ label: "Owner", value: "Human" },
+							{
+								label: "Next",
+								value: model.doctorPassAction.disabled
+									? "Resolve setup blockers"
+									: "Run Doctor Pass",
+							},
+						]}
+					/>
 				</header>
-
-				{feedbackMessage ? (
-					<div
-						className="rounded-lg border border-border/60 bg-muted/30 px-4 py-3 text-sm text-foreground"
-						role="status"
-					>
-						{feedbackMessage}
-					</div>
-				) : null}
 
 				<SetupPairingPanel
 					pairing={model.pairing}

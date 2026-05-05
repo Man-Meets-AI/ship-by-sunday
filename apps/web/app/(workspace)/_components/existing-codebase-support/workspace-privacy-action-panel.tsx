@@ -20,18 +20,30 @@ export function PrivacyActionPanel({
 	onDeleteFindings: () => void;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<div className="flex items-start gap-3">
-				<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
+		<section className="rounded-xl border border-border/60 bg-background p-4">
+			<div className="flex items-center gap-2">
+				<ShieldCheck className="size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
-					<h2 className="text-base font-semibold text-foreground">Controls</h2>
-					<p className="mt-2 text-sm leading-6 text-muted-foreground">
-						These actions change hosted workspace state only. Local files and
-						runner credentials are managed in terminal.
-					</p>
+					<h2 className="text-base font-semibold text-foreground">
+						Hosted-state controls
+					</h2>
 				</div>
 			</div>
-			<div className="mt-4 grid gap-2">
+			<div className="mt-3 grid gap-2 rounded-lg border border-border/60 bg-muted/15 p-3 text-xs leading-5 text-muted-foreground">
+				<p>
+					<span className="font-medium text-foreground">Scope:</span> workspace
+					state only.
+				</p>
+				<p>
+					<span className="font-medium text-foreground">Local files:</span>{" "}
+					terminal-managed.
+				</p>
+				<p>
+					<span className="font-medium text-foreground">Runner creds:</span> not
+					deleted here.
+				</p>
+			</div>
+			<div className="mt-3 grid gap-2">
 				<Button
 					type="button"
 					variant="outline"
@@ -51,7 +63,7 @@ export function PrivacyActionPanel({
 					<Trash2 className="size-4" aria-hidden />
 				</Button>
 			</div>
-			<p className="mt-4 text-sm leading-6 text-muted-foreground">
+			<p className="mt-3 text-sm leading-5 text-muted-foreground">
 				{localReportDeletionNote}
 			</p>
 		</section>

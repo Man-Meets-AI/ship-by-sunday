@@ -21,10 +21,12 @@ type RunnerCredentialFile = {
 };
 
 export function resolveLocalRunnerHome(env: NodeJS.ProcessEnv = process.env) {
-	return path.resolve(
-		env[RUNNER_HOME_ENV_VAR] ??
-			path.join(os.homedir(), ".ship-by-sunday", "runner"),
-	);
+	const configuredRunnerHome = env[RUNNER_HOME_ENV_VAR]?.trim();
+	if (configuredRunnerHome) {
+		return path.resolve(configuredRunnerHome);
+	}
+	const homeDirectory = env.HOME?.trim() || os.homedir();
+	return path.resolve(path.join(homeDirectory, ".sbs", "runner"));
 }
 
 export async function ensureLocalRunnerHome(

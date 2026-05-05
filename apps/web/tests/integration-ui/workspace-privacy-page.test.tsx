@@ -1,7 +1,7 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
 import type {
@@ -14,11 +14,19 @@ const {
 	requestManagedGithubMock,
 	revokeManagedGithubMock,
 	revokeRunnerMock,
+	reportClientErrorMock,
+	routerPushMock,
+	toastErrorMock,
+	toastSuccessMock,
 } = vi.hoisted(() => ({
 	markFindingsDeletedMock: vi.fn(),
 	requestManagedGithubMock: vi.fn(),
 	revokeManagedGithubMock: vi.fn(),
 	revokeRunnerMock: vi.fn(),
+	reportClientErrorMock: vi.fn(),
+	routerPushMock: vi.fn(),
+	toastErrorMock: vi.fn(),
+	toastSuccessMock: vi.fn(),
 }));
 
 vi.mock("@/convex/_generated/api", () => ({
@@ -50,6 +58,23 @@ vi.mock("convex/react", () => ({
 		}
 		throw new Error(`Unexpected mutation ${mutationRef}`);
 	},
+}));
+
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		error: toastErrorMock,
+		success: toastSuccessMock,
+	},
+}));
+
+vi.mock("@/lib/observability/client-error-report", () => ({
+	reportClientError: reportClientErrorMock,
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -151,6 +176,17 @@ function createFinding(): WorkspaceFindingDocument {
 }
 
 describe("WorkspacePrivacyPage", () => {
+	beforeEach(() => {
+		markFindingsDeletedMock.mockReset();
+		requestManagedGithubMock.mockReset();
+		revokeManagedGithubMock.mockReset();
+		revokeRunnerMock.mockReset();
+		reportClientErrorMock.mockReset();
+		routerPushMock.mockReset();
+		toastErrorMock.mockReset();
+		toastSuccessMock.mockReset();
+	});
+
 	it("renders local privacy boundaries and calls existing control mutations", async () => {
 		const user = userEvent.setup();
 		revokeRunnerMock.mockResolvedValue({});
@@ -242,82 +278,28 @@ describe("WorkspacePrivacyPage", () => {
 		);
 
 		expect(
-			screen.getByRole("heading", { name: "Local execution controls" }),
+			screen.getByRole("heading", { name: "Privacy controls" }),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("region", { name: "Privacy summary" }),
 		).toBeTruthy();
 		expect(screen.getByText("Customer repo")).toBeTruthy();
 		expect(screen.getAllByText("customer/app").length).toBeGreaterThan(0);
 		expect(screen.getByText("Parker MacBook")).toBeTruthy();
+		expect(screen.getByText("Open Findings")).toBeTruthy();
 		expect(screen.getByText("Raw source sharing")).toBeTruthy();
 		expect(screen.getByText("Raw terminal log sharing")).toBeTruthy();
 		expect(screen.getByText("Codex transcript sharing")).toBeTruthy();
 		expect(screen.getByText("Approval required")).toBeTruthy();
-		expect(screen.getByText("Execution surfaces")).toBeTruthy();
-		expect(screen.getByText("Local runner")).toBeTruthy();
-		expect(screen.getByText("Default active lane")).toBeTruthy();
-		expect(screen.getByText("Codex cloud handoff")).toBeTruthy();
-		expect(screen.getByText("Customer-owned handoff")).toBeTruthy();
-		expect(screen.getByText("Generated repo")).toBeTruthy();
-		expect(screen.getByText("Generated-codebase lane")).toBeTruthy();
-		expect(screen.getByText("Codex app server")).toBeTruthy();
-		expect(screen.getByText("Generation bridge only")).toBeTruthy();
-		expect(
-			screen.getByText("No GitHub action runs from consent alone"),
-		).toBeTruthy();
-		expect(
-			screen.getByText("No existing customer repository authority"),
-		).toBeTruthy();
 		expect(screen.getByText("sha256:preview")).toBeTruthy();
 		expect(
 			screen.getByText(".sbs/reports/doctor-pass/run-1/sync-preview.json"),
 		).toBeTruthy();
-		expect(screen.getByText("Available by concierge request")).toBeTruthy();
-		expect(screen.getByText("Selected GitHub repository only")).toBeTruthy();
-		expect(screen.getByText("PR authority")).toBeTruthy();
-		expect(screen.getByText("Raw-source visibility")).toBeTruthy();
-		expect(screen.getByText("Proof boundaries")).toBeTruthy();
+		expect(screen.getByText("Hosted-state controls")).toBeTruthy();
+		expect(screen.getByText(/workspace state only/i)).toBeTruthy();
 		expect(
 			screen.getByTestId("workspace-privacy-local-nav").textContent,
 		).toContain("Privacy");
-
-		await user.click(
-			screen.getByRole("button", { name: /Request concierge review/i }),
-		);
-		expect(requestManagedGithubMock).toHaveBeenCalledWith({
-			projectId: "workspaceProjects_1",
-			repositoryBindingId: "workspaceRepositoryBindings_1",
-			acknowledgement: {
-				repoAccess: true,
-				installationScope: true,
-				storagePolicy: true,
-				prAuthority: true,
-				auditLog: true,
-				revocation: true,
-				rawSourceVisibility: true,
-				proofBoundaries: true,
-			},
-		});
-		expect(
-			await screen.findByText(
-				"Managed GitHub concierge request recorded. No GitHub action runs until the next explicit approval.",
-			),
-		).toBeTruthy();
-		expect(screen.getByText(/Managed Github Requested/)).toBeTruthy();
-
-		await user.click(screen.getByRole("button", { name: /Revoke request/i }));
-		expect(revokeManagedGithubMock).toHaveBeenCalledWith({
-			projectId: "workspaceProjects_1",
-			consentId: "managedGithubExecutionConsents_1",
-			reason: "Revoked from workspace privacy controls",
-		});
-		expect(
-			await screen.findByText(
-				"Managed GitHub request revoked. Concierge execution needs a new consent packet.",
-			),
-		).toBeTruthy();
-		expect(
-			screen.getByRole("button", { name: /Request concierge review/i }),
-		).toBeTruthy();
-		expect(screen.getByText(/Managed Github Revoked/)).toBeTruthy();
 
 		await user.click(screen.getByRole("button", { name: /Revoke runner/i }));
 		expect(revokeRunnerMock).toHaveBeenCalledWith({
@@ -325,11 +307,22 @@ describe("WorkspacePrivacyPage", () => {
 			runnerId: "workspaceRunnerBindings_1",
 			reason: "Revoked from workspace privacy controls",
 		});
-		expect(
-			await screen.findByText(
-				"Runner revoked. Pair again from Setup to resume.",
-			),
-		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith("Runner revoked", {
+				action: expect.objectContaining({
+					label: "Open Setup",
+				}),
+				id: "workspace-privacy-revoke-runner-success",
+				description: "Pair again from Setup to resume.",
+				duration: 6000,
+				position: "bottom-right",
+			});
+		});
+		const revokeRunnerToastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Runner revoked",
+		)?.[1];
+		revokeRunnerToastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/setup");
 
 		await user.click(
 			screen.getByRole("button", { name: /Delete synced findings/i }),
@@ -338,9 +331,22 @@ describe("WorkspacePrivacyPage", () => {
 			projectId: "workspaceProjects_1",
 			findingDocumentIds: ["codebaseFindings_1"],
 		});
-		expect(
-			await screen.findByText("Synced findings hidden from the workspace."),
-		).toBeTruthy();
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith("Findings hidden", {
+				action: expect.objectContaining({
+					label: "View findings",
+				}),
+				id: "workspace-privacy-delete-findings-success",
+				description: undefined,
+				duration: 6000,
+				position: "bottom-right",
+			});
+		});
+		const deleteFindingsToastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Findings hidden",
+		)?.[1];
+		deleteFindingsToastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/findings");
 
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("dangerously");
@@ -350,5 +356,43 @@ describe("WorkspacePrivacyPage", () => {
 		expect(visibleText).not.toContain("queue worker");
 		expect(visibleText).not.toContain("rerun ci now");
 		expect(visibleText).not.toContain("raw source uploaded");
+	});
+
+	it("toasts and reports privacy action failures", async () => {
+		const user = userEvent.setup();
+		const revokeError = new Error("Runner revoke failed");
+		revokeRunnerMock.mockRejectedValueOnce(revokeError);
+
+		render(
+			<WorkspacePrivacyPage
+				initialSetupState={createSetupState()}
+				initialSyncPreviewState={createSyncPreviewState()}
+				initialManagedGithubState={{
+					consent: null,
+					auditEvents: [],
+				}}
+				initialFindings={[createFinding()]}
+				now={61_000}
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: /Revoke runner/i }));
+
+		await waitFor(() => {
+			expect(toastErrorMock).toHaveBeenCalledWith("Runner revoke failed", {
+				id: "workspace-privacy-revoke-runner-error",
+				duration: 6000,
+				position: "bottom-right",
+			});
+		});
+		expect(reportClientErrorMock).toHaveBeenCalledWith({
+			error: revokeError,
+			pathname: "/workspace/privacy",
+			code: "workspace_privacy_runner_revoke_failed",
+			severity: "medium",
+			details: {
+				action: "revoke_runner",
+			},
+		});
 	});
 });

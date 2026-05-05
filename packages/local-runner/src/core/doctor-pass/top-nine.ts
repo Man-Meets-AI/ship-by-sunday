@@ -9,6 +9,7 @@ import {
 	TOP_NINE_SCHEMA_VERSION,
 	type DoctorFinding,
 	type DoctorProbeResult,
+	type EvidenceRef,
 	type TopNineOutput,
 } from "./types";
 
@@ -250,18 +251,27 @@ function validateTopNineOutput(value: unknown): TopNineOutput {
 		throw new Error("Codex output summary is required.");
 	}
 	const ranks = new Set<number>();
+	const findings: DoctorFinding[] = [];
 	for (const finding of candidate.findings) {
-		validateFinding(finding);
+		const normalizedFinding = validateFinding(finding);
 		if (ranks.has(finding.rank)) {
 			throw new Error(`Duplicate finding rank ${finding.rank}.`);
 		}
 		ranks.add(finding.rank);
-		assertSyncSafeValue(finding, `doctor finding ${finding.findingId}`);
+		assertSyncSafeValue(
+			normalizedFinding,
+			`doctor finding ${finding.findingId}`,
+		);
+		findings.push(normalizedFinding);
 	}
-	return candidate;
+	return {
+		schemaVersion: TOP_NINE_SCHEMA_VERSION,
+		summary: candidate.summary,
+		findings,
+	};
 }
 
-function validateFinding(finding: DoctorFinding) {
+function validateFinding(finding: DoctorFinding): DoctorFinding {
 	const requiredStringFields = [
 		"findingId",
 		"title",
@@ -294,6 +304,63 @@ function validateFinding(finding: DoctorFinding) {
 	}
 	if (finding.permissionRequired === "managed_github") {
 		throw new Error("Doctor pass findings cannot require managed GitHub.");
+	}
+	return {
+		...finding,
+		evidenceRefs: finding.evidenceRefs.map(normalizeEvidenceRef),
+		blockedReason:
+			typeof finding.blockedReason === "string"
+				? finding.blockedReason
+				: undefined,
+	};
+}
+
+function normalizeEvidenceRef(evidenceRef: EvidenceRef): EvidenceRef {
+	const candidate = evidenceRef as EvidenceRef & Record<string, unknown>;
+	switch (candidate.kind) {
+		case "file":
+			return {
+				kind: "file",
+				repoRelativePath: candidate.repoRelativePath,
+				...(typeof candidate.lineStart === "number"
+					? { lineStart: candidate.lineStart }
+					: {}),
+				...(typeof candidate.lineEnd === "number"
+					? { lineEnd: candidate.lineEnd }
+					: {}),
+				...(typeof candidate.summary === "string"
+					? { summary: candidate.summary }
+					: {}),
+			};
+		case "command":
+			return {
+				kind: "command",
+				commandName: candidate.commandName,
+				...(typeof candidate.summary === "string"
+					? { summary: candidate.summary }
+					: {}),
+			};
+		case "artifact":
+			return {
+				kind: "artifact",
+				artifactId: candidate.artifactId,
+				...(typeof candidate.localReportRef === "string"
+					? { localReportRef: candidate.localReportRef }
+					: {}),
+				...(typeof candidate.summary === "string"
+					? { summary: candidate.summary }
+					: {}),
+			};
+		case "package":
+			return {
+				kind: "package",
+				packageName: candidate.packageName,
+				...(typeof candidate.summary === "string"
+					? { summary: candidate.summary }
+					: {}),
+			};
+		default:
+			throw new Error("Finding evidence ref has unsupported kind.");
 	}
 }
 

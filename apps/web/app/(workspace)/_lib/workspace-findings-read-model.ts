@@ -141,11 +141,13 @@ export type WorkspaceFindingDetailModel = WorkspaceFindingLedgerRow & {
 
 export type WorkspaceWorkflowApprovalModel = {
 	workflowId: string;
+	isSupportedByLocalRunner: boolean;
 	workflowKind:
 		| "source_truth"
 		| "observability_debuggability"
 		| "broken_app_readonly"
 		| "mature_repo_adoption"
+		| "docs_spine_adoption"
 		| "generic";
 	workflowCommandName: string;
 	confirmationFlag: string;
@@ -243,11 +245,24 @@ const workflowLabels: Record<string, string> = {
 	"observability-debuggability": "Observability Debuggability",
 	"broken-app-triage": "Broken App Triage",
 	"mature-repo-adoption": "Mature Repo Adoption",
+	"docs-spine-adoption": "Docs Spine Adoption",
 	"revenue-path-audit": "Revenue Path Audit",
 	"ux-conversion-snapshot": "UX Conversion Snapshot",
 	"proof-harness": "Proof Harness",
 	"test-hardening": "Test Hardening",
 };
+
+const supportedLocalRunnerWorkflowIds = [
+	"source-truth-agent-readiness",
+	"observability-debuggability",
+	"broken-app-triage",
+	"mature-repo-adoption",
+	"docs-spine-adoption",
+] as const;
+
+const supportedLocalRunnerWorkflowIdSet = new Set<string>(
+	supportedLocalRunnerWorkflowIds,
+);
 
 const defaultFilters: WorkspaceFindingsFilterState = {
 	category: "all",
@@ -323,8 +338,9 @@ export function buildWorkspaceFindingDetailModel(
 	const disallowedTouchTargets = getDisallowedTouchTargets(
 		finding.recommendedWorkflowId,
 	);
-	const syncPolicySummary =
-		"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.";
+	const syncPolicySummary = getWorkflowSyncPolicySummary(
+		finding.recommendedWorkflowId,
+	);
 
 	return {
 		...row,
@@ -503,6 +519,16 @@ function getExpectedOutputs(workflowId: string) {
 			"local proof or blocked-proof summary",
 		];
 	}
+	if (workflowId === "docs-spine-adoption") {
+		return [
+			"docs spine adoption workflow packet",
+			"docs spine adoption manifest",
+			"repo facts and scanner artifacts",
+			"bounded Codex synthesis packets",
+			"local proof or blocked-proof summary",
+			"sync preview metadata",
+		];
+	}
 
 	return [
 		"scoped workflow packet",
@@ -542,6 +568,9 @@ function getAllowedTouchTargets(workflowId: string) {
 			"repo convention metadata only",
 		];
 	}
+	if (workflowId === "docs-spine-adoption") {
+		return [".sbs/runs/<workflow-run-id>/**", ".sbs/docs-spine-adoption/**"];
+	}
 
 	return [
 		"finding-scoped files after approval",
@@ -561,10 +590,13 @@ function getDisallowedTouchTargets(workflowId: string) {
 		"generated folders",
 		"package scripts",
 	];
-	if (workflowId !== "mature-repo-adoption") {
+	if (
+		workflowId !== "mature-repo-adoption" &&
+		workflowId !== "docs-spine-adoption"
+	) {
 		return disallowedTouchTargets;
 	}
-	return [
+	const localRunnerDisallowedTargets = [
 		...disallowedTouchTargets,
 		"root agent instructions",
 		"CI configuration",
@@ -575,6 +607,28 @@ function getDisallowedTouchTargets(workflowId: string) {
 		"raw source",
 		"Codex transcripts",
 	];
+	if (workflowId === "docs-spine-adoption") {
+		return [
+			...disallowedTouchTargets,
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"docs spine Markdown application",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"Codex transcripts",
+		];
+	}
+	return localRunnerDisallowedTargets;
+}
+
+function getWorkflowSyncPolicySummary(workflowId: string) {
+	if (workflowId === "docs-spine-adoption") {
+		return "Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.";
+	}
+	return "Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, and Codex session history stay on the machine.";
 }
 
 function buildWorkflowApprovalModel({
@@ -595,6 +649,7 @@ function buildWorkflowApprovalModel({
 	const workflowKind = getWorkflowKind(workflowId);
 	return {
 		workflowId,
+		isSupportedByLocalRunner: isLocalRunnerWorkflowSupported(workflowId),
 		workflowKind,
 		workflowCommandName: getWorkflowCommandName(workflowId),
 		confirmationFlag: getWorkflowConfirmationFlag(workflowId),
@@ -618,6 +673,10 @@ function buildWorkflowApprovalModel({
 	};
 }
 
+export function isLocalRunnerWorkflowSupported(workflowId: string) {
+	return supportedLocalRunnerWorkflowIdSet.has(workflowId);
+}
+
 function getWorkflowKind(
 	workflowId: string,
 ): WorkspaceWorkflowApprovalModel["workflowKind"] {
@@ -632,6 +691,9 @@ function getWorkflowKind(
 	}
 	if (workflowId === "mature-repo-adoption") {
 		return "mature_repo_adoption";
+	}
+	if (workflowId === "docs-spine-adoption") {
+		return "docs_spine_adoption";
 	}
 	return "generic";
 }
@@ -653,6 +715,9 @@ function getWorkflowConfirmationFlag(workflowId: string) {
 	if (workflowId === "mature-repo-adoption") {
 		return "--confirm-adoption-audit";
 	}
+	if (workflowId === "docs-spine-adoption") {
+		return "--confirm-docs-spine-adoption";
+	}
 	return "--confirm-local-writes";
 }
 
@@ -665,6 +730,9 @@ function getWorkflowBranchName(workflowId: string, approvalTimestamp: number) {
 	}
 	if (workflowId === "mature-repo-adoption") {
 		return `sbs/mature-repo-adoption-${formatBranchTimestamp(approvalTimestamp)}`;
+	}
+	if (workflowId === "docs-spine-adoption") {
+		return `sbs/docs-spine-adoption-${formatBranchTimestamp(approvalTimestamp)}`;
 	}
 	return `sbs/${workflowId}-${formatBranchTimestamp(approvalTimestamp)}`;
 }
@@ -703,6 +771,14 @@ function getWorkflowStopConditions(workflowId: string) {
 			"proof command fails",
 		];
 	}
+	if (workflowId === "docs-spine-adoption") {
+		return [
+			"worktree is dirty before branch creation",
+			"write lease expires before docs spine scaffold starts",
+			"requested work needs docs application, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		];
+	}
 
 	return [
 		"worktree is dirty before branch creation",
@@ -723,6 +799,9 @@ function getWorkflowRollbackNotes(
 	}
 	if (workflowKind === "mature_repo_adoption") {
 		return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.";
+	}
+	if (workflowKind === "docs_spine_adoption") {
+		return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the docs spine adoption branch after reviewing local proof.";
 	}
 	return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the source-truth branch after reviewing local proof.";
 }

@@ -37,6 +37,7 @@ describe("setup pair", () => {
 		process.env.SBS_RUNNER_HOME = runnerHome;
 
 		let pairRequestCount = 0;
+		const deliveredEvents: Array<{ payload?: Record<string, unknown> }> = [];
 		const server = createServer(async (request, response) => {
 			if (
 				request.url === "/api/workspace/runner/pair" &&
@@ -62,7 +63,7 @@ describe("setup pair", () => {
 				request.url === "/api/workspace/runner/events" &&
 				request.method === "POST"
 			) {
-				await readRequestBody(request);
+				deliveredEvents.push(JSON.parse(await readRequestBody(request)));
 				response.writeHead(200, { "Content-Type": "application/json" });
 				response.end(JSON.stringify({ inserted: true }));
 				return;
@@ -103,6 +104,14 @@ describe("setup pair", () => {
 				]),
 			).rejects.toThrow("different setup token");
 			expect(pairRequestCount).toBe(1);
+			expect(deliveredEvents).toContainEqual(
+				expect.objectContaining({
+					payload: expect.objectContaining({
+						eventType: "runner.paired",
+						repositoryDisplayName: path.basename(repositoryRoot),
+					}),
+				}),
+			);
 
 			await expect(
 				runSetupPairCommand([

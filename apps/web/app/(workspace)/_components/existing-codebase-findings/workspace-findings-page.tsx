@@ -6,6 +6,7 @@ import { RefreshCcw } from "lucide-react";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(workspace)/_components/workspace-navigation/workspace-local-nav-rail";
+import { WorkspaceOperatorSummaryCard } from "@/app/(workspace)/_components/workspace-operator-summary-card";
 import {
 	buildWorkspaceFindingsLedgerModel,
 	type WorkspaceFindingDocument,
@@ -64,19 +65,11 @@ export function WorkspaceFindingsPage({
 							and keep local evidence behind refs.
 						</p>
 					</div>
-					<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Uploaded</span>
-							<span className="font-mono text-xs font-medium text-foreground">
-								{ledgerModel.totalCount}
-							</span>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<span className="text-muted-foreground">Visible</span>
-							<span className="font-mono text-xs font-medium text-foreground">
-								{ledgerModel.filteredCount}
-							</span>
-						</div>
+					<div className="grid min-w-0 gap-2">
+						<WorkspaceOperatorSummaryCard
+							title="Findings summary"
+							rows={buildFindingsSummaryRows(ledgerModel)}
+						/>
 						<Button asChild variant="outline" size="sm" className="mt-2">
 							<Link href={routeConfig.workspaceDoctorPass}>
 								<RefreshCcw className="size-3.5" aria-hidden />
@@ -102,4 +95,53 @@ export function WorkspaceFindingsPage({
 			</div>
 		</AppShell>
 	);
+}
+
+function buildFindingsSummaryRows(
+	ledgerModel: ReturnType<typeof buildWorkspaceFindingsLedgerModel>,
+) {
+	const localRunId = getLocalRunId(
+		ledgerModel.recommendedFirst?.localReportRef ??
+			ledgerModel.allRows[0]?.localReportRef,
+	);
+
+	return [
+		{
+			label: "State",
+			value:
+				ledgerModel.totalCount > 0 ? "Uploaded findings" : "No findings yet",
+		},
+		{ label: "Owner", value: "Human" },
+		{
+			label: "Next",
+			value: ledgerModel.totalCount > 0 ? "Open finding" : "Run Doctor Pass",
+		},
+		{
+			label: "Uploaded",
+			value: String(ledgerModel.totalCount),
+			mono: true,
+		},
+		{
+			label: "Visible",
+			value: String(ledgerModel.filteredCount),
+			mono: true,
+		},
+		...(localRunId
+			? [
+					{
+						label: "Local run",
+						value: localRunId,
+						copyValue: localRunId,
+						mono: true,
+					},
+				]
+			: []),
+	];
+}
+
+function getLocalRunId(localReportRef: string | undefined) {
+	const match = localReportRef?.match(
+		/^\.sbs\/reports\/doctor-pass\/([^/]+)\//,
+	);
+	return match?.[1] ?? null;
 }

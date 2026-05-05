@@ -57,6 +57,7 @@ export type WorkspaceRunnerEventPayload =
 			runnerMode: WorkspaceRunnerMode;
 			machineDisplayName?: string;
 			runnerVersion?: string;
+			repositoryDisplayName?: string;
 	  }
 	| {
 			eventType: "runner.heartbeat";

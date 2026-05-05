@@ -49,20 +49,20 @@ function FindingLedgerRow({ row }: { row: WorkspaceFindingLedgerRow }) {
 	return (
 		<Link
 			href={row.href}
-			className="grid gap-3 px-3 py-3 text-sm transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40 lg:grid-cols-[3rem_minmax(10rem,1.2fr)_6.5rem_5.5rem_5.5rem_minmax(9rem,1fr)_6.5rem_minmax(8rem,0.8fr)_7rem_6rem_1.5rem] lg:items-center lg:gap-2"
+			className="grid min-w-0 gap-3 px-3 py-3 text-sm transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/40 lg:grid-cols-[3rem_minmax(10rem,1.2fr)_6.5rem_5.5rem_5.5rem_minmax(9rem,1fr)_6.5rem_minmax(8rem,0.8fr)_7rem_6rem_1.5rem] lg:items-center lg:gap-2"
 		>
 			<div className="flex items-center gap-2 lg:block">
 				<span className="font-mono text-xs font-semibold text-foreground">
 					{row.rankLabel}
 				</span>
-				{row.recommendedFirst ? (
-					<Badge variant="secondary" className="lg:mt-2">
-						Recommended first
-					</Badge>
-				) : null}
 			</div>
 			<div className="min-w-0">
 				<p className="break-words font-medium text-foreground">{row.title}</p>
+				{row.recommendedFirst ? (
+					<Badge variant="secondary" className="mt-2 max-w-full">
+						Recommended first
+					</Badge>
+				) : null}
 				<p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground lg:hidden">
 					{row.buyerImpact}
 				</p>
@@ -111,10 +111,11 @@ function DenseLabel({
 			</span>
 			<span
 				className={cn(
-					"min-w-0 truncate text-sm text-foreground",
+					"block min-w-0 truncate text-sm text-foreground",
 					mono ? "font-mono text-xs" : null,
 					valueClassName,
 				)}
+				title={value}
 			>
 				{value}
 			</span>

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createHash } from "node:crypto";
 
+import { createApprovedFindingsDigest } from "@/convex/workspace/approved_findings_digest";
 import {
 	bindWorkspaceRunner,
 	bindWorkspaceRunnerByPairingToken,
@@ -27,7 +27,7 @@ import {
 
 import { createWorkspaceTestCtx } from "./workspace-test-helpers";
 
-function createApprovedFindingsDigest({
+async function createPreviewDigest({
 	runId,
 	doctorPassRunId,
 	findings,
@@ -36,16 +36,13 @@ function createApprovedFindingsDigest({
 	doctorPassRunId: string;
 	findings: unknown[];
 }) {
-	return `sha256:${createHash("sha256")
-		.update(
-			JSON.stringify({
-				schemaVersion: "doctor-pass-local.v1",
-				runId,
-				doctorPassRunId,
-				findings,
-			}),
-		)
-		.digest("hex")}`;
+	return await createApprovedFindingsDigest({
+		runId,
+		doctorPassRunId,
+		findings: findings as Parameters<
+			typeof createApprovedFindingsDigest
+		>[0]["findings"],
+	});
 }
 
 async function createProjectAndRunner() {
@@ -152,6 +149,49 @@ async function createMatureRepoAdoptionFinding({
 	});
 }
 
+async function createDocsSpineAdoptionFinding({
+	ctx,
+	projectId,
+	runnerId,
+}: {
+	ctx: ReturnType<typeof createWorkspaceTestCtx>["ctx"];
+	projectId: string;
+	runnerId: string;
+}) {
+	const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+		ctx as never,
+		{
+			projectId: projectId as never,
+			runnerId: runnerId as never,
+			runnerMode: "daemon",
+		},
+	);
+	return await ctx.db.insert("codebaseFindings", {
+		projectId,
+		doctorPassRunId: doctorPassRun._id,
+		findingId: "finding-docs-spine-adoption",
+		rank: 4,
+		status: "needs_approval",
+		title: "Docs spine adoption needs a deterministic loop",
+		category: "other",
+		severity: "medium",
+		confidence: 0.86,
+		buyerImpact: "Future agent work needs the repo docs spine bootstrapped.",
+		blastRadius: "low",
+		proofPath: "Review local docs spine adoption proof.",
+		proofability: "partial",
+		permissionRequired: "workspace_write",
+		recommendedWorkflowId: "docs-spine-adoption",
+		whyThisNow:
+			"The repo needs structured docs spine facts before Markdown writes are approved.",
+		evidenceRefs: [],
+		syncSensitivity: "low",
+		localReportRef: ".sbs/reports/doctor-pass/run-1/docs-spine-adoption.json",
+		createdAt: 1,
+		updatedAt: 1,
+	});
+}
+
 function buildMatureRepoAdoptionApprovalArgs({
 	projectId,
 	findingDocumentId,
@@ -219,6 +259,77 @@ function buildMatureRepoAdoptionApprovalArgs({
 		],
 		rollbackNotes:
 			"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the mature adoption branch after reviewing local proof.",
+	};
+}
+
+function buildDocsSpineAdoptionApprovalArgs({
+	projectId,
+	findingDocumentId,
+	runnerId,
+	workflowVersion = "v1",
+	writeLeaseDurationMinutes = 30,
+}: {
+	projectId: string;
+	findingDocumentId: string;
+	runnerId: string;
+	workflowVersion?: string;
+	writeLeaseDurationMinutes?: number;
+}) {
+	return {
+		projectId: projectId as never,
+		findingDocumentId: findingDocumentId as never,
+		runnerId: runnerId as never,
+		workflowId: "docs-spine-adoption",
+		workflowVersion,
+		branchName: "sbs/docs-spine-adoption-20260505-1200",
+		profileName: "sbs-workspace-write",
+		writeLeaseDurationMinutes,
+		expectedOutputs: [
+			"docs spine adoption workflow packet",
+			"docs spine adoption manifest",
+			"repo facts and scanner artifacts",
+			"bounded Codex synthesis packets",
+			"local proof or blocked-proof summary",
+			"sync preview metadata",
+		],
+		allowedTouchTargets: [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-spine-adoption/**",
+		],
+		disallowedTouchTargets: [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"dependency locks",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"package scripts",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"docs spine Markdown application",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"Codex transcripts",
+		],
+		proofCommands: [
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+		],
+		syncPolicySummary:
+			"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.",
+		stopConditions: [
+			"worktree is dirty before branch creation",
+			"write lease expires before docs spine scaffold starts",
+			"requested work needs docs application, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		],
+		rollbackNotes:
+			"Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the docs spine adoption branch after reviewing local proof.",
 	};
 }
 
@@ -352,6 +463,37 @@ describe("workspace runner events", () => {
 		);
 	});
 
+	it("creates a repository binding from the paired runner display name", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-runner-paired-repo",
+			projectId: project._id,
+			runnerId: runner._id,
+			eventType: "runner.paired",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 60_000,
+			payload: {
+				eventType: "runner.paired",
+				pairingStatus: "paired",
+				runnerMode: "daemon",
+				machineDisplayName: "Parker MacBook",
+				repositoryDisplayName: "ship-by-sunday",
+			},
+		});
+		const setupState = await getWorkspaceSetupState._handler(ctx as never, {
+			projectId: project._id,
+		});
+
+		expect(setupState.repositoryBinding).toMatchObject({
+			projectId: project._id,
+			runnerId: runner._id,
+			displayName: "ship-by-sunday",
+			provider: "unknown",
+			status: "active",
+		});
+	});
+
 	it("consumes setup pairing tokens after the first successful bind", async () => {
 		const testContext = createWorkspaceTestCtx();
 		vi.spyOn(Date, "now").mockReturnValue(110_000);
@@ -458,6 +600,44 @@ describe("workspace runner events", () => {
 		});
 	});
 
+	it("returns the latest failed doctor pass run for operator status", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const olderRun = await startWorkspaceDoctorPassRun._handler(ctx as never, {
+			projectId: project._id,
+			runnerId: runner._id,
+			runnerMode: "daemon",
+		});
+		await ctx.db.patch(olderRun._id, {
+			status: "findings_uploaded",
+			syncPreviewStatus: "uploaded",
+			startedAt: 10,
+		});
+		const latestRun = await startWorkspaceDoctorPassRun._handler(ctx as never, {
+			projectId: project._id,
+			runnerId: runner._id,
+			runnerMode: "daemon",
+		});
+		await ctx.db.patch(latestRun._id, {
+			status: "failed",
+			syncPreviewStatus: "not_ready",
+			blockedReason: "Codex interpretation failed.",
+			startedAt: 20,
+		});
+
+		const syncPreviewState = await getWorkspaceSyncPreviewState._handler(
+			ctx as never,
+			{
+				projectId: project._id,
+			},
+		);
+
+		expect(syncPreviewState.doctorPassRun).toMatchObject({
+			_id: latestRun._id,
+			status: "failed",
+			blockedReason: "Codex interpretation failed.",
+		});
+	});
+
 	it("keeps sync preview approval on the user-owned approval mutation", async () => {
 		const { ctx, tables, project, runner } = await createProjectAndRunner();
 		const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
@@ -558,7 +738,7 @@ describe("workspace runner events", () => {
 					runnerMode: "daemon",
 				},
 			);
-		const previewDigest = createApprovedFindingsDigest({
+		const previewDigest = await createPreviewDigest({
 			runId: "run-credential",
 			doctorPassRunId: startedRun.doctorPassRunId,
 			findings: [],
@@ -1219,6 +1399,199 @@ describe("workspace runner events", () => {
 		).rejects.toThrow(
 			"Mature repo adoption write lease duration is not approved",
 		);
+	});
+
+	it("approves and resolves docs spine adoption as a supported local scaffold workflow", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId = await createDocsSpineAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsSpineAdoptionApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+		const resolvedWorkflowRun =
+			await getWorkspaceWorkflowRunByCredential._handler(ctx as never, {
+				runnerCredentialHash: "sha256:runner-credential",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+			});
+
+		expect(resolvedWorkflowRun).toMatchObject({
+			workflowRunId: workflowRun._id,
+			workflowId: "docs-spine-adoption",
+			branchName: "sbs/docs-spine-adoption-20260505-1200",
+			profileName: "sbs-workspace-write",
+			localWorkflowPacketRef: `.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+			localProofRef: `.sbs/runs/${workflowRun._id}/proof.json`,
+		});
+	});
+
+	it("rejects docs spine adoption approvals with an unsupported workflow version", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const findingDocumentId = await createDocsSpineAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+
+		await expect(
+			requestWorkspaceWorkflowRun._handler(
+				ctx as never,
+				buildDocsSpineAdoptionApprovalArgs({
+					projectId: project._id,
+					findingDocumentId,
+					runnerId: runner._id,
+					workflowVersion: "v2",
+				}),
+			),
+		).rejects.toThrow("Docs spine adoption workflow version is not approved");
+	});
+
+	it("rejects docs spine adoption approvals that drift from the shipped packet", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const findingDocumentId = await createDocsSpineAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+
+		await expect(
+			requestWorkspaceWorkflowRun._handler(ctx as never, {
+				...buildDocsSpineAdoptionApprovalArgs({
+					projectId: project._id,
+					findingDocumentId,
+					runnerId: runner._id,
+				}),
+				expectedOutputs: ["docs spine adoption workflow packet"],
+			}),
+		).rejects.toThrow(
+			"Docs spine adoption expectedOutputs does not match the approved workflow packet",
+		);
+	});
+
+	it("blocks docs spine proof events that report non-.sbs touched files", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId = await createDocsSpineAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsSpineAdoptionApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-docs-spine-unsafe-proof",
+			projectId: project._id,
+			runnerId: runner._id,
+			workflowRunId: workflowRun._id,
+			eventType: "workflow.proof.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 202_000,
+			payload: {
+				eventType: "workflow.proof.completed",
+				workflowId: "docs-spine-adoption",
+				writeLeaseId: workflowRun.writeLeaseId,
+				proofStatus: "passed",
+				proofSummary: "Docs spine adoption proof passed.",
+				touchedFileRefs: ["src/runtime.ts"],
+				createdArtifactRefs: [
+					`.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+					".sbs/docs-spine-adoption/manifest.json",
+				],
+				proofCommandResults: [
+					{ commandName: "git status --short", status: "passed" },
+				],
+			},
+		});
+
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "blocked",
+			proofStatus: "blocked",
+			deliveryStatus: "blocked",
+			touchedFileRefs: ["src/runtime.ts"],
+		});
+		expect(tables.workflowRuns[0]?.blockedReason).toContain("src/runtime.ts");
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			_id: findingDocumentId,
+			status: "blocked",
+		});
+	});
+
+	it("blocks docs spine proof events that omit required scanner artifact refs", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId = await createDocsSpineAdoptionFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsSpineAdoptionApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-docs-spine-missing-artifact-refs",
+			projectId: project._id,
+			runnerId: runner._id,
+			workflowRunId: workflowRun._id,
+			eventType: "workflow.proof.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 203_000,
+			payload: {
+				eventType: "workflow.proof.completed",
+				workflowId: "docs-spine-adoption",
+				writeLeaseId: workflowRun.writeLeaseId,
+				proofStatus: "passed",
+				proofSummary: "Docs spine adoption proof passed.",
+				touchedFileRefs: [],
+				createdArtifactRefs: [],
+				proofCommandResults: [
+					{ commandName: "git status --short", status: "passed" },
+				],
+			},
+		});
+
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "blocked",
+			proofStatus: "blocked",
+			deliveryStatus: "blocked",
+			createdArtifactRefs: [],
+		});
+		expect(tables.workflowRuns[0]?.blockedReason).toContain(
+			"missing required docs-spine artifact refs",
+		);
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			_id: findingDocumentId,
+			status: "blocked",
+		});
 	});
 
 	it("rejects observability approvals that drift from the shipped audit packet", async () => {

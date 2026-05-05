@@ -529,4 +529,34 @@ describe("SignInPage", () => {
 		});
 		expect(signIn.resetPasswordEmailCode.sendCode).toHaveBeenCalledTimes(1);
 	});
+
+	it("renders Clerk reset password field errors without a duplicate reset banner", () => {
+		const compromisedPasswordError = {
+			message:
+				"Password has been found in an online data breach. For account safety, please use a different password.",
+		};
+		const signInState = createSignInMock({
+			status: "needs_new_password",
+		});
+		useSignInMock.mockReturnValue({
+			errors: {
+				fields: {
+					code: null,
+					identifier: null,
+					password: compromisedPasswordError,
+				},
+				global: null,
+				raw: [compromisedPasswordError],
+			},
+			fetchStatus: signInState.fetchStatus,
+			signIn: signInState.signIn,
+		});
+
+		render(<SignInPage />);
+
+		expect(screen.queryByText("We couldn't continue the reset.")).toBeNull();
+		expect(screen.getAllByText(compromisedPasswordError.message)).toHaveLength(
+			1,
+		);
+	});
 });

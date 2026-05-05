@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useMutation } from "convex/react";
 
@@ -17,6 +18,7 @@ import {
 	type WorkspaceFindingDetailModel,
 	type WorkspaceFindingDocument,
 } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import { showWorkspaceActionSuccessToast } from "@/app/(workspace)/_lib/workspace-action-feedback";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
@@ -28,6 +30,27 @@ type ApprovedWorkflowRunCommand = {
 	branchName: string;
 	profileName: string;
 };
+
+const workspaceFindingDetailToastIds = {
+	copyEvidenceRefSuccess: "workspace-finding-detail-copy-evidence-ref-success",
+} as const;
+
+type UnavailableWorkflowStatus =
+	| Exclude<WorkspaceFindingDetailModel["status"], "ready">
+	| "deleted";
+
+const unavailableWorkflowMessages = {
+	blocked:
+		"This finding is blocked. Resolve the blocker before starting a workflow.",
+	deleted:
+		"This finding is no longer available. Return to Findings and choose another item.",
+	done: "This finding already has completed proof. Review Runs before starting any deliberate rerun.",
+	needs_approval:
+		"This finding still needs approval. Approve the finding before starting a workflow.",
+	running:
+		"A workflow is already running for this finding. Review the current run state before starting another workflow.",
+	unsupported: "This workflow is not available in the local runner yet.",
+} as const satisfies Record<UnavailableWorkflowStatus | "unsupported", string>;
 
 export function WorkspaceFindingDetailPage({
 	initialFindings,
@@ -42,6 +65,7 @@ export function WorkspaceFindingDetailPage({
 	activeRunnerId: string | null;
 	approvalTimestamp: number;
 }) {
+	const router = useRouter();
 	const requestWorkflowRun = useMutation(
 		api.workspace.requestWorkspaceWorkflowRun,
 	);
@@ -71,10 +95,35 @@ export function WorkspaceFindingDetailPage({
 
 		await navigator.clipboard?.writeText(detail.copyEvidenceRef);
 		setActionState(approvedWorkflowRunCommand ? "approved" : "copied");
+		showWorkspaceActionSuccessToast({
+			action: {
+				label: "View runs",
+				onClick: () => router.push(routeConfig.workspaceRuns),
+			},
+			id: workspaceFindingDetailToastIds.copyEvidenceRefSuccess,
+			title: "Local evidence ref copied.",
+			description: "Use Runs to match this ref to the local report history.",
+		});
 	}
 
 	async function approveWorkflow() {
-		if (!detail || !projectId || !activeRunnerId) {
+		if (!detail) {
+			return;
+		}
+
+		if (detail.status !== "ready") {
+			setActionError(getUnavailableWorkflowMessage(detail));
+			setActionState("error");
+			return;
+		}
+
+		if (!detail.workflowApproval.isSupportedByLocalRunner) {
+			setActionError(unavailableWorkflowMessages.unsupported);
+			setActionState("error");
+			return;
+		}
+
+		if (!projectId || !activeRunnerId) {
 			setActionError(
 				"Pair an active local runner before creating the workflow.",
 			);
@@ -111,7 +160,7 @@ export function WorkspaceFindingDetailPage({
 			});
 			setActionState("approved");
 		} catch (error) {
-			setActionError(error instanceof Error ? error.message : String(error));
+			setActionError(getWorkflowRequestErrorMessage(error));
 			setActionState("error");
 		}
 	}
@@ -214,6 +263,9 @@ function FindingDecisionContent({
 							{detail.whyNow}
 						</p>
 					</DecisionSection>
+					<DecisionSection title="Workflow bounds">
+						<WorkflowBoundsGrid approval={detail.workflowApproval} />
+					</DecisionSection>
 					<DecisionSection title="Evidence refs">
 						<div className="divide-y divide-border/60">
 							{detail.evidenceRefs.map((ref) => (
@@ -241,6 +293,72 @@ function FindingDecisionContent({
 				/>
 			</div>
 		</>
+	);
+}
+
+function WorkflowBoundsGrid({
+	approval,
+}: {
+	approval: WorkspaceFindingDetailModel["workflowApproval"];
+}) {
+	return (
+		<div className="grid overflow-hidden rounded-lg border border-border/60 sm:grid-cols-2 xl:grid-cols-3">
+			<WorkflowBoundsGroup
+				title="Expected outputs"
+				items={approval.expectedOutputs}
+			/>
+			<WorkflowBoundsGroup
+				title="Allowed touch targets"
+				items={approval.allowedTouchTargets}
+			/>
+			<WorkflowBoundsGroup
+				title="Disallowed touch targets"
+				items={approval.disallowedTouchTargets}
+			/>
+			<WorkflowBoundsGroup
+				title="Proof commands"
+				items={approval.proofCommands}
+				mono
+			/>
+			<WorkflowBoundsGroup
+				title="Stop conditions"
+				items={approval.stopConditions}
+			/>
+			<WorkflowBoundsGroup
+				title="Sync and rollback"
+				items={[approval.syncPolicySummary, approval.rollbackNotes]}
+			/>
+		</div>
+	);
+}
+
+function WorkflowBoundsGroup({
+	title,
+	items,
+	mono,
+}: {
+	title: string;
+	items: string[];
+	mono?: boolean;
+}) {
+	return (
+		<div className="min-w-0 border-border/60 p-3 sm:border-r sm:border-b xl:[&:nth-child(3n)]:border-r-0 xl:[&:nth-last-child(-n+3)]:border-b-0">
+			<h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
+			<ul className="mt-2 flex flex-wrap gap-1.5">
+				{items.map((item) => (
+					<li
+						key={item}
+						className={
+							mono
+								? "max-w-full rounded-md bg-muted px-2 py-1 font-mono text-xs leading-5 text-foreground"
+								: "max-w-full rounded-md bg-muted px-2 py-1 text-xs leading-5 text-foreground"
+						}
+					>
+						<span className="break-words">{item}</span>
+					</li>
+				))}
+			</ul>
+		</div>
 	);
 }
 
@@ -286,4 +404,34 @@ function FindingUnavailable() {
 			</Button>
 		</section>
 	);
+}
+
+function getUnavailableWorkflowMessage(detail: WorkspaceFindingDetailModel) {
+	if (detail.status === "ready") {
+		return null;
+	}
+	return unavailableWorkflowMessages[detail.status];
+}
+
+function getWorkflowRequestErrorMessage(error: unknown) {
+	const message = error instanceof Error ? error.message : String(error);
+	if (message.includes("Blocked findings cannot start workflows")) {
+		return unavailableWorkflowMessages.blocked;
+	}
+	if (
+		message.includes("Finding is deleted") ||
+		message.includes("Finding not found")
+	) {
+		return unavailableWorkflowMessages.deleted;
+	}
+	if (message.includes("paired workspace runner")) {
+		return "Pair an active local runner before creating the workflow.";
+	}
+	if (
+		message.includes("Workflow is not supported") ||
+		message.includes("Workflow must match")
+	) {
+		return unavailableWorkflowMessages.unsupported;
+	}
+	return "Workflow request failed. Review the finding status and try again.";
 }

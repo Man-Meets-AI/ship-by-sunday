@@ -1,11 +1,11 @@
 ---
-title: 'Active Programs'
-summary: 'Entry point for unfinished Program documents that still describe an active multi-slice initiative.'
-docType: 'readme'
-status: 'active'
+title: "Active Programs"
+summary: "Entry point for unfinished Program documents that still describe an active multi-slice initiative."
+docType: "readme"
+status: "active"
 read_when:
-  - 'Starting work from a durable Program document.'
-  - 'Checking whether a multi-slice initiative already has an active Program.'
+  - "Starting work from a durable Program document."
+  - "Checking whether a multi-slice initiative already has an active Program."
 ---
 
 # Active Programs
@@ -28,5 +28,7 @@ Inside that folder:
 Active Program folders:
 
 - `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
+- `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/` - deterministic local-runner docs-spine adoption for mature repos; scaffold, scanner facts, and synthesis packets complete, apply-and-proof next.
+- `docs/programs/active/2026-05-05-worker-generate-tutorials-ia/` - Generate Codebase, Tutorials, and Worker IA migration with capability-based access, canonical routes, navigation, copy, and runtime compatibility.
 
 Completed Program packets live under `docs/programs/completed/`.

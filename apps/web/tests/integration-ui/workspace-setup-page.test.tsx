@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -12,6 +12,17 @@ const preparePairingMock = vi.fn();
 const cancelPairingMock = vi.fn();
 const saveWorkspaceProjectMock = vi.fn();
 const startDoctorPassRunMock = vi.fn();
+const {
+	reportClientErrorMock,
+	routerPushMock,
+	toastErrorMock,
+	toastSuccessMock,
+} = vi.hoisted(() => ({
+	reportClientErrorMock: vi.fn(),
+	routerPushMock: vi.fn(),
+	toastErrorMock: vi.fn(),
+	toastSuccessMock: vi.fn(),
+}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -40,10 +51,27 @@ vi.mock("next/link", () => ({
 	),
 }));
 
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: routerPushMock,
+	}),
+}));
+
 vi.mock("convex/react", () => ({
 	useConvexAuth: () => useConvexAuthMock(),
 	useMutation: (mutationRef: string) => useMutationMock(mutationRef),
 	useQuery: (queryRef: string, args: unknown) => useQueryMock(queryRef, args),
+}));
+
+vi.mock("sonner", () => ({
+	toast: {
+		error: toastErrorMock,
+		success: toastSuccessMock,
+	},
+}));
+
+vi.mock("@/lib/observability/client-error-report", () => ({
+	reportClientError: reportClientErrorMock,
 }));
 
 vi.mock("@/app/(workspace)/_components/app-shell", () => ({
@@ -185,6 +213,10 @@ describe("ExistingCodebaseSetupPage", () => {
 			status: "running",
 			syncPreviewStatus: "not_ready",
 		});
+		reportClientErrorMock.mockReset();
+		routerPushMock.mockReset();
+		toastErrorMock.mockReset();
+		toastSuccessMock.mockReset();
 		useMutationMock.mockImplementation((mutationRef: string) => {
 			if (mutationRef === "prepareWorkspaceSetupPairing") {
 				return preparePairingMock;
@@ -202,15 +234,23 @@ describe("ExistingCodebaseSetupPage", () => {
 		});
 	});
 
-	it("renders the setup command, readiness sections, blockers, and privacy defaults", () => {
+	it("renders the setup command, readiness sections, blockers, and privacy defaults", async () => {
+		const user = userEvent.setup();
+
 		renderSetupPage();
 
 		expect(
 			screen.getByRole("heading", { name: "Existing codebase setup" }),
 		).toBeTruthy();
+		expect(screen.getByText("Pending Project Setup")).toBeTruthy();
 		expect(
 			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
 		).toBeTruthy();
+		expect(
+			screen.queryByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeNull();
+		expect(screen.queryByText("npx fallback")).toBeNull();
+		await user.click(screen.getByRole("radio", { name: "Use npm" }));
 		expect(
 			screen.getByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
 		).toBeTruthy();
@@ -221,13 +261,17 @@ describe("ExistingCodebaseSetupPage", () => {
 		expect(screen.getByText("SBS Codex profiles are missing.")).toBeTruthy();
 		expect(screen.getAllByText("Why it blocks").length).toBeGreaterThan(0);
 		expect(screen.getAllByText("Preview diff").length).toBeGreaterThan(0);
-		expect(screen.getAllByText("Retry check").length).toBeGreaterThan(0);
+		expect(
+			screen.getAllByText("Run setup check locally").length,
+		).toBeGreaterThan(0);
 		expect(screen.getByText("Raw source")).toBeTruthy();
 		expect(screen.getByText("Raw terminal logs")).toBeTruthy();
 		expect(screen.getByText("Codex transcripts")).toBeTruthy();
 		expect(screen.getAllByText("Disabled by default").length).toBeGreaterThan(
 			2,
 		);
+		expect(screen.getByRole("region", { name: "Setup summary" })).toBeTruthy();
+		expect(screen.getByText("Resolve setup blockers")).toBeTruthy();
 		expect(screen.getByText("Default open destination")).toBeTruthy();
 		expect(
 			(
@@ -268,6 +312,11 @@ describe("ExistingCodebaseSetupPage", () => {
 				},
 				runnerBindings: [pairedRunner],
 				activeRunner: pairedRunner,
+				repositoryBinding: {
+					_id: "workspaceRepositoryBindings_1",
+					displayName: "customer-app",
+					provider: "unknown",
+				},
 				setupEvents: [
 					...requiredReadySetupEvents(),
 					completedSetupEvent({
@@ -293,6 +342,59 @@ describe("ExistingCodebaseSetupPage", () => {
 			).disabled,
 		).toBe(false);
 		expect(screen.getAllByText(/Warnings can remain visible/).length).toBe(2);
+		expect(screen.getAllByText("customer-app").length).toBeGreaterThan(0);
+		expect(
+			screen.queryByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeNull();
+		expect(screen.queryByText("npx fallback")).toBeNull();
+		expect(screen.queryByText("Regenerate token")).toBeNull();
+		expect(screen.queryByText("Use one-shot mode")).toBeNull();
+		expect(screen.queryByText("Paired runner")).toBeNull();
+		expect(screen.getByRole("button", { name: "Repair pairing" })).toBeTruthy();
+	});
+
+	it("shows repair commands as a single package-manager switcher", async () => {
+		const user = userEvent.setup();
+		const pairedRunner = {
+			_id: "workspaceRunnerBindings_1",
+			status: "paired" as const,
+			pairingStatus: "paired" as const,
+			runnerMode: "daemon" as const,
+			runnerLabel: "Local daemon",
+			machineDisplayName: "Parker MacBook",
+			machineHealthStatus: "warning" as const,
+			projectHealthStatus: "warning" as const,
+			lastHeartbeatAt: renderedAt - 20_000,
+		};
+
+		renderSetupPage(
+			createSetupState({
+				runnerBindings: [pairedRunner],
+				activeRunner: pairedRunner,
+				repositoryBinding: {
+					_id: "workspaceRepositoryBindings_1",
+					displayName: "customer-app",
+					provider: "unknown",
+					repositoryRoot: "/Users/parker/customer-app",
+				},
+				setupEvents: requiredReadySetupEvents(),
+			}),
+		);
+
+		expect(screen.getByText("Repair command")).toBeTruthy();
+		expect(
+			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeTruthy();
+		expect(screen.queryByText("npx repair fallback")).toBeNull();
+		expect(
+			screen.queryByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeNull();
+
+		await user.click(screen.getByRole("radio", { name: "Use npm" }));
+
+		expect(
+			screen.getByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+		).toBeTruthy();
 	});
 
 	it("starts a doctor pass run when readiness has no blockers", async () => {
@@ -338,7 +440,20 @@ describe("ExistingCodebaseSetupPage", () => {
 			repositoryBindingId: "workspaceRepositoryBindings_1",
 			runnerMode: "daemon",
 		});
-		expect(await screen.findByText("Doctor pass started.")).toBeTruthy();
+		expect(toastSuccessMock).toHaveBeenCalledWith("Doctor pass started", {
+			action: expect.objectContaining({
+				label: "Open Doctor Pass",
+			}),
+			id: "workspace-setup-doctor-pass-success",
+			description: undefined,
+			duration: 6000,
+			position: "bottom-right",
+		});
+		const toastOptions = toastSuccessMock.mock.calls.find(
+			([title]) => title === "Doctor pass started",
+		)?.[1];
+		toastOptions?.action?.onClick();
+		expect(routerPushMock).toHaveBeenCalledWith("/workspace/doctor-pass");
 	});
 
 	it("saves the default open destination through the workspace contract", async () => {
@@ -349,6 +464,43 @@ describe("ExistingCodebaseSetupPage", () => {
 
 		expect(saveWorkspaceProjectMock).toHaveBeenCalledWith({
 			defaultOpenDestination: "vscode",
+		});
+		expect(toastSuccessMock).toHaveBeenCalledWith("Open destination saved", {
+			id: "workspace-setup-open-destination-success",
+			description: "VS Code",
+			duration: 1800,
+			position: "bottom-right",
+		});
+	});
+
+	it("toasts and reports default open destination save failures", async () => {
+		const user = userEvent.setup();
+		const saveError = new Error("Open destination write failed");
+		saveWorkspaceProjectMock.mockRejectedValueOnce(saveError);
+		renderSetupPage();
+
+		await user.click(screen.getByRole("button", { name: /VS Code/i }));
+
+		expect(saveWorkspaceProjectMock).toHaveBeenCalledWith({
+			defaultOpenDestination: "vscode",
+		});
+		expect(toastErrorMock).toHaveBeenCalledWith(
+			"Open destination write failed",
+			{
+				id: "workspace-setup-open-destination-error",
+				duration: 6000,
+				position: "bottom-right",
+			},
+		);
+		expect(reportClientErrorMock).toHaveBeenCalledWith({
+			error: saveError,
+			pathname: "/workspace/setup",
+			code: "workspace_setup_open_destination_save_failed",
+			severity: "medium",
+			details: {
+				action: "Workspace setup open destination save failed",
+				defaultOpenDestination: "vscode",
+			},
 		});
 	});
 
@@ -370,6 +522,17 @@ describe("ExistingCodebaseSetupPage", () => {
 			projectId: "workspaceProjects_1",
 			runnerMode: "one_shot",
 			regenerate: true,
+		});
+		await waitFor(() => {
+			expect(toastSuccessMock).toHaveBeenCalledWith(
+				"One-shot pairing token ready",
+				{
+					id: "workspace-setup-pairing-success",
+					description: undefined,
+					duration: 1800,
+					position: "bottom-right",
+				},
+			);
 		});
 	});
 });

@@ -55,6 +55,7 @@ export async function runSetupPairCommand(argv: string[]) {
 			process.env.SBS_RUNNER_API_BASE_URL ??
 			DEFAULT_API_BASE_URL,
 	);
+	const repositoryDisplayName = getRepositoryDisplayName(repositoryRoot);
 	const apiBaseUrl = existingCredential?.apiBaseUrl ?? requestedApiBaseUrl;
 	const machineDisplayName = getMachineDisplayName();
 	const pairingTokenDigest = digestPairingToken(pairingToken);
@@ -100,7 +101,7 @@ export async function runSetupPairCommand(argv: string[]) {
 		apiBaseUrl: pairedApiBaseUrl,
 		eventEndpoint: pairResponse.eventEndpoint,
 		pairingTokenDigest,
-		repositoryDisplayName: getRepositoryDisplayName(repositoryRoot),
+		repositoryDisplayName,
 		machineDisplayName,
 		runnerVersion: LOCAL_RUNNER_VERSION,
 		pairedAt: Date.now(),
@@ -134,6 +135,7 @@ export async function runSetupPairCommand(argv: string[]) {
 				runnerMode: pairResponse.runnerMode,
 				machineDisplayName,
 				runnerVersion: LOCAL_RUNNER_VERSION,
+				repositoryDisplayName,
 			},
 		}),
 	);

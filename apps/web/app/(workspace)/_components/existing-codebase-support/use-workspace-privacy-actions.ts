@@ -1,19 +1,37 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 
 import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import {
+	showWorkspaceActionErrorToast,
+	showWorkspaceActionSuccessToast,
+} from "@/app/(workspace)/_lib/workspace-action-feedback";
 import {
 	buildWorkspacePrivacyModel,
 	type ManagedGithubExecutionState,
 	type WorkspacePrivacySetupState,
 	type WorkspacePrivacySyncPreviewState,
 } from "@/app/(workspace)/_lib/workspace-support-read-model";
+import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
 type PrivacyActionState = "idle" | "submitting" | "done" | "error";
+
+const workspacePrivacyToastIds = {
+	revokeRunnerSuccess: "workspace-privacy-revoke-runner-success",
+	revokeRunnerError: "workspace-privacy-revoke-runner-error",
+	deleteFindingsSuccess: "workspace-privacy-delete-findings-success",
+	deleteFindingsError: "workspace-privacy-delete-findings-error",
+	requestManagedGithubSuccess:
+		"workspace-privacy-request-managed-github-success",
+	requestManagedGithubError: "workspace-privacy-request-managed-github-error",
+	revokeManagedGithubSuccess: "workspace-privacy-revoke-managed-github-success",
+	revokeManagedGithubError: "workspace-privacy-revoke-managed-github-error",
+} as const;
 
 export function useWorkspacePrivacyActions({
 	initialSetupState,
@@ -28,6 +46,7 @@ export function useWorkspacePrivacyActions({
 	initialFindings: WorkspaceFindingDocument[];
 	now?: number;
 }) {
+	const router = useRouter();
 	const revokeRunner = useMutation(api.workspace.revokeWorkspaceRunner);
 	const markFindingsDeleted = useMutation(
 		api.workspace.markWorkspaceFindingsDeleted,
@@ -46,7 +65,6 @@ export function useWorkspacePrivacyActions({
 	const [deleteState, setDeleteState] = useState<PrivacyActionState>("idle");
 	const [managedGithubActionState, setManagedGithubActionState] =
 		useState<PrivacyActionState>("idle");
-	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 	const privacyModel = useMemo(
 		() =>
 			buildWorkspacePrivacyModel({
@@ -75,7 +93,6 @@ export function useWorkspacePrivacyActions({
 		}
 
 		setRevokeState("submitting");
-		setFeedbackMessage(null);
 		try {
 			await revokeRunner({
 				projectId: privacyModel.projectId as Id<"workspaceProjects">,
@@ -83,12 +100,30 @@ export function useWorkspacePrivacyActions({
 				reason: "Revoked from workspace privacy controls",
 			});
 			setRevokeState("done");
-			setFeedbackMessage("Runner revoked. Pair again from Setup to resume.");
+			showWorkspaceActionSuccessToast({
+				action: {
+					label: "Open Setup",
+					onClick: () => router.push(routeConfig.workspaceSetup),
+				},
+				id: workspacePrivacyToastIds.revokeRunnerSuccess,
+				title: "Runner revoked",
+				description: "Pair again from Setup to resume.",
+			});
 		} catch (error) {
 			setRevokeState("error");
-			setFeedbackMessage(
-				error instanceof Error ? error.message : "Unable to revoke runner.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspacePrivacyToastIds.revokeRunnerError,
+				error,
+				fallbackMessage: "Unable to revoke runner.",
+				report: {
+					title: "Workspace privacy runner revoke failed",
+					code: "workspace_privacy_runner_revoke_failed",
+					pathname: routeConfig.workspacePrivacy,
+					details: {
+						action: "revoke_runner",
+					},
+				},
+			});
 		}
 	}
 
@@ -98,7 +133,6 @@ export function useWorkspacePrivacyActions({
 		}
 
 		setDeleteState("submitting");
-		setFeedbackMessage(null);
 		try {
 			await markFindingsDeleted({
 				projectId: privacyModel.projectId as Id<"workspaceProjects">,
@@ -114,14 +148,29 @@ export function useWorkspacePrivacyActions({
 				),
 			);
 			setDeleteState("done");
-			setFeedbackMessage("Synced findings hidden from the workspace.");
+			showWorkspaceActionSuccessToast({
+				action: {
+					label: "View findings",
+					onClick: () => router.push(routeConfig.workspaceFindings),
+				},
+				id: workspacePrivacyToastIds.deleteFindingsSuccess,
+				title: "Findings hidden",
+			});
 		} catch (error) {
 			setDeleteState("error");
-			setFeedbackMessage(
-				error instanceof Error
-					? error.message
-					: "Unable to delete synced findings.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspacePrivacyToastIds.deleteFindingsError,
+				error,
+				fallbackMessage: "Unable to delete synced findings.",
+				report: {
+					title: "Workspace privacy synced findings delete failed",
+					code: "workspace_privacy_synced_findings_delete_failed",
+					pathname: routeConfig.workspacePrivacy,
+					details: {
+						action: "delete_synced_findings",
+					},
+				},
+			});
 		}
 	}
 
@@ -136,7 +185,6 @@ export function useWorkspacePrivacyActions({
 		}
 
 		setManagedGithubActionState("submitting");
-		setFeedbackMessage(null);
 		try {
 			const nextManagedGithubState = await requestManagedGithubConsent({
 				projectId: privacyModel.projectId as Id<"workspaceProjects">,
@@ -155,16 +203,26 @@ export function useWorkspacePrivacyActions({
 			});
 			setManagedGithubState(nextManagedGithubState);
 			setManagedGithubActionState("done");
-			setFeedbackMessage(
-				"Managed GitHub concierge request recorded. No GitHub action runs until the next explicit approval.",
-			);
+			showWorkspaceActionSuccessToast({
+				id: workspacePrivacyToastIds.requestManagedGithubSuccess,
+				title: "Managed GitHub request recorded",
+				description: "No GitHub action runs until the next explicit approval.",
+			});
 		} catch (error) {
 			setManagedGithubActionState("error");
-			setFeedbackMessage(
-				error instanceof Error
-					? error.message
-					: "Unable to request managed GitHub.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspacePrivacyToastIds.requestManagedGithubError,
+				error,
+				fallbackMessage: "Unable to request managed GitHub.",
+				report: {
+					title: "Workspace privacy managed GitHub request failed",
+					code: "workspace_privacy_managed_github_request_failed",
+					pathname: routeConfig.workspacePrivacy,
+					details: {
+						action: "request_managed_github",
+					},
+				},
+			});
 		}
 	}
 
@@ -179,7 +237,6 @@ export function useWorkspacePrivacyActions({
 		}
 
 		setManagedGithubActionState("submitting");
-		setFeedbackMessage(null);
 		try {
 			const nextManagedGithubState = await revokeManagedGithubConsent({
 				projectId: privacyModel.projectId as Id<"workspaceProjects">,
@@ -189,16 +246,26 @@ export function useWorkspacePrivacyActions({
 			});
 			setManagedGithubState(nextManagedGithubState);
 			setManagedGithubActionState("done");
-			setFeedbackMessage(
-				"Managed GitHub request revoked. Concierge execution needs a new consent packet.",
-			);
+			showWorkspaceActionSuccessToast({
+				id: workspacePrivacyToastIds.revokeManagedGithubSuccess,
+				title: "Managed GitHub request revoked",
+				description: "Concierge execution needs a new consent packet.",
+			});
 		} catch (error) {
 			setManagedGithubActionState("error");
-			setFeedbackMessage(
-				error instanceof Error
-					? error.message
-					: "Unable to revoke managed GitHub.",
-			);
+			showWorkspaceActionErrorToast({
+				id: workspacePrivacyToastIds.revokeManagedGithubError,
+				error,
+				fallbackMessage: "Unable to revoke managed GitHub.",
+				report: {
+					title: "Workspace privacy managed GitHub revoke failed",
+					code: "workspace_privacy_managed_github_revoke_failed",
+					pathname: routeConfig.workspacePrivacy,
+					details: {
+						action: "revoke_managed_github",
+					},
+				},
+			});
 		}
 	}
 
@@ -206,7 +273,6 @@ export function useWorkspacePrivacyActions({
 		canDeleteFindings,
 		canRevokeRunner,
 		deleteState,
-		feedbackMessage,
 		handleDeleteFindings,
 		handleRequestManagedGithub,
 		handleRevokeManagedGithub,

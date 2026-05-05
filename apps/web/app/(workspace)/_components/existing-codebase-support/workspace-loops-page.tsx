@@ -60,7 +60,7 @@ export function WorkspaceLoopsPage({
 							still starts from a finding approval, not from a queue.
 						</p>
 					</div>
-					<div className="grid gap-2 rounded-xl border border-border/60 bg-background p-4 text-sm">
+					<div className="grid min-w-0 gap-2 overflow-hidden rounded-xl border border-border/60 bg-background p-4 text-sm">
 						<WorkspaceSupportMetric
 							label="Catalog workflows"
 							value={loopsModel.rows.length}

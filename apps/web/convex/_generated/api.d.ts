@@ -40,6 +40,7 @@ import type * as observability_validators from "../observability/validators.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
 import type * as uploads from "../uploads.js";
 import type * as workspace from "../workspace.js";
+import type * as workspace_approved_findings_digest from "../workspace/approved_findings_digest.js";
 import type * as workspace_events from "../workspace/events.js";
 import type * as workspace_model from "../workspace/model.js";
 import type * as workspace_types from "../workspace/types.js";
@@ -84,6 +85,7 @@ declare const fullApi: ApiFromModules<{
   stripeWebhook: typeof stripeWebhook;
   uploads: typeof uploads;
   workspace: typeof workspace;
+  "workspace/approved_findings_digest": typeof workspace_approved_findings_digest;
   "workspace/events": typeof workspace_events;
   "workspace/model": typeof workspace_model;
   "workspace/types": typeof workspace_types;

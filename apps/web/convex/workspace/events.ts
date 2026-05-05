@@ -50,6 +50,7 @@ const eventPayloadFieldsByType: Record<
 		"runnerMode",
 		"machineDisplayName",
 		"runnerVersion",
+		"repositoryDisplayName",
 	]),
 	"runner.heartbeat": new Set([
 		"eventType",

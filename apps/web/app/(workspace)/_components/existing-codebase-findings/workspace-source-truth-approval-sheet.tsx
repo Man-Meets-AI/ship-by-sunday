@@ -3,9 +3,8 @@
 import Link from "next/link";
 import {
 	AlertTriangle,
-	CheckCircle2,
 	Clipboard,
-	ShieldCheck,
+	GitBranchPlus,
 	Terminal,
 } from "lucide-react";
 
@@ -45,9 +44,12 @@ export function WorkspaceSourceTruthApprovalSheet({
 }) {
 	const approval = detail.workflowApproval;
 	const canApprove = Boolean(projectId && activeRunnerId);
+	const approvalButtonDisabled =
+		!canApprove || actionState === "submitting" || actionState === "approved";
 	const isBrokenAppReadOnly = approval.workflowKind === "broken_app_readonly";
 	const isObservabilityAudit =
 		approval.workflowKind === "observability_debuggability";
+	const workflowActionState = getWorkflowActionState(detail);
 	const primaryCommand = approvedWorkflowRunCommand
 		? buildWorkflowCommand({
 				packageRunner: "bunx",
@@ -66,24 +68,19 @@ export function WorkspaceSourceTruthApprovalSheet({
 
 	return (
 		<aside className="grid gap-5 lg:sticky lg:top-20">
-			<section className="rounded-xl border border-border/60 bg-background p-4">
-				<div className="flex items-start gap-3">
-					<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
-					<div className="min-w-0">
-						<h2 className="text-sm font-semibold text-foreground">
-							Workflow approval
-						</h2>
-						<p className="mt-1 text-sm leading-6 text-muted-foreground">
-							{isBrokenAppReadOnly
-								? "Approve this bounded packet, then run read-only diagnostics locally before any patch is allowed."
-								: isObservabilityAudit
-									? "Approve this bounded packet, then run the local observability audit without changing runtime code or provider setup."
-									: "Approve this bounded packet, then run the command locally to create the branch and proof."}
-						</p>
-					</div>
-				</div>
+			<section className="rounded-xl border border-border/60 bg-background p-5">
+				<h2 className="text-base font-semibold text-foreground">
+					Workflow approval
+				</h2>
+				<p className="mt-2 text-sm leading-6 text-muted-foreground">
+					{isBrokenAppReadOnly
+						? "Approve the bounded packet, then run read-only diagnostics locally before any patch is allowed."
+						: isObservabilityAudit
+							? "Approve the bounded packet, then run the local observability audit without changing runtime code or provider setup."
+							: "Approve the bounded packet, then run the local command to create the branch and proof."}
+				</p>
 
-				<div className="mt-4 grid gap-3 text-sm">
+				<div className="mt-4 grid gap-2 rounded-lg border border-border/60 bg-muted/20 p-3 text-sm">
 					<ApprovalFact label="Branch" value={approval.branchName} mono />
 					<ApprovalFact label="Profile" value={approval.profileName} />
 					<ApprovalFact
@@ -92,35 +89,37 @@ export function WorkspaceSourceTruthApprovalSheet({
 					/>
 				</div>
 
-				<div className="mt-4 grid gap-2">
-					<Button
-						type="button"
-						onClick={onApproveWorkflow}
-						disabled={!canApprove || actionState === "submitting"}
-					>
-						{actionState === "submitting"
-							? "Creating workflow run"
-							: primaryActionLabel}
-						<CheckCircle2 className="size-4" aria-hidden />
-					</Button>
-					<Button type="button" variant="outline" onClick={onCopyEvidenceRef}>
-						Copy local evidence ref
-						<Clipboard className="size-4" aria-hidden />
-					</Button>
-					<Button asChild variant="ghost">
-						<Link href={routeConfig.workspaceFindings}>Not now</Link>
-					</Button>
-				</div>
+				{workflowActionState.kind === "ready" ? (
+					<div className="mt-4 grid gap-2">
+						<Button
+							type="button"
+							onClick={onApproveWorkflow}
+							disabled={approvalButtonDisabled}
+							className="justify-center"
+						>
+							<GitBranchPlus className="size-4" aria-hidden />
+							{getPrimaryButtonLabel({
+								actionState,
+								primaryActionLabel,
+							})}
+						</Button>
+						<SecondaryWorkflowActions onCopyEvidenceRef={onCopyEvidenceRef} />
+					</div>
+				) : (
+					<UnavailableWorkflowActionPanel
+						state={workflowActionState}
+						onCopyEvidenceRef={onCopyEvidenceRef}
+					/>
+				)}
 
-				{!canApprove ? (
+				{workflowActionState.kind === "ready" && !canApprove ? (
 					<SheetStatus tone="warning">
 						Pair an active local runner before creating the workflow branch.
 					</SheetStatus>
 				) : null}
-				{actionState === "copied" ? (
-					<SheetStatus tone="neutral">Local evidence ref copied.</SheetStatus>
-				) : null}
-				{actionState === "error" && actionError ? (
+				{workflowActionState.kind === "ready" &&
+				actionState === "error" &&
+				actionError ? (
 					<SheetStatus tone="warning">{actionError}</SheetStatus>
 				) : null}
 				{actionState === "approved" && primaryCommand && fallbackCommand ? (
@@ -143,37 +142,143 @@ export function WorkspaceSourceTruthApprovalSheet({
 					</div>
 				) : null}
 			</section>
-
-			<ApprovalList title="Expected outputs" items={approval.expectedOutputs} />
-			<ApprovalList
-				title="Allowed touch targets"
-				items={approval.allowedTouchTargets}
-			/>
-			<ApprovalList
-				title="Disallowed touch targets"
-				items={approval.disallowedTouchTargets}
-			/>
-			<ApprovalList
-				title="Proof commands"
-				items={approval.proofCommands}
-				mono
-			/>
-			<ApprovalList title="Stop conditions" items={approval.stopConditions} />
-			<section className="rounded-xl border border-border/60 bg-background p-5">
-				<h2 className="text-base font-semibold text-foreground">Sync policy</h2>
-				<p className="mt-4 text-sm leading-6 text-muted-foreground">
-					{approval.syncPolicySummary}
-				</p>
-			</section>
-			<section className="rounded-xl border border-border/60 bg-background p-5">
-				<h2 className="text-base font-semibold text-foreground">
-					Rollback note
-				</h2>
-				<p className="mt-4 text-sm leading-6 text-muted-foreground">
-					{approval.rollbackNotes}
-				</p>
-			</section>
 		</aside>
+	);
+}
+
+type WorkflowActionState =
+	| { kind: "ready" }
+	| {
+			kind: "unavailable";
+			buttonLabel: string;
+			description: string;
+			reason: string | null;
+			title: string;
+	  };
+
+function getWorkflowActionState(
+	detail: WorkspaceFindingDetailModel,
+): WorkflowActionState {
+	switch (detail.status) {
+		case "ready":
+			if (!detail.workflowApproval.isSupportedByLocalRunner) {
+				return {
+					kind: "unavailable",
+					title: "Workflow unavailable",
+					buttonLabel: "Workflow unavailable",
+					description:
+						"This workflow is not available in the local runner yet.",
+					reason: detail.workflowApproval.workflowId,
+				};
+			}
+			return { kind: "ready" };
+		case "blocked":
+			return {
+				kind: "unavailable",
+				title: "Workflow blocked",
+				buttonLabel: "Workflow blocked",
+				description:
+					"This finding is blocked. Resolve the blocker before starting a workflow.",
+				reason: detail.blockedReason,
+			};
+		case "needs_approval":
+			return {
+				kind: "unavailable",
+				title: "Approval needed",
+				buttonLabel: "Waiting for approval",
+				description:
+					"This finding still needs approval. Approve the finding before starting a workflow.",
+				reason: detail.blockedReason,
+			};
+		case "running":
+			return {
+				kind: "unavailable",
+				title: "Workflow already running",
+				buttonLabel: "Workflow running",
+				description:
+					"A workflow is already running for this finding. Review the current run state before starting another workflow.",
+				reason: detail.blockedReason,
+			};
+		case "done":
+			return {
+				kind: "unavailable",
+				title: "Workflow completed",
+				buttonLabel: "Workflow completed",
+				description:
+					"This finding already has completed proof. Review Runs before starting any deliberate rerun.",
+				reason: detail.blockedReason,
+			};
+	}
+}
+
+function getPrimaryButtonLabel({
+	actionState,
+	primaryActionLabel,
+}: {
+	actionState: WorkflowApprovalActionState;
+	primaryActionLabel: string;
+}) {
+	if (actionState === "submitting") {
+		return "Creating workflow run";
+	}
+	if (actionState === "approved") {
+		return "Workflow run approved";
+	}
+	return primaryActionLabel;
+}
+
+function UnavailableWorkflowActionPanel({
+	state,
+	onCopyEvidenceRef,
+}: {
+	state: Extract<WorkflowActionState, { kind: "unavailable" }>;
+	onCopyEvidenceRef: () => void;
+}) {
+	return (
+		<div className="mt-4 grid gap-3">
+			<Button type="button" disabled className="justify-center">
+				<GitBranchPlus className="size-4" aria-hidden />
+				{state.buttonLabel}
+			</Button>
+			<div
+				className="rounded-lg border border-border/60 bg-muted/30 px-3 py-2"
+				role="status"
+			>
+				<p className="text-sm font-medium text-foreground">{state.title}</p>
+				<p className="mt-1 text-sm leading-6 text-muted-foreground">
+					{state.description}
+				</p>
+				{state.reason ? (
+					<p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
+						Reason: {state.reason}
+					</p>
+				) : null}
+			</div>
+			<SecondaryWorkflowActions onCopyEvidenceRef={onCopyEvidenceRef} />
+		</div>
+	);
+}
+
+function SecondaryWorkflowActions({
+	onCopyEvidenceRef,
+}: {
+	onCopyEvidenceRef: () => void;
+}) {
+	return (
+		<>
+			<Button
+				type="button"
+				variant="outline"
+				className="justify-center"
+				onClick={onCopyEvidenceRef}
+			>
+				<Clipboard className="size-4" aria-hidden />
+				Copy local evidence ref
+			</Button>
+			<Button asChild variant="ghost" className="justify-center">
+				<Link href={routeConfig.workspaceFindings}>Not now</Link>
+			</Button>
+		</>
 	);
 }
 
@@ -237,47 +342,18 @@ function ApprovalFact({
 	mono?: boolean;
 }) {
 	return (
-		<div className="min-w-0">
+		<div className="grid min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-start gap-3">
 			<p className="text-xs font-medium text-muted-foreground">{label}</p>
 			<p
 				className={
 					mono
-						? "mt-1 break-words font-mono text-xs text-foreground"
-						: "mt-1 break-words text-sm text-foreground"
+						? "break-words font-mono text-xs text-foreground"
+						: "break-words text-sm text-foreground"
 				}
 			>
 				{value}
 			</p>
 		</div>
-	);
-}
-
-function ApprovalList({
-	title,
-	items,
-	mono,
-}: {
-	title: string;
-	items: string[];
-	mono?: boolean;
-}) {
-	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<h2 className="text-base font-semibold text-foreground">{title}</h2>
-			<ul
-				className={
-					mono
-						? "mt-4 grid gap-2 font-mono text-xs leading-6 text-muted-foreground"
-						: "mt-4 grid gap-2 text-sm leading-6 text-muted-foreground"
-				}
-			>
-				{items.map((item) => (
-					<li key={item} className="break-words">
-						{item}
-					</li>
-				))}
-			</ul>
-		</section>
 	);
 }
 
