@@ -117,9 +117,6 @@ export function WorkspaceSourceTruthApprovalSheet({
 						Pair an active local runner before creating the workflow branch.
 					</SheetStatus>
 				) : null}
-				{actionState === "copied" ? (
-					<SheetStatus tone="neutral">Local evidence ref copied.</SheetStatus>
-				) : null}
 				{actionState === "error" && actionError ? (
 					<SheetStatus tone="warning">{actionError}</SheetStatus>
 				) : null}
@@ -142,36 +139,6 @@ export function WorkspaceSourceTruthApprovalSheet({
 						<CommandBlock command={fallbackCommand} />
 					</div>
 				) : null}
-			</section>
-
-			<ApprovalList title="Expected outputs" items={approval.expectedOutputs} />
-			<ApprovalList
-				title="Allowed touch targets"
-				items={approval.allowedTouchTargets}
-			/>
-			<ApprovalList
-				title="Disallowed touch targets"
-				items={approval.disallowedTouchTargets}
-			/>
-			<ApprovalList
-				title="Proof commands"
-				items={approval.proofCommands}
-				mono
-			/>
-			<ApprovalList title="Stop conditions" items={approval.stopConditions} />
-			<section className="rounded-xl border border-border/60 bg-background p-5">
-				<h2 className="text-base font-semibold text-foreground">Sync policy</h2>
-				<p className="mt-4 text-sm leading-6 text-muted-foreground">
-					{approval.syncPolicySummary}
-				</p>
-			</section>
-			<section className="rounded-xl border border-border/60 bg-background p-5">
-				<h2 className="text-base font-semibold text-foreground">
-					Rollback note
-				</h2>
-				<p className="mt-4 text-sm leading-6 text-muted-foreground">
-					{approval.rollbackNotes}
-				</p>
 			</section>
 		</aside>
 	);
@@ -249,35 +216,6 @@ function ApprovalFact({
 				{value}
 			</p>
 		</div>
-	);
-}
-
-function ApprovalList({
-	title,
-	items,
-	mono,
-}: {
-	title: string;
-	items: string[];
-	mono?: boolean;
-}) {
-	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<h2 className="text-base font-semibold text-foreground">{title}</h2>
-			<ul
-				className={
-					mono
-						? "mt-4 grid gap-2 font-mono text-xs leading-6 text-muted-foreground"
-						: "mt-4 grid gap-2 text-sm leading-6 text-muted-foreground"
-				}
-			>
-				{items.map((item) => (
-					<li key={item} className="break-words">
-						{item}
-					</li>
-				))}
-			</ul>
-		</section>
 	);
 }
 

@@ -146,6 +146,9 @@ describe("WorkspaceFindingDetailPage", () => {
 		expect(
 			screen.getByText("It improves every later local workflow."),
 		).toBeTruthy();
+		expect(
+			screen.getByRole("heading", { name: "Workflow bounds" }),
+		).toBeTruthy();
 		expect(screen.getByText("AGENTS.md:1-40")).toBeTruthy();
 		expect(screen.getByText("bun run typecheck")).toBeTruthy();
 		expect(screen.getByText("Source Truth Agent Readiness")).toBeTruthy();
@@ -166,7 +169,7 @@ describe("WorkspaceFindingDetailPage", () => {
 			screen.getByRole("button", { name: /Copy local evidence ref/i }),
 		);
 		expect(writeTextMock).toHaveBeenCalledWith("AGENTS.md:1-40");
-		expect(screen.getByText("Local evidence ref copied.")).toBeTruthy();
+		expect(screen.queryByText("Local evidence ref copied.")).toBeNull();
 		expect(toastSuccessMock).toHaveBeenCalledWith(
 			"Local evidence ref copied.",
 			{
@@ -174,8 +177,7 @@ describe("WorkspaceFindingDetailPage", () => {
 					label: "View runs",
 				}),
 				id: "workspace-finding-detail-copy-evidence-ref-success",
-				description:
-					"Use Runs to match this ref to the local report history.",
+				description: "Use Runs to match this ref to the local report history.",
 				duration: 6000,
 				position: "bottom-right",
 			},
