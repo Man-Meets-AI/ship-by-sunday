@@ -80,11 +80,13 @@ describe("customer-safe snapshot contract", () => {
 	it("keeps the shared trace contract aligned with the shipped source files", () => {
 		expect(buildRepoDownloadTraceIncludes()).toEqual(
 			expect.arrayContaining([
-				"../../docs/prompts/exec-plan*.md",
 				"../../docs/prompts/execplan*.md",
 				"./.env.local.example",
 				"./tests/**/*",
 			]),
+		);
+		expect(buildRepoDownloadTraceIncludes()).not.toContain(
+			"../../docs/prompts/exec-plan*.md",
 		);
 		expect(buildRepoDownloadTraceIncludes()).not.toContain("./.env.production");
 		expect(buildRepoDownloadTraceIncludes()).not.toContain(

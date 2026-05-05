@@ -64,6 +64,17 @@ export const workspaceRepositoryProviderValidator = v.union(
 	v.literal("unknown"),
 );
 
+export const managedGithubConsentStatusValidator = v.union(
+	v.literal("requested"),
+	v.literal("approved"),
+	v.literal("revoked"),
+);
+
+export const managedGithubAuditEventTypeValidator = v.union(
+	v.literal("managed_github.requested"),
+	v.literal("managed_github.revoked"),
+);
+
 export const packageManagerValidator = v.union(
 	v.literal("bun"),
 	v.literal("npm"),
@@ -190,6 +201,7 @@ export const evidenceRefValidator = v.union(
 export const workflowRunStatusValidator = v.union(
 	v.literal("approval_requested"),
 	v.literal("approved"),
+	v.literal("paused"),
 	v.literal("running"),
 	v.literal("proof_completed"),
 	v.literal("blocked"),
@@ -212,6 +224,25 @@ export const workflowDeliveryStatusValidator = v.union(
 	v.literal("blocked"),
 );
 
+export const workflowProofCommandResultValidator = v.object({
+	commandName: v.string(),
+	status: v.union(
+		v.literal("passed"),
+		v.literal("failed"),
+		v.literal("blocked"),
+	),
+});
+
+export const workflowApprovalSourceValidator = v.union(
+	v.literal("finding_detail"),
+	v.literal("runner_cli"),
+);
+
+export const workflowDirtyStatePolicyValidator = v.union(
+	v.literal("require_clean_worktree"),
+	v.literal("checkpoint_required"),
+);
+
 export const workspaceRunnerEventSchemaVersionValidator = v.literal(
 	"workspace.runner-event.v1",
 );
@@ -226,6 +257,7 @@ export const workspaceRunnerEventTypeValidator = v.union(
 	v.literal("doctor.sync_preview.ready"),
 	v.literal("doctor.findings.approved"),
 	v.literal("workflow.approval.requested"),
+	v.literal("workflow.claimed"),
 	v.literal("workflow.started"),
 	v.literal("workflow.proof.completed"),
 	v.literal("workflow.blocked"),
@@ -311,6 +343,12 @@ export const workspaceRunnerEventPayloadValidator = v.union(
 		summary: v.string(),
 	}),
 	v.object({
+		eventType: v.literal("workflow.claimed"),
+		workflowId: v.string(),
+		writeLeaseId: v.string(),
+		writeLeaseExpiresAt: v.number(),
+	}),
+	v.object({
 		eventType: v.literal("workflow.started"),
 		workflowId: v.string(),
 		branchName: v.optional(v.string()),
@@ -321,6 +359,12 @@ export const workspaceRunnerEventPayloadValidator = v.union(
 		workflowId: v.string(),
 		proofStatus: workflowProofStatusValidator,
 		proofSummary: v.string(),
+		touchedFileRefs: v.optional(v.array(v.string())),
+		createdArtifactRefs: v.optional(v.array(v.string())),
+		proofCommandResults: v.optional(
+			v.array(workflowProofCommandResultValidator),
+		),
+		nextRecommendedWorkflowId: v.optional(v.string()),
 	}),
 	v.object({
 		eventType: v.literal("workflow.blocked"),
@@ -413,11 +457,17 @@ export const doctorPassRunFields = {
 	projectId: v.id("workspaceProjects"),
 	runnerId: v.optional(v.id("workspaceRunnerBindings")),
 	repositoryBindingId: v.optional(v.id("workspaceRepositoryBindings")),
+	localRunId: v.optional(v.string()),
 	status: doctorPassRunStatusValidator,
 	runnerMode: workspaceRunnerModeValidator,
 	currentStage: v.optional(doctorPassStageValidator),
 	syncPreviewStatus: syncPreviewStatusValidator,
 	syncPreviewDigest: v.optional(v.string()),
+	syncPreviewApprovedAt: v.optional(v.number()),
+	syncPreviewApprovedByClerkUserId: v.optional(v.string()),
+	syncPreviewApprovedDigest: v.optional(v.string()),
+	syncPreviewApprovedSchemaVersion: v.optional(v.string()),
+	syncPreviewApprovalSource: v.optional(v.string()),
 	syncPreviewFindingsCount: v.optional(v.number()),
 	excludedArtifactCount: v.optional(v.number()),
 	findingsCount: v.optional(v.number()),
@@ -494,7 +544,31 @@ export const workflowRunFields = {
 	proofStatus: workflowProofStatusValidator,
 	deliveryStatus: workflowDeliveryStatusValidator,
 	branchName: v.optional(v.string()),
+	targetBranch: v.optional(v.string()),
 	profileName: v.optional(v.string()),
+	approvalSchemaVersion: v.optional(v.string()),
+	approvedAt: v.optional(v.number()),
+	approvedByClerkUserId: v.optional(v.string()),
+	approvalSource: v.optional(workflowApprovalSourceValidator),
+	writeLeaseId: v.optional(v.string()),
+	writeLeaseExpiresAt: v.optional(v.number()),
+	writeLeaseDurationMinutes: v.optional(v.number()),
+	writeLeaseRenewalCount: v.optional(v.number()),
+	dirtyStatePolicy: v.optional(workflowDirtyStatePolicyValidator),
+	localWorkflowPacketRef: v.optional(v.string()),
+	localProofRef: v.optional(v.string()),
+	expectedOutputs: v.optional(v.array(v.string())),
+	allowedTouchTargets: v.optional(v.array(v.string())),
+	disallowedTouchTargets: v.optional(v.array(v.string())),
+	proofCommands: v.optional(v.array(v.string())),
+	proofCommandResults: v.optional(v.array(workflowProofCommandResultValidator)),
+	syncPolicySummary: v.optional(v.string()),
+	stopConditions: v.optional(v.array(v.string())),
+	rollbackNotes: v.optional(v.string()),
+	proofSummary: v.optional(v.string()),
+	touchedFileRefs: v.optional(v.array(v.string())),
+	createdArtifactRefs: v.optional(v.array(v.string())),
+	nextRecommendedWorkflowId: v.optional(v.string()),
 	blockedReason: v.optional(v.string()),
 	startedAt: v.optional(v.number()),
 	completedAt: v.optional(v.number()),
@@ -514,6 +588,87 @@ export const workspaceRunnerEventFields = {
 	createdAt: v.number(),
 	receivedAt: v.number(),
 	payload: workspaceRunnerEventPayloadValidator,
+};
+
+export const managedGithubRepositoryAccessValidator = v.object({
+	provider: v.literal("github"),
+	remoteOwner: v.string(),
+	remoteName: v.string(),
+	defaultBranch: v.optional(v.string()),
+	accessMode: v.literal("selected_repository_only"),
+});
+
+export const managedGithubInstallationScopeValidator = v.object({
+	repositorySelection: v.literal("selected_repository_only"),
+	permissions: v.array(v.string()),
+});
+
+export const managedGithubStoragePolicyValidator = v.object({
+	sourceCloneRetention: v.literal("ephemeral_until_delivery_or_revocation"),
+	proofArtifactRetention: v.literal("structured_metadata_only"),
+	secretStorage: v.literal("never_store_customer_secrets"),
+});
+
+export const managedGithubPrAuthorityValidator = v.object({
+	branchCreation: v.literal("customer_approval_required"),
+	pullRequestCreation: v.literal("customer_approval_required"),
+	mergeAuthority: v.literal("never"),
+	ciRerunAuthority: v.literal("customer_approval_required"),
+});
+
+export const managedGithubRawSourceVisibilityValidator = v.object({
+	operatorVisibility: v.literal("assigned_concierge_only_after_consent"),
+	rawSourceSharing: v.literal("disabled_until_explicit_share"),
+	transcriptStorage: v.literal("disabled"),
+});
+
+export const managedGithubProofBoundaryValidator = v.object({
+	proofCommands: v.literal("customer_approved_only"),
+	ciCommands: v.literal("customer_approved_only"),
+	syncedArtifacts: v.literal("proof_metadata_and_pr_refs_only"),
+});
+
+export const managedGithubConsentAcknowledgementValidator = v.object({
+	repoAccess: v.literal(true),
+	installationScope: v.literal(true),
+	storagePolicy: v.literal(true),
+	prAuthority: v.literal(true),
+	auditLog: v.literal(true),
+	revocation: v.literal(true),
+	rawSourceVisibility: v.literal(true),
+	proofBoundaries: v.literal(true),
+});
+
+export const managedGithubExecutionConsentFields = {
+	projectId: v.id("workspaceProjects"),
+	repositoryBindingId: v.id("workspaceRepositoryBindings"),
+	status: managedGithubConsentStatusValidator,
+	consentSchemaVersion: v.literal("managed-github-consent.v1"),
+	repositoryAccess: managedGithubRepositoryAccessValidator,
+	installationScope: managedGithubInstallationScopeValidator,
+	storagePolicy: managedGithubStoragePolicyValidator,
+	prAuthority: managedGithubPrAuthorityValidator,
+	rawSourceVisibility: managedGithubRawSourceVisibilityValidator,
+	proofBoundary: managedGithubProofBoundaryValidator,
+	requestedByClerkUserId: v.string(),
+	requestedAt: v.number(),
+	approvedByClerkUserId: v.optional(v.string()),
+	approvedAt: v.optional(v.number()),
+	revokedByClerkUserId: v.optional(v.string()),
+	revokedAt: v.optional(v.number()),
+	revokeReason: v.optional(v.string()),
+	createdAt: v.number(),
+	updatedAt: v.number(),
+};
+
+export const managedGithubAuditEventFields = {
+	projectId: v.id("workspaceProjects"),
+	consentId: v.optional(v.id("managedGithubExecutionConsents")),
+	eventType: managedGithubAuditEventTypeValidator,
+	actorClerkUserId: v.string(),
+	summary: v.string(),
+	repositoryLabel: v.string(),
+	createdAt: v.number(),
 };
 
 export const workspaceProjectDocumentValidator = v.object({
@@ -558,10 +713,52 @@ export const workflowRunDocumentValidator = v.object({
 	...workflowRunFields,
 });
 
+export const workspaceRunnerWorkflowApprovalValidator = v.object({
+	workflowRunId: v.id("workflowRuns"),
+	workflowId: v.string(),
+	workflowVersion: v.string(),
+	branchName: v.string(),
+	profileName: v.string(),
+	writeLeaseId: v.string(),
+	writeLeaseExpiresAt: v.number(),
+	writeLeaseDurationMinutes: v.number(),
+	dirtyStatePolicy: workflowDirtyStatePolicyValidator,
+	expectedOutputs: v.array(v.string()),
+	allowedTouchTargets: v.array(v.string()),
+	disallowedTouchTargets: v.array(v.string()),
+	proofCommands: v.array(v.string()),
+	syncPolicySummary: v.string(),
+	stopConditions: v.array(v.string()),
+	rollbackNotes: v.string(),
+	localWorkflowPacketRef: v.string(),
+	localProofRef: v.string(),
+});
+
+export const workspaceWorkerQueueStateValidator = v.object({
+	project: v.union(workspaceProjectDocumentValidator, v.null()),
+	activeRunner: v.union(
+		workspaceRunnerBindingPublicDocumentValidator,
+		v.null(),
+	),
+	workflowRuns: v.array(workflowRunDocumentValidator),
+});
+
 export const workspaceRunnerEventDocumentValidator = v.object({
 	_id: v.id("workspaceRunnerEvents"),
 	_creationTime: v.number(),
 	...workspaceRunnerEventFields,
+});
+
+export const managedGithubExecutionConsentDocumentValidator = v.object({
+	_id: v.id("managedGithubExecutionConsents"),
+	_creationTime: v.number(),
+	...managedGithubExecutionConsentFields,
+});
+
+export const managedGithubAuditEventDocumentValidator = v.object({
+	_id: v.id("managedGithubAuditEvents"),
+	_creationTime: v.number(),
+	...managedGithubAuditEventFields,
 });
 
 export const workspaceProjectStateValidator = v.object({
@@ -636,4 +833,9 @@ export const workspaceFindingsSyncResultValidator = v.object({
 	syncedAt: v.number(),
 	insertedCount: v.number(),
 	patchedCount: v.number(),
+});
+
+export const managedGithubExecutionStateValidator = v.object({
+	consent: v.union(managedGithubExecutionConsentDocumentValidator, v.null()),
+	auditEvents: v.array(managedGithubAuditEventDocumentValidator),
 });

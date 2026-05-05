@@ -14,12 +14,17 @@ import {
 	queueRunnerEvent,
 	type SetupCheckStatus,
 } from "../core/runner-events";
+import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
+import { claimApprovedWorkflowRun } from "../core/workflow-run-api";
 import { collectSetupChecks } from "./setup-check";
 
 type DaemonOptions = {
 	repo?: string;
 	json?: boolean;
 	once?: boolean;
+	work?: boolean;
+	confirmLocalWrites?: boolean;
 	intervalMs: number;
 };
 
@@ -53,6 +58,12 @@ async function runDaemonStart(argv: string[]) {
 
 	do {
 		await sendHeartbeat({ repositoryRoot, isGitRepository });
+		if (options.work) {
+			await claimAndRunNextWorkflow({
+				repositoryRoot,
+				confirmLocalWrites: options.confirmLocalWrites === true,
+			});
+		}
 		if (options.once) {
 			break;
 		}
@@ -154,6 +165,57 @@ async function sendHeartbeat({
 	});
 }
 
+async function claimAndRunNextWorkflow({
+	repositoryRoot,
+	confirmLocalWrites,
+}: {
+	repositoryRoot: string;
+	confirmLocalWrites: boolean;
+}) {
+	if (!confirmLocalWrites) {
+		throw new Error(
+			"daemon start --work requires --confirm-local-writes for approved queue jobs.",
+		);
+	}
+
+	const [state, credential] = await Promise.all([
+		readLocalProjectState(repositoryRoot),
+		readRunnerCredential({ repositoryRoot }),
+	]);
+	if (!state || !credential) {
+		throw new Error("Run setup pair before starting worker mode.");
+	}
+
+	const approvedWorkflowRun = await claimApprovedWorkflowRun({
+		state,
+		credential,
+	});
+	if (!approvedWorkflowRun) {
+		return null;
+	}
+	if (approvedWorkflowRun.workflowId === "broken-app-triage") {
+		return await runBrokenAppTriageWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmReadOnlyReproduction: true,
+		});
+	}
+	if (approvedWorkflowRun.workflowId === "source-truth-agent-readiness") {
+		return await runSourceTruthWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmLocalWrites,
+		});
+	}
+	throw new Error(
+		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
+	);
+}
+
 function parseDaemonOptions(argv: string[]): DaemonOptions {
 	const options: DaemonOptions = { intervalMs: 30_000 };
 	for (let index = 0; index < argv.length; index += 1) {
@@ -165,6 +227,10 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.json = true;
 		} else if (arg === "--once") {
 			options.once = true;
+		} else if (arg === "--work") {
+			options.work = true;
+		} else if (arg === "--confirm-local-writes") {
+			options.confirmLocalWrites = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),

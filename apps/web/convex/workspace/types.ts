@@ -12,6 +12,9 @@ export type DoctorPassRunDoc = Doc<"doctorPassRuns">;
 export type CodebaseFindingDoc = Doc<"codebaseFindings">;
 export type WorkflowRunDoc = Doc<"workflowRuns">;
 export type WorkspaceRunnerEventDoc = Doc<"workspaceRunnerEvents">;
+export type ManagedGithubExecutionConsentDoc =
+	Doc<"managedGithubExecutionConsents">;
+export type ManagedGithubAuditEventDoc = Doc<"managedGithubAuditEvents">;
 
 export type WorkspaceProjectId = Id<"workspaceProjects">;
 export type WorkspaceRunnerBindingId = Id<"workspaceRunnerBindings">;
@@ -19,6 +22,8 @@ export type WorkspaceRepositoryBindingId = Id<"workspaceRepositoryBindings">;
 export type DoctorPassRunId = Id<"doctorPassRuns">;
 export type CodebaseFindingId = Id<"codebaseFindings">;
 export type WorkflowRunId = Id<"workflowRuns">;
+export type ManagedGithubExecutionConsentId =
+	Id<"managedGithubExecutionConsents">;
 
 export type SetupCheckStatus = "unknown" | "blocked" | "warning" | "ready";
 export type WorkspaceRunnerMode = "daemon" | "one_shot";
@@ -33,6 +38,7 @@ export type WorkspaceRunnerEventType =
 	| "doctor.sync_preview.ready"
 	| "doctor.findings.approved"
 	| "workflow.approval.requested"
+	| "workflow.claimed"
 	| "workflow.started"
 	| "workflow.proof.completed"
 	| "workflow.blocked"
@@ -120,6 +126,12 @@ export type WorkspaceRunnerEventPayload =
 			summary: string;
 	  }
 	| {
+			eventType: "workflow.claimed";
+			workflowId: string;
+			writeLeaseId: string;
+			writeLeaseExpiresAt: number;
+	  }
+	| {
 			eventType: "workflow.started";
 			workflowId: string;
 			branchName?: string;
@@ -130,6 +142,13 @@ export type WorkspaceRunnerEventPayload =
 			workflowId: string;
 			proofStatus: "not_started" | "passed" | "failed" | "blocked";
 			proofSummary: string;
+			touchedFileRefs?: string[];
+			createdArtifactRefs?: string[];
+			proofCommandResults?: Array<{
+				commandName: string;
+				status: "passed" | "failed" | "blocked";
+			}>;
+			nextRecommendedWorkflowId?: string;
 	  }
 	| {
 			eventType: "workflow.blocked";

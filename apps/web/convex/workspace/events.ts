@@ -97,6 +97,12 @@ const eventPayloadFieldsByType: Record<
 		"requiredPermission",
 		"summary",
 	]),
+	"workflow.claimed": new Set([
+		"eventType",
+		"workflowId",
+		"writeLeaseId",
+		"writeLeaseExpiresAt",
+	]),
 	"workflow.started": new Set([
 		"eventType",
 		"workflowId",
@@ -108,6 +114,10 @@ const eventPayloadFieldsByType: Record<
 		"workflowId",
 		"proofStatus",
 		"proofSummary",
+		"touchedFileRefs",
+		"createdArtifactRefs",
+		"proofCommandResults",
+		"nextRecommendedWorkflowId",
 	]),
 	"workflow.blocked": new Set([
 		"eventType",

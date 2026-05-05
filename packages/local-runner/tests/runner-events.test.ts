@@ -55,6 +55,54 @@ describe("runner events", () => {
 		);
 	});
 
+	it("keeps events queued while a flush is in progress", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-runner-events-");
+		const firstEvent = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "runner.heartbeat",
+				runnerMode: "daemon",
+				status: "online",
+				machineHealthStatus: "ready",
+				projectHealthStatus: "ready",
+			},
+		});
+		const concurrentEvent = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "workflow.blocked",
+				workflowId: "broken-app-triage",
+				blockedStage: "reproduction-command",
+				blockedReason:
+					"No approved read-only diagnostic command was available.",
+			},
+		});
+
+		await queueRunnerEvent(repositoryRoot, firstEvent);
+		const result = await flushRunnerEvents({
+			repositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_secret",
+				apiBaseUrl: "https://example.com/",
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
+			fetchRunnerEvent: async () => {
+				await queueRunnerEvent(repositoryRoot, concurrentEvent);
+				return new Response(null, { status: 200 });
+			},
+		});
+
+		expect(result).toEqual({ delivered: 1, remaining: 0 });
+		await expect(readQueuedRunnerEvents(repositoryRoot)).resolves.toEqual([
+			concurrentEvent,
+		]);
+	});
+
 	it("rejects unsafe payload fields before enqueue", () => {
 		expect(() =>
 			createRunnerEvent({

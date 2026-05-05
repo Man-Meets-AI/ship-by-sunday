@@ -77,8 +77,44 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		steps: [
 			"Read `START-HERE.md` and confirm core setup, auth setup, billing setup, and verification are done first.",
 			"Start by updating `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts`.",
-			"Prefer `$copywriting`, `$frontend-design`, `$docs`, and `$testing-practices` as the first follow-on skills.",
+			"Prefer `$starter-product-copy`, `$starter-frontend-design`, and `$starter-docs-and-testing` as the first follow-on skills.",
 			"Keep auth and billing contracts stable until the product already feels like the buyer's product.",
+		],
+	},
+	{
+		name: "starter-product-copy",
+		path: ".agents/skills/starter-product-copy/SKILL.md",
+		description:
+			"Use when replacing generated product identity, homepage copy, CTA language, pricing copy, or positioning in this Codebase.",
+		steps: [
+			"Read `DESIGN.md`, `docs/facts/project-definition.json`, `apps/web/config/product.ts`, and `apps/web/app/_content/home-page.ts` before editing copy.",
+			"Keep claims aligned with the generated product facts until the buyer explicitly changes the product promise.",
+			"Update visible copy and the nearby source of truth together when the product identity changes.",
+			"Avoid changing auth, billing, or protected access behavior while doing copy work.",
+		],
+	},
+	{
+		name: "starter-frontend-design",
+		path: ".agents/skills/starter-frontend-design/SKILL.md",
+		description:
+			"Use when changing user-facing UI, layout, styling, theming, or component presentation in this Codebase.",
+		steps: [
+			"Read root `DESIGN.md` before changing user-facing UI.",
+			"Read `docs/facts/design-system.json` and `apps/web/config/generated-design-system.ts` for the machine-readable design snapshot.",
+			"Preserve the shipped design tokens and component conventions unless the buyer explicitly asks to redesign them.",
+			"Verify the changed UI with the smallest relevant test or browser check before handoff.",
+		],
+	},
+	{
+		name: "starter-docs-and-testing",
+		path: ".agents/skills/starter-docs-and-testing/SKILL.md",
+		description:
+			"Use when documenting a change, choosing validation commands, or recording proof in this Codebase.",
+		steps: [
+			"Read `docs/build/docs/readiness.md`, `docs/build/docs/review.md`, and `docs/testing/README.md` before choosing validation.",
+			"Run the narrowest relevant check first, then broaden to `bun run lint`, `bun run typecheck`, or `bun run build` when the changed surface requires it.",
+			"Record what changed, validation results, assumptions, and requirement-to-evidence notes in `docs/build/docs/documentation.md` when the build contract changes.",
+			"Keep proof notes concise and tied to observable user outcomes.",
 		],
 	},
 	{

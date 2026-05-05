@@ -1,0 +1,90 @@
+import { TOP_NINE_SCHEMA_VERSION } from "./types";
+
+export function createTopNineOutputSchema() {
+	return {
+		type: "object",
+		additionalProperties: false,
+		required: ["schemaVersion", "summary", "findings"],
+		properties: {
+			schemaVersion: { const: TOP_NINE_SCHEMA_VERSION },
+			summary: { type: "string", minLength: 1 },
+			findings: {
+				type: "array",
+				minItems: 0,
+				maxItems: 9,
+				items: {
+					type: "object",
+					additionalProperties: false,
+					required: [
+						"findingId",
+						"rank",
+						"status",
+						"title",
+						"category",
+						"severity",
+						"confidence",
+						"buyerImpact",
+						"blastRadius",
+						"proofPath",
+						"proofability",
+						"permissionRequired",
+						"recommendedWorkflowId",
+						"whyThisNow",
+						"evidenceRefs",
+						"syncSensitivity",
+						"localReportRef",
+					],
+					properties: {
+						findingId: { type: "string", minLength: 1 },
+						rank: { type: "number", minimum: 1, maximum: 9 },
+						status: {
+							enum: ["ready", "blocked", "needs_approval", "running", "done"],
+						},
+						title: { type: "string", minLength: 1 },
+						category: {
+							enum: [
+								"source_truth",
+								"setup",
+								"proof",
+								"revenue_path",
+								"observability",
+								"ux_conversion",
+								"broken_app",
+								"performance",
+								"security",
+								"testing",
+								"other",
+							],
+						},
+						severity: { enum: ["critical", "high", "medium", "low"] },
+						confidence: { type: "number", minimum: 0, maximum: 1 },
+						buyerImpact: { type: "string", minLength: 1 },
+						blastRadius: { enum: ["none", "low", "medium", "high"] },
+						proofPath: { type: "string", minLength: 1 },
+						proofability: { enum: ["clear", "partial", "blocked"] },
+						permissionRequired: {
+							enum: [
+								"read_only",
+								"docs_write",
+								"workspace_write",
+								"network",
+								"provider_access",
+								"managed_github",
+							],
+						},
+						recommendedWorkflowId: { type: "string", minLength: 1 },
+						whyThisNow: { type: "string", minLength: 1 },
+						evidenceRefs: {
+							type: "array",
+							maxItems: 20,
+							items: { type: "object" },
+						},
+						blockedReason: { type: "string" },
+						syncSensitivity: { enum: ["low", "medium", "high"] },
+						localReportRef: { type: "string", minLength: 1 },
+					},
+				},
+			},
+		},
+	};
+}

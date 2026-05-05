@@ -1,10 +1,10 @@
 ---
 title: Reconcile Customer Agentic Source Contract
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-05
 summary: Make generated customer repo agent guidance coherent before shipping the full Program and ExecPlan operating pack.
-post_build_recap: null
+post_build_recap: Reconciled generated START-HERE skill triggers with shipped wrapper skills and the external-skill manifest, codified the no-hyphen `execplan-*` prompt asset family as the generated Codebase contract, and added clean-room compiler tests for trigger/script/source-contract coherence.
 program_id: customer-agentic-operating-system
 planning_brief: docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md
 read_when:
@@ -29,17 +29,18 @@ The user-visible result is a downloaded repo whose agent guidance points to file
 
 - [x] 2026-05-02 EDT: Created this child ExecPlan from `docs/programs/active/2026-05-02-customer-agentic-operating-system/planning-brief-1.md`.
 - [x] 2026-05-02 EDT: Renamed and narrowed the plan after subagent review found the source-contract reconciliation should precede full operating-pack shipment.
-- [ ] Inspect the current generated repo materialization path and customer-safe exclusions immediately before implementation.
-- [ ] Reconcile generated prompt naming and prompt contents with the customer-facing plan contract.
-- [ ] Reconcile generated skill triggers with local and external skill availability.
-- [ ] Reconcile generated package-script promises with actual generated root scripts.
-- [ ] Reconcile customer-safe snapshot exclusions with future operating-pack extension points.
-- [ ] Add focused compiler tests and clean-room materialization proof for source-contract coherence.
-- [ ] Refresh the owning Program after implementation.
+- [x] 2026-05-05 EDT: Inspected the current generated repo materialization path, template overrides, starter onboarding, wrapper skills, root package scripts, prompt-pack rendering, customer-safe exclusions, review-download zip tests, and compiler instructions immediately before implementation.
+- [x] 2026-05-05 EDT: Reconciled prompt naming by making the no-hyphen `execplan-*` prompt asset family the generated Codebase contract; removed the hyphenated `exec-plan*` family from the download trace and customer-safe shipping contract.
+- [x] 2026-05-05 EDT: Reconciled generated skill triggers by replacing generic `$copywriting`, `$frontend-design`, `$docs`, and `$testing-practices` references with shipped local wrapper skills: `$starter-product-copy`, `$starter-frontend-design`, and `$starter-docs-and-testing`.
+- [x] 2026-05-05 EDT: Rechecked package-script promises against generated root scripts and added a clean-room trigger-resolution test that proves every START-HERE `$skill` resolves to a shipped wrapper skill or external manifest entry.
+- [x] 2026-05-05 EDT: Reconciled customer-safe snapshot expectations with the current source trace: internal Programs, internal ExecPlans, Program prompts, OpenAI sources, Ship by Sunday sources, env files, and local agent state remain excluded.
+- [x] 2026-05-05 EDT: Added focused compiler tests and clean-room materialization proof for source-contract coherence.
+- [x] 2026-05-05 EDT: Refreshed the owning Program after implementation and recorded validation evidence.
 
 ## Surprises & Discoveries
 
-No implementation discoveries have been recorded yet.
+- 2026-05-05 EDT: The generated onboarding path still referenced generic `$copywriting`, `$frontend-design`, `$docs`, and `$testing-practices` triggers, but those skills were neither shipped under `.agents/skills/` nor included in `.agents/skills/external-skills.json`.
+- 2026-05-05 EDT: Both `exec-plan-*` and `execplan-*` prompt files exist in the source repo, but generated Codebases already render and test only the no-hyphen `execplan-*` family. The source contract now names that family as the customer-facing prompt asset set.
 
 ## Decision Log
 
@@ -51,9 +52,19 @@ Decision: Do not ship internal Program and ExecPlan archives.
 Rationale: Customers need generalized contracts, templates, prompts, and skills. Internal completed Programs, release evidence, and repo-specific planning history are not customer-safe.
 Date: 2026-05-02
 
+Decision: Use the no-hyphen `execplan-*` prompt family for generated Codebases.
+Rationale: The compiler renders `docs/prompts/execplan-outline-from-session.md`, `docs/prompts/execplan-execution-loop.md`, `docs/prompts/execplan-grill.md`, and `docs/prompts/execplan-writer.md`; existing materialization tests already assert those paths. Shipping a second hyphenated prompt family would make generated guidance ambiguous and increase prompt drift.
+Date: 2026-05-05
+
+Decision: Generated onboarding may reference only shipped wrapper skills or manifest-backed external skills.
+Rationale: START-HERE is the buyer's first agent handoff. Generic skill triggers that are not installed by the Codebase create dead instructions, so product-copy, frontend-design, docs, and testing guidance now use local wrapper skills shipped in `.agents/skills/`.
+Date: 2026-05-05
+
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with what changed, what validation passed, what remains, and how the owning Program should choose the full operating file-set slice.
+This plan is complete. Generated Codebases now have a coherent first source contract: START-HERE references only shipped local wrapper skills or manifest-backed external skills, package-script promises are covered by the generated root `package.json`, customer-facing prompt assets use the no-hyphen `execplan-*` family, and internal Program/ExecPlan archives remain excluded from customer snapshots.
+
+The next Program slice can now add the generated-repo operating pack deliberately instead of compounding source-contract drift. That later slice should ship customer-safe Program and ExecPlan templates, bootstrap commands, prompts, and structural tests without exposing internal planning history.
 
 ## Context and Orientation
 
@@ -120,9 +131,9 @@ Run package checks:
 
 Run planning validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md
+    bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
     git diff --check
 
 ## Validation and Acceptance
@@ -133,18 +144,43 @@ The generated repo should not expose commands that are not implemented. If this 
 
 ### Test Commands
 
-Run these commands from the repo root:
+Validation evidence from 2026-05-05 EDT:
 
     bun run --cwd packages/codebase-compiler test -- tests/repo-generation.test.ts tests/review-download-zip.test.ts tests/customer-safe-snapshot-contract.test.ts
-    bun run --cwd packages/codebase-compiler typecheck
-    bun run --cwd packages/codebase-compiler format:check
-    bun run --cwd packages/codebase-compiler lint
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md
-    bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/active/2026-05-02-reconcile-customer-agentic-source-contract.md
-    git diff --check
+    Superseded by the broader focused command below.
 
-Broaden to root `bun run format`, `bun run lint`, and `bun run typecheck` before final completion unless the implementation is proven to be docs-only or package-local and the reason for skipping broader gates is recorded here.
+    bun run --cwd packages/codebase-compiler test -- tests/repo-generation.test.ts tests/customer-safe-snapshot-contract.test.ts tests/review-download-zip.test.ts tests/codebase-renderers.test.ts
+    Test Files 4 passed; Tests 13 passed.
+
+    bun run --cwd packages/codebase-compiler typecheck
+    Passed.
+
+    bun run --cwd packages/codebase-compiler lint
+    Passed.
+
+    bun run --cwd packages/codebase-compiler format:check
+    Passed after applying the package formatter.
+
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
+    Passed.
+
+    bun run programs:lint
+    Passed.
+
+    bun run markdown:lint -- --paths docs/programs/active/2026-05-02-customer-agentic-operating-system docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md
+    Passed.
+
+    bun run format
+    Passed.
+
+    bun lint
+    Passed.
+
+    bun typecheck
+    Passed and built the Next.js app route manifest.
+
+    git diff --check
+    Passed.
 
 ## Idempotence and Recovery
 

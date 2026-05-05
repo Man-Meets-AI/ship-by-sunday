@@ -33,13 +33,7 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 			pathPattern: "docs/prompts/execplan*.md",
 			shippingMode: "ship-unchanged",
 			reason:
-				"Ship the ExecPlan prompt assets unchanged under repo-root docs/prompts.",
-		},
-		{
-			pathPattern: "docs/prompts/exec-plan*.md",
-			shippingMode: "ship-unchanged",
-			reason:
-				"Ship the current ExecPlan prompt assets unchanged under repo-root docs/prompts.",
+				"Ship the customer-facing ExecPlan prompt assets unchanged under repo-root docs/prompts. The no-hyphen execplan-* family is the generated Codebase prompt contract.",
 		},
 		{
 			pathPattern: ".agents/**",
@@ -104,8 +98,7 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 		{
 			pathPattern: "docs/openai/**",
 			shippingMode: "exclude",
-			reason:
-				"Exclude internal source templates from the shipped Codebase.",
+			reason: "Exclude internal source templates from the shipped Codebase.",
 		},
 		{
 			pathPattern: "docs/PLANS.md",
@@ -167,7 +160,8 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 		{
 			pathPattern: "todo.md",
 			shippingMode: "exclude",
-			reason: "Exclude internal task-tracking notes from the Codebase snapshot.",
+			reason:
+				"Exclude internal task-tracking notes from the Codebase snapshot.",
 		},
 		{
 			pathPattern: "tmp-blog-article.png",

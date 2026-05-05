@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
 
 import {
 	approveWorkspaceSyncPreview,
@@ -13,7 +14,53 @@ import {
 
 import { createWorkspaceTestCtx } from "./workspace-test-helpers";
 
-async function createApprovedDoctorPassRun() {
+function createApprovedFindingsDigest({
+	runId,
+	doctorPassRunId,
+	findings,
+}: {
+	runId: string;
+	doctorPassRunId: string;
+	findings: Array<typeof syncSafeFinding>;
+}) {
+	return `sha256:${createHash("sha256")
+		.update(
+			JSON.stringify({
+				schemaVersion: "doctor-pass-local.v1",
+				runId,
+				doctorPassRunId,
+				findings: findings.map((finding) => ({
+					findingId: finding.findingId,
+					rank: finding.rank,
+					status: finding.status,
+					title: finding.title,
+					category: finding.category,
+					severity: finding.severity,
+					confidence: finding.confidence,
+					buyerImpact: finding.buyerImpact,
+					blastRadius: finding.blastRadius,
+					proofPath: finding.proofPath,
+					proofability: finding.proofability,
+					permissionRequired: finding.permissionRequired,
+					recommendedWorkflowId: finding.recommendedWorkflowId,
+					whyThisNow: finding.whyThisNow,
+					evidenceRefs: finding.evidenceRefs,
+					blockedReason: finding.blockedReason,
+					syncSensitivity: finding.syncSensitivity,
+					localReportRef: finding.localReportRef,
+				})),
+			}),
+		)
+		.digest("hex")}`;
+}
+
+async function createApprovedDoctorPassRun({
+	approvedFindings = [syncSafeFinding],
+	runId = "run-1",
+}: {
+	approvedFindings?: Array<typeof syncSafeFinding>;
+	runId?: string;
+} = {}) {
 	const testContext = createWorkspaceTestCtx();
 	const projectResult = await createOrLoadWorkspaceProject._handler(
 		testContext.ctx as never,
@@ -28,9 +75,15 @@ async function createApprovedDoctorPassRun() {
 		{
 			projectId: projectResult.project._id,
 			runnerId: runner._id,
+			localRunId: runId,
 			runnerMode: "daemon",
 		},
 	);
+	const previewDigest = createApprovedFindingsDigest({
+		runId,
+		doctorPassRunId: doctorPassRun._id,
+		findings: approvedFindings,
+	});
 
 	await ingestWorkspaceRunnerEvent._handler(testContext.ctx as never, {
 		eventId: "evt-sync-preview-ready",
@@ -42,7 +95,7 @@ async function createApprovedDoctorPassRun() {
 		createdAt: 100,
 		payload: {
 			eventType: "doctor.sync_preview.ready",
-			previewDigest: "sha256:approved-preview",
+			previewDigest,
 			findingsCount: 1,
 			excludedArtifactCount: 2,
 			localReportRef: ".sbs/reports/doctor-pass/run-1/sync-preview.json",
@@ -51,13 +104,14 @@ async function createApprovedDoctorPassRun() {
 	await approveWorkspaceSyncPreview._handler(testContext.ctx as never, {
 		projectId: projectResult.project._id,
 		doctorPassRunId: doctorPassRun._id,
-		previewDigest: "sha256:approved-preview",
+		previewDigest,
 	});
 
 	return {
 		...testContext,
 		project: projectResult.project,
 		doctorPassRun,
+		previewDigest,
 	};
 }
 
@@ -101,7 +155,7 @@ describe("workspace privacy contract", () => {
 	});
 
 	it("syncs only approved structured findings and supports deletion markers", async () => {
-		const { ctx, project, doctorPassRun, tables } =
+		const { ctx, project, doctorPassRun, tables, previewDigest } =
 			await createApprovedDoctorPassRun();
 
 		const syncResult = await syncApprovedCodebaseFindings._handler(
@@ -109,6 +163,7 @@ describe("workspace privacy contract", () => {
 			{
 				projectId: project._id,
 				doctorPassRunId: doctorPassRun._id,
+				previewDigest,
 				findings: [syncSafeFinding],
 			},
 		);
@@ -161,7 +216,8 @@ describe("workspace privacy contract", () => {
 	});
 
 	it("rejects raw source fields, Markdown report bodies, and local absolute paths", async () => {
-		const { ctx, project, doctorPassRun } = await createApprovedDoctorPassRun();
+		const { ctx, project, doctorPassRun, previewDigest } =
+			await createApprovedDoctorPassRun();
 
 		await expect(
 			syncApprovedCodebaseFindings._handler(
@@ -169,10 +225,10 @@ describe("workspace privacy contract", () => {
 				{
 					projectId: project._id,
 					doctorPassRunId: doctorPassRun._id,
+					previewDigest,
 					findings: [
 						{
 							...syncSafeFinding,
-							findingId: "finding-raw-source",
 							sourceExcerpt: "const secret = process.env.STRIPE_SECRET_KEY",
 						},
 					],
@@ -186,10 +242,10 @@ describe("workspace privacy contract", () => {
 				{
 					projectId: project._id,
 					doctorPassRunId: doctorPassRun._id,
+					previewDigest,
 					findings: [
 						{
 							...syncSafeFinding,
-							findingId: "finding-markdown-report",
 							markdownReport: "# Full local report\n\nDo not sync this.",
 						},
 					],
@@ -197,39 +253,66 @@ describe("workspace privacy contract", () => {
 			),
 		).rejects.toThrow("markdownReport");
 
+		const localPathFinding = {
+			...syncSafeFinding,
+			findingId: "finding-local-path",
+			evidenceRefs: [
+				{
+					kind: "file" as const,
+					repoRelativePath: "/Users/customer/app/page.tsx",
+				},
+			],
+		};
+		const localPathRun = await createApprovedDoctorPassRun({
+			approvedFindings: [localPathFinding],
+			runId: "run-local-path",
+		});
 		await expect(
-			syncApprovedCodebaseFindings._handler(ctx as never, {
-				projectId: project._id,
-				doctorPassRunId: doctorPassRun._id,
-				findings: [
-					{
-						...syncSafeFinding,
-						findingId: "finding-local-path",
-						evidenceRefs: [
-							{
-								kind: "file",
-								repoRelativePath: "/Users/customer/app/page.tsx",
-							},
-						],
-					},
-				],
+			syncApprovedCodebaseFindings._handler(localPathRun.ctx as never, {
+				projectId: localPathRun.project._id,
+				doctorPassRunId: localPathRun.doctorPassRun._id,
+				previewDigest: localPathRun.previewDigest,
+				findings: [localPathFinding],
 			}),
 		).rejects.toThrow("local absolute path");
+
+		const embeddedLocalPathFinding = {
+			...syncSafeFinding,
+			findingId: "finding-embedded-local-path",
+			buyerImpact:
+				"Probe failed at /Users/customer/app/src/page.tsx during setup.",
+		};
+		const embeddedLocalPathRun = await createApprovedDoctorPassRun({
+			approvedFindings: [embeddedLocalPathFinding],
+			runId: "run-embedded-local-path",
+		});
+		await expect(
+			syncApprovedCodebaseFindings._handler(embeddedLocalPathRun.ctx as never, {
+				projectId: embeddedLocalPathRun.project._id,
+				doctorPassRunId: embeddedLocalPathRun.doctorPassRun._id,
+				previewDigest: embeddedLocalPathRun.previewDigest,
+				findings: [embeddedLocalPathFinding],
+			}),
+		).rejects.toThrow("local absolute path");
+	});
+
+	it("rejects public findings sync when fields differ from the approved digest", async () => {
+		const { ctx, project, doctorPassRun, previewDigest } =
+			await createApprovedDoctorPassRun();
 
 		await expect(
 			syncApprovedCodebaseFindings._handler(ctx as never, {
 				projectId: project._id,
 				doctorPassRunId: doctorPassRun._id,
+				previewDigest,
 				findings: [
 					{
 						...syncSafeFinding,
-						findingId: "finding-embedded-local-path",
-						buyerImpact:
-							"Probe failed at /Users/customer/app/src/page.tsx during setup.",
+						permissionRequired: "provider_access",
 					},
 				],
 			}),
-		).rejects.toThrow("local absolute path");
+		).rejects.toThrow("approved preview");
 	});
 
 	it("does not let another entitled viewer read a workspace project by id", async () => {

@@ -1,0 +1,281 @@
+"use client";
+
+import Link from "next/link";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	Clipboard,
+	ShieldCheck,
+	Terminal,
+} from "lucide-react";
+
+import type { WorkspaceFindingDetailModel } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import { Button } from "@/components/ui/button";
+import { routeConfig } from "@/config/product";
+
+export type WorkflowApprovalActionState =
+	| "idle"
+	| "copied"
+	| "submitting"
+	| "approved"
+	| "error";
+
+export function WorkspaceSourceTruthApprovalSheet({
+	detail,
+	projectId,
+	activeRunnerId,
+	actionState,
+	approvedWorkflowRunCommand,
+	actionError,
+	onApproveWorkflow,
+	onCopyEvidenceRef,
+}: {
+	detail: WorkspaceFindingDetailModel;
+	projectId: string | null;
+	activeRunnerId: string | null;
+	actionState: WorkflowApprovalActionState;
+	approvedWorkflowRunCommand: {
+		workflowRunId: string;
+		branchName: string;
+		profileName: string;
+	} | null;
+	actionError: string | null;
+	onApproveWorkflow: () => void;
+	onCopyEvidenceRef: () => void;
+}) {
+	const approval = detail.workflowApproval;
+	const canApprove = Boolean(projectId && activeRunnerId);
+	const isBrokenAppReadOnly = approval.workflowKind === "broken_app_readonly";
+	const primaryCommand = approvedWorkflowRunCommand
+		? buildWorkflowCommand({
+				packageRunner: "bunx",
+				isBrokenAppReadOnly,
+				approvedWorkflowRunCommand,
+			})
+		: null;
+	const fallbackCommand = approvedWorkflowRunCommand
+		? buildWorkflowCommand({
+				packageRunner: "npx",
+				isBrokenAppReadOnly,
+				approvedWorkflowRunCommand,
+			})
+		: null;
+	const primaryActionLabel = isBrokenAppReadOnly
+		? "Run read-only diagnostics"
+		: "Create branch and run workflow";
+
+	return (
+		<aside className="grid gap-5 lg:sticky lg:top-20">
+			<section className="rounded-xl border border-border/60 bg-background p-4">
+				<div className="flex items-start gap-3">
+					<ShieldCheck className="mt-0.5 size-4 text-foreground" aria-hidden />
+					<div className="min-w-0">
+						<h2 className="text-sm font-semibold text-foreground">
+							Workflow approval
+						</h2>
+						<p className="mt-1 text-sm leading-6 text-muted-foreground">
+							{isBrokenAppReadOnly
+								? "Approve this bounded packet, then run read-only diagnostics locally before any patch is allowed."
+								: "Approve this bounded packet, then run the command locally to create the branch and proof."}
+						</p>
+					</div>
+				</div>
+
+				<div className="mt-4 grid gap-3 text-sm">
+					<ApprovalFact label="Branch" value={approval.branchName} mono />
+					<ApprovalFact label="Profile" value={approval.profileName} />
+					<ApprovalFact
+						label="Write lease"
+						value={`${approval.writeLeaseDurationMinutes} minutes`}
+					/>
+				</div>
+
+				<div className="mt-4 grid gap-2">
+					<Button
+						type="button"
+						onClick={onApproveWorkflow}
+						disabled={!canApprove || actionState === "submitting"}
+					>
+						{actionState === "submitting"
+							? "Creating workflow run"
+							: primaryActionLabel}
+						<CheckCircle2 className="size-4" aria-hidden />
+					</Button>
+					<Button type="button" variant="outline" onClick={onCopyEvidenceRef}>
+						Copy local evidence ref
+						<Clipboard className="size-4" aria-hidden />
+					</Button>
+					<Button asChild variant="ghost">
+						<Link href={routeConfig.workspaceFindings}>Not now</Link>
+					</Button>
+				</div>
+
+				{!canApprove ? (
+					<SheetStatus tone="warning">
+						Pair an active local runner before creating the workflow branch.
+					</SheetStatus>
+				) : null}
+				{actionState === "copied" ? (
+					<SheetStatus tone="neutral">Local evidence ref copied.</SheetStatus>
+				) : null}
+				{actionState === "error" && actionError ? (
+					<SheetStatus tone="warning">{actionError}</SheetStatus>
+				) : null}
+				{actionState === "approved" && primaryCommand && fallbackCommand ? (
+					<div
+						className="mt-4 grid gap-3 rounded-lg border border-border/60 bg-muted/30 p-3"
+						role="status"
+					>
+						<div className="flex items-start gap-2">
+							<Terminal className="mt-0.5 size-4 text-foreground" aria-hidden />
+							<p className="text-sm leading-6 text-muted-foreground">
+								{isBrokenAppReadOnly
+									? "Run one of these in the paired repo. This command writes local .sbs proof only; it does not patch source files, push a branch, or open a PR."
+									: "Run one of these in the paired repo. No branch is pushed and no PR is opened by this command."}
+							</p>
+						</div>
+						<CommandBlock command={primaryCommand} />
+						<CommandBlock command={fallbackCommand} />
+					</div>
+				) : null}
+			</section>
+
+			<ApprovalList title="Expected outputs" items={approval.expectedOutputs} />
+			<ApprovalList
+				title="Allowed touch targets"
+				items={approval.allowedTouchTargets}
+			/>
+			<ApprovalList
+				title="Disallowed touch targets"
+				items={approval.disallowedTouchTargets}
+			/>
+			<ApprovalList
+				title="Proof commands"
+				items={approval.proofCommands}
+				mono
+			/>
+			<ApprovalList title="Stop conditions" items={approval.stopConditions} />
+			<section className="rounded-xl border border-border/60 bg-background p-5">
+				<h2 className="text-base font-semibold text-foreground">Sync policy</h2>
+				<p className="mt-4 text-sm leading-6 text-muted-foreground">
+					{approval.syncPolicySummary}
+				</p>
+			</section>
+			<section className="rounded-xl border border-border/60 bg-background p-5">
+				<h2 className="text-base font-semibold text-foreground">
+					Rollback note
+				</h2>
+				<p className="mt-4 text-sm leading-6 text-muted-foreground">
+					{approval.rollbackNotes}
+				</p>
+			</section>
+		</aside>
+	);
+}
+
+function buildWorkflowCommand({
+	packageRunner,
+	isBrokenAppReadOnly,
+	approvedWorkflowRunCommand,
+}: {
+	packageRunner: "bunx" | "npx";
+	isBrokenAppReadOnly: boolean;
+	approvedWorkflowRunCommand: {
+		workflowRunId: string;
+		branchName: string;
+		profileName: string;
+	};
+}) {
+	const workflowName = isBrokenAppReadOnly
+		? "broken-app-triage"
+		: "source-truth-readiness";
+	const confirmationFlag = isBrokenAppReadOnly
+		? "--confirm-read-only-reproduction"
+		: "--confirm-local-writes";
+	return `${packageRunner} ship-by-sunday workflow ${workflowName} run --workflow-run-id ${approvedWorkflowRunCommand.workflowRunId} --branch-name ${approvedWorkflowRunCommand.branchName} --profile ${approvedWorkflowRunCommand.profileName} ${confirmationFlag}`;
+}
+
+function ApprovalFact({
+	label,
+	value,
+	mono,
+}: {
+	label: string;
+	value: string;
+	mono?: boolean;
+}) {
+	return (
+		<div className="min-w-0">
+			<p className="text-xs font-medium text-muted-foreground">{label}</p>
+			<p
+				className={
+					mono
+						? "mt-1 break-words font-mono text-xs text-foreground"
+						: "mt-1 break-words text-sm text-foreground"
+				}
+			>
+				{value}
+			</p>
+		</div>
+	);
+}
+
+function ApprovalList({
+	title,
+	items,
+	mono,
+}: {
+	title: string;
+	items: string[];
+	mono?: boolean;
+}) {
+	return (
+		<section className="rounded-xl border border-border/60 bg-background p-5">
+			<h2 className="text-base font-semibold text-foreground">{title}</h2>
+			<ul
+				className={
+					mono
+						? "mt-4 grid gap-2 font-mono text-xs leading-6 text-muted-foreground"
+						: "mt-4 grid gap-2 text-sm leading-6 text-muted-foreground"
+				}
+			>
+				{items.map((item) => (
+					<li key={item} className="break-words">
+						{item}
+					</li>
+				))}
+			</ul>
+		</section>
+	);
+}
+
+function CommandBlock({ command }: { command: string }) {
+	return (
+		<code className="block break-words rounded-md border border-border/60 bg-background px-3 py-2 font-mono text-xs text-foreground">
+			{command}
+		</code>
+	);
+}
+
+function SheetStatus({
+	children,
+	tone,
+}: {
+	children: string;
+	tone: "neutral" | "warning";
+}) {
+	return (
+		<div
+			className="mt-4 flex items-start gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-2 text-sm leading-6 text-muted-foreground"
+			role="status"
+		>
+			{tone === "warning" ? (
+				<AlertTriangle
+					className="mt-1 size-3.5 shrink-0 text-foreground"
+					aria-hidden
+				/>
+			) : null}
+			<span>{children}</span>
+		</div>
+	);
+}

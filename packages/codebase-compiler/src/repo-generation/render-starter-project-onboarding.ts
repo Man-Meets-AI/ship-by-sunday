@@ -201,7 +201,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		],
 		agentPrompt:
 			"Verify the shipped Codebase before we customize it. Run the smallest relevant checks first and call out any real setup drift before we touch product code.",
-		skillTriggers: ["$testing-practices", "$starter-billing-setup"],
+		skillTriggers: ["$starter-docs-and-testing", "$starter-billing-setup"],
 		references: [
 			{
 				label: "apps/web/content/docs/local-qa.mdx",
@@ -220,7 +220,11 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		],
 		agentPrompt:
 			"Update the generated Codebase identity to match my product before touching auth or billing. Start with the product config and homepage content, then tell me what still looks like setup scaffolding.",
-		skillTriggers: ["$starter-first-slice", "$copywriting", "$frontend-design"],
+		skillTriggers: [
+			"$starter-first-slice",
+			"$starter-product-copy",
+			"$starter-frontend-design",
+		],
 		references: [
 			{
 				label: "apps/web/config/product.ts",
@@ -243,7 +247,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		],
 		agentPrompt:
 			"The Codebase is stable. Help me pick and implement the first real customer-visible slice, then keep docs and tests aligned as we move away from setup scaffolding.",
-		skillTriggers: ["$starter-first-slice", "$docs", "$testing-practices"],
+		skillTriggers: ["$starter-first-slice", "$starter-docs-and-testing"],
 		references: [
 			{
 				label: "apps/web/content/docs/build-your-product.mdx",

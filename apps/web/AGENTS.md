@@ -13,7 +13,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 - For UI layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation, read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md`.
 - Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
 - Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
-- Before changing Next.js App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries, read the relevant guide in `apps/web/node_modules/next/dist/docs/`.
+- Before changing Next.js App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries, read the relevant guide in the installed `next` package's `dist/docs/`. In this Bun workspace, Next.js is hoisted to `../../node_modules/next/dist/docs/` from `apps/web`.
 
 ## Product Contract
 

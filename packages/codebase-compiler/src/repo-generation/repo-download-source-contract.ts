@@ -61,7 +61,6 @@ export const customerSafeCodebaseCompilerDirectoryPaths = [
 
 export const codebaseCompilerTemplateSourceTracePaths = [
 	"../../docs/openai/**/*",
-	"../../docs/prompts/exec-plan*.md",
 	"../../docs/prompts/execplan*.md",
 ] as const;
 

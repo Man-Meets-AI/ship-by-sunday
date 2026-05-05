@@ -2,6 +2,7 @@ import { readRunnerCredential } from "../core/local-runner-home";
 import { readLocalProjectState } from "../core/local-project-state";
 import { resolveRepositoryRoot } from "../core/repository-root";
 import { flushRunnerEvents } from "../core/runner-events";
+import { runDoctorPass } from "../core/doctor-pass/doctor-pass-runner";
 import { collectSetupChecks, queueSetupCheckEvents } from "./setup-check";
 
 type OneShotOptions = {
@@ -28,11 +29,23 @@ export async function runOneShotCommand(argv: string[]) {
 	});
 	await queueSetupCheckEvents(repositoryRoot, setupChecks.checks);
 	const flushResult = await flushRunnerEvents({ repositoryRoot, credential });
+	const hasBlockedSetup = setupChecks.checks.some(
+		(check) => check.status === "blocked",
+	);
+	const doctorPass = hasBlockedSetup
+		? {
+				status: "skipped_due_to_blocked_setup" as const,
+			}
+		: await runDoctorPass({
+				repositoryRoot,
+				state,
+				credential,
+			});
 	const result = {
 		repositoryRoot,
 		setup: setupChecks,
 		eventDelivery: flushResult,
-		doctorPass: "not_implemented_in_local_runner_prototype",
+		doctorPass,
 	};
 
 	if (options.json) {
@@ -44,9 +57,12 @@ export async function runOneShotCommand(argv: string[]) {
 		console.log(
 			`Delivered ${flushResult.delivered} event(s); ${flushResult.remaining} queued.`,
 		);
+		if ("runId" in doctorPass) {
+			console.log(`Doctor pass wrote ${doctorPass.localReportRefPrefix}.`);
+		}
 	}
 
-	return setupChecks.checks.some((check) => check.status === "blocked") ? 2 : 0;
+	return hasBlockedSetup ? 2 : 0;
 }
 
 function parseOneShotOptions(argv: string[]): OneShotOptions {

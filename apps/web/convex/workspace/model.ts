@@ -11,6 +11,8 @@ import type {
 	CodebaseFindingInput,
 	CodebaseFindingId,
 	DoctorPassRunId,
+	ManagedGithubExecutionConsentId,
+	WorkflowRunDoc,
 	WorkflowRunId,
 	WorkspaceMutationCtx,
 	WorkspaceProjectDoc,
@@ -28,6 +30,8 @@ import {
 	codebaseFindingInputValidator,
 	codebaseFindingStatusValidator,
 	doctorPassRunDocumentValidator,
+	managedGithubConsentAcknowledgementValidator,
+	managedGithubExecutionStateValidator,
 	packageManagerValidator,
 	workspaceCreateOrLoadResultValidator,
 	workspaceDefaultOpenDestinationValidator,
@@ -44,8 +48,11 @@ import {
 	workspaceRunnerEventSchemaVersionValidator,
 	workspaceRunnerEventTypeValidator,
 	workspaceRunnerModeValidator,
+	workspaceRunnerWorkflowApprovalValidator,
 	workspaceSetupStateValidator,
 	workspaceSyncPreviewStateValidator,
+	workspaceWorkerQueueStateValidator,
+	workflowDirtyStatePolicyValidator,
 	workflowRunDocumentValidator,
 } from "./validators";
 
@@ -53,6 +60,23 @@ const DEFAULT_WORKSPACE_PROJECT_NAME = "Existing codebase workspace";
 const MAX_SYNCED_FINDINGS_PER_RUN = 9;
 const PAIRING_TOKEN_TTL_MS = 30 * 60 * 1000;
 const SETUP_EVENT_READ_LIMIT = 30;
+const DOCTOR_PASS_LOCAL_SCHEMA_VERSION = "doctor-pass-local.v1";
+const SOURCE_TRUTH_WORKFLOW_ID = "source-truth-agent-readiness";
+const BROKEN_APP_TRIAGE_WORKFLOW_ID = "broken-app-triage";
+const DEFAULT_WORKFLOW_VERSION = "v1";
+const WORKFLOW_APPROVAL_SCHEMA_VERSION = "workspace.workflow-approval.v1";
+const DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES = 30;
+const MAX_WORKFLOW_LIST_ENTRIES = 32;
+const MANAGED_GITHUB_CONSENT_SCHEMA_VERSION =
+	"managed-github-consent.v1" as const;
+const APPROVED_WORKFLOW_HISTORY_STATUSES = [
+	"approved",
+	"paused",
+	"running",
+	"proof_completed",
+	"blocked",
+	"canceled",
+] as const;
 
 export const getWorkspaceProjectStateArgs = {
 	projectId: v.optional(v.id("workspaceProjects")),
@@ -127,19 +151,88 @@ export const startWorkspaceDoctorPassRunArgs = {
 	projectId: v.id("workspaceProjects"),
 	runnerId: v.optional(v.id("workspaceRunnerBindings")),
 	repositoryBindingId: v.optional(v.id("workspaceRepositoryBindings")),
+	localRunId: v.optional(v.string()),
 	runnerMode: workspaceRunnerModeValidator,
 };
 export const startWorkspaceDoctorPassRunReturns =
 	doctorPassRunDocumentValidator;
 
+export const startWorkspaceDoctorPassRunByCredentialArgs = {
+	runnerCredentialHash: v.string(),
+	projectId: v.id("workspaceProjects"),
+	runnerId: v.id("workspaceRunnerBindings"),
+	localRunId: v.string(),
+	runnerMode: workspaceRunnerModeValidator,
+};
+export const startWorkspaceDoctorPassRunByCredentialReturns = v.object({
+	doctorPassRunId: v.id("doctorPassRuns"),
+	startedAt: v.number(),
+});
+
 export const requestWorkspaceWorkflowRunArgs = {
 	projectId: v.id("workspaceProjects"),
-	findingDocumentId: v.optional(v.id("codebaseFindings")),
-	runnerId: v.optional(v.id("workspaceRunnerBindings")),
+	findingDocumentId: v.id("codebaseFindings"),
+	runnerId: v.id("workspaceRunnerBindings"),
 	workflowId: v.string(),
 	workflowVersion: v.optional(v.string()),
+	branchName: v.string(),
+	profileName: v.string(),
+	writeLeaseDurationMinutes: v.optional(v.number()),
+	dirtyStatePolicy: v.optional(workflowDirtyStatePolicyValidator),
+	expectedOutputs: v.array(v.string()),
+	allowedTouchTargets: v.array(v.string()),
+	disallowedTouchTargets: v.array(v.string()),
+	proofCommands: v.array(v.string()),
+	syncPolicySummary: v.string(),
+	stopConditions: v.array(v.string()),
+	rollbackNotes: v.string(),
 };
 export const requestWorkspaceWorkflowRunReturns = workflowRunDocumentValidator;
+
+export const getWorkspaceWorkflowRunByCredentialArgs = {
+	runnerCredentialHash: v.string(),
+	projectId: v.id("workspaceProjects"),
+	runnerId: v.id("workspaceRunnerBindings"),
+	workflowRunId: v.id("workflowRuns"),
+};
+export const getWorkspaceWorkflowRunByCredentialReturns =
+	workspaceRunnerWorkflowApprovalValidator;
+
+export const claimWorkspaceWorkflowRunByCredentialArgs = {
+	runnerCredentialHash: v.string(),
+	projectId: v.id("workspaceProjects"),
+	runnerId: v.id("workspaceRunnerBindings"),
+};
+export const claimWorkspaceWorkflowRunByCredentialReturns = v.union(
+	workspaceRunnerWorkflowApprovalValidator,
+	v.null(),
+);
+
+export const getWorkspaceWorkerQueueStateArgs = {
+	projectId: v.optional(v.id("workspaceProjects")),
+};
+export const getWorkspaceWorkerQueueStateReturns =
+	workspaceWorkerQueueStateValidator;
+
+export const pauseWorkspaceWorkflowRunArgs = {
+	projectId: v.id("workspaceProjects"),
+	workflowRunId: v.id("workflowRuns"),
+	reason: v.optional(v.string()),
+};
+export const pauseWorkspaceWorkflowRunReturns = workflowRunDocumentValidator;
+
+export const resumeWorkspaceWorkflowRunArgs = {
+	projectId: v.id("workspaceProjects"),
+	workflowRunId: v.id("workflowRuns"),
+};
+export const resumeWorkspaceWorkflowRunReturns = workflowRunDocumentValidator;
+
+export const stopWorkspaceWorkflowRunArgs = {
+	projectId: v.id("workspaceProjects"),
+	workflowRunId: v.id("workflowRuns"),
+	reason: v.optional(v.string()),
+};
+export const stopWorkspaceWorkflowRunReturns = workflowRunDocumentValidator;
 
 export const ingestWorkspaceRunnerEventArgs = {
 	eventId: v.string(),
@@ -181,9 +274,21 @@ export const approveWorkspaceSyncPreviewReturns =
 export const syncApprovedCodebaseFindingsArgs = {
 	projectId: v.id("workspaceProjects"),
 	doctorPassRunId: v.id("doctorPassRuns"),
+	previewDigest: v.string(),
 	findings: v.array(codebaseFindingInputValidator),
 };
 export const syncApprovedCodebaseFindingsReturns =
+	workspaceFindingsSyncResultValidator;
+
+export const syncApprovedCodebaseFindingsByCredentialArgs = {
+	runnerCredentialHash: v.string(),
+	projectId: v.id("workspaceProjects"),
+	runnerId: v.id("workspaceRunnerBindings"),
+	doctorPassRunId: v.id("doctorPassRuns"),
+	previewDigest: v.string(),
+	findings: v.array(codebaseFindingInputValidator),
+};
+export const syncApprovedCodebaseFindingsByCredentialReturns =
 	workspaceFindingsSyncResultValidator;
 
 export const listWorkspaceFindingsArgs = {
@@ -219,6 +324,28 @@ export const revokeWorkspaceRunnerArgs = {
 export const revokeWorkspaceRunnerReturns =
 	workspaceRunnerBindingDocumentValidator;
 
+export const getManagedGithubExecutionStateArgs = {
+	projectId: v.optional(v.id("workspaceProjects")),
+};
+export const getManagedGithubExecutionStateReturns =
+	managedGithubExecutionStateValidator;
+
+export const requestManagedGithubExecutionConsentArgs = {
+	projectId: v.id("workspaceProjects"),
+	repositoryBindingId: v.id("workspaceRepositoryBindings"),
+	acknowledgement: managedGithubConsentAcknowledgementValidator,
+};
+export const requestManagedGithubExecutionConsentReturns =
+	managedGithubExecutionStateValidator;
+
+export const revokeManagedGithubExecutionConsentArgs = {
+	projectId: v.id("workspaceProjects"),
+	consentId: v.id("managedGithubExecutionConsents"),
+	reason: v.optional(v.string()),
+};
+export const revokeManagedGithubExecutionConsentReturns =
+	managedGithubExecutionStateValidator;
+
 export const markWorkspaceFindingsDeletedArgs = {
 	projectId: v.id("workspaceProjects"),
 	findingDocumentIds: v.array(v.id("codebaseFindings")),
@@ -244,6 +371,31 @@ function assertBoundedText(value: string | undefined, context: string) {
 	}
 
 	assertSyncSafeText(value, context);
+}
+
+function assertBoundedTextList(
+	values: string[],
+	context: string,
+	maxEntries = MAX_WORKFLOW_LIST_ENTRIES,
+) {
+	if (values.length > maxEntries) {
+		throw new ConvexError(`${context} has too many entries`);
+	}
+
+	values.forEach((value, index) => {
+		assertSyncSafeText(value, `${context}[${index}]`);
+	});
+}
+
+function normalizeWriteLeaseDurationMinutes(durationMinutes?: number) {
+	const duration = durationMinutes ?? DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES;
+	if (!Number.isFinite(duration) || duration <= 0 || duration > 60) {
+		throw new ConvexError(
+			"Write lease duration must be between 1 and 60 minutes",
+		);
+	}
+
+	return duration;
 }
 
 async function getActiveWorkspaceProjectByViewer(
@@ -417,6 +569,126 @@ async function requireRepositoryBinding(
 	return repositoryBinding;
 }
 
+function requireManagedGithubRepositoryBinding(
+	repositoryBinding: Awaited<ReturnType<typeof requireRepositoryBinding>>,
+) {
+	if (repositoryBinding.provider !== "github") {
+		throw new ConvexError("Managed GitHub requires a GitHub repository");
+	}
+
+	if (!repositoryBinding.remoteOwner || !repositoryBinding.remoteName) {
+		throw new ConvexError(
+			"Managed GitHub requires a selected repository owner and name",
+		);
+	}
+
+	return repositoryBinding;
+}
+
+function buildManagedGithubRepositoryLabel(repositoryBinding: {
+	remoteOwner?: string;
+	remoteName?: string;
+	displayName: string;
+}) {
+	const remoteLabel = [
+		repositoryBinding.remoteOwner,
+		repositoryBinding.remoteName,
+	]
+		.filter(Boolean)
+		.join("/");
+	const repositoryLabel = remoteLabel || repositoryBinding.displayName;
+	assertSyncSafeText(repositoryLabel, "managed GitHub repository label");
+	return repositoryLabel;
+}
+
+function buildManagedGithubConsentPacket(
+	repositoryBinding: Awaited<ReturnType<typeof requireRepositoryBinding>>,
+) {
+	const githubRepository =
+		requireManagedGithubRepositoryBinding(repositoryBinding);
+	const remoteOwner = githubRepository.remoteOwner;
+	const remoteName = githubRepository.remoteName;
+	if (!remoteOwner || !remoteName) {
+		throw new ConvexError(
+			"Managed GitHub requires a selected repository owner and name",
+		);
+	}
+	assertSyncSafeText(remoteOwner, "managed GitHub remote owner");
+	assertSyncSafeText(remoteName, "managed GitHub remote name");
+	assertBoundedText(
+		githubRepository.defaultBranch,
+		"managed GitHub default branch",
+	);
+
+	return {
+		consentSchemaVersion: MANAGED_GITHUB_CONSENT_SCHEMA_VERSION,
+		repositoryAccess: {
+			provider: "github" as const,
+			remoteOwner,
+			remoteName,
+			defaultBranch: githubRepository.defaultBranch,
+			accessMode: "selected_repository_only" as const,
+		},
+		installationScope: {
+			repositorySelection: "selected_repository_only" as const,
+			permissions: [
+				"metadata:read",
+				"contents:read",
+				"pull_requests:write",
+				"checks:read",
+				"actions:read",
+				"statuses:read",
+			],
+		},
+		storagePolicy: {
+			sourceCloneRetention: "ephemeral_until_delivery_or_revocation" as const,
+			proofArtifactRetention: "structured_metadata_only" as const,
+			secretStorage: "never_store_customer_secrets" as const,
+		},
+		prAuthority: {
+			branchCreation: "customer_approval_required" as const,
+			pullRequestCreation: "customer_approval_required" as const,
+			mergeAuthority: "never" as const,
+			ciRerunAuthority: "customer_approval_required" as const,
+		},
+		rawSourceVisibility: {
+			operatorVisibility: "assigned_concierge_only_after_consent" as const,
+			rawSourceSharing: "disabled_until_explicit_share" as const,
+			transcriptStorage: "disabled" as const,
+		},
+		proofBoundary: {
+			proofCommands: "customer_approved_only" as const,
+			ciCommands: "customer_approved_only" as const,
+			syncedArtifacts: "proof_metadata_and_pr_refs_only" as const,
+		},
+	};
+}
+
+async function insertManagedGithubAuditEvent(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		consentId: ManagedGithubExecutionConsentId;
+		eventType: "managed_github.requested" | "managed_github.revoked";
+		actorClerkUserId: string;
+		repositoryLabel: string;
+		summary: string;
+		createdAt: number;
+	},
+) {
+	assertSyncSafeText(args.repositoryLabel, "managed GitHub audit repository");
+	assertSyncSafeText(args.summary, "managed GitHub audit summary");
+	await ctx.db.insert("managedGithubAuditEvents", {
+		projectId: args.projectId,
+		consentId: args.consentId,
+		eventType: args.eventType,
+		actorClerkUserId: args.actorClerkUserId,
+		repositoryLabel: args.repositoryLabel,
+		summary: args.summary,
+		createdAt: args.createdAt,
+	});
+}
+
 async function requireDoctorPassRun(
 	ctx: WorkspaceReadCtx,
 	projectId: WorkspaceProjectId,
@@ -449,6 +721,92 @@ async function requireWorkflowRun(
 	}
 
 	return workflowRun;
+}
+
+function requireWorkflowRunOwnedByRunner(
+	workflowRun: Awaited<ReturnType<typeof requireWorkflowRun>>,
+	runnerBinding: WorkspaceRunnerBindingDoc,
+) {
+	if (workflowRun.runnerId !== runnerBinding._id) {
+		throw new ConvexError("Workspace runner does not own this workflow run");
+	}
+
+	return workflowRun;
+}
+
+function requireSupportedWorkflowRun(
+	workflowRun: Awaited<ReturnType<typeof requireWorkflowRun>>,
+) {
+	if (
+		workflowRun.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
+		workflowRun.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID
+	) {
+		throw new ConvexError("Workflow is not supported by the local runner");
+	}
+	if (!workflowRun.branchName || !workflowRun.profileName) {
+		throw new ConvexError("Workflow run is missing approved branch or profile");
+	}
+	if (
+		!workflowRun.writeLeaseId ||
+		workflowRun.writeLeaseExpiresAt === undefined ||
+		workflowRun.writeLeaseDurationMinutes === undefined
+	) {
+		throw new ConvexError("Workflow run is missing approved write lease");
+	}
+	if (!workflowRun.dirtyStatePolicy) {
+		throw new ConvexError("Workflow run is missing dirty state policy");
+	}
+	if (
+		!workflowRun.expectedOutputs ||
+		!workflowRun.allowedTouchTargets ||
+		!workflowRun.disallowedTouchTargets ||
+		!workflowRun.proofCommands ||
+		!workflowRun.syncPolicySummary ||
+		!workflowRun.stopConditions ||
+		!workflowRun.rollbackNotes ||
+		!workflowRun.localWorkflowPacketRef ||
+		!workflowRun.localProofRef
+	) {
+		throw new ConvexError("Workflow run is missing approved packet metadata");
+	}
+
+	return {
+		workflowRunId: workflowRun._id,
+		workflowId: workflowRun.workflowId,
+		workflowVersion: workflowRun.workflowVersion,
+		branchName: workflowRun.branchName,
+		profileName: workflowRun.profileName,
+		writeLeaseId: workflowRun.writeLeaseId,
+		writeLeaseExpiresAt: workflowRun.writeLeaseExpiresAt,
+		writeLeaseDurationMinutes: workflowRun.writeLeaseDurationMinutes,
+		dirtyStatePolicy: workflowRun.dirtyStatePolicy,
+		expectedOutputs: workflowRun.expectedOutputs,
+		allowedTouchTargets: workflowRun.allowedTouchTargets,
+		disallowedTouchTargets: workflowRun.disallowedTouchTargets,
+		proofCommands: workflowRun.proofCommands,
+		syncPolicySummary: workflowRun.syncPolicySummary,
+		stopConditions: workflowRun.stopConditions,
+		rollbackNotes: workflowRun.rollbackNotes,
+		localWorkflowPacketRef: workflowRun.localWorkflowPacketRef,
+		localProofRef: workflowRun.localProofRef,
+	};
+}
+
+function isTerminalWorkflowRunStatus(status: string) {
+	return (
+		status === "proof_completed" ||
+		status === "blocked" ||
+		status === "canceled" ||
+		status === "deleted"
+	);
+}
+
+function isClaimableWorkflowRunStatus(status: string) {
+	return status === "approved";
+}
+
+function isDirectlyRunnableWorkflowRunStatus(status: string) {
+	return status === "approved" || status === "running";
 }
 
 async function getLatestRunnerBindings(
@@ -1101,6 +1459,7 @@ export async function startWorkspaceDoctorPassRunHandler(
 		projectId: WorkspaceProjectId;
 		runnerId?: WorkspaceRunnerBindingId;
 		repositoryBindingId?: WorkspaceRepositoryBindingId;
+		localRunId?: string;
 		runnerMode: "daemon" | "one_shot";
 	},
 ) {
@@ -1116,12 +1475,91 @@ export async function startWorkspaceDoctorPassRunHandler(
 			args.repositoryBindingId,
 		);
 	}
+	if (args.localRunId) {
+		assertSyncSafeText(args.localRunId, "localRunId");
+	}
 
+	return await createDoctorPassRun(ctx, {
+		projectId: args.projectId,
+		runnerId: args.runnerId,
+		repositoryBindingId: args.repositoryBindingId,
+		localRunId: args.localRunId,
+		runnerMode: args.runnerMode,
+	});
+}
+
+export async function startWorkspaceDoctorPassRunByCredentialHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		runnerCredentialHash: string;
+		projectId: WorkspaceProjectId;
+		runnerId: WorkspaceRunnerBindingId;
+		localRunId: string;
+		runnerMode: "daemon" | "one_shot";
+	},
+) {
+	assertSyncSafeText(args.runnerCredentialHash, "runnerCredentialHash");
+	assertSyncSafeText(args.localRunId, "localRunId");
+	const runnerBinding = await requireRunnerBindingByCredentialHash(
+		ctx,
+		args.runnerCredentialHash,
+	);
+	if (
+		runnerBinding._id !== args.runnerId ||
+		runnerBinding.projectId !== args.projectId
+	) {
+		throw new ConvexError("Workspace runner credential does not match run");
+	}
+	if (runnerBinding.runnerMode !== args.runnerMode) {
+		throw new ConvexError("Workspace runner mode does not match run");
+	}
+	await requireRunnerProject(ctx, runnerBinding);
+
+	const existingRun = await findDoctorPassRunByRunnerLocalRunId(ctx, {
+		runnerId: args.runnerId,
+		localRunId: args.localRunId,
+	});
+	if (existingRun) {
+		if (
+			existingRun.projectId !== args.projectId ||
+			existingRun.runnerMode !== args.runnerMode
+		) {
+			throw new ConvexError("Local doctor pass run id belongs elsewhere");
+		}
+		return {
+			doctorPassRunId: existingRun._id,
+			startedAt: existingRun.startedAt,
+		};
+	}
+
+	const doctorPassRun = await createDoctorPassRun(ctx, {
+		projectId: args.projectId,
+		runnerId: args.runnerId,
+		localRunId: args.localRunId,
+		runnerMode: args.runnerMode,
+	});
+	return {
+		doctorPassRunId: doctorPassRun._id,
+		startedAt: doctorPassRun.startedAt,
+	};
+}
+
+async function createDoctorPassRun(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		runnerId?: WorkspaceRunnerBindingId;
+		repositoryBindingId?: WorkspaceRepositoryBindingId;
+		localRunId?: string;
+		runnerMode: "daemon" | "one_shot";
+	},
+) {
 	const now = Date.now();
 	const doctorPassRun = {
 		projectId: args.projectId,
 		runnerId: args.runnerId,
 		repositoryBindingId: args.repositoryBindingId,
+		localRunId: args.localRunId,
 		status: "running" as const,
 		runnerMode: args.runnerMode,
 		syncPreviewStatus: "not_ready" as const,
@@ -1138,50 +1576,504 @@ export async function startWorkspaceDoctorPassRunHandler(
 	};
 }
 
+async function findDoctorPassRunByRunnerLocalRunId(
+	ctx: WorkspaceReadCtx,
+	args: {
+		runnerId: WorkspaceRunnerBindingId;
+		localRunId: string;
+	},
+) {
+	const runs = await ctx.db
+		.query("doctorPassRuns")
+		.withIndex("by_runner_id_and_local_run_id", (query) =>
+			query.eq("runnerId", args.runnerId).eq("localRunId", args.localRunId),
+		)
+		.take(1);
+
+	return runs[0] ?? null;
+}
+
+async function findActiveWorkflowRunByFinding(
+	ctx: WorkspaceReadCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		findingDocumentId: CodebaseFindingId;
+		workflowId: string;
+	},
+) {
+	const activeStatuses = [
+		"approval_requested",
+		"approved",
+		"paused",
+		"running",
+	] as const;
+	for (const status of activeStatuses) {
+		const workflowRun = await ctx.db
+			.query("workflowRuns")
+			.withIndex("by_project_finding_workflow_status_created_at", (query) =>
+				query
+					.eq("projectId", args.projectId)
+					.eq("findingDocumentId", args.findingDocumentId)
+					.eq("workflowId", args.workflowId)
+					.eq("status", status),
+			)
+			.order("desc")
+			.take(1);
+		if (workflowRun[0]) {
+			return workflowRun[0];
+		}
+	}
+
+	return null;
+}
+
 export async function requestWorkspaceWorkflowRunHandler(
 	ctx: WorkspaceMutationCtx,
 	args: {
 		projectId: WorkspaceProjectId;
-		findingDocumentId?: CodebaseFindingId;
-		runnerId?: WorkspaceRunnerBindingId;
+		findingDocumentId: CodebaseFindingId;
+		runnerId: WorkspaceRunnerBindingId;
 		workflowId: string;
 		workflowVersion?: string;
+		branchName: string;
+		profileName: string;
+		writeLeaseDurationMinutes?: number;
+		dirtyStatePolicy?: "require_clean_worktree" | "checkpoint_required";
+		expectedOutputs: string[];
+		allowedTouchTargets: string[];
+		disallowedTouchTargets: string[];
+		proofCommands: string[];
+		syncPolicySummary: string;
+		stopConditions: string[];
+		rollbackNotes: string;
 	},
 ) {
 	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
 	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
-	if (args.runnerId) {
-		await requireRunnerBinding(ctx, args.projectId, args.runnerId);
+	const runnerBinding = await requireRunnerBinding(
+		ctx,
+		args.projectId,
+		args.runnerId,
+	);
+	if (
+		runnerBinding.status !== "paired" ||
+		runnerBinding.pairingStatus !== "paired"
+	) {
+		throw new ConvexError("A paired workspace runner is required");
 	}
-	if (args.findingDocumentId) {
-		const finding = await ctx.db.get(args.findingDocumentId);
-		if (!finding || finding.projectId !== args.projectId) {
-			throw new ConvexError("Finding not found");
-		}
+
+	const finding = await ctx.db.get(args.findingDocumentId);
+	if (!finding || finding.projectId !== args.projectId) {
+		throw new ConvexError("Finding not found");
+	}
+	if (finding.status === "deleted") {
+		throw new ConvexError("Finding is deleted");
+	}
+	if (finding.status === "blocked") {
+		throw new ConvexError("Blocked findings cannot start workflows");
+	}
+	if (
+		args.workflowId !== SOURCE_TRUTH_WORKFLOW_ID &&
+		args.workflowId !== BROKEN_APP_TRIAGE_WORKFLOW_ID
+	) {
+		throw new ConvexError("Workflow is not supported by the local runner");
+	}
+	if (finding.recommendedWorkflowId !== args.workflowId) {
+		throw new ConvexError("Workflow must match the selected finding");
 	}
 
 	assertSyncSafeText(args.workflowId, "workflowId");
 	assertBoundedText(args.workflowVersion, "workflowVersion");
+	assertSyncSafeText(args.branchName, "branchName");
+	assertSyncSafeText(args.profileName, "profileName");
+	assertSyncSafeText(args.syncPolicySummary, "syncPolicySummary");
+	assertSyncSafeText(args.rollbackNotes, "rollbackNotes");
+	assertBoundedTextList(args.expectedOutputs, "expectedOutputs");
+	assertBoundedTextList(args.allowedTouchTargets, "allowedTouchTargets");
+	assertBoundedTextList(args.disallowedTouchTargets, "disallowedTouchTargets");
+	assertBoundedTextList(args.proofCommands, "proofCommands");
+	assertBoundedTextList(args.stopConditions, "stopConditions");
+	if (
+		args.workflowId === BROKEN_APP_TRIAGE_WORKFLOW_ID &&
+		args.proofCommands.some(
+			(command) =>
+				command !== "git status --short" && command !== "git diff --name-only",
+		)
+	) {
+		throw new ConvexError(
+			"Broken-app triage only supports read-only Git diagnostics",
+		);
+	}
+
+	const existingWorkflowRun = await findActiveWorkflowRunByFinding(ctx, {
+		projectId: args.projectId,
+		findingDocumentId: args.findingDocumentId,
+		workflowId: args.workflowId,
+	});
+	if (existingWorkflowRun) {
+		return existingWorkflowRun;
+	}
 
 	const now = Date.now();
+	const writeLeaseDurationMinutes = normalizeWriteLeaseDurationMinutes(
+		args.writeLeaseDurationMinutes,
+	);
 	const workflowRun = {
 		projectId: args.projectId,
 		findingDocumentId: args.findingDocumentId,
 		runnerId: args.runnerId,
 		workflowId: args.workflowId,
-		workflowVersion: args.workflowVersion ?? "v1",
-		status: "approval_requested" as const,
+		workflowVersion: args.workflowVersion ?? DEFAULT_WORKFLOW_VERSION,
+		status: "approved" as const,
 		proofStatus: "not_started" as const,
 		deliveryStatus: "not_started" as const,
+		branchName: args.branchName,
+		targetBranch: args.branchName,
+		profileName: args.profileName,
+		approvalSchemaVersion: WORKFLOW_APPROVAL_SCHEMA_VERSION,
+		approvedAt: now,
+		approvedByClerkUserId: clerkUserId,
+		approvalSource: "finding_detail" as const,
+		writeLeaseExpiresAt: now + writeLeaseDurationMinutes * 60 * 1000,
+		writeLeaseDurationMinutes,
+		writeLeaseRenewalCount: 0,
+		dirtyStatePolicy: args.dirtyStatePolicy ?? "require_clean_worktree",
+		expectedOutputs: args.expectedOutputs,
+		allowedTouchTargets: args.allowedTouchTargets,
+		disallowedTouchTargets: args.disallowedTouchTargets,
+		proofCommands: args.proofCommands,
+		syncPolicySummary: args.syncPolicySummary,
+		stopConditions: args.stopConditions,
+		rollbackNotes: args.rollbackNotes,
 		createdAt: now,
 		updatedAt: now,
 	};
 	const workflowRunId = await ctx.db.insert("workflowRuns", workflowRun);
+	const localWorkflowPacketRef = `.sbs/runs/${workflowRunId}/workflow-packet.json`;
+	const localProofRef = `.sbs/runs/${workflowRunId}/proof.json`;
+	const writeLeaseId = `lease_${workflowRunId}`;
+	await ctx.db.patch(workflowRunId, {
+		writeLeaseId,
+		localWorkflowPacketRef,
+		localProofRef,
+	});
 
 	return {
 		_id: workflowRunId,
 		_creationTime: now,
 		...workflowRun,
+		writeLeaseId,
+		localWorkflowPacketRef,
+		localProofRef,
+	};
+}
+
+export async function getWorkspaceWorkflowRunByCredentialHandler(
+	ctx: WorkspaceQueryCtx,
+	args: {
+		runnerCredentialHash: string;
+		projectId: WorkspaceProjectId;
+		runnerId: WorkspaceRunnerBindingId;
+		workflowRunId: WorkflowRunId;
+	},
+) {
+	assertSyncSafeText(args.runnerCredentialHash, "runnerCredentialHash");
+	const runnerBinding = await requireRunnerBindingByCredentialHash(
+		ctx,
+		args.runnerCredentialHash,
+	);
+	if (
+		runnerBinding._id !== args.runnerId ||
+		runnerBinding.projectId !== args.projectId
+	) {
+		throw new ConvexError(
+			"Workspace runner credential does not match workflow",
+		);
+	}
+	await requireRunnerProject(ctx, runnerBinding);
+	const workflowRun = await requireWorkflowRun(
+		ctx,
+		args.projectId,
+		args.workflowRunId,
+	);
+	requireWorkflowRunOwnedByRunner(workflowRun, runnerBinding);
+	if (!isDirectlyRunnableWorkflowRunStatus(workflowRun.status)) {
+		throw new ConvexError("Workflow run is not runnable");
+	}
+	return requireSupportedWorkflowRun(workflowRun);
+}
+
+async function findRunningWorkflowRunForProject(
+	ctx: WorkspaceReadCtx,
+	projectId: WorkspaceProjectId,
+) {
+	const runningWorkflowRuns = await ctx.db
+		.query("workflowRuns")
+		.withIndex("by_project_id_and_status_and_created_at", (query) =>
+			query.eq("projectId", projectId).eq("status", "running"),
+		)
+		.order("asc")
+		.take(1);
+
+	return runningWorkflowRuns[0] ?? null;
+}
+
+async function findOldestClaimableWorkflowRunForRunner(
+	ctx: WorkspaceReadCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		runnerId: WorkspaceRunnerBindingId;
+	},
+) {
+	const approvedWorkflowRuns = await ctx.db
+		.query("workflowRuns")
+		.withIndex("by_runner_id_and_status_and_created_at", (query) =>
+			query.eq("runnerId", args.runnerId).eq("status", "approved"),
+		)
+		.order("asc")
+		.take(1);
+
+	return (
+		approvedWorkflowRuns.find(
+			(workflowRun) =>
+				workflowRun.projectId === args.projectId &&
+				workflowRun.runnerId === args.runnerId &&
+				isClaimableWorkflowRunStatus(workflowRun.status),
+		) ?? null
+	);
+}
+
+export async function claimWorkspaceWorkflowRunByCredentialHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		runnerCredentialHash: string;
+		projectId: WorkspaceProjectId;
+		runnerId: WorkspaceRunnerBindingId;
+	},
+) {
+	assertSyncSafeText(args.runnerCredentialHash, "runnerCredentialHash");
+	const runnerBinding = await requireRunnerBindingByCredentialHash(
+		ctx,
+		args.runnerCredentialHash,
+	);
+	if (
+		runnerBinding._id !== args.runnerId ||
+		runnerBinding.projectId !== args.projectId
+	) {
+		throw new ConvexError("Workspace runner credential does not match queue");
+	}
+	if (runnerBinding.runnerMode !== "daemon") {
+		throw new ConvexError("Only daemon runners can claim workflow queue jobs");
+	}
+	await requireRunnerProject(ctx, runnerBinding);
+
+	const runningWorkflowRun = await findRunningWorkflowRunForProject(
+		ctx,
+		args.projectId,
+	);
+	if (runningWorkflowRun) {
+		return null;
+	}
+
+	const workflowRun = await findOldestClaimableWorkflowRunForRunner(ctx, args);
+	if (!workflowRun) {
+		return null;
+	}
+	const approvedWorkflowRun = requireSupportedWorkflowRun(workflowRun);
+	const now = Date.now();
+	const writeLeaseDurationMinutes =
+		workflowRun.writeLeaseDurationMinutes ??
+		DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES;
+	const writeLeaseExpiresAt = now + writeLeaseDurationMinutes * 60 * 1000;
+
+	await ctx.db.patch(workflowRun._id, {
+		status: "running" as const,
+		startedAt: workflowRun.startedAt ?? now,
+		writeLeaseExpiresAt,
+		updatedAt: now,
+	});
+
+	const eventDocument = {
+		eventId: `workflow-claimed:${workflowRun._id}:${now}`,
+		projectId: args.projectId,
+		runnerId: runnerBinding._id,
+		workflowRunId: workflowRun._id,
+		eventType: "workflow.claimed" as const,
+		schemaVersion: getWorkspaceRunnerEventSchemaVersion(),
+		createdAt: now,
+		receivedAt: now,
+		payload: {
+			eventType: "workflow.claimed" as const,
+			workflowId: workflowRun.workflowId,
+			writeLeaseId: approvedWorkflowRun.writeLeaseId,
+			writeLeaseExpiresAt,
+		},
+	};
+	await ctx.db.insert("workspaceRunnerEvents", eventDocument);
+
+	return {
+		...approvedWorkflowRun,
+		writeLeaseExpiresAt,
+		writeLeaseDurationMinutes,
+	};
+}
+
+export async function getWorkspaceWorkerQueueStateHandler(
+	ctx: WorkspaceQueryCtx,
+	args: { projectId?: WorkspaceProjectId },
+) {
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	const project = await loadViewerWorkspaceProject(
+		ctx,
+		clerkUserId,
+		args.projectId,
+	);
+	if (!project) {
+		return {
+			project: null,
+			activeRunner: null,
+			workflowRuns: [],
+		};
+	}
+
+	const [runnerBindings, workflowRuns] = await Promise.all([
+		getLatestRunnerBindings(ctx, project._id),
+		ctx.db
+			.query("workflowRuns")
+			.withIndex("by_project_id_and_created_at", (query) =>
+				query.eq("projectId", project._id),
+			)
+			.order("desc")
+			.take(50),
+	]);
+	const activeRunner = getActiveRunnerBinding(runnerBindings, Date.now());
+
+	return {
+		project,
+		activeRunner: activeRunner
+			? redactRunnerCredentialHash(activeRunner)
+			: null,
+		workflowRuns: workflowRuns.filter(
+			(workflowRun) => workflowRun.status !== "deleted",
+		),
+	};
+}
+
+export async function pauseWorkspaceWorkflowRunHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		workflowRunId: WorkflowRunId;
+		reason?: string;
+	},
+) {
+	assertBoundedText(args.reason, "pause reason");
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
+	const workflowRun = await requireWorkflowRun(
+		ctx,
+		args.projectId,
+		args.workflowRunId,
+	);
+	if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+		throw new ConvexError("Terminal workflow runs cannot be paused");
+	}
+	if (workflowRun.status === "paused") {
+		return workflowRun;
+	}
+
+	const now = Date.now();
+	await ctx.db.patch(workflowRun._id, {
+		status: "paused" as const,
+		blockedReason: args.reason,
+		updatedAt: now,
+	});
+
+	return {
+		...workflowRun,
+		status: "paused" as const,
+		blockedReason: args.reason,
+		updatedAt: now,
+	};
+}
+
+export async function resumeWorkspaceWorkflowRunHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		workflowRunId: WorkflowRunId;
+	},
+) {
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
+	const workflowRun = await requireWorkflowRun(
+		ctx,
+		args.projectId,
+		args.workflowRunId,
+	);
+	if (workflowRun.status !== "paused") {
+		throw new ConvexError("Only paused workflow runs can be resumed");
+	}
+
+	const now = Date.now();
+	await ctx.db.patch(workflowRun._id, {
+		status: "approved" as const,
+		blockedReason: undefined,
+		updatedAt: now,
+	});
+
+	return {
+		...workflowRun,
+		status: "approved" as const,
+		blockedReason: undefined,
+		updatedAt: now,
+	};
+}
+
+export async function stopWorkspaceWorkflowRunHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		workflowRunId: WorkflowRunId;
+		reason?: string;
+	},
+) {
+	assertBoundedText(args.reason, "stop reason");
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
+	const workflowRun = await requireWorkflowRun(
+		ctx,
+		args.projectId,
+		args.workflowRunId,
+	);
+	if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+		return workflowRun;
+	}
+
+	const now = Date.now();
+	const stoppedReason = args.reason ?? "Stopped from workspace run controls";
+	await ctx.db.patch(workflowRun._id, {
+		status: "canceled" as const,
+		deliveryStatus: "blocked" as const,
+		blockedReason: stoppedReason,
+		completedAt: now,
+		updatedAt: now,
+	});
+	if (workflowRun.findingDocumentId) {
+		await ctx.db.patch(workflowRun.findingDocumentId, {
+			status: "needs_approval" as const,
+			blockedReason: stoppedReason,
+			updatedAt: now,
+		});
+	}
+
+	return {
+		...workflowRun,
+		status: "canceled" as const,
+		deliveryStatus: "blocked" as const,
+		blockedReason: stoppedReason,
+		completedAt: now,
+		updatedAt: now,
 	};
 }
 
@@ -1349,19 +2241,43 @@ async function applyEventDerivedState(
 			});
 			return;
 		}
+		case "workflow.claimed": {
+			const workflowRun = await requireWorkflowRunForEvent(
+				ctx,
+				args.project._id,
+				args.workflowRunId,
+			);
+			if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+				return;
+			}
+			await ctx.db.patch(workflowRun._id, {
+				status: "running" as const,
+				startedAt: workflowRun.startedAt ?? args.createdAt,
+				writeLeaseExpiresAt: args.payload.writeLeaseExpiresAt,
+				updatedAt: now,
+			});
+			return;
+		}
 		case "workflow.started": {
 			const workflowRun = await requireWorkflowRunForEvent(
 				ctx,
 				args.project._id,
 				args.workflowRunId,
 			);
+			if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+				return;
+			}
 			await ctx.db.patch(workflowRun._id, {
 				status: "running" as const,
-				branchName: args.payload.branchName,
-				profileName: args.payload.profileName,
 				startedAt: args.createdAt,
 				updatedAt: now,
 			});
+			if (workflowRun.findingDocumentId) {
+				await ctx.db.patch(workflowRun.findingDocumentId, {
+					status: "running" as const,
+					updatedAt: now,
+				});
+			}
 			return;
 		}
 		case "workflow.proof.completed": {
@@ -1370,12 +2286,34 @@ async function applyEventDerivedState(
 				args.project._id,
 				args.workflowRunId,
 			);
+			if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+				return;
+			}
 			await ctx.db.patch(workflowRun._id, {
 				status: "proof_completed" as const,
 				proofStatus: args.payload.proofStatus,
+				deliveryStatus: "local_only" as const,
+				proofSummary: args.payload.proofSummary,
+				touchedFileRefs: args.payload.touchedFileRefs,
+				createdArtifactRefs: args.payload.createdArtifactRefs,
+				proofCommandResults: args.payload.proofCommandResults,
+				nextRecommendedWorkflowId: args.payload.nextRecommendedWorkflowId,
 				completedAt: args.createdAt,
 				updatedAt: now,
 			});
+			if (workflowRun.findingDocumentId) {
+				await ctx.db.patch(workflowRun.findingDocumentId, {
+					status:
+						args.payload.proofStatus === "passed"
+							? ("done" as const)
+							: ("blocked" as const),
+					blockedReason:
+						args.payload.proofStatus === "passed"
+							? undefined
+							: args.payload.proofSummary,
+					updatedAt: now,
+				});
+			}
 			return;
 		}
 		case "workflow.blocked": {
@@ -1384,6 +2322,9 @@ async function applyEventDerivedState(
 				args.project._id,
 				args.workflowRunId,
 			);
+			if (isTerminalWorkflowRunStatus(workflowRun.status)) {
+				return;
+			}
 			await ctx.db.patch(workflowRun._id, {
 				status: "blocked" as const,
 				proofStatus: "blocked" as const,
@@ -1392,6 +2333,13 @@ async function applyEventDerivedState(
 				completedAt: args.createdAt,
 				updatedAt: now,
 			});
+			if (workflowRun.findingDocumentId) {
+				await ctx.db.patch(workflowRun.findingDocumentId, {
+					status: "blocked" as const,
+					blockedReason: args.payload.blockedReason,
+					updatedAt: now,
+				});
+			}
 			return;
 		}
 		case "runner.revoked": {
@@ -1444,7 +2392,26 @@ async function insertWorkspaceRunnerEvent(
 		await requireDoctorPassRun(ctx, args.project._id, args.doctorPassRunId);
 	}
 	if (args.workflowRunId) {
-		await requireWorkflowRun(ctx, args.project._id, args.workflowRunId);
+		const workflowRun = await requireWorkflowRun(
+			ctx,
+			args.project._id,
+			args.workflowRunId,
+		);
+		requireWorkflowRunOwnedByRunner(workflowRun, args.runnerBinding);
+		if ("workflowId" in args.payload) {
+			if (args.payload.workflowId !== workflowRun.workflowId) {
+				throw new ConvexError("Runner event workflow id does not match run");
+			}
+			if (
+				args.payload.eventType === "workflow.started" &&
+				(args.payload.branchName !== workflowRun.branchName ||
+					args.payload.profileName !== workflowRun.profileName)
+			) {
+				throw new ConvexError(
+					"Runner event branch and profile must match approved workflow run",
+				);
+			}
+		}
 	}
 
 	const receivedAt = Date.now();
@@ -1612,6 +2579,11 @@ export async function approveWorkspaceSyncPreviewHandler(
 	await ctx.db.patch(doctorPassRun._id, {
 		status: "sync_approved" as const,
 		syncPreviewStatus: "approved" as const,
+		syncPreviewApprovedAt: now,
+		syncPreviewApprovedByClerkUserId: clerkUserId,
+		syncPreviewApprovedDigest: args.previewDigest,
+		syncPreviewApprovedSchemaVersion: DOCTOR_PASS_LOCAL_SCHEMA_VERSION,
+		syncPreviewApprovalSource: "workspace",
 		updatedAt: now,
 	});
 
@@ -1619,6 +2591,11 @@ export async function approveWorkspaceSyncPreviewHandler(
 		...doctorPassRun,
 		status: "sync_approved" as const,
 		syncPreviewStatus: "approved" as const,
+		syncPreviewApprovedAt: now,
+		syncPreviewApprovedByClerkUserId: clerkUserId,
+		syncPreviewApprovedDigest: args.previewDigest,
+		syncPreviewApprovedSchemaVersion: DOCTOR_PASS_LOCAL_SCHEMA_VERSION,
+		syncPreviewApprovalSource: "workspace",
 		updatedAt: now,
 	};
 }
@@ -1643,22 +2620,89 @@ export async function syncApprovedCodebaseFindingsHandler(
 	args: {
 		projectId: WorkspaceProjectId;
 		doctorPassRunId: DoctorPassRunId;
+		previewDigest: string;
 		findings: CodebaseFindingInput[];
 	},
 ) {
-	if (args.findings.length > MAX_SYNCED_FINDINGS_PER_RUN) {
-		throw new ConvexError("Only Top 9 findings can be synced");
-	}
-
+	assertSyncSafeText(args.previewDigest, "previewDigest");
 	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
 	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
+	return await syncFindingsForApprovedDoctorPassRun(ctx, args);
+}
+
+export async function syncApprovedCodebaseFindingsByCredentialHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		runnerCredentialHash: string;
+		projectId: WorkspaceProjectId;
+		runnerId: WorkspaceRunnerBindingId;
+		doctorPassRunId: DoctorPassRunId;
+		previewDigest: string;
+		findings: CodebaseFindingInput[];
+	},
+) {
+	assertSyncSafeText(args.runnerCredentialHash, "runnerCredentialHash");
+	assertSyncSafeText(args.previewDigest, "previewDigest");
+	const runnerBinding = await requireRunnerBindingByCredentialHash(
+		ctx,
+		args.runnerCredentialHash,
+	);
+	if (
+		runnerBinding._id !== args.runnerId ||
+		runnerBinding.projectId !== args.projectId
+	) {
+		throw new ConvexError("Workspace runner credential does not match sync");
+	}
 	const doctorPassRun = await requireDoctorPassRun(
 		ctx,
 		args.projectId,
 		args.doctorPassRunId,
 	);
-	if (doctorPassRun.syncPreviewStatus !== "approved") {
+	if (doctorPassRun.runnerId && doctorPassRun.runnerId !== args.runnerId) {
+		throw new ConvexError("Workspace runner does not own this doctor pass run");
+	}
+	return await syncFindingsForApprovedDoctorPassRun(ctx, args, doctorPassRun);
+}
+
+async function syncFindingsForApprovedDoctorPassRun(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		doctorPassRunId: DoctorPassRunId;
+		previewDigest: string;
+		findings: CodebaseFindingInput[];
+	},
+	existingDoctorPassRun?: Awaited<ReturnType<typeof requireDoctorPassRun>>,
+) {
+	assertSyncSafeText(args.previewDigest, "previewDigest");
+	if (args.findings.length > MAX_SYNCED_FINDINGS_PER_RUN) {
+		throw new ConvexError("Only Top 9 findings can be synced");
+	}
+
+	const doctorPassRun =
+		existingDoctorPassRun ??
+		(await requireDoctorPassRun(ctx, args.projectId, args.doctorPassRunId));
+	if (
+		doctorPassRun.syncPreviewStatus !== "approved" &&
+		doctorPassRun.syncPreviewStatus !== "uploaded"
+	) {
 		throw new ConvexError("Sync preview must be approved before findings sync");
+	}
+	if (doctorPassRun.syncPreviewDigest !== args.previewDigest) {
+		throw new ConvexError("Sync preview digest does not match run");
+	}
+	if (
+		doctorPassRun.syncPreviewApprovedDigest &&
+		doctorPassRun.syncPreviewApprovedDigest !== args.previewDigest
+	) {
+		throw new ConvexError("Approved sync preview digest does not match upload");
+	}
+	const uploadDigest = await createApprovedFindingsDigest({
+		doctorPassRun,
+		findings: args.findings,
+	});
+	if (uploadDigest !== args.previewDigest) {
+		throw new ConvexError("Uploaded findings do not match approved preview");
 	}
 
 	const now = Date.now();
@@ -1726,6 +2770,53 @@ export async function syncApprovedCodebaseFindingsHandler(
 	};
 }
 
+async function createApprovedFindingsDigest({
+	doctorPassRun,
+	findings,
+}: {
+	doctorPassRun: Awaited<ReturnType<typeof requireDoctorPassRun>>;
+	findings: CodebaseFindingInput[];
+}) {
+	if (!doctorPassRun.localRunId) {
+		throw new ConvexError("Doctor pass run is missing its local run id");
+	}
+
+	const payload = {
+		schemaVersion: DOCTOR_PASS_LOCAL_SCHEMA_VERSION,
+		runId: doctorPassRun.localRunId,
+		doctorPassRunId: doctorPassRun._id,
+		findings: findings.map(normalizeFindingForPreviewDigest),
+	};
+	const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
+	const digest = await crypto.subtle.digest("SHA-256", encodedPayload);
+	return `sha256:${Array.from(new Uint8Array(digest))
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("")}`;
+}
+
+function normalizeFindingForPreviewDigest(finding: CodebaseFindingInput) {
+	return {
+		findingId: finding.findingId,
+		rank: finding.rank,
+		status: finding.status,
+		title: finding.title,
+		category: finding.category,
+		severity: finding.severity,
+		confidence: finding.confidence,
+		buyerImpact: finding.buyerImpact,
+		blastRadius: finding.blastRadius,
+		proofPath: finding.proofPath,
+		proofability: finding.proofability,
+		permissionRequired: finding.permissionRequired,
+		recommendedWorkflowId: finding.recommendedWorkflowId,
+		whyThisNow: finding.whyThisNow,
+		evidenceRefs: finding.evidenceRefs,
+		blockedReason: finding.blockedReason,
+		syncSensitivity: finding.syncSensitivity,
+		localReportRef: finding.localReportRef,
+	};
+}
+
 export async function listWorkspaceFindingsHandler(
 	ctx: WorkspaceQueryCtx,
 	args: {
@@ -1787,7 +2878,7 @@ export async function getWorkspaceRunHistoryHandler(
 		};
 	}
 
-	const [doctorPassRuns, workflowRuns] = await Promise.all([
+	const [doctorPassRuns, workflowRunsByStatus] = await Promise.all([
 		ctx.db
 			.query("doctorPassRuns")
 			.withIndex("by_project_id_and_started_at", (query) =>
@@ -1795,19 +2886,34 @@ export async function getWorkspaceRunHistoryHandler(
 			)
 			.order("desc")
 			.take(20),
-		ctx.db
-			.query("workflowRuns")
-			.withIndex("by_project_id_and_created_at", (query) =>
-				query.eq("projectId", project._id),
-			)
-			.order("desc")
-			.take(20),
+		Promise.all(
+			APPROVED_WORKFLOW_HISTORY_STATUSES.map((status) =>
+				ctx.db
+					.query("workflowRuns")
+					.withIndex("by_project_id_and_status_and_created_at", (query) =>
+						query.eq("projectId", project._id).eq("status", status),
+					)
+					.order("desc")
+					.take(20),
+			),
+		),
 	]);
+	const workflowRuns = workflowRunsByStatus
+		.flat()
+		.sort(compareWorkflowRunsByCreatedAtDesc)
+		.slice(0, 20);
 
 	return {
 		doctorPassRuns,
 		workflowRuns,
 	};
+}
+
+function compareWorkflowRunsByCreatedAtDesc(
+	left: WorkflowRunDoc,
+	right: WorkflowRunDoc,
+) {
+	return right.createdAt - left.createdAt;
 }
 
 export async function getWorkspaceHeartbeatStateHandler(
@@ -1876,6 +2982,200 @@ export async function getWorkspaceSyncPreviewStateHandler(
 					run.syncPreviewStatus === "uploaded",
 			) ?? null,
 	};
+}
+
+async function buildManagedGithubExecutionStateForProject(
+	ctx: WorkspaceReadCtx,
+	project: WorkspaceProjectDoc | null,
+) {
+	if (!project) {
+		return {
+			consent: null,
+			auditEvents: [],
+		};
+	}
+
+	const [requestedConsents, approvedConsents, auditEvents] = await Promise.all([
+		ctx.db
+			.query("managedGithubExecutionConsents")
+			.withIndex("by_project_id_and_status_and_updated_at", (query) =>
+				query.eq("projectId", project._id).eq("status", "requested"),
+			)
+			.order("desc")
+			.take(1),
+		ctx.db
+			.query("managedGithubExecutionConsents")
+			.withIndex("by_project_id_and_status_and_updated_at", (query) =>
+				query.eq("projectId", project._id).eq("status", "approved"),
+			)
+			.order("desc")
+			.take(1),
+		ctx.db
+			.query("managedGithubAuditEvents")
+			.withIndex("by_project_id_and_created_at", (query) =>
+				query.eq("projectId", project._id),
+			)
+			.order("desc")
+			.take(12),
+	]);
+
+	return {
+		consent: approvedConsents[0] ?? requestedConsents[0] ?? null,
+		auditEvents,
+	};
+}
+
+export async function getManagedGithubExecutionStateHandler(
+	ctx: WorkspaceQueryCtx,
+	args: { projectId?: WorkspaceProjectId },
+) {
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	const project = await loadViewerWorkspaceProject(
+		ctx,
+		clerkUserId,
+		args.projectId,
+	);
+	return buildManagedGithubExecutionStateForProject(ctx, project);
+}
+
+export async function requestManagedGithubExecutionConsentHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		repositoryBindingId: WorkspaceRepositoryBindingId;
+		acknowledgement: {
+			repoAccess: true;
+			installationScope: true;
+			storagePolicy: true;
+			prAuthority: true;
+			auditLog: true;
+			revocation: true;
+			rawSourceVisibility: true;
+			proofBoundaries: true;
+		};
+	},
+) {
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
+	const repositoryBinding = requireManagedGithubRepositoryBinding(
+		await requireRepositoryBinding(
+			ctx,
+			args.projectId,
+			args.repositoryBindingId,
+		),
+	);
+	const existingConsent = await findActiveManagedGithubConsent(
+		ctx,
+		args.projectId,
+	);
+	if (existingConsent) {
+		const project = await ctx.db.get(args.projectId);
+		return buildManagedGithubExecutionStateForProject(ctx, project);
+	}
+
+	const now = Date.now();
+	const consentPacket = buildManagedGithubConsentPacket(repositoryBinding);
+	const consent = {
+		projectId: args.projectId,
+		repositoryBindingId: args.repositoryBindingId,
+		status: "requested" as const,
+		...consentPacket,
+		requestedByClerkUserId: clerkUserId,
+		requestedAt: now,
+		createdAt: now,
+		updatedAt: now,
+	};
+	const consentId = await ctx.db.insert(
+		"managedGithubExecutionConsents",
+		consent,
+	);
+	await insertManagedGithubAuditEvent(ctx, {
+		projectId: args.projectId,
+		consentId,
+		eventType: "managed_github.requested",
+		actorClerkUserId: clerkUserId,
+		repositoryLabel: buildManagedGithubRepositoryLabel(repositoryBinding),
+		summary:
+			"Customer requested concierge managed GitHub review after accepting repository, storage, PR, audit, raw-source, revocation, and proof boundaries.",
+		createdAt: now,
+	});
+
+	const project = await ctx.db.get(args.projectId);
+	return buildManagedGithubExecutionStateForProject(ctx, project);
+}
+
+async function findActiveManagedGithubConsent(
+	ctx: WorkspaceReadCtx,
+	projectId: WorkspaceProjectId,
+) {
+	const [approvedConsents, requestedConsents] = await Promise.all([
+		ctx.db
+			.query("managedGithubExecutionConsents")
+			.withIndex("by_project_id_and_status_and_updated_at", (query) =>
+				query.eq("projectId", projectId).eq("status", "approved"),
+			)
+			.order("desc")
+			.take(1),
+		ctx.db
+			.query("managedGithubExecutionConsents")
+			.withIndex("by_project_id_and_status_and_updated_at", (query) =>
+				query.eq("projectId", projectId).eq("status", "requested"),
+			)
+			.order("desc")
+			.take(1),
+	]);
+
+	return approvedConsents[0] ?? requestedConsents[0] ?? null;
+}
+
+export async function revokeManagedGithubExecutionConsentHandler(
+	ctx: WorkspaceMutationCtx,
+	args: {
+		projectId: WorkspaceProjectId;
+		consentId: ManagedGithubExecutionConsentId;
+		reason?: string;
+	},
+) {
+	const clerkUserId = await requireExistingCodebaseProductAccess(ctx);
+	await requireViewerWorkspaceProject(ctx, clerkUserId, args.projectId);
+	const consent = await ctx.db.get(args.consentId);
+	if (!consent || consent.projectId !== args.projectId) {
+		throw new ConvexError("Managed GitHub consent not found");
+	}
+	assertBoundedText(args.reason, "managed GitHub revocation reason");
+
+	if (consent.status === "revoked") {
+		const project = await ctx.db.get(args.projectId);
+		return buildManagedGithubExecutionStateForProject(ctx, project);
+	}
+
+	const now = Date.now();
+	const repositoryBinding = await requireRepositoryBinding(
+		ctx,
+		args.projectId,
+		consent.repositoryBindingId,
+	);
+	await ctx.db.patch(consent._id, {
+		status: "revoked" as const,
+		revokedByClerkUserId: clerkUserId,
+		revokedAt: now,
+		revokeReason: args.reason,
+		updatedAt: now,
+	});
+	await insertManagedGithubAuditEvent(ctx, {
+		projectId: args.projectId,
+		consentId: consent._id,
+		eventType: "managed_github.revoked",
+		actorClerkUserId: clerkUserId,
+		repositoryLabel: buildManagedGithubRepositoryLabel(repositoryBinding),
+		summary:
+			args.reason ??
+			"Customer revoked managed GitHub concierge request from workspace privacy controls.",
+		createdAt: now,
+	});
+
+	const project = await ctx.db.get(args.projectId);
+	return buildManagedGithubExecutionStateForProject(ctx, project);
 }
 
 export async function revokeWorkspaceRunnerHandler(

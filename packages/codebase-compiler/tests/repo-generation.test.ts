@@ -60,6 +60,13 @@ function snapshotText(file: { content: string | Buffer } | undefined) {
 		: file.content.toString();
 }
 
+function extractSkillTriggers(content: string) {
+	return Array.from(
+		content.matchAll(/\$[a-z][a-z0-9-]*/g),
+		(match) => match[0],
+	);
+}
+
 describe("repo generation", () => {
 	it("builds a repo manifest from the project definition", () => {
 		const manifest = buildRepoGenerationManifest(
@@ -98,6 +105,9 @@ describe("repo generation", () => {
 				".agents/skills/starter-linear-workflow/SKILL.md",
 				".agents/skills/starter-billing-setup/SKILL.md",
 				".agents/skills/starter-first-slice/SKILL.md",
+				".agents/skills/starter-product-copy/SKILL.md",
+				".agents/skills/starter-frontend-design/SKILL.md",
+				".agents/skills/starter-docs-and-testing/SKILL.md",
 				".agents/skills/starter-nextjs-in-this-repo/SKILL.md",
 				".agents/skills/starter-convex-in-this-repo/SKILL.md",
 				".agents/skills/external-skills.json",
@@ -145,6 +155,9 @@ describe("repo generation", () => {
 		expect(onboardingOverride?.content).toContain("$starter-billing-setup");
 		expect(onboardingOverride?.content).toContain("$clerk");
 		expect(onboardingOverride?.content).toContain("$stripe-best-practices");
+		expect(onboardingOverride?.content).toContain("$starter-product-copy");
+		expect(onboardingOverride?.content).toContain("$starter-frontend-design");
+		expect(onboardingOverride?.content).toContain("$starter-docs-and-testing");
 		expect(onboardingOverride?.content).toContain("Run core setup");
 		expect(onboardingOverride?.content).toContain("Run auth setup");
 		expect(onboardingOverride?.content).toContain("Run billing setup");
@@ -193,6 +206,9 @@ describe("repo generation", () => {
 				".agents/skills/starter-auth-setup/SKILL.md",
 				".agents/skills/starter-linear-workflow/SKILL.md",
 				".agents/skills/starter-billing-setup/SKILL.md",
+				".agents/skills/starter-product-copy/SKILL.md",
+				".agents/skills/starter-frontend-design/SKILL.md",
+				".agents/skills/starter-docs-and-testing/SKILL.md",
 				".agents/skills/external-skills.json",
 				"apps/web/content/docs/index.mdx",
 				"apps/web/config/product.ts",
@@ -243,6 +259,48 @@ describe("repo generation", () => {
 			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
 		expect(forbiddenPaths).toEqual([]);
+	});
+
+	it("keeps every generated skill trigger backed by a shipped or installable skill", async () => {
+		const snapshotFiles = await materializeRepoSnapshot(
+			createCompleteProjectDefinition(),
+		);
+		const onboarding = snapshotText(
+			snapshotFiles.find((file) => file.path === "START-HERE.md"),
+		);
+		const wrapperSkillTriggers = new Set(
+			snapshotFiles
+				.map((file) => file.path)
+				.filter(
+					(path) =>
+						path.startsWith(".agents/skills/") && path.endsWith("/SKILL.md"),
+				)
+				.map((path) => `$${path.split("/").at(-2) ?? ""}`),
+		);
+		const externalSkillsManifest = JSON.parse(
+			snapshotText(
+				snapshotFiles.find(
+					(file) => file.path === ".agents/skills/external-skills.json",
+				),
+			) || "{}",
+		) as {
+			externalSkills?: { recommendedTriggers?: string[] }[];
+		};
+		const externalSkillTriggers = new Set(
+			(externalSkillsManifest.externalSkills ?? []).flatMap(
+				(entry) => entry.recommendedTriggers ?? [],
+			),
+		);
+		const unresolvedTriggers = extractSkillTriggers(onboarding).filter(
+			(trigger) =>
+				!wrapperSkillTriggers.has(trigger) &&
+				!externalSkillTriggers.has(trigger),
+		);
+
+		expect(unresolvedTriggers).toEqual([]);
+		expect(onboarding).not.toContain("$copywriting");
+		expect(onboarding).not.toContain("$frontend-design");
+		expect(onboarding).not.toContain("$testing-practices");
 	});
 
 	it("materializes a build pack an agent can start from without chat history", async () => {

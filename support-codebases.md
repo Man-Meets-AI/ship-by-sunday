@@ -126,16 +126,17 @@ Recommended surfaces:
 
 Managed GitHub requires an explicit contract before use:
 
-- GitHub app or token scope
-- repository selection
+- GitHub App scope
+- selected repository only
 - branch naming
-- PR authority
-- CI visibility
+- branch, PR, and CI authority
 - stored artifact policy
 - audit log
 - raw-source visibility rules
 - operator access boundaries
 - revocation path
+
+The first shipped Run-phase slice records this as a customer-visible concierge request and audit trail in `/workspace/privacy`. It does not call GitHub, store provider tokens, clone source, push a branch, open a PR, rerun CI, or share raw source. Operator setup is documented in `docs/internal/managed-github-execution.md`, and managed execution remains non-executable until a later integration slice connects a GitHub App and a separate customer approval names the exact off-machine action.
 
 It should not be required for the first local doctor pass.
 
@@ -158,7 +159,7 @@ A workflow packet can include:
 
 Codex should reason over evidence and write approved patches where useful. It should not be the only scanner.
 
-`.sbs/codebase-intake.py` is the first good deterministic probe shape:
+`.sbs/intake-probe/codebase-intake.py` is the first good deterministic probe shape:
 
 - default mode is passive and read-only
 - skips `.env*`, lockfiles, dependency folders, generated folders, scanner files, `.codex`, `.cursor`, and `.claude`
@@ -586,7 +587,13 @@ In Walk, it should also show approved workflow runs:
 - next recommendation
 - `Open local proof`
 
-No queue controls yet.
+Work phase now adds approved queue controls to `/workspace/runs`:
+
+- queued, paused, running, and blocked workflow state
+- one active project write lease at claim time
+- pause, resume, and stop controls
+- proof and blocked-proof state
+- local daemon command for approved queue work
 
 The empty state should say runs appear after the doctor pass. Do not market always-on workers prematurely.
 
@@ -733,6 +740,7 @@ Use `bunx` first and `npx` as fallback:
 ```bash
 bunx ship-by-sunday setup pair <token>
 bunx ship-by-sunday daemon start
+bunx ship-by-sunday daemon start --work --confirm-local-writes
 bunx ship-by-sunday project doctor
 ```
 
@@ -810,7 +818,7 @@ The fastest credible AHA is a read-only doctor pass fed by deterministic probes:
 - `repo-doctor-top-nine`: rank the top nine findings with value, confidence, blast radius, proof path, required permission, and recommended workflow.
 - `command-proof-map`: discover install, dev, lint, typecheck, test, build, release, and browser proof commands.
 - `source-truth-agent-readiness`: audit `AGENTS.md`, docs, planning files, skills, and source-truth boundaries.
-- `broken-app-triage`: reproduce an error, localize it, propose the smallest patch, and prove or block honestly.
+- `broken-app-triage`: reproduce an error through approved read-only commands, localize likely root cause, write a local proof packet, and request separate patch approval before any source write.
 - `revenue-path-audit`: inspect auth, checkout, billing, entitlement, webhook, and environment contracts.
 - `ux-conversion-snapshot`: use screenshots or browser proof to rank activation, conversion, and design risks.
 - `release-readiness-audit`: inspect release commands, CI, deploy docs, and proof workflow.
@@ -873,7 +881,13 @@ Why:
 
 The likely second write workflow is `observability-debuggability`, especially for fragile apps. It should come after source truth and command proof because it can require provider keys, runtime changes, dependency installs, deploy proof, and production-policy decisions.
 
-`broken-app-triage` is the conditional first write workflow when the customer arrives with a concrete failure. It should still start with read-only reproduction before patching.
+`broken-app-triage` is the conditional first rescue workflow when the customer arrives with a concrete failure. Its first shipped phase is read-only diagnostics: it runs only approved Git diagnostics, writes local `.sbs/runs/<workflow-run-id>/` proof artifacts, syncs structured proof status, and records that source patching and package-script reproduction require later approval.
+
+The broken-app reproduction command is:
+
+    bunx ship-by-sunday workflow broken-app-triage run --workflow-run-id <id> --confirm-read-only-reproduction
+
+It may also run through the daemon worker queue after the customer approves the workflow in the browser. The workflow must not patch source files, execute package scripts, push a branch, open a PR, install packages, run migrations, call provider CLIs, share raw logs, or sync raw source in this phase.
 
 ## `source-truth-agent-readiness` Workflow Packet
 
@@ -1084,12 +1098,15 @@ Keep one Program and split implementation into dependency-ordered child ExecPlan
    - concrete failure intake
    - read-only reproduction
    - root-cause localization
-   - patch only after approval
+   - local proof packet
+   - structured sync-safe proof
+   - patch only after later approval
 11. `managed-github-run-phase`
    - premium or concierge mode
    - explicit repo access
-   - branch and PR authority
-   - CI visibility
+   - selected-repository GitHub App scope
+   - branch, PR, and CI authority
+   - storage and raw-source policy
    - audit log
    - revocation
 12. `generated-repo-operating-pack`
@@ -1137,7 +1154,7 @@ Avoid until implemented:
 - Treat `managed_github` as a premium or concierge execution mode because it requires broader repo trust.
 - Use `source-truth-agent-readiness` as the default first proof-backed write workflow after Top 9.
 - Treat `observability-debuggability` as the likely second write workflow.
-- Let `broken-app-triage` become the first write workflow only when the customer arrives with a concrete failure.
+- Let `broken-app-triage` become the first rescue workflow only when the customer arrives with a concrete failure; its first phase is read-only and any patch remains a later approval.
 - Require `source-truth-agent-readiness` workflow packets to include identity, version, runner, profile, write lease, branch targets, dirty-state policy, touch boundaries, proof commands, sync policy, stop conditions, approvals, outputs, and rollback notes.
 - Keep the first `source-truth-agent-readiness` write boundary to docs and local SBS artifacts only.
 - Show a concrete first-write approval sheet with branch, profile, write lease duration, touch boundaries, expected artifacts, proof commands, sync policy, stop conditions, and rollback note.
@@ -1163,7 +1180,7 @@ Avoid until implemented:
 - Create the second new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-existing-codebase-workspace-data-model-and-events.md`, scoped to Convex workspace tables, validators, sync-safe event ingestion, and backend-derived state.
 - Create the third new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-existing-codebase-setup-ui.md`, scoped to `/workspace/setup`, Machine Setup, Project Setup, pairing states, blockers, warnings, privacy defaults, default open destination, and `Run doctor pass`.
 - Create the fourth new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-local-runner-prototype.md`, scoped to the new local runner package, `bunx`/`npx` pairing, foreground daemon, one-shot boundary, local `.sbs/` state, `gh` readiness, SBS Codex profiles, config diff/backup/approval, and `codex exec` boundaries.
-- Create the fifth new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-doctor-pass-and-sync-preview.md`, scoped to passive probes, `.sbs/codebase-intake.py` sync-safe JSON plus local Markdown, branchless doctor pass through local runner and `codex exec`, local reports, sync preview approval, and findings upload only after approval.
+- Create the fifth new existing-codebase child ExecPlan at `docs/exec-plans/active/2026-05-04-doctor-pass-and-sync-preview.md`, scoped to passive probes, `.sbs/intake-probe/codebase-intake.py` sync-safe JSON plus local Markdown, branchless doctor pass through local runner and `codex exec`, local reports, sync preview approval, and findings upload only after approval.
 
 ## Open Questions
 

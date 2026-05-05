@@ -12,6 +12,9 @@ import {
 	bindWorkspaceRunnerByPairingTokenReturns,
 	bindWorkspaceRunnerHandler,
 	bindWorkspaceRunnerReturns,
+	claimWorkspaceWorkflowRunByCredentialArgs,
+	claimWorkspaceWorkflowRunByCredentialHandler,
+	claimWorkspaceWorkflowRunByCredentialReturns,
 	cancelWorkspaceSetupPairingArgs,
 	cancelWorkspaceSetupPairingHandler,
 	cancelWorkspaceSetupPairingReturns,
@@ -21,6 +24,9 @@ import {
 	getWorkspaceHeartbeatStateArgs,
 	getWorkspaceHeartbeatStateHandler,
 	getWorkspaceHeartbeatStateReturns,
+	getManagedGithubExecutionStateArgs,
+	getManagedGithubExecutionStateHandler,
+	getManagedGithubExecutionStateReturns,
 	getWorkspaceProjectStateArgs,
 	getWorkspaceProjectStateHandler,
 	getWorkspaceProjectStateReturns,
@@ -30,6 +36,12 @@ import {
 	getWorkspaceSyncPreviewStateArgs,
 	getWorkspaceSyncPreviewStateHandler,
 	getWorkspaceSyncPreviewStateReturns,
+	getWorkspaceWorkerQueueStateArgs,
+	getWorkspaceWorkerQueueStateHandler,
+	getWorkspaceWorkerQueueStateReturns,
+	getWorkspaceWorkflowRunByCredentialArgs,
+	getWorkspaceWorkflowRunByCredentialHandler,
+	getWorkspaceWorkflowRunByCredentialReturns,
 	ingestWorkspaceRunnerEventArgs,
 	ingestWorkspaceRunnerEventByCredentialArgs,
 	ingestWorkspaceRunnerEventByCredentialHandler,
@@ -45,19 +57,40 @@ import {
 	markWorkspaceProjectDeletedArgs,
 	markWorkspaceProjectDeletedHandler,
 	markWorkspaceProjectDeletedReturns,
+	pauseWorkspaceWorkflowRunArgs,
+	pauseWorkspaceWorkflowRunHandler,
+	pauseWorkspaceWorkflowRunReturns,
 	prepareWorkspaceSetupPairingArgs,
 	prepareWorkspaceSetupPairingHandler,
 	prepareWorkspaceSetupPairingReturns,
 	requestWorkspaceWorkflowRunArgs,
 	requestWorkspaceWorkflowRunHandler,
 	requestWorkspaceWorkflowRunReturns,
+	requestManagedGithubExecutionConsentArgs,
+	requestManagedGithubExecutionConsentHandler,
+	requestManagedGithubExecutionConsentReturns,
+	resumeWorkspaceWorkflowRunArgs,
+	resumeWorkspaceWorkflowRunHandler,
+	resumeWorkspaceWorkflowRunReturns,
 	revokeWorkspaceRunnerArgs,
 	revokeWorkspaceRunnerHandler,
 	revokeWorkspaceRunnerReturns,
+	revokeManagedGithubExecutionConsentArgs,
+	revokeManagedGithubExecutionConsentHandler,
+	revokeManagedGithubExecutionConsentReturns,
 	startWorkspaceDoctorPassRunArgs,
+	startWorkspaceDoctorPassRunByCredentialArgs,
+	startWorkspaceDoctorPassRunByCredentialHandler,
+	startWorkspaceDoctorPassRunByCredentialReturns,
 	startWorkspaceDoctorPassRunHandler,
 	startWorkspaceDoctorPassRunReturns,
+	stopWorkspaceWorkflowRunArgs,
+	stopWorkspaceWorkflowRunHandler,
+	stopWorkspaceWorkflowRunReturns,
 	syncApprovedCodebaseFindingsArgs,
+	syncApprovedCodebaseFindingsByCredentialArgs,
+	syncApprovedCodebaseFindingsByCredentialHandler,
+	syncApprovedCodebaseFindingsByCredentialReturns,
 	syncApprovedCodebaseFindingsHandler,
 	syncApprovedCodebaseFindingsReturns,
 	getWorkspaceSetupStateArgs,
@@ -119,10 +152,52 @@ export const startWorkspaceDoctorPassRun = mutation({
 	handler: startWorkspaceDoctorPassRunHandler,
 });
 
+export const startWorkspaceDoctorPassRunByCredential = mutation({
+	args: startWorkspaceDoctorPassRunByCredentialArgs,
+	returns: startWorkspaceDoctorPassRunByCredentialReturns,
+	handler: startWorkspaceDoctorPassRunByCredentialHandler,
+});
+
 export const requestWorkspaceWorkflowRun = mutation({
 	args: requestWorkspaceWorkflowRunArgs,
 	returns: requestWorkspaceWorkflowRunReturns,
 	handler: requestWorkspaceWorkflowRunHandler,
+});
+
+export const getWorkspaceWorkflowRunByCredential = query({
+	args: getWorkspaceWorkflowRunByCredentialArgs,
+	returns: getWorkspaceWorkflowRunByCredentialReturns,
+	handler: getWorkspaceWorkflowRunByCredentialHandler,
+});
+
+export const claimWorkspaceWorkflowRunByCredential = mutation({
+	args: claimWorkspaceWorkflowRunByCredentialArgs,
+	returns: claimWorkspaceWorkflowRunByCredentialReturns,
+	handler: claimWorkspaceWorkflowRunByCredentialHandler,
+});
+
+export const getWorkspaceWorkerQueueState = query({
+	args: getWorkspaceWorkerQueueStateArgs,
+	returns: getWorkspaceWorkerQueueStateReturns,
+	handler: getWorkspaceWorkerQueueStateHandler,
+});
+
+export const pauseWorkspaceWorkflowRun = mutation({
+	args: pauseWorkspaceWorkflowRunArgs,
+	returns: pauseWorkspaceWorkflowRunReturns,
+	handler: pauseWorkspaceWorkflowRunHandler,
+});
+
+export const resumeWorkspaceWorkflowRun = mutation({
+	args: resumeWorkspaceWorkflowRunArgs,
+	returns: resumeWorkspaceWorkflowRunReturns,
+	handler: resumeWorkspaceWorkflowRunHandler,
+});
+
+export const stopWorkspaceWorkflowRun = mutation({
+	args: stopWorkspaceWorkflowRunArgs,
+	returns: stopWorkspaceWorkflowRunReturns,
+	handler: stopWorkspaceWorkflowRunHandler,
 });
 
 export const ingestWorkspaceRunnerEvent = internalMutation({
@@ -149,6 +224,12 @@ export const syncApprovedCodebaseFindings = mutation({
 	handler: syncApprovedCodebaseFindingsHandler,
 });
 
+export const syncApprovedCodebaseFindingsByCredential = mutation({
+	args: syncApprovedCodebaseFindingsByCredentialArgs,
+	returns: syncApprovedCodebaseFindingsByCredentialReturns,
+	handler: syncApprovedCodebaseFindingsByCredentialHandler,
+});
+
 export const listWorkspaceFindings = query({
 	args: listWorkspaceFindingsArgs,
 	returns: listWorkspaceFindingsReturns,
@@ -165,6 +246,24 @@ export const getWorkspaceHeartbeatState = query({
 	args: getWorkspaceHeartbeatStateArgs,
 	returns: getWorkspaceHeartbeatStateReturns,
 	handler: getWorkspaceHeartbeatStateHandler,
+});
+
+export const getManagedGithubExecutionState = query({
+	args: getManagedGithubExecutionStateArgs,
+	returns: getManagedGithubExecutionStateReturns,
+	handler: getManagedGithubExecutionStateHandler,
+});
+
+export const requestManagedGithubExecutionConsent = mutation({
+	args: requestManagedGithubExecutionConsentArgs,
+	returns: requestManagedGithubExecutionConsentReturns,
+	handler: requestManagedGithubExecutionConsentHandler,
+});
+
+export const revokeManagedGithubExecutionConsent = mutation({
+	args: revokeManagedGithubExecutionConsentArgs,
+	returns: revokeManagedGithubExecutionConsentReturns,
+	handler: revokeManagedGithubExecutionConsentHandler,
 });
 
 export const getWorkspaceSyncPreviewState = query({

@@ -2,9 +2,11 @@
 import { pathToFileURL } from "node:url";
 
 import { runDaemonCommand } from "./commands/daemon";
+import { runDoctorPassCommand } from "./commands/doctor-pass";
 import { runOneShotCommand } from "./commands/one-shot";
 import { runSetupCheckCommand } from "./commands/setup-check";
 import { runSetupPairCommand } from "./commands/setup-pair";
+import { runWorkflowCommand } from "./commands/workflow";
 
 const HELP_TEXT = `
 Ship by Sunday local runner
@@ -15,10 +17,14 @@ Usage:
   ship-by-sunday setup check --codex-config-preview
   ship-by-sunday setup check --apply-codex-config
   ship-by-sunday setup check --rollback-codex-config <backup>
-  ship-by-sunday daemon start [--repo <path>] [--once]
+  ship-by-sunday daemon start [--repo <path>] [--once] [--work --confirm-local-writes]
   ship-by-sunday daemon status [--repo <path>] [--json]
   ship-by-sunday daemon stop [--repo <path>]
   ship-by-sunday one-shot [--repo <path>] [--json]
+  ship-by-sunday doctor-pass run [--repo <path>] [--json] [--local-only]
+  ship-by-sunday doctor-pass upload --run-id <id> [--repo <path>] [--json]
+  ship-by-sunday workflow source-truth-readiness run --workflow-run-id <id> --confirm-local-writes [--repo <path>] [--json]
+  ship-by-sunday workflow broken-app-triage run --workflow-run-id <id> --confirm-read-only-reproduction [--repo <path>] [--json]
 `;
 
 export async function runCli(argv = process.argv.slice(2)) {
@@ -40,6 +46,12 @@ export async function runCli(argv = process.argv.slice(2)) {
 		}
 		if (command === "one-shot") {
 			return await runOneShotCommand([subcommand, ...rest].filter(Boolean));
+		}
+		if (command === "doctor-pass") {
+			return await runDoctorPassCommand([subcommand, ...rest].filter(Boolean));
+		}
+		if (command === "workflow") {
+			return await runWorkflowCommand([subcommand, ...rest].filter(Boolean));
 		}
 
 		throw new Error(`Unknown command: ${argv.join(" ")}`);

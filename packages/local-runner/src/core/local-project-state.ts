@@ -73,7 +73,10 @@ function localCodexThreadStatePath(repositoryRoot: string) {
 	);
 }
 
-export async function ensureLocalProjectStateDirectory(repositoryRoot: string) {
+export async function ensureLocalProjectStateDirectory(
+	repositoryRoot: string,
+	options: { updateGitExclude?: boolean } = {},
+) {
 	const stateDirectory = getLocalStateDirectory(repositoryRoot);
 	await mkdir(path.join(stateDirectory, "events"), { recursive: true });
 	await mkdir(path.join(stateDirectory, "runs"), { recursive: true });
@@ -81,7 +84,9 @@ export async function ensureLocalProjectStateDirectory(repositoryRoot: string) {
 		path.join(stateDirectory, ".gitignore"),
 		["*", "!.gitignore", ""].join("\n"),
 	);
-	await ensureLocalGitExcludesSbs(repositoryRoot);
+	if (options.updateGitExclude ?? true) {
+		await ensureLocalGitExcludesSbs(repositoryRoot);
+	}
 	return stateDirectory;
 }
 

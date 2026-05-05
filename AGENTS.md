@@ -34,7 +34,7 @@
 
 ## Path Triggers
 
-- Next.js code in `apps/web`: read the relevant guide in `apps/web/node_modules/next/dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. This version has breaking changes; do not rely on memory of older Next.js behavior.
+- Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
 - User-facing UI: read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation.
 - Public homepage: read `apps/web/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.

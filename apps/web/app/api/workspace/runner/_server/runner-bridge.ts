@@ -2,12 +2,13 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 
-import { fetchMutation } from "convex/nextjs";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import type {
+	CodebaseFindingInput,
 	WorkspaceRunnerEventPayload,
 	WorkspaceRunnerEventType,
 } from "@/convex/workspace/types";
@@ -77,6 +78,72 @@ function normalizeRunnerEventBody(body: Record<string, unknown> | null) {
 		schemaVersion: "workspace.runner-event.v1" as const,
 		createdAt,
 		payload: payload as WorkspaceRunnerEventPayload,
+	};
+}
+
+function normalizeDoctorPassStartBody(body: Record<string, unknown> | null) {
+	const projectId = getString(body?.projectId);
+	const runnerId = getString(body?.runnerId);
+	const localRunId = getString(body?.localRunId);
+	const runnerMode = getRunnerMode(body?.runnerMode);
+	if (!projectId || !runnerId || !localRunId || !runnerMode) {
+		return null;
+	}
+	return {
+		projectId: projectId as Id<"workspaceProjects">,
+		runnerId: runnerId as Id<"workspaceRunnerBindings">,
+		localRunId,
+		runnerMode,
+	};
+}
+
+function normalizeFindingsUploadBody(body: Record<string, unknown> | null) {
+	const projectId = getString(body?.projectId);
+	const runnerId = getString(body?.runnerId);
+	const doctorPassRunId = getString(body?.doctorPassRunId);
+	const previewDigest = getString(body?.previewDigest);
+	const findings = body?.findings;
+	if (
+		!projectId ||
+		!runnerId ||
+		!doctorPassRunId ||
+		!previewDigest ||
+		!Array.isArray(findings)
+	) {
+		return null;
+	}
+	return {
+		projectId: projectId as Id<"workspaceProjects">,
+		runnerId: runnerId as Id<"workspaceRunnerBindings">,
+		doctorPassRunId: doctorPassRunId as Id<"doctorPassRuns">,
+		previewDigest,
+		findings: findings as CodebaseFindingInput[],
+	};
+}
+
+function normalizeWorkflowRunResolveBody(body: Record<string, unknown> | null) {
+	const projectId = getString(body?.projectId);
+	const runnerId = getString(body?.runnerId);
+	const workflowRunId = getString(body?.workflowRunId);
+	if (!projectId || !runnerId || !workflowRunId) {
+		return null;
+	}
+	return {
+		projectId: projectId as Id<"workspaceProjects">,
+		runnerId: runnerId as Id<"workspaceRunnerBindings">,
+		workflowRunId: workflowRunId as Id<"workflowRuns">,
+	};
+}
+
+function normalizeWorkflowRunClaimBody(body: Record<string, unknown> | null) {
+	const projectId = getString(body?.projectId);
+	const runnerId = getString(body?.runnerId);
+	if (!projectId || !runnerId) {
+		return null;
+	}
+	return {
+		projectId: projectId as Id<"workspaceProjects">,
+		runnerId: runnerId as Id<"workspaceRunnerBindings">,
 	};
 }
 
@@ -202,6 +269,204 @@ export async function ingestWorkspaceRunnerEventFromRequest(request: Request) {
 			},
 		);
 
+		return jsonWithRequestId(result, undefined, requestId);
+	} catch (error) {
+		return jsonWithRequestId(
+			{
+				error: readErrorMessage(error),
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+}
+
+export async function startWorkspaceDoctorPassFromRequest(request: Request) {
+	const requestId = getRequestIdFromRequest(request);
+	const runnerToken = getBearerToken(request);
+	if (!runnerToken) {
+		return jsonWithRequestId(
+			{
+				error: "Runner bearer token is required.",
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+
+	const body = await readJsonObject(request);
+	const startBody = normalizeDoctorPassStartBody(body);
+	if (!startBody) {
+		return jsonWithRequestId(
+			{
+				error: "Doctor pass start payload is required.",
+				requestId,
+			},
+			{ status: 400 },
+			requestId,
+		);
+	}
+
+	try {
+		const result = await fetchMutation(
+			api.workspace.startWorkspaceDoctorPassRunByCredential,
+			{
+				runnerCredentialHash: hashRunnerToken(runnerToken),
+				...startBody,
+			},
+		);
+		return jsonWithRequestId(result, undefined, requestId);
+	} catch (error) {
+		return jsonWithRequestId(
+			{
+				error: readErrorMessage(error),
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+}
+
+export async function uploadWorkspaceRunnerFindingsFromRequest(
+	request: Request,
+) {
+	const requestId = getRequestIdFromRequest(request);
+	const runnerToken = getBearerToken(request);
+	if (!runnerToken) {
+		return jsonWithRequestId(
+			{
+				error: "Runner bearer token is required.",
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+
+	const body = await readJsonObject(request);
+	const uploadBody = normalizeFindingsUploadBody(body);
+	if (!uploadBody) {
+		return jsonWithRequestId(
+			{
+				error: "Findings upload payload is required.",
+				requestId,
+			},
+			{ status: 400 },
+			requestId,
+		);
+	}
+
+	try {
+		const result = await fetchMutation(
+			api.workspace.syncApprovedCodebaseFindingsByCredential,
+			{
+				runnerCredentialHash: hashRunnerToken(runnerToken),
+				...uploadBody,
+			},
+		);
+		return jsonWithRequestId(result, undefined, requestId);
+	} catch (error) {
+		return jsonWithRequestId(
+			{
+				error: readErrorMessage(error),
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+}
+
+export async function resolveWorkspaceRunnerWorkflowRunFromRequest(
+	request: Request,
+) {
+	const requestId = getRequestIdFromRequest(request);
+	const runnerToken = getBearerToken(request);
+	if (!runnerToken) {
+		return jsonWithRequestId(
+			{
+				error: "Runner bearer token is required.",
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+
+	const body = await readJsonObject(request);
+	const workflowRunBody = normalizeWorkflowRunResolveBody(body);
+	if (!workflowRunBody) {
+		return jsonWithRequestId(
+			{
+				error: "Workflow run resolve payload is required.",
+				requestId,
+			},
+			{ status: 400 },
+			requestId,
+		);
+	}
+
+	try {
+		const result = await fetchQuery(
+			api.workspace.getWorkspaceWorkflowRunByCredential,
+			{
+				runnerCredentialHash: hashRunnerToken(runnerToken),
+				...workflowRunBody,
+			},
+		);
+		return jsonWithRequestId(result, undefined, requestId);
+	} catch (error) {
+		return jsonWithRequestId(
+			{
+				error: readErrorMessage(error),
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+}
+
+export async function claimWorkspaceRunnerWorkflowRunFromRequest(
+	request: Request,
+) {
+	const requestId = getRequestIdFromRequest(request);
+	const runnerToken = getBearerToken(request);
+	if (!runnerToken) {
+		return jsonWithRequestId(
+			{
+				error: "Runner bearer token is required.",
+				requestId,
+			},
+			{ status: 401 },
+			requestId,
+		);
+	}
+
+	const body = await readJsonObject(request);
+	const workflowRunBody = normalizeWorkflowRunClaimBody(body);
+	if (!workflowRunBody) {
+		return jsonWithRequestId(
+			{
+				error: "Workflow run claim payload is required.",
+				requestId,
+			},
+			{ status: 400 },
+			requestId,
+		);
+	}
+
+	try {
+		const result = await fetchMutation(
+			api.workspace.claimWorkspaceWorkflowRunByCredential,
+			{
+				runnerCredentialHash: hashRunnerToken(runnerToken),
+				...workflowRunBody,
+			},
+		);
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {
 		return jsonWithRequestId(

@@ -16,6 +16,8 @@ import {
 import {
 	codebaseFindingFields,
 	doctorPassRunFields,
+	managedGithubAuditEventFields,
+	managedGithubExecutionConsentFields,
 	workflowRunFields,
 	workspaceProjectFields,
 	workspaceRepositoryBindingFields,
@@ -166,7 +168,8 @@ export default defineSchema({
 			"startedAt",
 		])
 		.index("by_project_id_and_started_at", ["projectId", "startedAt"])
-		.index("by_runner_id_and_started_at", ["runnerId", "startedAt"]),
+		.index("by_runner_id_and_started_at", ["runnerId", "startedAt"])
+		.index("by_runner_id_and_local_run_id", ["runnerId", "localRunId"]),
 	codebaseFindings: defineTable(codebaseFindingFields)
 		.index("by_project_id_and_status_and_rank", ["projectId", "status", "rank"])
 		.index("by_project_id_and_rank", ["projectId", "rank"])
@@ -179,6 +182,18 @@ export default defineSchema({
 			"createdAt",
 		])
 		.index("by_project_id_and_created_at", ["projectId", "createdAt"])
+		.index("by_project_finding_workflow_status_created_at", [
+			"projectId",
+			"findingDocumentId",
+			"workflowId",
+			"status",
+			"createdAt",
+		])
+		.index("by_runner_id_and_status_and_created_at", [
+			"runnerId",
+			"status",
+			"createdAt",
+		])
 		.index("by_runner_id_and_created_at", ["runnerId", "createdAt"]),
 	workspaceRunnerEvents: defineTable(workspaceRunnerEventFields)
 		.index("by_event_id", ["eventId"])
@@ -194,6 +209,22 @@ export default defineSchema({
 			"createdAt",
 		])
 		.index("by_workflow_run_id_and_created_at", ["workflowRunId", "createdAt"]),
+	managedGithubExecutionConsents: defineTable(
+		managedGithubExecutionConsentFields,
+	)
+		.index("by_project_id_and_status_and_updated_at", [
+			"projectId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_project_id_and_updated_at", ["projectId", "updatedAt"])
+		.index("by_repository_binding_id_and_updated_at", [
+			"repositoryBindingId",
+			"updatedAt",
+		]),
+	managedGithubAuditEvents: defineTable(managedGithubAuditEventFields)
+		.index("by_project_id_and_created_at", ["projectId", "createdAt"])
+		.index("by_consent_id_and_created_at", ["consentId", "createdAt"]),
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

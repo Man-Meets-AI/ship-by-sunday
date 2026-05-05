@@ -9,6 +9,7 @@ export type BoundedProcessResult = {
 	stdout: string;
 	stderr: string;
 	timedOut: boolean;
+	exitCode?: number;
 };
 
 export function getReadinessProbeTimeoutMs(
@@ -48,6 +49,7 @@ export async function runBoundedProcess({
 		};
 	} catch (error) {
 		const processError = error as {
+			code?: unknown;
 			stdout?: unknown;
 			stderr?: unknown;
 			killed?: boolean;
@@ -62,6 +64,8 @@ export async function runBoundedProcess({
 				typeof processError.stderr === "string" ? processError.stderr : "",
 			timedOut:
 				processError.killed === true && processError.signal === "SIGTERM",
+			exitCode:
+				typeof processError.code === "number" ? processError.code : undefined,
 		};
 	}
 }

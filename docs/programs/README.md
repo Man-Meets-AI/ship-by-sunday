@@ -16,13 +16,13 @@ read_when:
 
 Active:
 
-- `docs/programs/active/2026-05-03-ui-design-system-alignment/`: active Program for aligning Ship by Sunday app UI around screenshot-grounded color, typography, spacing, control, and visual proof rules.
 - `docs/programs/active/2026-05-02-one-click-paid-access/`: active Program for making Ship by Sunday payment nearly one-click while paid access attaches instantly to the checkout email.
 - `docs/programs/active/2026-05-02-customer-agentic-operating-system/`: active Program for making Ship by Sunday install durable Program, ExecPlan, validation, prompt, skill, and agent-loop practices into generated customer repos and mature existing codebases.
 
 Recently completed:
 
 - `docs/programs/completed/2026-05-04-codebase-language-migration/`: completed direct Codebase language migration across public language, Program packets, package surfaces, generated output, and validation metadata.
+- `docs/programs/completed/2026-05-03-ui-design-system-alignment/`: completed app UI design-system alignment around screenshot-grounded color, typography, spacing, control, and visual proof rules.
 - `docs/programs/completed/2026-05-02-posthog-observability-migration/`: completed PostHog observability migration Program that moved generic analytics, errors, source maps, masked replay defaults, and draft-only Linear triage to PostHog-owned paths while narrowing Convex to provider-specific/runtime-intake duties.
 - `docs/programs/completed/2026-05-01-generated-repo-first-slice-autonomy/`: completed generated customer-repo autonomy Program that made downloaded repos executable by fresh coding agents without chat history.
 - `docs/programs/completed/2026-04-26-app-structure-refactor/`: completed refactor Program that reduced and disciplined the Ship by Sunday app structure across App Router routes, Convex, Stripe, shared UI, platform boundaries, and durable product domains.
