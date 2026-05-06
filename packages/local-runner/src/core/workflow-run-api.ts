@@ -11,6 +11,17 @@ import {
 	DOCS_SPINE_ADOPTION_WORKFLOW_ID,
 	DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
 } from "../workflows/docs-spine-adoption/manifest";
+import {
+	DOCS_SPINE_APPLY_ALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_APPLY_DISALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_APPLY_EXPECTED_OUTPUTS,
+	DOCS_SPINE_APPLY_PROOF_COMMANDS,
+	DOCS_SPINE_APPLY_ROLLBACK_NOTES,
+	DOCS_SPINE_APPLY_STOP_CONDITIONS,
+	DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY,
+	DOCS_SPINE_APPLY_WORKFLOW_ID,
+	DOCS_SPINE_APPLY_WORKFLOW_VERSION,
+} from "../workflows/docs-spine-apply-and-proof/manifest";
 
 export const WORKFLOW_RUN_RESOLVE_ENDPOINT =
 	"/api/workspace/runner/workflow-runs/resolve";
@@ -69,7 +80,8 @@ export type ApprovedWorkflowRunPacket = {
 		| "observability-debuggability"
 		| "broken-app-triage"
 		| "mature-repo-adoption"
-		| typeof DOCS_SPINE_ADOPTION_WORKFLOW_ID;
+		| typeof DOCS_SPINE_ADOPTION_WORKFLOW_ID
+		| typeof DOCS_SPINE_APPLY_WORKFLOW_ID;
 	workflowVersion: string;
 	branchName: string;
 	profileName: string;
@@ -183,7 +195,8 @@ function assertApprovedWorkflowRunPacket(
 		packet.workflowId !== "observability-debuggability" &&
 		packet.workflowId !== "broken-app-triage" &&
 		packet.workflowId !== "mature-repo-adoption" &&
-		packet.workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID
+		packet.workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID &&
+		packet.workflowId !== DOCS_SPINE_APPLY_WORKFLOW_ID
 	) {
 		throw new Error("Approved workflow run is not supported.");
 	}
@@ -198,6 +211,9 @@ function assertApprovedWorkflowRunPacket(
 	}
 	if (packet.workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID) {
 		assertDocsSpineAdoptionPacket(packet);
+	}
+	if (packet.workflowId === DOCS_SPINE_APPLY_WORKFLOW_ID) {
+		assertDocsSpineApplyPacket(packet);
 	}
 }
 
@@ -320,6 +336,64 @@ function assertDocsSpineAdoptionPacket(packet: ApprovedWorkflowRunPacket) {
 	}
 	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
 		throw new Error("Docs spine adoption proof ref is not approved.");
+	}
+}
+
+function assertDocsSpineApplyPacket(packet: ApprovedWorkflowRunPacket) {
+	if (packet.workflowVersion !== DOCS_SPINE_APPLY_WORKFLOW_VERSION) {
+		throw new Error("Docs spine apply workflow version is not approved.");
+	}
+	if (packet.profileName !== "sbs-workspace-write") {
+		throw new Error("Docs spine apply profile is not approved.");
+	}
+	if (!/^sbs\/docs-spine-apply-\d{8}-\d{4}$/.test(packet.branchName)) {
+		throw new Error("Docs spine apply branch is not approved.");
+	}
+	if (packet.writeLeaseDurationMinutes !== 30) {
+		throw new Error("Docs spine apply write lease duration is not approved.");
+	}
+	if (packet.dirtyStatePolicy !== "require_clean_worktree") {
+		throw new Error("Docs spine apply requires a clean-worktree policy.");
+	}
+	assertExactTextList(
+		packet.expectedOutputs,
+		DOCS_SPINE_APPLY_EXPECTED_OUTPUTS,
+		"Docs spine apply expected outputs",
+	);
+	assertExactTextList(
+		packet.allowedTouchTargets,
+		DOCS_SPINE_APPLY_ALLOWED_TOUCH_TARGETS,
+		"Docs spine apply allowed touch targets",
+	);
+	assertExactTextList(
+		packet.disallowedTouchTargets,
+		DOCS_SPINE_APPLY_DISALLOWED_TOUCH_TARGETS,
+		"Docs spine apply disallowed touch targets",
+	);
+	assertExactTextList(
+		packet.proofCommands,
+		DOCS_SPINE_APPLY_PROOF_COMMANDS,
+		"Docs spine apply proof commands",
+	);
+	if (packet.syncPolicySummary !== DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY) {
+		throw new Error("Docs spine apply sync policy is not approved.");
+	}
+	assertExactTextList(
+		packet.stopConditions,
+		DOCS_SPINE_APPLY_STOP_CONDITIONS,
+		"Docs spine apply stop conditions",
+	);
+	if (packet.rollbackNotes !== DOCS_SPINE_APPLY_ROLLBACK_NOTES) {
+		throw new Error("Docs spine apply rollback notes are not approved.");
+	}
+	if (
+		packet.localWorkflowPacketRef !==
+		`.sbs/runs/${packet.workflowRunId}/workflow-packet.json`
+	) {
+		throw new Error("Docs spine apply workflow packet ref is not approved.");
+	}
+	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
+		throw new Error("Docs spine apply proof ref is not approved.");
 	}
 }
 

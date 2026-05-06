@@ -16,6 +16,7 @@ import {
 } from "../core/runner-events";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
 import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
+import { runDocsSpineApplyWorkflow } from "../core/docs-spine-apply-and-proof-workflow";
 import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
 import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
@@ -31,6 +32,7 @@ type DaemonOptions = {
 	confirmObservabilityAudit?: boolean;
 	confirmAdoptionAudit?: boolean;
 	confirmDocsSpineAdoption?: boolean;
+	confirmDocsSpineApply?: boolean;
 	intervalMs: number;
 };
 
@@ -50,6 +52,15 @@ export async function runDaemonCommand(argv: string[]) {
 
 async function runDaemonStart(argv: string[]) {
 	const options = parseDaemonOptions(argv);
+	if (options.work) {
+		assertDaemonWorkerConfirmations({
+			confirmLocalWrites: options.confirmLocalWrites === true,
+			confirmObservabilityAudit: options.confirmObservabilityAudit === true,
+			confirmAdoptionAudit: options.confirmAdoptionAudit === true,
+			confirmDocsSpineAdoption: options.confirmDocsSpineAdoption === true,
+			confirmDocsSpineApply: options.confirmDocsSpineApply === true,
+		});
+	}
 	const { repositoryRoot, isGitRepository } = await resolveRepositoryRoot({
 		explicitRoot: options.repo,
 	});
@@ -71,6 +82,7 @@ async function runDaemonStart(argv: string[]) {
 				confirmObservabilityAudit: options.confirmObservabilityAudit === true,
 				confirmAdoptionAudit: options.confirmAdoptionAudit === true,
 				confirmDocsSpineAdoption: options.confirmDocsSpineAdoption === true,
+				confirmDocsSpineApply: options.confirmDocsSpineApply === true,
 			});
 		}
 		if (options.once) {
@@ -180,28 +192,22 @@ async function claimAndRunNextWorkflow({
 	confirmObservabilityAudit,
 	confirmAdoptionAudit,
 	confirmDocsSpineAdoption,
+	confirmDocsSpineApply,
 }: {
 	repositoryRoot: string;
 	confirmLocalWrites: boolean;
 	confirmObservabilityAudit: boolean;
 	confirmAdoptionAudit: boolean;
 	confirmDocsSpineAdoption: boolean;
+	confirmDocsSpineApply: boolean;
 }) {
-	if (!confirmLocalWrites) {
-		throw new Error(
-			"daemon start --work requires --confirm-local-writes for approved queue jobs.",
-		);
-	}
-	if (!confirmObservabilityAudit) {
-		throw new Error(
-			"daemon start --work requires --confirm-observability-audit because the queue can claim observability audit jobs.",
-		);
-	}
-	if (!confirmDocsSpineAdoption) {
-		throw new Error(
-			"daemon start --work requires --confirm-docs-spine-adoption because the queue can claim docs-spine adoption jobs.",
-		);
-	}
+	assertDaemonWorkerConfirmations({
+		confirmLocalWrites,
+		confirmObservabilityAudit,
+		confirmAdoptionAudit,
+		confirmDocsSpineAdoption,
+		confirmDocsSpineApply,
+	});
 
 	const [state, credential] = await Promise.all([
 		readLocalProjectState(repositoryRoot),
@@ -263,9 +269,58 @@ async function claimAndRunNextWorkflow({
 			confirmDocsSpineAdoption,
 		});
 	}
+	if (approvedWorkflowRun.workflowId === "docs-spine-apply-and-proof") {
+		return await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmDocsSpineApply,
+		});
+	}
 	throw new Error(
 		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
 	);
+}
+
+function assertDaemonWorkerConfirmations({
+	confirmLocalWrites,
+	confirmObservabilityAudit,
+	confirmAdoptionAudit,
+	confirmDocsSpineAdoption,
+	confirmDocsSpineApply,
+}: {
+	confirmLocalWrites: boolean;
+	confirmObservabilityAudit: boolean;
+	confirmAdoptionAudit: boolean;
+	confirmDocsSpineAdoption: boolean;
+	confirmDocsSpineApply: boolean;
+}) {
+	if (!confirmLocalWrites) {
+		throw new Error(
+			"daemon start --work requires --confirm-local-writes for approved queue jobs.",
+		);
+	}
+	if (!confirmObservabilityAudit) {
+		throw new Error(
+			"daemon start --work requires --confirm-observability-audit because the queue can claim observability audit jobs.",
+		);
+	}
+	if (!confirmAdoptionAudit) {
+		throw new Error(
+			"daemon start --work requires --confirm-adoption-audit because the queue can claim mature repo adoption jobs.",
+		);
+	}
+	if (!confirmDocsSpineAdoption) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-spine-adoption because the queue can claim docs-spine adoption jobs.",
+		);
+	}
+	if (!confirmDocsSpineApply) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-spine-apply because the queue can claim docs-spine apply jobs.",
+		);
+	}
 }
 
 function parseDaemonOptions(argv: string[]): DaemonOptions {
@@ -289,6 +344,8 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.confirmAdoptionAudit = true;
 		} else if (arg === "--confirm-docs-spine-adoption") {
 			options.confirmDocsSpineAdoption = true;
+		} else if (arg === "--confirm-docs-spine-apply") {
+			options.confirmDocsSpineApply = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),
