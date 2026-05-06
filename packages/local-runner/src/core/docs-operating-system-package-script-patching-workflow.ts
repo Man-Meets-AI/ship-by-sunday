@@ -22,6 +22,7 @@ import {
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_LOCAL_ARTIFACT_REFS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PHASES,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROFILE_NAME,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_NEXT_RECOMMENDED_WORKFLOW_ID,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROOF_COMMANDS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROOF_DELIVERY,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROVIDER_ACCESS_POLICY,
@@ -438,7 +439,8 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 			proofCommandResults,
 			rollbackInstructions:
 				DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ROLLBACK_NOTES,
-			nextRecommendedWorkflow: "docs-operating-system-lockfile-refresh",
+			nextRecommendedWorkflow:
+				DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_NEXT_RECOMMENDED_WORKFLOW_ID,
 			createdAt: now,
 		});
 		await writeJsonArtifact(repositoryRoot, workflowRunId, syncPreviewRef, {
@@ -463,7 +465,8 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 					status,
 				}),
 			),
-			nextRecommendedWorkflowId: "docs-operating-system-lockfile-refresh",
+			nextRecommendedWorkflowId:
+				DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_NEXT_RECOMMENDED_WORKFLOW_ID,
 		});
 
 		const proofEventResult = await sendRunnerEventDirect({
@@ -487,7 +490,8 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 							status,
 						}),
 					),
-					nextRecommendedWorkflowId: "docs-operating-system-lockfile-refresh",
+					nextRecommendedWorkflowId:
+						DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_NEXT_RECOMMENDED_WORKFLOW_ID,
 				},
 			}),
 		});

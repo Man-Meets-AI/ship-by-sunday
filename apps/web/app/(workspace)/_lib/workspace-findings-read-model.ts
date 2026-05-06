@@ -151,6 +151,7 @@ export type WorkspaceWorkflowApprovalModel = {
 		| "docs_spine_apply"
 		| "docs_operating_system_adoption"
 		| "docs_operating_system_package_script_patching"
+		| "docs_operating_system_lockfile_refresh"
 		| "generic";
 	workflowCommandName: string;
 	confirmationFlag: string;
@@ -255,6 +256,8 @@ const workflowLabels: Record<string, string> = {
 	"docs-operating-system-adoption": "Docs Operating System Adoption",
 	"docs-operating-system-package-script-patching":
 		"Docs Operating System Package Script Patching",
+	"docs-operating-system-lockfile-refresh":
+		"Docs Operating System Lockfile Refresh",
 	"revenue-path-audit": "Revenue Path Audit",
 	"ux-conversion-snapshot": "UX Conversion Snapshot",
 	"proof-harness": "Proof Harness",
@@ -270,6 +273,7 @@ const supportedLocalRunnerWorkflowIds = [
 	"docs-spine-apply-and-proof",
 	"docs-operating-system-adoption",
 	"docs-operating-system-package-script-patching",
+	"docs-operating-system-lockfile-refresh",
 ] as const;
 
 const supportedLocalRunnerWorkflowIdSet = new Set<string>(
@@ -566,6 +570,14 @@ function getExpectedOutputs(workflowId: string) {
 			"sync preview metadata",
 		];
 	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return [
+			"docs operating system lockfile refresh workflow packet",
+			"package-manager lockfile refresh summary",
+			"local proof or blocked-proof summary",
+			"sync preview metadata",
+		];
+	}
 
 	return [
 		"scoped workflow packet",
@@ -622,6 +634,18 @@ function getAllowedTouchTargets(workflowId: string) {
 			"scripts/sbs-docs/**",
 		];
 	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-operating-system-adoption/lockfile-refresh/**",
+			"bun.lock",
+			"bun.lockb",
+			"package-lock.json",
+			"npm-shrinkwrap.json",
+			"pnpm-lock.yaml",
+			"yarn.lock",
+		];
+	}
 	if (workflowId === "docs-spine-apply-and-proof") {
 		return [
 			".sbs/runs/<workflow-run-id>/**",
@@ -659,7 +683,8 @@ function getDisallowedTouchTargets(workflowId: string) {
 		workflowId !== "docs-spine-adoption" &&
 		workflowId !== "docs-spine-apply-and-proof" &&
 		workflowId !== "docs-operating-system-adoption" &&
-		workflowId !== "docs-operating-system-package-script-patching"
+		workflowId !== "docs-operating-system-package-script-patching" &&
+		workflowId !== "docs-operating-system-lockfile-refresh"
 	) {
 		return disallowedTouchTargets;
 	}
@@ -737,10 +762,40 @@ function getDisallowedTouchTargets(workflowId: string) {
 			"Codex transcripts",
 		];
 	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"app-stack command wiring",
+			"Worker-specific operating state",
+			"docs spine Markdown application",
+			"package script changes",
+			"wrapper file changes",
+			"full dependency install state",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"package script bodies",
+			"dependency versions from the target repo",
+			"local absolute paths",
+			"Codex transcripts",
+		];
+	}
 	return localRunnerDisallowedTargets;
 }
 
 function getWorkflowSyncPolicySummary(workflowId: string) {
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return "Only approved structured workflow metadata, proof status, command names, artifact names, touched lockfile refs, and command statuses sync. Package script bodies, target dependency versions, raw package-manager output, raw source, raw logs, local absolute paths, and Codex transcripts stay on the machine.";
+	}
 	if (workflowId === "docs-operating-system-package-script-patching") {
 		return "Only approved structured workflow metadata, proof status, command names, artifact names, touched repo-relative refs, and operation statuses sync. Package script bodies, target dependency versions, wrapper contents, raw source, raw logs, local absolute paths, and Codex session history stay on the machine.";
 	}
@@ -787,7 +842,8 @@ function buildWorkflowApprovalModel({
 				: "sbs-workspace-write",
 		installProfile:
 			workflowKind === "docs_operating_system_adoption" ||
-			workflowKind === "docs_operating_system_package_script_patching"
+			workflowKind === "docs_operating_system_package_script_patching" ||
+			workflowKind === "docs_operating_system_lockfile_refresh"
 				? "worker-grade"
 				: undefined,
 		writeLeaseDurationMinutes: 30,
@@ -835,6 +891,9 @@ function getWorkflowKind(
 	if (workflowId === "docs-operating-system-package-script-patching") {
 		return "docs_operating_system_package_script_patching";
 	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return "docs_operating_system_lockfile_refresh";
+	}
 	return "generic";
 }
 
@@ -876,6 +935,9 @@ function getWorkflowConfirmationFlags(workflowId: string) {
 	if (workflowId === "docs-operating-system-package-script-patching") {
 		return ["--confirm-docs-operating-system-tooling-apply"];
 	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return ["--confirm-docs-operating-system-lockfile-refresh"];
+	}
 	return ["--confirm-local-writes"];
 }
 
@@ -900,6 +962,9 @@ function getWorkflowBranchName(workflowId: string, approvalTimestamp: number) {
 	}
 	if (workflowId === "docs-operating-system-package-script-patching") {
 		return `sbs/docs-operating-system-package-scripts-${formatBranchTimestamp(approvalTimestamp)}`;
+	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return `sbs/docs-operating-system-lockfile-refresh-${formatBranchTimestamp(approvalTimestamp)}`;
 	}
 	return `sbs/${workflowId}-${formatBranchTimestamp(approvalTimestamp)}`;
 }
@@ -926,6 +991,14 @@ function getWorkflowProofCommands(workflowId: string) {
 			"git diff --name-only",
 			"git diff --check",
 			"node --check scripts/sbs-docs/*.mjs",
+		];
+	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return [
+			"package-manager lockfile refresh with lifecycle scripts disabled",
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
 		];
 	}
 
@@ -996,6 +1069,17 @@ function getWorkflowStopConditions(workflowId: string) {
 			"proof command fails",
 		];
 	}
+	if (workflowId === "docs-operating-system-lockfile-refresh") {
+		return [
+			"write lease expires before lockfile refresh starts",
+			"approved packet is missing installProfile: worker-grade",
+			"worktree has dirty lockfiles or unsafe runner artifacts before lockfile refresh starts",
+			"package-script apply summary is missing, invalid, blocked, or stale",
+			"live package.json or wrapper files no longer match the approved package-script patch contract",
+			"requested work needs package manifest mutation, package script mutation, wrapper mutation, full dependency install state, docs application, root instruction rewrites, runtime setup, provider setup, CI, PRs, branch pushes, raw source, raw logs, script bodies, dependency versions from the target repo, or Codex transcripts",
+			"proof command fails",
+		];
+	}
 
 	return [
 		"worktree is dirty before branch creation",
@@ -1028,6 +1112,9 @@ function getWorkflowRollbackNotes(
 	}
 	if (workflowKind === "docs_operating_system_package_script_patching") {
 		return "Review the local package.json, scripts/sbs-docs, and .sbs tooling-apply diff. Roll back by reverting those touched refs and deleting this workflow run's .sbs/runs/<workflow-run-id> directory.";
+	}
+	if (workflowKind === "docs_operating_system_lockfile_refresh") {
+		return "Review the local lockfile diff and .sbs lockfile-refresh artifacts. Roll back by reverting the touched lockfile refs and deleting this workflow run's .sbs/runs/<workflow-run-id> directory.";
 	}
 	return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the source-truth branch after reviewing local proof.";
 }

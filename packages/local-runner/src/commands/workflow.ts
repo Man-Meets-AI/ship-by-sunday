@@ -3,6 +3,7 @@ import { readLocalProjectState } from "../core/local-project-state";
 import { resolveRepositoryRoot } from "../core/repository-root";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
 import { runDocsOperatingSystemAdoptionWorkflow } from "../core/docs-operating-system-adoption-workflow";
+import { runDocsOperatingSystemLockfileRefreshWorkflow } from "../core/docs-operating-system-lockfile-refresh-workflow";
 import { runDocsOperatingSystemPackageScriptPatchingWorkflow } from "../core/docs-operating-system-package-script-patching-workflow";
 import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
 import { runDocsSpineApplyWorkflow } from "../core/docs-spine-apply-and-proof-workflow";
@@ -26,6 +27,7 @@ type WorkflowCommandOptions = {
 	confirmDocsOperatingSystemScan?: boolean;
 	confirmDocsOperatingSystemToolingPlan?: boolean;
 	confirmDocsOperatingSystemToolingApply?: boolean;
+	confirmDocsOperatingSystemLockfileRefresh?: boolean;
 };
 
 export async function runWorkflowCommand(argv: string[]) {
@@ -38,11 +40,12 @@ export async function runWorkflowCommand(argv: string[]) {
 			workflowName !== "docs-spine-adoption" &&
 			workflowName !== "docs-spine-apply-and-proof" &&
 			workflowName !== "docs-operating-system-adoption" &&
-			workflowName !== "docs-operating-system-package-script-patching") ||
+			workflowName !== "docs-operating-system-package-script-patching" &&
+			workflowName !== "docs-operating-system-lockfile-refresh") ||
 		action !== "run"
 	) {
 		throw new Error(
-			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption|docs-spine-adoption|docs-spine-apply-and-proof|docs-operating-system-adoption|docs-operating-system-package-script-patching> run --workflow-run-id <id>",
+			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption|docs-spine-adoption|docs-spine-apply-and-proof|docs-operating-system-adoption|docs-operating-system-package-script-patching|docs-operating-system-lockfile-refresh> run --workflow-run-id <id>",
 		);
 	}
 
@@ -145,13 +148,23 @@ export async function runWorkflowCommand(argv: string[]) {
 											confirmDocsOperatingSystemToolingApply:
 												options.confirmDocsOperatingSystemToolingApply === true,
 										})
-									: await runSourceTruthWorkflow({
-											repositoryRoot,
-											state,
-											credential,
-											approvedWorkflowRun,
-											confirmLocalWrites: options.confirmLocalWrites === true,
-										});
+									: workflowName === "docs-operating-system-lockfile-refresh"
+										? await runDocsOperatingSystemLockfileRefreshWorkflow({
+												repositoryRoot,
+												state,
+												credential,
+												approvedWorkflowRun,
+												confirmDocsOperatingSystemLockfileRefresh:
+													options.confirmDocsOperatingSystemLockfileRefresh ===
+													true,
+											})
+										: await runSourceTruthWorkflow({
+												repositoryRoot,
+												state,
+												credential,
+												approvedWorkflowRun,
+												confirmLocalWrites: options.confirmLocalWrites === true,
+											});
 
 	if (options.json) {
 		console.log(JSON.stringify(result, null, 2));
@@ -192,6 +205,12 @@ export async function runWorkflowCommand(argv: string[]) {
 	} else if (workflowName === "docs-operating-system-package-script-patching") {
 		console.log(
 			`Docs operating system package-script patching workflow wrote ${result.localRunDirectoryRef}.`,
+		);
+		console.log(`Branch: ${result.branchName}.`);
+		console.log(`Proof status: ${result.proofStatus}.`);
+	} else if (workflowName === "docs-operating-system-lockfile-refresh") {
+		console.log(
+			`Docs operating system lockfile refresh workflow wrote ${result.localRunDirectoryRef}.`,
 		);
 		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
@@ -257,6 +276,8 @@ function parseWorkflowCommandOptions(argv: string[]): WorkflowCommandOptions {
 			options.confirmDocsOperatingSystemToolingPlan = true;
 		} else if (arg === "--confirm-docs-operating-system-tooling-apply") {
 			options.confirmDocsOperatingSystemToolingApply = true;
+		} else if (arg === "--confirm-docs-operating-system-lockfile-refresh") {
+			options.confirmDocsOperatingSystemLockfileRefresh = true;
 		} else {
 			throw new Error(`Unknown workflow option: ${arg}`);
 		}

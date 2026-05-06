@@ -16,6 +16,7 @@ import {
 } from "../core/runner-events";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
 import { runDocsOperatingSystemAdoptionWorkflow } from "../core/docs-operating-system-adoption-workflow";
+import { runDocsOperatingSystemLockfileRefreshWorkflow } from "../core/docs-operating-system-lockfile-refresh-workflow";
 import { runDocsOperatingSystemPackageScriptPatchingWorkflow } from "../core/docs-operating-system-package-script-patching-workflow";
 import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
 import { runDocsSpineApplyWorkflow } from "../core/docs-spine-apply-and-proof-workflow";
@@ -38,6 +39,7 @@ type DaemonOptions = {
 	confirmDocsOperatingSystemScan?: boolean;
 	confirmDocsOperatingSystemToolingPlan?: boolean;
 	confirmDocsOperatingSystemToolingApply?: boolean;
+	confirmDocsOperatingSystemLockfileRefresh?: boolean;
 	intervalMs: number;
 };
 
@@ -70,6 +72,8 @@ async function runDaemonStart(argv: string[]) {
 				options.confirmDocsOperatingSystemToolingPlan === true,
 			confirmDocsOperatingSystemToolingApply:
 				options.confirmDocsOperatingSystemToolingApply === true,
+			confirmDocsOperatingSystemLockfileRefresh:
+				options.confirmDocsOperatingSystemLockfileRefresh === true,
 		});
 	}
 	const { repositoryRoot, isGitRepository } = await resolveRepositoryRoot({
@@ -100,6 +104,8 @@ async function runDaemonStart(argv: string[]) {
 					options.confirmDocsOperatingSystemToolingPlan === true,
 				confirmDocsOperatingSystemToolingApply:
 					options.confirmDocsOperatingSystemToolingApply === true,
+				confirmDocsOperatingSystemLockfileRefresh:
+					options.confirmDocsOperatingSystemLockfileRefresh === true,
 			});
 		}
 		if (options.once) {
@@ -213,6 +219,7 @@ async function claimAndRunNextWorkflow({
 	confirmDocsOperatingSystemScan,
 	confirmDocsOperatingSystemToolingPlan,
 	confirmDocsOperatingSystemToolingApply,
+	confirmDocsOperatingSystemLockfileRefresh,
 }: {
 	repositoryRoot: string;
 	confirmLocalWrites: boolean;
@@ -223,6 +230,7 @@ async function claimAndRunNextWorkflow({
 	confirmDocsOperatingSystemScan: boolean;
 	confirmDocsOperatingSystemToolingPlan: boolean;
 	confirmDocsOperatingSystemToolingApply: boolean;
+	confirmDocsOperatingSystemLockfileRefresh: boolean;
 }) {
 	assertDaemonWorkerConfirmations({
 		confirmLocalWrites,
@@ -233,6 +241,7 @@ async function claimAndRunNextWorkflow({
 		confirmDocsOperatingSystemScan,
 		confirmDocsOperatingSystemToolingPlan,
 		confirmDocsOperatingSystemToolingApply,
+		confirmDocsOperatingSystemLockfileRefresh,
 	});
 
 	const [state, credential] = await Promise.all([
@@ -326,6 +335,17 @@ async function claimAndRunNextWorkflow({
 			confirmDocsOperatingSystemToolingApply,
 		});
 	}
+	if (
+		approvedWorkflowRun.workflowId === "docs-operating-system-lockfile-refresh"
+	) {
+		return await runDocsOperatingSystemLockfileRefreshWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmDocsOperatingSystemLockfileRefresh,
+		});
+	}
 	throw new Error(
 		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
 	);
@@ -340,6 +360,7 @@ function assertDaemonWorkerConfirmations({
 	confirmDocsOperatingSystemScan,
 	confirmDocsOperatingSystemToolingPlan,
 	confirmDocsOperatingSystemToolingApply,
+	confirmDocsOperatingSystemLockfileRefresh,
 }: {
 	confirmLocalWrites: boolean;
 	confirmObservabilityAudit: boolean;
@@ -349,6 +370,7 @@ function assertDaemonWorkerConfirmations({
 	confirmDocsOperatingSystemScan: boolean;
 	confirmDocsOperatingSystemToolingPlan: boolean;
 	confirmDocsOperatingSystemToolingApply: boolean;
+	confirmDocsOperatingSystemLockfileRefresh: boolean;
 }) {
 	if (!confirmLocalWrites) {
 		throw new Error(
@@ -390,6 +412,11 @@ function assertDaemonWorkerConfirmations({
 			"daemon start --work requires --confirm-docs-operating-system-tooling-apply because the queue can claim docs operating system package-script patching jobs.",
 		);
 	}
+	if (!confirmDocsOperatingSystemLockfileRefresh) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-operating-system-lockfile-refresh because the queue can claim docs operating system lockfile refresh jobs.",
+		);
+	}
 }
 
 function parseDaemonOptions(argv: string[]): DaemonOptions {
@@ -421,6 +448,8 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.confirmDocsOperatingSystemToolingPlan = true;
 		} else if (arg === "--confirm-docs-operating-system-tooling-apply") {
 			options.confirmDocsOperatingSystemToolingApply = true;
+		} else if (arg === "--confirm-docs-operating-system-lockfile-refresh") {
+			options.confirmDocsOperatingSystemLockfileRefresh = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),

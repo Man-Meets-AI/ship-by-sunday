@@ -3,6 +3,8 @@ import type {
 	DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID,
 	DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_VERSION,
 	DOCS_OPERATING_SYSTEM_CANONICAL_SCRIPTS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_VERSION,
 	DOCS_OPERATING_SYSTEM_MODULE_IDS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_VERSION,
@@ -199,5 +201,63 @@ export type DocsOperatingSystemPackageScriptPatchingManifest = {
 	localArtifactRefs: Record<string, string>;
 	syncPolicySummary: string;
 	rollbackNotes: string;
+	createdAt: number;
+};
+
+export type DocsOperatingSystemLockfileRefreshManifest = {
+	schemaVersion: "docs-operating-system-lockfile-refresh-manifest.v1";
+	workflowId: typeof DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID;
+	workflowVersion: typeof DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_VERSION;
+	installProfile: DocsOperatingSystemInstallProfile;
+	phases: readonly string[];
+	allowedTouchTargets: readonly string[];
+	disallowedTouchTargets: readonly string[];
+	proofCommands: readonly string[];
+	localArtifactRefs: Record<string, string>;
+	syncPolicySummary: string;
+	rollbackNotes: string;
+	createdAt: number;
+};
+
+export type DocsOperatingSystemLockfileRefreshCommand = {
+	packageManager: "bun" | "npm" | "pnpm";
+	command: string;
+	args: string[];
+	commandName: string;
+	expectedLockfileRefs: string[];
+};
+
+export type DocsOperatingSystemLockfileRefreshBlockedReason = {
+	stage: string;
+	reason: string;
+	targetRef?: string;
+};
+
+export type DocsOperatingSystemLockfileRefreshSummary = {
+	schemaVersion: "docs-operating-system-lockfile-refresh.v1";
+	workflowId: typeof DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID;
+	workflowVersion: typeof DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_VERSION;
+	installProfile: DocsOperatingSystemInstallProfile;
+	sourceInstallPlanRef: string;
+	sourceApplySummaryRef: string;
+	status: "refreshed" | "failed" | "blocked";
+	packageManager: string;
+	commandName?: string;
+	commandStatus: "passed" | "failed" | "blocked";
+	exitCodeSummary: string;
+	guardedInputRefs: string[];
+	touchedLockfileRefs: string[];
+	unexpectedTouchedFiles: string[];
+	blockedReasons: DocsOperatingSystemLockfileRefreshBlockedReason[];
+	proofCommandResults: DocsOperatingSystemProofCommandResult[];
+	privacyBoundary: {
+		rawSourceIncluded: false;
+		rawLogsIncluded: false;
+		rawPackageManagerOutputIncluded: false;
+		packageScriptBodiesIncluded: false;
+		targetDependencyVersionsIncluded: false;
+		localAbsolutePathsIncluded: false;
+		codexTranscriptsIncluded: false;
+	};
 	createdAt: number;
 };

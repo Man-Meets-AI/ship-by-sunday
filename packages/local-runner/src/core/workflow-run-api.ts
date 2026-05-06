@@ -33,6 +33,15 @@ import {
 	DOCS_OPERATING_SYSTEM_ADOPTION_SYNC_POLICY_SUMMARY,
 	DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID,
 	DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_VERSION,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_EXPECTED_OUTPUTS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_VERSION,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ALLOWED_TOUCH_TARGETS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_DISALLOWED_TOUCH_TARGETS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_EXPECTED_OUTPUTS,
@@ -104,7 +113,8 @@ export type ApprovedWorkflowRunPacket = {
 		| typeof DOCS_SPINE_ADOPTION_WORKFLOW_ID
 		| typeof DOCS_SPINE_APPLY_WORKFLOW_ID
 		| typeof DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID
-		| typeof DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID;
+		| typeof DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
+		| typeof DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID;
 	workflowVersion: string;
 	branchName: string;
 	profileName: string;
@@ -223,7 +233,8 @@ function assertApprovedWorkflowRunPacket(
 		packet.workflowId !== DOCS_SPINE_APPLY_WORKFLOW_ID &&
 		packet.workflowId !== DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID &&
 		packet.workflowId !==
-			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
+			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID &&
+		packet.workflowId !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID
 	) {
 		throw new Error("Approved workflow run is not supported.");
 	}
@@ -250,6 +261,11 @@ function assertApprovedWorkflowRunPacket(
 		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
 	) {
 		assertDocsOperatingSystemPackageScriptPatchingPacket(packet);
+	}
+	if (
+		packet.workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID
+	) {
+		assertDocsOperatingSystemLockfileRefreshPacket(packet);
 	}
 }
 
@@ -615,6 +631,104 @@ function assertDocsOperatingSystemPackageScriptPatchingPacket(
 	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
 		throw new Error(
 			"Docs operating system package-script patching proof ref is not approved.",
+		);
+	}
+}
+
+function assertDocsOperatingSystemLockfileRefreshPacket(
+	packet: ApprovedWorkflowRunPacket,
+) {
+	if (
+		packet.workflowVersion !==
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_VERSION
+	) {
+		throw new Error(
+			"Docs operating system lockfile refresh workflow version is not approved.",
+		);
+	}
+	if (packet.profileName !== "sbs-workspace-write") {
+		throw new Error(
+			"Docs operating system lockfile refresh profile is not approved.",
+		);
+	}
+	if (
+		packet.installProfile !== DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE
+	) {
+		throw new Error(
+			"Docs operating system lockfile refresh install profile is not approved.",
+		);
+	}
+	if (
+		!/^sbs\/docs-operating-system-lockfile-refresh-\d{8}-\d{4}$/.test(
+			packet.branchName,
+		)
+	) {
+		throw new Error(
+			"Docs operating system lockfile refresh branch is not approved.",
+		);
+	}
+	if (packet.writeLeaseDurationMinutes !== 30) {
+		throw new Error(
+			"Docs operating system lockfile refresh write lease duration is not approved.",
+		);
+	}
+	if (packet.dirtyStatePolicy !== "require_clean_worktree") {
+		throw new Error(
+			"Docs operating system lockfile refresh requires a clean-worktree policy.",
+		);
+	}
+	assertExactTextList(
+		packet.expectedOutputs,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_EXPECTED_OUTPUTS,
+		"Docs operating system lockfile refresh expected outputs",
+	);
+	assertExactTextList(
+		packet.allowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS,
+		"Docs operating system lockfile refresh allowed touch targets",
+	);
+	assertExactTextList(
+		packet.disallowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS,
+		"Docs operating system lockfile refresh disallowed touch targets",
+	);
+	assertExactTextList(
+		packet.proofCommands,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS,
+		"Docs operating system lockfile refresh proof commands",
+	);
+	if (
+		packet.syncPolicySummary !==
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY
+	) {
+		throw new Error(
+			"Docs operating system lockfile refresh sync policy is not approved.",
+		);
+	}
+	assertExactTextList(
+		packet.stopConditions,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS,
+		"Docs operating system lockfile refresh stop conditions",
+	);
+	if (
+		packet.rollbackNotes !==
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES
+	) {
+		throw new Error(
+			"Docs operating system lockfile refresh rollback notes are not approved.",
+		);
+	}
+	if (
+		packet.localWorkflowPacketRef !==
+		`.sbs/runs/${packet.workflowRunId}/workflow-packet.json`
+	) {
+		throw new Error(
+			"Docs operating system lockfile refresh workflow packet ref is not approved.",
+		);
+	}
+	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
+		throw new Error(
+			"Docs operating system lockfile refresh proof ref is not approved.",
 		);
 	}
 }

@@ -325,6 +325,51 @@ async function createDocsOperatingSystemPackageScriptPatchingFinding({
 	});
 }
 
+async function createDocsOperatingSystemLockfileRefreshFinding({
+	ctx,
+	projectId,
+	runnerId,
+}: {
+	ctx: ReturnType<typeof createWorkspaceTestCtx>["ctx"];
+	projectId: string;
+	runnerId: string;
+}) {
+	const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+		ctx as never,
+		{
+			projectId: projectId as never,
+			runnerId: runnerId as never,
+			runnerMode: "daemon",
+		},
+	);
+	return await ctx.db.insert("codebaseFindings", {
+		projectId,
+		doctorPassRunId: doctorPassRun._id,
+		findingId: "finding-docs-operating-system-lockfile",
+		rank: 8,
+		status: "needs_approval",
+		title: "Docs operating system dependency metadata needs lockfile proof",
+		category: "other",
+		severity: "medium",
+		confidence: 0.86,
+		buyerImpact:
+			"Future agent work needs the portable docs package dependency locked or honestly blocked.",
+		blastRadius: "medium",
+		proofPath: "Review local docs operating system lockfile proof.",
+		proofability: "partial",
+		permissionRequired: "workspace_write",
+		recommendedWorkflowId: "docs-operating-system-lockfile-refresh",
+		whyThisNow:
+			"The package-script apply workflow added dependency metadata that needs package-manager proof.",
+		evidenceRefs: [],
+		syncSensitivity: "low",
+		localReportRef:
+			".sbs/reports/doctor-pass/run-1/docs-operating-system-lockfile-refresh.json",
+		createdAt: 1,
+		updatedAt: 1,
+	});
+}
+
 function buildMatureRepoAdoptionApprovalArgs({
 	projectId,
 	findingDocumentId,
@@ -708,6 +753,94 @@ function buildDocsOperatingSystemPackageScriptPatchingApprovalArgs({
 	};
 }
 
+function buildDocsOperatingSystemLockfileRefreshApprovalArgs({
+	projectId,
+	findingDocumentId,
+	runnerId,
+	workflowVersion = "v1",
+	writeLeaseDurationMinutes = 30,
+	installProfile = "worker-grade",
+}: {
+	projectId: string;
+	findingDocumentId: string;
+	runnerId: string;
+	workflowVersion?: string;
+	writeLeaseDurationMinutes?: number;
+	installProfile?: string;
+}) {
+	return {
+		projectId: projectId as never,
+		findingDocumentId: findingDocumentId as never,
+		runnerId: runnerId as never,
+		workflowId: "docs-operating-system-lockfile-refresh",
+		workflowVersion,
+		branchName: "sbs/docs-operating-system-lockfile-refresh-20260506-1430",
+		profileName: "sbs-workspace-write",
+		installProfile,
+		writeLeaseDurationMinutes,
+		expectedOutputs: [
+			"docs operating system lockfile refresh workflow packet",
+			"package-manager lockfile refresh summary",
+			"local proof or blocked-proof summary",
+			"sync preview metadata",
+		],
+		allowedTouchTargets: [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-operating-system-adoption/lockfile-refresh/**",
+			"bun.lock",
+			"bun.lockb",
+			"package-lock.json",
+			"npm-shrinkwrap.json",
+			"pnpm-lock.yaml",
+			"yarn.lock",
+		],
+		disallowedTouchTargets: [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"app-stack command wiring",
+			"Worker-specific operating state",
+			"docs spine Markdown application",
+			"package script changes",
+			"wrapper file changes",
+			"full dependency install state",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"package script bodies",
+			"dependency versions from the target repo",
+			"local absolute paths",
+			"Codex transcripts",
+		],
+		proofCommands: [
+			"package-manager lockfile refresh with lifecycle scripts disabled",
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+		],
+		syncPolicySummary:
+			"Only approved structured workflow metadata, proof status, command names, artifact names, touched lockfile refs, and command statuses sync. Package script bodies, target dependency versions, raw package-manager output, raw source, raw logs, local absolute paths, and Codex transcripts stay on the machine.",
+		stopConditions: [
+			"write lease expires before lockfile refresh starts",
+			"approved packet is missing installProfile: worker-grade",
+			"worktree has dirty lockfiles or unsafe runner artifacts before lockfile refresh starts",
+			"package-script apply summary is missing, invalid, blocked, or stale",
+			"live package.json or wrapper files no longer match the approved package-script patch contract",
+			"requested work needs package manifest mutation, package script mutation, wrapper mutation, full dependency install state, docs application, root instruction rewrites, runtime setup, provider setup, CI, PRs, branch pushes, raw source, raw logs, script bodies, dependency versions from the target repo, or Codex transcripts",
+			"proof command fails",
+		],
+		rollbackNotes:
+			"Review the local lockfile diff and .sbs lockfile-refresh artifacts. Roll back by reverting the touched lockfile refs and deleting this workflow run's .sbs/runs/<workflow-run-id> directory.",
+	};
+}
+
 function docsOperatingSystemRequiredArtifactRefs(workflowRunId: string) {
 	return [
 		`.sbs/runs/${workflowRunId}/workflow-packet.json`,
@@ -729,6 +862,18 @@ function docsOperatingSystemPackageScriptRequiredArtifactRefs(
 		`.sbs/runs/${workflowRunId}/sync-preview.json`,
 		".sbs/docs-operating-system-adoption/tooling-apply/manifest.json",
 		".sbs/docs-operating-system-adoption/tooling-apply/package-script-patching.json",
+	];
+}
+
+function docsOperatingSystemLockfileRefreshRequiredArtifactRefs(
+	workflowRunId: string,
+) {
+	return [
+		`.sbs/runs/${workflowRunId}/workflow-packet.json`,
+		`.sbs/runs/${workflowRunId}/proof.json`,
+		`.sbs/runs/${workflowRunId}/sync-preview.json`,
+		".sbs/docs-operating-system-adoption/lockfile-refresh/manifest.json",
+		".sbs/docs-operating-system-adoption/lockfile-refresh/lockfile-refresh.json",
 	];
 }
 
@@ -2190,6 +2335,152 @@ describe("workspace runner events", () => {
 		).rejects.toThrow(
 			"Docs operating system package-script patching install profile is not approved",
 		);
+	});
+
+	it("approves and claims docs operating system lockfile refresh with worker-grade install profile", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId =
+			await createDocsOperatingSystemLockfileRefreshFinding({
+				ctx,
+				projectId: project._id,
+				runnerId: runner._id,
+			});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsOperatingSystemLockfileRefreshApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+		const resolvedWorkflowRun =
+			await getWorkspaceWorkflowRunByCredential._handler(ctx as never, {
+				runnerCredentialHash: "sha256:runner-credential",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+			});
+		const claimedWorkflowRun =
+			await claimWorkspaceWorkflowRunByCredential._handler(ctx as never, {
+				runnerCredentialHash: "sha256:runner-credential",
+				projectId: project._id,
+				runnerId: runner._id,
+			});
+
+		expect(workflowRun).toMatchObject({
+			status: "approved",
+			workflowId: "docs-operating-system-lockfile-refresh",
+			branchName: "sbs/docs-operating-system-lockfile-refresh-20260506-1430",
+			profileName: "sbs-workspace-write",
+			installProfile: "worker-grade",
+		});
+		expect(resolvedWorkflowRun).toMatchObject({
+			workflowRunId: workflowRun._id,
+			workflowId: "docs-operating-system-lockfile-refresh",
+			branchName: "sbs/docs-operating-system-lockfile-refresh-20260506-1430",
+			profileName: "sbs-workspace-write",
+			installProfile: "worker-grade",
+			localWorkflowPacketRef: `.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+			localProofRef: `.sbs/runs/${workflowRun._id}/proof.json`,
+		});
+		expect(claimedWorkflowRun).toMatchObject({
+			workflowRunId: workflowRun._id,
+			workflowId: "docs-operating-system-lockfile-refresh",
+			installProfile: "worker-grade",
+		});
+	});
+
+	it("rejects docs operating system lockfile refresh approvals without the worker-grade install profile", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		const findingDocumentId =
+			await createDocsOperatingSystemLockfileRefreshFinding({
+				ctx,
+				projectId: project._id,
+				runnerId: runner._id,
+			});
+		const approvalArgs = buildDocsOperatingSystemLockfileRefreshApprovalArgs({
+			projectId: project._id,
+			findingDocumentId,
+			runnerId: runner._id,
+		});
+		delete approvalArgs.installProfile;
+
+		await expect(
+			requestWorkspaceWorkflowRun._handler(ctx as never, approvalArgs),
+		).rejects.toThrow(
+			"Docs operating system lockfile refresh install profile is not approved",
+		);
+	});
+
+	it("accepts docs operating system lockfile refresh proof events with bounded lockfile refs", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId =
+			await createDocsOperatingSystemLockfileRefreshFinding({
+				ctx,
+				projectId: project._id,
+				runnerId: runner._id,
+			});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsOperatingSystemLockfileRefreshApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-docs-operating-system-lockfile-proof",
+			projectId: project._id,
+			runnerId: runner._id,
+			workflowRunId: workflowRun._id,
+			eventType: "workflow.proof.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 209_000,
+			payload: {
+				eventType: "workflow.proof.completed",
+				workflowId: "docs-operating-system-lockfile-refresh",
+				writeLeaseId: workflowRun.writeLeaseId,
+				proofStatus: "passed",
+				proofSummary: "Docs operating system lockfile proof passed.",
+				touchedFileRefs: [
+					"bun.lock",
+					".sbs/docs-operating-system-adoption/lockfile-refresh/lockfile-refresh.json",
+				],
+				createdArtifactRefs:
+					docsOperatingSystemLockfileRefreshRequiredArtifactRefs(
+						workflowRun._id,
+					),
+				proofCommandResults: [
+					{
+						commandName:
+							"package-manager lockfile refresh with lifecycle scripts disabled",
+						status: "passed",
+					},
+					{ commandName: "git status --short", status: "passed" },
+				],
+			},
+		});
+
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "proof_completed",
+			proofStatus: "passed",
+			deliveryStatus: "local_only",
+			touchedFileRefs: [
+				"bun.lock",
+				".sbs/docs-operating-system-adoption/lockfile-refresh/lockfile-refresh.json",
+			],
+		});
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			_id: findingDocumentId,
+			status: "done",
+		});
 	});
 
 	it("accepts docs operating system package-script proof events with bounded package and wrapper refs", async () => {

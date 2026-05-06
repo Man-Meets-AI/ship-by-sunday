@@ -76,6 +76,8 @@ const DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID =
 	"docs-operating-system-adoption";
 const DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID =
 	"docs-operating-system-package-script-patching";
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID =
+	"docs-operating-system-lockfile-refresh";
 const DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE = "worker-grade";
 const OBSERVABILITY_PROFILE_NAME = "sbs-workspace-write";
 const DEFAULT_WORKFLOW_VERSION = "v1";
@@ -377,6 +379,70 @@ const DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_REQUIRED_STATIC_ARTIFACT_REF
 		".sbs/docs-operating-system-adoption/tooling-apply/manifest.json",
 		".sbs/docs-operating-system-adoption/tooling-apply/package-script-patching.json",
 	] as const;
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_EXPECTED_OUTPUTS = [
+	"docs operating system lockfile refresh workflow packet",
+	"package-manager lockfile refresh summary",
+	"local proof or blocked-proof summary",
+	"sync preview metadata",
+] as const;
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS = [
+	".sbs/runs/<workflow-run-id>/**",
+	".sbs/docs-operating-system-adoption/lockfile-refresh/**",
+	"bun.lock",
+	"bun.lockb",
+	"package-lock.json",
+	"npm-shrinkwrap.json",
+	"pnpm-lock.yaml",
+	"yarn.lock",
+] as const;
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS = [
+	"runtime app code",
+	"environment files",
+	"dependency manifests",
+	"database migrations",
+	"provider configuration",
+	"generated folders",
+	"root agent instructions",
+	"CI configuration",
+	"CI-affecting commands",
+	"app-stack command wiring",
+	"Worker-specific operating state",
+	"docs spine Markdown application",
+	"package script changes",
+	"wrapper file changes",
+	"full dependency install state",
+	"branch pushes",
+	"pull requests",
+	"raw logs",
+	"raw source",
+	"package script bodies",
+	"dependency versions from the target repo",
+	"local absolute paths",
+	"Codex transcripts",
+] as const;
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS = [
+	"package-manager lockfile refresh with lifecycle scripts disabled",
+	"git status --short",
+	"git diff --name-only",
+	"git diff --check",
+] as const;
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY =
+	"Only approved structured workflow metadata, proof status, command names, artifact names, touched lockfile refs, and command statuses sync. Package script bodies, target dependency versions, raw package-manager output, raw source, raw logs, local absolute paths, and Codex transcripts stay on the machine.";
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS = [
+	"write lease expires before lockfile refresh starts",
+	"approved packet is missing installProfile: worker-grade",
+	"worktree has dirty lockfiles or unsafe runner artifacts before lockfile refresh starts",
+	"package-script apply summary is missing, invalid, blocked, or stale",
+	"live package.json or wrapper files no longer match the approved package-script patch contract",
+	"requested work needs package manifest mutation, package script mutation, wrapper mutation, full dependency install state, docs application, root instruction rewrites, runtime setup, provider setup, CI, PRs, branch pushes, raw source, raw logs, script bodies, dependency versions from the target repo, or Codex transcripts",
+	"proof command fails",
+] as const;
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES =
+	"Review the local lockfile diff and .sbs lockfile-refresh artifacts. Roll back by reverting the touched lockfile refs and deleting this workflow run's .sbs/runs/<workflow-run-id> directory.";
+const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_REQUIRED_STATIC_ARTIFACT_REFS = [
+	".sbs/docs-operating-system-adoption/lockfile-refresh/manifest.json",
+	".sbs/docs-operating-system-adoption/lockfile-refresh/lockfile-refresh.json",
+] as const;
 
 export const getWorkspaceProjectStateArgs = {
 	projectId: v.optional(v.id("workspaceProjects")),
@@ -1166,6 +1232,94 @@ function assertDocsOperatingSystemPackageScriptPatchingWorkflowApprovalPacket(ar
 	}
 }
 
+function assertDocsOperatingSystemLockfileRefreshWorkflowApprovalPacket(args: {
+	workflowVersion?: string;
+	profileName: string;
+	installProfile?: string;
+	writeLeaseDurationMinutes?: number;
+	dirtyStatePolicy?: "require_clean_worktree" | "checkpoint_required";
+	expectedOutputs: string[];
+	allowedTouchTargets: string[];
+	disallowedTouchTargets: string[];
+	proofCommands: string[];
+	syncPolicySummary: string;
+	stopConditions: string[];
+	rollbackNotes: string;
+}) {
+	if (args.profileName !== OBSERVABILITY_PROFILE_NAME) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh profile name is not approved",
+		);
+	}
+	if (args.installProfile !== DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh install profile is not approved",
+		);
+	}
+	if (
+		args.workflowVersion !== undefined &&
+		args.workflowVersion !== DEFAULT_WORKFLOW_VERSION
+	) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh workflow version is not approved",
+		);
+	}
+	if (
+		args.writeLeaseDurationMinutes !== undefined &&
+		args.writeLeaseDurationMinutes !== DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES
+	) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh write lease duration is not approved",
+		);
+	}
+	if (
+		args.dirtyStatePolicy !== undefined &&
+		args.dirtyStatePolicy !== "require_clean_worktree"
+	) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh requires a clean-worktree policy",
+		);
+	}
+	assertExactTextList(
+		args.expectedOutputs,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_EXPECTED_OUTPUTS,
+		"Docs operating system lockfile refresh expectedOutputs",
+	);
+	assertExactTextList(
+		args.allowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS,
+		"Docs operating system lockfile refresh allowedTouchTargets",
+	);
+	assertExactTextList(
+		args.disallowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS,
+		"Docs operating system lockfile refresh disallowedTouchTargets",
+	);
+	assertExactTextList(
+		args.proofCommands,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS,
+		"Docs operating system lockfile refresh proofCommands",
+	);
+	if (
+		args.syncPolicySummary !==
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY
+	) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh syncPolicySummary does not match the approved workflow packet",
+		);
+	}
+	assertExactTextList(
+		args.stopConditions,
+		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS,
+		"Docs operating system lockfile refresh stopConditions",
+	);
+	if (args.rollbackNotes !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh rollbackNotes does not match the approved workflow packet",
+		);
+	}
+}
+
 function normalizeWriteLeaseDurationMinutes(durationMinutes?: number) {
 	const duration = durationMinutes ?? DEFAULT_WORKFLOW_WRITE_LEASE_MINUTES;
 	if (!Number.isFinite(duration) || duration <= 0 || duration > 60) {
@@ -1553,7 +1707,9 @@ function requireSupportedWorkflowRun(
 		workflowRun.workflowId !== DOCS_SPINE_APPLY_WORKFLOW_ID &&
 		workflowRun.workflowId !== DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID &&
 		workflowRun.workflowId !==
-			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
+			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID &&
+		workflowRun.workflowId !==
+			DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
 	}
@@ -1660,7 +1816,8 @@ function hasBoundedProofRefs(workflowId: string) {
 		workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID ||
 		workflowId === DOCS_SPINE_APPLY_WORKFLOW_ID ||
 		workflowId === DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID ||
-		workflowId === DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
+		workflowId === DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID ||
+		workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID
 	);
 }
 
@@ -1678,6 +1835,11 @@ function getRequiredWorkflowProofArtifactRefs(
 		workflowId === DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
 	) {
 		return getRequiredDocsOperatingSystemPackageScriptPatchingProofArtifactRefs(
+			workflowRunId,
+		);
+	}
+	if (workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID) {
+		return getRequiredDocsOperatingSystemLockfileRefreshProofArtifactRefs(
 			workflowRunId,
 		);
 	}
@@ -1715,6 +1877,17 @@ function getRequiredDocsOperatingSystemPackageScriptPatchingProofArtifactRefs(
 	];
 }
 
+function getRequiredDocsOperatingSystemLockfileRefreshProofArtifactRefs(
+	workflowRunId: string,
+) {
+	return [
+		`.sbs/runs/${workflowRunId}/workflow-packet.json`,
+		`.sbs/runs/${workflowRunId}/proof.json`,
+		`.sbs/runs/${workflowRunId}/sync-preview.json`,
+		...DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_REQUIRED_STATIC_ARTIFACT_REFS,
+	];
+}
+
 function isApprovedWorkflowProofRef(
 	ref: string,
 	workflowId: string,
@@ -1730,6 +1903,12 @@ function isApprovedWorkflowProofRef(
 		workflowId === DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
 	) {
 		return isApprovedDocsOperatingSystemPackageScriptPatchingTouchedRef(
+			ref,
+			workflowRunId,
+		);
+	}
+	if (workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID) {
+		return isApprovedDocsOperatingSystemLockfileRefreshTouchedRef(
 			ref,
 			workflowRunId,
 		);
@@ -1772,6 +1951,25 @@ function isApprovedDocsOperatingSystemPackageScriptPatchingTouchedRef(
 		ref.startsWith(".sbs/docs-operating-system-adoption/tooling-apply/") ||
 		ref === "package.json" ||
 		ref.startsWith("scripts/sbs-docs/")
+	);
+}
+
+function isApprovedDocsOperatingSystemLockfileRefreshTouchedRef(
+	ref: string,
+	workflowRunId: string,
+) {
+	if (!isRepoRelativeRef(ref)) {
+		return false;
+	}
+	return (
+		ref.startsWith(`.sbs/runs/${workflowRunId}/`) ||
+		ref.startsWith(".sbs/docs-operating-system-adoption/lockfile-refresh/") ||
+		ref === "bun.lock" ||
+		ref === "bun.lockb" ||
+		ref === "package-lock.json" ||
+		ref === "npm-shrinkwrap.json" ||
+		ref === "pnpm-lock.yaml" ||
+		ref === "yarn.lock"
 	);
 }
 
@@ -1857,6 +2055,9 @@ function getWorkflowProofLabel(workflowId: string) {
 	) {
 		return "Docs operating system package-script patching";
 	}
+	if (workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID) {
+		return "Docs operating system lockfile refresh";
+	}
 	if (workflowId === DOCS_SPINE_APPLY_WORKFLOW_ID) {
 		return "Docs spine apply";
 	}
@@ -1871,6 +2072,9 @@ function getWorkflowProofArtifactLabel(workflowId: string) {
 		workflowId === DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
 	) {
 		return "docs-operating-system-package-script";
+	}
+	if (workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID) {
+		return "docs-operating-system-lockfile-refresh";
 	}
 	return "docs-spine";
 }
@@ -2799,7 +3003,8 @@ export async function requestWorkspaceWorkflowRunHandler(
 		args.workflowId !== DOCS_SPINE_APPLY_WORKFLOW_ID &&
 		args.workflowId !== DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID &&
 		args.workflowId !==
-			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
+			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID &&
+		args.workflowId !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID
 	) {
 		throw new ConvexError("Workflow is not supported by the local runner");
 	}
@@ -2908,6 +3113,19 @@ export async function requestWorkspaceWorkflowRunHandler(
 		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
 	) {
 		assertDocsOperatingSystemPackageScriptPatchingWorkflowApprovalPacket(args);
+	}
+	if (
+		args.workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID &&
+		!/^sbs\/docs-operating-system-lockfile-refresh-\d{8}-\d{4}$/.test(
+			args.branchName,
+		)
+	) {
+		throw new ConvexError(
+			"Docs operating system lockfile refresh branch name is not approved",
+		);
+	}
+	if (args.workflowId === DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_WORKFLOW_ID) {
+		assertDocsOperatingSystemLockfileRefreshWorkflowApprovalPacket(args);
 	}
 
 	const existingWorkflowRun = await findActiveWorkflowRunByFinding(ctx, {

@@ -28,6 +28,13 @@ import {
 	DOCS_OPERATING_SYSTEM_ADOPTION_ROLLBACK_NOTES,
 	DOCS_OPERATING_SYSTEM_ADOPTION_STOP_CONDITIONS,
 	DOCS_OPERATING_SYSTEM_ADOPTION_SYNC_POLICY_SUMMARY,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_EXPECTED_OUTPUTS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS,
+	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ALLOWED_TOUCH_TARGETS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_DISALLOWED_TOUCH_TARGETS,
 	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_EXPECTED_OUTPUTS,
@@ -252,6 +259,41 @@ function createDocsOperatingSystemPackageScriptPatchingPacket(
 	};
 }
 
+function createDocsOperatingSystemLockfileRefreshPacket(
+	overrides: Record<string, unknown> = {},
+) {
+	return {
+		workflowRunId: "workflowRuns_docs_os_lockfile",
+		workflowId: "docs-operating-system-lockfile-refresh",
+		workflowVersion: "v1",
+		branchName: "sbs/docs-operating-system-lockfile-refresh-20260506-1600",
+		profileName: "sbs-workspace-write",
+		installProfile: DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
+		writeLeaseId: "lease_workflowRuns_docs_os_lockfile",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [
+			...DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_EXPECTED_OUTPUTS,
+		],
+		allowedTouchTargets: [
+			...DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS,
+		],
+		disallowedTouchTargets: [
+			...DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS,
+		],
+		proofCommands: [...DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS],
+		syncPolicySummary:
+			DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY,
+		stopConditions: [...DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS],
+		rollbackNotes: DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES,
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_docs_os_lockfile/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_docs_os_lockfile/proof.json",
+		...overrides,
+	};
+}
+
 describe("workflow run API", () => {
 	it("claims the next approved workflow packet from the worker queue", async () => {
 		const requests: unknown[] = [];
@@ -402,6 +444,20 @@ describe("workflow run API", () => {
 		expect(workflowRun?.installProfile).toBe("worker-grade");
 	});
 
+	it("accepts docs operating system lockfile refresh packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json(createDocsOperatingSystemLockfileRefreshPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe(
+			"docs-operating-system-lockfile-refresh",
+		);
+		expect(workflowRun?.installProfile).toBe("worker-grade");
+	});
+
 	it("rejects mature repo adoption workflow packets that omit disallowed authorities", async () => {
 		await expect(
 			claimApprovedWorkflowRun({
@@ -477,5 +533,20 @@ describe("workflow run API", () => {
 		).rejects.toThrow(
 			"Docs operating system package-script patching install profile",
 		);
+	});
+
+	it("rejects docs operating system lockfile refresh packets without the worker-grade install profile", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createDocsOperatingSystemLockfileRefreshPacket({
+							installProfile: undefined,
+						}),
+					),
+			}),
+		).rejects.toThrow("Docs operating system lockfile refresh install profile");
 	});
 });
