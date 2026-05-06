@@ -1,5 +1,7 @@
 export const DEFAULT_PROOF_COURSE_SLUG = "ship-by-sunday";
 export const DEFAULT_PROOF_COUPON_LIFETIME_SECONDS = 15 * 60;
+export const HOMEPAGE_CHECKOUT_PROOF_PATH = "/?marketing=1";
+export const EXPRESS_CHECKOUT_ROUTE_PATH = "/api/stripe/checkout/express";
 
 function trimTrailingSlash(value) {
 	return value.endsWith("/") ? value.slice(0, -1) : value;
@@ -8,6 +10,15 @@ function trimTrailingSlash(value) {
 export function normalizeAppBaseUrl(baseUrl) {
 	const normalizedUrl = new URL(baseUrl);
 	return trimTrailingSlash(normalizedUrl.toString());
+}
+
+export function isExpressCheckoutRouteUrl(requestUrl, appBaseUrl) {
+	try {
+		const url = new URL(requestUrl, appBaseUrl);
+		return url.pathname === EXPRESS_CHECKOUT_ROUTE_PATH;
+	} catch {
+		return false;
+	}
 }
 
 export function buildHostedProofCouponParams({ runLabel, now = Date.now() }) {

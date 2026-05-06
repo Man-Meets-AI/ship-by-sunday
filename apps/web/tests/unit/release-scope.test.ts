@@ -26,6 +26,32 @@ describe("release scope classifier", () => {
 				"apps/web/platform/billing/checkout/checkout-session.ts",
 			),
 		).toBe(true);
+		expect(isBillingSensitivePath("apps/web/config/product.ts")).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/_components/home-page/sections/home-page-checkout-cta.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/_components/home-page/sections/hero-sections.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/_components/home-page/sections/pricing-footer-sections.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/app/blog/_components/blog-post-promo.tsx",
+			),
+		).toBe(true);
 		expect(
 			isBillingSensitivePath(
 				"apps/web/app/(identity)/_components/checkout-email-handoff/checkout-email-handoff-form.tsx",

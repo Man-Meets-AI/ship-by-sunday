@@ -100,6 +100,45 @@ describe("CheckoutButton interactions", () => {
 		expect(button.getAttribute("aria-busy")).toBe("false");
 	});
 
+	it("recovers when the checkout request cannot reach Stripe", async () => {
+		vi.spyOn(globalThis, "fetch").mockRejectedValue(
+			new Error("Network unavailable."),
+		);
+
+		const user = userEvent.setup();
+		render(<CheckoutButton label="Get instant access" />);
+
+		const button = screen.getByRole("button");
+		await user.click(button);
+
+		expect(await screen.findByText("Network unavailable.")).toBeTruthy();
+		expect(button.getAttribute("disabled")).toBeNull();
+		expect(button.getAttribute("aria-busy")).toBe("false");
+	});
+
+	it("recovers when Stripe checkout returns a malformed success payload", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(JSON.stringify({ sessionId: "cs_missing_url" }), {
+				status: 200,
+				headers: {
+					"content-type": "application/json",
+				},
+			}),
+		);
+
+		const user = userEvent.setup();
+		render(<CheckoutButton label="Get instant access" />);
+
+		const button = screen.getByRole("button");
+		await user.click(button);
+
+		expect(
+			await screen.findByText("Missing checkout redirect URL."),
+		).toBeTruthy();
+		expect(button.getAttribute("disabled")).toBeNull();
+		expect(button.getAttribute("aria-busy")).toBe("false");
+	});
+
 	it("redirects to the Stripe checkout URL on success", async () => {
 		const assignMock = vi.fn();
 		Object.defineProperty(window, "location", {

@@ -60,33 +60,45 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 			setPhase("redirecting");
 		}
 
-		const response = await fetch(apiRouteConfig.stripeCheckout, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				checkoutIntent,
-			}),
-		});
+		try {
+			const response = await fetch(apiRouteConfig.stripeCheckout, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					checkoutIntent,
+				}),
+			});
 
-		if (!response.ok) {
-			const data = (await response
-				.json()
-				.catch(() => ({ error: "Unable to start Stripe checkout." }))) as
-				| { error: string }
-				| { url?: never };
+			if (!response.ok) {
+				const data = (await response
+					.json()
+					.catch(() => ({ error: "Unable to start Stripe checkout." }))) as
+					| { error: string }
+					| { url?: never };
 
-			assert("error" in data, "Missing checkout error message.");
-			setError(data.error);
+				assert("error" in data, "Missing checkout error message.");
+				setError(data.error);
+				setPhase("idle");
+				return;
+			}
+
+			const data = (await response.json()) as {
+				sessionId: string;
+				url: string;
+			};
+
+			assert("url" in data, "Missing checkout redirect URL.");
+			window.location.assign(data.url);
+		} catch (checkoutError) {
+			setError(
+				checkoutError instanceof Error
+					? checkoutError.message
+					: "Unable to start Stripe checkout.",
+			);
 			setPhase("idle");
-			return;
 		}
-
-		const data = (await response.json()) as { sessionId: string; url: string };
-
-		assert("url" in data, "Missing checkout redirect URL.");
-		window.location.assign(data.url);
 	}, [checkoutIntentInput, onBeforeCheckout]);
 
 	return { startCheckout, phase, isLoading, error, clearError };

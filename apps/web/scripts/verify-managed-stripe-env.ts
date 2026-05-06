@@ -74,6 +74,27 @@ async function verifyHostedCheckoutRoute(appBaseUrl: string) {
 	return body as { sessionId: string; url: string };
 }
 
+async function expireHostedCheckoutRouteSession(
+	stripe: Stripe,
+	sessionId: string,
+) {
+	const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+	if (session.status !== "open") {
+		return {
+			expired: false,
+			status: session.status,
+		};
+	}
+
+	const expiredSession = await stripe.checkout.sessions.expire(sessionId);
+
+	return {
+		expired: expiredSession.status === "expired",
+		status: expiredSession.status,
+	};
+}
+
 const { appBaseUrl, expectedMode } = parseArgs(process.argv.slice(2));
 const stripeConfig = getManagedStripeConfigFromEnv(process.env);
 const stripe = new Stripe(getNormalizedStripeSecretKey(stripeConfig), {
@@ -88,6 +109,9 @@ const checkoutRoute =
 	appBaseUrl && appBaseUrl.length > 0
 		? await verifyHostedCheckoutRoute(appBaseUrl)
 		: null;
+const checkoutRouteCleanup = checkoutRoute
+	? await expireHostedCheckoutRouteSession(stripe, checkoutRoute.sessionId)
+	: null;
 
 console.log(
 	JSON.stringify(
@@ -96,6 +120,7 @@ console.log(
 			expectedMode: expectedMode ?? null,
 			appBaseUrl,
 			checkoutRoute,
+			checkoutRouteCleanup,
 		},
 		null,
 		2,
