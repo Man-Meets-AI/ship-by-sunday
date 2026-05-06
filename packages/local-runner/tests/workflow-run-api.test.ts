@@ -10,6 +10,15 @@ import {
 	DOCS_SPINE_ADOPTION_STOP_CONDITIONS,
 	DOCS_SPINE_ADOPTION_SYNC_POLICY_SUMMARY,
 } from "../src/workflows/docs-spine-adoption/manifest";
+import {
+	DOCS_SPINE_APPLY_ALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_APPLY_DISALLOWED_TOUCH_TARGETS,
+	DOCS_SPINE_APPLY_EXPECTED_OUTPUTS,
+	DOCS_SPINE_APPLY_PROOF_COMMANDS,
+	DOCS_SPINE_APPLY_ROLLBACK_NOTES,
+	DOCS_SPINE_APPLY_STOP_CONDITIONS,
+	DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY,
+} from "../src/workflows/docs-spine-apply-and-proof/manifest";
 
 function createState(): LocalProjectState {
 	return {
@@ -130,6 +139,31 @@ function createDocsSpineAdoptionPacket(
 	};
 }
 
+function createDocsSpineApplyPacket(overrides: Record<string, unknown> = {}) {
+	return {
+		workflowRunId: "workflowRuns_docs_spine_apply",
+		workflowId: "docs-spine-apply-and-proof",
+		workflowVersion: "v1",
+		branchName: "sbs/docs-spine-apply-20260505-1300",
+		profileName: "sbs-workspace-write",
+		writeLeaseId: "lease_workflowRuns_docs_spine_apply",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [...DOCS_SPINE_APPLY_EXPECTED_OUTPUTS],
+		allowedTouchTargets: [...DOCS_SPINE_APPLY_ALLOWED_TOUCH_TARGETS],
+		disallowedTouchTargets: [...DOCS_SPINE_APPLY_DISALLOWED_TOUCH_TARGETS],
+		proofCommands: [...DOCS_SPINE_APPLY_PROOF_COMMANDS],
+		syncPolicySummary: DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY,
+		stopConditions: [...DOCS_SPINE_APPLY_STOP_CONDITIONS],
+		rollbackNotes: DOCS_SPINE_APPLY_ROLLBACK_NOTES,
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_docs_spine_apply/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_docs_spine_apply/proof.json",
+		...overrides,
+	};
+}
+
 describe("workflow run API", () => {
 	it("claims the next approved workflow packet from the worker queue", async () => {
 		const requests: unknown[] = [];
@@ -244,6 +278,16 @@ describe("workflow run API", () => {
 		expect(workflowRun?.workflowId).toBe("docs-spine-adoption");
 	});
 
+	it("accepts docs spine apply workflow packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () => Response.json(createDocsSpineApplyPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe("docs-spine-apply-and-proof");
+	});
+
 	it("rejects mature repo adoption workflow packets that omit disallowed authorities", async () => {
 		await expect(
 			claimApprovedWorkflowRun({
@@ -272,5 +316,20 @@ describe("workflow run API", () => {
 					),
 			}),
 		).rejects.toThrow("Docs spine adoption disallowed touch targets");
+	});
+
+	it("rejects docs spine apply workflow packets that omit approved docs roots", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createDocsSpineApplyPacket({
+							allowedTouchTargets: [".sbs/runs/<workflow-run-id>/**"],
+						}),
+					),
+			}),
+		).rejects.toThrow("Docs spine apply allowed touch targets");
 	});
 });

@@ -29,7 +29,16 @@ type RepoInventory = {
 	repoRefs: string[];
 	packageManager: string;
 	packageMetadata: PackageMetadata;
+	instructionClassification: InstructionClassification;
 	createdAt: number;
+};
+
+type InstructionClassification = {
+	canonicalInstructionRefs: string[];
+	shimInstructionRefs: string[];
+	secondaryInstructionRefs: string[];
+	ignoredInstructionRefs: string[];
+	skillRefs: string[];
 };
 
 export async function buildDocsSpineScannerBundle({
@@ -41,11 +50,16 @@ export async function buildDocsSpineScannerBundle({
 }): Promise<DocsSpineScannerBundle> {
 	const repoRefs = await listTrackedRepoRefs(repositoryRoot);
 	const packageMetadata = await readPackageMetadata(repositoryRoot);
+	const instructionClassification = await classifyInstructionRefs({
+		repositoryRoot,
+		repoRefs,
+	});
 	const inventory: RepoInventory = {
 		repositoryRoot,
 		repoRefs,
 		packageManager: detectPackageManager(repositoryRoot),
 		packageMetadata,
+		instructionClassification,
 		createdAt: now,
 	};
 	const repoFacts = buildRepoFacts(inventory);
@@ -70,8 +84,12 @@ export async function buildDocsSpineScannerBundle({
 }
 
 function buildRepoFacts(inventory: RepoInventory): DocsSpineRepoFacts {
-	const agentInstructionRefs = filterRefs(inventory, isAgentInstructionRef);
-	const assistantShimRefs = filterRefs(inventory, isAssistantShimRef);
+	const agentInstructionRefs =
+		inventory.instructionClassification.canonicalInstructionRefs;
+	const assistantShimRefs = [
+		...inventory.instructionClassification.shimInstructionRefs,
+		...filterRefs(inventory, isAssistantShimRef),
+	];
 	const docsRefs = filterRefs(inventory, isDocsRef);
 	const programRefs = filterRefs(inventory, (ref) =>
 		ref.startsWith("docs/programs/"),
@@ -125,6 +143,11 @@ function buildRepoFacts(inventory: RepoInventory): DocsSpineRepoFacts {
 		instructionSurface: {
 			agentInstructionRefs,
 			assistantShimRefs,
+			secondaryInstructionRefs:
+				inventory.instructionClassification.secondaryInstructionRefs,
+			ignoredInstructionRefs:
+				inventory.instructionClassification.ignoredInstructionRefs,
+			skillRefs: inventory.instructionClassification.skillRefs,
 		},
 		docsSurface: {
 			docsRefs,
@@ -165,8 +188,17 @@ function buildSourceTruthMap(
 	return artifact("sourceTruthMap", {
 		schemaVersion: "docs-spine-source-truth-map.v1",
 		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		canonicalInstructionRefs: filterRefs(inventory, isAgentInstructionRef),
-		assistantShimRefs: filterRefs(inventory, isAssistantShimRef),
+		canonicalInstructionRefs:
+			inventory.instructionClassification.canonicalInstructionRefs,
+		assistantShimRefs: [
+			...inventory.instructionClassification.shimInstructionRefs,
+			...filterRefs(inventory, isAssistantShimRef),
+		],
+		secondaryInstructionRefs:
+			inventory.instructionClassification.secondaryInstructionRefs,
+		ignoredInstructionRefs:
+			inventory.instructionClassification.ignoredInstructionRefs,
+		instructionRouting: buildInstructionRouting(inventory),
 		rootReadmeRefs,
 		docsIndexRefs,
 		architectureRefs,
@@ -178,7 +210,10 @@ function buildSourceTruthMap(
 		promptIndexRefs: refsEqual(inventory, ["docs/prompts/README.md"]),
 		generatedIndexRefs: refsEqual(inventory, ["docs/generated/index.md"]),
 		missingRequiredSurfaces: buildMissingSurfaceRows([
-			["agent-instructions", filterRefs(inventory, isAgentInstructionRef)],
+			[
+				"agent-instructions",
+				inventory.instructionClassification.canonicalInstructionRefs,
+			],
 			["docs-index", docsIndexRefs],
 			["architecture", architectureRefs],
 			["reliability", reliabilityRefs],
@@ -207,7 +242,7 @@ function buildCommandProofMap(
 		packageScriptNames: inventory.packageMetadata.scriptNames,
 		scriptRows,
 		nativeGateScriptNames: inventory.packageMetadata.scriptNames.filter(
-			(scriptName) => ["gate", "check", "proof", "ci"].includes(scriptName),
+			(scriptName) => isNativeGateScriptName(scriptName),
 		),
 		validationScriptNames: scriptRows
 			.filter((row) => row.proofKind !== "other")
@@ -301,6 +336,7 @@ function buildArchitectureSignals(
 		appPackageRefs: filterRefs(inventory, (ref) =>
 			/^apps\/[^/]+\/package\.json$/.test(ref),
 		),
+		appRootRefs: findAppRootRefs(inventory.repoRefs),
 		packagePackageRefs: filterRefs(inventory, (ref) =>
 			/^packages\/[^/]+\/package\.json$/.test(ref),
 		),
@@ -367,9 +403,18 @@ function buildInstructionSurfaceMap(
 	return artifact("instructionSurfaceMap", {
 		schemaVersion: "docs-spine-instruction-surface-map.v1",
 		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		agentInstructionRefs: filterRefs(inventory, isAgentInstructionRef),
-		assistantShimRefs: filterRefs(inventory, isAssistantShimRef),
-		skillRefs: filterRefs(inventory, isSkillRef),
+		agentInstructionRefs:
+			inventory.instructionClassification.canonicalInstructionRefs,
+		assistantShimRefs: [
+			...inventory.instructionClassification.shimInstructionRefs,
+			...filterRefs(inventory, isAssistantShimRef),
+		],
+		secondaryInstructionRefs:
+			inventory.instructionClassification.secondaryInstructionRefs,
+		ignoredInstructionRefs:
+			inventory.instructionClassification.ignoredInstructionRefs,
+		skillRefs: inventory.instructionClassification.skillRefs,
+		instructionRouting: buildInstructionRouting(inventory),
 		rootInstructionRefs: filterRefs(inventory, (ref) =>
 			["AGENTS.md", "CLAUDE.md", "GEMINI.md"].includes(path.basename(ref)),
 		),
@@ -446,9 +491,7 @@ function buildValidationSurfaceMap(
 		releaseRefs: filterRefs(inventory, isReleaseRef),
 		packageScriptRows: scriptRows,
 		nativeGateScriptNames: scriptRows
-			.filter((row) =>
-				["gate", "check", "proof", "ci"].includes(row.scriptName),
-			)
+			.filter((row) => isNativeGateScriptName(row.scriptName))
 			.map((row) => row.scriptName),
 		createdAt: inventory.createdAt,
 	});
@@ -537,6 +580,19 @@ function inferProofKind(scriptName: string) {
 	return "other";
 }
 
+function isNativeGateScriptName(scriptName: string) {
+	return [
+		"gate",
+		"check",
+		"test",
+		"lint",
+		"typecheck",
+		"build",
+		"proof",
+		"ci",
+	].includes(scriptName);
+}
+
 function frameworkSignal(
 	frameworkName: string,
 	dependencyNames: string[],
@@ -560,8 +616,59 @@ async function listTrackedRepoRefs(repositoryRoot: string) {
 		.map((ref) => ref.trim())
 		.filter(Boolean)
 		.filter((ref) => !shouldSkipRef(ref))
+		.sort(compareRepoRefPriority)
 		.slice(0, MAX_REPO_REFS)
+		.sort((left, right) => left.localeCompare(right));
+}
+
+async function classifyInstructionRefs({
+	repositoryRoot,
+	repoRefs,
+}: {
+	repositoryRoot: string;
+	repoRefs: string[];
+}): Promise<InstructionClassification> {
+	const explicitInstructionRefs = repoRefs.filter(
+		isExplicitAgentInstructionRef,
+	);
+	const skillRefs = repoRefs.filter(isSkillRef).sort();
+	const hiddenInstructionRefs = repoRefs
+		.filter((ref) => isHiddenInstructionNoiseRef(ref) && !isSkillRef(ref))
 		.sort();
+	const shimInstructionRefs: string[] = [];
+	for (const ref of explicitInstructionRefs) {
+		if (await isInstructionShimFile(repositoryRoot, ref)) {
+			shimInstructionRefs.push(ref);
+		}
+	}
+	const shimSet = new Set(shimInstructionRefs);
+	const canonicalInstructionRefs = explicitInstructionRefs
+		.filter((ref) => !shimSet.has(ref))
+		.sort(compareInstructionRefPriority);
+	const secondaryInstructionRefs = repoRefs
+		.filter((ref) => isAssistantShimRef(ref))
+		.sort();
+
+	return {
+		canonicalInstructionRefs,
+		shimInstructionRefs: shimInstructionRefs.sort(),
+		secondaryInstructionRefs,
+		ignoredInstructionRefs: hiddenInstructionRefs,
+		skillRefs,
+	};
+}
+
+async function isInstructionShimFile(repositoryRoot: string, ref: string) {
+	if (ref !== "AGENTS.md") {
+		return false;
+	}
+	if (!existsSync(path.join(repositoryRoot, ".codex", "AGENTS.md"))) {
+		return false;
+	}
+	const contents = await readFile(path.join(repositoryRoot, ref), "utf8").catch(
+		() => "",
+	);
+	return /shim|canonical instruction|\.codex\/AGENTS\.md/i.test(contents);
 }
 
 async function readPackageMetadata(
@@ -646,6 +753,27 @@ function findWorkspacePackageRefs(repoRefs: string[]) {
 	);
 }
 
+function findAppRootRefs(repoRefs: string[]) {
+	const appRoots = new Set<string>();
+	for (const ref of repoRefs) {
+		const match = /^(apps|packages)\/[^/]+\//.exec(ref);
+		if (match) {
+			appRoots.add(match[0].replace(/\/$/, ""));
+		}
+	}
+	return [...appRoots].sort();
+}
+
+function buildInstructionRouting(inventory: RepoInventory) {
+	return {
+		canonicalRefs: inventory.instructionClassification.canonicalInstructionRefs,
+		shimRefs: inventory.instructionClassification.shimInstructionRefs,
+		secondaryRefs: inventory.instructionClassification.secondaryInstructionRefs,
+		skillRefs: inventory.instructionClassification.skillRefs,
+		ignoredRefsStored: false,
+	};
+}
+
 function shouldSkipRef(ref: string) {
 	return (
 		ref.startsWith("node_modules/") ||
@@ -659,11 +787,15 @@ function shouldSkipRef(ref: string) {
 }
 
 function isAgentInstructionRef(ref: string) {
+	return isExplicitAgentInstructionRef(ref);
+}
+
+function isExplicitAgentInstructionRef(ref: string) {
 	const name = path.basename(ref).toLowerCase();
 	return (
-		name === "agents.md" ||
-		ref.startsWith(".agents/") ||
-		ref.startsWith(".codex/skills/")
+		name === "agents.md" &&
+		!isSkillRef(ref) &&
+		!isHiddenInstructionNoiseRef(ref)
 	);
 }
 
@@ -673,6 +805,9 @@ function isAssistantShimRef(ref: string) {
 }
 
 function isDocsRef(ref: string) {
+	if (isHiddenInstructionNoiseRef(ref)) {
+		return false;
+	}
 	const lower = ref.toLowerCase();
 	return (
 		lower === "readme.md" ||
@@ -686,6 +821,9 @@ function isDocsRef(ref: string) {
 }
 
 function isValidationRef(ref: string) {
+	if (isHiddenInstructionNoiseRef(ref)) {
+		return false;
+	}
 	const lower = ref.toLowerCase();
 	return (
 		lower.includes("test") ||
@@ -720,6 +858,83 @@ function isConfigRef(ref: string) {
 
 function isSkillRef(ref: string) {
 	return ref.includes("/skills/") && path.basename(ref) === "SKILL.md";
+}
+
+function isHiddenInstructionNoiseRef(ref: string) {
+	return (
+		ref.startsWith(".agents/daily-audit/") ||
+		ref.startsWith(".ai/") ||
+		ref.startsWith(".claude/") ||
+		ref.startsWith(".codex/skills/")
+	);
+}
+
+function compareRepoRefPriority(left: string, right: string) {
+	return (
+		getRepoRefPriority(left) - getRepoRefPriority(right) ||
+		left.localeCompare(right)
+	);
+}
+
+function compareInstructionRefPriority(left: string, right: string) {
+	return (
+		getInstructionRefPriority(left) - getInstructionRefPriority(right) ||
+		left.localeCompare(right)
+	);
+}
+
+function getInstructionRefPriority(ref: string) {
+	if (ref === ".codex/AGENTS.md") {
+		return 0;
+	}
+	if (ref === "AGENTS.md") {
+		return 1;
+	}
+	if (ref.endsWith("/AGENTS.md")) {
+		return 2;
+	}
+	return 3;
+}
+
+function getRepoRefPriority(ref: string) {
+	if (/^(AGENTS|README|DESIGN|ARCHITECTURE)\.md$/i.test(ref)) {
+		return 0;
+	}
+	if (ref === ".codex/AGENTS.md") {
+		return 1;
+	}
+	if (ref === "package.json" || isLockfileRef(ref)) {
+		return 2;
+	}
+	if (ref.startsWith(".github/workflows/")) {
+		return 3;
+	}
+	if (ref.startsWith("docs/")) {
+		return 4;
+	}
+	if (/^(apps|packages)\/[^/]+\/package\.json$/.test(ref)) {
+		return 5;
+	}
+	if (/^(apps|packages)\//.test(ref)) {
+		return 6;
+	}
+	if (isSkillRef(ref)) {
+		return 8;
+	}
+	if (ref.startsWith(".")) {
+		return 9;
+	}
+	return 7;
+}
+
+function isLockfileRef(ref: string) {
+	return [
+		"bun.lock",
+		"bun.lockb",
+		"pnpm-lock.yaml",
+		"package-lock.json",
+		"yarn.lock",
+	].includes(ref);
 }
 
 async function runGit(repositoryRoot: string, args: string[]) {

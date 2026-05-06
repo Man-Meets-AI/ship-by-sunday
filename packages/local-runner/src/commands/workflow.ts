@@ -3,6 +3,7 @@ import { readLocalProjectState } from "../core/local-project-state";
 import { resolveRepositoryRoot } from "../core/repository-root";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
 import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
+import { runDocsSpineApplyWorkflow } from "../core/docs-spine-apply-and-proof-workflow";
 import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
 import { runObservabilityDebuggabilityWorkflow } from "../core/observability-debuggability-workflow";
 import { runSourceTruthWorkflow } from "../core/source-truth-workflow";
@@ -19,6 +20,7 @@ type WorkflowCommandOptions = {
 	confirmReadOnlyReproduction?: boolean;
 	confirmAdoptionAudit?: boolean;
 	confirmDocsSpineAdoption?: boolean;
+	confirmDocsSpineApply?: boolean;
 };
 
 export async function runWorkflowCommand(argv: string[]) {
@@ -28,11 +30,12 @@ export async function runWorkflowCommand(argv: string[]) {
 			workflowName !== "observability-debuggability" &&
 			workflowName !== "broken-app-triage" &&
 			workflowName !== "mature-repo-adoption" &&
-			workflowName !== "docs-spine-adoption") ||
+			workflowName !== "docs-spine-adoption" &&
+			workflowName !== "docs-spine-apply-and-proof") ||
 		action !== "run"
 	) {
 		throw new Error(
-			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption|docs-spine-adoption> run --workflow-run-id <id>",
+			"Usage: ship-by-sunday workflow <source-truth-readiness|observability-debuggability|broken-app-triage|mature-repo-adoption|docs-spine-adoption|docs-spine-apply-and-proof> run --workflow-run-id <id>",
 		);
 	}
 
@@ -106,13 +109,21 @@ export async function runWorkflowCommand(argv: string[]) {
 								confirmDocsSpineAdoption:
 									options.confirmDocsSpineAdoption === true,
 							})
-						: await runSourceTruthWorkflow({
-								repositoryRoot,
-								state,
-								credential,
-								approvedWorkflowRun,
-								confirmLocalWrites: options.confirmLocalWrites === true,
-							});
+						: workflowName === "docs-spine-apply-and-proof"
+							? await runDocsSpineApplyWorkflow({
+									repositoryRoot,
+									state,
+									credential,
+									approvedWorkflowRun,
+									confirmDocsSpineApply: options.confirmDocsSpineApply === true,
+								})
+							: await runSourceTruthWorkflow({
+									repositoryRoot,
+									state,
+									credential,
+									approvedWorkflowRun,
+									confirmLocalWrites: options.confirmLocalWrites === true,
+								});
 
 	if (options.json) {
 		console.log(JSON.stringify(result, null, 2));
@@ -135,6 +146,12 @@ export async function runWorkflowCommand(argv: string[]) {
 	} else if (workflowName === "docs-spine-adoption") {
 		console.log(
 			`Docs spine adoption workflow wrote ${result.localRunDirectoryRef}.`,
+		);
+		console.log(`Branch: ${result.branchName}.`);
+		console.log(`Proof status: ${result.proofStatus}.`);
+	} else if (workflowName === "docs-spine-apply-and-proof") {
+		console.log(
+			`Docs spine apply workflow wrote ${result.localRunDirectoryRef}.`,
 		);
 		console.log(`Branch: ${result.branchName}.`);
 		console.log(`Proof status: ${result.proofStatus}.`);
@@ -192,6 +209,8 @@ function parseWorkflowCommandOptions(argv: string[]): WorkflowCommandOptions {
 			options.confirmAdoptionAudit = true;
 		} else if (arg === "--confirm-docs-spine-adoption") {
 			options.confirmDocsSpineAdoption = true;
+		} else if (arg === "--confirm-docs-spine-apply") {
+			options.confirmDocsSpineApply = true;
 		} else {
 			throw new Error(`Unknown workflow option: ${arg}`);
 		}

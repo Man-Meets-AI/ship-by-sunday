@@ -18,6 +18,8 @@ The Program must satisfy [PROGRAMS.md](../PROGRAMS.md), use `status: complete`, 
 
 Completed Program folders:
 
+- `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`: completed docs-spine adoption reset that added deterministic evals, source-truth scanner repair, contract-grade rendering, apply proof hardening, weak-output replacement, and live Arena CRM acceptance with quality score 100.
+- `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/`: historical v1 deterministic local-runner docs-spine adoption Program. Its Arena CRM output is now treated as insufficient and superseded by `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`.
 - `docs/programs/completed/2026-05-02-one-click-paid-access/`: completed one-click paid access Program that made checkout fulfillment immediate by purchase email, added Express Checkout as progressive enhancement over hosted Checkout fallback, and replaced post-payment generic auth recovery with Clerk email OTP for the checkout email.
 - `docs/programs/completed/2026-05-02-customer-agentic-operating-system/`: completed customer agentic operating system Program that shipped generated-repo operating packs, existing-codebase setup and doctor-pass support, local runner workflows, Work-phase workers, broken-app rescue, managed GitHub consent, mature-repo adoption, execution-surface/workflow-packet contracts, and update-channel guardrails.
 - `docs/programs/completed/2026-05-04-codebase-language-migration/`: completed direct Codebase language migration across public language, Program packets, package surfaces, generated output, and validation metadata.

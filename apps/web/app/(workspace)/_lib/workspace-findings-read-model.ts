@@ -148,6 +148,7 @@ export type WorkspaceWorkflowApprovalModel = {
 		| "broken_app_readonly"
 		| "mature_repo_adoption"
 		| "docs_spine_adoption"
+		| "docs_spine_apply"
 		| "generic";
 	workflowCommandName: string;
 	confirmationFlag: string;
@@ -246,6 +247,7 @@ const workflowLabels: Record<string, string> = {
 	"broken-app-triage": "Broken App Triage",
 	"mature-repo-adoption": "Mature Repo Adoption",
 	"docs-spine-adoption": "Docs Spine Adoption",
+	"docs-spine-apply-and-proof": "Docs Spine Apply And Proof",
 	"revenue-path-audit": "Revenue Path Audit",
 	"ux-conversion-snapshot": "UX Conversion Snapshot",
 	"proof-harness": "Proof Harness",
@@ -258,6 +260,7 @@ const supportedLocalRunnerWorkflowIds = [
 	"broken-app-triage",
 	"mature-repo-adoption",
 	"docs-spine-adoption",
+	"docs-spine-apply-and-proof",
 ] as const;
 
 const supportedLocalRunnerWorkflowIdSet = new Set<string>(
@@ -529,6 +532,14 @@ function getExpectedOutputs(workflowId: string) {
 			"sync preview metadata",
 		];
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return [
+			"docs spine apply workflow packet",
+			"approved docs-spine draft application or blocked-proof summary",
+			"local docs proof summary",
+			"sync preview metadata",
+		];
+	}
 
 	return [
 		"scoped workflow packet",
@@ -571,6 +582,19 @@ function getAllowedTouchTargets(workflowId: string) {
 	if (workflowId === "docs-spine-adoption") {
 		return [".sbs/runs/<workflow-run-id>/**", ".sbs/docs-spine-adoption/**"];
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-spine-adoption/**",
+			"docs/index.md",
+			"docs/programs/**",
+			"docs/exec-plans/**",
+			"docs/prompts/**",
+			"docs/QUALITY_SCORE.md",
+			"docs/proof.md",
+			"docs/validation.md",
+		];
+	}
 
 	return [
 		"finding-scoped files after approval",
@@ -592,7 +616,8 @@ function getDisallowedTouchTargets(workflowId: string) {
 	];
 	if (
 		workflowId !== "mature-repo-adoption" &&
-		workflowId !== "docs-spine-adoption"
+		workflowId !== "docs-spine-adoption" &&
+		workflowId !== "docs-spine-apply-and-proof"
 	) {
 		return disallowedTouchTargets;
 	}
@@ -621,10 +646,16 @@ function getDisallowedTouchTargets(workflowId: string) {
 			"Codex transcripts",
 		];
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return localRunnerDisallowedTargets;
+	}
 	return localRunnerDisallowedTargets;
 }
 
 function getWorkflowSyncPolicySummary(workflowId: string) {
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return "Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Applied Markdown content, local code, command output, docs drafts, and Codex session history stay on the machine.";
+	}
 	if (workflowId === "docs-spine-adoption") {
 		return "Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Local code, command output, docs drafts, and Codex session history stay on the machine.";
 	}
@@ -695,6 +726,9 @@ function getWorkflowKind(
 	if (workflowId === "docs-spine-adoption") {
 		return "docs_spine_adoption";
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return "docs_spine_apply";
+	}
 	return "generic";
 }
 
@@ -718,6 +752,9 @@ function getWorkflowConfirmationFlag(workflowId: string) {
 	if (workflowId === "docs-spine-adoption") {
 		return "--confirm-docs-spine-adoption";
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return "--confirm-docs-spine-apply";
+	}
 	return "--confirm-local-writes";
 }
 
@@ -734,12 +771,24 @@ function getWorkflowBranchName(workflowId: string, approvalTimestamp: number) {
 	if (workflowId === "docs-spine-adoption") {
 		return `sbs/docs-spine-adoption-${formatBranchTimestamp(approvalTimestamp)}`;
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return `sbs/docs-spine-apply-${formatBranchTimestamp(approvalTimestamp)}`;
+	}
 	return `sbs/${workflowId}-${formatBranchTimestamp(approvalTimestamp)}`;
 }
 
 function getWorkflowProofCommands(workflowId: string) {
 	if (workflowId === "broken-app-triage") {
 		return ["git status --short", "git diff --name-only"];
+	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return [
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+			"docs spine structural check",
+			"repo-native gate candidate",
+		];
 	}
 
 	return ["git status --short", "git diff --name-only", "git diff --check"];
@@ -779,6 +828,16 @@ function getWorkflowStopConditions(workflowId: string) {
 			"proof command fails",
 		];
 	}
+	if (workflowId === "docs-spine-apply-and-proof") {
+		return [
+			"worktree has unexpected dirty files before docs spine apply starts",
+			"unable to create or check out the approved docs spine apply branch",
+			"write lease expires before docs spine apply starts",
+			"approved drafts are missing, malformed, target an unapproved path, or lack apply-ready Markdown",
+			"requested work needs root agent instructions, runtime code, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		];
+	}
 
 	return [
 		"worktree is dirty before branch creation",
@@ -802,6 +861,9 @@ function getWorkflowRollbackNotes(
 	}
 	if (workflowKind === "docs_spine_adoption") {
 		return "Review the local .sbs docs-spine artifacts. Roll back by deleting the .sbs docs-spine run artifacts for this workflow run.";
+	}
+	if (workflowKind === "docs_spine_apply") {
+		return "Review the local branch diff. Roll back by reverting the applied docs files and deleting the .sbs docs-spine apply run artifacts for this workflow run.";
 	}
 	return "Keep the branch local by default. Roll back with git switch back to the base branch and git branch -D the source-truth branch after reviewing local proof.";
 }

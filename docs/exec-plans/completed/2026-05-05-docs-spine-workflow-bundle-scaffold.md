@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Create the deterministic local-runner workflow bundle scaffold for future docs-spine adoption in mature repositories.
 post_build_recap: Added the docs-spine-adoption runner scaffold, exact approval packet validation, local .sbs artifacts, focused tests, and workflow packet docs.
 program_id: docs-spine-adoption-operating-loop
-planning_brief: docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-1.md
 read_when:
   - Starting implementation of the docs-spine adoption workflow bundle.
   - Updating local-runner workflow bundle conventions.
@@ -27,7 +27,7 @@ After this slice, the repo should have a named `docs-spine-adoption` workflow sc
 
 ## Progress
 
-- [x] 2026-05-05: Created this ExecPlan from `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-1.md`.
+- [x] 2026-05-05: Created this ExecPlan from `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-1.md`.
 - [x] 2026-05-05: Read root `AGENTS.md`, `docs/internal/workflow-packets.md`, the local-runner workflow implementations, workspace approval read models, Convex workflow model, and this ExecPlan before editing.
 - [x] 2026-05-05: Added the `docs-spine-adoption` workflow id to local-runner and app approval surfaces.
 - [x] 2026-05-05: Created the workflow bundle scaffold, manifest, schemas, artifact refs, and blocked/proof output.
@@ -78,7 +78,7 @@ Validation evidence:
     bun run typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md docs/internal/workflow-packets.md docs/programs/README.md docs/programs/active/index.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md docs/internal/workflow-packets.md docs/programs/README.md docs/programs/active/index.md
     git diff --check
     bun lint
 
@@ -172,7 +172,7 @@ Run the narrow checks that match the files touched. The expected initial set is:
     bun run --cwd apps/web test:unit -- tests/unit/workspace-findings-read-model.test.ts tests/unit/workspace-support-read-model.test.ts tests/unit/workspace-runner-events.test.ts
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md docs/internal/workflow-packets.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md docs/internal/workflow-packets.md
     git diff --check
 
 Run broader gates if the implementation touches shared app or runner behavior beyond the focused workflow boundaries:
@@ -193,7 +193,7 @@ If a later Go scanner is introduced, it must preserve the same JSON artifact con
 
 ## Artifacts and Notes
 
-The owning Program is `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/program.md`.
+The owning Program is `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/program.md`.
 
 The first local artifacts should be:
 

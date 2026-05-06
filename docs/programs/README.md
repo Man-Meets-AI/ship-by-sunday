@@ -17,10 +17,12 @@ read_when:
 Active:
 
 - `docs/programs/active/2026-05-05-admin-user-impersonation/`: Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
-- `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/`: deterministic local-runner docs-spine adoption for mature repos; scaffold, scanner facts, and synthesis packets complete, apply-and-proof next.
+- `docs/programs/active/2026-05-05-worker-generate-tutorials-ia/`: Generate Codebase, Tutorials, and Worker IA migration with capability-based access, canonical routes, navigation, copy, and runtime compatibility.
 
 Recently completed:
 
+- `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`: completed docs-spine adoption reset that added deterministic evals, source-truth scanner repair, contract-grade rendering, apply proof hardening, weak-output replacement, and live Arena CRM acceptance with quality score 100.
+- `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/`: historical v1 deterministic local-runner docs-spine adoption Program. Its Arena CRM output is now treated as insufficient and superseded by `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`.
 - `docs/programs/completed/2026-05-02-one-click-paid-access/`: completed one-click paid access Program that grants paid checkout access by purchase email, progressively offers Express Checkout over hosted Checkout fallback, and uses Clerk email OTP to prove the checkout email after guest payment.
 - `docs/programs/completed/2026-05-02-customer-agentic-operating-system/`: completed customer agentic operating system Program that made generated repos, existing-codebase doctor passes, local runner workflows, broken-app rescue, mature-repo adoption, managed GitHub consent, and future update-channel contracts part of one durable operating layer.
 - `docs/programs/completed/2026-05-04-codebase-language-migration/`: completed direct Codebase language migration across public language, Program packets, package surfaces, generated output, and validation metadata.

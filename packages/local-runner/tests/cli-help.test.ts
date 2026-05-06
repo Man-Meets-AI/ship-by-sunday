@@ -9,7 +9,7 @@ describe("cli", () => {
 		expect(logSpy.mock.calls.join("\n")).toContain("setup pair <token>");
 		expect(logSpy.mock.calls.join("\n")).toContain("daemon start");
 		expect(logSpy.mock.calls.join("\n")).toContain(
-			"--work --confirm-local-writes --confirm-observability-audit --confirm-docs-spine-adoption [--confirm-adoption-audit]",
+			"--work --confirm-local-writes --confirm-observability-audit --confirm-adoption-audit --confirm-docs-spine-adoption --confirm-docs-spine-apply",
 		);
 		expect(logSpy.mock.calls.join("\n")).toContain(
 			"workflow observability-debuggability run",
@@ -19,6 +19,9 @@ describe("cli", () => {
 		);
 		expect(logSpy.mock.calls.join("\n")).toContain(
 			"workflow docs-spine-adoption run",
+		);
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"workflow docs-spine-apply-and-proof run",
 		);
 		logSpy.mockRestore();
 	});

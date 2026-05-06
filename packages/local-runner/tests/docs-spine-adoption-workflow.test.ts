@@ -104,6 +104,11 @@ async function createDocsSpineRepository() {
 	await mkdir(path.join(repositoryRoot, ".codex", "skills", "review"), {
 		recursive: true,
 	});
+	await mkdir(path.join(repositoryRoot, ".agents", "daily-audit"), {
+		recursive: true,
+	});
+	await mkdir(path.join(repositoryRoot, ".ai", "notes"), { recursive: true });
+	await mkdir(path.join(repositoryRoot, ".claude"), { recursive: true });
 	await mkdir(path.join(repositoryRoot, ".github", "workflows"), {
 		recursive: true,
 	});
@@ -130,7 +135,10 @@ async function createDocsSpineRepository() {
 		path.join(repositoryRoot, ".codex", "AGENTS.md"),
 		"# Agents\n",
 	);
-	await writeFile(path.join(repositoryRoot, "AGENTS.md"), "# Shim\n");
+	await writeFile(
+		path.join(repositoryRoot, "AGENTS.md"),
+		"# Arena CRM Legacy Root Shim\n\nCanonical instructions live in `.codex/AGENTS.md`.\n",
+	);
 	await writeFile(path.join(repositoryRoot, "docs", "index.md"), "# Docs\n");
 	await writeFile(
 		path.join(repositoryRoot, "docs", "SECURITY.md"),
@@ -159,6 +167,18 @@ async function createDocsSpineRepository() {
 	await writeFile(
 		path.join(repositoryRoot, ".codex", "skills", "review", "SKILL.md"),
 		"# Review skill\n",
+	);
+	await writeFile(
+		path.join(repositoryRoot, ".agents", "daily-audit", "2026-05-05.md"),
+		"# Historical audit log\n",
+	);
+	await writeFile(
+		path.join(repositoryRoot, ".ai", "notes", "handoff.md"),
+		"# AI note\n",
+	);
+	await writeFile(
+		path.join(repositoryRoot, ".claude", "scratch.md"),
+		"# Claude scratch\n",
 	);
 	await writeFile(
 		path.join(repositoryRoot, "apps", "web", "package.json"),
@@ -329,8 +349,17 @@ describe("docs spine adoption workflow", () => {
 		]);
 		expect(repoFacts.instructionSurface.agentInstructionRefs).toEqual([
 			".codex/AGENTS.md",
-			".codex/skills/review/SKILL.md",
+		]);
+		expect(repoFacts.instructionSurface.assistantShimRefs).toEqual([
 			"AGENTS.md",
+		]);
+		expect(repoFacts.instructionSurface.skillRefs).toEqual([
+			".codex/skills/review/SKILL.md",
+		]);
+		expect(repoFacts.instructionSurface.ignoredInstructionRefs).toEqual([
+			".agents/daily-audit/2026-05-05.md",
+			".ai/notes/handoff.md",
+			".claude/scratch.md",
 		]);
 		expect(repoFacts.docsSurface.programRefs).toEqual([
 			"docs/programs/PROGRAMS.md",
@@ -343,6 +372,7 @@ describe("docs spine adoption workflow", () => {
 				".sbs/docs-spine-adoption/facts/command-proof-map.json",
 				".sbs/docs-spine-adoption/facts/quality-score-baseline.json",
 				".sbs/docs-spine-adoption/facts/parity-checklist.json",
+				".sbs/docs-spine-adoption/facts/quality-report.json",
 				".sbs/docs-spine-adoption/drafts/codex-synthesis-packet.json",
 				".sbs/docs-spine-adoption/drafts/quality-score-notes.json",
 			]),
@@ -364,6 +394,7 @@ describe("docs spine adoption workflow", () => {
 			".sbs/docs-spine-adoption/facts/instruction-surface-map.json",
 			".sbs/docs-spine-adoption/facts/parity-checklist.json",
 			".sbs/docs-spine-adoption/facts/performance-timings.json",
+			".sbs/docs-spine-adoption/facts/quality-report.json",
 			".sbs/docs-spine-adoption/facts/quality-score-baseline.json",
 			".sbs/docs-spine-adoption/facts/repo-facts.json",
 			".sbs/docs-spine-adoption/facts/security-signals.json",
@@ -423,6 +454,18 @@ describe("docs spine adoption workflow", () => {
 				"utf8",
 			),
 		);
+		const docsIndexDraft = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"docs-spine-adoption",
+					"drafts",
+					"docs-index-draft.json",
+				),
+				"utf8",
+			),
+		);
 		const qualityScoreNotes = JSON.parse(
 			await readFile(
 				path.join(
@@ -435,10 +478,33 @@ describe("docs spine adoption workflow", () => {
 				"utf8",
 			),
 		);
+		const qualityReport = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"docs-spine-adoption",
+					"facts",
+					"quality-report.json",
+				),
+				"utf8",
+			),
+		);
 		expect(commandProofMap.scriptRows).toEqual([
 			{ scriptName: "lint", proofKind: "static", commandBodyStored: false },
 			{ scriptName: "gate", proofKind: "gate", commandBodyStored: false },
 		]);
+		expect(commandProofMap.nativeGateScriptNames).toEqual(["lint", "gate"]);
+		expect(sourceTruthMap.canonicalInstructionRefs).toEqual([
+			".codex/AGENTS.md",
+		]);
+		expect(sourceTruthMap.assistantShimRefs).toEqual(["AGENTS.md"]);
+		expect(sourceTruthMap.instructionRouting).toMatchObject({
+			canonicalRefs: [".codex/AGENTS.md"],
+			shimRefs: ["AGENTS.md"],
+			skillRefs: [".codex/skills/review/SKILL.md"],
+			ignoredRefsStored: false,
+		});
 		expect(sourceTruthMap.qualityScoreRefs).toEqual(["docs/QUALITY_SCORE.md"]);
 		expect(qualityScoreBaseline).toMatchObject({
 			status: "blocked_missing_evidence",
@@ -459,9 +525,20 @@ describe("docs spine adoption workflow", () => {
 				canOpenPullRequests: false,
 			},
 		});
+		expect(docsIndexDraft.proposedFiles).toEqual([
+			expect.objectContaining({
+				targetRef: "docs/index.md",
+				markdown: expect.stringContaining("## How Codex loads repo guidance"),
+			}),
+		]);
 		expect(qualityScoreNotes).toMatchObject({
 			familyId: "quality-score",
-			blockedReasons: ["quality-score-evidence-blocked"],
+			blockedReasons: [],
+		});
+		expect(qualityReport).toMatchObject({
+			schemaVersion: "docs-spine-quality-report.v1",
+			status: "passed",
+			score: 100,
 		});
 		const localArtifactText = JSON.stringify({
 			repoFacts,
@@ -469,7 +546,9 @@ describe("docs spine adoption workflow", () => {
 			sourceTruthMap,
 			qualityScoreBaseline,
 			codexSynthesisPacket,
+			docsIndexDraft,
 			qualityScoreNotes,
+			qualityReport,
 		}).toLowerCase();
 		expect(localArtifactText).not.toContain("secret_token");
 		expect(localArtifactText).not.toContain("never-sync");
