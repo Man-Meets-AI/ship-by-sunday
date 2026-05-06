@@ -159,8 +159,11 @@ export async function runDocsSpineApplyWorkflow({
 		});
 	}
 
-	const currentBranch = await readCurrentBranch(repositoryRoot);
-	if (currentBranch !== branchName) {
+	const branchResult = await checkoutOrCreateApprovedBranch(
+		repositoryRoot,
+		branchName,
+	);
+	if (!branchResult.succeeded) {
 		return await blockWorkflow({
 			repositoryRoot,
 			state,
@@ -173,7 +176,8 @@ export async function runDocsSpineApplyWorkflow({
 			localRunDirectory,
 			blockedStage: "branch-guard",
 			blockedReason:
-				"Current branch does not match the approved docs spine apply branch.",
+				branchResult.blockedReason ??
+				"Unable to create or check out the approved docs spine apply branch.",
 			fetchRunnerEvent,
 		});
 	}
@@ -1434,13 +1438,44 @@ async function assertNoSymlinkInExistingPath(
 	}
 }
 
-async function readCurrentBranch(repositoryRoot: string) {
+async function checkoutOrCreateApprovedBranch(
+	repositoryRoot: string,
+	branchName: string,
+) {
 	const result = await runGit(repositoryRoot, [
 		"rev-parse",
 		"--abbrev-ref",
 		"HEAD",
 	]);
-	return result.succeeded ? result.stdout.trim() : "";
+	if (!result.succeeded) {
+		return {
+			succeeded: false,
+			blockedReason: "Unable to read current branch.",
+		};
+	}
+	if (result.stdout.trim() === branchName) {
+		return { succeeded: true };
+	}
+	const existingLocalBranch = await runGit(repositoryRoot, [
+		"show-ref",
+		"--verify",
+		`refs/heads/${branchName}`,
+	]);
+	const checkout = await runGit(
+		repositoryRoot,
+		existingLocalBranch.succeeded
+			? ["checkout", branchName]
+			: ["checkout", "-b", branchName],
+	);
+	if (!checkout.succeeded) {
+		return {
+			succeeded: false,
+			blockedReason: existingLocalBranch.succeeded
+				? "Unable to check out the approved docs spine apply branch."
+				: "Unable to create the approved docs spine apply branch.",
+		};
+	}
+	return { succeeded: true };
 }
 
 async function runGit(repositoryRoot: string, args: string[]) {

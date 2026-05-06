@@ -81,7 +81,11 @@ function createApprovedWorkflowRun(
 	};
 }
 
-async function createApplyRepository() {
+async function createApplyRepository({
+	checkoutApprovedBranch = true,
+}: {
+	checkoutApprovedBranch?: boolean;
+} = {}) {
 	const repositoryRoot = await createTemporaryDirectory(
 		"sbs-docs-spine-apply-",
 	);
@@ -92,11 +96,13 @@ async function createApplyRepository() {
 	await execFileAsync("git", ["commit", "-m", "Initial commit"], {
 		cwd: repositoryRoot,
 	});
-	await execFileAsync(
-		"git",
-		["checkout", "-b", "sbs/docs-spine-apply-20260505-1300"],
-		{ cwd: repositoryRoot },
-	);
+	if (checkoutApprovedBranch) {
+		await execFileAsync(
+			"git",
+			["checkout", "-b", "sbs/docs-spine-apply-20260505-1300"],
+			{ cwd: repositoryRoot },
+		);
+	}
 	return repositoryRoot;
 }
 
@@ -630,6 +636,36 @@ describe("docs spine apply and proof workflow", () => {
 				}),
 			}),
 		]);
+	});
+
+	it("creates the approved docs spine apply branch before daemon-style writes", async () => {
+		const repositoryRoot = await createApplyRepository({
+			checkoutApprovedBranch: false,
+		});
+		await writeApplyReadyDraft(repositoryRoot);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		const currentBranch = await execFileAsync(
+			"git",
+			["rev-parse", "--abbrev-ref", "HEAD"],
+			{ cwd: repositoryRoot },
+		);
+		expect(result.status).toBe("proof_completed");
+		expect(currentBranch.stdout.trim()).toBe(
+			"sbs/docs-spine-apply-20260505-1300",
+		);
+		await expect(
+			readFile(path.join(repositoryRoot, "docs", "index.md"), "utf8"),
+		).resolves.toBe(buildPassingDocsIndexMarkdown());
 	});
 
 	it("merges approved docs spine sections into existing docs files", async () => {

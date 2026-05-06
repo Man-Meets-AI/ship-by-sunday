@@ -54,7 +54,7 @@ export const DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY =
 
 export const DOCS_SPINE_APPLY_STOP_CONDITIONS = [
 	"worktree has unexpected dirty files before docs spine apply starts",
-	"current branch does not match the approved docs spine apply branch",
+	"unable to create or check out the approved docs spine apply branch",
 	"write lease expires before docs spine apply starts",
 	"approved drafts are missing, malformed, target an unapproved path, or lack apply-ready Markdown",
 	"requested work needs root agent instructions, runtime code, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
