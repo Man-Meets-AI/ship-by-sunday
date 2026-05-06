@@ -53,11 +53,12 @@ export const DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY =
 	"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Applied Markdown content, local code, command output, docs drafts, and Codex session history stay on the machine.";
 
 export const DOCS_SPINE_APPLY_STOP_CONDITIONS = [
-	"worktree has unexpected dirty files before docs spine apply starts",
+	"approved docs-spine targets or unsafe runner artifact paths are dirty before docs spine apply starts",
 	"unable to create or check out the approved docs spine apply branch",
 	"write lease expires before docs spine apply starts",
 	"approved drafts are missing, malformed, target an unapproved path, or lack apply-ready Markdown",
 	"requested work needs root agent instructions, runtime code, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+	"post-apply re-scan quality report fails after approved docs writes",
 	"proof command fails",
 ] as const;
 

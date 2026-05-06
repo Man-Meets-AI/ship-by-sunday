@@ -494,7 +494,34 @@ function artifact(
 ): DocsSpineScannerArtifact {
 	return {
 		repoRelativePath: DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS[key],
-		value,
+		value: withScannerProvenance(value),
+	};
+}
+
+function withScannerProvenance(value: unknown) {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		return value;
+	}
+	return {
+		...(value as Record<string, unknown>),
+		provenance: {
+			refSource: "git ls-files",
+			refNormalization: "repo-relative-posix",
+			rawSourceStored: false,
+			rawLogsStored: false,
+			packageScriptBodiesStored: false,
+			dependencyVersionsStored: false,
+			localAbsolutePathsStored: false,
+			cacheBoundaries: [
+				"tracked-repo-ref-inventory",
+				"package-manifest-metadata",
+			],
+			parallelReadBoundaries: ["instruction-shim-classification"],
+			performanceBudget: {
+				maxRepoRefs: MAX_REPO_REFS,
+				maxPackageFieldNames: MAX_PACKAGE_FIELD_NAMES,
+			},
+		},
 	};
 }
 
@@ -582,8 +609,8 @@ async function listTrackedRepoRefs(repositoryRoot: string) {
 	}
 	return result.stdout
 		.split(/\r?\n/)
-		.map((ref) => ref.trim())
-		.filter(Boolean)
+		.map(normalizeGitRepoRef)
+		.filter((ref): ref is string => ref !== null)
 		.filter((ref) => !shouldSkipRef(ref))
 		.sort(compareRepoRefPriority)
 		.slice(0, MAX_REPO_REFS)
@@ -604,12 +631,15 @@ async function classifyInstructionRefs({
 	const hiddenInstructionRefs = repoRefs
 		.filter((ref) => isHiddenInstructionNoiseRef(ref) && !isSkillRef(ref))
 		.sort();
-	const shimInstructionRefs: string[] = [];
-	for (const ref of explicitInstructionRefs) {
-		if (await isInstructionShimFile(repositoryRoot, ref)) {
-			shimInstructionRefs.push(ref);
-		}
-	}
+	const shimChecks = await Promise.all(
+		explicitInstructionRefs.map(async (ref) => ({
+			ref,
+			isShim: await isInstructionShimFile(repositoryRoot, ref),
+		})),
+	);
+	const shimInstructionRefs = shimChecks
+		.filter((check) => check.isShim)
+		.map((check) => check.ref);
 	const shimSet = new Set(shimInstructionRefs);
 	const canonicalInstructionRefs = explicitInstructionRefs
 		.filter((ref) => !shimSet.has(ref))
@@ -753,6 +783,22 @@ function shouldSkipRef(ref: string) {
 		ref.startsWith(".sbs/") ||
 		path.basename(ref).startsWith(".env")
 	);
+}
+
+function normalizeGitRepoRef(rawRef: string) {
+	const repoRef = rawRef.trim().replaceAll("\\", "/");
+	if (repoRef === "" || path.isAbsolute(repoRef) || repoRef.includes("\0")) {
+		return null;
+	}
+	const segments = repoRef.split("/");
+	if (
+		segments.some(
+			(segment) => segment === "" || segment === "." || segment === "..",
+		)
+	) {
+		return null;
+	}
+	return repoRef;
 }
 
 function isAgentInstructionRef(ref: string) {

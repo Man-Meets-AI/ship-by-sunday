@@ -9,6 +9,37 @@ import {
 } from "../docs-spine-apply-and-proof/manifest";
 import type { DocsSpineRepoFacts } from "./schemas";
 
+const REQUIRED_PROGRAM_PROMPT_REFS = [
+	"docs/prompts/program-orchestrator.md",
+	"docs/prompts/program-initialize.md",
+	"docs/prompts/program-funnel.md",
+	"docs/prompts/program-research-passes.md",
+	"docs/prompts/program-normalize-pass.md",
+	"docs/prompts/program-converged-decision-packet.md",
+	"docs/prompts/program-dependency-graph.md",
+	"docs/prompts/program-plan-split-recommendation.md",
+	"docs/prompts/program-cross-repo-review.md",
+	"docs/prompts/program-planning-brief.md",
+	"docs/prompts/program-doc-synthesis.md",
+	"docs/prompts/program-loop.md",
+	"docs/prompts/program-docs-sync.md",
+	"docs/prompts/program-planning-refresh.md",
+	"docs/prompts/program-completion-review.md",
+] as const;
+
+const REQUIRED_EXEC_PLAN_PROMPT_REFS = [
+	"docs/prompts/exec-plan-writer.md",
+	"docs/prompts/exec-plan-grill.md",
+	"docs/prompts/exec-plan-execute.md",
+	"docs/prompts/exec-plan-validate.md",
+] as const;
+
+const REQUIRED_PROMPT_REFS = [
+	"docs/prompts/program-create.md",
+	...REQUIRED_PROGRAM_PROMPT_REFS,
+	...REQUIRED_EXEC_PLAN_PROMPT_REFS,
+] as const;
+
 export type DocsSpineQualitySeverity = "error" | "warning";
 
 export type DocsSpineQualityRuleResult = {
@@ -75,6 +106,7 @@ export function buildDocsSpineDraftQualityReport({
 			...evaluateDocsSpineMarkdownFiles({
 				files: proposedFiles,
 				repoFacts,
+				now,
 			}),
 			...evaluateNativeGateDiscovery({
 				repoFacts,
@@ -99,7 +131,7 @@ export function buildDocsSpineApplyQualityReport({
 		now,
 		sourceArtifactRefs: files.map((file) => file.sourceArtifactRef),
 		ruleResults: [
-			...evaluateDocsSpineMarkdownFiles({ files, repoFacts }),
+			...evaluateDocsSpineMarkdownFiles({ files, repoFacts, now }),
 			...evaluateNativeGateDiscovery({ repoFacts, files }),
 		],
 	});
@@ -158,13 +190,19 @@ function evaluateDraftArtifact(
 function evaluateDocsSpineMarkdownFiles({
 	files,
 	repoFacts,
+	now,
 }: {
 	files: DocsSpineMarkdownFile[];
 	repoFacts?: DocsSpineRepoFacts;
+	now?: number;
 }): DocsSpineQualityRuleResult[] {
 	const results: DocsSpineQualityRuleResult[] = [];
+	const createdAtDate =
+		typeof now === "number" ? new Date(now).toISOString().slice(0, 10) : null;
 	for (const file of files) {
-		results.push(...evaluateCommonMarkdownRules(file));
+		if (file.targetRef.endsWith(".md")) {
+			results.push(...evaluateCommonMarkdownRules(file, createdAtDate));
+		}
 		if (file.targetRef === "docs/index.md") {
 			results.push(...evaluateDocsIndex(file, repoFacts));
 		} else if (file.targetRef === "docs/QUALITY_SCORE.md") {
@@ -176,12 +214,30 @@ function evaluateDocsSpineMarkdownFiles({
 			file.targetRef.endsWith("/program.md")
 		) {
 			results.push(...evaluateActiveProgram(file));
+		} else if (
+			/^docs\/programs\/(?:active|completed)\/\d{4}-\d{2}-\d{2}-[^/]+\/planning-brief-\d+\.md$/.test(
+				file.targetRef,
+			)
+		) {
+			results.push(...evaluatePlanningBrief(file));
+		} else if (
+			/^docs\/programs\/(?:active|completed)\/\d{4}-\d{2}-\d{2}-[^/]+\/current-planning-brief\.txt$/.test(
+				file.targetRef,
+			)
+		) {
+			results.push(...evaluateCurrentPlanningBriefPointer(file));
 		} else if (file.targetRef === "docs/exec-plans/PLANS.md") {
 			results.push(...evaluateExecPlanContract(file));
-		} else if (file.targetRef.includes("docs/exec-plans/active/")) {
+		} else if (
+			/^docs\/exec-plans\/active\/\d{4}-\d{2}-\d{2}-[^/]+\.md$/.test(
+				file.targetRef,
+			)
+		) {
 			results.push(...evaluateActiveExecPlan(file));
 		} else if (file.targetRef === "docs/prompts/README.md") {
 			results.push(...evaluatePromptsIndex(file));
+		} else if (file.targetRef === "docs/prompts/program-create.md") {
+			results.push(...evaluateProgramCreatePrompt(file));
 		} else if (
 			file.targetRef === "docs/validation.md" ||
 			file.targetRef === "docs/proof.md"
@@ -189,11 +245,15 @@ function evaluateDocsSpineMarkdownFiles({
 			results.push(...evaluateValidationProof(file));
 		}
 	}
+	results.push(...evaluateProgramAuthoringPromptCoverage(files));
+	results.push(...evaluatePromptAssetCoverage(files));
+	results.push(...evaluateProgramPacketArtifactCoverage(files));
 	return results;
 }
 
 function evaluateCommonMarkdownRules(
 	file: DocsSpineMarkdownFile,
+	createdAtDate: string | null,
 ): DocsSpineQualityRuleResult[] {
 	const results: DocsSpineQualityRuleResult[] = [];
 	if (!/^#\s+\S+/m.test(file.markdown)) {
@@ -226,6 +286,42 @@ function evaluateCommonMarkdownRules(
 					"Generated docs route hidden audit, AI, Claude, or skill folders as primary guidance.",
 				remediation:
 					"Route canonical docs, root instructions, package manifests, CI, and app topology first; keep hidden historical artifacts out of first-hop docs.",
+			}),
+		);
+	}
+	if (SOURCE_TEST_ASSET_ROUTE_PATTERN.test(file.markdown)) {
+		results.push(
+			failedRule({
+				ruleId: "content.source-test-asset-primary-route",
+				path: file.targetRef,
+				message:
+					"Generated docs route source, test, public, static, or asset files as docs-spine guidance.",
+				remediation:
+					"Use docs-spine refs such as docs/index.md, docs/programs/PROGRAMS.md, docs/exec-plans/PLANS.md, docs/QUALITY_SCORE.md, and docs/prompts/README.md as first-hop routes.",
+			}),
+		);
+	}
+	if (LOCAL_ABSOLUTE_PATH_PATTERN.test(file.markdown)) {
+		results.push(
+			failedRule({
+				ruleId: "content.no-local-absolute-paths",
+				path: file.targetRef,
+				message:
+					"Generated docs include local absolute paths that are not portable or sync-safe.",
+				remediation:
+					"Use repo-relative paths only and keep machine-local paths out of generated customer docs.",
+			}),
+		);
+	}
+	if (findStaleDocsSpineAdoptionRoute(file.markdown, createdAtDate)) {
+		results.push(
+			failedRule({
+				ruleId: "content.no-stale-docs-spine-routes",
+				path: file.targetRef,
+				message:
+					"Generated docs route a prior dated docs-spine adoption packet as current guidance.",
+				remediation:
+					"Render current docs-spine target refs from the active workflow date and keep prior adoption packets out of first-hop guidance.",
 			}),
 		);
 	}
@@ -287,16 +383,18 @@ function evaluateDocsIndex(
 	);
 	if (
 		repoFacts?.instructionSurface.assistantShimRefs.length &&
-		!file.markdown.includes(".codex/AGENTS.md")
+		!repoFacts.instructionSurface.agentInstructionRefs.some((ref) =>
+			file.markdown.includes(ref),
+		)
 	) {
 		results.push(
 			failedRule({
 				ruleId: "docs-index.instruction-shim-routing",
 				path: file.targetRef,
 				message:
-					"docs/index.md does not route the detected assistant instruction shim to the canonical instruction file.",
+					"docs/index.md does not route the detected assistant instruction shim to a canonical instruction file.",
 				remediation:
-					"Name the root shim and canonical instruction file explicitly, such as `.codex/AGENTS.md` for Arena-style repos.",
+					"Name the root or assistant shim and at least one canonical instruction file explicitly, such as `.codex/AGENTS.md` for Arena-style repos or `AGENTS.md` for root-owned repos.",
 			}),
 		);
 	}
@@ -508,6 +606,259 @@ function evaluatePromptsIndex(file: DocsSpineMarkdownFile) {
 			remediation:
 				"List the durable prompt families and explain when agents should use them.",
 		}),
+		testPattern({
+			ruleId: "prompts-index.program-create",
+			path: file.targetRef,
+			markdown: file.markdown,
+			pattern: /docs\/prompts\/program-create\.md/,
+			message: "Prompt README does not link the Program creation prompt.",
+			remediation:
+				"List `docs/prompts/program-create.md` as the prompt agents use to create Program packets.",
+		}),
+	];
+}
+
+function evaluateProgramCreatePrompt(file: DocsSpineMarkdownFile) {
+	return [
+		...evaluateRequiredSections(file, "program-create-prompt.sections", [
+			"Load Order",
+			"Inputs",
+			"Creation Steps",
+			"Required Packet Outputs",
+			"Quality Gate",
+			"Output",
+		]),
+		testPattern({
+			ruleId: "program-create-prompt.lint-fallback",
+			path: file.targetRef,
+			markdown: file.markdown,
+			pattern:
+				/(programs:lint|markdown:lint|docs:validate)[\s\S]*(blocked proof|missing-script blocker|no Program or Markdown lint script)/i,
+			message:
+				"Program creation prompt does not define lint commands and missing-script fallback.",
+			remediation:
+				"Name repo-native Program/Markdown lint commands and require blocked proof when they are absent.",
+		}),
+		testPattern({
+			ruleId: "program-create-prompt.agent-load-order",
+			path: file.targetRef,
+			markdown: file.markdown,
+			pattern:
+				/(instruction file|AGENTS\.md|canonical instruction refs)[\s\S]*docs\/index\.md[\s\S]*docs\/programs\/PROGRAMS\.md/i,
+			message:
+				"Program creation prompt does not route agents through instructions, docs index, and Program contract.",
+			remediation:
+				"Tell agents to load the nearest instructions, docs/index.md, and docs/programs/PROGRAMS.md before writing Program packets.",
+		}),
+	];
+}
+
+function evaluatePlanningBrief(file: DocsSpineMarkdownFile) {
+	const requiredKeys = [
+		"title",
+		"program_id",
+		"brief_version",
+		"status",
+		"summary",
+		"read_when",
+	];
+	const missingKeys = requiredKeys.filter(
+		(key) => !hasFrontmatterKey(file.markdown, key),
+	);
+	const title = readFrontmatterValue(file.markdown, "title");
+	const h1 = file.markdown.match(/^#\s+(.+?)\s*$/m)?.[1] ?? null;
+	const status = readFrontmatterValue(file.markdown, "status");
+	const results: DocsSpineQualityRuleResult[] = [];
+	if (
+		missingKeys.length === 0 &&
+		title &&
+		h1 === title &&
+		(status === "current" || status === "superseded") &&
+		!/^created_at:/m.test(extractFrontmatterText(file.markdown))
+	) {
+		results.push(
+			passedRule({
+				ruleId: "program.planning-brief-frontmatter",
+				path: file.targetRef,
+				message:
+					"Planning brief frontmatter matches the Program packet contract.",
+				remediation: "No action required.",
+			}),
+		);
+	} else {
+		results.push(
+			failedRule({
+				ruleId: "program.planning-brief-frontmatter",
+				path: file.targetRef,
+				message:
+					"Planning brief frontmatter must include title, program_id, brief_version, status, summary, and read_when; H1 must match title; status must be current or superseded; no extra created_at key is allowed.",
+				remediation:
+					"Use the Worker-compatible planning brief frontmatter contract and make the H1 match `title` exactly.",
+			}),
+		);
+	}
+	return results;
+}
+
+function evaluateCurrentPlanningBriefPointer(file: DocsSpineMarkdownFile) {
+	const pointerLines = file.markdown
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.filter((line) => line !== "");
+	const pointerTarget = pointerLines[0] ?? "";
+	if (
+		pointerLines.length === 1 &&
+		/^planning-brief-\d+\.md$/.test(pointerTarget)
+	) {
+		return [
+			passedRule({
+				ruleId: "program.current-planning-brief-pointer",
+				path: file.targetRef,
+				message:
+					"Current planning brief pointer contains exactly one versioned brief filename.",
+				remediation: "No action required.",
+			}),
+		];
+	}
+	return [
+		failedRule({
+			ruleId: "program.current-planning-brief-pointer",
+			path: file.targetRef,
+			message:
+				"`current-planning-brief.txt` must contain exactly one `planning-brief-<N>.md` filename and no path.",
+			remediation:
+				"Write only the current versioned planning brief filename, for example `planning-brief-1.md`.",
+		}),
+	];
+}
+
+function evaluateProgramPacketArtifactCoverage(files: DocsSpineMarkdownFile[]) {
+	const activeProgramFiles = files.filter((file) =>
+		/^docs\/programs\/active\/\d{4}-\d{2}-\d{2}-[^/]+\/program\.md$/.test(
+			file.targetRef,
+		),
+	);
+	const results: DocsSpineQualityRuleResult[] = [];
+	const targetRefs = new Set(files.map((file) => file.targetRef));
+	for (const programFile of activeProgramFiles) {
+		const programRoot = programFile.targetRef.replace(/\/program\.md$/, "");
+		const requiredExactRefs = [
+			`${programRoot}/converged-decision-packet.md`,
+			`${programRoot}/dependency-graph.md`,
+			`${programRoot}/plan-split-recommendation.md`,
+			`${programRoot}/cross-repo-review.md`,
+			`${programRoot}/planning-brief-1.md`,
+			`${programRoot}/current-planning-brief.txt`,
+		];
+		const missingExactRefs = requiredExactRefs.filter(
+			(ref) => !targetRefs.has(ref),
+		);
+		const hasResearchPass = files.some((file) =>
+			new RegExp(
+				`^${escapeRegExp(programRoot)}/(?:track-\\d+-.+|research-pass-.+)\\.md$`,
+			).test(file.targetRef),
+		);
+		const hasNormalizedPass = files.some((file) =>
+			new RegExp(
+				`^${escapeRegExp(programRoot)}/(?:normalized-track-\\d+|normalized-pass-.+)\\.md$`,
+			).test(file.targetRef),
+		);
+		const missingArtifactDescriptions = [
+			...missingExactRefs,
+			...(hasResearchPass ? [] : [`${programRoot}/track-<N>-<slug>.md`]),
+			...(hasNormalizedPass ? [] : [`${programRoot}/normalized-track-<N>.md`]),
+		];
+		if (missingArtifactDescriptions.length === 0) {
+			results.push(
+				passedRule({
+					ruleId: "program.packet-artifacts",
+					path: programRoot,
+					message: "Program packet includes required durable artifacts.",
+					remediation: "No action required.",
+				}),
+			);
+			continue;
+		}
+		results.push(
+			failedRule({
+				ruleId: "program.packet-artifacts",
+				path: programRoot,
+				message:
+					"Program packet is missing required durable artifacts: " +
+					missingArtifactDescriptions.join(", "),
+				remediation:
+					"Generate the full Program packet: program.md, research pass, normalized pass, decision packet, dependency graph, plan split, cross-repo review, planning brief, and current planning-brief pointer.",
+			}),
+		);
+	}
+	return results;
+}
+
+function evaluateProgramAuthoringPromptCoverage(
+	files: DocsSpineMarkdownFile[],
+) {
+	const hasProgramContract = files.some(
+		(file) => file.targetRef === "docs/programs/PROGRAMS.md",
+	);
+	if (!hasProgramContract) {
+		return [];
+	}
+	const hasProgramCreatePrompt = files.some(
+		(file) => file.targetRef === "docs/prompts/program-create.md",
+	);
+	if (hasProgramCreatePrompt) {
+		return [
+			passedRule({
+				ruleId: "program.authoring-prompt",
+				path: "docs-spine-output",
+				message: "Generated docs include a Program creation prompt.",
+				remediation: "No action required.",
+			}),
+		];
+	}
+	return [
+		failedRule({
+			ruleId: "program.authoring-prompt",
+			path: "docs-spine-output",
+			message:
+				"Generated docs include a Program contract but no Program creation prompt.",
+			remediation:
+				"Generate `docs/prompts/program-create.md` so future agents can create Program packets from the contract.",
+		}),
+	];
+}
+
+function evaluatePromptAssetCoverage(files: DocsSpineMarkdownFile[]) {
+	const targetRefs = new Set(files.map((file) => file.targetRef));
+	const hasPromptIndex = targetRefs.has("docs/prompts/README.md");
+	const hasProgramContract = targetRefs.has("docs/programs/PROGRAMS.md");
+	if (!hasPromptIndex && !hasProgramContract) {
+		return [];
+	}
+	const missingPromptRefs = REQUIRED_PROMPT_REFS.filter(
+		(ref) => !targetRefs.has(ref),
+	);
+	if (missingPromptRefs.length === 0) {
+		return [
+			passedRule({
+				ruleId: "prompts.required-family",
+				path: "docs/prompts",
+				message:
+					"Generated docs include the required Program and ExecPlan prompt family.",
+				remediation: "No action required.",
+			}),
+		];
+	}
+	return [
+		failedRule({
+			ruleId: "prompts.required-family",
+			path: "docs/prompts",
+			message:
+				"Generated prompt assets are missing required Program or ExecPlan prompts: " +
+				missingPromptRefs.join(", "),
+			remediation:
+				"Generate the Program Funnel prompts, Program refresh/completion prompts, and ExecPlan writer/grill/execute/validate prompts.",
+		}),
 	];
 }
 
@@ -657,6 +1008,16 @@ function readFrontmatterValue(markdown: string, key: string) {
 		new RegExp(`^${escapeRegExp(key)}:\\s*(.+?)\\s*$`, "m"),
 	);
 	return match ? match[1].replace(/^["']|["']$/g, "") : null;
+}
+
+function extractFrontmatterText(markdown: string) {
+	return markdown.match(/^---\n([\s\S]*?)\n---\n/)?.[1] ?? "";
+}
+
+function hasFrontmatterKey(markdown: string, key: string) {
+	return new RegExp(`^${escapeRegExp(key)}:`, "m").test(
+		extractFrontmatterText(markdown),
+	);
 }
 
 function readSectionBody(markdown: string, section: string) {
@@ -871,4 +1232,28 @@ function toRecord(value: unknown) {
 
 function escapeRegExp(value: string) {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const SOURCE_TEST_ASSET_ROUTE_PATTERN =
+	/(?:^|[\s`("'[])(?:(?:apps|packages)\/[^`\s"'()]+\/(?:src|test|tests|__tests__|assets|public|static)\/[^`\s"')]+|(?:src|test|tests|__tests__|assets|public|static)\/[^`\s"')]+)/m;
+const LOCAL_ABSOLUTE_PATH_PATTERN =
+	/(?:^|[\s`("'[])(?:\/Users\/|\/home\/|\/private\/var\/|[A-Za-z]:\\)/m;
+const PRIOR_DOCS_SPINE_ADOPTION_ROUTE_PATTERN =
+	/docs\/(?:programs|exec-plans)\/active\/(\d{4}-\d{2}-\d{2})-docs-spine-adoption(?:\/|-[^`\s)]+)/g;
+
+function findStaleDocsSpineAdoptionRoute(
+	markdown: string,
+	createdAtDate: string | null,
+) {
+	if (!createdAtDate) {
+		return false;
+	}
+	for (const match of markdown.matchAll(
+		PRIOR_DOCS_SPINE_ADOPTION_ROUTE_PATTERN,
+	)) {
+		if (match[1] !== createdAtDate) {
+			return true;
+		}
+	}
+	return false;
 }

@@ -29,5 +29,6 @@ Active Program folders:
 
 - `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
 - `docs/programs/active/2026-05-05-worker-generate-tutorials-ia/` - Generate Codebase, Tutorials, and Worker IA migration with capability-based access, canonical routes, navigation, copy, and runtime compatibility.
+- `docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/` - Local-runner expansion from docs-only spine application into Worker-grade scripts, validators, runtime bootstrap, optional operating surfaces, conflict handling, and proof.
 
 Completed Program packets live under `docs/programs/completed/`.

@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -318,6 +318,37 @@ describe("docs spine apply and proof workflow", () => {
 		expect(report.status).toBe("passed");
 	});
 
+	it("fails Program contract output that omits the Program creation prompt", () => {
+		const report = buildDocsSpineApplyQualityReport({
+			now: 1_000,
+			files: [
+				{
+					targetRef: "docs/programs/PROGRAMS.md",
+					sourceArtifactRef:
+						".sbs/docs-spine-adoption/drafts/program-packet-draft.json",
+					markdown: [
+						"---",
+						"title: Programs",
+						"---",
+						"",
+						"# Programs",
+						"",
+					].join("\n"),
+				},
+			],
+		});
+
+		expect(report.status).toBe("failed");
+		expect(report.ruleResults).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					ruleId: "program.authoring-prompt",
+					status: "failed",
+				}),
+			]),
+		);
+	});
+
 	it("fails superficial quality-score docs that only name one scorecard token", () => {
 		const report = buildDocsSpineApplyQualityReport({
 			now: 1_000,
@@ -575,8 +606,22 @@ describe("docs spine apply and proof workflow", () => {
 						"docs/programs/active/2026-05-05-docs-spine-adoption-quality-reset/planning-brief-2.md",
 					sourceArtifactRef:
 						".sbs/docs-spine-adoption/drafts/program-packet-draft.json",
-					markdown:
-						"# Docs Spine Quality Reset Planning Brief 2\n\nNext slice.\n",
+					markdown: [
+						"---",
+						"title: 'Planning Brief 2: Docs Spine Quality Reset'",
+						"program_id: docs-spine-adoption-quality-reset",
+						"brief_version: 2",
+						"status: current",
+						"summary: Next slice for the docs spine quality reset Program.",
+						"read_when:",
+						"  - Writing the next child ExecPlan.",
+						"---",
+						"",
+						"# Planning Brief 2: Docs Spine Quality Reset",
+						"",
+						"Next slice.",
+						"",
+					].join("\n"),
 				},
 			],
 		});
@@ -608,6 +653,42 @@ describe("docs spine apply and proof workflow", () => {
 				ruleId: "content.hidden-noise-primary-route",
 				status: "failed",
 			}),
+		);
+	});
+
+	it("flags source, test, asset, and local absolute paths in generated docs", () => {
+		const report = buildDocsSpineApplyQualityReport({
+			now: 1_000,
+			files: [
+				{
+					targetRef: "docs/index.md",
+					sourceArtifactRef:
+						".sbs/docs-spine-adoption/drafts/docs-index-draft.json",
+					markdown: [
+						buildPassingDocsIndexMarkdown(),
+						"- Existing docs refs: `apps/api/src/rest/router.ts`, `packages/core/__tests__/gate.test.ts`, `assets/logo.png`",
+						"- Local source: `/Users/customer/private/repo/docs/index.md`",
+						"- Old packet: `docs/programs/active/2026-05-05-docs-spine-adoption/program.md`",
+					].join("\n"),
+				},
+			],
+		});
+
+		expect(report.ruleResults).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					ruleId: "content.source-test-asset-primary-route",
+					status: "failed",
+				}),
+				expect.objectContaining({
+					ruleId: "content.no-local-absolute-paths",
+					status: "failed",
+				}),
+				expect.objectContaining({
+					ruleId: "content.no-stale-docs-spine-routes",
+					status: "failed",
+				}),
+			]),
 		);
 	});
 
@@ -700,6 +781,96 @@ describe("docs spine apply and proof workflow", () => {
 		]);
 	});
 
+	it("blocks after approved writes when post-apply re-scan finds a quality regression", async () => {
+		const repositoryRoot = await createApplyRepository();
+		await mkdir(path.join(repositoryRoot, ".codex"), { recursive: true });
+		await writeFile(
+			path.join(repositoryRoot, "AGENTS.md"),
+			"# Agent Shim\n\nCanonical instruction lives in `.codex/AGENTS.md`.\n",
+		);
+		await writeFile(
+			path.join(repositoryRoot, ".codex", "AGENTS.md"),
+			"# Canonical Instructions\n",
+		);
+		await execFileAsync("git", ["add", "AGENTS.md", ".codex/AGENTS.md"], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "Add agent instructions"], {
+			cwd: repositoryRoot,
+		});
+		await writeApplyReadyDraft(repositoryRoot);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		const applySummary = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"docs-spine-adoption",
+					"apply",
+					"apply-summary.json",
+				),
+				"utf8",
+			),
+		);
+		const qualityReport = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"docs-spine-adoption",
+					"apply",
+					"quality-report.json",
+				),
+				"utf8",
+			),
+		);
+		const proof = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"runs",
+					"workflowRuns_docs_spine_apply",
+					"proof.json",
+				),
+				"utf8",
+			),
+		);
+
+		expect(result.status).toBe("blocked");
+		expect(result.proofStatus).toBe("blocked");
+		expect(result.touchedFiles).toEqual(["docs/index.md"]);
+		expect(applySummary.status).toBe("blocked");
+		expect(applySummary.appliedFileRefs).toEqual(["docs/index.md"]);
+		expect(qualityReport.status).toBe("failed");
+		expect(qualityReport.ruleResults).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					ruleId: "docs-index.instruction-shim-routing",
+					status: "failed",
+				}),
+			]),
+		);
+		expect(proof.blockedProof).toContainEqual(
+			expect.objectContaining({
+				stage: "post-apply-quality",
+			}),
+		);
+		await expect(
+			readFile(path.join(repositoryRoot, "docs", "index.md"), "utf8"),
+		).resolves.toBe(buildPassingDocsIndexMarkdown());
+	});
+
 	it("creates the approved docs spine apply branch before daemon-style writes", async () => {
 		const repositoryRoot = await createApplyRepository({
 			checkoutApprovedBranch: false,
@@ -728,6 +899,36 @@ describe("docs spine apply and proof workflow", () => {
 		await expect(
 			readFile(path.join(repositoryRoot, "docs", "index.md"), "utf8"),
 		).resolves.toBe(buildPassingDocsIndexMarkdown());
+	});
+
+	it("can apply on the existing static docs-spine apply branch", async () => {
+		const repositoryRoot = await createApplyRepository({
+			checkoutApprovedBranch: false,
+		});
+		await execFileAsync("git", ["checkout", "-b", "sbs/docs-spine-apply"], {
+			cwd: repositoryRoot,
+		});
+		await writeApplyReadyDraft(repositoryRoot);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun({
+				branchName: "sbs/docs-spine-apply",
+			}),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		const currentBranch = await execFileAsync(
+			"git",
+			["branch", "--show-current"],
+			{ cwd: repositoryRoot },
+		);
+		expect(result.status).toBe("proof_completed");
+		expect(currentBranch.stdout.trim()).toBe("sbs/docs-spine-apply");
 	});
 
 	it("merges approved docs spine sections into existing docs files", async () => {
@@ -865,6 +1066,52 @@ describe("docs spine apply and proof workflow", () => {
 		expect(qualityReport.status).toBe("passed");
 		expect(docsIndex).toBe(buildPassingDocsIndexMarkdown());
 		expect(docsIndex).not.toContain(".agents/daily-audit");
+		expect(docsIndex).not.toContain("sbs-docs-spine:start");
+	});
+
+	it("replaces prior docs-spine output that routed source refs as docs", async () => {
+		const repositoryRoot = await createApplyRepository();
+		await writeFile(
+			path.join(repositoryRoot, "docs", "index.md"),
+			[
+				"---",
+				"title: Docs Index",
+				"---",
+				"",
+				"# Docs Index",
+				"",
+				"## Existing Docs",
+				"",
+				"- Existing docs refs: `apps/api/src/rest/router.ts`, `packages/core/__tests__/gate.test.ts`",
+				"",
+			].join("\n"),
+		);
+		await execFileAsync("git", ["add", "docs/index.md"], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "Add weak docs index"], {
+			cwd: repositoryRoot,
+		});
+		await writeApplyReadyDraft(repositoryRoot);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		const docsIndex = await readFile(
+			path.join(repositoryRoot, "docs", "index.md"),
+			"utf8",
+		);
+		expect(result.status).toBe("proof_completed");
+		expect(result.proofStatus).toBe("passed");
+		expect(docsIndex).toBe(buildPassingDocsIndexMarkdown());
+		expect(docsIndex).not.toContain("apps/api/src");
 		expect(docsIndex).not.toContain("sbs-docs-spine:start");
 	});
 
@@ -1282,11 +1529,231 @@ describe("docs spine apply and proof workflow", () => {
 
 		expect(result.status).toBe("blocked");
 		expect(result.blockedReason).toBe(
-			"Worktree has unexpected dirty files before docs spine apply starts.",
+			"Worktree has dirty docs-spine targets or unsafe runner artifacts before apply starts.",
 		);
 		await expect(
 			readFile(path.join(repositoryRoot, "docs", "index.md"), "utf8"),
 		).rejects.toThrow();
+	});
+
+	it("allows unrelated pre-existing dirty files outside docs-spine targets", async () => {
+		const repositoryRoot = await createApplyRepository();
+		const archivedSkillRef = ".codex/skill-archive/power-dialer/SKILL.md";
+		await mkdir(path.dirname(path.join(repositoryRoot, archivedSkillRef)), {
+			recursive: true,
+		});
+		await writeFile(
+			path.join(repositoryRoot, archivedSkillRef),
+			"# Power Dialer Skill\n",
+		);
+		await execFileAsync("git", ["add", archivedSkillRef], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "Add archived skill"], {
+			cwd: repositoryRoot,
+		});
+		await rm(path.join(repositoryRoot, archivedSkillRef));
+		await writeApplyReadyDraft(repositoryRoot);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		const proof = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"runs",
+					"workflowRuns_docs_spine_apply",
+					"proof.json",
+				),
+				"utf8",
+			),
+		);
+		const status = await execFileAsync("git", ["status", "--short"], {
+			cwd: repositoryRoot,
+		});
+
+		expect(result.status).toBe("proof_completed");
+		expect(result.proofStatus).toBe("passed");
+		expect(result.touchedFiles).not.toContain(archivedSkillRef);
+		expect(proof.preexistingDirtyFileRefs).toEqual([archivedSkillRef]);
+		expect(status.stdout).toContain(` D ${archivedSkillRef}`);
+		await expect(
+			readFile(path.join(repositoryRoot, "docs", "index.md"), "utf8"),
+		).resolves.toBe(buildPassingDocsIndexMarkdown());
+	});
+
+	it("blocks pre-existing dirty docs-spine target files", async () => {
+		const repositoryRoot = await createApplyRepository();
+		await mkdir(path.join(repositoryRoot, "docs"), { recursive: true });
+		await writeFile(
+			path.join(repositoryRoot, "docs", "index.md"),
+			"# Owner Draft\n\nDo not overwrite yet.\n",
+		);
+		await execFileAsync("git", ["add", "docs/index.md"], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "Add owner docs index"], {
+			cwd: repositoryRoot,
+		});
+		await writeFile(
+			path.join(repositoryRoot, "docs", "index.md"),
+			"# Owner Draft\n\nUncommitted owner edit.\n",
+		);
+		await writeApplyReadyDraft(repositoryRoot);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		expect(result.status).toBe("blocked");
+		expect(result.blockedReason).toBe(
+			"Worktree has dirty docs-spine targets or unsafe runner artifacts before apply starts.",
+		);
+		await expect(
+			readFile(path.join(repositoryRoot, "docs", "index.md"), "utf8"),
+		).resolves.toBe("# Owner Draft\n\nUncommitted owner edit.\n");
+	});
+
+	it("replaces generated dated docs-spine adoption packet files on rerun", async () => {
+		const repositoryRoot = await createApplyRepository();
+		const planningBriefRef =
+			"docs/programs/active/2026-05-06-docs-spine-adoption/planning-brief-1.md";
+		await mkdir(path.dirname(path.join(repositoryRoot, planningBriefRef)), {
+			recursive: true,
+		});
+		await writeFile(
+			path.join(repositoryRoot, planningBriefRef),
+			[
+				"---",
+				"title: 'Planning Brief 1: Docs Spine Adoption'",
+				"program_id: docs-spine-adoption",
+				"brief_version: 1",
+				"status: current",
+				"summary: First planning brief for reviewing the installed docs spine.",
+				"read_when:",
+				"  - Writing the first child ExecPlan.",
+				"---",
+				"",
+				"# Planning Brief 1: Docs Spine Adoption",
+				"",
+				"Install the first docs-spine slice for this repository and keep the result aligned with the repository's native instructions, docs, and validation gate.",
+				"",
+			].join("\n"),
+		);
+		const draftDirectory = path.join(
+			repositoryRoot,
+			".sbs",
+			"docs-spine-adoption",
+			"drafts",
+		);
+		await mkdir(draftDirectory, { recursive: true });
+		await writeFile(
+			path.join(draftDirectory, "program-packet-draft.json"),
+			`${JSON.stringify(
+				{
+					schemaVersion: "docs-spine-program-packet-draft.v1",
+					proposedFiles: [
+						{
+							targetRef: planningBriefRef,
+							markdown: [
+								"---",
+								"title: 'Planning Brief 1: Docs Spine Adoption'",
+								"program_id: docs-spine-adoption",
+								"brief_version: 1",
+								"status: current",
+								"summary: Updated generated planning brief.",
+								"read_when:",
+								"  - Writing the first child ExecPlan.",
+								"---",
+								"",
+								"# Planning Brief 1: Docs Spine Adoption",
+								"",
+								"Updated generated planning brief.",
+								"",
+							].join("\n"),
+						},
+					],
+				},
+				null,
+				2,
+			)}\n`,
+		);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		expect(result.status).toBe("proof_completed");
+		await expect(
+			readFile(path.join(repositoryRoot, planningBriefRef), "utf8"),
+		).resolves.toBe(
+			"---\ntitle: 'Planning Brief 1: Docs Spine Adoption'\nprogram_id: docs-spine-adoption\nbrief_version: 1\nstatus: current\nsummary: Updated generated planning brief.\nread_when:\n  - Writing the first child ExecPlan.\n---\n\n# Planning Brief 1: Docs Spine Adoption\n\nUpdated generated planning brief.\n",
+		);
+	});
+
+	it("writes current planning brief pointer targets", async () => {
+		const repositoryRoot = await createApplyRepository();
+		const pointerRef =
+			"docs/programs/active/2026-05-06-docs-spine-adoption/current-planning-brief.txt";
+		const draftDirectory = path.join(
+			repositoryRoot,
+			".sbs",
+			"docs-spine-adoption",
+			"drafts",
+		);
+		await mkdir(draftDirectory, { recursive: true });
+		await writeFile(
+			path.join(draftDirectory, "program-packet-draft.json"),
+			`${JSON.stringify(
+				{
+					schemaVersion: "docs-spine-program-packet-draft.v1",
+					proposedFiles: [
+						{
+							targetRef: pointerRef,
+							markdown: "planning-brief-1.md\n",
+						},
+					],
+				},
+				null,
+				2,
+			)}\n`,
+		);
+
+		const result = await runDocsSpineApplyWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineApply: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => Response.json({ ok: true }),
+		});
+
+		expect(result.status).toBe("proof_completed");
+		await expect(
+			readFile(path.join(repositoryRoot, pointerRef), "utf8"),
+		).resolves.toBe("planning-brief-1.md\n");
 	});
 
 	it("allows prior docs-spine adoption run artifacts before apply starts", async () => {
@@ -1311,7 +1778,7 @@ describe("docs spine apply and proof workflow", () => {
 		).resolves.toBe(buildPassingDocsIndexMarkdown());
 	});
 
-	it("blocks non-Markdown targets under approved docs roots", async () => {
+	it("blocks non-approved text targets under approved docs roots", async () => {
 		const repositoryRoot = await createApplyRepository();
 		const draftDirectory = path.join(
 			repositoryRoot,
@@ -1344,7 +1811,7 @@ describe("docs spine apply and proof workflow", () => {
 
 		expect(result.status).toBe("blocked");
 		expect(result.blockedReason).toContain(
-			"target must be an approved Markdown file",
+			"target must be an approved Markdown file or current planning brief pointer",
 		);
 		await expect(
 			readFile(

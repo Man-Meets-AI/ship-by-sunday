@@ -153,8 +153,12 @@ export async function runDocsSpineAdoptionWorkflow({
 		});
 	}
 
-	const dirtyState = await runGit(repositoryRoot, ["status", "--porcelain"]);
-	if (!dirtyState.succeeded || dirtyState.stdout.trim()) {
+	const preAdoptionDirtyFileRefs = await listGitDirtyFileRefs(repositoryRoot);
+	const unsafePreAdoptionDirtyFiles = listUnsafePreAdoptionDirtyFiles(
+		preAdoptionDirtyFileRefs,
+		workflowRunId,
+	);
+	if (unsafePreAdoptionDirtyFiles.length > 0) {
 		return await blockWorkflow({
 			repositoryRoot,
 			state,
@@ -166,9 +170,8 @@ export async function runDocsSpineAdoptionWorkflow({
 			localRunDirectoryRef,
 			localRunDirectory,
 			blockedStage: "dirty-state",
-			blockedReason: dirtyState.succeeded
-				? "Worktree is dirty before docs spine adoption scaffold writes."
-				: "Unable to inspect Git dirty state before docs spine adoption scaffold writes.",
+			blockedReason:
+				"Worktree has unsafe runner artifacts before docs spine adoption scaffold writes.",
 			fetchRunnerEvent,
 		});
 	}
@@ -350,8 +353,15 @@ export async function runDocsSpineAdoptionWorkflow({
 			qualityReport,
 		);
 
+		const preexistingDirtyFileRefs = preAdoptionDirtyFileRefs.filter(
+			(fileRef) => !fileRef.startsWith(".sbs/"),
+		);
 		const { proofCommandResults, unexpectedTouchedFiles } =
-			await runProofCommands(repositoryRoot, workflowRunId);
+			await runProofCommands(
+				repositoryRoot,
+				workflowRunId,
+				preAdoptionDirtyFileRefs,
+			);
 		const proofStatus =
 			proofCommandResults.every((result) => result.status === "passed") &&
 			qualityReport.status === "passed"
@@ -378,6 +388,7 @@ export async function runDocsSpineAdoptionWorkflow({
 				.filter((rule) => rule.status === "failed")
 				.map((rule) => rule.ruleId),
 			diffSummary: await readGitDiffSummary(repositoryRoot),
+			preexistingDirtyFileRefs,
 			touchedFiles: unexpectedTouchedFiles,
 			createdArtifacts,
 			proofCommandsRun: proofCommandResults.map((result) => result.commandName),
@@ -409,6 +420,7 @@ export async function runDocsSpineAdoptionWorkflow({
 			qualityReportRef,
 			qualityReportStatus: qualityReport.status,
 			qualityScore: qualityReport.score,
+			preexistingDirtyFileCount: preexistingDirtyFileRefs.length,
 			blockedProofCount: repoFacts.blockedFacts.length,
 			nextRecommendedWorkflowId:
 				DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,
@@ -548,7 +560,11 @@ function getStringArrayField(value: unknown, fieldName: string) {
 	);
 }
 
-async function runProofCommands(repositoryRoot: string, workflowRunId: string) {
+async function runProofCommands(
+	repositoryRoot: string,
+	workflowRunId: string,
+	preAdoptionDirtyFileRefs: string[] = [],
+) {
 	const commands = [
 		["git", ["status", "--short"]],
 		["git", ["diff", "--name-only"]],
@@ -558,6 +574,7 @@ async function runProofCommands(repositoryRoot: string, workflowRunId: string) {
 	const unexpectedTouchedFiles = await listUnexpectedTouchedFiles(
 		repositoryRoot,
 		workflowRunId,
+		preAdoptionDirtyFileRefs,
 	);
 	for (const [command, args] of commands) {
 		const result = await runBoundedProcess({
@@ -587,7 +604,16 @@ async function runProofCommands(repositoryRoot: string, workflowRunId: string) {
 async function listUnexpectedTouchedFiles(
 	repositoryRoot: string,
 	workflowRunId: string,
+	preAdoptionDirtyFileRefs: string[] = [],
 ) {
+	const preAdoptionDirtySet = new Set(preAdoptionDirtyFileRefs);
+	const dirtyFileRefs = await listGitDirtyFileRefs(repositoryRoot);
+	return dirtyFileRefs
+		.filter((fileRef) => !preAdoptionDirtySet.has(fileRef))
+		.filter((fileRef) => !isAllowedLocalProofRef(fileRef, workflowRunId));
+}
+
+async function listGitDirtyFileRefs(repositoryRoot: string) {
 	const result = await runGit(repositoryRoot, [
 		"status",
 		"--porcelain",
@@ -596,11 +622,30 @@ async function listUnexpectedTouchedFiles(
 	if (!result.succeeded) {
 		return ["<unable to inspect git status>"];
 	}
-	return result.stdout
-		.split(/\r?\n/)
-		.flatMap(parseGitStatusPathsForProof)
-		.filter((fileRef): fileRef is string => Boolean(fileRef))
-		.filter((fileRef) => !isAllowedLocalProofRef(fileRef, workflowRunId))
+	return Array.from(
+		new Set(
+			result.stdout
+				.split(/\r?\n/)
+				.flatMap(parseGitStatusPathsForProof)
+				.filter((fileRef): fileRef is string => Boolean(fileRef)),
+		),
+	).sort();
+}
+
+function listUnsafePreAdoptionDirtyFiles(
+	dirtyFileRefs: string[],
+	workflowRunId: string,
+) {
+	return dirtyFileRefs
+		.filter((fileRef) => {
+			if (fileRef === "<unable to inspect git status>") {
+				return true;
+			}
+			return (
+				fileRef.startsWith(".sbs/") &&
+				!isAllowedLocalProofRef(fileRef, workflowRunId)
+			);
+		})
 		.sort();
 }
 

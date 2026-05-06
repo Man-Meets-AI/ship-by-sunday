@@ -1,5 +1,12 @@
 import { execFile } from "node:child_process";
-import { mkdir, readdir, readFile, symlink, writeFile } from "node:fs/promises";
+import {
+	mkdir,
+	readdir,
+	readFile,
+	rm,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -564,6 +571,18 @@ describe("docs spine adoption workflow", () => {
 				"utf8",
 			),
 		);
+		const promptAssetsDraft = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"docs-spine-adoption",
+					"drafts",
+					"prompt-assets-draft.json",
+				),
+				"utf8",
+			),
+		);
 		const qualityScoreNotes = JSON.parse(
 			await readFile(
 				path.join(
@@ -607,6 +626,17 @@ describe("docs spine adoption workflow", () => {
 		expect(sourceTruthMap.securityRefs).toEqual(["docs/SECURITY.md"]);
 		expect(sourceTruthMap.architectureRefs).toEqual([]);
 		expect(sourceTruthMap.reliabilityRefs).toEqual([]);
+		expect(sourceTruthMap.provenance).toMatchObject({
+			refSource: "git ls-files",
+			refNormalization: "repo-relative-posix",
+			rawSourceStored: false,
+			packageScriptBodiesStored: false,
+			localAbsolutePathsStored: false,
+			cacheBoundaries: [
+				"tracked-repo-ref-inventory",
+				"package-manifest-metadata",
+			],
+		});
 		expect(docsGapReport.surfaces).toContainEqual(
 			expect.objectContaining({
 				surfaceId: "architecture",
@@ -653,8 +683,22 @@ describe("docs spine adoption workflow", () => {
 				markdown: expect.stringContaining("## How Codex loads repo guidance"),
 			}),
 		]);
+		expect(docsIndexDraft.proposedFiles[0].markdown).not.toContain(
+			"apps/web/src/security.ts",
+		);
+		expect(docsIndexDraft.proposedFiles[0].markdown).not.toContain(
+			"packages/core/src/reliability-check.test.ts",
+		);
 		expect(programPacketDraft.proposedFiles).toEqual(
 			expect.arrayContaining([
+				expect.objectContaining({
+					targetRef: "docs/programs/README.md",
+					markdown: expect.stringContaining("## Program Funnel"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/programs/AGENTS.md",
+					markdown: expect.stringContaining("## Critical Rules"),
+				}),
 				expect.objectContaining({
 					targetRef: "docs/programs/PROGRAMS.md",
 					markdown: expect.stringContaining("## What A Program Is"),
@@ -666,7 +710,49 @@ describe("docs spine adoption workflow", () => {
 				}),
 				expect.objectContaining({
 					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/track-1-docs-spine-surfaces.md",
+				}),
+				expect.objectContaining({
+					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/normalized-track-1.md",
+				}),
+				expect.objectContaining({
+					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/converged-decision-packet.md",
+				}),
+				expect.objectContaining({
+					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/dependency-graph.md",
+				}),
+				expect.objectContaining({
+					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/plan-split-recommendation.md",
+				}),
+				expect.objectContaining({
+					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/cross-repo-review.md",
+				}),
+				expect.objectContaining({
+					targetRef:
 						"docs/programs/active/2026-05-06-docs-spine-adoption/planning-brief-1.md",
+					markdown: expect.stringContaining(
+						"title: 'Planning Brief 1: Docs Spine Adoption'",
+					),
+				}),
+				expect.objectContaining({
+					targetRef:
+						"docs/programs/active/2026-05-06-docs-spine-adoption/current-planning-brief.txt",
+					markdown: "planning-brief-1.md\n",
+				}),
+				expect.objectContaining({
+					targetRef: "docs/programs/active/index.md",
+					markdown: expect.stringContaining(
+						"(2026-05-06-docs-spine-adoption/program.md)",
+					),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/programs/completed/index.md",
+					markdown: expect.stringContaining("# Completed Programs"),
 				}),
 			]),
 		);
@@ -683,8 +769,24 @@ describe("docs spine adoption workflow", () => {
 		expect(execPlanDraft.proposedFiles).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
+					targetRef: "docs/exec-plans/index.md",
+					markdown: expect.stringContaining("# ExecPlans"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/exec-plans/AGENTS.md",
+					markdown: expect.stringContaining("## Critical Rules"),
+				}),
+				expect.objectContaining({
 					targetRef: "docs/exec-plans/PLANS.md",
 					markdown: expect.stringContaining("## Non-negotiable requirements"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/exec-plans/active/index.md",
+					markdown: expect.stringContaining("# Active ExecPlans"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/exec-plans/completed/index.md",
+					markdown: expect.stringContaining("# Completed ExecPlans"),
 				}),
 				expect.objectContaining({
 					targetRef:
@@ -705,6 +807,34 @@ describe("docs spine adoption workflow", () => {
 				markdown: expect.stringContaining("## Implementation discipline"),
 			}),
 		);
+		expect(promptAssetsDraft.proposedFiles).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					targetRef: "docs/prompts/README.md",
+					markdown: expect.stringContaining("docs/prompts/program-create.md"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/prompts/program-create.md",
+					markdown: expect.stringContaining("## Quality Gate"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/prompts/program-orchestrator.md",
+					markdown: expect.stringContaining("## Prompt"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/prompts/program-planning-brief.md",
+					markdown: expect.stringContaining("current-planning-brief.txt"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/prompts/exec-plan-writer.md",
+					markdown: expect.stringContaining("planning_brief"),
+				}),
+				expect.objectContaining({
+					targetRef: "docs/prompts/exec-plan-validate.md",
+					markdown: expect.stringContaining("## Prompt"),
+				}),
+			]),
+		);
 		expect(JSON.stringify({ programPacketDraft, execPlanDraft })).not.toContain(
 			"2026-05-05-docs-spine-adoption",
 		);
@@ -724,6 +854,7 @@ describe("docs spine adoption workflow", () => {
 			qualityScoreBaseline,
 			codexSynthesisPacket,
 			docsIndexDraft,
+			promptAssetsDraft,
 			qualityScoreNotes,
 			qualityReport,
 		}).toLowerCase();
@@ -782,6 +913,78 @@ describe("docs spine adoption workflow", () => {
 				}),
 			}),
 		]);
+	});
+
+	it("allows unrelated pre-existing dirty files outside .sbs during scaffold writes", async () => {
+		const repositoryRoot = await createDocsSpineRepository();
+		const archivedSkillRef = ".codex/skill-archive/power-dialer/SKILL.md";
+		await mkdir(path.dirname(path.join(repositoryRoot, archivedSkillRef)), {
+			recursive: true,
+		});
+		await writeFile(
+			path.join(repositoryRoot, archivedSkillRef),
+			"# Power Dialer Skill\n",
+		);
+		await execFileAsync("git", ["add", archivedSkillRef], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "Add archived skill"], {
+			cwd: repositoryRoot,
+		});
+		await rm(path.join(repositoryRoot, archivedSkillRef));
+
+		const result = await runDocsSpineAdoptionWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineAdoption: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => new Response(null, { status: 200 }),
+		});
+		const proof = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs",
+					"runs",
+					"workflowRuns_docs_spine",
+					"proof.json",
+				),
+				"utf8",
+			),
+		);
+
+		expect(result.status).toBe("proof_completed");
+		expect(result.proofStatus).toBe("passed");
+		expect(result.touchedFiles).not.toContain(archivedSkillRef);
+		expect(proof.preexistingDirtyFileRefs).toEqual([archivedSkillRef]);
+	});
+
+	it("blocks unsafe pre-existing .sbs files outside the current scaffold roots", async () => {
+		const repositoryRoot = await createDocsSpineRepository();
+		await mkdir(path.join(repositoryRoot, ".sbs", "runs", "other-run"), {
+			recursive: true,
+		});
+		await writeFile(
+			path.join(repositoryRoot, ".sbs", "runs", "other-run", "proof.json"),
+			"{}\n",
+		);
+
+		const result = await runDocsSpineAdoptionWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun(),
+			confirmDocsSpineAdoption: true,
+			now: 1_000,
+			fetchRunnerEvent: async () => new Response(null, { status: 200 }),
+		});
+
+		expect(result.status).toBe("blocked");
+		expect(result.blockedReason).toBe(
+			"Worktree has unsafe runner artifacts before docs spine adoption scaffold writes.",
+		);
 	});
 
 	it("refuses to write docs spine artifacts through an existing .sbs symlink", async () => {
