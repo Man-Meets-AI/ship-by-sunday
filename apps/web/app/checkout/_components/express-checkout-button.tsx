@@ -66,12 +66,19 @@ export function ExpressCheckoutButton({
 	const [state, setState] = useState<ExpressCheckoutButtonState>({
 		kind: "loading",
 	});
+	const checkoutIntent: CheckoutIntent = checkoutIntentInput
+		? normalizeCheckoutIntent(checkoutIntentInput)
+		: UNSPECIFIED_CHECKOUT_INTENT;
+	const { buyerStartingPoint, checkoutCtaId, fulfillmentTrack } =
+		checkoutIntent;
 
 	useEffect(() => {
 		let isMounted = true;
-		const checkoutIntent: CheckoutIntent = checkoutIntentInput
-			? normalizeCheckoutIntent(checkoutIntentInput)
-			: UNSPECIFIED_CHECKOUT_INTENT;
+		const normalizedCheckoutIntent = {
+			buyerStartingPoint,
+			checkoutCtaId,
+			fulfillmentTrack,
+		};
 
 		async function prepareExpressCheckout() {
 			try {
@@ -81,7 +88,7 @@ export function ExpressCheckoutButton({
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						checkoutIntent,
+						checkoutIntent: normalizedCheckoutIntent,
 					}),
 				});
 
@@ -118,7 +125,7 @@ export function ExpressCheckoutButton({
 		return () => {
 			isMounted = false;
 		};
-	}, [checkoutIntentInput]);
+	}, [buyerStartingPoint, checkoutCtaId, fulfillmentTrack]);
 
 	useEffect(() => {
 		if (state.kind !== "unavailable") {
@@ -134,6 +141,7 @@ export function ExpressCheckoutButton({
 	return (
 		<div className={cn("min-h-11", className)} data-testid={testId}>
 			<CheckoutElementsProvider
+				key={state.clientSecret}
 				stripe={state.stripePromise}
 				options={{
 					clientSecret: state.clientSecret,
@@ -150,7 +158,7 @@ export function ExpressCheckoutButton({
 					buttonHeight={buttonHeight}
 					returnUrl={state.returnUrl}
 					onBeforeCheckout={onBeforeCheckout}
-					checkoutIntent={checkoutIntentInput}
+					checkoutIntent={checkoutIntent}
 					onAvailableChange={onAvailableChange}
 					onError={onError}
 				/>
@@ -162,23 +170,26 @@ export function ExpressCheckoutButton({
 function ExpressCheckoutElementController({
 	buttonHeight,
 	returnUrl,
-	checkoutIntent: checkoutIntentInput,
+	checkoutIntent,
 	onBeforeCheckout,
 	onAvailableChange,
 	onError,
 }: {
 	readonly buttonHeight: number;
 	readonly returnUrl: string;
-	readonly checkoutIntent?: CheckoutIntentInput;
+	readonly checkoutIntent: CheckoutIntent;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
 	readonly onAvailableChange?: (isAvailable: boolean) => void;
 	readonly onError?: (message: string | null) => void;
 }) {
 	const checkoutResult = useCheckoutElements();
 	const [isVisible, setIsVisible] = useState(false);
-	const checkoutIntent: CheckoutIntent = checkoutIntentInput
-		? normalizeCheckoutIntent(checkoutIntentInput)
-		: UNSPECIFIED_CHECKOUT_INTENT;
+	const { buyerStartingPoint, checkoutCtaId, fulfillmentTrack } =
+		checkoutIntent;
+	const checkoutTotal =
+		checkoutResult.type === "success"
+			? checkoutResult.checkout.total.total.amount
+			: null;
 	const stripeButtonHeight = getStripeExpressCheckoutButtonHeight(buttonHeight);
 	const options = useMemo(
 		() => ({
@@ -225,7 +236,9 @@ function ExpressCheckoutElementController({
 				event: "checkout_started",
 				properties: {
 					surface: "express_checkout",
-					...checkoutIntent,
+					buyerStartingPoint,
+					checkoutCtaId,
+					fulfillmentTrack,
 				},
 			});
 
@@ -256,7 +269,15 @@ function ExpressCheckoutElementController({
 				onError?.(result.error.message);
 			}
 		},
-		[checkoutIntent, checkoutResult, onBeforeCheckout, onError, returnUrl],
+		[
+			buyerStartingPoint,
+			checkoutCtaId,
+			checkoutResult,
+			fulfillmentTrack,
+			onBeforeCheckout,
+			onError,
+			returnUrl,
+		],
 	);
 
 	if (checkoutResult.type === "error") {
@@ -264,7 +285,15 @@ function ExpressCheckoutElementController({
 	}
 
 	return (
-		<div className={isVisible ? "block" : "hidden"} aria-hidden={!isVisible}>
+		<div
+			className={cn("space-y-1.5", isVisible ? "block" : "hidden")}
+			aria-hidden={!isVisible}
+		>
+			{checkoutTotal ? (
+				<p className="text-center text-xs font-medium text-muted-foreground">
+					Total {checkoutTotal}
+				</p>
+			) : null}
 			<ExpressCheckoutElement
 				options={options}
 				onReady={handleReady}
