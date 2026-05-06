@@ -51,6 +51,11 @@ export function buildStripeCheckoutSessionCreateParams({
 		payment_intent_data: {
 			metadata: checkoutMetadata,
 		},
+		wallet_options: {
+			link: {
+				display: "never",
+			},
+		},
 	};
 }
 
@@ -81,6 +86,11 @@ export function buildStripeExpressCheckoutSessionCreateParams({
 		metadata: checkoutMetadata,
 		payment_intent_data: {
 			metadata: checkoutMetadata,
+		},
+		wallet_options: {
+			link: {
+				display: "never",
+			},
 		},
 	};
 }

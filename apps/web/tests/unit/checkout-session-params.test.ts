@@ -63,6 +63,11 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 					fulfillmentTrack: "generated_codebase",
 				},
 			},
+			wallet_options: {
+				link: {
+					display: "never",
+				},
+			},
 		});
 	});
 
@@ -146,6 +151,11 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 					clerkUserId: "user_123",
 					courseSlug: productConfig.courseSlug,
 					fulfillmentTrack: "generated_codebase",
+				},
+			},
+			wallet_options: {
+				link: {
+					display: "never",
 				},
 			},
 		});
