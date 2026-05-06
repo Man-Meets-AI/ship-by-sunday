@@ -5,6 +5,9 @@ import {
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
+	EXPRESS_CHECKOUT_ROUTE_PATH,
+	HOMEPAGE_CHECKOUT_PROOF_PATH,
+	isExpressCheckoutRouteUrl,
 } from "../../scripts/lib/hosted-stripe-checkout-proof.mjs";
 
 describe("hosted Stripe checkout proof helpers", () => {
@@ -76,5 +79,22 @@ describe("hosted Stripe checkout proof helpers", () => {
 			clerkUserId: "user_123",
 			stripeCheckoutSessionId: "cs_live_123",
 		});
+	});
+
+	it("identifies homepage Express Checkout route requests", () => {
+		expect(HOMEPAGE_CHECKOUT_PROOF_PATH).toBe("/?marketing=1");
+		expect(EXPRESS_CHECKOUT_ROUTE_PATH).toBe("/api/stripe/checkout/express");
+		expect(
+			isExpressCheckoutRouteUrl(
+				"https://www.man-meets-ai.com/api/stripe/checkout/express",
+				"https://www.man-meets-ai.com",
+			),
+		).toBe(true);
+		expect(
+			isExpressCheckoutRouteUrl(
+				"https://www.man-meets-ai.com/api/stripe/checkout",
+				"https://www.man-meets-ai.com",
+			),
+		).toBe(false);
 	});
 });

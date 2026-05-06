@@ -95,7 +95,7 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 7. Confirm Vercel creates the production web deploy from the merged `main` commit.
 8. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` commit, or records an intentional skip when automatic deploys are paused.
 9. Let `Production Release Proof` wait for the exact Vercel production deployment for the merged commit, then run hosted verification against `https://www.man-meets-ai.com`.
-10. When the release touched checkout, Stripe, entitlement, webhook, or access-handoff behavior, make sure `Production Release Proof` also runs hosted `billing_integration`.
+10. When the release touched checkout, homepage checkout CTAs, Stripe, entitlement, webhook, or access-handoff behavior, make sure `Production Release Proof` also runs hosted `billing_integration`.
 11. Update `release.json` and `CHANGELOG.md` for the next version when the verified `main` commit is ready to publish.
 12. Create the protected `vMAJOR.MINOR.PATCH` tag at the verified `main` commit.
 13. Let `.github/workflows/release.yml` validate the manifest, collect release evidence for that tag target, build the release notes from the matching changelog section, and publish the GitHub Release.
@@ -115,7 +115,7 @@ bun run release:billing:doctor -- --env=production --dry-run
 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=default_ship
 ```
 
-For staging or production billing verification in this repo, prefer a restricted live `100% off` discount and confirm the buyer auto-forwards from `/checkout/success` into `/start`. On production, the canonical automation should create the Checkout Session directly with the discount already attached instead of relying on promotion-code entry in Stripe's hosted UI. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
+For staging or production billing verification in this repo, prefer a restricted live `100% off` discount and confirm the buyer auto-forwards from `/checkout/success` into `/start`. On production, the canonical automation should create the Checkout Session directly with the discount already attached instead of relying on promotion-code entry in Stripe's hosted UI, verify the app checkout route can create a hosted Checkout Session, expire that smoke-created session, and fail if the homepage precreates custom Express Checkout Sessions before a buyer clicks. Use [docs/internal/observability.md](./internal/observability.md) for the incident-control and webhook-origin drill.
 
 ## Manual Convex Dry-Run
 

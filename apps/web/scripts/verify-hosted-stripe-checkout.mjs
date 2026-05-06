@@ -12,6 +12,8 @@ import {
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
 	DEFAULT_PROOF_COURSE_SLUG,
+	HOMEPAGE_CHECKOUT_PROOF_PATH,
+	isExpressCheckoutRouteUrl,
 } from "./lib/hosted-stripe-checkout-proof.mjs";
 import { buildResetProductAccessCommand } from "./lib/convex-product-access-grant.mjs";
 import { withConvexDeploymentEnv } from "./lib/convex-deployment-env.mjs";
@@ -309,6 +311,84 @@ async function createAppCheckoutSession(page) {
 	});
 }
 
+async function expireAppCheckoutSession(stripe, sessionId) {
+	if (!sessionId) {
+		return {
+			expired: false,
+			status: "missing",
+		};
+	}
+
+	const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+	if (session.status !== "open") {
+		return {
+			expired: false,
+			status: session.status,
+		};
+	}
+
+	const expiredSession = await stripe.checkout.sessions.expire(sessionId);
+
+	return {
+		expired: expiredSession.status === "expired",
+		status: expiredSession.status,
+	};
+}
+
+async function verifyHomepageCheckoutContract(page, { baseUrl }) {
+	const expressCheckoutRequests = [];
+	const trackRequest = (request) => {
+		const requestUrl = request.url();
+
+		if (isExpressCheckoutRouteUrl(requestUrl, baseUrl)) {
+			expressCheckoutRequests.push(requestUrl);
+		}
+	};
+
+	page.on("request", trackRequest);
+	try {
+		await page.goto(new URL(HOMEPAGE_CHECKOUT_PROOF_PATH, baseUrl).toString(), {
+			waitUntil: "domcontentloaded",
+		});
+		await page
+			.locator(
+				[
+					"[data-testid='hero-primary-cta']",
+					"[data-testid='codebase-demo-checkout-cta']",
+					"[data-testid='codebase-demo-existing-checkout-cta']",
+					"[data-testid='pricing-primary-cta']",
+				].join(", "),
+			)
+			.first()
+			.waitFor({
+				state: "visible",
+				timeout: 20_000,
+			});
+		await page
+			.waitForLoadState("networkidle", { timeout: 10_000 })
+			.catch(() => null);
+	} finally {
+		page.off("request", trackRequest);
+	}
+
+	return {
+		expressCheckoutRequestCount: expressCheckoutRequests.length,
+		expressCheckoutRequests,
+		hostedCheckoutButtonCount: await page
+			.locator(
+				[
+					"[data-testid='hero-primary-cta']",
+					"[data-testid='codebase-demo-checkout-cta']",
+					"[data-testid='codebase-demo-existing-checkout-cta']",
+					"[data-testid='pricing-primary-cta']",
+				].join(", "),
+			)
+			.count(),
+		url: page.url(),
+	};
+}
+
 async function waitForAccessGrant({
 	clerkUserId,
 	requireConvexDebug,
@@ -483,6 +563,10 @@ try {
 	console.log(`Authenticated Clerk user ${clerkUserId ?? "missing"}`);
 	await resetHostedProofProductAccess(clerkUserId);
 	console.log(`Reset product access for ${clerkUserId}`);
+	const homepageCheckoutContract = await verifyHomepageCheckoutContract(page, {
+		baseUrl,
+	});
+	console.log("Verified homepage checkout contract");
 	const checkoutSession = await stripe.checkout.sessions.create(
 		buildHostedProofCheckoutSessionParams({
 			appBaseUrl: baseUrl,
@@ -500,6 +584,13 @@ try {
 	const appCheckoutSession = await createAppCheckoutSession(page);
 	console.log(
 		`App checkout route smoke: ok=${appCheckoutSession.ok} session=${appCheckoutSession.sessionId ?? "missing"}`,
+	);
+	const appCheckoutSessionExpiry = await expireAppCheckoutSession(
+		stripe,
+		appCheckoutSession.sessionId,
+	);
+	console.log(
+		`App checkout route smoke cleanup: expired=${appCheckoutSessionExpiry.expired} status=${appCheckoutSessionExpiry.status}`,
 	);
 	await page.goto(checkoutSession.url, {
 		waitUntil: "load",
@@ -537,6 +628,22 @@ try {
 			Boolean(appCheckoutSession.sessionId) &&
 			Boolean(appCheckoutSession.url),
 		`ok=${appCheckoutSession.ok}, session=${appCheckoutSession.sessionId ?? "missing"}`,
+	);
+	printCheck(
+		"App checkout route smoke cleanup",
+		appCheckoutSessionExpiry.expired ||
+			appCheckoutSessionExpiry.status !== "open",
+		`expired=${appCheckoutSessionExpiry.expired}, status=${appCheckoutSessionExpiry.status}`,
+	);
+	printCheck(
+		"Homepage hosted checkout CTAs visible",
+		homepageCheckoutContract.hostedCheckoutButtonCount > 0,
+		`count=${homepageCheckoutContract.hostedCheckoutButtonCount}, url=${homepageCheckoutContract.url}`,
+	);
+	printCheck(
+		"Homepage does not precreate Express Checkout sessions",
+		homepageCheckoutContract.expressCheckoutRequestCount === 0,
+		`express_requests=${homepageCheckoutContract.expressCheckoutRequestCount}`,
 	);
 	printCheck(
 		"Hosted success redirect",
@@ -585,7 +692,9 @@ try {
 				couponId: coupon.id,
 				finalPageUrl: page.url(),
 				appCheckoutSession,
+				appCheckoutSessionExpiry,
 				clerkUserId,
+				homepageCheckoutContract,
 				productAccess,
 				workspaceVerification,
 				sessionStatus: finalSession.status,
@@ -603,6 +712,12 @@ try {
 		!appCheckoutSession.ok ||
 		!appCheckoutSession.sessionId ||
 		!appCheckoutSession.url ||
+		!(
+			appCheckoutSessionExpiry.expired ||
+			appCheckoutSessionExpiry.status !== "open"
+		) ||
+		homepageCheckoutContract.hostedCheckoutButtonCount <= 0 ||
+		homepageCheckoutContract.expressCheckoutRequestCount !== 0 ||
 		!workspaceVerification.authorized ||
 		(requireConvexDebug &&
 			(!productAccess ||

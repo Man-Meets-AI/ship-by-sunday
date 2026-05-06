@@ -214,6 +214,12 @@ function ExpressCheckoutElementController({
 		onAvailableChange?.(false);
 	}, [checkoutResult.type, onAvailableChange]);
 
+	useEffect(() => {
+		if (checkoutResult.type !== "success") {
+			setIsVisible(false);
+		}
+	}, [checkoutResult.type]);
+
 	const handleReady = useCallback(
 		(event: { availablePaymentMethods?: Record<string, boolean> }) => {
 			const isAvailable = Object.values(
@@ -280,7 +286,7 @@ function ExpressCheckoutElementController({
 		],
 	);
 
-	if (checkoutResult.type === "error") {
+	if (checkoutResult.type !== "success") {
 		return null;
 	}
 

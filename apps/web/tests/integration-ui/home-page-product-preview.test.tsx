@@ -46,6 +46,12 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 	),
 }));
 
+vi.mock("@/app/checkout/_components/express-checkout-button", () => ({
+	ExpressCheckoutButton: () => {
+		throw new Error("Homepage checkout CTAs must not render Express Checkout.");
+	},
+}));
+
 import { homePageContent } from "@/app/_content/home-page";
 import HomePage from "@/app/_components/home-page/home-page";
 import { CodebaseDemoSectionBlock } from "@/app/_components/home-page/sections/codebase-demo/codebase-demo-section";
@@ -62,6 +68,7 @@ describe("CodebaseDemoSectionBlock", () => {
 
 	afterEach(() => {
 		window.localStorage.clear();
+		vi.restoreAllMocks();
 	});
 
 	it("renders all 7 canonical sections in order with foundation, design, and pricing interactive", () => {
@@ -237,6 +244,28 @@ describe("CodebaseDemoSectionBlock", () => {
 			screen.getAllByRole("img", { name: "Founder portrait" }),
 		).toHaveLength(1);
 		expect(document.querySelector("#system")).toBeNull();
+	});
+
+	it("does not create Express Checkout sessions during homepage render", async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(new Response("{}"));
+
+		render(await HomePage());
+
+		const createdExpressCheckoutSession = fetchMock.mock.calls.some(
+			([input]) =>
+				typeof input === "string" &&
+				input.includes("/api/stripe/checkout/express"),
+		);
+
+		expect(createdExpressCheckoutSession).toBe(false);
+		expect(document.querySelector("[data-testid$='-express']")).toBeNull();
+		expect(
+			screen
+				.getByTestId("codebase-demo-checkout-cta")
+				.getAttribute("data-kind"),
+		).toBe("checkout");
 	});
 
 	it("exposes a theme toggle in the demo top bar", async () => {

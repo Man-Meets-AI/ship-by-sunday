@@ -44,6 +44,7 @@ export function HomeHeroSection({
 						<HomePagePrimaryCta
 							target={primaryCtaTarget}
 							label={hero.primaryCta}
+							testId="hero-primary-cta"
 							className="h-16 rounded-2xl px-12 text-lg font-bold shadow-2xl shadow-foreground/15 motion-safe:transition-all motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-foreground/25 sm:min-w-80"
 						/>
 					</div>

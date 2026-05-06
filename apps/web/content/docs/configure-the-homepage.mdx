@@ -33,20 +33,21 @@ When you need to change the homepage, inspect these files in this order:
 18. `app/_components/home-page/sections/programs-section.tsx`
 19. `app/_components/home-page/sections/plans-md-section.tsx`
 20. `app/_components/home-page/sections/home-page-primary-cta.tsx`
-21. `app/checkout/_components/checkout-button.tsx`
-22. `app/checkout/_hooks/use-stripe-checkout.ts`
-23. `lib/codebase-flow/use-codebase-local-draft-seeder.ts`
-24. `app/(workspace)/_components/codebase-flow/codebase-local-draft-seeder.tsx`
-25. `app/_lib/home-page-structured-data.ts`
-26. `tests/unit/home-page-content.test.ts`
-27. `tests/unit/home-page-render-model.test.ts`
-28. `tests/unit/home-page-structured-data.test.ts`
-29. `tests/unit/home-page-codebase-draft-storage.test.ts`
-30. `tests/integration-ui/home-page-product-preview.test.tsx`
-31. `tests/integration-ui/home-page-primary-cta.test.tsx`
-32. `tests/integration-ui/checkout-button.test.tsx`
-33. `tests/integration-ui/codebase-local-draft-seeder.test.tsx`
-34. `tests/unit/public-metadata-routes.test.ts`
+21. `app/_components/home-page/sections/home-page-checkout-cta.tsx`
+22. `app/checkout/_components/checkout-button.tsx`
+23. `app/checkout/_hooks/use-stripe-checkout.ts`
+24. `lib/codebase-flow/use-codebase-local-draft-seeder.ts`
+25. `app/(workspace)/_components/codebase-flow/codebase-local-draft-seeder.tsx`
+26. `app/_lib/home-page-structured-data.ts`
+27. `tests/unit/home-page-content.test.ts`
+28. `tests/unit/home-page-render-model.test.ts`
+29. `tests/unit/home-page-structured-data.test.ts`
+30. `tests/unit/home-page-codebase-draft-storage.test.ts`
+31. `tests/integration-ui/home-page-product-preview.test.tsx`
+32. `tests/integration-ui/home-page-primary-cta.test.tsx`
+33. `tests/integration-ui/checkout-button.test.tsx`
+34. `tests/integration-ui/codebase-local-draft-seeder.test.tsx`
+35. `tests/unit/public-metadata-routes.test.ts`
 
 If you skip that order, it is easy to update copy while missing the render model, or to change visible sections while leaving schema and smoke tests out of sync.
 
@@ -139,6 +140,7 @@ Safe rules:
 - if you need checkout, use `kind: "checkout"` with a `checkoutIntent` containing `buyerStartingPoint` and `checkoutCtaId`
 - use `buyerStartingPoint: "no_codebase"` for generated-codebase checkout and `buyerStartingPoint: "existing_codebase"` for existing-codebase setup checkout
 - do not import `CheckoutButton` straight into hero or pricing again
+- homepage checkout CTAs use hosted Stripe Checkout; keep Link enabled through Stripe's hosted payment method surface instead of precreating custom Express Checkout Sessions on page load
 - if you add a new CTA target kind, update the target union, the render model, the CTA renderer, and the tests together
 
 ## Social proof contract
@@ -232,6 +234,7 @@ Edit:
 - `app/checkout/_hooks/use-stripe-checkout.ts`
 - `app/checkout/_components/checkout-button.tsx`
 - `app/_components/home-page/sections/home-page-primary-cta.tsx`
+- `app/_components/home-page/sections/home-page-checkout-cta.tsx`
 - `lib/codebase-flow/use-codebase-local-draft-seeder.ts`
 - `app/(workspace)/_components/codebase-flow/codebase-local-draft-seeder.tsx`
 - `tests/unit/home-page-codebase-draft-storage.test.ts`
@@ -290,9 +293,9 @@ If you do not update all of those in one slice, the homepage contract will drift
 Run these checks after meaningful homepage changes:
 
 ```bash
-bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-section.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-sidebar.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-foundation-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-design-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-pricing-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-locked-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts app/_components/home-page/sections/codebase-demo/use-home-page-codebase-draft.ts app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/codebase-flow/use-codebase-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
+bunx oxlint --deny-warnings config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-section.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-sidebar.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-foundation-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-design-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-pricing-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-locked-card.tsx app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts app/_components/home-page/sections/codebase-demo/use-home-page-codebase-draft.ts app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_components/home-page/sections/home-page-checkout-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/codebase-flow/use-codebase-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
 
-bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/codebase-demo app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/codebase-flow/use-codebase-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
+bunx oxfmt --check config/product.ts app/_components/home-page/home-page.tsx app/_components/home-page/sections/codebase-demo app/_components/home-page/sections/durability-section.tsx app/_components/home-page/sections/exec-loop-section.tsx app/_components/home-page/sections/hero-sections.tsx app/_components/home-page/sections/programs-section.tsx app/_components/home-page/sections/plans-md-section.tsx app/_components/home-page/sections/pricing-footer-sections.tsx app/_components/home-page/sections/home-page-primary-cta.tsx app/_components/home-page/sections/home-page-checkout-cta.tsx app/checkout/_components/checkout-button.tsx app/checkout/_hooks/use-stripe-checkout.ts lib/codebase-flow/use-codebase-local-draft-seeder.ts app/_content/home-page.ts app/_lib/home-page-render-model.ts app/_lib/home-page-structured-data.ts tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts tests/integration-ui/home-page-product-preview.test.tsx tests/integration-ui/home-page-primary-cta.test.tsx tests/integration-ui/checkout-button.test.tsx tests/integration-ui/codebase-local-draft-seeder.test.tsx
 
 bunx vitest --config vitest.config.ts run --project unit tests/unit/home-page-content.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/home-page-codebase-draft-storage.test.ts
 

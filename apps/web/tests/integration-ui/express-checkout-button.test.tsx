@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const checkoutConfirmMock = vi.hoisted(() => vi.fn());
+const checkoutElementsResultMock = vi.hoisted(() => vi.fn());
 const loadStripeMock = vi.hoisted(() => vi.fn());
 const capturePostHogProductEventMock = vi.hoisted(() => vi.fn());
 
@@ -42,17 +43,7 @@ vi.mock("@stripe/react-stripe-js/checkout", () => ({
 			</button>
 		);
 	},
-	useCheckoutElements: () => ({
-		type: "success",
-		checkout: {
-			total: {
-				total: {
-					amount: "US$250.00",
-				},
-			},
-			confirm: checkoutConfirmMock,
-		},
-	}),
+	useCheckoutElements: () => checkoutElementsResultMock(),
 }));
 
 vi.mock("@/lib/observability/posthog-client", () => ({
@@ -84,9 +75,42 @@ describe("ExpressCheckoutButton", () => {
 		vi.restoreAllMocks();
 		checkoutConfirmMock.mockReset();
 		checkoutConfirmMock.mockResolvedValue({ type: "success" });
+		checkoutElementsResultMock.mockReset();
+		checkoutElementsResultMock.mockReturnValue({
+			type: "success",
+			checkout: {
+				total: {
+					total: {
+						amount: "US$250.00",
+					},
+				},
+				confirm: checkoutConfirmMock,
+			},
+		});
 		capturePostHogProductEventMock.mockReset();
 		loadStripeMock.mockReset();
 		loadStripeMock.mockResolvedValue({ id: "stripe" });
+	});
+
+	it("does not render the Link button until Stripe checkout actions are ready", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			createExpressCheckoutResponse("cs_express_loading"),
+		);
+		checkoutElementsResultMock.mockReturnValue({ type: "loading" });
+
+		render(
+			<ExpressCheckoutButton
+				checkoutIntent={{
+					buyerStartingPoint: "no_codebase",
+					checkoutCtaId: "codebase_demo_generated",
+				}}
+			/>,
+		);
+
+		await screen.findByTestId("checkout-elements-provider");
+
+		expect(screen.queryByTestId("express-checkout-link")).toBeNull();
+		expect(checkoutConfirmMock).not.toHaveBeenCalled();
 	});
 
 	it("does not recreate the Checkout Session when an inline checkout intent re-renders with the same values", async () => {
