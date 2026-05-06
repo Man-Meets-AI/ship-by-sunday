@@ -426,6 +426,122 @@ describe("workspace findings read model", () => {
 		);
 	});
 
+	it("builds docs operating system adoption as a worker-grade dry-run workflow packet", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-docs-operating-system-adoption",
+					category: "other",
+					title: "Docs operating system tooling needs a dry-run plan",
+					permissionRequired: "workspace_write",
+					recommendedWorkflowId: "docs-operating-system-adoption",
+				}),
+			],
+			"finding-docs-operating-system-adoption",
+			Date.UTC(2026, 4, 6, 14, 0),
+		);
+
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "docs-operating-system-adoption",
+			workflowKind: "docs_operating_system_adoption",
+			workflowCommandName: "docs-operating-system-adoption",
+			confirmationFlag: "--confirm-docs-operating-system-scan",
+			confirmationFlags: [
+				"--confirm-docs-operating-system-scan",
+				"--confirm-docs-operating-system-tooling-plan",
+			],
+			branchName: "sbs/docs-operating-system-adoption-20260506-1400",
+			profileName: "sbs-workspace-write",
+			installProfile: "worker-grade",
+			proofCommands: [
+				"git status --short",
+				"git diff --name-only",
+				"git diff --check",
+			],
+		});
+		expect(detail?.workflowApproval.expectedOutputs).toEqual(
+			expect.arrayContaining([
+				"repo facts and scanner summary",
+				"portable docs tooling install plan",
+			]),
+		);
+		expect(detail?.workflowApproval.allowedTouchTargets).toEqual([
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-operating-system-adoption/**",
+		]);
+		expect(detail?.workflowApproval.disallowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				"package scripts",
+				"validator files",
+				"app-stack command wiring",
+				"Worker-specific operating state",
+				"package script bodies",
+				"dependency versions",
+			]),
+		);
+		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
+			"installProfile: worker-grade",
+		);
+	});
+
+	it("builds docs operating system package-script patching as a bounded worker-grade apply workflow packet", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-docs-operating-system-package-scripts",
+					category: "other",
+					title: "Docs operating system tooling plan is ready to apply",
+					permissionRequired: "workspace_write",
+					recommendedWorkflowId:
+						"docs-operating-system-package-script-patching",
+				}),
+			],
+			"finding-docs-operating-system-package-scripts",
+			Date.UTC(2026, 4, 6, 14, 15),
+		);
+
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "docs-operating-system-package-script-patching",
+			workflowKind: "docs_operating_system_package_script_patching",
+			workflowCommandName: "docs-operating-system-package-script-patching",
+			confirmationFlag: "--confirm-docs-operating-system-tooling-apply",
+			confirmationFlags: ["--confirm-docs-operating-system-tooling-apply"],
+			branchName: "sbs/docs-operating-system-package-scripts-20260506-1415",
+			profileName: "sbs-workspace-write",
+			installProfile: "worker-grade",
+			proofCommands: [
+				"git status --short",
+				"git diff --name-only",
+				"git diff --check",
+				"node --check scripts/sbs-docs/*.mjs",
+			],
+		});
+		expect(detail?.workflowApproval.expectedOutputs).toEqual(
+			expect.arrayContaining(["package-script and wrapper apply summary"]),
+		);
+		expect(detail?.workflowApproval.allowedTouchTargets).toEqual([
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-operating-system-adoption/tooling-apply/**",
+			"package.json",
+			"scripts/sbs-docs/**",
+		]);
+		expect(detail?.workflowApproval.disallowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				"dependency locks",
+				"package-manager installs",
+				"package script bodies",
+				"dependency versions from the target repo",
+				"Codex transcripts",
+			]),
+		);
+		expect(detail?.workflowApproval.syncPolicySummary).toContain(
+			"wrapper contents",
+		);
+		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
+			"installProfile: worker-grade",
+		);
+	});
+
 	it("does not build detail state for deleted or missing findings", () => {
 		expect(
 			buildWorkspaceFindingDetailModel(

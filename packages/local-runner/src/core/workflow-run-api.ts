@@ -22,6 +22,27 @@ import {
 	DOCS_SPINE_APPLY_WORKFLOW_ID,
 	DOCS_SPINE_APPLY_WORKFLOW_VERSION,
 } from "../workflows/docs-spine-apply-and-proof/manifest";
+import {
+	DOCS_OPERATING_SYSTEM_ADOPTION_ALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_EXPECTED_OUTPUTS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
+	DOCS_OPERATING_SYSTEM_ADOPTION_PROOF_COMMANDS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_ROLLBACK_NOTES,
+	DOCS_OPERATING_SYSTEM_ADOPTION_STOP_CONDITIONS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_SYNC_POLICY_SUMMARY,
+	DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID,
+	DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_VERSION,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_DISALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_EXPECTED_OUTPUTS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROOF_COMMANDS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ROLLBACK_NOTES,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_STOP_CONDITIONS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_SYNC_POLICY_SUMMARY,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_VERSION,
+} from "../workflows/docs-operating-system-adoption/manifest";
 
 export const WORKFLOW_RUN_RESOLVE_ENDPOINT =
 	"/api/workspace/runner/workflow-runs/resolve";
@@ -81,10 +102,13 @@ export type ApprovedWorkflowRunPacket = {
 		| "broken-app-triage"
 		| "mature-repo-adoption"
 		| typeof DOCS_SPINE_ADOPTION_WORKFLOW_ID
-		| typeof DOCS_SPINE_APPLY_WORKFLOW_ID;
+		| typeof DOCS_SPINE_APPLY_WORKFLOW_ID
+		| typeof DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID
+		| typeof DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID;
 	workflowVersion: string;
 	branchName: string;
 	profileName: string;
+	installProfile?: string;
 	writeLeaseId: string;
 	writeLeaseExpiresAt: number;
 	writeLeaseDurationMinutes: number;
@@ -196,7 +220,10 @@ function assertApprovedWorkflowRunPacket(
 		packet.workflowId !== "broken-app-triage" &&
 		packet.workflowId !== "mature-repo-adoption" &&
 		packet.workflowId !== DOCS_SPINE_ADOPTION_WORKFLOW_ID &&
-		packet.workflowId !== DOCS_SPINE_APPLY_WORKFLOW_ID
+		packet.workflowId !== DOCS_SPINE_APPLY_WORKFLOW_ID &&
+		packet.workflowId !== DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID &&
+		packet.workflowId !==
+			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
 	) {
 		throw new Error("Approved workflow run is not supported.");
 	}
@@ -214,6 +241,15 @@ function assertApprovedWorkflowRunPacket(
 	}
 	if (packet.workflowId === DOCS_SPINE_APPLY_WORKFLOW_ID) {
 		assertDocsSpineApplyPacket(packet);
+	}
+	if (packet.workflowId === DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID) {
+		assertDocsOperatingSystemAdoptionPacket(packet);
+	}
+	if (
+		packet.workflowId ===
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_ID
+	) {
+		assertDocsOperatingSystemPackageScriptPatchingPacket(packet);
 	}
 }
 
@@ -394,6 +430,192 @@ function assertDocsSpineApplyPacket(packet: ApprovedWorkflowRunPacket) {
 	}
 	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
 		throw new Error("Docs spine apply proof ref is not approved.");
+	}
+}
+
+function assertDocsOperatingSystemAdoptionPacket(
+	packet: ApprovedWorkflowRunPacket,
+) {
+	if (
+		packet.workflowVersion !== DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_VERSION
+	) {
+		throw new Error(
+			"Docs operating system adoption workflow version is not approved.",
+		);
+	}
+	if (packet.profileName !== "sbs-workspace-write") {
+		throw new Error("Docs operating system adoption profile is not approved.");
+	}
+	if (
+		packet.installProfile !== DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE
+	) {
+		throw new Error(
+			"Docs operating system adoption install profile is not approved.",
+		);
+	}
+	if (
+		!/^sbs\/docs-operating-system-adoption-\d{8}-\d{4}$/.test(packet.branchName)
+	) {
+		throw new Error("Docs operating system adoption branch is not approved.");
+	}
+	if (packet.writeLeaseDurationMinutes !== 30) {
+		throw new Error(
+			"Docs operating system adoption write lease duration is not approved.",
+		);
+	}
+	if (packet.dirtyStatePolicy !== "require_clean_worktree") {
+		throw new Error(
+			"Docs operating system adoption requires a clean-worktree policy.",
+		);
+	}
+	assertExactTextList(
+		packet.expectedOutputs,
+		DOCS_OPERATING_SYSTEM_ADOPTION_EXPECTED_OUTPUTS,
+		"Docs operating system adoption expected outputs",
+	);
+	assertExactTextList(
+		packet.allowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_ADOPTION_ALLOWED_TOUCH_TARGETS,
+		"Docs operating system adoption allowed touch targets",
+	);
+	assertExactTextList(
+		packet.disallowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+		"Docs operating system adoption disallowed touch targets",
+	);
+	assertExactTextList(
+		packet.proofCommands,
+		DOCS_OPERATING_SYSTEM_ADOPTION_PROOF_COMMANDS,
+		"Docs operating system adoption proof commands",
+	);
+	if (
+		packet.syncPolicySummary !==
+		DOCS_OPERATING_SYSTEM_ADOPTION_SYNC_POLICY_SUMMARY
+	) {
+		throw new Error(
+			"Docs operating system adoption sync policy is not approved.",
+		);
+	}
+	assertExactTextList(
+		packet.stopConditions,
+		DOCS_OPERATING_SYSTEM_ADOPTION_STOP_CONDITIONS,
+		"Docs operating system adoption stop conditions",
+	);
+	if (packet.rollbackNotes !== DOCS_OPERATING_SYSTEM_ADOPTION_ROLLBACK_NOTES) {
+		throw new Error(
+			"Docs operating system adoption rollback notes are not approved.",
+		);
+	}
+	if (
+		packet.localWorkflowPacketRef !==
+		`.sbs/runs/${packet.workflowRunId}/workflow-packet.json`
+	) {
+		throw new Error(
+			"Docs operating system adoption workflow packet ref is not approved.",
+		);
+	}
+	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
+		throw new Error(
+			"Docs operating system adoption proof ref is not approved.",
+		);
+	}
+}
+
+function assertDocsOperatingSystemPackageScriptPatchingPacket(
+	packet: ApprovedWorkflowRunPacket,
+) {
+	if (
+		packet.workflowVersion !==
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_WORKFLOW_VERSION
+	) {
+		throw new Error(
+			"Docs operating system package-script patching workflow version is not approved.",
+		);
+	}
+	if (packet.profileName !== "sbs-workspace-write") {
+		throw new Error(
+			"Docs operating system package-script patching profile is not approved.",
+		);
+	}
+	if (
+		packet.installProfile !== DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE
+	) {
+		throw new Error(
+			"Docs operating system package-script patching install profile is not approved.",
+		);
+	}
+	if (
+		!/^sbs\/docs-operating-system-package-scripts-\d{8}-\d{4}$/.test(
+			packet.branchName,
+		)
+	) {
+		throw new Error(
+			"Docs operating system package-script patching branch is not approved.",
+		);
+	}
+	if (packet.writeLeaseDurationMinutes !== 30) {
+		throw new Error(
+			"Docs operating system package-script patching write lease duration is not approved.",
+		);
+	}
+	if (packet.dirtyStatePolicy !== "require_clean_worktree") {
+		throw new Error(
+			"Docs operating system package-script patching requires a clean-worktree policy.",
+		);
+	}
+	assertExactTextList(
+		packet.expectedOutputs,
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_EXPECTED_OUTPUTS,
+		"Docs operating system package-script patching expected outputs",
+	);
+	assertExactTextList(
+		packet.allowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ALLOWED_TOUCH_TARGETS,
+		"Docs operating system package-script patching allowed touch targets",
+	);
+	assertExactTextList(
+		packet.disallowedTouchTargets,
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_DISALLOWED_TOUCH_TARGETS,
+		"Docs operating system package-script patching disallowed touch targets",
+	);
+	assertExactTextList(
+		packet.proofCommands,
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROOF_COMMANDS,
+		"Docs operating system package-script patching proof commands",
+	);
+	if (
+		packet.syncPolicySummary !==
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_SYNC_POLICY_SUMMARY
+	) {
+		throw new Error(
+			"Docs operating system package-script patching sync policy is not approved.",
+		);
+	}
+	assertExactTextList(
+		packet.stopConditions,
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_STOP_CONDITIONS,
+		"Docs operating system package-script patching stop conditions",
+	);
+	if (
+		packet.rollbackNotes !==
+		DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ROLLBACK_NOTES
+	) {
+		throw new Error(
+			"Docs operating system package-script patching rollback notes are not approved.",
+		);
+	}
+	if (
+		packet.localWorkflowPacketRef !==
+		`.sbs/runs/${packet.workflowRunId}/workflow-packet.json`
+	) {
+		throw new Error(
+			"Docs operating system package-script patching workflow packet ref is not approved.",
+		);
+	}
+	if (packet.localProofRef !== `.sbs/runs/${packet.workflowRunId}/proof.json`) {
+		throw new Error(
+			"Docs operating system package-script patching proof ref is not approved.",
+		);
 	}
 }
 

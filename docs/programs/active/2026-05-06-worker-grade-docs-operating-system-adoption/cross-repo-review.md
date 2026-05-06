@@ -4,7 +4,7 @@ summary: Portability review for applying Worker docs operating-system patterns t
 docType: program_cross_repo_review
 status: active
 read_when:
-  - Reviewing risks before implementing tooling or runtime install.
+  - Reviewing risks before implementing docs tooling install.
   - Checking how Worker, Ship by Sunday, Arena CRM, and sparse repos differ.
 ---
 
@@ -12,7 +12,7 @@ read_when:
 
 ## Worker
 
-Worker is the parity target. It has the full operating model: path-family markdown lint, docs-spine validation, specialized validators, runtime wrapper scripts, agent-legibility bootstrap, worktree-local runtime state, worker-state commands, and proof artifacts. It proves the shape of the system but should not be copied wholesale into every repo.
+Worker is the quality target. It has path-family markdown lint, docs-spine validation, Program and ExecPlan validators, planning scripts, and proof artifacts. It also has specialized operating state and runtime systems, but those are deferred from this Program. Worker proves the docs and validation shape of the system, not a template to copy wholesale.
 
 ## Ship by Sunday
 
@@ -24,18 +24,20 @@ Arena CRM is the customer pilot. It has its own `.codex/AGENTS.md` instruction h
 
 ## Sparse Repos
 
-Sparse fixtures are required because not every repo has a runtime app, worker-state concept, topology file, or existing docs tree. The runner must degrade honestly. A sparse repo can receive Programs, ExecPlans, docs routing, prompts, portable validators, and proof without receiving Worker-specific state that would be fake.
+Sparse fixtures are required because not every repo has an existing docs tree. The runner must degrade honestly. A sparse repo can receive Programs, ExecPlans, docs routing, prompts, portable validators, and proof without receiving Worker-specific state that would be fake.
 
 ## Portability Risks
 
 The biggest portability risk is over-installing Worker-specific operating surfaces. The second risk is under-installing scripts and validators while claiming the docs spine is operational. The third risk is damaging owner files through same-name template writes.
 
-The mitigation is a profile model plus a structured install plan. Each proposed operation should say whether it is core, optional, already present, installable, conflicting, or blocked.
+The mitigation is a profile model plus a structured install plan. Each proposed portable docs operation should say whether it is already present, installable, conflicting, or blocked. Non-core surfaces should be reported as out of scope, not modeled as installable modules.
+
+Runtime and Worker-specific operating state are out of scope for this Program. Worker routes runtime commands into `apps/runtime`, and Worker-owned state surfaces assume Worker concepts. Treat them as deferred references, not source code or install behavior for this docs tooling Program.
 
 ## API And File Contract Risks
 
-Package manifests and lockfiles must be parsed, not edited as raw text. Shell wrappers must respect the target package manager and existing repo scripts. Runtime bootstrap paths must be worktree-local and avoid committing local state. Proof artifacts should stay under `.sbs/runs/<workflow-run-id>/` or documented ignored runtime directories.
+Package manifests and lockfiles must be parsed, not edited as raw text. Script wrappers must respect the target package manager and existing repo scripts. Proof artifacts should stay under `.sbs/runs/<workflow-run-id>/`.
 
 ## Review Conclusion
 
-The Program is portable if it treats Worker as a behavioral reference and installs only the target repo's selected profile. The first implementation slice should prove the manifest and conflict contract before mutating package scripts or runtime files.
+The Program is portable if it treats Worker as a docs-quality reference and installs only the target repo's selected portable docs profile. The first implementation slice should prove the manifest and conflict contract before mutating package scripts or validator files.

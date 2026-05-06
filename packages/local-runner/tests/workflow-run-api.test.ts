@@ -19,6 +19,23 @@ import {
 	DOCS_SPINE_APPLY_STOP_CONDITIONS,
 	DOCS_SPINE_APPLY_SYNC_POLICY_SUMMARY,
 } from "../src/workflows/docs-spine-apply-and-proof/manifest";
+import {
+	DOCS_OPERATING_SYSTEM_ADOPTION_ALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_EXPECTED_OUTPUTS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
+	DOCS_OPERATING_SYSTEM_ADOPTION_PROOF_COMMANDS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_ROLLBACK_NOTES,
+	DOCS_OPERATING_SYSTEM_ADOPTION_STOP_CONDITIONS,
+	DOCS_OPERATING_SYSTEM_ADOPTION_SYNC_POLICY_SUMMARY,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_DISALLOWED_TOUCH_TARGETS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_EXPECTED_OUTPUTS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROOF_COMMANDS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ROLLBACK_NOTES,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_STOP_CONDITIONS,
+	DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_SYNC_POLICY_SUMMARY,
+} from "../src/workflows/docs-operating-system-adoption/manifest";
 
 function createState(): LocalProjectState {
 	return {
@@ -164,6 +181,77 @@ function createDocsSpineApplyPacket(overrides: Record<string, unknown> = {}) {
 	};
 }
 
+function createDocsOperatingSystemAdoptionPacket(
+	overrides: Record<string, unknown> = {},
+) {
+	return {
+		workflowRunId: "workflowRuns_docs_os",
+		workflowId: "docs-operating-system-adoption",
+		workflowVersion: "v1",
+		branchName: "sbs/docs-operating-system-adoption-20260506-1400",
+		profileName: "sbs-workspace-write",
+		installProfile: DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
+		writeLeaseId: "lease_workflowRuns_docs_os",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [...DOCS_OPERATING_SYSTEM_ADOPTION_EXPECTED_OUTPUTS],
+		allowedTouchTargets: [
+			...DOCS_OPERATING_SYSTEM_ADOPTION_ALLOWED_TOUCH_TARGETS,
+		],
+		disallowedTouchTargets: [
+			...DOCS_OPERATING_SYSTEM_ADOPTION_DISALLOWED_TOUCH_TARGETS,
+		],
+		proofCommands: [...DOCS_OPERATING_SYSTEM_ADOPTION_PROOF_COMMANDS],
+		syncPolicySummary: DOCS_OPERATING_SYSTEM_ADOPTION_SYNC_POLICY_SUMMARY,
+		stopConditions: [...DOCS_OPERATING_SYSTEM_ADOPTION_STOP_CONDITIONS],
+		rollbackNotes: DOCS_OPERATING_SYSTEM_ADOPTION_ROLLBACK_NOTES,
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_docs_os/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_docs_os/proof.json",
+		...overrides,
+	};
+}
+
+function createDocsOperatingSystemPackageScriptPatchingPacket(
+	overrides: Record<string, unknown> = {},
+) {
+	return {
+		workflowRunId: "workflowRuns_docs_os_package",
+		workflowId: "docs-operating-system-package-script-patching",
+		workflowVersion: "v1",
+		branchName: "sbs/docs-operating-system-package-scripts-20260506-1500",
+		profileName: "sbs-workspace-write",
+		installProfile: DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
+		writeLeaseId: "lease_workflowRuns_docs_os_package",
+		writeLeaseExpiresAt: 4_102_444_800_000,
+		writeLeaseDurationMinutes: 30,
+		dirtyStatePolicy: "require_clean_worktree",
+		expectedOutputs: [
+			...DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_EXPECTED_OUTPUTS,
+		],
+		allowedTouchTargets: [
+			...DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ALLOWED_TOUCH_TARGETS,
+		],
+		disallowedTouchTargets: [
+			...DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_DISALLOWED_TOUCH_TARGETS,
+		],
+		proofCommands: [
+			...DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_PROOF_COMMANDS,
+		],
+		syncPolicySummary:
+			DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_SYNC_POLICY_SUMMARY,
+		stopConditions: [
+			...DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_STOP_CONDITIONS,
+		],
+		rollbackNotes: DOCS_OPERATING_SYSTEM_PACKAGE_SCRIPT_PATCHING_ROLLBACK_NOTES,
+		localWorkflowPacketRef:
+			".sbs/runs/workflowRuns_docs_os_package/workflow-packet.json",
+		localProofRef: ".sbs/runs/workflowRuns_docs_os_package/proof.json",
+		...overrides,
+	};
+}
+
 describe("workflow run API", () => {
 	it("claims the next approved workflow packet from the worker queue", async () => {
 		const requests: unknown[] = [];
@@ -288,6 +376,32 @@ describe("workflow run API", () => {
 		expect(workflowRun?.workflowId).toBe("docs-spine-apply-and-proof");
 	});
 
+	it("accepts docs operating system adoption packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json(createDocsOperatingSystemAdoptionPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe("docs-operating-system-adoption");
+		expect(workflowRun?.installProfile).toBe("worker-grade");
+	});
+
+	it("accepts docs operating system package-script patching packets from the worker queue", async () => {
+		const workflowRun = await claimApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			fetchWorkflowRun: async () =>
+				Response.json(createDocsOperatingSystemPackageScriptPatchingPacket()),
+		});
+
+		expect(workflowRun?.workflowId).toBe(
+			"docs-operating-system-package-script-patching",
+		);
+		expect(workflowRun?.installProfile).toBe("worker-grade");
+	});
+
 	it("rejects mature repo adoption workflow packets that omit disallowed authorities", async () => {
 		await expect(
 			claimApprovedWorkflowRun({
@@ -331,5 +445,37 @@ describe("workflow run API", () => {
 					),
 			}),
 		).rejects.toThrow("Docs spine apply allowed touch targets");
+	});
+
+	it("rejects docs operating system adoption packets without the worker-grade install profile", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createDocsOperatingSystemAdoptionPacket({
+							installProfile: undefined,
+						}),
+					),
+			}),
+		).rejects.toThrow("Docs operating system adoption install profile");
+	});
+
+	it("rejects docs operating system package-script patching packets without the worker-grade install profile", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					Response.json(
+						createDocsOperatingSystemPackageScriptPatchingPacket({
+							installProfile: undefined,
+						}),
+					),
+			}),
+		).rejects.toThrow(
+			"Docs operating system package-script patching install profile",
+		);
 	});
 });

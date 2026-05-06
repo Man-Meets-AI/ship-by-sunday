@@ -17,7 +17,7 @@ Usage:
   ship-by-sunday setup check --codex-config-preview
   ship-by-sunday setup check --apply-codex-config
   ship-by-sunday setup check --rollback-codex-config <backup>
-  ship-by-sunday daemon start [--repo <path>] [--once] [--work --confirm-local-writes --confirm-observability-audit --confirm-adoption-audit --confirm-docs-spine-adoption --confirm-docs-spine-apply]
+  ship-by-sunday daemon start [--repo <path>] [--once] [--work --confirm-local-writes --confirm-observability-audit --confirm-adoption-audit --confirm-docs-spine-adoption --confirm-docs-spine-apply --confirm-docs-operating-system-scan --confirm-docs-operating-system-tooling-plan --confirm-docs-operating-system-tooling-apply]
   ship-by-sunday daemon status [--repo <path>] [--json]
   ship-by-sunday daemon stop [--repo <path>]
   ship-by-sunday one-shot [--repo <path>] [--json]
@@ -29,6 +29,8 @@ Usage:
   ship-by-sunday workflow mature-repo-adoption run --workflow-run-id <id> --confirm-adoption-audit [--repo <path>] [--json]
   ship-by-sunday workflow docs-spine-adoption run --workflow-run-id <id> --confirm-docs-spine-adoption [--repo <path>] [--json]
   ship-by-sunday workflow docs-spine-apply-and-proof run --workflow-run-id <id> --confirm-docs-spine-apply [--repo <path>] [--json]
+  ship-by-sunday workflow docs-operating-system-adoption run --workflow-run-id <id> --confirm-docs-operating-system-scan --confirm-docs-operating-system-tooling-plan [--repo <path>] [--json]
+  ship-by-sunday workflow docs-operating-system-package-script-patching run --workflow-run-id <id> --confirm-docs-operating-system-tooling-apply [--repo <path>] [--json]
 `;
 
 export async function runCli(argv = process.argv.slice(2)) {

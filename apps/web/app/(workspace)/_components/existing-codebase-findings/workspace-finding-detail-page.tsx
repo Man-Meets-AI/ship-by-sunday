@@ -143,6 +143,7 @@ export function WorkspaceFindingDetailPage({
 				workflowVersion: approval.workflowVersion,
 				branchName: approval.branchName,
 				profileName: approval.profileName,
+				installProfile: approval.installProfile,
 				writeLeaseDurationMinutes: approval.writeLeaseDurationMinutes,
 				dirtyStatePolicy: approval.dirtyStatePolicy,
 				expectedOutputs: approval.expectedOutputs,

@@ -22,17 +22,13 @@ Implement structured package manifest operations. Add or preserve scripts for `p
 
 Install or generate the portable validator files: Program packet lint, ExecPlan lint, path-family markdown lint, docs-spine validation, prompt inventory lint, quality-score freshness checks, docs route checks, stale path checks, and child-plan generation. Prove the generated tooling can run in a target repo or produce exact blocked setup evidence.
 
-## Slice 4: Runtime Legibility And Proof Artifacts
+## Slice 4: Multi-Repo Acceptance
 
-Install the runtime wrapper and bootstrap profile. Wire `runtime:bootstrap`, `runtime:up`, `runtime:health`, `runtime:down`, runtime proof commands, worktree-local `.runtime/` state, `ASSISTANT_RUNTIME_ROOT`, runtime index files, logs, and durable proof artifacts. Keep runtime install optional if the target repo only wants docs and validators.
+Run the full flow against Worker, Ship by Sunday, Arena CRM, and sparse fixtures. Acceptance should prove three states: already-installed, installable with structured patches, and honestly blocked because the repo lacks a required portable docs dependency.
 
-## Slice 5: Specialized Operating-Surface Modules
+## Deferred Out-Of-Scope Programs
 
-Add optional modules for notes, goals, projects, worker role docs, topology, worker state, and companion docs. Each module should include detection, install files, scripts, validation proof, and a clear reason to skip when the target repo does not need it.
-
-## Slice 6: Multi-Repo Acceptance
-
-Run the full flow against Worker, Ship by Sunday, Arena CRM, and sparse fixtures. Acceptance should prove three states: already-installed, installable with structured patches, and honestly blocked because the repo lacks a selected dependency or optional surface.
+Runtime legibility, runtime bootstrap, target-stack health checks, `.runtime/` state, `ASSISTANT_RUNTIME_ROOT`, runtime index files, logs, runtime proof commands, Worker notes, Worker goals, Worker projects, worker role docs, topology, worker-state commands, CI/provider setup, app-stack command conventions, and broad root `AGENTS.md` rewrites are intentionally not in this Program.
 
 ## First Child ExecPlan
 
