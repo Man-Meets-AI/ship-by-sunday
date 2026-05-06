@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Generate bounded local Codex synthesis packets from docs-spine scanner facts without applying customer docs.
 post_build_recap: Added local Codex synthesis packet and draft artifacts under .sbs/docs-spine-adoption/drafts without model calls or docs application.
 program_id: docs-spine-adoption-operating-loop
-planning_brief: docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-3.md
+planning_brief: docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-3.md
 read_when:
   - Implementing Codex synthesis packets for docs-spine adoption.
   - Updating docs-spine draft artifact contracts.
@@ -65,7 +65,7 @@ Validation evidence:
     bun run --cwd packages/local-runner test
     bun run --cwd packages/local-runner build
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-codex-synthesis-packets.md docs/internal/workflow-packets.md docs/programs/README.md docs/programs/active/index.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-codex-synthesis-packets.md docs/internal/workflow-packets.md docs/programs/README.md docs/programs/active/index.md
     git diff --check
 
 ## Context and Orientation
@@ -74,7 +74,7 @@ The docs-spine workflow runner is `packages/local-runner/src/core/docs-spine-ado
 
 The workflow-local scanner and schemas live under `packages/local-runner/src/workflows/docs-spine-adoption/`.
 
-The owning Program is `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/program.md`; this slice was built from `planning-brief-3.md`.
+The owning Program is `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/program.md`; this slice was built from `planning-brief-3.md`.
 
 ### In Scope
 
@@ -120,7 +120,7 @@ Work from the repository root:
 
 Inspect the current scanner surfaces:
 
-    rg -n "DocsSpine|docs-spine-adoption|drafts" packages/local-runner docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop
+    rg -n "DocsSpine|docs-spine-adoption|drafts" packages/local-runner docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop
 
 Implement the synthesis packet generator under `packages/local-runner/src/workflows/docs-spine-adoption/`, then wire it into the runner.
 
@@ -138,7 +138,7 @@ Acceptance requires local-runner tests proving every draft artifact is written u
     bun run --cwd packages/local-runner format:check
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-docs-spine-codex-synthesis-packets.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-codex-synthesis-packets.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-codex-synthesis-packets.md
     git diff --check
 
 ## Idempotence and Recovery

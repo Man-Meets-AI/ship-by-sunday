@@ -28,7 +28,6 @@ Inside that folder:
 Active Program folders:
 
 - `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
-- `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/` - deterministic local-runner docs-spine adoption for mature repos; scaffold, scanner facts, and synthesis packets complete, apply-and-proof next.
 - `docs/programs/active/2026-05-05-worker-generate-tutorials-ia/` - Generate Codebase, Tutorials, and Worker IA migration with capability-based access, canonical routes, navigation, copy, and runtime compatibility.
 
 Completed Program packets live under `docs/programs/completed/`.

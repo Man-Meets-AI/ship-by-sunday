@@ -6,7 +6,7 @@ completed_at: 2026-05-05
 summary: Expand docs-spine-adoption from a scaffold into deterministic scanner artifacts without applying customer docs.
 post_build_recap: Added deterministic docs-spine scanner artifacts, schema refs, proof coverage, and sync-safe scanner tests.
 program_id: docs-spine-adoption-operating-loop
-planning_brief: docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/planning-brief-2.md
 read_when:
   - Implementing scanner artifacts for docs-spine adoption.
   - Updating docs-spine facts schemas or proof output.
@@ -73,7 +73,7 @@ Validation evidence:
 
 The runner implementation is `packages/local-runner/src/core/docs-spine-adoption-workflow.ts`. The workflow constants and current schemas live in `packages/local-runner/src/workflows/docs-spine-adoption/`.
 
-The owning Program is `docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop/program.md`; the current brief is `planning-brief-2.md`.
+The owning Program is `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/program.md`; the current brief is `planning-brief-2.md`.
 
 ### In Scope
 
@@ -121,7 +121,7 @@ Work from the repository root:
 
 Inspect the current docs-spine scaffold before changing code:
 
-    rg -n "docs-spine-adoption|DocsSpine" packages/local-runner apps/web/convex apps/web/app/\(workspace\)/_lib docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop
+    rg -n "docs-spine-adoption|DocsSpine" packages/local-runner apps/web/convex apps/web/app/\(workspace\)/_lib docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop
 
 Implement the scanner as workflow-local code under `packages/local-runner/src/workflows/docs-spine-adoption/`, then wire it through `packages/local-runner/src/core/docs-spine-adoption-workflow.ts`.
 
@@ -139,7 +139,7 @@ Acceptance requires focused local-runner tests proving every scanner artifact is
     bun run --cwd packages/local-runner format:check
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-docs-spine-scanner-and-facts-model.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-scanner-and-facts-model.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop docs/exec-plans/completed/2026-05-05-docs-spine-scanner-and-facts-model.md
     git diff --check
 
 ## Idempotence and Recovery
