@@ -357,11 +357,34 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 			});
 		}
 
-		await writeTextTarget(
-			repositoryRoot,
-			"package.json",
-			packagePatch.packageJsonText,
-		);
+		const writePreflightBlockedReasons =
+			await listPackagePatchWritePreflightBlockedReasons({
+				repositoryRoot,
+				targetRefs: [
+					"package.json",
+					...packagePatch.wrapperFiles.map((file) => file.targetRef),
+				],
+			});
+		if (writePreflightBlockedReasons.length > 0) {
+			return await blockWorkflow({
+				repositoryRoot,
+				state,
+				credential,
+				workflowRunId,
+				branchName,
+				profileName,
+				writeLeaseId,
+				localRunDirectoryRef,
+				localRunDirectory,
+				blockedStage: "write-preflight",
+				blockedReason:
+					"Docs operating system package-script patching blocked before source writes because approved targets are not writable files.",
+				createdArtifacts: [workflowPacketRef, manifestRef, applySummaryRef],
+				blockedDetails: writePreflightBlockedReasons,
+				fetchRunnerEvent,
+			});
+		}
+
 		for (const wrapperFile of packagePatch.wrapperFiles) {
 			await writeTextTarget(
 				repositoryRoot,
@@ -369,6 +392,11 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 				wrapperFile.content,
 			);
 		}
+		await writeTextTarget(
+			repositoryRoot,
+			"package.json",
+			packagePatch.packageJsonText,
+		);
 
 		const { proofCommandResults, unexpectedTouchedFiles } =
 			await runProofCommands({
@@ -553,8 +581,18 @@ async function readTextIfExists(
 	repoRelativePath: string,
 ) {
 	const targetPath = path.join(repositoryRoot, repoRelativePath);
-	if (!existsSync(targetPath)) {
+	const stats = await lstat(targetPath).catch((error) => {
+		const code = (error as { code?: string }).code;
+		if (code === "ENOENT" || code === "ENOTDIR") {
+			return null;
+		}
+		throw error;
+	});
+	if (!stats) {
 		return null;
+	}
+	if (!stats.isFile()) {
+		return "";
 	}
 	return await readFile(targetPath, "utf8");
 }
@@ -748,6 +786,86 @@ async function writeTextTarget(
 	await writeFile(targetPath, value);
 }
 
+async function listPackagePatchWritePreflightBlockedReasons({
+	repositoryRoot,
+	targetRefs,
+}: {
+	repositoryRoot: string;
+	targetRefs: string[];
+}): Promise<DocsOperatingSystemPackagePatchBlockedReason[]> {
+	const blockedReasons: DocsOperatingSystemPackagePatchBlockedReason[] = [];
+	for (const targetRef of targetRefs) {
+		try {
+			assertApprovedPackageScriptPatchingTargetRef(targetRef);
+			await assertNoSymlinkInExistingPath(repositoryRoot, targetRef);
+		} catch (error) {
+			blockedReasons.push({
+				stage: "write-preflight",
+				targetRef,
+				reason: error instanceof Error ? error.message : String(error),
+			});
+			continue;
+		}
+
+		const parentBlockedReason = await getInvalidParentDirectoryReason(
+			repositoryRoot,
+			targetRef,
+		);
+		if (parentBlockedReason) {
+			blockedReasons.push({
+				stage: "write-preflight",
+				targetRef,
+				reason: parentBlockedReason,
+			});
+			continue;
+		}
+
+		const targetPath = path.join(repositoryRoot, targetRef);
+		const stats = await lstat(targetPath).catch((error) => {
+			const code = (error as { code?: string }).code;
+			if (code === "ENOENT" || code === "ENOTDIR") {
+				return null;
+			}
+			throw error;
+		});
+		if (stats && !stats.isFile()) {
+			blockedReasons.push({
+				stage: "write-preflight",
+				targetRef,
+				reason: "Approved target already exists and is not a regular file.",
+			});
+		}
+	}
+	return blockedReasons;
+}
+
+async function getInvalidParentDirectoryReason(
+	repositoryRoot: string,
+	repoRelativePath: string,
+) {
+	let currentPath = repositoryRoot;
+	for (const segment of repoRelativePath.split("/").slice(0, -1)) {
+		currentPath = path.join(currentPath, segment);
+		const stats = await lstat(currentPath).catch((error) => {
+			const code = (error as { code?: string }).code;
+			if (code === "ENOENT" || code === "ENOTDIR") {
+				return null;
+			}
+			throw error;
+		});
+		if (!stats) {
+			return null;
+		}
+		if (!stats.isDirectory()) {
+			return `Parent path ${path.relative(
+				repositoryRoot,
+				currentPath,
+			)} exists and is not a directory.`;
+		}
+	}
+	return null;
+}
+
 async function ensureSafePackageScriptPatchingArtifactDirectory(
 	repositoryRoot: string,
 	repoRelativePath: string,
@@ -821,7 +939,8 @@ async function assertNoSymlinkInExistingPath(
 	for (const segment of repoRelativePath.split("/")) {
 		currentPath = path.join(currentPath, segment);
 		const stats = await lstat(currentPath).catch((error) => {
-			if ((error as { code?: string }).code === "ENOENT") {
+			const code = (error as { code?: string }).code;
+			if (code === "ENOENT" || code === "ENOTDIR") {
 				return null;
 			}
 			throw error;

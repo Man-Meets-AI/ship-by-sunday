@@ -200,13 +200,15 @@ describe("docs operating system install plan", () => {
 	it("does not recognize arbitrary Ship by Sunday text or runtime wrappers as portable docs scripts", () => {
 		const plan = buildDocsOperatingSystemInstallPlan({
 			repoFacts: createRepoFacts({
-				packageScripts: ["docs:validate", "programs:lint"],
+				packageScripts: ["docs:validate", "programs:lint", "markdown:lint"],
 			}),
 			rootPackageManifest: {
 				name: "customer-repo",
 				scripts: {
 					"docs:validate": "echo ship-by-sunday migration pending",
 					"programs:lint": "scripts/run-runtime.sh programs:lint",
+					"markdown:lint":
+						"echo extra && bun scripts/sbs-docs/markdown-lint.mjs",
 				},
 			},
 			trackedRepoRefs: ["package.json"],
@@ -225,6 +227,11 @@ describe("docs operating system install plan", () => {
 					status: "blocked",
 					currentScriptRecognized: false,
 				}),
+				expect.objectContaining({
+					scriptName: "markdown:lint",
+					status: "blocked",
+					currentScriptRecognized: false,
+				}),
 			]),
 		);
 		expect(plan.blockedOperations).toEqual(
@@ -237,10 +244,15 @@ describe("docs operating system install plan", () => {
 					operationId: "package-script:programs:lint",
 					surface: "package-script",
 				}),
+				expect.objectContaining({
+					operationId: "package-script:markdown:lint",
+					surface: "package-script",
+				}),
 			]),
 		);
 		expect(JSON.stringify(plan)).not.toContain("ship-by-sunday migration");
 		expect(JSON.stringify(plan)).not.toContain("run-runtime.sh");
+		expect(JSON.stringify(plan)).not.toContain("echo extra");
 	});
 
 	it("reports runtime and worker-specific surfaces as out of scope", () => {

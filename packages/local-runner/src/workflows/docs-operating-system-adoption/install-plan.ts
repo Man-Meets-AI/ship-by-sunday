@@ -233,36 +233,46 @@ export function isRecognizedPortableDocsScript(
 	const normalizedScript = currentScript.replace(/\s+/g, " ").trim();
 	const recognizedPatterns: Record<
 		DocsOperatingSystemCanonicalScript,
-		RegExp[]
+		string[]
 	> = {
 		"programs:lint": [
-			/scripts\/programs\/run-lint\.ts/,
-			/scripts\/sbs-docs\/programs-lint\.mjs/,
+			"bun scripts/programs/run-lint.ts",
+			"bun run scripts/programs/run-lint.ts",
+			"bun scripts/sbs-docs/programs-lint.mjs",
+			"bun run scripts/sbs-docs/programs-lint.mjs",
 		],
 		"plans:lint": [
-			/scripts\/exec-plan\/run-lint\.ts/,
-			/scripts\/sbs-docs\/exec-plans-lint\.mjs/,
+			"bun scripts/exec-plan/run-lint.ts",
+			"bun run scripts/exec-plan/run-lint.ts",
+			"bun scripts/sbs-docs/exec-plans-lint.mjs",
+			"bun run scripts/sbs-docs/exec-plans-lint.mjs",
 		],
 		"markdown:lint": [
-			/scripts\/markdown-metadata\/run-lint\.ts/,
-			/scripts\/sbs-docs\/markdown-lint\.mjs/,
+			"bun scripts/markdown-metadata/run-lint.ts",
+			"bun run scripts/markdown-metadata/run-lint.ts",
+			"bun scripts/sbs-docs/markdown-lint.mjs",
+			"bun run scripts/sbs-docs/markdown-lint.mjs",
 		],
 		"docs:validate": [
-			/scripts\/docs-quality\/validate\.ts/,
-			/scripts\/sbs-docs\/docs-validate\.mjs/,
+			"bun scripts/docs-quality/validate.ts",
+			"bun run scripts/docs-quality/validate.ts",
+			"bun scripts/sbs-docs/docs-validate.mjs",
+			"bun run scripts/sbs-docs/docs-validate.mjs",
 		],
 		"docs:refresh-quality": [
-			/scripts\/docs-quality\/refresh/,
-			/scripts\/sbs-docs\/docs-refresh-quality\.mjs/,
+			"bun scripts/docs-quality/refresh-quality.ts",
+			"bun run scripts/docs-quality/refresh-quality.ts",
+			"bun scripts/sbs-docs/docs-refresh-quality.mjs",
+			"bun run scripts/sbs-docs/docs-refresh-quality.mjs",
 		],
 		"program:write-child-plan": [
-			/scripts\/programs\/write-child-plan/,
-			/scripts\/sbs-docs\/write-child-plan\.mjs/,
+			"bun scripts/programs/write-child-plan.ts",
+			"bun run scripts/programs/write-child-plan.ts",
+			"bun scripts/sbs-docs/write-child-plan.mjs",
+			"bun run scripts/sbs-docs/write-child-plan.mjs",
 		],
 	};
-	return recognizedPatterns[scriptName].some((pattern) =>
-		pattern.test(normalizedScript),
-	);
+	return recognizedPatterns[scriptName].includes(normalizedScript);
 }
 
 function resolveShipBySundayDependencyStatus({
