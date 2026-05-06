@@ -548,7 +548,8 @@ describe("workspace findings read model", () => {
 				createFinding({
 					findingId: "finding-docs-operating-system-lockfile",
 					category: "other",
-					title: "Docs operating system dependency metadata needs lockfile proof",
+					title:
+						"Docs operating system dependency metadata needs lockfile proof",
 					permissionRequired: "workspace_write",
 					recommendedWorkflowId: "docs-operating-system-lockfile-refresh",
 				}),
@@ -567,7 +568,7 @@ describe("workspace findings read model", () => {
 			profileName: "sbs-workspace-write",
 			installProfile: "worker-grade",
 			proofCommands: [
-				"package-manager lockfile refresh with lifecycle scripts disabled",
+				"package-manager lockfile refresh with lifecycle scripts and repo-controlled pnpm hooks disabled",
 				"git status --short",
 				"git diff --name-only",
 				"git diff --check",
@@ -584,7 +585,6 @@ describe("workspace findings read model", () => {
 			"package-lock.json",
 			"npm-shrinkwrap.json",
 			"pnpm-lock.yaml",
-			"yarn.lock",
 		]);
 		expect(detail?.workflowApproval.disallowedTouchTargets).toEqual(
 			expect.arrayContaining([

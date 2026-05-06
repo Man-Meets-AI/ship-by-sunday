@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -9,6 +9,7 @@ import { runDocsOperatingSystemLockfileRefreshWorkflow } from "../src/core/docs-
 import { runDocsOperatingSystemPackageScriptPatchingWorkflow } from "../src/core/docs-operating-system-package-script-patching-workflow";
 import type { ApprovedWorkflowRunPacket } from "../src/core/workflow-run-api";
 import { buildDocsOperatingSystemInstallPlan } from "../src/workflows/docs-operating-system-adoption/install-plan";
+import { resolveDocsOperatingSystemLockfileRefreshCommand } from "../src/workflows/docs-operating-system-adoption/lockfile-refresh";
 import {
 	DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
 	DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS,
@@ -263,14 +264,24 @@ async function applyPackageScriptPatch(repositoryRoot: string) {
 	});
 	expect(result.status).toBe("proof_completed");
 	expect(result.proofStatus).toBe("passed");
+	await commitAll(repositoryRoot, "apply docs operating system package patch");
+}
+
+async function commitAll(repositoryRoot: string, message: string) {
+	await execFileAsync("git", ["add", "-A"], { cwd: repositoryRoot });
+	await execFileAsync("git", ["commit", "-m", message], {
+		cwd: repositoryRoot,
+	});
 }
 
 async function createFakeBun({
 	exitCode = 0,
 	mutatePackageJson = false,
+	lockfileRef = "bun.lock",
 }: {
 	exitCode?: number;
 	mutatePackageJson?: boolean;
+	lockfileRef?: string;
 } = {}) {
 	const binDirectory = await createTemporaryDirectory("sbs-fake-bun-");
 	const bunPath = path.join(binDirectory, "bun");
@@ -279,7 +290,7 @@ async function createFakeBun({
 		[
 			"#!/bin/sh",
 			'if [ "$1" = "install" ]; then',
-			'  printf "# refreshed by fake bun\\n" > bun.lock',
+			`  printf "# refreshed by fake bun\\n" > ${lockfileRef}`,
 			mutatePackageJson
 				? '  printf "{\\"name\\":\\"mutated\\"}\\n" > package.json'
 				: "  :",
@@ -313,6 +324,26 @@ async function withPath<T>(binDirectory: string, callback: () => Promise<T>) {
 const successfulEventFetch = async () => new Response(null, { status: 204 });
 
 describe("docs operating system lockfile refresh workflow", () => {
+	it("resolves pnpm with pnpmfile hooks ignored and CI frozen lockfile disabled", () => {
+		const commandResolution =
+			resolveDocsOperatingSystemLockfileRefreshCommand("pnpm");
+
+		expect(commandResolution.status).toBe("ready");
+		if (commandResolution.status !== "ready") {
+			throw new Error("Expected pnpm lockfile refresh command to be ready.");
+		}
+		expect(commandResolution.command.args).toEqual([
+			"install",
+			"--lockfile-only",
+			"--ignore-scripts",
+			"--ignore-pnpmfile",
+			"--no-frozen-lockfile",
+		]);
+		expect(commandResolution.command.commandName).toBe(
+			"pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile",
+		);
+	});
+
 	it("blocks without explicit lockfile refresh confirmation", async () => {
 		const repositoryRoot = await createPackagePatchRepository();
 		await writeInstallPlan(repositoryRoot);
@@ -391,6 +422,7 @@ describe("docs operating system lockfile refresh workflow", () => {
 	it("blocks before package-manager execution when package-script apply proof is missing", async () => {
 		const repositoryRoot = await createPackagePatchRepository();
 		await writeInstallPlan(repositoryRoot);
+		await commitAll(repositoryRoot, "add docs operating system install plan");
 		const fakeBunBin = await createFakeBun();
 
 		const result = await withPath(fakeBunBin, async () =>
@@ -430,6 +462,155 @@ describe("docs operating system lockfile refresh workflow", () => {
 				expect.objectContaining({
 					stage: "package-script-apply",
 					targetRef: applySummaryRef,
+				}),
+			]),
+		);
+	});
+
+	it("blocks dirty guarded package inputs before package-manager execution", async () => {
+		const repositoryRoot = await createPackagePatchRepository();
+		await writeInstallPlan(repositoryRoot);
+		await applyPackageScriptPatch(repositoryRoot);
+		await writePackageJson(repositoryRoot, {
+			name: "customer-repo",
+			scripts: {},
+		});
+		const fakeBunBin = await createFakeBun();
+
+		const result = await withPath(fakeBunBin, async () =>
+			runDocsOperatingSystemLockfileRefreshWorkflow({
+				repositoryRoot,
+				state: createState(),
+				credential: createCredential(),
+				approvedWorkflowRun: createApprovedLockfileRefreshRun({
+					workflowRunId: "workflowRuns_docs_os_lockfile_dirty_package",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_dirty_package/workflow-packet.json",
+					localProofRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_dirty_package/proof.json",
+				}),
+				confirmDocsOperatingSystemLockfileRefresh: true,
+				fetchRunnerEvent: successfulEventFetch,
+			}),
+		);
+
+		expect(result.status).toBe("blocked");
+		await expect(
+			readFile(path.join(repositoryRoot, "bun.lock"), "utf8"),
+		).rejects.toThrow();
+		const proof = await readJson<{
+			blockedProof: Array<{ stage: string; targetRef?: string }>;
+		}>(
+			repositoryRoot,
+			".sbs/runs/workflowRuns_docs_os_lockfile_dirty_package/proof.json",
+		);
+		expect(proof.blockedProof).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					stage: "dirty-state",
+					targetRef: "package.json",
+				}),
+			]),
+		);
+	});
+
+	it("blocks dirty source install-plan artifacts before package-manager execution", async () => {
+		const repositoryRoot = await createPackagePatchRepository();
+		await writeInstallPlan(repositoryRoot);
+		await applyPackageScriptPatch(repositoryRoot);
+		const installPlan = await readJson<Record<string, unknown>>(
+			repositoryRoot,
+			installPlanRef,
+		);
+		await writeFile(
+			path.join(repositoryRoot, installPlanRef),
+			`${JSON.stringify({ ...installPlan, packageManager: "npm" }, null, 2)}\n`,
+		);
+		const fakeBunBin = await createFakeBun();
+
+		const result = await withPath(fakeBunBin, async () =>
+			runDocsOperatingSystemLockfileRefreshWorkflow({
+				repositoryRoot,
+				state: createState(),
+				credential: createCredential(),
+				approvedWorkflowRun: createApprovedLockfileRefreshRun({
+					workflowRunId: "workflowRuns_docs_os_lockfile_dirty_plan",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_dirty_plan/workflow-packet.json",
+					localProofRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_dirty_plan/proof.json",
+				}),
+				confirmDocsOperatingSystemLockfileRefresh: true,
+				fetchRunnerEvent: successfulEventFetch,
+			}),
+		);
+
+		expect(result.status).toBe("blocked");
+		await expect(
+			readFile(path.join(repositoryRoot, "bun.lock"), "utf8"),
+		).rejects.toThrow();
+		const proof = await readJson<{
+			blockedProof: Array<{ stage: string; targetRef?: string }>;
+		}>(
+			repositoryRoot,
+			".sbs/runs/workflowRuns_docs_os_lockfile_dirty_plan/proof.json",
+		);
+		expect(proof.blockedProof).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					stage: "dirty-state",
+					targetRef: installPlanRef,
+				}),
+			]),
+		);
+	});
+
+	it("blocks when committed live package patch state would need to be reapplied", async () => {
+		const repositoryRoot = await createPackagePatchRepository();
+		await writeInstallPlan(repositoryRoot);
+		await applyPackageScriptPatch(repositoryRoot);
+		await rm(
+			path.join(repositoryRoot, "scripts", "sbs-docs", "programs-lint.mjs"),
+		);
+		await commitAll(repositoryRoot, "remove approved docs wrapper");
+		const fakeBunBin = await createFakeBun();
+
+		const result = await withPath(fakeBunBin, async () =>
+			runDocsOperatingSystemLockfileRefreshWorkflow({
+				repositoryRoot,
+				state: createState(),
+				credential: createCredential(),
+				approvedWorkflowRun: createApprovedLockfileRefreshRun({
+					workflowRunId: "workflowRuns_docs_os_lockfile_missing_wrapper",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_missing_wrapper/workflow-packet.json",
+					localProofRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_missing_wrapper/proof.json",
+				}),
+				confirmDocsOperatingSystemLockfileRefresh: true,
+				fetchRunnerEvent: successfulEventFetch,
+			}),
+		);
+
+		expect(result.status).toBe("blocked");
+		await expect(
+			readFile(path.join(repositoryRoot, "bun.lock"), "utf8"),
+		).rejects.toThrow();
+		const proof = await readJson<{
+			blockedProof: Array<{
+				stage: string;
+				targetRef?: string;
+				reason: string;
+			}>;
+		}>(
+			repositoryRoot,
+			".sbs/runs/workflowRuns_docs_os_lockfile_missing_wrapper/proof.json",
+		);
+		expect(proof.blockedProof).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					stage: "package-script-apply",
+					targetRef: "scripts/sbs-docs/programs-lint.mjs",
 				}),
 			]),
 		);
@@ -508,5 +689,42 @@ describe("docs operating system lockfile refresh workflow", () => {
 			".sbs/runs/workflowRuns_docs_os_lockfile_guarded/proof.json",
 		);
 		expect(proof.unexpectedTouchedFiles).toContain("package.json");
+	});
+
+	it("fails proof when the package manager writes a non-manager lockfile", async () => {
+		const repositoryRoot = await createPackagePatchRepository();
+		await writeInstallPlan(repositoryRoot);
+		await applyPackageScriptPatch(repositoryRoot);
+		const fakeBunBin = await createFakeBun({ lockfileRef: "yarn.lock" });
+
+		const result = await withPath(fakeBunBin, async () =>
+			runDocsOperatingSystemLockfileRefreshWorkflow({
+				repositoryRoot,
+				state: createState(),
+				credential: createCredential(),
+				approvedWorkflowRun: createApprovedLockfileRefreshRun({
+					workflowRunId: "workflowRuns_docs_os_lockfile_wrong_manager",
+					localWorkflowPacketRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_wrong_manager/workflow-packet.json",
+					localProofRef:
+						".sbs/runs/workflowRuns_docs_os_lockfile_wrong_manager/proof.json",
+				}),
+				confirmDocsOperatingSystemLockfileRefresh: true,
+				fetchRunnerEvent: successfulEventFetch,
+			}),
+		);
+
+		expect(result.status).toBe("proof_completed");
+		expect(result.proofStatus).toBe("failed");
+		expect(result.touchedFiles).toEqual([]);
+		const proof = await readJson<{
+			touchedFiles: string[];
+			unexpectedTouchedFiles: string[];
+		}>(
+			repositoryRoot,
+			".sbs/runs/workflowRuns_docs_os_lockfile_wrong_manager/proof.json",
+		);
+		expect(proof.touchedFiles).toEqual([]);
+		expect(proof.unexpectedTouchedFiles).toContain("yarn.lock");
 	});
 });

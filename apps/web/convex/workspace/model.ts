@@ -393,7 +393,6 @@ const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ALLOWED_TOUCH_TARGETS = [
 	"package-lock.json",
 	"npm-shrinkwrap.json",
 	"pnpm-lock.yaml",
-	"yarn.lock",
 ] as const;
 const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS = [
 	"runtime app code",
@@ -421,7 +420,7 @@ const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_DISALLOWED_TOUCH_TARGETS = [
 	"Codex transcripts",
 ] as const;
 const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_PROOF_COMMANDS = [
-	"package-manager lockfile refresh with lifecycle scripts disabled",
+	"package-manager lockfile refresh with lifecycle scripts and repo-controlled pnpm hooks disabled",
 	"git status --short",
 	"git diff --name-only",
 	"git diff --check",
@@ -431,7 +430,7 @@ const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_SYNC_POLICY_SUMMARY =
 const DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS = [
 	"write lease expires before lockfile refresh starts",
 	"approved packet is missing installProfile: worker-grade",
-	"worktree has dirty lockfiles or unsafe runner artifacts before lockfile refresh starts",
+	"worktree has dirty lockfiles, guarded package inputs, source install/apply artifacts, or unsafe runner artifacts before lockfile refresh starts",
 	"package-script apply summary is missing, invalid, blocked, or stale",
 	"live package.json or wrapper files no longer match the approved package-script patch contract",
 	"requested work needs package manifest mutation, package script mutation, wrapper mutation, full dependency install state, docs application, root instruction rewrites, runtime setup, provider setup, CI, PRs, branch pushes, raw source, raw logs, script bodies, dependency versions from the target repo, or Codex transcripts",
@@ -1313,7 +1312,9 @@ function assertDocsOperatingSystemLockfileRefreshWorkflowApprovalPacket(args: {
 		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS,
 		"Docs operating system lockfile refresh stopConditions",
 	);
-	if (args.rollbackNotes !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES) {
+	if (
+		args.rollbackNotes !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES
+	) {
 		throw new ConvexError(
 			"Docs operating system lockfile refresh rollbackNotes does not match the approved workflow packet",
 		);
@@ -1968,8 +1969,7 @@ function isApprovedDocsOperatingSystemLockfileRefreshTouchedRef(
 		ref === "bun.lockb" ||
 		ref === "package-lock.json" ||
 		ref === "npm-shrinkwrap.json" ||
-		ref === "pnpm-lock.yaml" ||
-		ref === "yarn.lock"
+		ref === "pnpm-lock.yaml"
 	);
 }
 

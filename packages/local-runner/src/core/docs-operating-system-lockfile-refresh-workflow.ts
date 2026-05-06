@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -375,6 +376,7 @@ export async function runDocsOperatingSystemLockfileRefreshWorkflow({
 		const touchedLockfileRefs = await listTouchedLockfileRefs({
 			repositoryRoot,
 			preRunDirtyFileRefs,
+			expectedLockfileRefs: validation.command.expectedLockfileRefs,
 		});
 		approvedLockfileRefs = touchedLockfileRefs;
 		const changedGuardedInputRefs = await listChangedGuardedInputRefs({
@@ -681,6 +683,21 @@ async function validateLockfileRefreshPrerequisites({
 	}
 
 	const packageManager = installPlan?.packageManager ?? "unknown";
+	const detectedPackageManager =
+		detectPackageManagerFromLockfiles(repositoryRoot);
+	if (
+		installPlan &&
+		detectedPackageManager !== "unknown" &&
+		detectedPackageManager !== "unknown-node" &&
+		detectedPackageManager !== packageManager
+	) {
+		blockedReasons.push({
+			stage: "install-plan",
+			targetRef: SOURCE_INSTALL_PLAN_REF,
+			reason:
+				"Install plan package manager no longer matches the live repository lockfile state.",
+		});
+	}
 	if (applySummary) {
 		blockedReasons.push(...validateApplySummary(applySummary));
 	}
@@ -698,6 +715,17 @@ async function validateLockfileRefreshPrerequisites({
 					reason: reason.reason,
 					targetRef: reason.targetRef,
 				})),
+			);
+		} else {
+			blockedReasons.push(
+				...packagePatch.appliedOperations
+					.filter((operation) => operation.status !== "kept")
+					.map((operation) => ({
+						stage: "package-script-apply",
+						targetRef: operation.targetRef,
+						reason:
+							"Live package.json or wrapper files no longer contain the approved package-script patch.",
+					})),
 			);
 		}
 	}
@@ -976,12 +1004,14 @@ function formatExitCodeSummary(result: BoundedProcessResult) {
 async function listTouchedLockfileRefs({
 	repositoryRoot,
 	preRunDirtyFileRefs,
+	expectedLockfileRefs,
 }: {
 	repositoryRoot: string;
 	preRunDirtyFileRefs: string[];
+	expectedLockfileRefs: string[];
 }) {
 	const preRunDirtySet = new Set(preRunDirtyFileRefs);
-	const lockfileRefSet = new Set<string>(listDocsOperatingSystemLockfileRefs());
+	const lockfileRefSet = new Set<string>(expectedLockfileRefs);
 	const dirtyFileRefs = await listGitDirtyFileRefs(repositoryRoot);
 	return dirtyFileRefs
 		.filter((fileRef) => lockfileRefSet.has(fileRef))
@@ -1061,18 +1091,43 @@ async function listGitDirtyFileRefs(repositoryRoot: string) {
 function listUnsafePreRunDirtyFiles(dirtyFileRefs: string[]) {
 	const lockfileRefSet = new Set<string>(listDocsOperatingSystemLockfileRefs());
 	return dirtyFileRefs.filter((fileRef) => {
-		if (fileRef.startsWith(".sbs/docs-operating-system-adoption/")) {
-			return false;
-		}
 		if (fileRef.startsWith(".sbs/runs/")) {
 			return false;
 		}
 		return (
 			lockfileRefSet.has(fileRef) ||
+			fileRef === "package.json" ||
+			fileRef.startsWith("scripts/sbs-docs/") ||
+			fileRef.startsWith(".sbs/docs-operating-system-adoption/") ||
 			fileRef === "<unable to inspect git status>" ||
 			fileRef.startsWith(".sbs/")
 		);
 	});
+}
+
+function detectPackageManagerFromLockfiles(repositoryRoot: string) {
+	if (existsSync(path.join(repositoryRoot, "bun.lock"))) {
+		return "bun";
+	}
+	if (existsSync(path.join(repositoryRoot, "bun.lockb"))) {
+		return "bun";
+	}
+	if (existsSync(path.join(repositoryRoot, "pnpm-lock.yaml"))) {
+		return "pnpm";
+	}
+	if (existsSync(path.join(repositoryRoot, "yarn.lock"))) {
+		return "yarn";
+	}
+	if (existsSync(path.join(repositoryRoot, "package-lock.json"))) {
+		return "npm";
+	}
+	if (existsSync(path.join(repositoryRoot, "npm-shrinkwrap.json"))) {
+		return "npm";
+	}
+	if (existsSync(path.join(repositoryRoot, "package.json"))) {
+		return "unknown-node";
+	}
+	return "unknown";
 }
 
 async function readGitDiffSummary(repositoryRoot: string) {

@@ -792,7 +792,6 @@ function buildDocsOperatingSystemLockfileRefreshApprovalArgs({
 			"package-lock.json",
 			"npm-shrinkwrap.json",
 			"pnpm-lock.yaml",
-			"yarn.lock",
 		],
 		disallowedTouchTargets: [
 			"runtime app code",
@@ -820,7 +819,7 @@ function buildDocsOperatingSystemLockfileRefreshApprovalArgs({
 			"Codex transcripts",
 		],
 		proofCommands: [
-			"package-manager lockfile refresh with lifecycle scripts disabled",
+			"package-manager lockfile refresh with lifecycle scripts and repo-controlled pnpm hooks disabled",
 			"git status --short",
 			"git diff --name-only",
 			"git diff --check",
@@ -830,7 +829,7 @@ function buildDocsOperatingSystemLockfileRefreshApprovalArgs({
 		stopConditions: [
 			"write lease expires before lockfile refresh starts",
 			"approved packet is missing installProfile: worker-grade",
-			"worktree has dirty lockfiles or unsafe runner artifacts before lockfile refresh starts",
+			"worktree has dirty lockfiles, guarded package inputs, source install/apply artifacts, or unsafe runner artifacts before lockfile refresh starts",
 			"package-script apply summary is missing, invalid, blocked, or stale",
 			"live package.json or wrapper files no longer match the approved package-script patch contract",
 			"requested work needs package manifest mutation, package script mutation, wrapper mutation, full dependency install state, docs application, root instruction rewrites, runtime setup, provider setup, CI, PRs, branch pushes, raw source, raw logs, script bodies, dependency versions from the target repo, or Codex transcripts",
@@ -2460,7 +2459,7 @@ describe("workspace runner events", () => {
 				proofCommandResults: [
 					{
 						commandName:
-							"package-manager lockfile refresh with lifecycle scripts disabled",
+							"package-manager lockfile refresh with lifecycle scripts and repo-controlled pnpm hooks disabled",
 						status: "passed",
 					},
 					{ commandName: "git status --short", status: "passed" },
@@ -2480,6 +2479,70 @@ describe("workspace runner events", () => {
 		expect(tables.codebaseFindings[0]).toMatchObject({
 			_id: findingDocumentId,
 			status: "done",
+		});
+	});
+
+	it("blocks docs operating system lockfile refresh proof events that report yarn.lock", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId =
+			await createDocsOperatingSystemLockfileRefreshFinding({
+				ctx,
+				projectId: project._id,
+				runnerId: runner._id,
+			});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsOperatingSystemLockfileRefreshApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-docs-operating-system-lockfile-yarn-proof",
+			projectId: project._id,
+			runnerId: runner._id,
+			workflowRunId: workflowRun._id,
+			eventType: "workflow.proof.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 209_500,
+			payload: {
+				eventType: "workflow.proof.completed",
+				workflowId: "docs-operating-system-lockfile-refresh",
+				writeLeaseId: workflowRun.writeLeaseId,
+				proofStatus: "passed",
+				proofSummary: "Docs operating system lockfile proof passed.",
+				touchedFileRefs: [
+					"yarn.lock",
+					".sbs/docs-operating-system-adoption/lockfile-refresh/lockfile-refresh.json",
+				],
+				createdArtifactRefs:
+					docsOperatingSystemLockfileRefreshRequiredArtifactRefs(
+						workflowRun._id,
+					),
+				proofCommandResults: [
+					{ commandName: "git status --short", status: "passed" },
+				],
+			},
+		});
+
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "blocked",
+			proofStatus: "blocked",
+			deliveryStatus: "blocked",
+			touchedFileRefs: [
+				"yarn.lock",
+				".sbs/docs-operating-system-adoption/lockfile-refresh/lockfile-refresh.json",
+			],
+		});
+		expect(tables.workflowRuns[0]?.blockedReason).toContain("yarn.lock");
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			_id: findingDocumentId,
+			status: "blocked",
 		});
 	});
 

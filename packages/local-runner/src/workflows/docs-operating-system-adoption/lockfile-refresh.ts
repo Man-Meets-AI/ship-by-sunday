@@ -51,8 +51,15 @@ export function resolveDocsOperatingSystemLockfileRefreshCommand(
 			command: {
 				packageManager,
 				command: "pnpm",
-				args: ["install", "--lockfile-only", "--ignore-scripts"],
-				commandName: "pnpm install --lockfile-only --ignore-scripts",
+				args: [
+					"install",
+					"--lockfile-only",
+					"--ignore-scripts",
+					"--ignore-pnpmfile",
+					"--no-frozen-lockfile",
+				],
+				commandName:
+					"pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile",
 				expectedLockfileRefs: ["pnpm-lock.yaml"],
 			},
 		};
