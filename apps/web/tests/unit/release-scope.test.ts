@@ -18,6 +18,14 @@ describe("release scope classifier", () => {
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
+				"apps/web/scripts/verify-dev-stripe-card-payment.mjs",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(".github/workflows/dev-staging-payment-proof.yml"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
 				"scripts/release/lib/billing-integration-step-planner.mjs",
 			),
 		).toBe(true);
