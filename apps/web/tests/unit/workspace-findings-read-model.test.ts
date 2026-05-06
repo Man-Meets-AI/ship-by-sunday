@@ -375,6 +375,57 @@ describe("workspace findings read model", () => {
 		);
 	});
 
+	it("builds docs spine apply as a bounded docs mutation workflow packet", () => {
+		const detail = buildWorkspaceFindingDetailModel(
+			[
+				createFinding({
+					findingId: "finding-docs-spine-apply",
+					category: "other",
+					title: "Docs spine drafts are ready to apply",
+					permissionRequired: "workspace_write",
+					recommendedWorkflowId: "docs-spine-apply-and-proof",
+				}),
+			],
+			"finding-docs-spine-apply",
+			Date.UTC(2026, 4, 5, 13, 0),
+		);
+
+		expect(detail?.workflowApproval).toMatchObject({
+			workflowId: "docs-spine-apply-and-proof",
+			workflowKind: "docs_spine_apply",
+			workflowCommandName: "docs-spine-apply-and-proof",
+			confirmationFlag: "--confirm-docs-spine-apply",
+			branchName: "sbs/docs-spine-apply-20260505-1300",
+			profileName: "sbs-workspace-write",
+		});
+		expect(detail?.workflowApproval.allowedTouchTargets).toEqual([
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-spine-adoption/**",
+			"docs/index.md",
+			"docs/programs/**",
+			"docs/exec-plans/**",
+			"docs/prompts/**",
+			"docs/QUALITY_SCORE.md",
+			"docs/proof.md",
+			"docs/validation.md",
+		]);
+		expect(detail?.workflowApproval.disallowedTouchTargets).toEqual(
+			expect.arrayContaining([
+				"root agent instructions",
+				"runtime app code",
+				"branch pushes",
+				"pull requests",
+				"Codex transcripts",
+			]),
+		);
+		expect(detail?.workflowApproval.syncPolicySummary).toContain(
+			"Applied Markdown content",
+		);
+		expect(detail?.workflowApproval.stopConditions.join(" ")).toContain(
+			"apply-ready Markdown",
+		);
+	});
+
 	it("does not build detail state for deleted or missing findings", () => {
 		expect(
 			buildWorkspaceFindingDetailModel(

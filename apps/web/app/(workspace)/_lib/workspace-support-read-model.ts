@@ -429,6 +429,17 @@ const workflowDefinitions: WorkflowCatalogDefinition[] = [
 		riskLevel: "Low",
 	},
 	{
+		id: "docs-spine-apply-and-proof",
+		name: "Docs Spine Apply And Proof",
+		category: "Adoption",
+		whenUseful:
+			"A mature repo has approved docs-spine draft packets ready for bounded Markdown application.",
+		requiredPermission: "Workspace write for approved docs files",
+		typicalProof:
+			"Applied docs refs or blocked proof, local Git proof, sync preview, and rollback notes.",
+		riskLevel: "Medium",
+	},
+	{
 		id: "test-hardening",
 		name: "Test Hardening",
 		category: "Testing",

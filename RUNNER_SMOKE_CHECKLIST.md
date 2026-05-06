@@ -312,6 +312,14 @@ be approved before findings sync`; after browser approval, inserted and
   Expected: pairing state, setup blockers, doctor-pass button, and default open
   destination are coherent.
   Failure: stale blocker count, disabled button with no reason, or wrong repo.
+  Observed: setup correctly showed `arena-crm`, paired runner
+  `MAC-H9KNHRH6VH`, warnings that do not block Doctor Pass, ready GitHub auth,
+  and ready SBS execution profiles. Remaining UX issue: a repair token and
+  `bunx ship-by-sunday setup pair ...` package-manager command were visible
+  while the workspace was already paired and healthy. Repair commands should be
+  collapsed behind `Repair pairing` until explicitly requested, and production
+  setup copy should use the `man-meets-ai.com` installer flow instead of npm
+  package-manager commands.
 
 - [ ] `/workspace/doctor-pass`
 
@@ -407,6 +415,15 @@ be approved before findings sync`; after browser approval, inserted and
 
   Expected: doctor-pass and approved workflow history show clear statuses.
   Failure: run history missing, wrong status, or only opaque IDs.
+  Observed: page shows Doctor Pass history, uploaded/approved sync states,
+  local report refs, approved workflow run, proof status, local-only delivery,
+  and proof ref action. Remaining UX issues: old approved-but-not-uploaded
+  Doctor Pass runs are mixed with latest uploaded runs without enough latest vs
+  history separation; workflow proof shows `Failed` without an inline reason
+  such as `not reproduced`; `Open local proof` affordance is unclear when it
+  cannot open locally; summary labels like `Doctor 4`, `Workflows 1`, and
+  `Total 5` are ambiguous because `Doctor 4` appears to mean latest uploaded
+  finding count while the table contains four Doctor Pass runs.
 
 - [ ] `/workspace/loops`
 
@@ -457,11 +474,16 @@ bun packages/local-runner/src/cli.ts workflow source-truth-readiness run --workf
 bun packages/local-runner/src/cli.ts workflow observability-debuggability run --workflow-run-id <id> --confirm-observability-audit --repo <customer-repo-path> --json
 bun packages/local-runner/src/cli.ts workflow broken-app-triage run --workflow-run-id <id> --confirm-read-only-reproduction --repo <customer-repo-path> --json
 bun packages/local-runner/src/cli.ts workflow mature-repo-adoption run --workflow-run-id <id> --confirm-adoption-audit --repo <customer-repo-path> --json
+bun packages/local-runner/src/cli.ts workflow docs-spine-adoption run --workflow-run-id <id> --confirm-docs-spine-adoption --repo <customer-repo-path> --json
+bun packages/local-runner/src/cli.ts workflow docs-spine-apply-and-proof run --workflow-run-id <id> --confirm-docs-spine-apply --repo <customer-repo-path> --json
 ```
 
 - [ ] Missing confirmation flags block execution.
 
   Expected: command refuses to run without the required explicit confirmation.
+  Daemon worker mode requires
+  `--work --confirm-local-writes --confirm-observability-audit --confirm-adoption-audit --confirm-docs-spine-adoption --confirm-docs-spine-apply`
+  before it can claim approved queue jobs.
   Failure: local writes or audits run without confirmation.
 
 - [ ] Wrong branch or profile blocks execution.

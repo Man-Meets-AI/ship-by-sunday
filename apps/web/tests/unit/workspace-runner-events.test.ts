@@ -192,6 +192,49 @@ async function createDocsSpineAdoptionFinding({
 	});
 }
 
+async function createDocsSpineApplyFinding({
+	ctx,
+	projectId,
+	runnerId,
+}: {
+	ctx: ReturnType<typeof createWorkspaceTestCtx>["ctx"];
+	projectId: string;
+	runnerId: string;
+}) {
+	const doctorPassRun = await startWorkspaceDoctorPassRun._handler(
+		ctx as never,
+		{
+			projectId: projectId as never,
+			runnerId: runnerId as never,
+			runnerMode: "daemon",
+		},
+	);
+	return await ctx.db.insert("codebaseFindings", {
+		projectId,
+		doctorPassRunId: doctorPassRun._id,
+		findingId: "finding-docs-spine-apply",
+		rank: 5,
+		status: "needs_approval",
+		title: "Docs spine drafts are ready to apply",
+		category: "other",
+		severity: "medium",
+		confidence: 0.86,
+		buyerImpact: "Future agent work needs the approved docs spine applied.",
+		blastRadius: "medium",
+		proofPath: "Review local docs spine apply proof.",
+		proofability: "partial",
+		permissionRequired: "workspace_write",
+		recommendedWorkflowId: "docs-spine-apply-and-proof",
+		whyThisNow:
+			"The repo has local docs-spine drafts that need bounded Markdown application.",
+		evidenceRefs: [],
+		syncSensitivity: "low",
+		localReportRef: ".sbs/reports/doctor-pass/run-1/docs-spine-apply.json",
+		createdAt: 1,
+		updatedAt: 1,
+	});
+}
+
 function buildMatureRepoAdoptionApprovalArgs({
 	projectId,
 	findingDocumentId,
@@ -330,6 +373,84 @@ function buildDocsSpineAdoptionApprovalArgs({
 		],
 		rollbackNotes:
 			"Review the local .sbs docs-spine artifacts. Roll back by deleting the .sbs docs-spine run artifacts for this workflow run.",
+	};
+}
+
+function buildDocsSpineApplyApprovalArgs({
+	projectId,
+	findingDocumentId,
+	runnerId,
+	workflowVersion = "v1",
+	writeLeaseDurationMinutes = 30,
+}: {
+	projectId: string;
+	findingDocumentId: string;
+	runnerId: string;
+	workflowVersion?: string;
+	writeLeaseDurationMinutes?: number;
+}) {
+	return {
+		projectId: projectId as never,
+		findingDocumentId: findingDocumentId as never,
+		runnerId: runnerId as never,
+		workflowId: "docs-spine-apply-and-proof",
+		workflowVersion,
+		branchName: "sbs/docs-spine-apply-20260505-1300",
+		profileName: "sbs-workspace-write",
+		writeLeaseDurationMinutes,
+		expectedOutputs: [
+			"docs spine apply workflow packet",
+			"approved docs-spine draft application or blocked-proof summary",
+			"local docs proof summary",
+			"sync preview metadata",
+		],
+		allowedTouchTargets: [
+			".sbs/runs/<workflow-run-id>/**",
+			".sbs/docs-spine-adoption/**",
+			"docs/index.md",
+			"docs/programs/**",
+			"docs/exec-plans/**",
+			"docs/prompts/**",
+			"docs/QUALITY_SCORE.md",
+			"docs/proof.md",
+			"docs/validation.md",
+		],
+		disallowedTouchTargets: [
+			"runtime app code",
+			"environment files",
+			"dependency manifests",
+			"dependency locks",
+			"database migrations",
+			"provider configuration",
+			"generated folders",
+			"package scripts",
+			"root agent instructions",
+			"CI configuration",
+			"CI-affecting commands",
+			"branch pushes",
+			"pull requests",
+			"raw logs",
+			"raw source",
+			"Codex transcripts",
+		],
+		proofCommands: [
+			"git status --short",
+			"git diff --name-only",
+			"git diff --check",
+			"docs spine structural check",
+		],
+		syncPolicySummary:
+			"Only approved structured workflow metadata, proof status, command names, artifact names, and repo-relative refs sync. Applied Markdown content, local code, command output, docs drafts, and Codex session history stay on the machine.",
+		stopConditions: [
+			"worktree has unexpected dirty files before docs spine apply starts",
+			"current branch does not match the approved docs spine apply branch",
+			"write lease expires before docs spine apply starts",
+			"approved drafts are missing, malformed, target an unapproved path, or lack apply-ready Markdown",
+			"requested work needs root agent instructions, runtime code, provider setup, package installs, migrations, CI, PRs, branch pushes, raw source, raw logs, or Codex transcripts",
+			"proof command fails",
+		],
+		rollbackNotes:
+			"Review the local branch diff. Roll back by reverting the applied docs files and deleting the .sbs docs-spine apply run artifacts for this workflow run.",
 	};
 }
 
@@ -1479,6 +1600,164 @@ describe("workspace runner events", () => {
 		).rejects.toThrow(
 			"Docs spine adoption expectedOutputs does not match the approved workflow packet",
 		);
+	});
+
+	it("approves and resolves docs spine apply as a supported local mutation workflow", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId = await createDocsSpineApplyFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsSpineApplyApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+		const resolvedWorkflowRun =
+			await getWorkspaceWorkflowRunByCredential._handler(ctx as never, {
+				runnerCredentialHash: "sha256:runner-credential",
+				projectId: project._id,
+				runnerId: runner._id,
+				workflowRunId: workflowRun._id,
+			});
+
+		expect(resolvedWorkflowRun).toMatchObject({
+			workflowRunId: workflowRun._id,
+			workflowId: "docs-spine-apply-and-proof",
+			branchName: "sbs/docs-spine-apply-20260505-1300",
+			profileName: "sbs-workspace-write",
+			localWorkflowPacketRef: `.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+			localProofRef: `.sbs/runs/${workflowRun._id}/proof.json`,
+		});
+		expect(resolvedWorkflowRun.allowedTouchTargets).toContain("docs/index.md");
+	});
+
+	it("blocks docs spine apply proof events that report unapproved touched files", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId = await createDocsSpineApplyFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsSpineApplyApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-docs-spine-apply-unsafe-proof",
+			projectId: project._id,
+			runnerId: runner._id,
+			workflowRunId: workflowRun._id,
+			eventType: "workflow.proof.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 204_000,
+			payload: {
+				eventType: "workflow.proof.completed",
+				workflowId: "docs-spine-apply-and-proof",
+				writeLeaseId: workflowRun.writeLeaseId,
+				proofStatus: "passed",
+				proofSummary: "Docs spine apply proof passed.",
+				touchedFileRefs: ["docs/index.md", "src/runtime.ts"],
+				createdArtifactRefs: [
+					`.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+					`.sbs/runs/${workflowRun._id}/proof.json`,
+					`.sbs/runs/${workflowRun._id}/sync-preview.json`,
+					".sbs/docs-spine-adoption/apply/apply-summary.json",
+				],
+				proofCommandResults: [
+					{ commandName: "git status --short", status: "passed" },
+				],
+			},
+		});
+
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "blocked",
+			proofStatus: "blocked",
+			deliveryStatus: "blocked",
+			touchedFileRefs: ["docs/index.md", "src/runtime.ts"],
+		});
+		expect(tables.workflowRuns[0]?.blockedReason).toContain("src/runtime.ts");
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			_id: findingDocumentId,
+			status: "blocked",
+		});
+	});
+
+	it("blocks docs spine apply proof events that report non-Markdown docs refs", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+		await ctx.db.patch(runner._id, {
+			runnerCredentialHash: "sha256:runner-credential",
+		});
+		const findingDocumentId = await createDocsSpineApplyFinding({
+			ctx,
+			projectId: project._id,
+			runnerId: runner._id,
+		});
+		const workflowRun = await requestWorkspaceWorkflowRun._handler(
+			ctx as never,
+			buildDocsSpineApplyApprovalArgs({
+				projectId: project._id,
+				findingDocumentId,
+				runnerId: runner._id,
+			}),
+		);
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-docs-spine-apply-non-markdown-proof",
+			projectId: project._id,
+			runnerId: runner._id,
+			workflowRunId: workflowRun._id,
+			eventType: "workflow.proof.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 205_000,
+			payload: {
+				eventType: "workflow.proof.completed",
+				workflowId: "docs-spine-apply-and-proof",
+				writeLeaseId: workflowRun.writeLeaseId,
+				proofStatus: "passed",
+				proofSummary: "Docs spine apply proof passed.",
+				touchedFileRefs: ["docs/programs/active/program.json"],
+				createdArtifactRefs: [
+					`.sbs/runs/${workflowRun._id}/workflow-packet.json`,
+					`.sbs/runs/${workflowRun._id}/proof.json`,
+					`.sbs/runs/${workflowRun._id}/sync-preview.json`,
+					".sbs/docs-spine-adoption/apply/apply-summary.json",
+				],
+				proofCommandResults: [
+					{ commandName: "git status --short", status: "passed" },
+				],
+			},
+		});
+
+		expect(tables.workflowRuns[0]).toMatchObject({
+			status: "blocked",
+			proofStatus: "blocked",
+			deliveryStatus: "blocked",
+			touchedFileRefs: ["docs/programs/active/program.json"],
+		});
+		expect(tables.workflowRuns[0]?.blockedReason).toContain(
+			"docs/programs/active/program.json",
+		);
+		expect(tables.codebaseFindings[0]).toMatchObject({
+			_id: findingDocumentId,
+			status: "blocked",
+		});
 	});
 
 	it("blocks docs spine proof events that report non-.sbs touched files", async () => {
