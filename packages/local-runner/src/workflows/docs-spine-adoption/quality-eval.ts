@@ -390,6 +390,15 @@ function evaluateProgramContract(file: DocsSpineMarkdownFile) {
 			message: "Program contract does not name the Program lint command.",
 			remediation: "Document the repo-local Program lint command.",
 		}),
+		...evaluateRequiredSections(file, "program-contract.example-bar", [
+			"What A Program Is",
+			"Storage And Lifecycle",
+			"Frontmatter",
+			"Section Expectations",
+			"Relationship To ExecPlans",
+			"Completion Guidance",
+			"Validation",
+		]),
 	];
 }
 
@@ -442,6 +451,17 @@ function evaluateExecPlanContract(file: DocsSpineMarkdownFile) {
 			message: "ExecPlan contract does not name the ExecPlan lint command.",
 			remediation: "Document the repo-local ExecPlan lint command.",
 		}),
+		...evaluateRequiredSections(file, "exec-plan-contract.example-bar", [
+			"Repo-specific conventions",
+			"How to use ExecPlans",
+			"When to use an ExecPlan",
+			"Non-negotiable requirements",
+			"Formatting rules",
+			"Front Matter",
+			"Section Expectations",
+			"Implementation discipline",
+			"Validation and Acceptance",
+		]),
 	];
 }
 

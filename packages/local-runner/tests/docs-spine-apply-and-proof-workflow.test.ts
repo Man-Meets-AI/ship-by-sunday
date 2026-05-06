@@ -351,6 +351,68 @@ describe("docs spine apply and proof workflow", () => {
 		);
 	});
 
+	it("fails thin Program and ExecPlan contract docs below the example bar", () => {
+		const report = buildDocsSpineApplyQualityReport({
+			now: 1_000,
+			files: [
+				{
+					targetRef: "docs/programs/PROGRAMS.md",
+					sourceArtifactRef:
+						".sbs/docs-spine-adoption/drafts/program-packet-draft.json",
+					markdown: [
+						"---",
+						"title: Programs",
+						"---",
+						"",
+						"# Programs",
+						"",
+						"## Required Structure",
+						"",
+						"Program packets need structure.",
+						"",
+						"## Prompt Contract",
+						"",
+						"Run `bun run programs:lint`.",
+					].join("\n"),
+				},
+				{
+					targetRef: "docs/exec-plans/PLANS.md",
+					sourceArtifactRef:
+						".sbs/docs-spine-adoption/drafts/exec-plan-draft.json",
+					markdown: [
+						"---",
+						"title: ExecPlans",
+						"---",
+						"",
+						"# ExecPlans",
+						"",
+						"## Required Structure",
+						"",
+						"ExecPlans need implementation structure.",
+						"",
+						"## Validation and Acceptance",
+						"",
+						"Run `bun run plans:lint`.",
+					].join("\n"),
+				},
+			],
+		});
+
+		expect(report.status).toBe("failed");
+		expect(report.ruleResults).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					ruleId: "program-contract.example-bar",
+					status: "failed",
+				}),
+				expect.objectContaining({
+					ruleId: "exec-plan-contract.example-bar",
+					status: "failed",
+				}),
+			]),
+		);
+	});
+
 	it("fails Program and ExecPlan drafts that break packet linkage contracts", () => {
 		const report = buildDocsSpineApplyQualityReport({
 			now: 1_000,

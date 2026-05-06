@@ -90,24 +90,17 @@ function buildRepoFacts(inventory: RepoInventory): DocsSpineRepoFacts {
 		...inventory.instructionClassification.shimInstructionRefs,
 		...filterRefs(inventory, isAssistantShimRef),
 	];
-	const docsRefs = filterRefs(inventory, isDocsRef);
-	const programRefs = filterRefs(inventory, (ref) =>
-		ref.startsWith("docs/programs/"),
-	);
-	const execPlanRefs = filterRefs(inventory, (ref) =>
-		ref.startsWith("docs/exec-plans/"),
-	);
-	const promptRefs = filterRefs(inventory, (ref) =>
-		ref.startsWith("docs/prompts/"),
-	);
+	const docsRefs = filterRefs(inventory, isDocumentationRef);
+	const programRefs = filterRefs(inventory, isProgramDocumentationRef);
+	const execPlanRefs = filterRefs(inventory, isExecPlanDocumentationRef);
+	const promptRefs = filterRefs(inventory, isPromptDocumentationRef);
 	const specRefs = filterRefs(
 		inventory,
 		(ref) =>
-			ref.startsWith("docs/specs/") || ref.startsWith("docs/product-specs/"),
+			isMarkdownRefUnder(ref, "docs/specs/") ||
+			isMarkdownRefUnder(ref, "docs/product-specs/"),
 	);
-	const generatedRefs = filterRefs(inventory, (ref) =>
-		ref.startsWith("docs/generated/"),
-	);
+	const generatedRefs = filterRefs(inventory, isGeneratedDocumentationRef);
 	const validationRefs = filterRefs(inventory, isValidationRef);
 	const ciRefs = filterRefs(inventory, isCiRef);
 	const releaseRefs = filterRefs(inventory, isReleaseRef);
@@ -172,18 +165,10 @@ function buildSourceTruthMap(
 ): DocsSpineScannerArtifact {
 	const docsIndexRefs = refsEqual(inventory, ["docs/index.md"]);
 	const rootReadmeRefs = refsEqual(inventory, ["README.md", "readme.md"]);
-	const architectureRefs = filterRefs(inventory, (ref) =>
-		ref.toLowerCase().includes("architecture"),
-	);
-	const reliabilityRefs = filterRefs(inventory, (ref) =>
-		ref.toLowerCase().includes("reliability"),
-	);
-	const securityRefs = filterRefs(inventory, (ref) =>
-		ref.toLowerCase().includes("security"),
-	);
-	const qualityScoreRefs = filterRefs(inventory, (ref) =>
-		ref.toLowerCase().includes("quality_score"),
-	);
+	const architectureRefs = filterRefs(inventory, isArchitectureDocRef);
+	const reliabilityRefs = filterRefs(inventory, isReliabilityDocRef);
+	const securityRefs = filterRefs(inventory, isSecurityDocRef);
+	const qualityScoreRefs = filterRefs(inventory, isQualityScoreDocRef);
 
 	return artifact("sourceTruthMap", {
 		schemaVersion: "docs-spine-source-truth-map.v1",
@@ -271,23 +256,13 @@ function buildDocsGapReport(
 		requiredSurface("docs-index", refsEqual(inventory, ["docs/index.md"])),
 		requiredSurface(
 			"architecture",
-			filterRefs(inventory, (ref) =>
-				ref.toLowerCase().includes("architecture"),
-			),
+			filterRefs(inventory, isArchitectureDocRef),
 		),
-		requiredSurface(
-			"reliability",
-			filterRefs(inventory, (ref) => ref.toLowerCase().includes("reliability")),
-		),
-		requiredSurface(
-			"security",
-			filterRefs(inventory, (ref) => ref.toLowerCase().includes("security")),
-		),
+		requiredSurface("reliability", filterRefs(inventory, isReliabilityDocRef)),
+		requiredSurface("security", filterRefs(inventory, isSecurityDocRef)),
 		requiredSurface(
 			"quality-score",
-			filterRefs(inventory, (ref) =>
-				ref.toLowerCase().includes("quality_score"),
-			),
+			filterRefs(inventory, isQualityScoreDocRef),
 		),
 		requiredSurface(
 			"program-contract",
@@ -359,9 +334,7 @@ function buildSecuritySignals(
 	return artifact("securitySignals", {
 		schemaVersion: "docs-spine-security-signals.v1",
 		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		securityDocRefs: filterRefs(inventory, (ref) =>
-			ref.toLowerCase().includes("security"),
-		),
+		securityDocRefs: filterRefs(inventory, isSecurityDocRef),
 		authRefs: filterRefs(inventory, (ref) => {
 			const lower = ref.toLowerCase();
 			return lower.includes("auth") || lower.includes("clerk");
@@ -381,9 +354,7 @@ function buildSecuritySignals(
 function buildQualityScoreBaseline(
 	inventory: RepoInventory,
 ): DocsSpineScannerArtifact {
-	const qualityScoreRefs = filterRefs(inventory, (ref) =>
-		ref.toLowerCase().includes("quality_score"),
-	);
+	const qualityScoreRefs = filterRefs(inventory, isQualityScoreDocRef);
 
 	return artifact("qualityScoreBaseline", {
 		schemaVersion: "docs-spine-quality-score-baseline.v1",
@@ -460,9 +431,7 @@ function buildGeneratedSurfaceMap(
 	return artifact("generatedSurfaceMap", {
 		schemaVersion: "docs-spine-generated-surface-map.v1",
 		workflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
-		generatedDocsRefs: filterRefs(inventory, (ref) =>
-			ref.startsWith("docs/generated/"),
-		),
+		generatedDocsRefs: filterRefs(inventory, isGeneratedDocumentationRef),
 		generatorRefs: filterRefs(inventory, (ref) => {
 			const lower = ref.toLowerCase();
 			return lower.includes("generate") || lower.includes("compiler");
@@ -804,19 +773,86 @@ function isAssistantShimRef(ref: string) {
 	return name === "claude.md" || name === "gemini.md";
 }
 
-function isDocsRef(ref: string) {
+function isDocumentationRef(ref: string) {
 	if (isHiddenInstructionNoiseRef(ref)) {
 		return false;
 	}
 	const lower = ref.toLowerCase();
+	if (lower.startsWith("docs/")) {
+		return isMarkdownDocumentRef(lower);
+	}
+	if (isRootDocumentationRef(lower)) {
+		return true;
+	}
+	return /^(apps|packages)\/[^/]+\/readme\.mdx?$/.test(lower);
+}
+
+function isArchitectureDocRef(ref: string) {
+	return isTopicDocumentationRef(ref, /architecture/);
+}
+
+function isReliabilityDocRef(ref: string) {
+	return isTopicDocumentationRef(ref, /reliability/);
+}
+
+function isSecurityDocRef(ref: string) {
+	return isTopicDocumentationRef(ref, /security/);
+}
+
+function isQualityScoreDocRef(ref: string) {
+	return isTopicDocumentationRef(ref, /quality[_-]score/);
+}
+
+function isTopicDocumentationRef(ref: string, topicPattern: RegExp) {
+	if (!isDocumentationRef(ref)) {
+		return false;
+	}
+	return topicPattern.test(ref.toLowerCase());
+}
+
+function isMarkdownDocumentRef(lowercaseRef: string) {
+	return lowercaseRef.endsWith(".md") || lowercaseRef.endsWith(".mdx");
+}
+
+function isMarkdownRefUnder(ref: string, rootRef: string) {
+	return ref.startsWith(rootRef) && isMarkdownDocumentRef(ref.toLowerCase());
+}
+
+function isProgramDocumentationRef(ref: string) {
 	return (
-		lower === "readme.md" ||
-		lower === "design.md" ||
-		lower === "architecture.md" ||
-		lower.startsWith("docs/") ||
-		lower.includes("architecture") ||
-		lower.includes("security") ||
-		lower.includes("reliability")
+		isMarkdownRefUnder(ref, "docs/programs/") ||
+		(ref.startsWith("docs/programs/") &&
+			path.basename(ref) === "current-planning-brief.txt")
+	);
+}
+
+function isExecPlanDocumentationRef(ref: string) {
+	return isMarkdownRefUnder(ref, "docs/exec-plans/");
+}
+
+function isPromptDocumentationRef(ref: string) {
+	return isMarkdownRefUnder(ref, "docs/prompts/");
+}
+
+function isGeneratedDocumentationRef(ref: string) {
+	return isMarkdownRefUnder(ref, "docs/generated/");
+}
+
+function isRootDocumentationRef(lowercaseRef: string) {
+	return (
+		!lowercaseRef.includes("/") &&
+		[
+			"readme.md",
+			"design.md",
+			"architecture.md",
+			"reliability.md",
+			"security.md",
+			"quality_score.md",
+			"quality-score.md",
+			"validation.md",
+			"proof.md",
+			"plans.md",
+		].includes(lowercaseRef)
 	);
 }
 
