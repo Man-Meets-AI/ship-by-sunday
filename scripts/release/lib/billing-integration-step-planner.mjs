@@ -14,6 +14,9 @@ export function buildBillingIntegrationSteps({
 	personaPrepareEnv,
 	targetUrl,
 }) {
+	const isProductionTarget = isProductionBillingTarget(targetUrl);
+	const isHostedDevTarget = !isLocalBillingTarget && !isProductionTarget;
+
 	return [
 		...(isLocalBillingTarget
 			? [
@@ -25,17 +28,21 @@ export function buildBillingIntegrationSteps({
 					},
 				]
 			: []),
-		{
-			label: "Prepare billing-integration release personas",
-			command: [
-				"bun",
-				"run",
-				"release:personas:prepare",
-				"--",
-				"--proof=billing_integration",
-			],
-			env: personaPrepareEnv,
-		},
+		...(isHostedDevTarget
+			? []
+			: [
+					{
+						label: "Prepare billing-integration release personas",
+						command: [
+							"bun",
+							"run",
+							"release:personas:prepare",
+							"--",
+							"--proof=billing_integration",
+						],
+						env: personaPrepareEnv,
+					},
+				]),
 		...(isLocalBillingTarget
 			? [
 					{
@@ -51,7 +58,7 @@ export function buildBillingIntegrationSteps({
 						requireBrowserEvidence: true,
 					},
 				]
-			: isProductionBillingTarget(targetUrl)
+			: isProductionTarget
 			? [
 					{
 						label: "Run the hosted production billing proof",
@@ -71,13 +78,13 @@ export function buildBillingIntegrationSteps({
 				]
 			: [
 					{
-						label: "Run the hosted dev billing proof",
+						label: "Run the hosted dev card payment proof",
 						command: [
 							"bun",
 							"run",
 							"--cwd",
 							"apps/web",
-							"stripe:hosted:verify:dev",
+							"stripe:hosted:verify:dev-card",
 							"--",
 							`--base-url=${targetUrl}`,
 						],

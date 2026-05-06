@@ -57,6 +57,7 @@
 		"release:billing:doctor": "node scripts/release-billing-doctor.mjs",
 		"stripe:env:verify": "bun scripts/verify-managed-stripe-env.ts",
 		"stripe:hosted:verify:dev": "node --env-file=.env.local scripts/verify-hosted-stripe-checkout.mjs",
+		"stripe:hosted:verify:dev-card": "node --env-file=.env.local scripts/verify-dev-stripe-card-payment.mjs",
 		"stripe:hosted:verify": "node --env-file=.env.production scripts/verify-hosted-stripe-checkout.mjs",
 		"clerk:test-user:check": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs check",
 		"clerk:test-user:create": "node --env-file=.env.local scripts/ensure-clerk-test-user.mjs create",
