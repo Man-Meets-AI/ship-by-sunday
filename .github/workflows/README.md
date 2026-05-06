@@ -15,6 +15,12 @@ The workflows in this directory follow the Codex-style lifecycle: pull requests 
 - `production-release-proof.yml` runs hosted production proof after pushes to `main` and on manual dispatch. It waits for the matching Vercel production deployment, runs `default_ship`, and runs `billing_integration` when the release scope requires it.
 - `convex-production-deploy.yml` owns Convex production deployment from `main`. Automatic deploys remain controlled by `CONVEX_PRODUCTION_DEPLOY_ENABLED`.
 
+## Dev Payment Staging
+
+- `dev-staging-payment-proof.yml` runs on pushes to the `dev` branch and on manual dispatch.
+- It waits for the `dev.man-meets-ai.com` branch-domain Preview deployment, pulls Vercel Preview env, bypasses Vercel Deployment Protection for automation, and runs a Stripe test-mode card through hosted Checkout.
+- This lane proves the app checkout route, hosted Stripe redirect, paid test-mode Checkout Session, paid test-mode PaymentIntent, and return to `/checkout/success` on the actual dev staging URL. It is not release authority and does not replace production proof on `main`.
+
 ## Tag Publication
 
 - `release.yml` runs on protected `v*` tags and manual dispatch.
@@ -24,6 +30,7 @@ The workflows in this directory follow the Codex-style lifecycle: pull requests 
 ## Repair And Non-Release Lanes
 
 - `issue-labels.yml` keeps managed labels available for the issue templates.
+- `dev-staging-payment-proof.yml` is current proof only for the `dev.man-meets-ai.com` test-mode payment lane.
 - Remote-only workflows such as `Deployment Smoke` are not current proof unless a tracked workflow file owns them. Disable or replace them during the remote landing pass.
 
 ## Rule Of Thumb

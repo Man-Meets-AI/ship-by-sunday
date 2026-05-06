@@ -1,4 +1,5 @@
 const exactBillingSensitivePaths = new Set([
+	".github/workflows/dev-staging-payment-proof.yml",
 	".github/workflows/production-release-proof.yml",
 	"apps/web/convex/access.ts",
 	"apps/web/convex/checkoutClaims.ts",
@@ -17,6 +18,7 @@ const exactBillingSensitivePaths = new Set([
 	"apps/web/scripts/ensure-clerk-entitled-test-user.mjs",
 	"apps/web/scripts/local-stripe-doctor.mjs",
 	"apps/web/scripts/local-stripe-webhook.mjs",
+	"apps/web/scripts/verify-dev-stripe-card-payment.mjs",
 	"apps/web/scripts/verify-hosted-stripe-checkout.mjs",
 	"apps/web/scripts/verify-local-stripe-checkout.mjs",
 	"apps/web/scripts/verify-managed-stripe-env.ts",
