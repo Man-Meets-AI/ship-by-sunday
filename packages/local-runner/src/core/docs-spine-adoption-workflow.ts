@@ -26,6 +26,7 @@ import {
 	DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
 } from "../workflows/docs-spine-adoption/manifest";
 import { buildDocsSpineScannerBundle } from "../workflows/docs-spine-adoption/scanner";
+import { buildDocsSpineDraftQualityReport } from "../workflows/docs-spine-adoption/quality-eval";
 import type {
 	DocsSpineAdoptionManifest,
 	DocsSpineAdoptionProofCommandResult,
@@ -236,9 +237,16 @@ export async function runDocsSpineAdoptionWorkflow({
 			scannerArtifacts: scannerBundle.artifacts,
 			now,
 		});
+		const qualityReport = buildDocsSpineDraftQualityReport({
+			draftArtifacts: synthesisArtifacts,
+			repoFacts: scannerBundle.repoFacts,
+			now,
+		});
 		const synthesisArtifactRefs = synthesisArtifacts.map(
 			(synthesisArtifact) => synthesisArtifact.repoRelativePath,
 		);
+		const qualityReportRef =
+			DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS.qualityReport;
 		const parityChecklistRef =
 			DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS.parityChecklist;
 		const parityChecklist = buildParityChecklistArtifact(
@@ -252,6 +260,7 @@ export async function runDocsSpineAdoptionWorkflow({
 			...scannerArtifactRefs,
 			parityChecklistRef,
 			...synthesisArtifactRefs,
+			qualityReportRef,
 			proofRef,
 			syncPreviewRef,
 		];
@@ -334,18 +343,24 @@ export async function runDocsSpineAdoptionWorkflow({
 				synthesisArtifact.value,
 			);
 		}
+		await writeJsonArtifact(
+			repositoryRoot,
+			workflowRunId,
+			qualityReportRef,
+			qualityReport,
+		);
 
 		const { proofCommandResults, unexpectedTouchedFiles } =
 			await runProofCommands(repositoryRoot, workflowRunId);
-		const proofStatus = proofCommandResults.every(
-			(result) => result.status === "passed",
-		)
-			? "passed"
-			: "failed";
+		const proofStatus =
+			proofCommandResults.every((result) => result.status === "passed") &&
+			qualityReport.status === "passed"
+				? "passed"
+				: "failed";
 		const proofSummary =
 			proofStatus === "passed"
-				? "Docs spine adoption scaffold wrote only approved .sbs artifacts."
-				: "Docs spine adoption scaffold wrote local artifacts, but one or more proof commands failed.";
+				? "Docs spine adoption scaffold wrote only approved .sbs artifacts and passed docs-spine quality evals."
+				: "Docs spine adoption scaffold wrote local artifacts, but proof commands or docs-spine quality evals failed.";
 
 		await writeJsonArtifact(repositoryRoot, workflowRunId, proofRef, {
 			schemaVersion: "docs-spine-adoption-proof.v1",
@@ -356,6 +371,12 @@ export async function runDocsSpineAdoptionWorkflow({
 			profileName,
 			manifestRef,
 			repoFactsRef,
+			qualityReportRef,
+			qualityReportStatus: qualityReport.status,
+			qualityScore: qualityReport.score,
+			qualityFailedRuleIds: qualityReport.ruleResults
+				.filter((rule) => rule.status === "failed")
+				.map((rule) => rule.ruleId),
 			diffSummary: await readGitDiffSummary(repositoryRoot),
 			touchedFiles: unexpectedTouchedFiles,
 			createdArtifacts,
@@ -385,6 +406,9 @@ export async function runDocsSpineAdoptionWorkflow({
 					status,
 				}),
 			),
+			qualityReportRef,
+			qualityReportStatus: qualityReport.status,
+			qualityScore: qualityReport.score,
 			blockedProofCount: repoFacts.blockedFacts.length,
 			nextRecommendedWorkflowId:
 				DOCS_SPINE_ADOPTION_NEXT_RECOMMENDED_WORKFLOW_ID,

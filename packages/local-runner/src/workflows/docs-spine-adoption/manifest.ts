@@ -75,6 +75,7 @@ export const DOCS_SPINE_ADOPTION_PHASES = [
 	"minimal-facts",
 	"scanner-facts",
 	"codex-synthesis-packets",
+	"docs-spine-quality-eval",
 	"proof",
 ] as const;
 
@@ -101,6 +102,7 @@ export const DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS = {
 		".sbs/docs-spine-adoption/facts/validation-surface-map.json",
 	performanceTimings: ".sbs/docs-spine-adoption/facts/performance-timings.json",
 	parityChecklist: ".sbs/docs-spine-adoption/facts/parity-checklist.json",
+	qualityReport: ".sbs/docs-spine-adoption/facts/quality-report.json",
 	codexSynthesisPacket:
 		".sbs/docs-spine-adoption/drafts/codex-synthesis-packet.json",
 	docsIndexDraft: ".sbs/docs-spine-adoption/drafts/docs-index-draft.json",

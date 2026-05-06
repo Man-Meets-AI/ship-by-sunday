@@ -23,6 +23,9 @@ export type DocsSpineRepoFacts = {
 	instructionSurface: {
 		agentInstructionRefs: string[];
 		assistantShimRefs: string[];
+		secondaryInstructionRefs: string[];
+		ignoredInstructionRefs: string[];
+		skillRefs: string[];
 	};
 	docsSurface: {
 		docsRefs: string[];
