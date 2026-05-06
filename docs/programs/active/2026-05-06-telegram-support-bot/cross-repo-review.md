@@ -66,7 +66,7 @@ Requirement: The header should contain only safe operator context: support id, e
 
 Risk: A visitor message can appear sent even though Telegram delivery failed.
 Evidence: The bridge has two writes: Convex support state and Telegram operator delivery.
-Requirement: Persist visitor messages before Telegram delivery, render explicit delivery states in the widget, keep failed messages in Convex, show a fallback link, and record safe delivery-error metadata for retry or debugging. Slice 1 should use manual/admin retry recovery only; automatic background retries belong to hardening.
+Requirement: Persist visitor messages before Telegram delivery, render explicit delivery states in the widget, keep failed messages in Convex, show a fallback link, and record safe delivery-error metadata for retry or debugging. Slice 1 should use a maintainer-only Convex recovery action protected by `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`; automatic background retries belong to hardening.
 
 Risk: Widget placement can damage the homepage conversion path.
 Evidence: The homepage already has sticky checkout/demo controls and mobile layout constraints.

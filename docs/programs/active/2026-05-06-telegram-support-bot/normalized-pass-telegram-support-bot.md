@@ -43,7 +43,7 @@ Convex should own support state:
 
 Visitor sends should be store-first. Convex writes the support message before Telegram delivery starts, then updates delivery state to `sending`, `delivered_to_parker`, or `delivery_failed`. If Telegram delivery fails, the message remains in Convex, the widget shows the failure with the fallback Telegram link, and backend metadata records enough error detail to retry or debug without sending message text to analytics.
 
-Slice 1 should not add automatic background retries. It should store delivery attempt count, last delivery error, and last delivery attempt time, and provide a manual/admin retry or recovery path after setup repair. Automatic retries belong in the hardening slice after the bridge is stable.
+Slice 1 should not add automatic background retries. It should store delivery attempt count, last delivery error, and last delivery attempt time, and provide a no-UI maintainer recovery action that retries one stored failed visitor message after setup repair. Protect that action with `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`; do not reuse the webhook secret, observability token, or Telegram operator allowlist as its only authority. Automatic retries belong in the hardening slice after the bridge is stable.
 
 The exact table names can change during implementation if a better local naming pattern exists, but customer support names must stay specific. Avoid vague names such as `messages`, `threads`, `chatData`, or `handler`.
 
@@ -51,7 +51,7 @@ The exact table names can change during implementation if a better local naming 
 
 Use a dedicated support bot and a dedicated private supergroup with forum topics enabled. The app should document exactly where the bot is created, what supergroup it is added to, how topics are used, what webhook URL is set, which environment owns each value, and which Convex or Vercel env variables hold the values.
 
-Support provider setup should live in Convex env and app docs. The support-specific Convex env values should be `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, and `TELEGRAM_SUPPORT_OPERATOR_USER_IDS` unless implementation finds a stronger local naming convention. The setup doc should explain BotFather, private supergroup/forum topics, bot admin permissions, webhook URL construction from `NEXT_PUBLIC_CONVEX_SITE_URL`, local/preview/production ownership, verification, and failure modes.
+Support provider setup should live in Convex env and app docs. The support-specific Convex env values should be `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, and `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN` unless implementation finds a stronger local naming convention. The setup doc should explain BotFather, private supergroup/forum topics, bot admin permissions, webhook URL construction from `NEXT_PUBLIC_CONVEX_SITE_URL`, maintainer recovery-token usage, local/preview/production ownership, verification, and failure modes.
 
 Telegram topic titles should not include user-supplied text. Use a generated support id and safe routing metadata only, such as `SBS-0421 · homepage · May 6`. Visitor names, emails, message text, and product details belong inside support messages, not topic names.
 

@@ -79,7 +79,7 @@ Decision: Store visitor messages before Telegram delivery.
 Rationale: Convex should remain the support source of truth even when Telegram delivery fails. A send writes the visitor message first, then attempts Telegram delivery, and the widget renders explicit states such as `sending`, `delivered_to_parker`, and `delivery_failed` with a fallback link on failure.
 
 Decision: Defer automatic Telegram delivery retries beyond Slice 1.
-Rationale: The first implementation should prove delivery state and recovery visibility before adding background scheduling. Slice 1 should record attempt count, last error, and last attempt time, provide manual/admin retry recovery, and document common env or permission repairs.
+Rationale: The first implementation should prove delivery state and recovery visibility before adding background scheduling. Slice 1 should record attempt count, last error, and last attempt time, provide a no-UI maintainer recovery action for one stored failed visitor message, protect it with `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and document common env or permission repairs.
 
 Decision: Validate Slice 1 with focused automated tests and browser proof, not full hosted e2e by default.
 Rationale: The support bridge should be proven through unit tests, Convex model tests, webhook integration tests, integration-ui widget tests, desktop/mobile browser proof, and repo format/lint/typecheck gates. Full hosted e2e is only required if implementation touches auth, checkout, entitlement, release proof, or another release-sensitive surface.

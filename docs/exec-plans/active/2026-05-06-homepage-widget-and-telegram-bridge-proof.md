@@ -78,6 +78,10 @@ Decision: Track analytics only as safe lifecycle metadata.
 Rationale: Support messages can contain private product context, contact details, or customer plans. PostHog events may record event names such as widget opened, thread created, message sent, reply received, send failed, and fallback clicked, but never message bodies, emails, Telegram ids, visitor tokens, or transcript text.
 Date: 2026-05-06
 
+Decision: Include a maintainer-only recovery action for failed Telegram deliveries.
+Rationale: Store-first delivery means a visitor message can be safely retained even when Telegram delivery fails. A separate no-UI recovery action lets a maintainer retry one stored failed message after fixing env or bot permissions without asking the visitor to resend, while still avoiding automatic background retries in Slice 1.
+Date: 2026-05-06
+
 ## Outcomes & Retrospective
 
 This plan is active. Fill this section after implementation with the exact behavior that shipped, the files changed, validation evidence, browser proof, setup docs written, remaining gaps, and whether the first real Telegram loop worked against the hosted Convex dev deployment.
@@ -90,7 +94,7 @@ The homepage is a server component tree until it reaches interactive client comp
 
 Convex code lives under `apps/web/convex`. Before implementation, reread `apps/web/convex/_generated/ai/guidelines.md`. Use hosted Convex dev only; do not switch this repo into Convex local mode. HTTP endpoints are registered in `apps/web/convex/http.ts` through `httpRouter` and `httpAction`. Environment parsing for Convex functions is in `apps/web/convex/env.ts`. The existing production-incident Telegram delivery in `apps/web/convex/observability/model.ts` is useful as a provider-call reference, but it is a negative ownership example: customer support must not reuse `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, incident tables, or incident delivery semantics.
 
-The new support implementation should be feature-local. A reasonable backend shape is `apps/web/convex/support/validators.ts`, `apps/web/convex/support/model.ts`, `apps/web/convex/support/telegram.ts`, `apps/web/convex/support.ts`, and, if a maintainer recovery command is needed, `apps/web/convex/supportAdmin.ts`. Use exact names that describe support behavior; do not create generic files named `utils`, `helpers`, or `misc`.
+The new support implementation should be feature-local. A reasonable backend shape is `apps/web/convex/support/validators.ts`, `apps/web/convex/support/model.ts`, `apps/web/convex/support/telegram.ts`, `apps/web/convex/support.ts`, and `apps/web/convex/supportAdmin.ts` for maintainer-only failed-delivery recovery. Use exact names that describe support behavior; do not create generic files named `utils`, `helpers`, or `misc`.
 
 The browser support widget can live under `apps/web/app/_components/home-page/support/`. Put the visual shell in a component such as `home-page-support-widget.tsx`, state orchestration in a hook such as `use-home-page-support-chat.ts`, and browser token storage in a small file such as `home-page-support-token-storage.ts`. The existing homepage demo storage in `apps/web/app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts` shows the localStorage pattern: guard `window`, catch storage access failures, and version stored envelopes.
 
@@ -102,7 +106,7 @@ Plain-language definitions for this plan: a support visitor is one browser-held 
 
 This plan includes dedicated support environment variables in Convex env, Convex support tables, validators, token hashing, lazy first-message thread creation, text-only support messages, retention fields, first-slice abuse controls, outbound Telegram topic creation and message delivery, inbound Telegram webhook parsing, Telegram operator allowlisting, normal Telegram replies becoming website-visible operator replies, one `Close thread` inline button, homepage-only support widget UI, browser-held support access token storage, delivery states, closed-state rendering, metadata-only analytics events, setup docs, focused tests, and desktop/mobile browser proof.
 
-The required support environment values are `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, and `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`. If implementation adds a maintainer-only recovery token for manual retry, document it in the same change and explain why no existing secret should be reused.
+The required support environment values are `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, and `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`. The admin recovery token protects the no-UI maintainer action that retries one stored failed visitor message after provider setup is repaired; do not reuse an existing webhook, observability, or operator secret for that boundary.
 
 ### Out Of Scope
 
@@ -175,12 +179,13 @@ Create the backend support boundary. Prefer these files unless implementation in
 
 Update `apps/web/convex/schema.ts` with separate support tables. A practical first shape is `supportVisitors`, `supportThreads`, `supportMessages`, `supportOperatorActions`, and `supportRateLimitBuckets`. Keep indexes motivated by reads named in this plan. Do not store an unbounded messages array on `supportThreads`.
 
-Update `apps/web/convex/env.ts` with support env keys. Add support provider code that reads:
+Update `apps/web/convex/env.ts` with support env keys. Add support provider and maintainer-recovery code that reads:
 
     TELEGRAM_SUPPORT_BOT_TOKEN
     TELEGRAM_SUPPORT_CHAT_ID
     TELEGRAM_SUPPORT_WEBHOOK_SECRET
     TELEGRAM_SUPPORT_OPERATOR_USER_IDS
+    TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN
 
 Implement the public visitor send function and internal mutation helpers. The website-facing function should accept the browser support token, message text, page path, and current entry surface. It should not accept a caller-provided visitor id, thread id, Clerk user id, operator id, delivery status, or Telegram id for authorization. Derive optional Clerk metadata server-side only when Convex identity is present.
 
@@ -212,6 +217,7 @@ Add or update focused tests near the touched surfaces. Expected test files inclu
 
     apps/web/tests/unit/support-token-storage.test.ts
     apps/web/tests/unit/convex-support-model.test.ts
+    apps/web/tests/unit/convex-support-admin.test.ts
     apps/web/tests/unit/support-telegram-update.test.ts
     apps/web/tests/unit/convex-env.test.ts
     apps/web/tests/unit/convex-http-boundary.test.ts
@@ -219,13 +225,15 @@ Add or update focused tests near the touched surfaces. Expected test files inclu
     apps/web/tests/unit/docs-content-loader.test.ts
     apps/web/tests/integration-ui/home-page-support-widget.test.tsx
 
+Implement `apps/web/convex/supportAdmin.ts` as a maintainer-only no-UI recovery boundary for failed Telegram delivery. It should expose a narrow action or mutation that accepts a failed support message id and recovery token, verifies `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, verifies the message is still eligible for retry, records another delivery attempt, and reuses the same provider-delivery path as visitor sends. It must not create a second visitor message or accept arbitrary thread ids as proof of authority.
+
 After each milestone, update this ExecPlan's `Progress`, `Surprises & Discoveries`, and `Decision Log` sections. After implementation, update `docs/programs/active/2026-05-06-telegram-support-bot/program.md` with the child plan status, validation evidence, and next recommended slice.
 
 ## Validation and Acceptance
 
 Acceptance for this plan is a working homepage-to-Telegram-to-homepage loop, not just a rendered bubble. A visitor on `/` must be able to open the widget, send a text message without email, see a stored message status, recover when Telegram is unavailable, and see Parker's reply after an allowlisted Telegram operator replies in the mapped support topic.
 
-The Convex model is accepted when anonymous access is scoped by browser token hash, one open thread per token is enforced, first message lazily creates the visitor and thread, support messages are separate rows, delivery metadata is explicit, retention timestamps exist, and abuse controls enforce message length, cooldown, pending-message cap, global hourly cap, and kill-switch behavior without CAPTCHA.
+The Convex model is accepted when anonymous access is scoped by browser token hash, one open thread per token is enforced, first message lazily creates the visitor and thread, support messages are separate rows, delivery metadata is explicit, retention timestamps exist, a maintainer-only recovery action can retry one stored failed visitor message, and abuse controls enforce message length, cooldown, pending-message cap, global hourly cap, and kill-switch behavior without CAPTCHA.
 
 Telegram delivery is accepted when visitor messages are stored before delivery, a first visitor message creates one safe forum topic, the bot posts a safe context header before the visitor message, topic names contain only a support id plus safe metadata, provider failures mark the stored message failed, normal text replies from allowlisted operators become visitor-visible messages, unknown chats/operators/topics fail closed, and `Close thread` is audited and reflected in the website.
 
@@ -237,7 +245,7 @@ External setup is accepted when app docs say what to create in Telegram, where t
 
 Run focused unit tests first from the worktree root, updating file names if implementation chooses slightly different test ownership:
 
-    bun run --cwd apps/web test:unit -- tests/unit/support-token-storage.test.ts tests/unit/convex-support-model.test.ts tests/unit/support-telegram-update.test.ts tests/unit/convex-env.test.ts tests/unit/convex-http-boundary.test.ts tests/unit/home-page-render-model.test.ts tests/unit/docs-content-loader.test.ts
+    bun run --cwd apps/web test:unit -- tests/unit/support-token-storage.test.ts tests/unit/convex-support-model.test.ts tests/unit/convex-support-admin.test.ts tests/unit/support-telegram-update.test.ts tests/unit/convex-env.test.ts tests/unit/convex-http-boundary.test.ts tests/unit/home-page-render-model.test.ts tests/unit/docs-content-loader.test.ts
 
 Run the widget integration UI proof:
 
@@ -274,11 +282,11 @@ Expected success means every command exits with code 0, the widget proof shows n
 
 All first-slice schema changes should be additive. If implementation discovers that an existing table needs a breaking migration, stop and update this ExecPlan with a migration strategy before editing data shape. Do not delete existing app records.
 
-Visitor send behavior must be safe to retry. If the first action stores a message and then Telegram delivery fails, a repeated send should not silently duplicate the old failed message unless the visitor explicitly sends again. Manual recovery should operate on a specific failed message id and should record another delivery attempt.
+Visitor send behavior must be safe to retry. If the first action stores a message and then Telegram delivery fails, a repeated send should not silently duplicate the old failed message unless the visitor explicitly sends again. Maintainer recovery should operate on a specific failed message id, verify `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and record another delivery attempt.
 
 Webhook handling must be safe under Telegram retries. Use the Telegram update id or message id plus topic mapping to prevent duplicate operator replies or duplicate close actions where practical. If exact de-duplication cannot be complete in the first implementation, document the residual risk and make duplicate close actions no-op once the thread is already closed.
 
-If the support bot lacks forum-topic permissions, delivery should fail visibly, leave the visitor message in Convex, and tell the visitor to use the fallback link. Recovery is to repair bot permissions, verify env, then run the documented manual/admin recovery path for the failed message or ask the visitor to resend if no safe retry path exists yet.
+If the support bot lacks forum-topic permissions, delivery should fail visibly, leave the visitor message in Convex, and tell the visitor to use the fallback link. Recovery is to repair bot permissions, verify env, then run the documented maintainer recovery action for the failed message. Asking the visitor to resend is a fallback only if the stored message is no longer eligible for recovery.
 
 If the kill switch is enabled, the widget should avoid creating new threads and render the fallback Telegram path. Existing open threads should remain readable unless a later hardening decision changes that behavior.
 
@@ -331,5 +339,6 @@ The required Convex env interface is:
     TELEGRAM_SUPPORT_CHAT_ID
     TELEGRAM_SUPPORT_WEBHOOK_SECRET
     TELEGRAM_SUPPORT_OPERATOR_USER_IDS
+    TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN
 
 The homepage support widget content interface should include launcher label, panel title, starter prompt, message placeholder, fallback label, disabled copy, sending label, delivered label, failed label, closed label, and privacy-safe analytics event names. It should not include a response-time promise, online state, email field label, or upload copy.

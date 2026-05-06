@@ -54,7 +54,7 @@ Convex is the natural state owner for support threads and messages because the w
 - [x] 2026-05-06: Locked provider setup boundary: support bot secrets live in Convex env, and app docs own BotFather, supergroup, webhook, verification, and failure-mode setup.
 - [x] 2026-05-06: Locked first Telegram button scope: Slice 1 ships only `Close thread` as a safe lifecycle button; AI drafts, prompts, checkout links, Linear drafts, and canned sends wait for Slice 2.
 - [x] 2026-05-06: Locked store-first delivery semantics: write visitor messages to Convex before Telegram delivery, expose delivery status in the widget, and fail visibly with fallback instead of pretending Parker saw undelivered messages.
-- [x] 2026-05-06: Locked Slice 1 retry boundary: record delivery attempts and errors, provide manual/admin recovery, and defer automatic background retries to hardening.
+- [x] 2026-05-06: Locked Slice 1 retry boundary: record delivery attempts and errors, provide a maintainer-only Convex recovery action protected by `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and defer automatic background retries to hardening.
 - [x] 2026-05-06: Locked Slice 1 validation scope: focused unit, Convex model, webhook, integration-ui, and desktop/mobile browser proof; broad repo gates; no full hosted e2e unless auth, checkout, or release-sensitive paths are touched.
 - [x] 2026-05-06: Locked text-only v1: plain text and links-as-text only; no uploads, screenshots, voice notes, or binary attachments in Slice 1.
 - [x] 2026-05-06: Locked optional Clerk association for signed-in visitors while preserving browser support token as the thread access authority in Slice 1.
@@ -159,7 +159,7 @@ Rationale: Convex is the source of truth for support state. A visitor send shoul
 Date: 2026-05-06
 
 Decision: Defer automatic Telegram delivery retries beyond Slice 1.
-Rationale: The first implementation should prove the bridge and failure visibility before adding background scheduling. Slice 1 should store delivery attempt count, last delivery error, and last delivery attempt time, show fallback to visitors on failure, and document manual/admin recovery for retry after env or bot-permission repair.
+Rationale: The first implementation should prove the bridge and failure visibility before adding background scheduling. Slice 1 should store delivery attempt count, last delivery error, and last delivery attempt time, show fallback to visitors on failure, and provide a no-UI maintainer recovery action that can retry one stored failed visitor message after env or bot-permission repair. That action must be protected by a separate Convex env token named `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`; it must not reuse the webhook secret, observability tokens, or operator allowlist as its only authority.
 Date: 2026-05-06
 
 Decision: Validate Slice 1 with focused automated tests and browser proof, not full hosted e2e by default.
@@ -192,7 +192,7 @@ Child ExecPlans:
 
 - `docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md`: active Slice 1 plan for `Homepage Widget And Telegram Bridge Proof`.
 
-Recommended Slice 1: Homepage Widget And Telegram Bridge Proof. This homepage-only slice should add the dedicated provider env contract, Convex support visitor/thread/message model, homepage widget, anonymous visitor token storage, lazy first-message thread creation, no dedicated contact/email field, Telegram forum-topic creation, store-first visitor message delivery with explicit status, Telegram HTTP action webhook inbound reply, operator allowlist enforcement, first-slice abuse controls, the `Close thread` operator button, and live website reply rendering.
+Recommended Slice 1: Homepage Widget And Telegram Bridge Proof. This homepage-only slice should add the dedicated provider env contract, Convex support visitor/thread/message model, homepage widget, anonymous visitor token storage, lazy first-message thread creation, no dedicated contact/email field, Telegram forum-topic creation, store-first visitor message delivery with explicit status, a maintainer-only failed-delivery recovery action, Telegram HTTP action webhook inbound reply, operator allowlist enforcement, first-slice abuse controls, the `Close thread` operator button, and live website reply rendering.
 
 Recommended Slice 2: Operator Actions And Prompt Buttons. This slice should build on the callback/audit plumbing from `Close thread` and add safe buttons such as draft reply, ask for email, ask for context, send pricing link, send checkout link, summarize lead, generate Codex prompt, create Linear draft, or mark hot lead.
 
@@ -250,7 +250,7 @@ Homepage-only scope is accepted when the widget renders on the public homepage o
 
 Delivery state is accepted when visitor messages are persisted before Telegram delivery starts, the widget renders sending, delivered-to-Parker, and delivery-failed states, Telegram delivery failures retain the message in Convex, visitors get a clear fallback link, and the backend records enough error metadata to retry or debug without exposing message text to analytics.
 
-Retry behavior is accepted when Slice 1 records `deliveryAttemptCount`, `lastDeliveryError`, and `lastDeliveryAttemptAt`, provides a manual/admin retry or recovery path, documents how to repair common Telegram env or permission failures before retrying, and does not introduce automatic background retry scheduling until the hardening slice.
+Retry behavior is accepted when Slice 1 records `deliveryAttemptCount`, `lastDeliveryError`, and `lastDeliveryAttemptAt`, provides a maintainer-only Convex recovery action that retries one stored failed visitor message after setup repair, documents how to repair common Telegram env or permission failures before retrying, protects that action with `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and does not introduce automatic background retry scheduling until the hardening slice.
 
 Retention is accepted when open support threads remain available, idle anonymous threads are auto-closed after 14 days, closed transcript bodies are retained for 90 days, purged threads no longer expose message bodies, and the matching Telegram forum topic is deleted or clearly marked for manual cleanup if Telegram deletion fails.
 
@@ -272,9 +272,9 @@ Text-only scope is accepted when the widget accepts plain text and links-as-text
 
 External setup docs must say what to create in Telegram, where to create it, exact bot/chat/webhook requirements, which environment owns each value, where values go, how to verify the bridge, and what failure looks like when setup is missing or misconfigured.
 
-The support setup contract is accepted when `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, and `TELEGRAM_SUPPORT_OPERATOR_USER_IDS` are documented as Convex env values, the webhook URL uses the Convex HTTP-actions site origin from `NEXT_PUBLIC_CONVEX_SITE_URL`, and the setup doc names BotFather, private supergroup/forum-topic requirements, bot admin permissions, verification steps, and failure modes.
+The support setup contract is accepted when `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, and `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN` are documented as Convex env values, the webhook URL uses the Convex HTTP-actions site origin from `NEXT_PUBLIC_CONVEX_SITE_URL`, and the setup doc names BotFather, private supergroup/forum-topic requirements, bot admin permissions, recovery-token usage, verification steps, and failure modes.
 
-Validation should include support token storage tests, support validators, Telegram update parsing tests, delivery classification tests, Convex model tests for thread/message lifecycle and abuse limits, webhook route/action integration tests, widget integration-ui tests for open/send/failure/closed states, desktop and mobile browser proof, `bun run programs:lint`, hosted Convex dev validation for Convex implementation slices, and broad app gates: `bun run format`, `bun lint`, and `bun typecheck`. Full hosted e2e is not required by default unless the implementation touches auth, checkout, entitlement, release proof, or other release-sensitive paths.
+Validation should include support token storage tests, support validators, Telegram update parsing tests, delivery classification tests, Convex model tests for thread/message lifecycle and abuse limits, maintainer recovery authorization tests, webhook route/action integration tests, widget integration-ui tests for open/send/failure/closed states, desktop and mobile browser proof, `bun run programs:lint`, hosted Convex dev validation for Convex implementation slices, and broad app gates: `bun run format`, `bun lint`, and `bun typecheck`. Full hosted e2e is not required by default unless the implementation touches auth, checkout, entitlement, release proof, or other release-sensitive paths.
 
 ## Artifacts and Notes
 

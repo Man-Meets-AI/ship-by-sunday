@@ -12,7 +12,7 @@ read_when:
 
 ## Slice 1: Homepage Widget And Telegram Bridge Proof
 
-Ship the narrow vertical proof: dedicated env names, Convex support visitor/thread/message tables and functions, retention fields, first-slice abuse controls, browser-held anonymous visitor access token with Convex-stored hash, homepage chat widget, no dedicated contact/email field, text-only lazy first-message visitor send, store-first delivery state, manual/admin delivery retry recovery, Telegram support bot forum-topic creation and outbound post, Convex HTTP action webhook inbound reply, operator allowlist enforcement, `Close thread` operator button, and live website reply rendering. Do not include uploads, attachments, AI drafts, prompt generation, checkout links, Linear drafts, canned customer-visible sends, or automatic background retries in this slice.
+Ship the narrow vertical proof: dedicated env names, Convex support visitor/thread/message tables and functions, retention fields, first-slice abuse controls, browser-held anonymous visitor access token with Convex-stored hash, homepage chat widget, no dedicated contact/email field, text-only lazy first-message visitor send, store-first delivery state, maintainer-only failed-delivery recovery action, Telegram support bot forum-topic creation and outbound post, Convex HTTP action webhook inbound reply, operator allowlist enforcement, `Close thread` operator button, and live website reply rendering. Do not include uploads, attachments, AI drafts, prompt generation, checkout links, Linear drafts, canned customer-visible sends, or automatic background retries in this slice.
 
 ## Slice 2: Operator Actions And Prompt Buttons
 
