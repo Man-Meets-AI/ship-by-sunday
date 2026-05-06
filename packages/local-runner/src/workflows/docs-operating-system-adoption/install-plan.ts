@@ -23,7 +23,7 @@ import type { DocsSpineRepoFacts } from "../docs-spine-adoption/schemas";
 
 type RootPackageManifestFacts = {
 	name?: string;
-	scripts: Record<string, string>;
+	scripts: Record<string, unknown>;
 };
 
 export type BuildDocsOperatingSystemInstallPlanOptions = {
@@ -197,6 +197,17 @@ function buildPackageScriptOperation({
 				"Script is missing and can be added in a later approved package-script patching slice.",
 		};
 	}
+	if (typeof currentScript !== "string") {
+		return {
+			scriptName,
+			moduleIds,
+			status: "blocked",
+			currentScriptRecognized: false,
+			proposedTarget: "package.json#scripts",
+			reason:
+				"Existing script name has a non-string value. Fix package.json before installing portable docs tooling.",
+		};
+	}
 	if (isRecognizedPortableDocsScript(scriptName, currentScript)) {
 		return {
 			scriptName,
@@ -237,39 +248,27 @@ export function isRecognizedPortableDocsScript(
 	> = {
 		"programs:lint": [
 			"bun scripts/programs/run-lint.ts",
-			"bun run scripts/programs/run-lint.ts",
 			"bun scripts/sbs-docs/programs-lint.mjs",
-			"bun run scripts/sbs-docs/programs-lint.mjs",
 		],
 		"plans:lint": [
 			"bun scripts/exec-plan/run-lint.ts",
-			"bun run scripts/exec-plan/run-lint.ts",
 			"bun scripts/sbs-docs/exec-plans-lint.mjs",
-			"bun run scripts/sbs-docs/exec-plans-lint.mjs",
 		],
 		"markdown:lint": [
 			"bun scripts/markdown-metadata/run-lint.ts",
-			"bun run scripts/markdown-metadata/run-lint.ts",
 			"bun scripts/sbs-docs/markdown-lint.mjs",
-			"bun run scripts/sbs-docs/markdown-lint.mjs",
 		],
 		"docs:validate": [
 			"bun scripts/docs-quality/validate.ts",
-			"bun run scripts/docs-quality/validate.ts",
 			"bun scripts/sbs-docs/docs-validate.mjs",
-			"bun run scripts/sbs-docs/docs-validate.mjs",
 		],
 		"docs:refresh-quality": [
 			"bun scripts/docs-quality/refresh-quality.ts",
-			"bun run scripts/docs-quality/refresh-quality.ts",
 			"bun scripts/sbs-docs/docs-refresh-quality.mjs",
-			"bun run scripts/sbs-docs/docs-refresh-quality.mjs",
 		],
 		"program:write-child-plan": [
 			"bun scripts/programs/write-child-plan.ts",
-			"bun run scripts/programs/write-child-plan.ts",
 			"bun scripts/sbs-docs/write-child-plan.mjs",
-			"bun run scripts/sbs-docs/write-child-plan.mjs",
 		],
 	};
 	return recognizedPatterns[scriptName].includes(normalizedScript);

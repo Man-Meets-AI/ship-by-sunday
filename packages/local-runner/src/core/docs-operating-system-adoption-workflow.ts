@@ -64,7 +64,7 @@ type RunDocsOperatingSystemAdoptionWorkflowOptions = {
 
 type RootPackageManifestFacts = {
 	name?: string;
-	scripts: Record<string, string>;
+	scripts: Record<string, unknown>;
 };
 
 export async function runDocsOperatingSystemAdoptionWorkflow({
@@ -654,12 +654,7 @@ async function readRootPackageManifest(
 		parsed.scripts &&
 		typeof parsed.scripts === "object" &&
 		!Array.isArray(parsed.scripts)
-			? Object.fromEntries(
-					Object.entries(parsed.scripts).filter(
-						(entry): entry is [string, string] =>
-							typeof entry[0] === "string" && typeof entry[1] === "string",
-					),
-				)
+			? { ...(parsed.scripts as Record<string, unknown>) }
 			: {};
 	return {
 		name: typeof parsed.name === "string" ? parsed.name : undefined,

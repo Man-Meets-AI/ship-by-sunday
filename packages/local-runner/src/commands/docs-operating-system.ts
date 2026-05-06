@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -508,35 +508,85 @@ async function writeChildExecPlan(params: {
 	options: WriteChildPlanOptions;
 	repoRootDir: string;
 }) {
-	const planPath = validatePlanPath(params.options.planPath);
-	if (!planPath.startsWith("docs/exec-plans/active/")) {
-		throw new Error(
-			"write-child-plan only creates active ExecPlans under docs/exec-plans/active/.",
-		);
-	}
-
+	const planPath = validateActiveExecPlanPath(params.options.planPath);
 	const createdAt = parseDateFromActivePlanPath(planPath);
 	const currentPlanningBrief = await resolveCurrentPlanningBrief({
 		repoRootDir: params.repoRootDir,
 		programId: params.options.programId,
 	});
-	const absolutePlanPath = path.join(params.repoRootDir, planPath);
-	await assertFileDoesNotExist(absolutePlanPath, planPath);
+	const absolutePlanPath = resolveSafeActiveExecPlanPath({
+		planPath,
+		repoRootDir: params.repoRootDir,
+	});
 	await mkdir(path.dirname(absolutePlanPath), { recursive: true });
-	await writeFile(
-		absolutePlanPath,
-		buildChildExecPlanContent({
-			createdAt,
-			planPath,
-			planningBriefPath: currentPlanningBrief.planningBriefPath,
-			programId: params.options.programId,
-			summary: params.options.summary,
-			title: params.options.title,
-		}),
-		"utf8",
-	);
+	try {
+		await writeFile(
+			absolutePlanPath,
+			buildChildExecPlanContent({
+				createdAt,
+				planPath,
+				planningBriefPath: currentPlanningBrief.planningBriefPath,
+				programId: params.options.programId,
+				summary: params.options.summary,
+				title: params.options.title,
+			}),
+			{ encoding: "utf8", flag: "wx" },
+		);
+	} catch (error) {
+		if (isFileAlreadyExistsError(error)) {
+			throw new Error(`Refusing to overwrite existing ExecPlan: ${planPath}`);
+		}
+		throw error;
+	}
 
 	return `Created ${planPath} with planning_brief ${currentPlanningBrief.planningBriefPath}.`;
+}
+
+function validateActiveExecPlanPath(rawPlanPath: string) {
+	const planPath = validatePlanPath(rawPlanPath);
+	if (planPath !== rawPlanPath.replaceAll("\\", "/")) {
+		throw new Error(
+			"write-child-plan requires a normalized repo-relative ExecPlan path.",
+		);
+	}
+	if (path.posix.normalize(planPath) !== planPath) {
+		throw new Error(
+			"write-child-plan requires a normalized repo-relative ExecPlan path.",
+		);
+	}
+	if (
+		!/^docs\/exec-plans\/active\/\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$/.test(
+			planPath,
+		)
+	) {
+		throw new Error(
+			"write-child-plan only creates active ExecPlans under docs/exec-plans/active/YYYY-MM-DD-slug.md.",
+		);
+	}
+	return planPath;
+}
+
+function resolveSafeActiveExecPlanPath(params: {
+	planPath: string;
+	repoRootDir: string;
+}) {
+	const activeRootPath = path.resolve(
+		params.repoRootDir,
+		"docs",
+		"exec-plans",
+		"active",
+	);
+	const targetPath = path.resolve(params.repoRootDir, params.planPath);
+	const activeRootRelativePath = path.relative(activeRootPath, targetPath);
+	if (
+		activeRootRelativePath.startsWith("..") ||
+		path.isAbsolute(activeRootRelativePath)
+	) {
+		throw new Error(
+			"write-child-plan target resolved outside docs/exec-plans/active/.",
+		);
+	}
+	return targetPath;
 }
 
 function parseDateFromActivePlanPath(planPath: string) {
@@ -549,19 +599,6 @@ function parseDateFromActivePlanPath(planPath: string) {
 		);
 	}
 	return match[1];
-}
-
-async function assertFileDoesNotExist(absolutePath: string, planPath: string) {
-	try {
-		await access(absolutePath);
-	} catch (error) {
-		if (isMissingPathError(error)) {
-			return;
-		}
-		throw error;
-	}
-
-	throw new Error(`Refusing to overwrite existing ExecPlan: ${planPath}`);
 }
 
 function buildChildExecPlanContent(params: {
@@ -666,6 +703,12 @@ function buildChildExecPlanContent(params: {
 
 function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
 	return error instanceof Error && "code" in error && error.code === "ENOENT";
+}
+
+function isFileAlreadyExistsError(
+	error: unknown,
+): error is NodeJS.ErrnoException {
+	return error instanceof Error && "code" in error && error.code === "EEXIST";
 }
 
 function buildProgramsLintUsage() {

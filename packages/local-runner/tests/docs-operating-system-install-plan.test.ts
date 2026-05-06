@@ -255,6 +255,75 @@ describe("docs operating system install plan", () => {
 		expect(JSON.stringify(plan)).not.toContain("echo extra");
 	});
 
+	it("blocks bun run wrapper paths because package scripts can shadow them", () => {
+		const plan = buildDocsOperatingSystemInstallPlan({
+			repoFacts: createRepoFacts({
+				packageScripts: ["docs:validate"],
+			}),
+			rootPackageManifest: {
+				name: "customer-repo",
+				scripts: {
+					"docs:validate": "bun run scripts/sbs-docs/docs-validate.mjs",
+				},
+			},
+			trackedRepoRefs: ["package.json"],
+			now: 10,
+		});
+
+		expect(plan.packageScriptOperations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					scriptName: "docs:validate",
+					status: "blocked",
+					currentScriptRecognized: false,
+				}),
+			]),
+		);
+		expect(plan.blockedOperations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					operationId: "package-script:docs:validate",
+					surface: "package-script",
+				}),
+			]),
+		);
+	});
+
+	it("blocks non-string same-name package scripts without serializing their values", () => {
+		const plan = buildDocsOperatingSystemInstallPlan({
+			repoFacts: createRepoFacts({
+				packageScripts: ["docs:validate"],
+			}),
+			rootPackageManifest: {
+				name: "customer-repo",
+				scripts: {
+					"docs:validate": ["SECRET_NON_STRING_SCRIPT"],
+				},
+			},
+			trackedRepoRefs: ["package.json"],
+			now: 10,
+		});
+
+		expect(plan.packageScriptOperations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					scriptName: "docs:validate",
+					status: "blocked",
+					currentScriptRecognized: false,
+				}),
+			]),
+		);
+		expect(plan.blockedOperations).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					operationId: "package-script:docs:validate",
+					surface: "package-script",
+				}),
+			]),
+		);
+		expect(JSON.stringify(plan)).not.toContain("SECRET_NON_STRING_SCRIPT");
+	});
+
 	it("reports runtime and worker-specific surfaces as out of scope", () => {
 		const plan = buildDocsOperatingSystemInstallPlan({
 			repoFacts: createRepoFacts({

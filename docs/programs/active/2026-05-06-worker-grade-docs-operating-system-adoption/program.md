@@ -60,6 +60,7 @@ The important boundary is authority. The existing `docs-spine-apply-and-proof` w
 - [x] 2026-05-06 EDT: Piloted the resulting install plan against Worker, Ship by Sunday, Arena CRM, and sparse test fixtures.
 - [x] 2026-05-06 EDT: Implemented package-script, shared dependency metadata, and wrapper-file patching behind the distinct `docs-operating-system-package-script-patching` tooling-apply authority.
 - [x] 2026-05-06 EDT: Implemented the package-owned `ship-by-sunday docs-operating-system` command surface for bundled docs validators and bounded child-plan creation.
+- [x] 2026-05-06 EDT: Hardened command and package-script boundaries after review: child-plan paths are normalized and create-only, `bun run <file>` script recognition is blocked, non-string canonical scripts block, invalid install-plan statuses block, and late partial source writes are reported honestly.
 
 ## Decision Log
 

@@ -179,6 +179,57 @@ describe("docs operating-system command", () => {
 		).rejects.toThrow(`Refusing to overwrite existing ExecPlan: ${planPath}`);
 	});
 
+	it("rejects child-plan paths that traverse outside the active ExecPlan root", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		const programRoot = "docs/programs/active/2026-05-06-command-program";
+		await writeRepoFile(
+			repositoryRoot,
+			`${programRoot}/planning-brief-1.md`,
+			[
+				"---",
+				"title: Command Program Brief",
+				"program_id: command-program",
+				"brief_version: 1",
+				"status: current",
+				"summary: Brief for command Program.",
+				"read_when:",
+				"  - Creating child plans.",
+				"---",
+				"",
+				"# Command Program Brief",
+				"",
+			].join("\n"),
+		);
+		await writeRepoFile(
+			repositoryRoot,
+			`${programRoot}/current-planning-brief.txt`,
+			"planning-brief-1.md\n",
+		);
+		const maliciousPlanPath =
+			"docs/exec-plans/active/2026-05-06-x/../../../../outside.md";
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"write-child-plan",
+				"--repo",
+				repositoryRoot,
+				"--program-id",
+				"command-program",
+				"--plan",
+				maliciousPlanPath,
+				"--title",
+				"Escaped Plan",
+				"--summary",
+				"This should not be created outside the active plan root.",
+			]),
+		).rejects.toThrow(
+			"write-child-plan requires a normalized repo-relative ExecPlan path",
+		);
+		await expect(
+			readFile(path.join(repositoryRoot, "outside.md"), "utf8"),
+		).rejects.toThrow();
+	});
+
 	it("recognizes quality refresh as blocked pending evidence-bound workflow", async () => {
 		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
 		const errorSpy = vi

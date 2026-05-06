@@ -261,6 +261,7 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 		proofRef,
 		syncPreviewRef,
 	];
+	let approvedSourceTargetRefs: string[] = [];
 
 	try {
 		const installPlan = await readInstallPlan(repositoryRoot);
@@ -356,6 +357,7 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 				fetchRunnerEvent,
 			});
 		}
+		approvedSourceTargetRefs = packagePatch.touchedFileRefs;
 
 		const writePreflightBlockedReasons =
 			await listPackagePatchWritePreflightBlockedReasons({
@@ -505,6 +507,12 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 			remainingEvents: startEventResult.remaining + proofEventResult.remaining,
 		};
 	} catch {
+		const partialSourceTouchedFiles =
+			await listPotentialPartialSourceTouchedFiles({
+				repositoryRoot,
+				preRunDirtyFileRefs,
+				approvedSourceTargetRefs,
+			}).catch(() => []);
 		const blockedResult = await blockWorkflow({
 			repositoryRoot,
 			state,
@@ -515,10 +523,20 @@ export async function runDocsOperatingSystemPackageScriptPatchingWorkflow({
 			writeLeaseId,
 			localRunDirectoryRef,
 			localRunDirectory,
-			blockedStage: "artifact-generation",
+			blockedStage:
+				partialSourceTouchedFiles.length > 0
+					? "source-write"
+					: "artifact-generation",
 			blockedReason:
-				"Docs operating system package-script patching failed before proof artifacts could be completed.",
+				partialSourceTouchedFiles.length > 0
+					? "Docs operating system package-script patching failed after one or more approved source writes. Review and revert the touched source refs before retrying."
+					: "Docs operating system package-script patching failed before proof artifacts could be completed.",
 			createdArtifacts,
+			touchedFiles: partialSourceTouchedFiles,
+			rollbackInstructions:
+				partialSourceTouchedFiles.length > 0
+					? `Source files may have been patched: ${partialSourceTouchedFiles.join(", ")}. Review and revert those refs plus this run's .sbs artifacts before retrying.`
+					: undefined,
 			fetchRunnerEvent,
 		});
 		return {
@@ -683,6 +701,26 @@ async function listUnexpectedTouchedFiles({
 		}
 		return !isAllowedPackageScriptPatchingArtifactRef(fileRef, workflowRunId);
 	});
+}
+
+async function listPotentialPartialSourceTouchedFiles({
+	repositoryRoot,
+	preRunDirtyFileRefs,
+	approvedSourceTargetRefs,
+}: {
+	repositoryRoot: string;
+	preRunDirtyFileRefs: string[];
+	approvedSourceTargetRefs: string[];
+}) {
+	const preRunDirtySet = new Set(preRunDirtyFileRefs);
+	const approvedSourceTargetSet = new Set(approvedSourceTargetRefs);
+	const dirtyFileRefs = await listGitDirtyFileRefs(repositoryRoot);
+	return dirtyFileRefs
+		.filter(
+			(fileRef) =>
+				approvedSourceTargetSet.has(fileRef) && !preRunDirtySet.has(fileRef),
+		)
+		.sort();
 }
 
 async function listGitDirtyFileRefs(repositoryRoot: string) {
@@ -996,6 +1034,8 @@ async function blockWorkflow({
 	blockedReason,
 	createdArtifacts,
 	blockedDetails = [],
+	touchedFiles = [],
+	rollbackInstructions,
 	fetchRunnerEvent,
 }: {
 	repositoryRoot: string;
@@ -1011,6 +1051,8 @@ async function blockWorkflow({
 	blockedReason: string;
 	createdArtifacts: string[];
 	blockedDetails?: DocsOperatingSystemPackagePatchBlockedReason[];
+	touchedFiles?: string[];
+	rollbackInstructions?: string;
 	fetchRunnerEvent?: typeof fetch;
 }): Promise<DocsOperatingSystemPackageScriptPatchingWorkflowResult> {
 	await ensureSafePackageScriptPatchingArtifactDirectory(
@@ -1031,7 +1073,7 @@ async function blockWorkflow({
 		branchName,
 		profileName,
 		installProfile: DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
-		touchedFiles: [],
+		touchedFiles,
 		createdArtifacts: allCreatedArtifacts,
 		proofCommandsRun: [],
 		proofCommandResults: [],
@@ -1047,6 +1089,7 @@ async function blockWorkflow({
 			})),
 		],
 		rollbackInstructions:
+			rollbackInstructions ??
 			"No source files were patched. Resolve the block and approve a fresh package-script patching workflow if needed.",
 		createdAt: Date.now(),
 	});
@@ -1059,7 +1102,7 @@ async function blockWorkflow({
 		branchName,
 		profileName,
 		installProfile: DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
-		touchedFileRefs: [],
+		touchedFileRefs: touchedFiles,
 		createdArtifactRefs: allCreatedArtifacts,
 		proofCommandResults: [],
 		blockedReason,
@@ -1089,7 +1132,7 @@ async function blockWorkflow({
 		installProfile: DOCS_OPERATING_SYSTEM_ADOPTION_INSTALL_PROFILE,
 		proofStatus: "blocked",
 		localRunDirectoryRef,
-		touchedFiles: [],
+		touchedFiles,
 		createdArtifacts: allCreatedArtifacts,
 		blockedReason,
 		deliveredEvents: blockedEventResult.delivered,

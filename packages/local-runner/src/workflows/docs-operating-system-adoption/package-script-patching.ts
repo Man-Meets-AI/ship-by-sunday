@@ -120,6 +120,15 @@ export function buildDocsOperatingSystemPackagePatch({
 			});
 			continue;
 		}
+		if (currentScript !== undefined && typeof currentScript !== "string") {
+			blockedReasons.push({
+				stage: "package-script-invalid",
+				targetRef: `package.json#scripts.${scriptName}`,
+				reason:
+					"Live package.json has a same-name docs script with a non-string value. Fix package.json before installing portable docs tooling.",
+			});
+			continue;
+		}
 		if (typeof currentScript === "string") {
 			if (isRecognizedPortableDocsScript(scriptName, currentScript)) {
 				appliedOperations.push({
@@ -171,6 +180,15 @@ export function buildDocsOperatingSystemPackagePatch({
 			stage: "dependency-blocked",
 			targetRef: `package.json#devDependencies.${DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME}`,
 			reason: dependencyOperation.reason,
+		});
+	} else if (
+		dependencyOperation.status !== "installable" &&
+		dependencyOperation.status !== "already-present"
+	) {
+		blockedReasons.push({
+			stage: "install-plan",
+			targetRef: `package.json#devDependencies.${DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME}`,
+			reason: "Install plan contains an invalid shared dependency status.",
 		});
 	} else if (hasSharedToolingDependency(packageJson)) {
 		appliedOperations.push({
@@ -245,6 +263,17 @@ export function buildDocsOperatingSystemPackagePatch({
 			});
 			continue;
 		}
+		if (
+			wrapperOperation.status !== "installable" &&
+			wrapperOperation.status !== "already-present"
+		) {
+			blockedReasons.push({
+				stage: "install-plan",
+				targetRef: wrapperOperation.targetRef,
+				reason: "Install plan contains an invalid wrapper file status.",
+			});
+			continue;
+		}
 		const existingContent = wrapperFilesByRef.get(wrapperOperation.targetRef);
 		const wrapperContent = buildWrapperFileContent(wrapperOperation.targetRef);
 		if (existingContent !== null && existingContent !== undefined) {
@@ -314,6 +343,14 @@ function validateInstallPlanForPatching(
 	installPlan: DocsOperatingSystemInstallPlan,
 ): DocsOperatingSystemPackagePatchBlockedReason[] {
 	const blockedReasons: DocsOperatingSystemPackagePatchBlockedReason[] = [];
+	if (!isJsonObject(installPlan)) {
+		return [
+			{
+				stage: "install-plan",
+				reason: "Install plan must be a JSON object.",
+			},
+		];
+	}
 	if (installPlan.workflowId !== DOCS_OPERATING_SYSTEM_ADOPTION_WORKFLOW_ID) {
 		blockedReasons.push({
 			stage: "install-plan",
@@ -329,14 +366,158 @@ function validateInstallPlanForPatching(
 			reason: "Install plan does not use installProfile: worker-grade.",
 		});
 	}
-	for (const operation of installPlan.blockedOperations) {
+	if (!Array.isArray(installPlan.packageScriptOperations)) {
 		blockedReasons.push({
-			stage: operation.operationId,
-			targetRef: operation.targetRef,
-			reason: operation.reason,
+			stage: "install-plan",
+			reason: "Install plan packageScriptOperations must be an array.",
+		});
+	} else {
+		for (const operation of installPlan.packageScriptOperations) {
+			if (!isJsonObject(operation)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					reason: "Install plan contains an invalid package script operation.",
+				});
+				continue;
+			}
+			if (!isCanonicalScriptName(operation.scriptName)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					reason:
+						"Install plan contains a package script operation for an unknown script name.",
+				});
+			}
+			if (!isPackageScriptOperationStatus(operation.status)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					targetRef: isCanonicalScriptName(operation.scriptName)
+						? `package.json#scripts.${operation.scriptName}`
+						: undefined,
+					reason:
+						"Install plan contains an invalid package script operation status.",
+				});
+			}
+		}
+	}
+	if (!Array.isArray(installPlan.dependencyOperations)) {
+		blockedReasons.push({
+			stage: "install-plan",
+			reason: "Install plan dependencyOperations must be an array.",
+		});
+	} else {
+		for (const operation of installPlan.dependencyOperations) {
+			if (!isJsonObject(operation)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					reason: "Install plan contains an invalid dependency operation.",
+				});
+				continue;
+			}
+			if (!isDependencyOperationStatus(operation.status)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					targetRef:
+						"package.json#devDependencies." +
+						DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME,
+					reason: "Install plan contains an invalid shared dependency status.",
+				});
+			}
+		}
+	}
+	if (!Array.isArray(installPlan.validatorFileOperations)) {
+		blockedReasons.push({
+			stage: "install-plan",
+			reason: "Install plan validatorFileOperations must be an array.",
+		});
+	} else {
+		for (const operation of installPlan.validatorFileOperations) {
+			if (!isJsonObject(operation)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					reason: "Install plan contains an invalid wrapper operation.",
+				});
+				continue;
+			}
+			if (!isFileOperationStatus(operation.status)) {
+				blockedReasons.push({
+					stage: "install-plan",
+					targetRef:
+						typeof operation.targetRef === "string"
+							? operation.targetRef
+							: undefined,
+					reason: "Install plan contains an invalid wrapper file status.",
+				});
+			}
+		}
+	}
+	if (!Array.isArray(installPlan.blockedOperations)) {
+		blockedReasons.push({
+			stage: "install-plan",
+			reason: "Install plan blockedOperations must be an array.",
+		});
+		return blockedReasons;
+	}
+	for (const operation of installPlan.blockedOperations) {
+		if (!isJsonObject(operation)) {
+			blockedReasons.push({
+				stage: "install-plan",
+				reason: "Install plan contains an invalid blocked operation.",
+			});
+			continue;
+		}
+		blockedReasons.push({
+			stage:
+				typeof operation.operationId === "string"
+					? operation.operationId
+					: "install-plan",
+			targetRef:
+				typeof operation.targetRef === "string"
+					? operation.targetRef
+					: undefined,
+			reason:
+				typeof operation.reason === "string"
+					? operation.reason
+					: "Install plan contains a blocked operation.",
 		});
 	}
 	return blockedReasons;
+}
+
+function isCanonicalScriptName(
+	value: unknown,
+): value is DocsOperatingSystemCanonicalScript {
+	return (
+		typeof value === "string" &&
+		DOCS_OPERATING_SYSTEM_CANONICAL_SCRIPTS.includes(
+			value as DocsOperatingSystemCanonicalScript,
+		)
+	);
+}
+
+function isPackageScriptOperationStatus(value: unknown) {
+	return (
+		value === "keep" ||
+		value === "add" ||
+		value === "blocked" ||
+		value === "conflict" ||
+		value === "rename-proposed"
+	);
+}
+
+function isDependencyOperationStatus(value: unknown) {
+	return (
+		value === "already-present" ||
+		value === "installable" ||
+		value === "blocked"
+	);
+}
+
+function isFileOperationStatus(value: unknown) {
+	return (
+		value === "already-present" ||
+		value === "installable" ||
+		value === "blocked"
+	);
 }
 
 function parsePackageJson(packageJsonText: string):

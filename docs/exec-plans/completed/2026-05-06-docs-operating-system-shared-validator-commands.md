@@ -32,6 +32,7 @@ After this slice, the local-runner package owns a `docs-operating-system` CLI co
 - [x] 2026-05-06 EDT: Implemented `ship-by-sunday docs-operating-system` command dispatch, bundled validator calls, `docs-validate`, explicit quality-refresh blocking, and create-only child-plan writing.
 - [x] 2026-05-06 EDT: Added focused command and CLI-help tests covering markdown lint, ExecPlan lint, failing aggregate docs validation, child-plan creation, overwrite refusal, and quality-refresh blocking.
 - [x] 2026-05-06 EDT: Updated durable workflow packet docs and the owning Program, then ran focused local-runner and docs validation.
+- [x] 2026-05-06 EDT: Fixed review findings in the completed slice: path traversal is rejected for child-plan creation, child plans use atomic create-only writes, unsafe `bun run <file>` script recognition is blocked, non-string scripts and invalid install-plan statuses block before mutation, and late partial write failure proof reports touched refs.
 
 ## Surprises & Discoveries
 
@@ -42,6 +43,10 @@ The repository references `docs:validate` as a docs operating-system aggregate, 
 `program:write-child-plan` has no existing executable implementation. This slice gives it the smallest useful behavior: create one Program-linked ExecPlan skeleton from an existing active Program packet and refuse to overwrite an existing plan.
 
 The ExecPlan linter trims subsection bodies before detecting runnable commands. A `### Test Commands` subsection whose first content is only an indented command does not satisfy the linter, so this plan and generated child-plan skeletons use bullet commands in that subsection.
+
+Review found that `validatePlanPath` was too broad for create-only child plans because it accepted traversal segments under the active ExecPlan prefix. The command now requires a normalized dated slug directly under `docs/exec-plans/active/`, resolves the target under that root, and writes with `flag: "wx"`.
+
+Review also found that `bun run scripts/...` command bodies can be shadowed by package scripts. Existing script recognition now accepts only command-exact `bun <file>` forms for portable docs tooling.
 
 ## Decision Log
 
@@ -65,7 +70,7 @@ Date: 2026-05-06
 
 This slice is complete. `packages/local-runner/src/commands/docs-operating-system.ts` now exposes the exact wrapper command family through `ship-by-sunday docs-operating-system ...`. `programs-lint`, `exec-plans-lint`, and `markdown-lint` reuse the bundled root validator modules; `docs-validate` aggregates Markdown, Program, and active ExecPlan validation from the selected target repo root; `write-child-plan` creates one Program-linked active ExecPlan skeleton after resolving the immutable planning brief; and `docs-refresh-quality` returns an explicit blocked message until an evidence-bound quality refresh workflow exists.
 
-The CLI help now lists the command family, and `bun build` proves the imported validator modules bundle into the local-runner CLI. Remaining work is package-manager install proof and lockfile refresh, plus a later quality-refresh workflow if quality evidence mutation becomes part of the portable docs core.
+The CLI help now lists the command family, and `bun build` proves the imported validator modules bundle into the local-runner CLI. Review hardening added stricter active-plan path containment, atomic child-plan creation, safer package-script recognition, runtime install-plan status validation, live non-string script blocking, and truthful blocked proof when a late source write failure leaves partial approved refs. Remaining work is package-manager install proof and lockfile refresh, plus a later quality-refresh workflow if quality evidence mutation becomes part of the portable docs core.
 
 ## Context and Orientation
 

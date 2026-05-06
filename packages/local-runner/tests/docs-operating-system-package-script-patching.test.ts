@@ -135,7 +135,7 @@ function createRepoFacts(packageScripts: string[] = []): DocsSpineRepoFacts {
 async function createPackagePatchRepository({
 	scripts = {},
 }: {
-	scripts?: Record<string, string>;
+	scripts?: Record<string, unknown>;
 } = {}) {
 	const repositoryRoot = await createTemporaryDirectory("sbs-docs-os-patch-");
 	await initializeGitRepository(repositoryRoot);
@@ -188,7 +188,7 @@ async function writePackageJson(
 async function writeInstallPlan(repositoryRoot: string, scripts = {}) {
 	const rootPackageManifest = {
 		name: "customer-repo",
-		scripts: scripts as Record<string, string>,
+		scripts: scripts as Record<string, unknown>,
 	};
 	const installPlan = buildDocsOperatingSystemInstallPlan({
 		repoFacts: createRepoFacts(Object.keys(rootPackageManifest.scripts)),
@@ -428,6 +428,121 @@ describe("docs operating system package-script patching workflow", () => {
 			]),
 		);
 		expect(JSON.stringify(proof)).toContain("is not a directory");
+	});
+
+	it("blocks live non-string canonical scripts instead of overwriting them", async () => {
+		const repositoryRoot = await createPackagePatchRepository();
+		await writeInstallPlan(repositoryRoot);
+		await writePackageJson(repositoryRoot, {
+			name: "customer-repo",
+			scripts: {
+				"docs:validate": ["SECRET_NON_STRING_SCRIPT"],
+			},
+			devDependencies: {
+				vitest: "1.0.0",
+			},
+		});
+		await execFileAsync("git", ["add", "package.json"], {
+			cwd: repositoryRoot,
+		});
+		await execFileAsync("git", ["commit", "-m", "non-string script"], {
+			cwd: repositoryRoot,
+		});
+
+		const result = await runDocsOperatingSystemPackageScriptPatchingWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun({
+				workflowRunId: "workflowRuns_docs_os_package_non_string",
+				localWorkflowPacketRef:
+					".sbs/runs/workflowRuns_docs_os_package_non_string/workflow-packet.json",
+				localProofRef:
+					".sbs/runs/workflowRuns_docs_os_package_non_string/proof.json",
+			}),
+			confirmDocsOperatingSystemToolingApply: true,
+			fetchRunnerEvent: successfulEventFetch,
+		});
+
+		expect(result.status).toBe("blocked");
+		const packageJson = await readJson<{
+			scripts: Record<string, unknown>;
+		}>(repositoryRoot, "package.json");
+		expect(packageJson.scripts["docs:validate"]).toEqual([
+			"SECRET_NON_STRING_SCRIPT",
+		]);
+
+		const proof = await readJson<{
+			blockedProof: Array<{ stage: string; targetRef?: string }>;
+		}>(
+			repositoryRoot,
+			".sbs/runs/workflowRuns_docs_os_package_non_string/proof.json",
+		);
+		expect(proof.blockedProof).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					stage: "package-script-invalid",
+					targetRef: "package.json#scripts.docs:validate",
+				}),
+			]),
+		);
+		expect(JSON.stringify(proof)).not.toContain("SECRET_NON_STRING_SCRIPT");
+	});
+
+	it("blocks invalid dependency and wrapper statuses from a stale install plan", async () => {
+		const repositoryRoot = await createPackagePatchRepository();
+		const packageJsonBefore = await readFile(
+			path.join(repositoryRoot, "package.json"),
+			"utf8",
+		);
+		const installPlan = await writeInstallPlan(repositoryRoot);
+		installPlan.dependencyOperations[0].status =
+			"bogus" as (typeof installPlan.dependencyOperations)[number]["status"];
+		installPlan.validatorFileOperations[0].status =
+			"bogus" as (typeof installPlan.validatorFileOperations)[number]["status"];
+		await writeFile(
+			path.join(repositoryRoot, installPlanRef),
+			`${JSON.stringify(installPlan, null, 2)}\n`,
+		);
+
+		const result = await runDocsOperatingSystemPackageScriptPatchingWorkflow({
+			repositoryRoot,
+			state: createState(),
+			credential: createCredential(),
+			approvedWorkflowRun: createApprovedWorkflowRun({
+				workflowRunId: "workflowRuns_docs_os_package_invalid_status",
+				localWorkflowPacketRef:
+					".sbs/runs/workflowRuns_docs_os_package_invalid_status/workflow-packet.json",
+				localProofRef:
+					".sbs/runs/workflowRuns_docs_os_package_invalid_status/proof.json",
+			}),
+			confirmDocsOperatingSystemToolingApply: true,
+			fetchRunnerEvent: successfulEventFetch,
+		});
+
+		expect(result.status).toBe("blocked");
+		await expect(
+			readFile(path.join(repositoryRoot, "package.json"), "utf8"),
+		).resolves.toBe(packageJsonBefore);
+
+		const proof = await readJson<{
+			blockedProof: Array<{ stage: string; reason: string }>;
+		}>(
+			repositoryRoot,
+			".sbs/runs/workflowRuns_docs_os_package_invalid_status/proof.json",
+		);
+		expect(proof.blockedProof).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					stage: "install-plan",
+					reason: "Install plan contains an invalid shared dependency status.",
+				}),
+				expect.objectContaining({
+					stage: "install-plan",
+					reason: "Install plan contains an invalid wrapper file status.",
+				}),
+			]),
+		);
 	});
 
 	it("does not trust a wrapper file only because it contains the generated marker", async () => {
