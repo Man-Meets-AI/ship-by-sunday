@@ -1,0 +1,335 @@
+---
+title: Homepage Widget And Telegram Bridge Proof
+status: active
+created_at: 2026-05-06
+completed_at: null
+summary: Build the first homepage support chat loop so a visitor can message Parker on the site and Parker can reply from Telegram.
+post_build_recap: null
+program_id: telegram-support-bot
+planning_brief: docs/programs/active/2026-05-06-telegram-support-bot/planning-brief-1.md
+read_when:
+  - Resuming the first Telegram support implementation slice.
+  - Changing homepage support UI, Convex support state, or Telegram support bot delivery.
+  - Validating the support widget before adding AI drafts or broader operator buttons.
+---
+
+# Homepage Widget And Telegram Bridge Proof
+
+This is a living execution plan. Keep it current as implementation, validation, discoveries, and decisions change.
+
+This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
+
+## Purpose / Big Picture
+
+Ship by Sunday needs a support channel that keeps visitors on the landing page while letting Parker answer from the Telegram app. After this slice, a visitor on `/` can open a quiet support launcher, send a text message without entering an email address or leaving the site, and later see Parker's Telegram reply in the same widget. Parker receives each visitor thread in a dedicated private Telegram support supergroup, replies normally inside the mapped forum topic, and can close the thread with one audited `Close thread` button.
+
+The visible proof is the core loop: open the homepage, open `Message Parker`, send a message, observe the message stored in Convex before Telegram delivery, see it appear in a Telegram forum topic through the dedicated support bot, reply as an allowlisted operator, and see the reply render live in the website widget. If Telegram setup is missing or delivery fails, the visitor should see a clear fallback to `https://t.me/parkerrex`, and the failed message should remain in Convex with safe delivery metadata.
+
+## Progress
+
+- [x] 2026-05-06 EDT: Created this ExecPlan from `docs/programs/active/2026-05-06-telegram-support-bot/planning-brief-1.md`.
+- [x] 2026-05-06 EDT: Read root `AGENTS.md`, `apps/web/AGENTS.md`, `docs/exec-plans/PLANS.md`, `apps/web/convex/_generated/ai/guidelines.md`, the Program packet, and the first planning brief.
+- [x] 2026-05-06 EDT: Inspected the homepage route, homepage render model, homepage content, Convex HTTP router, Convex env helper, Convex schema, root Convex client provider, observability Telegram code, PostHog client, app docs registry, and focused test layout.
+- [ ] Implement the Convex support schema, validators, token hashing, lifecycle model, abuse controls, delivery state, and Telegram bridge helpers.
+- [ ] Implement the Telegram HTTP action webhook, outbound forum-topic creation, visitor-message delivery, inbound operator replies, operator allowlist, and `Close thread` callback.
+- [ ] Implement the homepage-only widget, browser-held support token storage, direct Convex queries/actions, delivery states, closed state, fallback link, and metadata-only analytics.
+- [ ] Document Telegram support setup in app docs, update the env contract, and record verification and failure modes.
+- [ ] Add focused tests, desktop/mobile browser proof, broad gates, Program writeback, and this ExecPlan closeout before marking complete.
+
+## Surprises & Discoveries
+
+No implementation surprises yet. Code inspection confirmed the root app already mounts `ConvexProviderWithClerk` in `apps/web/platform/convex/convex-client-provider.tsx`, so the widget can call Convex React hooks directly from a client component. Code inspection also confirmed `apps/web/convex/http.ts` already owns provider HTTP actions, so the Telegram webhook belongs there rather than in a Next route.
+
+## Decision Log
+
+Decision: Use a dedicated first-party homepage widget rather than a third-party script.
+Rationale: The widget must match the homepage visual system, keep customer support data inside repo-owned Convex state, and evolve into typed operator actions. A third-party script would add another data processor and make custom Telegram-side actions harder to audit.
+Date: 2026-05-06
+
+Decision: Use Convex as the support state owner.
+Rationale: The website needs live subscribed messages, Telegram replies need a durable backend target, and Convex already owns provider webhook mutations in this app. Convex HTTP actions can receive Telegram updates while mutations keep support records consistent.
+Date: 2026-05-06
+
+Decision: Use a public Convex action for visitor sends, backed by internal mutations.
+Rationale: A visitor send must persist the message before attempting external Telegram delivery, then call Telegram over `fetch`. The public action can call an internal mutation to write Convex state first, perform Telegram delivery, then call internal mutations to mark delivered or failed.
+Date: 2026-05-06
+
+Decision: Store the anonymous support access token only in the browser and store only a token hash in Convex.
+Rationale: Anonymous visitors need to read and write their own thread without login, but raw bearer tokens should not be stored in database rows. Reads and writes must require the browser token and compare its hash against the visitor record.
+Date: 2026-05-06
+
+Decision: Create durable support state only on first real visitor message.
+Rationale: Opening the widget is local UI state. Creating Convex rows or Telegram forum topics on open would create noise and empty records.
+Date: 2026-05-06
+
+Decision: Keep Slice 1 text-only and contact-form-free.
+Rationale: The first slice proves support chat, not file intake or lead capture. Visitors can type links or contact details naturally in the message body, but the widget must not render uploads, a dedicated email field, an email validation gate, or a separate lead-form step.
+Date: 2026-05-06
+
+Decision: Use a private Telegram supergroup with forum topics enabled.
+Rationale: One forum topic per support thread keeps Parker's Telegram inbox organized and maps directly to Telegram `message_thread_id` for outbound and inbound delivery.
+Date: 2026-05-06
+
+Decision: Ship only the `Close thread` operator button in this slice.
+Rationale: `Close thread` proves callback parsing, operator allowlisting, support action audit, lifecycle mutation, and website closed-state rendering without widening into AI drafts, checkout links, Linear drafts, or canned customer-visible sends.
+Date: 2026-05-06
+
+Decision: Track analytics only as safe lifecycle metadata.
+Rationale: Support messages can contain private product context, contact details, or customer plans. PostHog events may record event names such as widget opened, thread created, message sent, reply received, send failed, and fallback clicked, but never message bodies, emails, Telegram ids, visitor tokens, or transcript text.
+Date: 2026-05-06
+
+## Outcomes & Retrospective
+
+This plan is active. Fill this section after implementation with the exact behavior that shipped, the files changed, validation evidence, browser proof, setup docs written, remaining gaps, and whether the first real Telegram loop worked against the hosted Convex dev deployment.
+
+## Context and Orientation
+
+This work happens in the `apps/web` app. The public homepage route is `apps/web/app/page.tsx`, which renders `apps/web/app/_components/home-page/home-page.tsx`. The homepage shell deliberately separates control, copy, render decisions, and presentation through `apps/web/config/product.ts`, `apps/web/app/_content/home-page.ts`, `apps/web/app/_lib/home-page-render-model.ts`, and the component tree under `apps/web/app/_components/home-page/`. The support widget should enter through that same homepage seam so future agents can find it.
+
+The homepage is a server component tree until it reaches interactive client components. The support widget itself must be a client component because it uses browser `localStorage`, Convex React hooks, form input, and local open/closed state. The app already mounts `ConvexProviderWithClerk` at the root in `apps/web/platform/convex/convex-client-provider.tsx`, so the widget does not need a Next API proxy for ordinary support queries and sends.
+
+Convex code lives under `apps/web/convex`. Before implementation, reread `apps/web/convex/_generated/ai/guidelines.md`. Use hosted Convex dev only; do not switch this repo into Convex local mode. HTTP endpoints are registered in `apps/web/convex/http.ts` through `httpRouter` and `httpAction`. Environment parsing for Convex functions is in `apps/web/convex/env.ts`. The existing production-incident Telegram delivery in `apps/web/convex/observability/model.ts` is useful as a provider-call reference, but it is a negative ownership example: customer support must not reuse `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, incident tables, or incident delivery semantics.
+
+The new support implementation should be feature-local. A reasonable backend shape is `apps/web/convex/support/validators.ts`, `apps/web/convex/support/model.ts`, `apps/web/convex/support/telegram.ts`, `apps/web/convex/support.ts`, and, if a maintainer recovery command is needed, `apps/web/convex/supportAdmin.ts`. Use exact names that describe support behavior; do not create generic files named `utils`, `helpers`, or `misc`.
+
+The browser support widget can live under `apps/web/app/_components/home-page/support/`. Put the visual shell in a component such as `home-page-support-widget.tsx`, state orchestration in a hook such as `use-home-page-support-chat.ts`, and browser token storage in a small file such as `home-page-support-token-storage.ts`. The existing homepage demo storage in `apps/web/app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts` shows the localStorage pattern: guard `window`, catch storage access failures, and version stored envelopes.
+
+Docs for provider setup should live in the shipped app docs because external setup is part of the product contract. Add a page such as `apps/web/content/docs/telegram-support-bot.mdx`, then register it in `apps/web/content/docs/_meta.ts` and `apps/web/app/docs/_server/docs-content.ts`. Update `apps/web/content/docs/environment-variables.mdx` and `apps/web/.env.local.example` for the local contract. If the implementation changes local QA, update `apps/web/content/docs/local-qa.mdx`.
+
+Plain-language definitions for this plan: a support visitor is one browser-held anonymous support token and optional Clerk metadata. A support thread is the conversation visible in the website widget and mapped to one Telegram forum topic. A support message is one visitor, operator, or system text record inside a thread. A support action is an audited operator action, such as closing the thread from Telegram. A delivery attempt is one attempt to send a stored visitor message to Telegram.
+
+### In Scope
+
+This plan includes dedicated support environment variables in Convex env, Convex support tables, validators, token hashing, lazy first-message thread creation, text-only support messages, retention fields, first-slice abuse controls, outbound Telegram topic creation and message delivery, inbound Telegram webhook parsing, Telegram operator allowlisting, normal Telegram replies becoming website-visible operator replies, one `Close thread` inline button, homepage-only support widget UI, browser-held support access token storage, delivery states, closed-state rendering, metadata-only analytics events, setup docs, focused tests, and desktop/mobile browser proof.
+
+The required support environment values are `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, and `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`. If implementation adds a maintainer-only recovery token for manual retry, document it in the same change and explain why no existing secret should be reused.
+
+### Out Of Scope
+
+Do not reuse the observability Telegram bot, token, chat id, delivery code, or incident tables. Do not add a third-party widget script. Do not add uploads, images, screenshots, voice notes, file storage, or binary attachments. Do not add a dedicated contact/email field or email validation step. Do not add CAPTCHA or Turnstile in this slice. Do not auto-open the widget, use timed popups, show a green online dot, or promise a response time. Do not render support inside protected workspace routes. Do not auto-send AI-generated customer-visible text. Do not add AI draft buttons, prompt generation, checkout links, Linear drafts, canned replies, multi-operator assignment, public CRM views, customer email notifications, or automatic background delivery retries.
+
+## Plan of Work
+
+Start by adding the backend domain contract. Define explicit validators for support visitor status, thread status, message source, delivery status, action type, action status, visitor kind, delivery failure class, and Telegram update parse results. Add Convex schema tables for support visitors, support threads, support messages, support operator actions, and any rate-limit buckets needed for the global hourly cap. Keep child items as separate tables rather than arrays on a thread. Add indexes for token-hash lookup, one open thread per visitor, thread lookup by Telegram topic id, messages by thread and creation time, actions by thread and creation time, and rate-limit bucket key.
+
+Implement token and lifecycle helpers next. The visitor token helper should create a high-entropy browser token, store a versioned envelope in `localStorage`, and send the raw token only as a Convex function argument. Convex should hash that token before lookup or insert. The first visitor send should create or reuse the visitor, create or reuse one open thread for that visitor, create the message, increment pending counters, enforce message length and rate limits, and return enough state for the action to deliver the message to Telegram.
+
+Implement Telegram outbound delivery as a Convex action. The action should call an internal mutation first to store the visitor message with a delivery state such as `sending`, then call Telegram `createForumTopic` when the thread has no topic yet, send a bot-authored context header with a `Close thread` inline keyboard, send the visitor message into the topic, and mark the message `delivered_to_parker` with Telegram message ids. On any provider failure, mark the message `delivery_failed`, record attempt count, last attempt time, safe error class, and a trimmed error message that does not include visitor text, then return a widget-safe failure result.
+
+Implement Telegram inbound webhook parsing in `apps/web/convex/http.ts`. The route should use a path such as `/telegram/support/webhook`, require the Telegram secret token header, parse JSON at the boundary, reject unknown update shapes with a 400, reject unknown chats, unknown operators, and unmapped topics with a 200 ignored response or a narrow error where appropriate, and never trust callback data without checking it maps to the current thread/topic state. Normal text messages from allowlisted operators in mapped topics should insert operator support messages and clear pending visitor count. Media messages, commands, bot messages, and non-text replies should not become website-visible replies in Slice 1.
+
+Implement the `Close thread` button as a structured support action. The first header message in each Telegram topic should include a callback button whose callback data is short and maps to the support thread, such as a support id plus action name. The webhook should verify the chat, topic, operator id, and callback data before closing the thread. Closing should write a support operator action record, update the thread to a closed state, record closed timestamps and retention timestamps, answer the callback query where possible, and make the website widget render a closed state. Do not add any other operator buttons in this slice.
+
+Implement the homepage widget after the backend contract is shaped. Add a support widget entry to the homepage control plane in `apps/web/config/product.ts`, support copy in `apps/web/app/_content/home-page.ts`, and support render data in `apps/web/app/_lib/home-page-render-model.ts`. Render the widget from `apps/web/app/_components/home-page/home-page.tsx` only when the homepage support widget is enabled. Keep the launcher quiet and fixed, with Parker-first copy such as `Message Parker` or `Ask Parker`. Desktop should open a compact panel. Mobile should open a bottom sheet. The widget must not cover the homepage's checkout, demo, or sticky mobile controls.
+
+The widget should use direct Convex React hooks. It should query the current support thread by browser token, call the visitor-send action, render messages, and show explicit sending, delivered-to-Parker, delivery-failed, and closed states. It should expose `https://t.me/parkerrex` as a fallback only when the bridge is unavailable or the visitor intentionally chooses Telegram. Mark support message containers and inputs with PostHog masking or blocking attributes so session replay does not capture message content.
+
+Add metadata-only analytics through `capturePostHogProductEvent` where useful. Safe events include `support_widget_opened`, `support_thread_created`, `support_message_sent`, `support_reply_received`, `support_send_failed`, and `support_fallback_clicked`. Safe properties include page path, thread status, delivery status, and error class. Do not pass message bodies, raw token values, token hashes, emails, Telegram ids, operator ids, visitor names, or transcript text into PostHog.
+
+Document external setup before calling the slice done. The setup doc should explain BotFather bot creation, dedicated private support supergroup creation, forum topics enabled, bot admin permissions for creating and deleting topics, how to discover the support chat id, how to set the Telegram webhook to the Convex HTTP-action site URL from `NEXT_PUBLIC_CONVEX_SITE_URL`, how to configure local, preview, and production Convex env values, how to verify a visitor message creates a topic and Parker reply returns to the site, and what failure looks like for missing env, wrong chat id, missing forum-topic permissions, unknown operator id, invalid webhook secret, and Telegram delivery failure.
+
+## Milestones
+
+The first milestone is the Convex support data model and visitor access contract. At the end, the schema has support visitor, thread, message, action, and rate-limit records; token hashing works; one open thread per anonymous token is enforced; text length, per-token cooldown, pending-message cap, and global hourly cap are modeled; retention timestamps exist; and focused unit tests prove lifecycle and abuse behavior without calling Telegram.
+
+The second milestone is Telegram outbound and inbound bridge behavior. At the end, a visitor-send action stores a message before Telegram delivery, creates a forum topic for the first message, posts a safe topic header, posts the visitor message, records delivery ids or failure metadata, and the webhook can turn an allowlisted operator's normal topic text into a website-visible reply. Tests should prove secret verification, chat verification, operator allowlisting, topic mapping, text-only handling, provider failure classification, and `Close thread` callback behavior.
+
+The third milestone is the homepage widget. At the end, `/` renders a passive `Message Parker` launcher behind the homepage render-model contract, opens a compact desktop panel and mobile bottom sheet, uses the browser support token, sends through Convex, subscribes to replies, renders delivery and closed states, masks message content from analytics/session replay, and stays clear of existing conversion controls. Integration-ui tests should prove open, send, failure, fallback, and closed states.
+
+The fourth milestone is setup docs, browser proof, and closeout. At the end, app docs describe Telegram provider setup and env ownership, `.env.local.example` and environment docs list the support env contract, desktop and mobile browser proof show the widget correctly framed on the homepage, focused tests pass, broad gates pass, this ExecPlan is updated, and the Program Slice Ledger points to this child plan with observed validation.
+
+## Concrete Steps
+
+Work from this worktree:
+
+    cd /Users/bazelrex/Developer/ship-by-sunday/.worktrees/telegram-support
+
+Before editing implementation code, reread the required instructions and versioned framework docs:
+
+    sed -n '1,260p' AGENTS.md
+    sed -n '1,220p' apps/web/AGENTS.md
+    sed -n '1,260p' docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md
+    sed -n '1,320p' apps/web/convex/_generated/ai/guidelines.md
+    sed -n '1,180p' /Users/bazelrex/Developer/ship-by-sunday/node_modules/next/dist/docs/01-app/01-getting-started/05-server-and-client-components.md
+
+Inspect the implementation anchors before writing code:
+
+    sed -n '1,180p' apps/web/config/product.ts
+    sed -n '1,220p' apps/web/app/_content/home-page.ts
+    sed -n '1,220p' apps/web/app/_lib/home-page-render-model.ts
+    sed -n '1,160p' apps/web/app/_components/home-page/home-page.tsx
+    sed -n '1,280p' apps/web/convex/http.ts
+    sed -n '1,120p' apps/web/convex/env.ts
+    sed -n '1,380p' apps/web/convex/schema.ts
+    sed -n '1,560p' apps/web/convex/observability/model.ts
+    sed -n '1,180p' apps/web/app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts
+    sed -n '1,120p' apps/web/lib/observability/posthog-client.ts
+
+Create the backend support boundary. Prefer these files unless implementation inspection finds a stronger existing local pattern:
+
+    apps/web/convex/support/validators.ts
+    apps/web/convex/support/model.ts
+    apps/web/convex/support/telegram.ts
+    apps/web/convex/support.ts
+    apps/web/convex/supportAdmin.ts
+
+Update `apps/web/convex/schema.ts` with separate support tables. A practical first shape is `supportVisitors`, `supportThreads`, `supportMessages`, `supportOperatorActions`, and `supportRateLimitBuckets`. Keep indexes motivated by reads named in this plan. Do not store an unbounded messages array on `supportThreads`.
+
+Update `apps/web/convex/env.ts` with support env keys. Add support provider code that reads:
+
+    TELEGRAM_SUPPORT_BOT_TOKEN
+    TELEGRAM_SUPPORT_CHAT_ID
+    TELEGRAM_SUPPORT_WEBHOOK_SECRET
+    TELEGRAM_SUPPORT_OPERATOR_USER_IDS
+
+Implement the public visitor send function and internal mutation helpers. The website-facing function should accept the browser support token, message text, page path, and current entry surface. It should not accept a caller-provided visitor id, thread id, Clerk user id, operator id, delivery status, or Telegram id for authorization. Derive optional Clerk metadata server-side only when Convex identity is present.
+
+Implement the Telegram webhook in `apps/web/convex/http.ts` with an exact path such as `/telegram/support/webhook`. Validate the Telegram secret token header. Use a strict parser for update payloads. For inbound operator messages, accept only text from configured operator user ids in the configured support chat and mapped topic. For callback queries, accept only the `Close thread` action in this slice.
+
+Create the homepage widget files under a feature-local folder such as:
+
+    apps/web/app/_components/home-page/support/home-page-support-widget.tsx
+    apps/web/app/_components/home-page/support/home-page-support-widget-panel.tsx
+    apps/web/app/_components/home-page/support/use-home-page-support-chat.ts
+    apps/web/app/_components/home-page/support/home-page-support-token-storage.ts
+
+Add support widget control and copy through:
+
+    apps/web/config/product.ts
+    apps/web/app/_content/home-page.ts
+    apps/web/app/_lib/home-page-render-model.ts
+    apps/web/app/_components/home-page/home-page.tsx
+
+Add setup docs and docs registry entries:
+
+    apps/web/content/docs/telegram-support-bot.mdx
+    apps/web/content/docs/_meta.ts
+    apps/web/app/docs/_server/docs-content.ts
+    apps/web/content/docs/environment-variables.mdx
+    apps/web/.env.local.example
+
+Add or update focused tests near the touched surfaces. Expected test files include:
+
+    apps/web/tests/unit/support-token-storage.test.ts
+    apps/web/tests/unit/convex-support-model.test.ts
+    apps/web/tests/unit/support-telegram-update.test.ts
+    apps/web/tests/unit/convex-env.test.ts
+    apps/web/tests/unit/convex-http-boundary.test.ts
+    apps/web/tests/unit/home-page-render-model.test.ts
+    apps/web/tests/unit/docs-content-loader.test.ts
+    apps/web/tests/integration-ui/home-page-support-widget.test.tsx
+
+After each milestone, update this ExecPlan's `Progress`, `Surprises & Discoveries`, and `Decision Log` sections. After implementation, update `docs/programs/active/2026-05-06-telegram-support-bot/program.md` with the child plan status, validation evidence, and next recommended slice.
+
+## Validation and Acceptance
+
+Acceptance for this plan is a working homepage-to-Telegram-to-homepage loop, not just a rendered bubble. A visitor on `/` must be able to open the widget, send a text message without email, see a stored message status, recover when Telegram is unavailable, and see Parker's reply after an allowlisted Telegram operator replies in the mapped support topic.
+
+The Convex model is accepted when anonymous access is scoped by browser token hash, one open thread per token is enforced, first message lazily creates the visitor and thread, support messages are separate rows, delivery metadata is explicit, retention timestamps exist, and abuse controls enforce message length, cooldown, pending-message cap, global hourly cap, and kill-switch behavior without CAPTCHA.
+
+Telegram delivery is accepted when visitor messages are stored before delivery, a first visitor message creates one safe forum topic, the bot posts a safe context header before the visitor message, topic names contain only a support id plus safe metadata, provider failures mark the stored message failed, normal text replies from allowlisted operators become visitor-visible messages, unknown chats/operators/topics fail closed, and `Close thread` is audited and reflected in the website.
+
+The widget is accepted when it renders only on the public homepage, stays passive and on-demand, uses Parker-first copy, avoids online/SLA claims, opens as a compact desktop panel and mobile bottom sheet, never renders a contact/email field, masks support content from analytics replay, and does not cover primary homepage conversion controls in desktop or mobile browser proof.
+
+External setup is accepted when app docs say what to create in Telegram, where to create it, exact bot and supergroup requirements, required permissions, Convex env names, webhook URL construction, local/preview/production ownership, verification steps, and failure modes. Chat history or local `.env` files are not sufficient setup documentation.
+
+### Test Commands
+
+Run focused unit tests first from the worktree root, updating file names if implementation chooses slightly different test ownership:
+
+    bun run --cwd apps/web test:unit -- tests/unit/support-token-storage.test.ts tests/unit/convex-support-model.test.ts tests/unit/support-telegram-update.test.ts tests/unit/convex-env.test.ts tests/unit/convex-http-boundary.test.ts tests/unit/home-page-render-model.test.ts tests/unit/docs-content-loader.test.ts
+
+Run the widget integration UI proof:
+
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-support-widget.test.tsx
+
+Run app surface checks for the touched app:
+
+    bun run --cwd apps/web format:check
+    bun run --cwd apps/web lint
+    bun run --cwd apps/web typecheck
+
+Run plan, Program, docs, and diff checks:
+
+    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md
+    bun run programs:lint
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md docs/programs/active/2026-05-06-telegram-support-bot apps/web/content/docs
+    git diff --check
+
+Before marking complete after code changes, run the repo completion gates unless a concrete blocker is recorded in this plan:
+
+    bun run format
+    bun lint
+    bun typecheck
+
+For browser proof, run the app against hosted Convex dev, never Convex local mode:
+
+    bun run --cwd apps/web dev:web:only -- -p 3105
+
+Then verify the homepage at `http://localhost:3105/` in one desktop viewport and one mobile viewport. If Telegram env is not configured locally, verify the configured failure state and fallback link, and record that limitation. If Telegram env is configured, send one test visitor message, reply in the mapped Telegram topic, and record the observed website reply.
+
+Expected success means every command exits with code 0, the widget proof shows no text overlap or conversion-control coverage, support message bodies never appear in PostHog payload assertions, and the Telegram loop is either proven live or the missing-provider limitation is recorded with the exact fallback behavior observed.
+
+## Idempotence and Recovery
+
+All first-slice schema changes should be additive. If implementation discovers that an existing table needs a breaking migration, stop and update this ExecPlan with a migration strategy before editing data shape. Do not delete existing app records.
+
+Visitor send behavior must be safe to retry. If the first action stores a message and then Telegram delivery fails, a repeated send should not silently duplicate the old failed message unless the visitor explicitly sends again. Manual recovery should operate on a specific failed message id and should record another delivery attempt.
+
+Webhook handling must be safe under Telegram retries. Use the Telegram update id or message id plus topic mapping to prevent duplicate operator replies or duplicate close actions where practical. If exact de-duplication cannot be complete in the first implementation, document the residual risk and make duplicate close actions no-op once the thread is already closed.
+
+If the support bot lacks forum-topic permissions, delivery should fail visibly, leave the visitor message in Convex, and tell the visitor to use the fallback link. Recovery is to repair bot permissions, verify env, then run the documented manual/admin recovery path for the failed message or ask the visitor to resend if no safe retry path exists yet.
+
+If the kill switch is enabled, the widget should avoid creating new threads and render the fallback Telegram path. Existing open threads should remain readable unless a later hardening decision changes that behavior.
+
+If broad repo gates fail because of unrelated dirty worktree changes, do not revert unrelated files. Record the exact failure and determine whether it belongs to this support slice before continuing.
+
+## Artifacts and Notes
+
+Important Program artifacts:
+
+    docs/programs/active/2026-05-06-telegram-support-bot/program.md
+    docs/programs/active/2026-05-06-telegram-support-bot/planning-brief-1.md
+    docs/programs/active/2026-05-06-telegram-support-bot/converged-decision-packet.md
+    docs/programs/active/2026-05-06-telegram-support-bot/plan-split-recommendation.md
+
+Important homepage anchors:
+
+    apps/web/config/product.ts
+    apps/web/app/_content/home-page.ts
+    apps/web/app/_lib/home-page-render-model.ts
+    apps/web/app/_components/home-page/home-page.tsx
+    apps/web/app/_components/home-page/sections/codebase-demo/home-page-codebase-draft-storage.ts
+
+Important Convex and provider anchors:
+
+    apps/web/convex/http.ts
+    apps/web/convex/env.ts
+    apps/web/convex/schema.ts
+    apps/web/convex/observability/model.ts
+    apps/web/platform/convex/convex-client-provider.tsx
+
+Official Telegram anchors already captured by the Program:
+
+    https://core.telegram.org/api/links
+    https://core.telegram.org/bots/api
+    https://core.telegram.org/bots/features
+
+## Interfaces and Dependencies
+
+This slice depends on Next.js App Router server/client component boundaries, the existing homepage render-model contract, Convex hosted backend state, Convex HTTP actions, Convex React hooks, browser `localStorage`, Telegram Bot API forum topics and inline keyboards, the dedicated Telegram support bot, PostHog browser analytics, and the app docs content registry.
+
+The website-facing Convex interface should expose a narrow support API. A practical shape is a query that reads the current visitor thread by token, an action that sends a visitor text message, and no public mutation that accepts arbitrary thread ids for authorization. Every website read or write must require the browser support token.
+
+The Telegram webhook interface must accept Telegram updates only at the configured Convex HTTP action path and verify `TELEGRAM_SUPPORT_WEBHOOK_SECRET`. It must reject or ignore updates from the wrong chat, unknown topics, unknown operators, unsupported message types, and malformed callback data.
+
+The Telegram provider interface should include only the methods this slice needs: create a forum topic, send a message with optional inline keyboard, answer a callback query where possible, and later delete or mark a topic during retention cleanup. The Slice 1 implementation may model deletion metadata without scheduling purge automation.
+
+The required Convex env interface is:
+
+    TELEGRAM_SUPPORT_BOT_TOKEN
+    TELEGRAM_SUPPORT_CHAT_ID
+    TELEGRAM_SUPPORT_WEBHOOK_SECRET
+    TELEGRAM_SUPPORT_OPERATOR_USER_IDS
+
+The homepage support widget content interface should include launcher label, panel title, starter prompt, message placeholder, fallback label, disabled copy, sending label, delivered label, failed label, closed label, and privacy-safe analytics event names. It should not include a response-time promise, online state, email field label, or upload copy.
