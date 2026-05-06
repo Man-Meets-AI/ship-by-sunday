@@ -1,10 +1,14 @@
 import {
 	attachGeneratedLessonMedia,
+	getBunnyThumbnailProxyUrl,
+	getBunnyThumbnailSourceUrl,
 	getLessonVideoAsset,
 	getBunnyEmbedUrl,
+	getVideoAssetByBunnyVideoId,
 	getVideoAsset,
 	hydrateLessonVideoContent,
 	isLessonVideoReady,
+	resolveLessonVideoPosterUrl,
 	resolveLessonVideoUrl,
 } from "@/lib/course/lesson/model/video";
 import { getLessonById } from "@/lib/course/lesson/model";
@@ -14,6 +18,18 @@ describe("lesson video helpers", () => {
 	it("builds Bunny embed urls deterministically", () => {
 		expect(getBunnyEmbedUrl(619172, "video-guid")).toBe(
 			"https://player.mediadelivery.net/embed/619172/video-guid",
+		);
+	});
+
+	it("builds Bunny thumbnail source and proxy urls deterministically", () => {
+		expect(
+			getBunnyThumbnailSourceUrl({
+				videoId: "video-guid",
+				thumbnailFileName: "thumbnail.jpg",
+			}),
+		).toBe("https://vz-fd54da20-4b1.b-cdn.net/video-guid/thumbnail.jpg");
+		expect(getBunnyThumbnailProxyUrl("video-guid")).toBe(
+			"/api/video/thumbnails/video-guid",
 		);
 	});
 
@@ -29,6 +45,7 @@ describe("lesson video helpers", () => {
 		expect(hydratedVideo?.url).toBe(
 			"https://player.mediadelivery.net/embed/619172/video-guid",
 		);
+		expect(hydratedVideo?.posterUrl).toBe("/api/video/thumbnails/video-guid");
 	});
 
 	it("treats Bunny videos with ids as ready even before url hydration", () => {
@@ -42,6 +59,9 @@ describe("lesson video helpers", () => {
 		expect(isLessonVideoReady(bunnyVideo)).toBe(true);
 		expect(resolveLessonVideoUrl(bunnyVideo)).toBe(
 			"https://player.mediadelivery.net/embed/619172/video-guid",
+		);
+		expect(resolveLessonVideoPosterUrl(bunnyVideo)).toBe(
+			"/api/video/thumbnails/video-guid",
 		);
 	});
 
@@ -61,6 +81,11 @@ describe("lesson video helpers", () => {
 			"374f9017-6573-426e-b2d4-270cbf1f747e",
 		);
 		expect(getLessonVideoAsset(null)).toBeNull();
+		expect(
+			getVideoAssetByBunnyVideoId("0df1d1d2-098a-425b-b6eb-3c465f0a32e1")
+				?.title,
+		).toBe("Welcome Video");
+		expect(getVideoAssetByBunnyVideoId("missing-video")).toBeNull();
 	});
 
 	it("falls back to the lesson title when Bunny metadata does not provide one", () => {

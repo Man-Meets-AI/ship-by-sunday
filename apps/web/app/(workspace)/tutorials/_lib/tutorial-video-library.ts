@@ -4,6 +4,7 @@ import {
 	getStudentFacingLessons,
 } from "@/lib/course/lesson/model/registry";
 import { getTutorialVideoHref } from "@/lib/course/lesson/routing/tutorial-routes";
+import { resolveLessonVideoPosterUrl } from "@/lib/course/lesson/model/video";
 
 export type TutorialVideoLesson = {
 	readonly lessonKey: string;
@@ -12,13 +13,22 @@ export type TutorialVideoLesson = {
 	readonly title: string;
 	readonly description: string;
 	readonly durationLabel: string | null;
+	readonly thumbnailUrl: string | null;
 	readonly href: string;
+};
+
+export type TutorialVideoSection = {
+	readonly id: string;
+	readonly label: string;
+	readonly lessons: readonly TutorialVideoLesson[];
 };
 
 export type TutorialVideoBlock = {
 	readonly id: BlockId;
 	readonly label: string;
 	readonly summary: string;
+	readonly videoCount: number;
+	readonly sections: readonly TutorialVideoSection[];
 	readonly lessons: readonly TutorialVideoLesson[];
 };
 
@@ -35,8 +45,52 @@ function toTutorialVideoLesson(lesson: LessonConfig): TutorialVideoLesson {
 		title: lesson.title,
 		description: lesson.content.intro,
 		durationLabel: lesson.content.coach.video?.durationLabel ?? null,
+		thumbnailUrl: resolveLessonVideoPosterUrl(lesson.content.coach.video),
 		href: getTutorialVideoHref(lesson.lessonKey),
 	};
+}
+
+function getTutorialVideoSectionLabel(blockId: BlockId, lessonId: string) {
+	if (blockId !== "BUILD") {
+		return "All videos";
+	}
+
+	if (["3.0", "3.1", "3.2"].includes(lessonId)) {
+		return "Start and orient";
+	}
+
+	if (["3.3", "3.4", "3.5", "3.6"].includes(lessonId)) {
+		return "Wire the product";
+	}
+
+	if (["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"].includes(lessonId)) {
+		return "Plan and build slices";
+	}
+
+	return "Stabilize and launch";
+}
+
+function buildTutorialVideoSections(
+	blockId: BlockId,
+	lessons: readonly TutorialVideoLesson[],
+): TutorialVideoSection[] {
+	const lessonsBySection = new Map<string, TutorialVideoLesson[]>();
+
+	for (const lesson of lessons) {
+		const sectionLabel = getTutorialVideoSectionLabel(
+			blockId,
+			lesson.displayLabel,
+		);
+		const sectionLessons = lessonsBySection.get(sectionLabel) ?? [];
+		sectionLessons.push(lesson);
+		lessonsBySection.set(sectionLabel, sectionLessons);
+	}
+
+	return Array.from(lessonsBySection, ([label, sectionLessons]) => ({
+		id: label.toLowerCase().replaceAll(" ", "-"),
+		label,
+		lessons: sectionLessons,
+	}));
 }
 
 export function buildTutorialVideoLibrary(): TutorialVideoLibrary {
@@ -51,11 +105,14 @@ export function buildTutorialVideoLibrary(): TutorialVideoLibrary {
 
 	const blocks = getOrderedBlocks()
 		.map((block): TutorialVideoBlock => {
+			const blockLessons = lessonsByBlock.get(block.id) ?? [];
 			return {
 				id: block.id,
 				label: block.label,
 				summary: block.summary,
-				lessons: lessonsByBlock.get(block.id) ?? [],
+				videoCount: blockLessons.length,
+				sections: buildTutorialVideoSections(block.id, blockLessons),
+				lessons: blockLessons,
 			};
 		})
 		.filter((block) => block.lessons.length > 0);

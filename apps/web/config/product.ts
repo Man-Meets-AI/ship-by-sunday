@@ -283,6 +283,7 @@ export const apiConfig = {
 	stripeApiVersion: "2026-02-25.clover",
 	convexAuthTokenTemplate: "convex",
 	bunnyEmbedBaseUrl: "https://player.mediadelivery.net/embed",
+	bunnyStreamCdnBaseUrl: "https://vz-fd54da20-4b1.b-cdn.net",
 	codexAppServerClientVersion: "0.1.0",
 } as const;
 

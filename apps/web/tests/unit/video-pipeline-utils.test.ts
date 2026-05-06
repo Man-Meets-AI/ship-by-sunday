@@ -1,5 +1,6 @@
 import {
 	buildCutOptionsFromArgv,
+	buildLessonMediaEntry,
 	compareLessonIds,
 	extractLessonDefinitions,
 	extractLessonMediaMap,
@@ -86,6 +87,28 @@ describe("lesson video pipeline helpers", () => {
 				libraryId: 619172,
 				videoId: "video-3-2",
 			},
+		});
+	});
+
+	it("keeps Bunny thumbnail filenames in generated media entries", () => {
+		expect(
+			buildLessonMediaEntry({
+				libraryId: 619172,
+				videoId: "video-3-2",
+				lessonTitle: "Map the Repo and Starter",
+				bunnyVideo: {
+					length: 209,
+					thumbnailFileName: "thumbnail.jpg",
+				},
+			}),
+		).toEqual({
+			status: "ready",
+			provider: "bunny",
+			libraryId: 619172,
+			videoId: "video-3-2",
+			title: "Map the Repo and Starter",
+			thumbnailFileName: "thumbnail.jpg",
+			durationLabel: "3m 29s",
 		});
 	});
 
