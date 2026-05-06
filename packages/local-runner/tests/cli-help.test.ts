@@ -18,6 +18,9 @@ describe("cli", () => {
 			"workflow mature-repo-adoption run",
 		);
 		expect(logSpy.mock.calls.join("\n")).toContain(
+			"docs-operating-system <programs-lint|exec-plans-lint|markdown-lint|docs-validate|docs-refresh-quality|write-child-plan>",
+		);
+		expect(logSpy.mock.calls.join("\n")).toContain(
 			"workflow docs-spine-adoption run",
 		);
 		expect(logSpy.mock.calls.join("\n")).toContain(

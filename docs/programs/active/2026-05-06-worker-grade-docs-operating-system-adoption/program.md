@@ -44,7 +44,9 @@ The first tooling boundary now exists as a dry-run workflow. `docs-operating-sys
 
 The first tooling-apply authority now covers package scripts, exact shared tooling dependency metadata, and generated wrappers. `docs-operating-system-package-script-patching` consumes `.sbs/docs-operating-system-adoption/tooling-plan/install-plan.json`, validates the live `package.json` against the dry-run conflict contract, writes only `package.json`, `scripts/sbs-docs/**`, `.sbs/runs/<workflow-run-id>/**`, and `.sbs/docs-operating-system-adoption/tooling-apply/**`, and blocks stale plans or unrecognized same-name canonical scripts before source writes. It does not run package-manager installs, mutate lockfiles, implement shared validator internals, apply docs, edit root instructions, configure CI/providers, touch runtime state, or wire app-stack commands.
 
-What is still missing is the validator and dependency-install follow-through behind those wrappers. The runner can install the command entries and wrapper files, but the full shared `ship-by-sunday` validator command surface, lockfile refresh, package-manager install proof, and native command integration remain later explicit authority slices.
+The shared validator command surface now exists behind those wrappers. `ship-by-sunday docs-operating-system programs-lint`, `exec-plans-lint`, `markdown-lint`, and `docs-validate` run bundled validator code from the target repo root; `write-child-plan` creates one Program-linked active ExecPlan without overwriting an existing plan; and `docs-refresh-quality` is recognized but explicitly blocked until a later evidence-bound quality refresh workflow exists.
+
+What is still missing is the dependency-install follow-through and lockfile proof behind the package metadata. The runner can install command entries and wrapper files, and the wrappers now call package-owned commands, but package-manager install proof, lockfile refresh, full quality refresh mutation, and native command integration remain later explicit authority slices.
 
 The important boundary is authority. The existing `docs-spine-apply-and-proof` workflow must remain a docs mutation packet. This Program owns the next authority class: a tooling install path that can read package manifests and repo scripts, propose or apply structured package/script/dependency changes, add portable docs validator files, and prove what was installed. Runtime bootstrap, runtime health, `.runtime` state, target-stack process management, CI/provider setup, app-stack command installation, broad root `AGENTS.md` rewrites, and Worker-specific operating state are explicitly out of scope for this Program.
 
@@ -57,6 +59,7 @@ The important boundary is authority. The existing `docs-spine-apply-and-proof` w
 - [x] 2026-05-06 EDT: Implemented the first tooling-install slice behind the distinct `docs-operating-system-adoption` dry-run approval boundary.
 - [x] 2026-05-06 EDT: Piloted the resulting install plan against Worker, Ship by Sunday, Arena CRM, and sparse test fixtures.
 - [x] 2026-05-06 EDT: Implemented package-script, shared dependency metadata, and wrapper-file patching behind the distinct `docs-operating-system-package-script-patching` tooling-apply authority.
+- [x] 2026-05-06 EDT: Implemented the package-owned `ship-by-sunday docs-operating-system` command surface for bundled docs validators and bounded child-plan creation.
 
 ## Decision Log
 
@@ -134,6 +137,8 @@ The first completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-work
 
 The second completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-package-script-patching.md`. It carries the same `program_id` and consumes the first child's dry-run install plan.
 
+The third completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-shared-validator-commands.md`. It carries the same `program_id` and implements the package-owned command surface that generated wrappers call.
+
 Completed prerequisite child ExecPlans from the earlier docs-spine Programs remain useful context:
 
 - `docs/exec-plans/completed/2026-05-05-docs-spine-workflow-bundle-scaffold.md`
@@ -147,7 +152,7 @@ Completed prerequisite child ExecPlans from the earlier docs-spine Programs rema
 
 ## Next Slice
 
-The next slice is lockfile refresh and shared validator command implementation. It should preserve the package-script patching boundary, run only an explicitly approved package-manager/install proof path, and make the generated wrappers call real packaged docs validators instead of stopping at wrapper installation.
+The next remaining authority slice is package-manager install proof and lockfile refresh. It should run only an explicitly approved package-manager/install proof path and must preserve the dry-run, package-script, and shared-command conflict contracts.
 
 That child slice must preserve the dry-run and package-script conflict contracts. Same-name scripts with unrecognized bodies stay blocked unless a later approval explicitly chooses a rename or replacement. Runtime bootstrap, Worker-specific state, CI/provider setup, app-stack command wiring, and broad root `AGENTS.md` rewrites remain out of scope.
 
@@ -169,7 +174,7 @@ Do not call the install complete until a fresh agent can run the documented comm
 
 ## Outcomes & Retrospective
 
-This Program is active. The first shipped outcome is the dry-run install boundary: a customer or operator can ask the local runner for a Worker-grade portable docs tooling plan and see exactly what would be installed, what is already present, what is blocked by owner-defined script names, and what is out of scope. The second shipped outcome is the package-script patching boundary: an approved runner can apply only conflict-free package script, dependency metadata, and wrapper-file operations from that plan while preserving repo ownership and reporting blocked stale/conflicting states. The remaining Program outcome is an approved validator and package-manager path that can prove the wrappers execute real shared docs tooling without widening into runtime or provider setup.
+This Program is active. The first shipped outcome is the dry-run install boundary: a customer or operator can ask the local runner for a Worker-grade portable docs tooling plan and see exactly what would be installed, what is already present, what is blocked by owner-defined script names, and what is out of scope. The second shipped outcome is the package-script patching boundary: an approved runner can apply only conflict-free package script, dependency metadata, and wrapper-file operations from that plan while preserving repo ownership and reporting blocked stale/conflicting states. The third shipped outcome is the shared command surface: generated wrappers now call package-owned docs validators and bounded child-plan creation instead of an unknown CLI command. The remaining Program outcome is an approved package-manager and lockfile path that can prove dependency installation without widening into distribution, runtime, or provider setup.
 
 ## Validation and Acceptance
 

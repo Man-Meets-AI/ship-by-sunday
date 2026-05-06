@@ -2,6 +2,7 @@
 import { pathToFileURL } from "node:url";
 
 import { runDaemonCommand } from "./commands/daemon";
+import { runDocsOperatingSystemCommand } from "./commands/docs-operating-system";
 import { runDoctorPassCommand } from "./commands/doctor-pass";
 import { runOneShotCommand } from "./commands/one-shot";
 import { runSetupCheckCommand } from "./commands/setup-check";
@@ -23,6 +24,7 @@ Usage:
   ship-by-sunday one-shot [--repo <path>] [--json]
   ship-by-sunday doctor-pass run [--repo <path>] [--json] [--local-only]
   ship-by-sunday doctor-pass upload --run-id <id> [--repo <path>] [--json]
+  ship-by-sunday docs-operating-system <programs-lint|exec-plans-lint|markdown-lint|docs-validate|docs-refresh-quality|write-child-plan> [--repo <path>]
   ship-by-sunday workflow source-truth-readiness run --workflow-run-id <id> --confirm-local-writes [--repo <path>] [--json]
   ship-by-sunday workflow observability-debuggability run --workflow-run-id <id> --confirm-observability-audit [--repo <path>] [--json]
   ship-by-sunday workflow broken-app-triage run --workflow-run-id <id> --confirm-read-only-reproduction [--repo <path>] [--json]
@@ -55,6 +57,11 @@ export async function runCli(argv = process.argv.slice(2)) {
 		}
 		if (command === "doctor-pass") {
 			return await runDoctorPassCommand([subcommand, ...rest].filter(Boolean));
+		}
+		if (command === "docs-operating-system") {
+			return await runDocsOperatingSystemCommand(
+				[subcommand, ...rest].filter(Boolean),
+			);
 		}
 		if (command === "workflow") {
 			return await runWorkflowCommand([subcommand, ...rest].filter(Boolean));
