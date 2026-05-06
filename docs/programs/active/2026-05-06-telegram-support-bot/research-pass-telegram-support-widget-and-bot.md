@@ -16,7 +16,7 @@ This research pass records the stable facts and current assumptions behind a cus
 
 The public homepage is controlled by `apps/web/config/product.ts`, `apps/web/app/_content/home-page.ts`, `apps/web/app/_lib/home-page-render-model.ts`, and `apps/web/app/_components/home-page/home-page.tsx`. `apps/web/content/docs/configure-the-homepage.mdx` explicitly says future homepage behavior should enter through the homepage content and render model instead of being scattered across section components.
 
-The app already has Convex as the backend and PostHog as the generic analytics/error source. Convex remains product state, and homepage or chat state should not be stored in local-only browser state after a visitor starts a real support conversation.
+The app already has Convex as the backend and PostHog as the generic analytics/error source. Convex remains product state, and homepage or chat state should not be stored in local-only browser state after a visitor starts a real support conversation. The anonymous support credential should be an HttpOnly server-set cookie rather than a JavaScript-readable localStorage token, with Convex storing only a token hash.
 
 The repo already has Telegram incident delivery. `docs/internal/observability.md` states that Telegram is a thin alert delivery client for high-signal production issues. `apps/web/convex/observability/model.ts` reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to send incident notifications. This existing bot and chat should not become customer support. Customer support needs separate token, chat, table names, docs, and failure handling.
 

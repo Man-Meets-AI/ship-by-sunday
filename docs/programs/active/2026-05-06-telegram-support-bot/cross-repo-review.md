@@ -22,11 +22,11 @@ Requirement: Keep direct chat as fallback only.
 
 Risk: A generic chat widget could become a privacy and spam surface.
 Evidence: Anonymous visitors can send arbitrary text. Authenticated users may eventually discuss private app state.
-Requirement: Add Convex-side abuse controls, message length limits, retention policy, sensitive-data guidance, and no raw-source or secret ingestion. The first slice should stay CAPTCHA-free but enforce one open thread per anonymous token, per-token cooldown, pending-message caps, global send caps, and a support kill switch.
+Requirement: Add Convex-side abuse controls, message length limits, retention policy, sensitive-data guidance, and no raw-source or secret ingestion. The first slice should stay CAPTCHA-free but enforce one open thread per anonymous support session, per-session cooldown, pending-message caps, global send caps, and a support kill switch.
 
 Risk: Support analytics can accidentally capture private message content.
 Evidence: The repo has PostHog autocapture and product-event helpers, and support messages are arbitrary visitor text.
-Requirement: Support analytics must be metadata-only. Do not capture message bodies, emails, Telegram ids, visitor tokens, or transcript text. Only lifecycle events and safe status/error properties belong in PostHog.
+Requirement: Support analytics must be metadata-only. Do not capture message bodies, emails, Telegram ids, visitor tokens, or transcript text. Only lifecycle events and safe status/error properties belong in PostHog. Browser or integration-ui proof must also assert that rendered transcript DOM and inputs are blocked or masked from PostHog session replay.
 
 Risk: Contact capture can turn the support widget into a lead form and expand PII handling before the chat bridge is proven.
 Evidence: Slice 1 is a landing-page chat proof, and the widget already accepts arbitrary visitor text.
@@ -46,11 +46,15 @@ Requirement: Model draft, preview, send, and failure states explicitly. The firs
 
 Risk: Telegram webhook endpoints can become unauthenticated write surfaces.
 Evidence: The app will need to receive updates from Telegram and mutate Convex support state.
-Requirement: Protect the webhook with a Telegram secret token or equivalent verification, validate update shape at the boundary, and reject unmapped chats, messages, or callback data.
+Requirement: Protect the webhook with `setWebhook.secret_token`, verify the incoming `X-Telegram-Bot-Api-Secret-Token` header, validate update shape at the boundary, and reject or ignore unmapped chats, messages, or callback data. Narrow `allowed_updates` to `message` and `callback_query`. Missing or wrong secret headers should return non-2xx, invalid JSON can return 400, and authenticated unsupported updates should return 200 ignored responses so Telegram does not retry unsupported Slice 1 shapes indefinitely.
 
 Risk: Optional Clerk association can accidentally become a second support-thread authority.
 Evidence: The app already uses Clerk user ids for protected product state, while support starts as an anonymous homepage flow.
-Requirement: In Slice 1, Clerk identity may be stored as support metadata for signed-in visitors, but widget reads and writes must still require the browser support token. Account-level support history requires a later privacy and access design.
+Requirement: In Slice 1, Clerk identity may be stored as support metadata for signed-in visitors, but widget reads and writes must still require the HttpOnly support session cookie. Account-level support history requires a later privacy and access design.
+
+Risk: A JavaScript-readable browser token can become a bearer credential for support transcripts.
+Evidence: Support transcripts may contain contact details and customer product context, and browser localStorage is readable by any successful XSS in the origin.
+Requirement: Do not store the raw support session token in localStorage or other JavaScript-readable browser storage. Use a server-minted `__Host-sbs_support_session` cookie with `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Secure` in production; store only the token hash in Convex; and route anonymous transcript reads and sends through a narrow Next support-session bridge.
 
 Risk: Public support can creep into protected workspace routes before privacy rules exist.
 Evidence: Workspace routes carry product state, project context, runner status, and potentially sensitive support summaries.
@@ -84,11 +88,11 @@ Requirement: Start with draft-only or reversible actions, record action audit, a
 
 The first child ExecPlan should use support-specific env names, including support bot token, support chat id, support webhook secret, and support operator Telegram user ids. The Telegram webhook should run as a Convex HTTP action because Convex owns support state.
 
-Those support env names should be Convex env values, not Next.js server env values, unless implementation moves part of the support bridge into Next.js. The app docs should own the setup page and explain BotFather, private supergroup/forum topics, bot permissions, webhook URL construction from `NEXT_PUBLIC_CONVEX_SITE_URL`, environment ownership, verification, and failure modes.
+Those support env names should be Convex env values, not Next.js server env values, unless implementation moves part of the support bridge into Next.js. The app docs should own the setup page and explain BotFather, private supergroup/forum topics, exact bot permissions, webhook URL construction from `NEXT_PUBLIC_CONVEX_SITE_URL`, environment ownership, verification, and failure modes. The setup doc must name `setWebhook.secret_token`, the incoming `X-Telegram-Bot-Api-Secret-Token` header, Telegram's 1 to 256 character secret-token constraint using only `A-Z`, `a-z`, `0-9`, `_`, and `-`, `allowed_updates`, `getWebhookInfo`, `can_manage_topics`, and `can_delete_messages`.
 
 The first child ExecPlan should use a private Telegram supergroup with forum topics enabled. Each support thread maps to one forum topic through Telegram `message_thread_id`.
 
-The first child ExecPlan should use a browser-held anonymous visitor access token with a Convex-stored token hash. Retention should follow the locked default: idle anonymous threads auto-close after 14 days, closed transcript bodies retain for 90 days, and purge removes message bodies plus the matching Telegram forum topic.
+The first child ExecPlan should use an HttpOnly anonymous support session cookie with a Convex-stored token hash and a Next support-session bridge for transcript reads and sends. Retention should follow the locked default: idle anonymous threads auto-close after 14 days, closed transcript bodies retain for 90 days, and purge removes message bodies plus the matching Telegram forum topic.
 
 ## Review Conclusion
 

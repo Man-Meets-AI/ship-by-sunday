@@ -36,14 +36,14 @@ Rationale: Convex owns support state, the webhook mutates that state, and the re
 Decision: Do not add a dedicated contact or email field in Slice 1.
 Rationale: The landing-page widget should reduce support friction and behave like chat, not a lead form. Visitors can volunteer contact details in the message body. Email collection can become an audited `Ask for email` operator action in Slice 2.
 
-Decision: Use browser-held anonymous support access tokens with Convex-stored token hashes.
-Rationale: Token-scoped access lets unauthenticated visitors read and write only their own support thread while preserving a future path to attach Clerk identity.
+Decision: Use HttpOnly anonymous support session cookies with Convex-stored token hashes.
+Rationale: Session-scoped access lets unauthenticated visitors read and write only their own support thread while preserving a future path to attach Clerk identity. The browser should not hold a JavaScript-readable bearer token for support transcripts. The server should mint the token, set it as `__Host-sbs_support_session` with `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Secure` in production, and store only a hash in Convex.
 
 Decision: Create the support visitor, Convex thread, and Telegram forum topic on first real message.
 Rationale: Widget open state is not a durable conversation. Lazy creation avoids empty backend records and empty Telegram topics.
 
-Decision: Use Convex React queries and mutations directly from the widget.
-Rationale: The app already mounts the Convex client provider at the root. A Next API proxy would add another boundary without improving maintainability.
+Decision: Use a narrow Next support-session bridge for anonymous support transcript reads and writes.
+Rationale: Convex remains the support state owner, but support transcripts may contain contact details or customer product context. Next route handlers can read the HttpOnly support session cookie, call server-facing Convex functions, and avoid exposing the raw support credential to widget JavaScript. Direct Convex React hooks remain acceptable for non-sensitive public state.
 
 Decision: Treat normal Telegram topic messages from allowed operators as visitor-visible replies.
 Rationale: Parker gets fast normal Telegram replying while buttons and commands remain reserved for explicit internal actions.
@@ -55,7 +55,7 @@ Decision: Make transcript retention explicit from v1.
 Rationale: Support conversations may contain contact details and product context. Open threads remain available, idle anonymous threads auto-close after 14 days, closed transcript bodies retain for 90 days, and purge removes Convex message bodies plus the matching Telegram forum topic while keeping minimal audit metadata.
 
 Decision: Use Convex-side abuse controls without CAPTCHA in the first slice.
-Rationale: The support widget should stay frictionless, but the backend must protect operator attention and Telegram delivery. The first slice should enforce one open thread per anonymous token, message length cap, per-token send cooldown, pending visitor message cap before operator reply, global hourly cap, and a support kill switch. CAPTCHA or Turnstile can be added later only if real spam justifies the provider setup.
+Rationale: The support widget should stay frictionless, but the backend must protect operator attention and Telegram delivery. The first slice should enforce one open thread per anonymous support session, message length cap, per-session send cooldown, pending visitor message cap before operator reply, global hourly cap, and a support kill switch. CAPTCHA or Turnstile can be added later only if real spam justifies the provider setup.
 
 Decision: Make the support widget passive and on-demand.
 Rationale: The homepage support surface should help visitors without competing with the hero, product preview, or pricing CTA. The widget should not auto-open, use timed popups, or imply fake availability; it should render as a quiet fixed launcher, compact desktop panel, and mobile bottom sheet.
@@ -67,10 +67,13 @@ Decision: Set asynchronous support expectations.
 Rationale: The widget should invite questions without implying a staffed live-chat SLA. It should avoid green dots, "online" claims, and response-time promises, and should say Parker will reply in the widget when available.
 
 Decision: Track only support lifecycle metadata in analytics.
-Rationale: Support threads can contain contact details and product context. Analytics should capture events like widget opened, thread created, message sent, reply received, send failed, and fallback clicked, but must not include message bodies, emails, Telegram ids, visitor tokens, or transcript text.
+Rationale: Support threads can contain contact details and product context. Analytics should capture events like widget opened, thread created, message sent, reply received, send failed, and fallback clicked, but must not include message bodies, emails, Telegram ids, visitor tokens, or transcript text. Browser proof must also assert that rendered transcript DOM and inputs are blocked or masked from PostHog session replay.
 
 Decision: Keep Telegram support provider setup in Convex env and app docs.
-Rationale: Telegram webhook ingestion and delivery run through Convex HTTP actions. Support bot secrets should live in Convex env, while app docs should explain BotFather setup, private supergroup/forum topics, bot permissions, webhook URL construction, environment ownership, verification, and failure modes.
+Rationale: Telegram webhook ingestion and delivery run through Convex HTTP actions. Support bot secrets should live in Convex env, while app docs should explain BotFather setup, private supergroup/forum topics, exact bot permissions, webhook URL construction, `setWebhook.secret_token`, the incoming `X-Telegram-Bot-Api-Secret-Token` header, `allowed_updates`, `getWebhookInfo` verification, environment ownership, verification, and failure modes.
+
+Decision: Make Telegram webhook responses retry-safe.
+Rationale: Telegram retries non-2xx webhook responses. Missing or wrong secret headers should deliberately return non-2xx, invalid JSON can return 400, and authenticated unsupported updates should return 200 ignored responses so unknown chats, unknown operators, unmapped topics, media, commands, and other non-Slice-1 shapes do not create retry storms.
 
 Decision: Ship only `Close thread` as the first Telegram button.
 Rationale: Slice 1 should prove callback parsing, operator allowlisting, support action audit, thread lifecycle mutation, and website closed-state rendering with one safe lifecycle action. AI drafts, prompt generation, checkout links, Linear drafts, and canned customer-visible sends belong to Slice 2 or later.
@@ -88,7 +91,7 @@ Decision: Keep Slice 1 text-only.
 Rationale: Plain text and links-as-text are enough to prove the support bridge. Uploads, screenshots, voice notes, and binary attachments would add storage, scanning, Telegram file mapping, retention, and privacy complexity that belongs to a later slice.
 
 Decision: Attach Clerk identity only as optional support metadata in Slice 1.
-Rationale: Signed-in visitors can give Parker useful support context, but the browser-held support token remains the thread access authority. Account-level support history and stronger authenticated support rules belong to a later slice.
+Rationale: Signed-in visitors can give Parker useful support context, but the HttpOnly support session cookie remains the thread access authority. Account-level support history and stronger authenticated support rules belong to a later slice.
 
 Decision: Keep Slice 1 homepage-only.
 Rationale: Public homepage support should prove the bridge before protected workspace support is added. Workspace support needs separate account-history, product-context, and privacy decisions.

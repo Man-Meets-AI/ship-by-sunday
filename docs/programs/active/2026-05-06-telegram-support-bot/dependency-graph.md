@@ -14,13 +14,15 @@ read_when:
 
 `Provider Contract And Secret Naming` precedes every implementation slice. The app needs a dedicated support bot token, support chat id, webhook secret, operator Telegram user id allowlist, and setup docs before customer support can be safely separated from observability.
 
-`Convex Support Data Model` precedes `Website Widget Live Thread` and `Telegram Webhook Bridge`. The widget and bot need one canonical visitor/thread/message store with browser-token hashing for anonymous access.
+`Convex Support Data Model` precedes `Website Support Session Bridge`, `Website Widget Live Thread`, and `Telegram Webhook Bridge`. The widget and bot need one canonical visitor/thread/message store with support-session token hashing for anonymous access.
 
-`Website Widget Live Thread` can proceed in parallel with `Telegram Webhook Bridge` after the data model exists. The widget needs lazy first-message thread creation, list-message, and send-message flows through Convex React queries and mutations. The bridge needs visitor-message-to-Telegram topic delivery and Telegram-reply-to-Convex HTTP action ingestion.
+`Website Support Session Bridge` precedes `Website Widget Live Thread`. The bridge needs Next route handlers that mint or read the HttpOnly `__Host-sbs_support_session` cookie, call server-facing Convex functions, and avoid exposing the raw support session token to widget JavaScript.
+
+`Website Widget Live Thread` can proceed in parallel with `Telegram Webhook Bridge` after the data model and support-session bridge exist. The widget needs lazy first-message thread creation, list-message, and send-message flows through the Next support-session bridge. The Telegram bridge needs visitor-message-to-Telegram topic delivery and Telegram-reply-to-Convex HTTP action ingestion.
 
 `Support Retention Model` depends on `Convex Support Data Model` and precedes any production rollout. The schema needs close and purge timestamps before support messages become customer data.
 
-`First-Slice Abuse Controls` depend on `Convex Support Data Model` and precede public widget enablement. Convex needs token-scoped limits, pending-message limits, global send caps, and kill-switch state before visitor messages can be mirrored to Telegram.
+`First-Slice Abuse Controls` depend on `Convex Support Data Model` and precede public widget enablement. Convex needs support-session-scoped limits, pending-message limits, global send caps, and kill-switch state before visitor messages can be mirrored to Telegram.
 
 `Close Thread Operator Button` depends on `Telegram Webhook Bridge`, `First-Slice Abuse Controls`, and `Support Retention Model`. It proves inline keyboard callback parsing, operator allowlisting, action audit, and thread lifecycle mutation with one safe action.
 
@@ -35,13 +37,14 @@ read_when:
 ## Critical Path
 
 1. Dedicated support provider contract and docs.
-2. Convex support schema, anonymous token access, and function contracts.
-3. Homepage widget vertical proof.
-4. Telegram forum-topic bridge vertical proof.
-5. Retention fields and cleanup runbook.
-6. First-slice abuse controls.
-7. `Close thread` operator button.
-8. AI draft and business-workflow actions.
+2. Convex support schema, anonymous support session access, and function contracts.
+3. Next support-session bridge.
+4. Homepage widget vertical proof.
+5. Telegram forum-topic bridge vertical proof.
+6. Retention fields and cleanup runbook.
+7. First-slice abuse controls.
+8. `Close thread` operator button.
+9. AI draft and business-workflow actions.
 
 ## Parallelizable Work
 

@@ -26,11 +26,11 @@ Do not introduce a third-party widget script unless a future decision explicitly
 
 Do not ship AI-generated replies directly to visitors without Parker approval. Early AI actions should produce Telegram-side drafts or prompts for Parker to review.
 
-Do not make the chat widget a login gate. Anonymous landing-page visitors can start a thread with a browser-held access token. Convex stores only the token hash, and every thread read or write checks the token. Authenticated customers can later have their support thread associated with their Clerk user when safe.
+Do not make the chat widget a login gate. Anonymous landing-page visitors can start a thread with an HttpOnly support session cookie. Convex stores only the token hash, and every thread read or write checks the server-minted support session. Authenticated customers can later have their support thread associated with their Clerk user when safe. Do not store the raw support session token in localStorage or any other JavaScript-readable browser storage.
 
 Do not make the first widget a contact form. Slice 1 should not render a dedicated email/contact field, email validation gate, or separate lead form step. Visitors can type contact details naturally in chat. A structured `Ask for email` operator action belongs to Slice 2.
 
-If the visitor is already signed in during Slice 1, the support thread may store `clerkUserId` as optional support metadata. That association must not replace the browser support token as the widget read/write authority. Account-level support history and protected-route support belong to a later authenticated-support slice.
+If the visitor is already signed in during Slice 1, the support thread may store `clerkUserId` as optional support metadata. That association must not replace the HttpOnly support session cookie as the widget read/write authority. Account-level support history and protected-route support belong to a later authenticated-support slice.
 
 ## State Direction
 
@@ -51,7 +51,7 @@ The exact table names can change during implementation if a better local naming 
 
 Use a dedicated support bot and a dedicated private supergroup with forum topics enabled. The app should document exactly where the bot is created, what supergroup it is added to, how topics are used, what webhook URL is set, which environment owns each value, and which Convex or Vercel env variables hold the values.
 
-Support provider setup should live in Convex env and app docs. The support-specific Convex env values should be `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, and `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN` unless implementation finds a stronger local naming convention. The setup doc should explain BotFather, private supergroup/forum topics, bot admin permissions, webhook URL construction from `NEXT_PUBLIC_CONVEX_SITE_URL`, maintainer recovery-token usage, local/preview/production ownership, verification, and failure modes.
+Support provider setup should live in Convex env and app docs. The support-specific Convex env values should be `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, and `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN` unless implementation finds a stronger local naming convention. The setup doc should explain BotFather, private supergroup/forum topics, webhook URL construction from `NEXT_PUBLIC_CONVEX_SITE_URL`, maintainer recovery-token usage, local/preview/production ownership, verification, and failure modes. It must name `setWebhook.secret_token`, the incoming `X-Telegram-Bot-Api-Secret-Token` header, Telegram's 1 to 256 character secret-token constraint using only `A-Z`, `a-z`, `0-9`, `_`, and `-`, `allowed_updates` limited to `message` and `callback_query`, `getWebhookInfo` checks, `can_manage_topics` for topic creation and closing, and `can_delete_messages` for deleting forum topics during retention cleanup.
 
 Telegram topic titles should not include user-supplied text. Use a generated support id and safe routing metadata only, such as `SBS-0421 · homepage · May 6`. Visitor names, emails, message text, and product details belong inside support messages, not topic names.
 
@@ -66,9 +66,9 @@ The first structured action should be only `Close thread`. It proves callback pa
 
 The first slice should prefer forum-topic mapping over complicated command parsing. The bot can create or reuse a topic for the support thread, post visitor messages into that topic, and map normal allowed-operator messages in that topic back to the support thread.
 
-Only configured Telegram operator user ids can create visitor-visible replies or run operator actions. Unknown Telegram users, unknown chats, and unmapped topics fail closed.
+Only configured Telegram operator user ids can create visitor-visible replies or run operator actions. Unknown Telegram users, unknown chats, and unmapped topics fail closed without creating support state. For webhook responses, missing or wrong secret headers should return non-2xx, invalid JSON can return 400, and authenticated unsupported updates should return 200 ignored responses so Telegram does not retry unsupported Slice 1 shapes indefinitely.
 
-The widget should call Convex React queries and mutations directly because the app already mounts the Convex client provider at the root. A Next API proxy is not part of the first support-chat data path.
+The widget should call a narrow Next support-session bridge for transcript reads and visitor sends. The route handlers should read or mint the HttpOnly support session cookie, call server-facing Convex functions, and return widget-safe thread state. Direct Convex React queries remain acceptable for non-sensitive public state, but not for support transcripts that depend on the anonymous support credential.
 
 ## Retention Direction
 
@@ -76,7 +76,7 @@ Support transcript retention should be explicit from the first implementation. O
 
 ## Abuse-Control Direction
 
-The first slice should stay CAPTCHA-free. Abuse controls should be server-side in Convex: one open thread per anonymous token, a message length cap, per-token send cooldown, a cap on pending visitor messages before an operator reply, a global hourly send cap to protect Telegram delivery, and a support kill switch that turns the widget into the fallback Telegram link. Turnstile or another CAPTCHA belongs in a later hardening slice only if actual spam justifies the provider setup and UX friction.
+The first slice should stay CAPTCHA-free. Abuse controls should be server-side in Convex: one open thread per anonymous support session, a message length cap, per-session send cooldown, a cap on pending visitor messages before an operator reply, a global hourly send cap to protect Telegram delivery, and a support kill switch that turns the widget into the fallback Telegram link. Turnstile or another CAPTCHA belongs in a later hardening slice only if actual spam justifies the provider setup and UX friction.
 
 ## Message Format Direction
 
@@ -84,7 +84,7 @@ Slice 1 should be text-only. The widget accepts plain text and links as text, an
 
 ## Analytics Direction
 
-Support analytics should be metadata-only. PostHog can record lifecycle events such as `support_widget_opened`, `support_thread_created`, `support_message_sent`, `support_reply_received`, `support_send_failed`, and `support_fallback_clicked` with safe properties such as page path, thread status, delivery status, and error class. Do not send message bodies, emails, Telegram ids, visitor tokens, or transcript text to analytics.
+Support analytics should be metadata-only. PostHog can record lifecycle events such as `support_widget_opened`, `support_thread_created`, `support_message_sent`, `support_reply_received`, `support_send_failed`, and `support_fallback_clicked` with safe properties such as page path, thread status, delivery status, and error class. Do not send message bodies, emails, Telegram ids, visitor tokens, or transcript text to analytics. Rendered transcript DOM and message inputs must also carry the repo's replay blocking or masking attributes, and the first slice needs browser or integration-ui proof that those attributes are present.
 
 ## UI Direction
 
