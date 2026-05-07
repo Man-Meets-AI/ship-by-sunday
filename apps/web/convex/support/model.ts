@@ -831,6 +831,24 @@ export async function completeOperatorActionAiDraftHandler(
 	return null;
 }
 
+export async function failOperatorActionAiDraftHandler(
+	ctx: MutationCtx,
+	args: {
+		operatorActionId: SupportOperatorActionId;
+		failureReason: string;
+	},
+) {
+	const failureReason = trimProviderError(args.failureReason);
+	await ctx.db.patch(args.operatorActionId, {
+		aiDraftGenerationStatus: "failed",
+		generationFailureReason: failureReason,
+		operatorNoteDeliveryStatus: "delivery_failed",
+		operatorNoteDeliveryFailureReason: failureReason,
+	});
+
+	return null;
+}
+
 export async function markOperatorActionNoteDeliveryHandler(
 	ctx: MutationCtx,
 	args: {
@@ -896,7 +914,7 @@ export async function runSupportRetentionDatabaseMaintenanceHandler(
 	const purgeResult = await purgeExpiredSupportTranscripts(ctx, now);
 	const deletedRateLimitBucketCount =
 		await deleteExpiredSupportRateLimitBuckets(ctx, now);
-	const pendingCleanups = await listPendingTelegramTopicCleanups(ctx);
+	const pendingCleanups = await listRetryableTelegramTopicCleanups(ctx);
 
 	return {
 		...purgeResult,
@@ -1309,11 +1327,23 @@ async function deleteExpiredSupportRateLimitBuckets(
 	return buckets.length;
 }
 
-async function listPendingTelegramTopicCleanups(ctx: MutationCtx) {
+async function listRetryableTelegramTopicCleanups(ctx: MutationCtx) {
+	const [pendingCleanups, failedCleanups] = await Promise.all([
+		listTelegramTopicCleanupsByStatus(ctx, "pending"),
+		listTelegramTopicCleanupsByStatus(ctx, "failed"),
+	]);
+
+	return mergeSupportTelegramTopicCleanups(pendingCleanups, failedCleanups);
+}
+
+async function listTelegramTopicCleanupsByStatus(
+	ctx: MutationCtx,
+	status: "pending" | "failed",
+) {
 	const threads = await ctx.db
 		.query("supportThreads")
 		.withIndex("by_telegram_topic_cleanup_status_and_updated_at", (query) =>
-			query.eq("telegramTopicCleanupStatus", "pending"),
+			query.eq("telegramTopicCleanupStatus", status),
 		)
 		.take(SUPPORT_RETENTION_THREAD_BATCH_SIZE);
 

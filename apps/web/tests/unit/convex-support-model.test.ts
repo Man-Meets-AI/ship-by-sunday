@@ -657,6 +657,65 @@ describe("convex support model", () => {
 		expect(orderMock).toHaveBeenCalledWith("desc");
 	});
 
+	it("marks scheduled AI drafts failed when thread context is gone", async () => {
+		const { failOperatorActionAiDraftHandler } =
+			await import("@/convex/support/model");
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = {
+			db: {
+				patch: async (id: string, patch: Record<string, unknown>) => {
+					patches.push({ id, patch });
+				},
+			},
+		} as unknown as Parameters<typeof failOperatorActionAiDraftHandler>[0];
+
+		await expect(
+			failOperatorActionAiDraftHandler(fakeCtx, {
+				operatorActionId: "action_scheduled",
+				failureReason:
+					"AI draft context unavailable; the support thread may be closed or purged.",
+			}),
+		).resolves.toBeNull();
+
+		expect(patches).toEqual([
+			{
+				id: "action_scheduled",
+				patch: {
+					aiDraftGenerationStatus: "failed",
+					generationFailureReason:
+						"AI draft context unavailable; the support thread may be closed or purged.",
+					operatorNoteDeliveryStatus: "delivery_failed",
+					operatorNoteDeliveryFailureReason:
+						"AI draft context unavailable; the support thread may be closed or purged.",
+				},
+			},
+		]);
+	});
+
+	it("fails scheduled AI drafts when the generation action cannot load context", async () => {
+		const { generateSupportOperatorAiDraftHandler } =
+			await import("@/convex/support");
+		const runMutation = vi.fn(async () => null);
+		const fakeCtx = {
+			runQuery: vi.fn(async () => null),
+			runMutation,
+		} as unknown as Parameters<typeof generateSupportOperatorAiDraftHandler>[0];
+
+		await expect(
+			generateSupportOperatorAiDraftHandler(fakeCtx, {
+				operatorActionId: "action_scheduled",
+				messageThreadId: 300,
+			}),
+		).resolves.toBeNull();
+
+		expect(runMutation).toHaveBeenCalledOnce();
+		expect(runMutation.mock.calls[0]?.[1]).toEqual({
+			operatorActionId: "action_scheduled",
+			failureReason:
+				"AI draft context unavailable; the support thread may be closed or purged.",
+		});
+	});
+
 	it("closes idle anonymous threads and purges expired transcripts", async () => {
 		const { runSupportRetentionDatabaseMaintenanceHandler } =
 			await import("@/convex/support/model");
@@ -769,6 +828,59 @@ describe("convex support model", () => {
 			]),
 		);
 		expect(deletedIds).toEqual(["bucket_old"]);
+	});
+
+	it("retries failed Telegram topic cleanups after transcript purge", async () => {
+		const { runSupportRetentionDatabaseMaintenanceHandler } =
+			await import("@/convex/support/model");
+		const now = Date.parse("2026-05-06T12:00:00.000Z");
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const deletedIds: string[] = [];
+		const fakeCtx = createRetentionMaintenanceContext({
+			idleThreads: [],
+			purgeThreads: [],
+			messages: [],
+			operatorActions: [],
+			rateLimitBuckets: [],
+			pendingTopicCleanups: [
+				{
+					_id: "thread_cleanup_pending",
+					supportId: "SBS-0506-3333",
+					telegramMessageThreadId: 777,
+				},
+			],
+			failedTopicCleanups: [
+				{
+					_id: "thread_cleanup_failed",
+					supportId: "SBS-0506-4444",
+					telegramMessageThreadId: 888,
+					telegramTopicCleanupStatus: "failed",
+				},
+			],
+			patches,
+			deletedIds,
+		}) as unknown as Parameters<
+			typeof runSupportRetentionDatabaseMaintenanceHandler
+		>[0];
+
+		await expect(
+			runSupportRetentionDatabaseMaintenanceHandler(fakeCtx, { now }),
+		).resolves.toMatchObject({
+			telegramTopicCleanups: [
+				{
+					threadId: "thread_cleanup_pending",
+					supportId: "SBS-0506-3333",
+					messageThreadId: 777,
+				},
+				{
+					threadId: "thread_cleanup_failed",
+					supportId: "SBS-0506-4444",
+					messageThreadId: 888,
+				},
+			],
+		});
+		expect(patches).toEqual([]);
+		expect(deletedIds).toEqual([]);
 	});
 
 	it("applies retry eligibility before recording a manual retry attempt", async () => {
@@ -1085,6 +1197,8 @@ function createRetentionMaintenanceContext({
 	messages,
 	operatorActions,
 	rateLimitBuckets,
+	pendingTopicCleanups = [],
+	failedTopicCleanups = [],
 	patches,
 	deletedIds,
 }: {
@@ -1093,6 +1207,8 @@ function createRetentionMaintenanceContext({
 	messages: Array<Record<string, unknown>>;
 	operatorActions: Array<Record<string, unknown>>;
 	rateLimitBuckets: Array<Record<string, unknown>>;
+	pendingTopicCleanups?: Array<Record<string, unknown>>;
+	failedTopicCleanups?: Array<Record<string, unknown>>;
 	patches: Array<{ id: string; patch: Record<string, unknown> }>;
 	deletedIds: string[];
 }) {
@@ -1108,7 +1224,12 @@ function createRetentionMaintenanceContext({
 				return null;
 			},
 			query: (table: string) => ({
-				withIndex: (indexName: string) => {
+				withIndex: (
+					indexName: string,
+					buildQuery?: (query: {
+						eq: (fieldName: string, value: string) => unknown;
+					}) => unknown,
+				) => {
 					if (
 						table === "supportThreads" &&
 						indexName === "by_status_and_idle_close_after"
@@ -1125,7 +1246,19 @@ function createRetentionMaintenanceContext({
 						table === "supportThreads" &&
 						indexName === "by_telegram_topic_cleanup_status_and_updated_at"
 					) {
-						return { take: async () => [] };
+						let cleanupStatus = "pending";
+						buildQuery?.({
+							eq: (_fieldName: string, value: string) => {
+								cleanupStatus = value;
+								return {};
+							},
+						});
+						return {
+							take: async () =>
+								cleanupStatus === "failed"
+									? failedTopicCleanups
+									: pendingTopicCleanups,
+						};
 					}
 					if (table === "supportMessages") {
 						return {

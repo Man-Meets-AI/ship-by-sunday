@@ -27,6 +27,7 @@ import {
 	createSupportDeliveryFailure,
 	createVisitorMessageForDeliveryHandler,
 	deliverSupportVisitorMessage,
+	failOperatorActionAiDraftHandler,
 	getSupportOperationsSnapshotHandler,
 	getFailedVisitorMessageForRecoveryHandler,
 	getOperatorActionAiDraftContextHandler,
@@ -335,6 +336,15 @@ export const completeOperatorActionAiDraft = internalMutation({
 	handler: completeOperatorActionAiDraftHandler,
 });
 
+export const failOperatorActionAiDraft = internalMutation({
+	args: {
+		operatorActionId: v.id("supportOperatorActions"),
+		failureReason: v.string(),
+	},
+	returns: v.null(),
+	handler: failOperatorActionAiDraftHandler,
+});
+
 export const markOperatorActionNoteDelivery = internalMutation({
 	args: {
 		operatorActionId: v.id("supportOperatorActions"),
@@ -352,67 +362,82 @@ export const generateSupportOperatorAiDraft = internalAction({
 		messageThreadId: v.number(),
 	},
 	returns: v.null(),
-	handler: async (ctx, args) => {
-		const draftContext: SupportOperatorAiDraftContext | null =
-			await ctx.runQuery(internal.support.getOperatorActionAiDraftContext, {
-				operatorActionId: args.operatorActionId,
-			});
-		if (!draftContext) {
-			return null;
-		}
-
-		const model = resolveSupportAiDraftModel(
-			readOptionalConvexEnv("SUPPORT_AI_DRAFT_MODEL"),
-		);
-
-		let operatorNoteText: string;
-		try {
-			const draftRequest: SupportAiDraftRequest = draftContext;
-			const generatedOutput = await generateSupportAiDraftText({
-				apiKey: requireConvexEnv("OPENAI_API_KEY"),
-				model,
-				request: draftRequest,
-			});
-			await ctx.runMutation(internal.support.completeOperatorActionAiDraft, {
-				operatorActionId: args.operatorActionId,
-				generatedOutput,
-				generatedOutputSource: "openai_responses",
-				generatedOutputModel: model,
-				generationFailureReason: null,
-			});
-			operatorNoteText = buildSupportAiDraftTelegramNote({
-				actionType: draftContext.actionType,
-				generatedOutput,
-				model,
-			});
-		} catch (error) {
-			const failureReason = normalizeSupportAiDraftFailureReason(error);
-			await ctx.runMutation(internal.support.completeOperatorActionAiDraft, {
-				operatorActionId: args.operatorActionId,
-				generatedOutput: draftContext.fallbackOutput,
-				generatedOutputSource: "deterministic",
-				generatedOutputModel: model,
-				generationFailureReason: failureReason,
-			});
-			operatorNoteText = buildSupportAiDraftFallbackTelegramNote({
-				actionType: draftContext.actionType,
-				fallbackOutput: draftContext.fallbackOutput,
-				failureReason,
-			});
-		}
-
-		const noteDelivery = await sendTelegramOperatorNote({
-			messageThreadId: args.messageThreadId,
-			text: operatorNoteText,
-		});
-		await ctx.runMutation(internal.support.markOperatorActionNoteDelivery, {
-			operatorActionId: args.operatorActionId,
-			...noteDelivery,
-		});
-
-		return null;
-	},
+	handler: generateSupportOperatorAiDraftHandler,
 });
+
+export async function generateSupportOperatorAiDraftHandler(
+	ctx: ActionCtx,
+	args: {
+		operatorActionId: Id<"supportOperatorActions">;
+		messageThreadId: number;
+	},
+) {
+	const draftContext: SupportOperatorAiDraftContext | null = await ctx.runQuery(
+		internal.support.getOperatorActionAiDraftContext,
+		{
+			operatorActionId: args.operatorActionId,
+		},
+	);
+	if (!draftContext) {
+		await ctx.runMutation(internal.support.failOperatorActionAiDraft, {
+			operatorActionId: args.operatorActionId,
+			failureReason:
+				"AI draft context unavailable; the support thread may be closed or purged.",
+		});
+		return null;
+	}
+
+	const model = resolveSupportAiDraftModel(
+		readOptionalConvexEnv("SUPPORT_AI_DRAFT_MODEL"),
+	);
+
+	let operatorNoteText: string;
+	try {
+		const draftRequest: SupportAiDraftRequest = draftContext;
+		const generatedOutput = await generateSupportAiDraftText({
+			apiKey: requireConvexEnv("OPENAI_API_KEY"),
+			model,
+			request: draftRequest,
+		});
+		await ctx.runMutation(internal.support.completeOperatorActionAiDraft, {
+			operatorActionId: args.operatorActionId,
+			generatedOutput,
+			generatedOutputSource: "openai_responses",
+			generatedOutputModel: model,
+			generationFailureReason: null,
+		});
+		operatorNoteText = buildSupportAiDraftTelegramNote({
+			actionType: draftContext.actionType,
+			generatedOutput,
+			model,
+		});
+	} catch (error) {
+		const failureReason = normalizeSupportAiDraftFailureReason(error);
+		await ctx.runMutation(internal.support.completeOperatorActionAiDraft, {
+			operatorActionId: args.operatorActionId,
+			generatedOutput: draftContext.fallbackOutput,
+			generatedOutputSource: "deterministic",
+			generatedOutputModel: model,
+			generationFailureReason: failureReason,
+		});
+		operatorNoteText = buildSupportAiDraftFallbackTelegramNote({
+			actionType: draftContext.actionType,
+			fallbackOutput: draftContext.fallbackOutput,
+			failureReason,
+		});
+	}
+
+	const noteDelivery = await sendTelegramOperatorNote({
+		messageThreadId: args.messageThreadId,
+		text: operatorNoteText,
+	});
+	await ctx.runMutation(internal.support.markOperatorActionNoteDelivery, {
+		operatorActionId: args.operatorActionId,
+		...noteDelivery,
+	});
+
+	return null;
+}
 
 export const getFailedVisitorMessageForRecovery = internalQuery({
 	args: {

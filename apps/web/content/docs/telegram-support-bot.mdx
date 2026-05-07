@@ -140,7 +140,7 @@ To verify the AI provider path, set `OPENAI_API_KEY`, tap `Draft reply`, and ins
 
 ## Operations runbook
 
-Convex runs `support retention maintenance` every six hours from `apps/web/convex/crons.ts` on the hosted deployment. It closes idle anonymous open threads after 14 days, retains closed transcript bodies for 90 days, purges `supportMessages.body` and `supportOperatorActions.generatedOutput` after the retention window, and then attempts Telegram `deleteForumTopic` when the thread has a known Telegram topic id. The support audit rows remain; purge removes transcript content and generated operator output, not the fact that the thread or action existed.
+Convex runs `support retention maintenance` every six hours from `apps/web/convex/crons.ts` on the hosted deployment. It closes idle anonymous open threads after 14 days, retains closed transcript bodies for 90 days, purges `supportMessages.body` and `supportOperatorActions.generatedOutput` after the retention window, and then attempts Telegram `deleteForumTopic` when the thread has a known Telegram topic id. Failed Telegram topic cleanup is selected again on later maintenance runs, so fixing bot permissions or transient provider failures lets the next run delete the already-purged topic. The support audit rows remain; purge removes transcript content and generated operator output, not the fact that the thread or action existed.
 
 Signed-in workspace support threads are not auto-closed by this retention worker. Their `idleCloseAfter` timestamp is moved forward so they stay visible until a later account-history plan defines a signed-in retention policy.
 
@@ -169,8 +169,9 @@ Support PostHog events are metadata-only. They may include support surface, entr
 - Missing support chat id or operator allowlist after a valid webhook secret: Convex returns `200` with an ignored setup reason so Telegram does not retry a non-actionable update.
 - Unsupported update shape, unknown chat, unknown operator, missing topic, command, or media-only message: Convex returns `200` with an ignored reason so Telegram does not retry noise.
 - Missing `OPENAI_API_KEY` or OpenAI provider failure: the webhook still returns `200`, the AI action keeps deterministic private output, `generationFailureReason` is recorded, and no website-visible message is created.
+- Thread closed or purged before a scheduled AI draft runs: Convex marks the action's AI draft generation as failed, records the context-unavailable reason, marks the private operator note as delivery failed, and creates no website-visible message.
 - Private Telegram note delivery failure: the webhook still returns `200`, the action row records `operatorNoteDeliveryStatus: "delivery_failed"` with the failure reason, and no generated output is inserted into `supportMessages`.
-- Retention cleanup failure: the thread records `telegramTopicCleanupStatus: "failed"` with `telegramTopicCleanupFailureReason`; transcript bodies remain purged, but the Telegram topic may need manual cleanup after bot permissions are repaired.
+- Retention cleanup failure: the thread records `telegramTopicCleanupStatus: "failed"` with `telegramTopicCleanupFailureReason`; transcript bodies remain purged, and later maintenance runs retry Telegram topic deletion after bot permissions or provider errors are repaired.
 - `Forbidden: not enough rights` from Telegram delivery usually means the bot is missing `can_manage_topics` or was not added as an administrator.
 - Closed-topic cleanup failures usually mean the bot is missing `can_delete_messages`.
 
