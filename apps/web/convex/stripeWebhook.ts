@@ -162,9 +162,7 @@ export const processStripeWebhook = internalAction({
 		}
 
 		const session = event.data.object as Stripe.Checkout.Session;
-		const sessionCourseSlug =
-			session.metadata?.courseSlug ?? PRODUCT_COURSE_SLUG;
-		if (sessionCourseSlug !== PRODUCT_COURSE_SLUG) {
+		if (session.metadata?.courseSlug !== PRODUCT_COURSE_SLUG) {
 			return {
 				kind: "ignored" as const,
 				eventId: event.id,

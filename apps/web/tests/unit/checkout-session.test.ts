@@ -3,6 +3,7 @@ import Stripe from "stripe";
 const authMock = vi.fn();
 const currentUserMock = vi.fn();
 const claimCheckoutSessionForViewerMock = vi.fn();
+const fulfillCheckoutSessionFromSuccessPageMock = vi.fn();
 const retrieveSessionMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
@@ -31,6 +32,8 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", async () => {
 		...actual,
 		claimCheckoutSessionForViewer: (...args: unknown[]) =>
 			claimCheckoutSessionForViewerMock(...args),
+		fulfillCheckoutSessionFromSuccessPage: (...args: unknown[]) =>
+			fulfillCheckoutSessionFromSuccessPageMock(...args),
 	};
 });
 
@@ -70,6 +73,7 @@ describe("getCheckoutSessionState", () => {
 		currentUserMock.mockReset();
 		currentUserMock.mockResolvedValue(null);
 		claimCheckoutSessionForViewerMock.mockReset();
+		fulfillCheckoutSessionFromSuccessPageMock.mockReset();
 		retrieveSessionMock.mockReset();
 		vi.resetModules();
 	});
@@ -118,6 +122,27 @@ describe("getCheckoutSessionState", () => {
 		expect(authMock).not.toHaveBeenCalled();
 	});
 
+	it("returns invalid_session when the checkout is missing course metadata", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					clerkUserId: "user_123",
+				},
+			}),
+		);
+
+		const { getCheckoutSessionState } =
+			await import("@/platform/billing/checkout/checkout-session");
+
+		await expect(
+			getCheckoutSessionState("cs_missing_course_metadata"),
+		).resolves.toEqual({
+			kind: "invalid_session",
+			sessionId: "cs_missing_course_metadata",
+		});
+		expect(authMock).not.toHaveBeenCalled();
+	});
+
 	it("returns sign_in_required when the checkout is valid but no user is signed in", async () => {
 		retrieveSessionMock.mockResolvedValue(createCheckoutSession());
 		authMock.mockResolvedValue({ userId: null });
@@ -131,7 +156,7 @@ describe("getCheckoutSessionState", () => {
 		});
 	});
 
-	it("treats a valid guest checkout as sign_in_required instead of invalid_session", async () => {
+	it("fulfills a valid signed-out guest checkout before requiring sign-in", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -141,6 +166,13 @@ describe("getCheckoutSessionState", () => {
 			}),
 		);
 		authMock.mockResolvedValue({ userId: null });
+		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
+			kind: "fulfilled",
+			sessionId: "cs_guest_signed_out",
+			clerkUserId: "user_buyer",
+			checkoutEmail: "buyer@example.com",
+			grantResult: { granted: "inserted" },
+		});
 
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
@@ -150,10 +182,15 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "sign_in_required",
 			sessionId: "cs_guest_signed_out",
+			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: undefined,
 		});
+		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
+			"cs_guest_signed_out",
+		);
 	});
 
-	it("requires checkout email proof for a signed-out guest checkout with an email", async () => {
+	it("uses normal sign-in for a signed-out guest checkout with an email", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -166,6 +203,13 @@ describe("getCheckoutSessionState", () => {
 			}),
 		);
 		authMock.mockResolvedValue({ userId: null });
+		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
+			kind: "fulfilled",
+			sessionId: "cs_guest_signed_out_email",
+			clerkUserId: "user_buyer",
+			checkoutEmail: "buyer@example.com",
+			grantResult: { granted: "inserted" },
+		});
 
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
@@ -173,13 +217,17 @@ describe("getCheckoutSessionState", () => {
 		await expect(
 			getCheckoutSessionState("cs_guest_signed_out_email"),
 		).resolves.toEqual({
-			kind: "checkout_email_handoff_required",
+			kind: "sign_in_required",
 			sessionId: "cs_guest_signed_out_email",
 			checkoutEmail: "buyer@example.com",
+			currentAccountEmail: undefined,
 		});
+		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
+			"cs_guest_signed_out_email",
+		);
 	});
 
-	it("claims and returns validated when guest checkout access belongs to the signed-in viewer", async () => {
+	it("returns validated when guest checkout fulfillment belongs to the signed-in viewer", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -189,10 +237,12 @@ describe("getCheckoutSessionState", () => {
 			}),
 		);
 		authMock.mockResolvedValue({ userId: "user_123" });
-		claimCheckoutSessionForViewerMock.mockResolvedValue({
-			kind: "validated",
+		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
+			kind: "fulfilled",
 			sessionId: "cs_guest_claimed",
-			claimResult: { granted: "inserted" },
+			clerkUserId: "user_123",
+			checkoutEmail: "buyer@example.com",
+			grantResult: { granted: "inserted" },
 		});
 
 		const { getCheckoutSessionState } =
@@ -203,12 +253,13 @@ describe("getCheckoutSessionState", () => {
 			sessionId: "cs_guest_claimed",
 			fulfillmentTrack: "unspecified",
 		});
-		expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
+		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
 			"cs_guest_claimed",
 		);
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
 	});
 
-	it("returns wrong_account when guest checkout access belongs to another user", async () => {
+	it("returns wrong_account when guest checkout fulfillment belongs to another user", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -226,11 +277,12 @@ describe("getCheckoutSessionState", () => {
 				emailAddress: "other@example.com",
 			},
 		});
-		claimCheckoutSessionForViewerMock.mockResolvedValue({
-			kind: "wrong_account",
+		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
+			kind: "fulfilled",
 			sessionId: "cs_guest_wrong_account",
+			clerkUserId: "user_123",
 			checkoutEmail: "buyer@example.com",
-			currentAccountEmail: "other@example.com",
+			grantResult: { granted: "patched" },
 		});
 
 		const { getCheckoutSessionState } =
@@ -246,7 +298,7 @@ describe("getCheckoutSessionState", () => {
 		});
 	});
 
-	it("returns payment_pending when the guest checkout claim reports a pending payment", async () => {
+	it("returns payment_pending when guest checkout fulfillment reports a pending payment", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -256,7 +308,7 @@ describe("getCheckoutSessionState", () => {
 			}),
 		);
 		authMock.mockResolvedValue({ userId: "user_other" });
-		claimCheckoutSessionForViewerMock.mockResolvedValue({
+		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "payment_pending",
 			sessionId: "cs_guest_pending",
 			paymentStatus: "unpaid",
@@ -272,33 +324,7 @@ describe("getCheckoutSessionState", () => {
 		});
 	});
 
-	it("returns sign_in_required when guest checkout claim needs the checkout email account", async () => {
-		retrieveSessionMock.mockResolvedValue(
-			createCheckoutSession({
-				metadata: {
-					courseSlug: "ship-by-sunday",
-				},
-				client_reference_id: null,
-			}),
-		);
-		authMock.mockResolvedValue({ userId: "user_other" });
-		claimCheckoutSessionForViewerMock.mockResolvedValue({
-			kind: "sign_in_required",
-			sessionId: "cs_guest_reauth",
-			checkoutEmail: "buyer@example.com",
-		});
-
-		const { getCheckoutSessionState } =
-			await import("@/platform/billing/checkout/checkout-session");
-
-		await expect(getCheckoutSessionState("cs_guest_reauth")).resolves.toEqual({
-			kind: "sign_in_required",
-			sessionId: "cs_guest_reauth",
-			checkoutEmail: "buyer@example.com",
-		});
-	});
-
-	it("adds the Stripe checkout email when a guest checkout claim requires sign-in without an email", async () => {
+	it("returns fulfillment_failed when success-page fulfillment cannot create access", async () => {
 		retrieveSessionMock.mockResolvedValue(
 			createCheckoutSession({
 				metadata: {
@@ -316,27 +342,29 @@ describe("getCheckoutSessionState", () => {
 				emailAddress: "other@example.com",
 			},
 		});
-		claimCheckoutSessionForViewerMock.mockResolvedValue({
-			kind: "sign_in_required",
-			sessionId: "cs_guest_sign_in_without_email",
+		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
+			kind: "grant_failed",
+			sessionId: "cs_guest_fulfillment_failed",
+			checkoutEmail: "buyer@example.com",
+			message: "Convex grant failed.",
 		});
 
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_guest_sign_in_without_email"),
+			getCheckoutSessionState("cs_guest_fulfillment_failed"),
 		).resolves.toEqual({
-			kind: "sign_in_required",
-			sessionId: "cs_guest_sign_in_without_email",
+			kind: "fulfillment_failed",
+			sessionId: "cs_guest_fulfillment_failed",
 			checkoutEmail: "buyer@example.com",
-			currentAccountEmail: "other@example.com",
+			message: "Convex grant failed.",
 		});
 	});
 
 	it.each(["invalid_session", "missing_checkout_email"] as const)(
-		"returns invalid_session when the guest checkout claim reports %s",
-		async (claimKind) => {
+		"returns invalid_session when guest checkout fulfillment reports %s",
+		async (fulfillmentKind) => {
 			retrieveSessionMock.mockResolvedValue(
 				createCheckoutSession({
 					metadata: {
@@ -346,20 +374,20 @@ describe("getCheckoutSessionState", () => {
 				}),
 			);
 			authMock.mockResolvedValue({ userId: "user_other" });
-			claimCheckoutSessionForViewerMock.mockResolvedValue({
-				kind: claimKind,
-				sessionId: `cs_${claimKind}`,
+			fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
+				kind: fulfillmentKind,
+				sessionId: `cs_${fulfillmentKind}`,
 			});
 
 			const { getCheckoutSessionState } =
 				await import("@/platform/billing/checkout/checkout-session");
 
-			await expect(getCheckoutSessionState(`cs_${claimKind}`)).resolves.toEqual(
-				{
-					kind: "invalid_session",
-					sessionId: `cs_${claimKind}`,
-				},
-			);
+			await expect(
+				getCheckoutSessionState(`cs_${fulfillmentKind}`),
+			).resolves.toEqual({
+				kind: "invalid_session",
+				sessionId: `cs_${fulfillmentKind}`,
+			});
 		},
 	);
 

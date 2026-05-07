@@ -2,7 +2,6 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { buildStripeCheckoutSessionCreateParams } from "@/platform/billing/checkout/checkout-session-params";
-import { normalizeCheckoutIntentRequestBody } from "@/platform/billing/checkout/checkout-intent";
 import { captureServerError } from "@/platform/observability/capture-server-error";
 import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
 import {
@@ -21,9 +20,6 @@ import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-imper
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
 	const { userId } = await auth();
-	const checkoutIntent = normalizeCheckoutIntentRequestBody(
-		await request.json().catch(() => null),
-	);
 
 	const appBaseUrl = getAppBaseUrl(request);
 	const stripeFailureContext = buildStripeCheckoutFailureContext({
@@ -52,7 +48,6 @@ export async function POST(request: Request) {
 			buildStripeCheckoutSessionCreateParams({
 				appBaseUrl,
 				clerkUserId: userId,
-				checkoutIntent,
 				customerEmail: user?.primaryEmailAddress?.emailAddress ?? null,
 			}),
 		);

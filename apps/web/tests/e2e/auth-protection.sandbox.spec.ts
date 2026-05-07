@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
 
 import {
-	memberWithAccessEmail,
-	memberWithAccessPassword,
 	memberWithAccessStorageStatePath,
 	memberWithoutAccessStorageStatePath,
 	shouldRunAuthenticatedE2E,
@@ -21,16 +19,16 @@ test.describe("protected routes", () => {
 		await expect(page).toHaveURL(/\/sign-in/);
 	});
 
-	test("@default_ship preserves redirect intent when an entitled user signs in", async ({
+	test("@default_ship signed-out sign-in stays passwordless", async ({
 		page,
 	}) => {
 		await page.goto("/sign-in?redirect_url=%2Fcodebase");
-		await page.getByLabel(/^email$/i).fill(memberWithAccessEmail);
-		await page.getByLabel(/^password$/i).fill(memberWithAccessPassword);
-		await page.getByRole("button", { name: /^sign in$/i }).click();
 
-		await expect(page).toHaveURL(/\/codebase$/);
-		await expect(page.getByRole("heading", { name: "Codebase" })).toBeVisible();
+		await expect(page.getByLabel(/^email$/i)).toBeVisible();
+		await expect(page.getByLabel(/^password$/i)).toHaveCount(0);
+		await expect(
+			page.getByRole("button", { name: /^send email code$/i }),
+		).toBeVisible();
 	});
 
 	test.describe("member without access", () => {

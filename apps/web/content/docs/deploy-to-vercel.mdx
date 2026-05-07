@@ -20,6 +20,7 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - any deployment values your Convex environment writes
 - Stripe secret key, product id, price id
 - live `STRIPE_WEBHOOK_SECRET`
+- live `CHECKOUT_FULFILLMENT_RETRY_SECRET`, mirrored into Vercel and the production Convex deployment
 - `APP_BASE_URL`
 - PostHog source-map upload values when error tracking is enabled:
   `NEXT_PUBLIC_POSTHOG_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`,
@@ -62,10 +63,10 @@ Do not leave Convex pointed at:
 After a merge to `main`, `Production Release Proof` should confirm all of this with a real test flow. That workflow should wait for the exact Vercel production deployment for the merged commit before it starts browser verification, not just wait for the production URL to return `200`.
 
 1. signed-out visitor hits a protected route and is pushed to sign-in
-2. signed-in user without access reaches `/codebase` and sees inline recovery
+2. signed-in user without access reaches a protected workspace route and sees inline recovery
 3. live checkout returns to `/checkout/success`
 4. webhook grants access
-5. newly granted user reaches `/codebase`
+5. newly granted user reaches `/workspace/choose`
 6. Vercel attributes the production web deploy to `main`
 7. GitHub Actions reports a matching `Convex Production Deploy` run for the same release
 
@@ -77,9 +78,10 @@ PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.productio
 
 That command assumes:
 
-- `tmp/release-personas.local.json` contains the real release proof account emails and passwords, unless `RELEASE_PERSONAS_LOCAL_FILE` points somewhere else
+- `tmp/release-personas.local.json` contains the real release proof account emails, unless `RELEASE_PERSONAS_LOCAL_FILE` points somewhere else
 - the file referenced by `QA_ENV_FILE` contains the production Clerk and Convex env values
 - the production Clerk instance matches the target site
+- the production Clerk instance allows the release proof accounts to receive an email-code challenge; the browser proof sends the code before using Clerk testing sign-in tokens for deterministic storage state
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
 - `QA_ENV_FILE=apps/web/.env.production` is resolved from the repository root in CI, not from `apps/web/`
 - the production proof bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the env file does not need a separate production deployment name

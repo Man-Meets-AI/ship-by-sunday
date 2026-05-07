@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -75,58 +75,63 @@ vi.mock("@/components/ui/input-otp", () => ({
 
 import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 
-function createSignInMock(overrides?: Partial<Record<string, unknown>>) {
-	return {
-		create: vi.fn().mockResolvedValue({ error: null }),
-		errors: {
-			fields: {
-				code: null,
-				identifier: null,
-				password: null,
-			},
-			global: null,
-			raw: null,
+type TestClerkError = { code?: string; message?: string } | null;
+
+function createSignInState(overrides?: Partial<Record<string, unknown>>) {
+	const signIn = {
+		create: vi.fn().mockResolvedValue({
+			error: null,
+			status: "needs_first_factor",
+		}),
+		emailCode: {
+			sendCode: vi.fn().mockResolvedValue({ error: null }),
+			verifyCode: vi.fn().mockImplementation(async () => {
+				signIn.status = "complete";
+				return {
+					error: null,
+				};
+			}),
 		},
 		existingSession: undefined,
-		fetchStatus: "idle",
-		finalize: vi.fn().mockResolvedValue({ error: null }),
-		mfa: {
-			sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-			sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-			verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-			verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-			verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-			verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-		},
-		password: vi.fn().mockResolvedValue({ error: null }),
+		finalize: vi.fn().mockImplementation(async ({ navigate }) => {
+			await navigate({
+				decorateUrl: (url: string) => url,
+				session: null,
+			});
+		}),
+		isTransferable: false,
 		reset: vi.fn().mockResolvedValue({ error: null }),
-		resetPasswordEmailCode: {
-			sendCode: vi.fn().mockResolvedValue({ error: null }),
-			submitPassword: vi.fn().mockResolvedValue({ error: null }),
-			verifyCode: vi.fn().mockResolvedValue({ error: null }),
-		},
-		signIn: {
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
+		status: "needs_first_factor",
+		supportedFirstFactors: [
+			{
+				emailAddressId: "idn_sign_in_email",
+				primary: true,
+				safeIdentifier: "buyer@example.com",
+				strategy: "email_code",
 			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
-				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			status: "needs_first_factor",
-			supportedSecondFactors: [],
-			finalize: vi.fn().mockResolvedValue({ error: null }),
-			create: vi.fn().mockResolvedValue({ error: null }),
-			...overrides,
+		],
+		...overrides,
+	};
+	const errors: {
+		fields: {
+			code: TestClerkError;
+			identifier: TestClerkError;
+		};
+		global: Array<NonNullable<TestClerkError>> | null;
+		raw: Array<NonNullable<TestClerkError>> | null;
+	} = {
+		fields: {
+			code: null,
+			identifier: null,
 		},
+		global: null,
+		raw: null,
+	};
+
+	return {
+		errors,
+		fetchStatus: "idle",
+		signIn,
 	};
 }
 
@@ -141,6 +146,9 @@ describe("SignInPage", () => {
 		useSearchParamsMock.mockReset();
 		useSignInMock.mockReset();
 		useClerkMock.mockReturnValue({
+			client: {
+				sessions: [],
+			},
 			setActive: setActiveMock.mockImplementation(async ({ navigate }) => {
 				await navigate({
 					decorateUrl: (url: string) => url,
@@ -152,13 +160,9 @@ describe("SignInPage", () => {
 		useSearchParamsMock.mockReturnValue(new URLSearchParams(""));
 	});
 
-	it("renders the custom sign-in UI without sign-up copy or legal footer", () => {
-		const signInState = createSignInMock();
-		useSignInMock.mockReturnValue({
-			errors: signInState.errors,
-			fetchStatus: signInState.fetchStatus,
-			signIn: signInState.signIn,
-		});
+	it("renders a passwordless sign-in UI without password, reset, sign-up, or legal copy", () => {
+		const signInState = createSignInState();
+		useSignInMock.mockReturnValue(signInState);
 
 		render(
 			<IdentityLayout>
@@ -170,14 +174,15 @@ describe("SignInPage", () => {
 		expect(screen.getByRole("link", { name: "Home" })).toBeTruthy();
 		expect(
 			screen.getByText(
-				"Use the account attached to your purchase to continue.",
+				"Enter the email tied to your purchase. We’ll send a one-time code.",
 			),
 		).toBeTruthy();
-		expect(
-			screen.queryByText("Reconnect the workspace tied to your checkout."),
-		).toBeNull();
 		expect(screen.getByLabelText("Email")).toBeTruthy();
-		expect(screen.getByLabelText("Password")).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Send email code" }),
+		).toBeTruthy();
+		expect(screen.queryByLabelText("Password")).toBeNull();
+		expect(screen.queryByText("Forgot your password?")).toBeNull();
 		expect(screen.queryByRole("button", { name: /continue with/i })).toBeNull();
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 		expect(screen.queryByText(/create account/i)).toBeNull();
@@ -188,18 +193,14 @@ describe("SignInPage", () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Fsettings"),
 		);
-		const signInState = createSignInMock();
-		useSignInMock.mockReturnValue({
-			errors: signInState.errors,
-			fetchStatus: signInState.fetchStatus,
-			signIn: signInState.signIn,
-		});
+		const signInState = createSignInState();
+		useSignInMock.mockReturnValue(signInState);
 
 		render(<SignInPage />);
 
 		expect(
 			screen.getByText(
-				"Use the account attached to your purchase to continue.",
+				"Enter the email tied to your purchase. We’ll send a one-time code.",
 			),
 		).toBeTruthy();
 		expect(
@@ -208,164 +209,221 @@ describe("SignInPage", () => {
 		expect(screen.queryByRole("link", { name: "See pricing" })).toBeNull();
 	});
 
-	it("does not render the retired post-checkout create-account path", () => {
-		const signInState = createSignInMock();
-		useSignInMock.mockReturnValue({
-			errors: signInState.errors,
-			fetchStatus: signInState.fetchStatus,
-			signIn: signInState.signIn,
-		});
+	it("starts a Clerk email-code sign-in attempt for the returned email factor", async () => {
+		const signInState = createSignInState();
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
 
 		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.create).toHaveBeenCalledWith({
+			identifier: "buyer@example.com",
+		});
+		expect(signInState.signIn.emailCode.sendCode).toHaveBeenCalledWith({
+			emailAddressId: "idn_sign_in_email",
+		});
+		expect(screen.getByLabelText("Email code")).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		).toBeTruthy();
+		expect(screen.queryByLabelText("Password")).toBeNull();
+	});
+
+	it("shows a purchase-license message for an email without an account", async () => {
+		const signInState = createSignInState();
+		const missingAccountError = {
+			code: "form_identifier_not_found",
+			message: "Couldn't find your account.",
+		};
+		signInState.signIn.create.mockImplementation(async () => {
+			signInState.errors.fields.identifier = missingAccountError;
+			signInState.errors.global = [missingAccountError];
+			return {
+				error: missingAccountError,
+				status: null,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "missing@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(
+			await screen.findByText(/We don't have an account for that email/),
+		).toBeTruthy();
+		const purchaseLink = screen.getByRole("link", {
+			name: "Purchase a license",
+		}) as HTMLAnchorElement;
+		expect(purchaseLink.getAttribute("href")).toBe("/#pricing");
+		expect(
+			screen.getByText(/first, then sign in with the checkout email/),
+		).toBeTruthy();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(screen.queryByText("Couldn't find your account.")).toBeNull();
+	});
+
+	it("shows the purchase-license message when Clerk reports a transferable sign-in", async () => {
+		const signInState = createSignInState({
+			isTransferable: true,
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "missing@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(
+			await screen.findByText(/We don't have an account for that email/),
+		).toBeTruthy();
+		expect(
+			(
+				screen.getByRole("link", {
+					name: "Purchase a license",
+				}) as HTMLAnchorElement
+			).getAttribute("href"),
+		).toBe("/#pricing");
+		expect(
+			screen.getByText(/first, then sign in with the checkout email/),
+		).toBeTruthy();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(reportClientErrorMock).not.toHaveBeenCalled();
+	});
+
+	it("verifies the email code and returns to the preserved target", async () => {
+		useSearchParamsMock.mockReturnValue(
+			new URLSearchParams("redirect_url=%2Fsettings"),
+		);
+		const signInState = createSignInState();
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(signInState.signIn.emailCode.verifyCode).toHaveBeenCalledWith({
+			code: "123456",
+		});
+		expect(signInState.signIn.finalize).toHaveBeenCalled();
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith("/settings");
+		});
+	});
+
+	it("shows an invalid email-code error only on the code field", async () => {
+		const signInState = createSignInState();
+		const incorrectCodeError = {
+			code: "form_code_incorrect",
+			message: "is incorrect",
+		};
+		signInState.signIn.emailCode.verifyCode.mockImplementation(async () => {
+			signInState.errors.fields.code = incorrectCodeError;
+			signInState.errors.global = [incorrectCodeError];
+			return {
+				error: incorrectCodeError,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
 
 		expect(
-			screen.queryByRole("link", {
-				name: "Create the account for this checkout",
-			}),
+			await screen.findByText(
+				"That code is incorrect. Use the latest email code or send a new one.",
+			),
+		).toBeTruthy();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(screen.queryByText("is incorrect")).toBeNull();
+		expect(pushMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps generic code format errors field-level without rewriting the copy", async () => {
+		const signInState = createSignInState();
+		const formatError = {
+			code: "form_param_format_invalid",
+			message: "Code must contain only digits.",
+		};
+		signInState.signIn.emailCode.verifyCode.mockImplementation(async () => {
+			signInState.errors.fields.code = formatError;
+			signInState.errors.global = [formatError];
+			return {
+				error: formatError,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "abcdef");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(
+			await screen.findByText("Code must contain only digits."),
+		).toBeTruthy();
+		expect(
+			screen.queryByText(
+				"That code is incorrect. Use the latest email code or send a new one.",
+			),
 		).toBeNull();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(pushMock).not.toHaveBeenCalled();
 	});
 
-	it("submits email and password through Clerk", async () => {
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
-			finalize: vi.fn().mockResolvedValue({ error: null }),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
-				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			status: "needs_first_factor",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
-		});
-
-		const user = userEvent.setup();
-		render(<SignInPage />);
-
-		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
-		await user.type(screen.getByLabelText("Password"), "supersecret");
-		await user.click(screen.getByRole("button", { name: "Sign in" }));
-
-		expect(signIn.password).toHaveBeenCalledWith({
-			identifier: "buyer@example.com",
-			password: "supersecret",
-		});
-	});
-
-	it("redirects a completed password sign-in back to the preserved target", async () => {
+	it("activates the created session when email-code verification completes before the hook state updates", async () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Fsettings"),
 		);
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
-			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
-				await navigate({
-					decorateUrl: (url: string) => url,
-					session: null,
-				});
-				return { error: null };
-			}),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
+		const signInState = createSignInState({
+			emailCode: {
 				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockImplementation(async () => {
+					signInState.signIn.createdSessionId = "sess_123";
+					signInState.signIn.status = "complete";
+					return {
+						error: null,
+					};
+				}),
 			},
-			status: "complete",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
 		});
-
+		useSignInMock.mockReturnValue(signInState);
 		const user = userEvent.setup();
+
 		render(<SignInPage />);
 
 		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
-		await user.type(screen.getByLabelText("Password"), "supersecret");
-		await user.click(screen.getByRole("button", { name: "Sign in" }));
-
-		expect(pushMock).toHaveBeenCalledWith("/settings");
-	});
-
-	it("activates the created session when the password response completes before the hook state updates", async () => {
-		useSearchParamsMock.mockReturnValue(
-			new URLSearchParams("redirect_url=%2Fsettings"),
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
 		);
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
-			finalize: vi.fn().mockResolvedValue({ error: null }),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({
-				createdSessionId: "sess_123",
-				error: null,
-				status: "complete",
-			}),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
-				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			status: "needs_first_factor",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
-		});
-
-		const user = userEvent.setup();
-		render(<SignInPage />);
-
-		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
-		await user.type(screen.getByLabelText("Password"), "supersecret");
-		await user.click(screen.getByRole("button", { name: "Sign in" }));
 
 		expect(setActiveMock).toHaveBeenCalledTimes(1);
 		expect(setActiveMock).toHaveBeenCalledWith({
@@ -375,53 +433,29 @@ describe("SignInPage", () => {
 		expect(pushMock).toHaveBeenCalledWith("/settings");
 	});
 
-	it("routes a completed password sign-in into the pending Clerk task", async () => {
+	it("routes completed passwordless sign-in into the pending Clerk task", async () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Fsettings"),
 		);
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
+		const signInState = createSignInState({
 			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
 				await navigate({
 					decorateUrl: (url: string) => url,
 					session: { currentTask: { key: "reset-password" } },
 				});
-				return { error: null };
 			}),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
-				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			status: "complete",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
 		});
-
+		useSignInMock.mockReturnValue(signInState);
 		const user = userEvent.setup();
+
 		render(<SignInPage />);
 
 		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
-		await user.type(screen.getByLabelText("Password"), "supersecret");
-		await user.click(screen.getByRole("button", { name: "Sign in" }));
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
 
 		expect(pushMock).toHaveBeenCalledWith(
 			"/session-tasks/reset-password?redirect_url=%2Fsettings",
@@ -432,131 +466,102 @@ describe("SignInPage", () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Fsettings"),
 		);
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
+		const signInState = createSignInState({
 			finalize: vi.fn().mockImplementation(async ({ navigate }) => {
 				await navigate({
 					decorateUrl: (url: string) => url,
 					session: { currentTask: { key: "setup-mfa" } },
 				});
-				return { error: null };
 			}),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
-				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
-			},
-			status: "complete",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
 		});
+		useSignInMock.mockReturnValue(signInState);
 		signOutMock.mockResolvedValue(undefined);
-
 		const user = userEvent.setup();
+
 		render(<SignInPage />);
 
 		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
-		await user.type(screen.getByLabelText("Password"), "supersecret");
-		await user.click(screen.getByRole("button", { name: "Sign in" }));
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
 
 		expect(signOutMock).toHaveBeenCalledWith({
 			redirectUrl: "/sign-in?redirect_url=%2Fsettings",
 		});
 	});
 
-	it("moves into the password reset flow and sends a reset code", async () => {
-		const signIn = {
-			create: vi.fn().mockResolvedValue({ error: null }),
-			finalize: vi.fn().mockResolvedValue({ error: null }),
-			mfa: {
-				sendEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				sendPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyBackupCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyEmailCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyPhoneCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyTOTP: vi.fn().mockResolvedValue({ error: null }),
-			},
-			password: vi.fn().mockResolvedValue({ error: null }),
-			reset: vi.fn().mockResolvedValue({ error: null }),
-			resetPasswordEmailCode: {
+	it("fails closed when Clerk requires MFA after the email code", async () => {
+		const signInState = createSignInState({
+			emailCode: {
 				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				submitPassword: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockImplementation(async () => {
+					signInState.signIn.status = "needs_second_factor";
+					return {
+						error: null,
+					};
+				}),
 			},
-			status: "needs_first_factor",
-			supportedSecondFactors: [],
-		};
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: { code: null, identifier: null, password: null },
-				global: null,
-				raw: null,
-			},
-			fetchStatus: "idle",
-			signIn,
+			finalize: vi.fn().mockResolvedValue({
+				error: new Error("needs_second_factor"),
+			}),
 		});
-
+		useSignInMock.mockReturnValue(signInState);
 		const user = userEvent.setup();
+
 		render(<SignInPage />);
 
 		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
 		await user.click(
-			screen.getByRole("button", { name: "Forgot your password?" }),
+			screen.getByRole("button", { name: "Verify and continue" }),
 		);
-		await user.click(screen.getByRole("button", { name: "Send reset code" }));
 
-		expect(signIn.reset).toHaveBeenCalledTimes(2);
-		expect(signIn.create).toHaveBeenCalledWith({
-			identifier: "buyer@example.com",
-		});
-		expect(signIn.resetPasswordEmailCode.sendCode).toHaveBeenCalledTimes(1);
+		expect(signInState.signIn.finalize).toHaveBeenCalled();
+		expect(setActiveMock).not.toHaveBeenCalled();
+		expect(reportClientErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: "clerk_passwordless_sign_in_unsupported_state",
+				details: expect.objectContaining({
+					status: "needs_second_factor",
+				}),
+			}),
+		);
+		expect(
+			screen.getByText(/Clerk needs another account step before this email/),
+		).toBeTruthy();
 	});
 
-	it("renders Clerk reset password field errors without a duplicate reset banner", () => {
-		const compromisedPasswordError = {
-			message:
-				"Password has been found in an online data breach. For account safety, please use a different password.",
-		};
-		const signInState = createSignInMock({
-			status: "needs_new_password",
-		});
-		useSignInMock.mockReturnValue({
-			errors: {
-				fields: {
-					code: null,
-					identifier: null,
-					password: compromisedPasswordError,
+	it("does not call Clerk email-code sending when the sign-in has no email-code factor", async () => {
+		const signInState = createSignInState({
+			supportedFirstFactors: [
+				{
+					strategy: "password",
 				},
-				global: null,
-				raw: [compromisedPasswordError],
-			},
-			fetchStatus: signInState.fetchStatus,
-			signIn: signInState.signIn,
+			],
 		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
 
 		render(<SignInPage />);
 
-		expect(screen.queryByText("We couldn't continue the reset.")).toBeNull();
-		expect(screen.getAllByText(compromisedPasswordError.message)).toHaveLength(
-			1,
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(
+			screen.getByText(/passwordless_email_code_factor_missing/),
+		).toBeTruthy();
+		expect(reportClientErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: "clerk_passwordless_sign_in_email_code_factor_missing",
+				details: expect.objectContaining({
+					supportedFirstFactors: ["password"],
+				}),
+			}),
 		);
+		expect(pushMock).not.toHaveBeenCalled();
 	});
 });

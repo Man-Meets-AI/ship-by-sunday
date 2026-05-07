@@ -1,9 +1,4 @@
-import {
-	getCheckoutSuccessHref,
-	getSignInRedirectHref,
-	routeConfig,
-} from "@/config/product";
-import { buildCheckoutEmailHandoffHref } from "@/platform/auth/auth-route-utils";
+import { getSignInRedirectHref, routeConfig } from "@/config/product";
 import { assertNever } from "@/lib/assert";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import type { FulfillmentTrack } from "@/platform/billing/checkout/checkout-intent";
@@ -39,6 +34,7 @@ export type CheckoutViewModel = {
 const workspaceOpenLabel = workspaceDisplayConfig.openHomeActionLabel;
 const workspaceNoun = workspaceDisplayConfig.homeNoun;
 const workspaceRouteStepLabel = workspaceDisplayConfig.firstStepLabel;
+const checkoutWelcomePath = `${routeConfig.workspaceChoice}?welcome=checkout`;
 
 type ValidatedFulfillmentRouteModel = {
 	actionHref: string;
@@ -67,7 +63,7 @@ function getValidatedFulfillmentRouteModel(
 			};
 		case "unspecified":
 			return {
-				actionHref: routeConfig.workspaceChoice,
+				actionHref: checkoutWelcomePath,
 				openLabel: "Choose path",
 				noun: "fulfillment choice",
 				stepLabel: "workspace path",
@@ -157,23 +153,15 @@ export function getCheckoutViewModel(
 			const signInCheckoutEmail = getCheckoutEmailLabel(
 				checkoutSessionState.checkoutEmail,
 			);
-			const checkoutSuccessHref = getCheckoutSuccessHref(
-				checkoutSessionState.sessionId,
-			);
-			const canUseCheckoutEmailHandoff = Boolean(
-				checkoutSessionState.checkoutEmail,
-			);
 			return {
 				shellTitle: "Finish access handoff",
 				shellSubtitle: checkoutSessionState.checkoutEmail
-					? `Payment is confirmed for ${checkoutSessionState.checkoutEmail}. Prove that checkout email to continue.`
+					? `Payment is confirmed for ${checkoutSessionState.checkoutEmail}. Sign in with the email code for that account.`
 					: "Sign in with the same account you used at checkout so we can attach access.",
 				statusLabel: "Sign in required",
-				heading: checkoutSessionState.checkoutEmail
-					? "Prove checkout email"
-					: "Sign in to continue",
+				heading: "Sign in to continue",
 				body: checkoutSessionState.checkoutEmail
-					? `We found a paid checkout session for ${signInCheckoutEmail}. Use the email code for that address so we can continue the access handoff. Do not buy again while this paid checkout is waiting.`
+					? `We found a paid checkout session for ${signInCheckoutEmail}. Use the normal email-code sign-in for that address so we can continue to workspace choice. Do not buy again while this paid checkout is waiting.`
 					: `We found a paid checkout session, but this browser is not signed in. Use ${signInCheckoutEmail}, then we can finish the access handoff. Do not buy again while this paid checkout is waiting.`,
 				progressSteps: [
 					{
@@ -184,9 +172,7 @@ export function getCheckoutViewModel(
 							: "We located the paid Stripe session from this success URL.",
 					},
 					{
-						label: checkoutSessionState.checkoutEmail
-							? "Prove email"
-							: "Sign in",
+						label: "Sign in",
 						state: "active",
 						detail: `Use ${signInCheckoutEmail}.`,
 					},
@@ -209,62 +195,58 @@ export function getCheckoutViewModel(
 						: "Return to this tab after sign-in so the access handoff can finish.",
 					"Do not start a second checkout. This payment already exists.",
 				],
-				primaryActionLabel: canUseCheckoutEmailHandoff
-					? "Prove checkout email"
+				primaryActionLabel: checkoutSessionState.checkoutEmail
+					? "Sign in with checkout email"
 					: "Sign in",
-				primaryActionHref: canUseCheckoutEmailHandoff
-					? buildCheckoutEmailHandoffHref({
-							redirectPath: checkoutSuccessHref,
-							sessionId: checkoutSessionState.sessionId,
-						})
-					: getSignInRedirectHref(checkoutSuccessHref),
+				primaryActionHref: getSignInRedirectHref(checkoutWelcomePath),
 				primaryActionBody: `Use ${signInCheckoutEmail} so we can attach the purchase to the right account.`,
 				secondaryActionBody: checkoutSessionState.checkoutEmail
 					? `After email verification, come back here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`
 					: `After sign-in, come back here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,
 			};
 		}
-		case "checkout_email_handoff_required": {
-			const checkoutSuccessHref = getCheckoutSuccessHref(
-				checkoutSessionState.sessionId,
+		case "fulfillment_failed": {
+			const checkoutEmail = getCheckoutEmailLabel(
+				checkoutSessionState.checkoutEmail,
 			);
 			return {
-				shellTitle: "Finish access handoff",
-				shellSubtitle: `Payment is confirmed for ${checkoutSessionState.checkoutEmail}. Prove that checkout email to continue.`,
-				statusLabel: "Email proof required",
-				heading: "Prove checkout email",
-				body: `Access is waiting for the Clerk user tied to ${checkoutSessionState.checkoutEmail}. Use the one-time email code for that address, then this page will continue into the workspace. Do not buy again.`,
+				shellTitle: "Access needs support",
+				shellSubtitle:
+					"We confirmed the checkout session, but could not finish the account handoff automatically.",
+				statusLabel: "Support needed",
+				heading: "We could not finish access",
+				body: `The purchase is tied to ${checkoutEmail}, but account fulfillment hit a recoverable error: ${checkoutSessionState.message}`,
 				progressSteps: [
 					{
 						label: "Payment confirmed",
 						state: "complete",
-						detail: "Stripe marked the checkout as paid.",
+						detail: "Stripe reported a paid checkout session.",
 					},
 					{
-						label: "Access granted",
-						state: "complete",
-						detail: `Access is attached to ${checkoutSessionState.checkoutEmail}.`,
-					},
-					{
-						label: "Prove email",
+						label: "Account handoff",
 						state: "active",
-						detail: "Verify the checkout email with a Clerk email code.",
+						detail: "Support needs to inspect Clerk and Convex state.",
+					},
+					{
+						label: "Open workspace",
+						state: "pending",
+						detail: "Workspace opens after access is repaired.",
 					},
 				],
-				helpTitle: "Use the checkout email",
-				helpLeadCopy: `The purchase is already tied to ${checkoutSessionState.checkoutEmail}. The remaining step is proving that email in Clerk.`,
+				helpTitle: "Do not buy again",
+				helpLeadCopy:
+					"The payment exists. This is an account handoff issue, not a missing purchase.",
 				helpItems: [
-					`Use the one-time code sent to ${checkoutSessionState.checkoutEmail}.`,
-					"Do not use Google or create a password from this checkout handoff.",
 					"Do not start a second checkout. This payment already exists.",
+					"Keep this success URL and share it with support if needed.",
+					"Try signing in with the checkout email if support confirms access is repaired.",
 				],
-				primaryActionLabel: "Prove checkout email",
-				primaryActionHref: buildCheckoutEmailHandoffHref({
-					redirectPath: checkoutSuccessHref,
-					sessionId: checkoutSessionState.sessionId,
-				}),
-				primaryActionBody: `Verify ${checkoutSessionState.checkoutEmail} so we can open the paid workspace.`,
-				secondaryActionBody: `After the email code succeeds, return here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,
+				primaryActionLabel: "Sign in",
+				primaryActionHref: getSignInRedirectHref(checkoutWelcomePath),
+				primaryActionBody:
+					"Sign in with the checkout email after the account handoff is repaired.",
+				secondaryActionBody:
+					"Use this page as proof of the paid checkout while support repairs access.",
 			};
 		}
 		case "wrong_account": {
@@ -273,9 +255,6 @@ export function getCheckoutViewModel(
 			);
 			const currentAccountEmail = getCurrentAccountLabel(
 				checkoutSessionState.currentAccountEmail,
-			);
-			const checkoutSuccessHref = getCheckoutSuccessHref(
-				checkoutSessionState.sessionId,
 			);
 			return {
 				shellTitle: "Wrong account for this checkout",
@@ -286,7 +265,7 @@ export function getCheckoutViewModel(
 						: "This browser is signed into a different account than the one used at checkout.",
 				statusLabel: "Account mismatch",
 				heading: "Use the checkout account",
-				body: `This paid checkout belongs to ${wrongAccountCheckoutEmail}. This browser is using ${currentAccountEmail}. Do not buy again; sign out, prove the checkout email, then retry this page or use ${workspaceOpenLabel.toLowerCase()}.`,
+				body: `This paid checkout belongs to ${wrongAccountCheckoutEmail}. This browser is using ${currentAccountEmail}. Do not buy again; sign out, use the checkout email code, then retry this page or use ${workspaceOpenLabel.toLowerCase()}.`,
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -314,12 +293,7 @@ export function getCheckoutViewModel(
 					"Do not start another checkout. This payment already exists.",
 				],
 				primaryActionLabel: "Switch accounts",
-				primaryActionHref: checkoutSessionState.checkoutEmail
-					? buildCheckoutEmailHandoffHref({
-							redirectPath: checkoutSuccessHref,
-							sessionId: checkoutSessionState.sessionId,
-						})
-					: getSignInRedirectHref(checkoutSuccessHref),
+				primaryActionHref: getSignInRedirectHref(checkoutWelcomePath),
 				primaryActionKind: "sign_out",
 				primaryActionBody: `Recover this purchase by using ${wrongAccountCheckoutEmail}. Do not buy again from ${currentAccountEmail}.`,
 				secondaryActionBody: `After switching accounts, return here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,
@@ -359,7 +333,7 @@ export function getCheckoutViewModel(
 					"Do not retry checkout unless Stripe shows the payment failed.",
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.codebase,
+				primaryActionHref: routeConfig.workspaceChoice,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} once payment settles to retry the ${workspaceNoun} gate.`,
 			};
@@ -397,7 +371,7 @@ export function getCheckoutViewModel(
 					"Keep the success URL intact when testing the live handoff.",
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.codebase,
+				primaryActionHref: routeConfig.workspaceChoice,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if payment was already confirmed.`,
 			};
@@ -435,7 +409,7 @@ export function getCheckoutViewModel(
 					"Keep the same browser session for the cleanest handoff.",
 				],
 				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.codebase,
+				primaryActionHref: routeConfig.workspaceChoice,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
 				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if access should already be live.`,
 			};

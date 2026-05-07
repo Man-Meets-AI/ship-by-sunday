@@ -2,8 +2,9 @@
 
 import { ArrowRight, Code2, ListVideo, Loader2, Sparkles } from "lucide-react";
 import { useMutation } from "convex/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api } from "@/convex/_generated/api";
 import { routeConfig } from "@/config/product";
@@ -20,7 +21,6 @@ const fulfillmentChoices = [
 	{
 		kind: "fulfillment",
 		fulfillmentTrack: "generated_codebase",
-		checkoutCtaId: "choice_generated",
 		title: "Generate a new codebase",
 		description:
 			"Open the guided Codebase workspace and turn the product draft into a new repo package.",
@@ -30,7 +30,6 @@ const fulfillmentChoices = [
 	{
 		kind: "fulfillment",
 		fulfillmentTrack: "existing_codebase_doctor",
-		checkoutCtaId: "choice_existing",
 		title: "Set up an existing codebase",
 		description:
 			"Start the protected setup entry for runner pairing, repository binding, and the first sync-safe doctor pass.",
@@ -56,13 +55,27 @@ const workspacePathChoices = [
 
 type WorkspacePathChoice = (typeof workspacePathChoices)[number];
 
-export function WorkspaceFulfillmentChoice() {
+export function WorkspaceFulfillmentChoice({
+	showCheckoutWelcome = false,
+	accountEmail,
+}: {
+	showCheckoutWelcome?: boolean;
+	accountEmail?: string;
+}) {
 	const router = useRouter();
 	const resolveFulfillmentTrack = useMutation(
 		api.access.resolveViewerFulfillmentTrack,
 	);
 	const [pendingChoice, setPendingChoice] = useState<ChoiceState>(null);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (!showCheckoutWelcome) {
+			return;
+		}
+
+		window.history.replaceState(null, "", routeConfig.workspaceChoice);
+	}, [showCheckoutWelcome]);
 
 	async function chooseWorkspacePath(choice: WorkspacePathChoice) {
 		if (choice.kind === "link") {
@@ -76,7 +89,6 @@ export function WorkspaceFulfillmentChoice() {
 		try {
 			const result = await resolveFulfillmentTrack({
 				fulfillmentTrack: choice.fulfillmentTrack,
-				checkoutCtaId: choice.checkoutCtaId,
 			});
 			if (isSupportModeBlockedMutationResult(result)) {
 				throw new Error(getSupportModeBlockedMutationMessage());
@@ -104,6 +116,40 @@ export function WorkspaceFulfillmentChoice() {
 						you bought so future handoffs open the right protected workspace.
 					</p>
 				</div>
+
+				{showCheckoutWelcome ? (
+					<div className="relative mt-6 overflow-hidden rounded-xl border border-border/60 bg-card p-4 shadow-sm shadow-foreground/5">
+						<div className="pointer-events-none absolute inset-x-0 top-0 flex justify-around px-4 pt-2 text-xs text-foreground/40 motion-safe:animate-pulse">
+							<span>*</span>
+							<span>.</span>
+							<span>*</span>
+							<span>.</span>
+							<span>*</span>
+						</div>
+						<div className="relative flex items-start gap-3">
+							<span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-foreground">
+								<Sparkles className="size-4" aria-hidden />
+							</span>
+							<div className="min-w-0">
+								<p className="text-sm font-semibold text-foreground">
+									You&apos;re in. Access is active
+									{accountEmail ? ` for ${accountEmail}` : ""}.
+								</p>
+								<p className="mt-1 text-sm leading-6 text-muted-foreground">
+									This account is associated with your checkout email. You can
+									manage account details from{" "}
+									<Link
+										href={routeConfig.settings}
+										className="font-medium text-foreground underline underline-offset-4 hover:text-foreground/70"
+									>
+										settings
+									</Link>{" "}
+									anytime.
+								</p>
+							</div>
+						</div>
+					</div>
+				) : null}
 
 				<div className="mt-8 grid gap-4 md:grid-cols-3">
 					{workspacePathChoices.map((choice) => {

@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
-import {
-	buildCheckoutEmailHandoffHref,
-	getSafeRedirectPath,
-} from "@/platform/auth/auth-route-utils";
+import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
 
 export const metadata: Metadata = {
 	robots: {
@@ -25,14 +22,7 @@ export default async function Page({
 		return redirect(`${routeConfig.home}${routeConfig.pricingHash}`);
 	}
 
-	const safeRedirectPath = getSafeRedirectPath(
-		redirectUrl ?? getCheckoutSuccessHref(sessionId),
-	);
-
 	return redirect(
-		buildCheckoutEmailHandoffHref({
-			redirectPath: safeRedirectPath,
-			sessionId,
-		}),
+		getSafeRedirectPath(redirectUrl ?? getCheckoutSuccessHref(sessionId)),
 	);
 }

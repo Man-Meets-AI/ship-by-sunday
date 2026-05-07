@@ -7,19 +7,10 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 	CheckoutButton: ({
 		label,
 		testId,
-		checkoutIntent,
 	}: {
 		readonly label: string;
 		readonly testId?: string;
-		readonly checkoutIntent?: { readonly checkoutCtaId?: string };
-	}) => (
-		<button
-			data-testid={testId}
-			data-checkout-cta-id={checkoutIntent?.checkoutCtaId}
-		>
-			{label}
-		</button>
-	),
+	}) => <button data-testid={testId}>{label}</button>,
 }));
 
 import { HomePagePrimaryCta } from "@/app/_components/home-page/sections/home-page-primary-cta";
@@ -30,10 +21,6 @@ describe("HomePagePrimaryCta", () => {
 			<HomePagePrimaryCta
 				target={{
 					kind: "checkout",
-					checkoutIntent: {
-						buyerStartingPoint: "no_codebase",
-						checkoutCtaId: "hero_primary",
-					},
 				}}
 				label="Buy now"
 				testId="primary-cta"
@@ -41,8 +28,5 @@ describe("HomePagePrimaryCta", () => {
 		);
 
 		expect(screen.getByTestId("primary-cta").textContent).toBe("Buy now");
-		expect(screen.getByTestId("primary-cta").dataset.checkoutCtaId).toBe(
-			"hero_primary",
-		);
 	});
 });

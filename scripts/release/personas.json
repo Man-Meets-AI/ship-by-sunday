@@ -9,13 +9,13 @@
     },
     "member_without_access": {
       "displayName": "Signed-in member without paid access",
-      "kind": "clerk_password",
+      "kind": "clerk_email_code",
       "accountScope": "ship-by-sunday-clerk-instance",
       "storageStatePath": "apps/web/tests/e2e/.auth/member-without-access.json"
     },
     "member_with_access": {
       "displayName": "Signed-in member with access",
-      "kind": "clerk_password_entitled",
+      "kind": "clerk_email_code_entitled",
       "accountScope": "ship-by-sunday-clerk-entitled",
       "storageStatePath": "apps/web/tests/e2e/.auth/member-with-access.json"
     }
@@ -36,21 +36,19 @@
       "softwareName": "Ship by Sunday",
       "provider": "clerk",
       "scope": "ship-by-sunday-clerk-instance",
-      "authMode": "password",
+      "authMode": "email_code",
       "firstName": "Release",
       "lastName": "Member",
-      "email": "__set_in_release_personas_local__",
-      "password": "__set_in_release_personas_local__"
+      "email": "__set_in_release_personas_local__"
     },
     "ship-by-sunday-clerk-entitled": {
       "softwareName": "Ship by Sunday",
       "provider": "clerk",
       "scope": "ship-by-sunday-clerk-entitled",
-      "authMode": "password",
+      "authMode": "email_code",
       "firstName": "Release",
       "lastName": "Entitled",
-      "email": "__set_in_release_personas_local__",
-      "password": "__set_in_release_personas_local__"
+      "email": "__set_in_release_personas_local__"
     }
   }
 }

@@ -14,7 +14,6 @@ export const CHECKOUT_SUCCESS_FIXTURE_SLUGS = [
 	"validated_arc",
 	"validated_redirect",
 	"wrong_account",
-	"checkout_email_handoff_required",
 	"sign_in_required",
 	"payment_pending",
 	"invalid_session",
@@ -92,15 +91,6 @@ const FIXTURE_BUILDERS: Record<
 		},
 		initialProductAccess: null,
 	}),
-	checkout_email_handoff_required: () => ({
-		fixtureSlug: "checkout_email_handoff_required",
-		checkoutSessionState: {
-			kind: "checkout_email_handoff_required",
-			sessionId: "fixture_checkout_email_handoff",
-			checkoutEmail: FIXTURE_BUYER_EMAIL,
-		},
-		initialProductAccess: null,
-	}),
 	payment_pending: () => ({
 		fixtureSlug: "payment_pending",
 		checkoutSessionState: {
@@ -150,4 +140,8 @@ export function getCheckoutSuccessFixture(input: {
 		return null;
 	}
 	return FIXTURE_BUILDERS[slug]();
+}
+
+export function hasCheckoutSuccessFixtureParam(input: { fixture?: string }) {
+	return input.fixture !== undefined;
 }

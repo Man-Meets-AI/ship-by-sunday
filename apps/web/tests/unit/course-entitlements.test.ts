@@ -283,7 +283,6 @@ describe("convex/access/model", () => {
 		await expect(
 			moduleUnderTest.resolveViewerFulfillmentTrackHandler(ctx as never, {
 				fulfillmentTrack: "existing_codebase_doctor",
-				checkoutCtaId: "choice_existing",
 			}),
 		).resolves.toEqual({
 			fulfillmentTrack: "existing_codebase_doctor",
@@ -292,8 +291,6 @@ describe("convex/access/model", () => {
 		expect(patch).toHaveBeenCalledWith(
 			"product_access_existing",
 			expect.objectContaining({
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "choice_existing",
 				fulfillmentTrack: "existing_codebase_doctor",
 				updatedAt: 450,
 			}),

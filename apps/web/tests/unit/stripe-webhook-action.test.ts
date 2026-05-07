@@ -83,7 +83,7 @@ describe("convex/stripeWebhook", () => {
 		expect(runMutation).not.toHaveBeenCalled();
 	});
 
-	it("fulfills access by checkout email when checkout metadata is incomplete but the buyer email exists", async () => {
+	it("fulfills access by checkout email when the buyer email exists", async () => {
 		constructEventMock.mockReturnValue({
 			id: "evt_pending_claim",
 			type: "checkout.session.completed",
@@ -91,7 +91,9 @@ describe("convex/stripeWebhook", () => {
 				object: {
 					id: "cs_test_123",
 					client_reference_id: null,
-					metadata: {},
+					metadata: {
+						courseSlug: "ship-by-sunday",
+					},
 					customer_details: {
 						email: "buyer@example.com",
 					},
@@ -137,6 +139,43 @@ describe("convex/stripeWebhook", () => {
 		expect(runMutation).not.toHaveBeenCalled();
 	});
 
+	it("ignores checkout sessions missing course metadata", async () => {
+		constructEventMock.mockReturnValue({
+			id: "evt_missing_course",
+			type: "checkout.session.completed",
+			data: {
+				object: {
+					id: "cs_test_123",
+					client_reference_id: null,
+					metadata: {},
+					customer_details: {
+						email: "buyer@example.com",
+					},
+					payment_status: "paid",
+				},
+			},
+		});
+		const runMutation = vi.fn();
+		const runAction = vi.fn();
+		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
+
+		const result = await processStripeWebhook._handler(
+			{ runMutation, runAction } as never,
+			{
+				body: "raw-webhook-body",
+				signature: "t=1,v1=signature",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "ignored",
+			eventId: "evt_missing_course",
+			eventType: "checkout.session.completed",
+		});
+		expect(runAction).not.toHaveBeenCalled();
+		expect(runMutation).not.toHaveBeenCalled();
+	});
+
 	it("returns missing_checkout_email when a guest checkout session has no recoverable buyer email", async () => {
 		constructEventMock.mockReturnValue({
 			id: "evt_missing_email",
@@ -145,7 +184,9 @@ describe("convex/stripeWebhook", () => {
 				object: {
 					id: "cs_test_123",
 					client_reference_id: null,
-					metadata: {},
+					metadata: {
+						courseSlug: "ship-by-sunday",
+					},
 				},
 			},
 		});
@@ -184,6 +225,7 @@ describe("convex/stripeWebhook", () => {
 						buyerStartingPoint: "existing_codebase",
 						checkoutCtaId: "codebase_demo_existing",
 						clerkUserId: "user_123",
+						courseSlug: "ship-by-sunday",
 						fulfillmentTrack: "existing_codebase_doctor",
 					},
 					customer: "cus_123",
@@ -241,6 +283,7 @@ describe("convex/stripeWebhook", () => {
 					client_reference_id: "user_123",
 					metadata: {
 						clerkUserId: "user_123",
+						courseSlug: "ship-by-sunday",
 					},
 				},
 			},
