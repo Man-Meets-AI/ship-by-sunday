@@ -443,6 +443,76 @@ describe("convex/checkoutClaimsActions", () => {
 		});
 	});
 
+	it("reuses the Clerk user when concurrent fulfillment creates it first", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_guest_create_race",
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			customer_details: {
+				email: "race@example.com",
+			},
+			payment_status: "paid",
+		});
+		const fetchMock = vi
+			.fn()
+			.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => [],
+			})
+			.mockResolvedValueOnce({
+				ok: false,
+				status: 422,
+				json: async () => ({
+					errors: [{ message: "That email address is taken." }],
+				}),
+			})
+			.mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json: async () => [
+					{
+						id: "user_created_elsewhere",
+						email_addresses: [{ email_address: "race@example.com" }],
+					},
+				],
+			});
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi
+			.fn()
+			.mockResolvedValueOnce({ saved: "inserted" })
+			.mockResolvedValueOnce({
+				repair: "repaired",
+				grantResult: { granted: "inserted" },
+			});
+		const { fulfillCheckoutSessionFromSuccessPage } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				fulfillmentToken: "checkout_retry_secret_123",
+				sessionId: "cs_guest_create_race",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "fulfilled",
+			sessionId: "cs_guest_create_race",
+			checkoutEmail: "race@example.com",
+			clerkUserId: "user_created_elsewhere",
+			clerkUserStatus: "exists",
+			grantResult: { granted: "inserted" },
+		});
+		expect(fetchMock).toHaveBeenCalledTimes(3);
+		expect(runMutation).toHaveBeenNthCalledWith(2, expect.anything(), {
+			stripeCheckoutSessionId: "cs_guest_create_race",
+			checkoutEmail: "race@example.com",
+			clerkUserId: "user_created_elsewhere",
+		});
+	});
+
 	it("refuses success-page fulfillment with an invalid server token", async () => {
 		retrieveSessionMock.mockResolvedValue({
 			id: "cs_guest_token",

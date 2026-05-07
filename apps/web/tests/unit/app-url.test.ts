@@ -76,6 +76,19 @@ describe("getAppBaseUrl", () => {
 		);
 	});
 
+	it("rejects local request origins when a deployed origin is configured", async () => {
+		const getAppBaseUrl = await getAppBaseUrlWithEnv({
+			APP_BASE_URL: "https://www.man-meets-ai.com/",
+			VERCEL_BRANCH_URL: "trusted-preview.vercel.app",
+			VERCEL_PROJECT_PRODUCTION_URL: "www.man-meets-ai.com",
+			VERCEL_URL: "deployment.vercel.app",
+		});
+
+		expect(getAppBaseUrl(new Request("http://localhost:3000/api/stripe"))).toBe(
+			"https://www.man-meets-ai.com",
+		);
+	});
+
 	it("uses the request origin before Vercel project URLs for route handlers", async () => {
 		const getAppBaseUrl = await getAppBaseUrlWithEnv({
 			APP_BASE_URL: "",

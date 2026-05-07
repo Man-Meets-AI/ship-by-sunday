@@ -215,6 +215,23 @@ type ClerkUserLookupResult =
 			message: string;
 	  };
 
+type ClerkUserSearchResult =
+	| {
+			status: "exists";
+			clerkUserId: string;
+	  }
+	| {
+			status: "missing";
+	  }
+	| {
+			status: "conflict";
+			matchingUserCount: number;
+	  }
+	| {
+			status: "lookup_failed";
+			message: string;
+	  };
+
 type ClerkEmailAddressPayload = {
 	email_address?: unknown;
 };
@@ -379,14 +396,13 @@ async function fetchClerkJson({
 	};
 }
 
-async function resolveCheckoutEmailClerkUser({
+async function findCheckoutEmailClerkUser({
 	checkoutEmail,
-	stripeCheckoutSessionId,
+	secretKey,
 }: {
 	checkoutEmail: string;
-	stripeCheckoutSessionId: string;
-}): Promise<ClerkUserLookupResult> {
-	const secretKey = requireConvexEnv("CLERK_SECRET_KEY");
+	secretKey: string;
+}): Promise<ClerkUserSearchResult> {
 	const lookup = await fetchClerkJson({
 		pathname: "/v1/users",
 		secretKey,
@@ -422,6 +438,28 @@ async function resolveCheckoutEmailClerkUser({
 		};
 	}
 
+	return {
+		status: "missing",
+	};
+}
+
+async function resolveCheckoutEmailClerkUser({
+	checkoutEmail,
+	stripeCheckoutSessionId,
+}: {
+	checkoutEmail: string;
+	stripeCheckoutSessionId: string;
+}): Promise<ClerkUserLookupResult> {
+	const secretKey = requireConvexEnv("CLERK_SECRET_KEY");
+	const existingUser = await findCheckoutEmailClerkUser({
+		checkoutEmail,
+		secretKey,
+	});
+
+	if (existingUser.status !== "missing") {
+		return existingUser;
+	}
+
 	const created = await fetchClerkJson({
 		pathname: "/v1/users",
 		secretKey,
@@ -446,6 +484,14 @@ async function resolveCheckoutEmailClerkUser({
 	});
 
 	if (!created.ok) {
+		const retryLookup = await findCheckoutEmailClerkUser({
+			checkoutEmail,
+			secretKey,
+		});
+		if (retryLookup.status === "exists" || retryLookup.status === "conflict") {
+			return retryLookup;
+		}
+
 		return {
 			status: "create_failed",
 			message: getMessageFromClerkPayload(
