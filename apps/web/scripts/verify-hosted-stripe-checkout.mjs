@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 
+import { clerk, clerkSetup } from "@clerk/testing/playwright";
 import { chromium } from "@playwright/test";
 import Stripe from "stripe";
 
@@ -83,15 +84,14 @@ async function loadQaBuyerCredentials() {
 	const parsed = JSON.parse(raw);
 	const account = parsed.accounts?.["ship-by-sunday-clerk-instance"];
 
-	if (!account?.email || !account?.password) {
+	if (!account?.email) {
 		throw new Error(
-			"Missing ship-by-sunday-clerk-instance credentials in tmp/release-personas.local.json or RELEASE_PERSONAS_LOCAL_FILE.",
+			"Missing ship-by-sunday-clerk-instance email in tmp/release-personas.local.json or RELEASE_PERSONAS_LOCAL_FILE.",
 		);
 	}
 
 	return {
 		email: account.email,
-		password: account.password,
 	};
 }
 
@@ -267,23 +267,19 @@ async function submitHostedCheckout(page) {
 	await submitButton.click();
 }
 
-async function signInBuyer(page, { baseUrl, email, password }) {
-	await page.goto(
-		`${baseUrl}${buildHostedProofSignInPath({ redirectPath: "/" })}`,
-		{
-			waitUntil: "networkidle",
-		},
-	);
-	await page.waitForFunction(
-		() => {
-			const runtimeWindow = window;
-			return runtimeWindow.Clerk?.loaded === true;
-		},
-		{ timeout: 15_000 },
-	);
-	await page.getByLabel(/^email$/i).fill(email);
-	await page.getByLabel(/^password$/i).fill(password);
-	await page.getByRole("button", { name: /^sign in$/i }).click();
+async function signInBuyer(page, { baseUrl, email }) {
+	const signInUrl = `${baseUrl}${buildHostedProofSignInPath({
+		redirectPath: "/",
+	})}`;
+	await assertPasswordlessOtpCanSend(page, { email, signInUrl });
+	await page.goto(signInUrl, {
+		waitUntil: "networkidle",
+	});
+	await waitForClerkLoaded(page);
+	await clerk.signIn({ page, emailAddress: email });
+	await page.goto(`${baseUrl}/`, {
+		waitUntil: "networkidle",
+	});
 	await page.waitForURL((url) => url.pathname === "/", {
 		timeout: 20_000,
 	});
@@ -295,6 +291,36 @@ async function signInBuyer(page, { baseUrl, email, password }) {
 	);
 
 	return await page.evaluate(() => window.Clerk?.user?.id ?? null);
+}
+
+async function waitForClerkLoaded(page) {
+	await page.waitForFunction(
+		() => {
+			const runtimeWindow = window;
+			return runtimeWindow.Clerk?.loaded === true;
+		},
+		{ timeout: 15_000 },
+	);
+}
+
+async function assertPasswordlessOtpCanSend(page, { email, signInUrl }) {
+	await page.goto(signInUrl, {
+		waitUntil: "networkidle",
+	});
+	await waitForClerkLoaded(page);
+
+	const passwordFieldCount = await page.getByLabel(/^password$/i).count();
+	if (passwordFieldCount > 0) {
+		throw new Error(
+			`Hosted passwordless proof found ${passwordFieldCount} password field(s) on ${signInUrl} for ${email}.`,
+		);
+	}
+
+	await page.getByLabel(/^email$/i).fill(email);
+	await page.getByRole("button", { name: /^send email code$/i }).click();
+	await page
+		.getByLabel(/^email code$/i)
+		.waitFor({ state: "visible", timeout: 20_000 });
 }
 
 async function createAppCheckoutSession(page) {
@@ -536,6 +562,7 @@ if (!stripePriceId) {
 }
 
 const buyerCredentials = await loadQaBuyerCredentials();
+await clerkSetup({ dotenv: false });
 const stripe = new Stripe(stripeSecretKey, {
 	apiVersion: "2026-02-25.clover",
 });
@@ -557,7 +584,6 @@ try {
 	const clerkUserId = await signInBuyer(page, {
 		baseUrl,
 		email: buyerCredentials.email,
-		password: buyerCredentials.password,
 	});
 	console.log(`Signed in QA buyer ${buyerCredentials.email}`);
 	console.log(`Authenticated Clerk user ${clerkUserId ?? "missing"}`);

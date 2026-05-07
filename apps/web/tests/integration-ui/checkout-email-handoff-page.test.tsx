@@ -39,7 +39,6 @@ function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 				signIn.status = "complete";
 				return {
 					error: null,
-					status: "complete",
 				};
 			}),
 		},
@@ -52,6 +51,14 @@ function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 		}),
 		isTransferable: false,
 		status: "needs_first_factor",
+		supportedFirstFactors: [
+			{
+				emailAddressId: "idn_checkout_email",
+				primary: true,
+				safeIdentifier: "buyer@example.com",
+				strategy: "email_code",
+			},
+		],
 		...overrides,
 	};
 
@@ -110,7 +117,7 @@ describe("CheckoutEmailHandoffPage", () => {
 		expect(screen.queryByText("Forgot your password?")).toBeNull();
 	});
 
-	it("starts a Clerk email-code sign-in attempt for the checkout email", async () => {
+	it("starts a Clerk email-code sign-in attempt for the returned checkout email factor", async () => {
 		const signInState = createSignInState();
 		useSignInMock.mockReturnValue(signInState);
 		const user = userEvent.setup();
@@ -128,7 +135,7 @@ describe("CheckoutEmailHandoffPage", () => {
 			identifier: "buyer@example.com",
 		});
 		expect(signInState.signIn.emailCode.sendCode).toHaveBeenCalledWith({
-			emailAddress: "buyer@example.com",
+			emailAddressId: "idn_checkout_email",
 		});
 		expect(screen.getByLabelText("Email code")).toBeTruthy();
 		expect(
@@ -165,6 +172,49 @@ describe("CheckoutEmailHandoffPage", () => {
 		});
 	});
 
+	it("fails closed when Clerk requires another factor after checkout email verification", async () => {
+		const signInState = createSignInState({
+			emailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockImplementation(async () => {
+					signInState.signIn.status = "needs_second_factor";
+					return {
+						error: null,
+					};
+				}),
+			},
+			finalize: vi.fn().mockResolvedValue({
+				error: new Error("needs_second_factor"),
+			}),
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(
+			<CheckoutEmailHandoffPage
+				checkoutEmail="buyer@example.com"
+				redirectPath="/checkout/success?session_id=cs_test_123"
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(signInState.signIn.finalize).toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(reportClientErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: "clerk_checkout_email_handoff_unsupported_state",
+				details: expect.objectContaining({
+					status: "needs_second_factor",
+				}),
+			}),
+		);
+	});
+
 	it("does not fall back to transfer sign-in or password setup when Clerk reports a transferable state", async () => {
 		const signInState = createSignInState({
 			isTransferable: true,
@@ -186,6 +236,39 @@ describe("CheckoutEmailHandoffPage", () => {
 		expect(reportClientErrorMock).toHaveBeenCalledWith(
 			expect.objectContaining({
 				code: "clerk_checkout_email_handoff_unsupported_state",
+			}),
+		);
+		expect(pushMock).not.toHaveBeenCalled();
+	});
+
+	it("does not call Clerk email-code sending when the sign-in has no email-code factor", async () => {
+		const signInState = createSignInState({
+			supportedFirstFactors: [
+				{
+					strategy: "password",
+				},
+			],
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(
+			<CheckoutEmailHandoffPage
+				checkoutEmail="buyer@example.com"
+				redirectPath="/checkout/success?session_id=cs_test_123"
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(screen.getByText(/checkout_email_code_factor_missing/)).toBeTruthy();
+		expect(reportClientErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: "clerk_checkout_email_handoff_email_code_factor_missing",
+				details: expect.objectContaining({
+					supportedFirstFactors: ["password"],
+				}),
 			}),
 		);
 		expect(pushMock).not.toHaveBeenCalled();

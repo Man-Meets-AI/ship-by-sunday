@@ -77,9 +77,10 @@ PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.productio
 
 That command assumes:
 
-- `tmp/release-personas.local.json` contains the real release proof account emails and passwords, unless `RELEASE_PERSONAS_LOCAL_FILE` points somewhere else
+- `tmp/release-personas.local.json` contains the real release proof account emails, unless `RELEASE_PERSONAS_LOCAL_FILE` points somewhere else
 - the file referenced by `QA_ENV_FILE` contains the production Clerk and Convex env values
 - the production Clerk instance matches the target site
+- the production Clerk instance allows the release proof accounts to receive an email-code challenge; the browser proof sends the code before using Clerk testing sign-in tokens for deterministic storage state
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` can read production deployment metadata so the workflow can wait for the exact release commit before running Playwright
 - `QA_ENV_FILE=apps/web/.env.production` is resolved from the repository root in CI, not from `apps/web/`
 - the production proof bootstrap can derive `CONVEX_DEPLOYMENT` from `NEXT_PUBLIC_CONVEX_URL`, so the env file does not need a separate production deployment name

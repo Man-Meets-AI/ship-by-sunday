@@ -6,6 +6,11 @@ import { useState } from "react";
 
 import { routeConfig } from "@/config/product";
 import { reportClientError } from "@/lib/observability/client-error-report";
+import {
+	getEmailCodeFirstFactor,
+	getSupportedFirstFactorStrategies,
+	type ClerkSignInWithFirstFactors,
+} from "@/app/(identity)/_lib/email-code-sign-in-factor";
 import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
 
 type CheckoutEmailHandoffStep = "send" | "verify";
@@ -24,6 +29,11 @@ type ClerkCompletionCandidate = {
 		}) => Promise<void>;
 	}) => Promise<unknown>;
 	status?: string | null;
+	supportedFirstFactors?: ClerkSignInWithFirstFactors["supportedFirstFactors"];
+};
+
+type ClerkFutureMutationResult = {
+	error?: unknown;
 };
 
 function getRenderableErrors(
@@ -118,6 +128,27 @@ export function useCheckoutEmailHandoffFlow({
 		});
 	}
 
+	function handleMissingEmailCodeFactor(
+		candidate?: ClerkSignInWithFirstFactors | null,
+	) {
+		const supportedFirstFactors = getSupportedFirstFactorStrategies(
+			candidate?.supportedFirstFactors?.length ? candidate : signIn,
+		);
+		const message =
+			"Clerk did not return an email-code sign-in method for this paid checkout account. Contact support and mention checkout_email_code_factor_missing.";
+		setLocalError(message);
+		reportClientError({
+			error: new Error("Missing Clerk email-code first factor."),
+			pathname: routeConfig.checkoutEmailHandoff,
+			code: "clerk_checkout_email_handoff_email_code_factor_missing",
+			severity: "high",
+			details: {
+				redirectPath: safeRedirectPath,
+				supportedFirstFactors,
+			},
+		});
+	}
+
 	async function navigateAfterAuth({
 		decorateUrl,
 		session,
@@ -161,14 +192,17 @@ export function useCheckoutEmailHandoffFlow({
 
 		const finalize = getFinalizeFunction(candidate);
 		const completionStatus = getCompletionStatus(candidate);
-		if (!finalize || completionStatus !== "complete") {
+		if (!finalize) {
 			handleUnsupportedState(completionStatus);
 			return;
 		}
 
-		await finalize({
+		const finalizeResponse = (await finalize({
 			navigate: navigateAfterAuth,
-		});
+		})) as ClerkFutureMutationResult;
+		if (finalizeResponse?.error) {
+			handleUnsupportedState(completionStatus);
+		}
 	}
 
 	async function startEmailCode() {
@@ -180,9 +214,9 @@ export function useCheckoutEmailHandoffFlow({
 		setIsSubmitting(true);
 
 		try {
-			const createResponse = (await signIn.create({
+			const createResponse = await signIn.create({
 				identifier: lockedEmailAddress,
-			})) as ClerkCompletionCandidate;
+			});
 			if (createResponse.error) {
 				return;
 			}
@@ -192,13 +226,22 @@ export function useCheckoutEmailHandoffFlow({
 				return;
 			}
 
-			if (getCompletionStatus(createResponse) === "complete") {
-				await finalizeSignIn(createResponse);
+			if (getCompletionStatus(signIn) === "complete") {
+				await finalizeSignIn(signIn);
+				return;
+			}
+
+			const emailCodeFactor = getEmailCodeFirstFactor(
+				signIn,
+				lockedEmailAddress,
+			);
+			if (!emailCodeFactor) {
+				handleMissingEmailCodeFactor(signIn);
 				return;
 			}
 
 			const sendCodeResponse = await signIn.emailCode.sendCode({
-				emailAddress: lockedEmailAddress,
+				emailAddressId: emailCodeFactor.emailAddressId,
 			});
 			if (sendCodeResponse.error) {
 				return;
@@ -220,19 +263,14 @@ export function useCheckoutEmailHandoffFlow({
 		setIsSubmitting(true);
 
 		try {
-			const response = (await signIn.emailCode.verifyCode({
+			const response = await signIn.emailCode.verifyCode({
 				code: verificationCode,
-			})) as ClerkCompletionCandidate;
+			});
 			if (response.error) {
 				return;
 			}
 
-			if (getCompletionStatus(response) !== "complete") {
-				handleUnsupportedState(getCompletionStatus(response));
-				return;
-			}
-
-			await finalizeSignIn(response);
+			await finalizeSignIn(signIn);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -247,8 +285,17 @@ export function useCheckoutEmailHandoffFlow({
 		setIsSubmitting(true);
 
 		try {
+			const emailCodeFactor = getEmailCodeFirstFactor(
+				signIn,
+				lockedEmailAddress,
+			);
+			if (!emailCodeFactor) {
+				handleMissingEmailCodeFactor();
+				return;
+			}
+
 			const response = await signIn.emailCode.sendCode({
-				emailAddress: lockedEmailAddress,
+				emailAddressId: emailCodeFactor.emailAddressId,
 			});
 			if (!response.error) {
 				setVerificationCode("");

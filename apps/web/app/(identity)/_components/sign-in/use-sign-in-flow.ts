@@ -2,88 +2,51 @@
 
 import { useClerk, useSignIn } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useState } from "react";
 
+import {
+	getEmailCodeFirstFactor,
+	getSupportedFirstFactorStrategies,
+	type ClerkSignInWithFirstFactors,
+} from "@/app/(identity)/_lib/email-code-sign-in-factor";
 import { authViewConfig, routeConfig } from "@/config/product";
-import { assertNever } from "@/lib/assert";
 import { reportClientError } from "@/lib/observability/client-error-report";
-
 import {
 	buildSignInHref,
 	getSessionTaskHref,
 	getSafeRedirectPath,
 } from "@/platform/auth/auth-route-utils";
-import type {
-	SignInStep,
-	VerificationMethod,
-	VerificationStatus,
-} from "@/app/(identity)/_components/sign-in/sign-in-flow-types";
 
-function isVerificationStatus(
-	value: string | null | undefined,
-): value is VerificationStatus {
-	return value === "needs_client_trust" || value === "needs_second_factor";
-}
+type RenderableError = {
+	message?: string;
+};
 
-function isCodeVerificationMethod(
-	value: VerificationMethod | null,
-): value is "email_code" | "phone_code" {
-	return value === "email_code" || value === "phone_code";
-}
+type SignInCompletionCandidate = {
+	createdSessionId?: string | null;
+	error?: unknown;
+	finalize?: (args: {
+		navigate: (params: {
+			decorateUrl: (url: string) => string;
+			session?: { currentTask?: { key: string } | null } | null;
+		}) => Promise<void>;
+	}) => Promise<unknown>;
+	status?: string | null;
+	supportedFirstFactors?: ClerkSignInWithFirstFactors["supportedFirstFactors"];
+};
 
-function getAvailableVerificationMethods(
-	methods: Array<{ strategy: string }> | undefined,
-): VerificationMethod[] {
-	if (!methods?.length) {
-		return [];
-	}
-
-	return methods
-		.map((method) => method.strategy)
-		.filter(
-			(strategy): strategy is VerificationMethod =>
-				strategy === "email_code" ||
-				strategy === "phone_code" ||
-				strategy === "totp" ||
-				strategy === "backup_code",
-		);
-}
-
-function getDefaultVerificationMethod(
-	methods: VerificationMethod[],
-): VerificationMethod | null {
-	if (!methods.length) {
-		return null;
-	}
-
-	if (methods.includes("email_code")) {
-		return "email_code";
-	}
-
-	if (methods.includes("phone_code")) {
-		return "phone_code";
-	}
-
-	if (methods.includes("totp")) {
-		return "totp";
-	}
-
-	if (methods.includes("backup_code")) {
-		return "backup_code";
-	}
-
-	return null;
-}
+type ClerkFutureMutationResult = {
+	error?: unknown;
+};
 
 function getRenderableErrors(
 	errors: Array<unknown> | null,
-): Array<{ message?: string }> | null {
+): RenderableError[] | null {
 	if (!errors?.length) {
 		return null;
 	}
 
 	return errors.filter(
-		(error): error is { message?: string } =>
+		(error): error is RenderableError =>
 			typeof error === "object" && error !== null,
 	);
 }
@@ -100,105 +63,23 @@ async function navigateWithRouter(
 	router.push(url);
 }
 
-type ResetStep =
-	| Extract<
-			SignInStep,
-			{ kind: "reset_request" | "reset_verify" | "reset_submit" }
-	  >["kind"]
-	| null;
-
 export function useSignInFlow() {
 	const clerk = useClerk();
 	const { errors, fetchStatus, signIn } = useSignIn();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [emailAddress, setEmailAddress] = useState("");
-	const [newPassword, setNewPassword] = useState("");
-	const [password, setPassword] = useState("");
-	const [resetStep, setResetStep] = useState<ResetStep>(null);
-	const [selectedVerificationMethod, setSelectedVerificationMethod] =
-		useState<VerificationMethod | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [localError, setLocalError] = useState<string | null>(null);
+	const [step, setStep] = useState<"email" | "email_code">("email");
 	const [verificationCode, setVerificationCode] = useState("");
-	const sentVerificationMethodRef = useRef<VerificationMethod | null>(null);
-
-	type SignInCompletionCandidate = {
-		status?: string | null;
-		finalize?: typeof signIn.finalize;
-		createdSessionId?: string | null;
-		error?: unknown;
-	};
 
 	const redirectPath = getSafeRedirectPath(searchParams.get("redirect_url"));
-	const availableVerificationMethods = useMemo(
-		() => getAvailableVerificationMethods(signIn?.supportedSecondFactors),
-		[signIn?.supportedSecondFactors],
-	);
-	const activeVerificationMethod =
-		selectedVerificationMethod &&
-		availableVerificationMethods.includes(selectedVerificationMethod)
-			? selectedVerificationMethod
-			: getDefaultVerificationMethod(availableVerificationMethods);
-	const step: SignInStep = useMemo(() => {
-		if (resetStep) {
-			return { kind: resetStep };
-		}
-
-		if (signIn?.status === "needs_new_password") {
-			return { kind: "reset_submit" };
-		}
-
-		if (
-			signIn &&
-			isVerificationStatus(signIn.status) &&
-			activeVerificationMethod
-		) {
-			return {
-				kind: "verification",
-				method: activeVerificationMethod,
-				status: signIn.status,
-			};
-		}
-
-		return { kind: "credentials" };
-	}, [activeVerificationMethod, resetStep, signIn]);
-
-	const isBusy = fetchStatus === "fetching";
-
-	useEffect(() => {
-		if (
-			!signIn ||
-			!isVerificationStatus(signIn.status) ||
-			!activeVerificationMethod
-		) {
-			sentVerificationMethodRef.current = null;
-			return;
-		}
-
-		if (!isCodeVerificationMethod(activeVerificationMethod)) {
-			return;
-		}
-
-		if (sentVerificationMethodRef.current === activeVerificationMethod) {
-			return;
-		}
-
-		sentVerificationMethodRef.current = activeVerificationMethod;
-
-		void (async () => {
-			const response =
-				activeVerificationMethod === "email_code"
-					? await signIn.mfa.sendEmailCode()
-					: await signIn.mfa.sendPhoneCode();
-
-			if (response.error) {
-				sentVerificationMethodRef.current = null;
-			}
-		})();
-	}, [activeVerificationMethod, signIn]);
-
-	useEffect(() => {
-		setVerificationCode("");
-	}, [activeVerificationMethod, step.kind]);
+	const clerkGlobalErrors = getRenderableErrors(errors.global ?? errors.raw);
+	const globalErrors = localError
+		? [{ message: localError }]
+		: clerkGlobalErrors;
+	const isBusy = fetchStatus === "fetching" || isSubmitting;
 
 	function getCompletionStatus(
 		candidate: SignInCompletionCandidate | null | undefined,
@@ -228,6 +109,43 @@ export function useSignInFlow() {
 					?.id) ??
 			null
 		);
+	}
+
+	function reportUnsupportedState(status: string | null) {
+		const message =
+			"Clerk needs another account step before this email can sign in. Use a fresh code, or contact support if it repeats.";
+		setLocalError(message);
+		reportClientError({
+			error: new Error("Unsupported Clerk passwordless sign-in state."),
+			pathname: routeConfig.signIn,
+			code: "clerk_passwordless_sign_in_unsupported_state",
+			severity: "high",
+			details: {
+				redirectPath,
+				status,
+			},
+		});
+	}
+
+	function reportMissingEmailCodeFactor(
+		candidate?: ClerkSignInWithFirstFactors | null,
+	) {
+		const supportedFirstFactors = getSupportedFirstFactorStrategies(
+			candidate?.supportedFirstFactors?.length ? candidate : signIn,
+		);
+		const message =
+			"Clerk did not return an email-code sign-in method for this account. Contact support and mention passwordless_email_code_factor_missing.";
+		setLocalError(message);
+		reportClientError({
+			error: new Error("Missing Clerk email-code first factor."),
+			pathname: routeConfig.signIn,
+			code: "clerk_passwordless_sign_in_email_code_factor_missing",
+			severity: "high",
+			details: {
+				redirectPath,
+				supportedFirstFactors,
+			},
+		});
 	}
 
 	async function navigateAfterAuth({
@@ -271,10 +189,7 @@ export function useSignInFlow() {
 	async function finalizeSignIn(
 		candidate: SignInCompletionCandidate | null | undefined = signIn,
 	) {
-		const completionStatus = getCompletionStatus(candidate);
-		const finalize = getFinalizeFunction(candidate);
 		const createdSessionId = getCreatedSessionId(candidate);
-
 		if (createdSessionId) {
 			await clerk.setActive({
 				session: createdSessionId,
@@ -283,13 +198,19 @@ export function useSignInFlow() {
 			return;
 		}
 
-		if (!finalize || completionStatus !== "complete") {
+		const finalize = getFinalizeFunction(candidate);
+		const completionStatus = getCompletionStatus(candidate);
+		if (!finalize) {
+			reportUnsupportedState(completionStatus);
 			return;
 		}
 
-		await finalize({
+		const finalizeResponse = (await finalize({
 			navigate: navigateAfterAuth,
-		});
+		})) as ClerkFutureMutationResult;
+		if (finalizeResponse?.error) {
+			reportUnsupportedState(completionStatus);
+		}
 	}
 
 	async function startOver() {
@@ -297,205 +218,123 @@ export function useSignInFlow() {
 			await signIn.reset();
 		}
 
-		setNewPassword("");
-		setPassword("");
-		setResetStep(null);
-		setSelectedVerificationMethod(null);
+		setLocalError(null);
+		setStep("email");
 		setVerificationCode("");
-		sentVerificationMethodRef.current = null;
 
 		startTransition(() => {
 			router.replace(buildSignInHref({ redirectPath }));
 		});
 	}
 
-	async function submitPassword() {
+	async function startEmailCode() {
 		if (!signIn) {
 			return;
 		}
 
-		setResetStep(null);
+		setLocalError(null);
+		setIsSubmitting(true);
 
-		const response = await signIn.password({
-			identifier: emailAddress,
-			password,
-		});
-
-		if (process.env.NODE_ENV === "development") {
-			console.info("submitPassword response", {
-				keys: Object.keys(response),
-				createdSessionId:
-					"createdSessionId" in response ? response.createdSessionId : null,
-				error: response.error,
-				responseStatus: "status" in response ? response.status : null,
-				signInStatus: signIn.status,
+		try {
+			const createResponse = await signIn.create({
+				identifier: emailAddress,
 			});
-		}
+			if (createResponse.error) {
+				return;
+			}
 
-		if (response.error) {
-			return;
-		}
+			if (signIn.isTransferable) {
+				reportUnsupportedState("transferable");
+				return;
+			}
 
-		setPassword("");
-		await finalizeSignIn(response);
-	}
+			if (getCompletionStatus(signIn) === "complete") {
+				await finalizeSignIn(signIn);
+				return;
+			}
 
-	async function startPasswordReset() {
-		if (signIn) {
-			await signIn.reset();
-		}
+			const emailCodeFactor = getEmailCodeFirstFactor(signIn, emailAddress);
+			if (!emailCodeFactor) {
+				reportMissingEmailCodeFactor(signIn);
+				return;
+			}
 
-		setPassword("");
-		setResetStep("reset_request");
-		setSelectedVerificationMethod(null);
-		setVerificationCode("");
-		sentVerificationMethodRef.current = null;
-	}
+			const sendCodeResponse = await signIn.emailCode.sendCode({
+				emailAddressId: emailCodeFactor.emailAddressId,
+			});
+			if (sendCodeResponse.error) {
+				return;
+			}
 
-	async function submitPasswordResetRequest() {
-		if (!signIn) {
-			return;
-		}
-
-		await signIn.reset();
-
-		const createResponse = await signIn.create({
-			identifier: emailAddress,
-		});
-
-		if (createResponse.error) {
-			return;
-		}
-
-		const sendCodeResponse = await signIn.resetPasswordEmailCode.sendCode();
-
-		if (sendCodeResponse.error) {
-			return;
-		}
-
-		setResetStep("reset_verify");
-		setVerificationCode("");
-	}
-
-	async function submitResetCode() {
-		if (!signIn) {
-			return;
-		}
-
-		const response = await signIn.resetPasswordEmailCode.verifyCode({
-			code: verificationCode,
-		});
-
-		if (response.error) {
-			return;
-		}
-
-		if (signIn.status === "needs_new_password") {
-			setResetStep("reset_submit");
 			setVerificationCode("");
+			setStep("email_code");
+		} finally {
+			setIsSubmitting(false);
 		}
 	}
 
-	async function submitNewPassword() {
+	async function submitEmailCode() {
 		if (!signIn) {
 			return;
 		}
 
-		const response = await signIn.resetPasswordEmailCode.submitPassword({
-			password: newPassword,
-		});
+		setLocalError(null);
+		setIsSubmitting(true);
 
-		if (response.error) {
-			return;
+		try {
+			const response = await signIn.emailCode.verifyCode({
+				code: verificationCode,
+			});
+			if (response.error) {
+				return;
+			}
+
+			await finalizeSignIn(signIn);
+		} finally {
+			setIsSubmitting(false);
 		}
-
-		setNewPassword("");
-		await finalizeSignIn(response);
 	}
 
-	async function submitVerification() {
-		if (!signIn || !activeVerificationMethod) {
+	async function resendEmailCode() {
+		if (!signIn) {
 			return;
 		}
 
-		let response: Awaited<ReturnType<typeof signIn.mfa.verifyBackupCode>>;
+		setLocalError(null);
+		setIsSubmitting(true);
 
-		switch (activeVerificationMethod) {
-			case "backup_code":
-				response = await signIn.mfa.verifyBackupCode({
-					code: verificationCode,
-				});
-				break;
-			case "email_code":
-				response = await signIn.mfa.verifyEmailCode({ code: verificationCode });
-				break;
-			case "phone_code":
-				response = await signIn.mfa.verifyPhoneCode({ code: verificationCode });
-				break;
-			case "totp":
-				response = await signIn.mfa.verifyTOTP({ code: verificationCode });
-				break;
-			default:
-				assertNever(
-					activeVerificationMethod,
-					"Unsupported verification method",
-				);
+		try {
+			const emailCodeFactor = getEmailCodeFirstFactor(signIn, emailAddress);
+			if (!emailCodeFactor) {
+				reportMissingEmailCodeFactor();
+				return;
+			}
+
+			const response = await signIn.emailCode.sendCode({
+				emailAddressId: emailCodeFactor.emailAddressId,
+			});
+			if (!response.error) {
+				setVerificationCode("");
+			}
+		} finally {
+			setIsSubmitting(false);
 		}
-
-		if (response.error) {
-			return;
-		}
-
-		await finalizeSignIn(response);
-	}
-
-	async function resendVerificationCode() {
-		if (!signIn || !isCodeVerificationMethod(activeVerificationMethod)) {
-			return;
-		}
-
-		sentVerificationMethodRef.current = activeVerificationMethod;
-
-		if (activeVerificationMethod === "email_code") {
-			await signIn.mfa.sendEmailCode();
-			return;
-		}
-
-		await signIn.mfa.sendPhoneCode();
-	}
-
-	function selectVerificationMethod(method: VerificationMethod) {
-		setSelectedVerificationMethod(method);
-		setVerificationCode("");
-		sentVerificationMethodRef.current = null;
 	}
 
 	return {
-		availableVerificationMethods,
 		emailAddress,
 		emailError: errors.fields.identifier,
-		globalErrors: getRenderableErrors(errors.global),
+		globalErrors,
 		isBusy,
 		isLoaded: Boolean(signIn),
-		newPassword,
-		password,
-		passwordError: errors.fields.password,
-		step,
+		resendEmailCode,
+		setEmailAddress,
+		setVerificationCode,
+		startEmailCode,
+		startOver,
+		step: { kind: step },
+		submitEmailCode,
 		verificationCode,
 		verificationError: errors.fields.code,
-		activeVerificationMethod,
-		setEmailAddress,
-		setNewPassword,
-		setPassword,
-		setVerificationCode,
-		resendVerificationCode,
-		selectVerificationMethod,
-		startOver,
-		startPasswordReset,
-		submitNewPassword,
-		submitPassword,
-		submitPasswordResetRequest,
-		submitResetCode,
-		submitVerification,
 	};
 }
