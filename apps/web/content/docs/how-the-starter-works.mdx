@@ -36,7 +36,7 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected product surface on `/codebase`, legacy redirect surfaces at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/review`, optional `/execute` after review unlock, and `/settings`
+- protected workspace-choice surface on `/workspace/choose`, generated-codebase surface on `/codebase`, legacy redirect surfaces at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/review`, optional `/execute` after review unlock, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
@@ -44,11 +44,10 @@ That split matters because checkout and access recovery live between those world
 
 The auth bridge between public and protected surfaces uses three route-group screens:
 
-- `/sign-in` for the branded sign-in UI
-- `/checkout/email-handoff` for the paid checkout email-code handoff
+- `/sign-in` for the branded passwordless sign-in UI
 - `/session-tasks/reset-password` for the Clerk reset-password task inside the same shell
 
-`/sign-up` is not a visible auth product surface in this repo. It redirects to pricing, except legacy checkout session links forward to `/checkout/email-handoff`.
+`/sign-up` is not a visible auth product surface in this repo. It redirects to pricing, except legacy checkout session links forward back to `/checkout/success`.
 
 ## Starter config and module gating
 
@@ -64,7 +63,7 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- the canonical protected flow now uses `/codebase` as the first landing surface and `/review` as the final handoff; `/start` and the stage-entry routes stay as compatibility redirects
+- the canonical new-buyer flow now uses `/workspace/choose` as the first paid landing surface and `/review` as the generated-codebase final handoff; `/start` and the stage-entry routes stay as compatibility redirects
 - `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/review`
 - the legacy private starter repository invite module has been removed from the customer-visible protected app
 
@@ -86,9 +85,9 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
 6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
-7. `/checkout/success` becomes the canonical post-payment handoff. If the buyer is not signed in yet, it sends them through `/checkout/email-handoff` to prove the Stripe checkout email with Clerk email OTP.
-8. Once Clerk verifies that checkout email, the buyer returns to `/checkout/success` as the user that owns the granted access.
-9. `/codebase` and the other codebase workspace routes use the same access state and can route signed-out pending-checkout recovery back to the checkout email handoff when the browser still holds the pending checkout session cookie.
+7. `/checkout/success` retries the same idempotent fulfillment if the webhook is delayed. For a signed-out buyer, it then sends them to `/sign-in?redirect_url=/workspace/choose?welcome=checkout`.
+8. `/sign-in` uses Clerk email-code OTP. When the redirect is the immediate checkout welcome path, it validates the pending Stripe session cookie server-side and locks the email field to the Stripe checkout email.
+9. Once Clerk verifies the email, the buyer lands on `/workspace/choose?welcome=checkout`, sees a one-time access-active banner, and chooses Generate a codebase, Set up an existing codebase, or Tutorial Videos.
 10. `/review` is the final handoff surface. It makes one auto-download attempt for the Ship by Sunday Codebase, then leaves the fallback download link visible if the browser blocks the download.
 11. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
 12. Returning users with granted access who hit `/` are resumed into the first incomplete codebase-first stage unless they explicitly force marketing mode.

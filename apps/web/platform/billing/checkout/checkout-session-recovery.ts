@@ -42,6 +42,44 @@ export type CheckoutSessionClaimResult =
 			claimResult: unknown;
 	  };
 
+export type CheckoutSessionFulfillmentResult =
+	| {
+			kind: "fulfilled";
+			sessionId: string;
+			checkoutEmail: string;
+			clerkUserId: string;
+			clerkUserStatus: "exists" | "created";
+			grantResult: {
+				granted: "inserted" | "patched";
+			};
+	  }
+	| {
+			kind: "invalid_session";
+			sessionId: string;
+	  }
+	| {
+			kind: "payment_pending";
+			sessionId: string;
+			paymentStatus: Stripe.Checkout.Session.PaymentStatus;
+	  }
+	| {
+			kind: "missing_checkout_email";
+			sessionId: string;
+	  }
+	| {
+			kind: "clerk_lookup_failed" | "clerk_create_failed" | "grant_failed";
+			sessionId: string;
+			checkoutEmail: string;
+			message: string;
+			clerkUserId?: string;
+	  }
+	| {
+			kind: "clerk_user_conflict";
+			sessionId: string;
+			checkoutEmail: string;
+			matchingUserCount: number;
+	  };
+
 export type CheckoutEmailClaimResult =
 	| {
 			kind: "sign_in_required";
@@ -112,6 +150,28 @@ export async function getPendingCheckoutSessionIdFromCookie() {
 	return cookieStore.get(PENDING_CHECKOUT_SESSION_COOKIE_NAME)?.value ?? null;
 }
 
+export async function getValidatedPendingCheckoutEmailFromCookie() {
+	const pendingCheckoutSessionId =
+		await getPendingCheckoutSessionIdFromCookie();
+	if (!pendingCheckoutSessionId) {
+		return null;
+	}
+
+	const session = await getCheckoutSessionForRecovery(pendingCheckoutSessionId);
+	if (!session) {
+		return null;
+	}
+
+	if (
+		!isStripeCheckoutSessionForCourse(session) ||
+		!isStripeCheckoutSessionPaid(session)
+	) {
+		return null;
+	}
+
+	return getStripeCheckoutSessionEmail(session);
+}
+
 export async function claimCheckoutSessionForViewer(
 	sessionId: string,
 ): Promise<CheckoutSessionClaimResult> {
@@ -130,6 +190,15 @@ export async function claimCheckoutSessionForViewer(
 	)) as CheckoutSessionClaimResult;
 
 	return result;
+}
+
+export async function fulfillCheckoutSessionFromSuccessPage(
+	sessionId: string,
+): Promise<CheckoutSessionFulfillmentResult> {
+	return (await fetchAction(
+		api.checkoutClaimsActions.fulfillCheckoutSessionFromSuccessPage,
+		{ sessionId },
+	)) as CheckoutSessionFulfillmentResult;
 }
 
 export async function claimLatestPendingCheckoutForViewer(): Promise<CheckoutEmailClaimResult> {

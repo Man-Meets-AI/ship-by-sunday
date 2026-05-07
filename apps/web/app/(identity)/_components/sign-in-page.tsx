@@ -6,8 +6,14 @@ import { useSignInFlow } from "@/app/(identity)/_components/sign-in/use-sign-in-
 
 import { AuthPageShell } from "./auth-page-shell";
 
-export function SignInPage() {
-	const flow = useSignInFlow();
+export function SignInPage({
+	initialEmail,
+	isInitialEmailLocked = false,
+}: {
+	initialEmail?: string;
+	isInitialEmailLocked?: boolean;
+}) {
+	const flow = useSignInFlow({ initialEmail, isInitialEmailLocked });
 	const content = getSignInPageContent({
 		step: flow.step,
 	});
@@ -18,6 +24,7 @@ export function SignInPage() {
 				emailAddress={flow.emailAddress}
 				emailError={flow.emailError}
 				globalErrors={flow.globalErrors}
+				isEmailLocked={flow.isEmailLocked}
 				isBusy={flow.isBusy}
 				isLoaded={flow.isLoaded}
 				resendEmailCode={flow.resendEmailCode}

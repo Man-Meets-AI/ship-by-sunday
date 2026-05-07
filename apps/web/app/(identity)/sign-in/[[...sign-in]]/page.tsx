@@ -4,10 +4,11 @@ import { redirect } from "next/navigation";
 
 import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 import {
-	buildCheckoutEmailHandoffHrefForSuccessRedirect,
 	getSafeRedirectPath,
+	isCheckoutWelcomeRedirectPath,
 } from "@/platform/auth/auth-route-utils";
 import { shouldBypassClerkProtection } from "@/platform/auth/clerk-middleware-bypass";
+import { getValidatedPendingCheckoutEmailFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 
 export const metadata: Metadata = {
 	robots: {
@@ -29,11 +30,14 @@ export default async function Page({
 		return redirect(safeRedirectPath);
 	}
 
-	const checkoutEmailHandoffHref =
-		buildCheckoutEmailHandoffHrefForSuccessRedirect(safeRedirectPath);
-	if (checkoutEmailHandoffHref) {
-		return redirect(checkoutEmailHandoffHref);
-	}
+	const initialEmail = isCheckoutWelcomeRedirectPath(safeRedirectPath)
+		? await getValidatedPendingCheckoutEmailFromCookie()
+		: null;
 
-	return <SignInPage />;
+	return (
+		<SignInPage
+			initialEmail={initialEmail ?? undefined}
+			isInitialEmailLocked={Boolean(initialEmail)}
+		/>
+	);
 }

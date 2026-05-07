@@ -35,10 +35,6 @@ describe("HomePagePrimaryCta", () => {
 			<HomePagePrimaryCta
 				target={{
 					kind: "checkout",
-					checkoutIntent: {
-						buyerStartingPoint: "no_codebase",
-						checkoutCtaId: "hero_primary",
-					},
 				}}
 				label="Get instant access"
 				className="cta-size"
@@ -73,10 +69,6 @@ describe("HomePagePrimaryCta", () => {
 			<HomePagePrimaryCta
 				target={{
 					kind: "checkout",
-					checkoutIntent: {
-						buyerStartingPoint: "no_codebase",
-						checkoutCtaId: "codebase_demo_generated",
-					},
 				}}
 				label="Generate my codebase"
 				testId="demo-cta"

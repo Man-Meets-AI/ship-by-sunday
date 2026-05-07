@@ -26,10 +26,6 @@ describe("home page render model", () => {
 		expect(renderModel.hero.isEnabled).toBe(true);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({
 			kind: "checkout",
-			checkoutIntent: {
-				buyerStartingPoint: "no_codebase",
-				checkoutCtaId: "hero_primary",
-			},
 		});
 		expect(renderModel.execLoop.isEnabled).toBe(true);
 		expect(
@@ -83,10 +79,6 @@ describe("home page render model", () => {
 		expect(renderModel.pricing.isEnabled).toBe(true);
 		expect(renderModel.pricing.primaryCtaTarget).toEqual({
 			kind: "checkout",
-			checkoutIntent: {
-				buyerStartingPoint: "no_codebase",
-				checkoutCtaId: "pricing_primary",
-			},
 		});
 	});
 

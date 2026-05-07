@@ -88,10 +88,10 @@ The starter uses this sequence:
 4. Stripe returns to `/checkout/success`
 5. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
 6. Convex verifies the signature and grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when the email has no account yet
-7. `/checkout/success` retries the same paid-session fulfillment if the webhook is delayed, then sends signed-out buyers through `/checkout/email-handoff` to prove the Stripe checkout email with Clerk email OTP
-8. after Clerk verifies that email, `/checkout/success` validates the matching user and redirects into `/codebase`
+7. `/checkout/success` retries the same paid-session fulfillment if the webhook is delayed, then sends signed-out buyers to `/sign-in?redirect_url=/workspace/choose?welcome=checkout`
+8. after Clerk verifies the checkout email with email-code OTP, the buyer lands on `/workspace/choose?welcome=checkout` and chooses the product path
 
-Pending checkout claims still exist as fallback and audit records. They are no longer the happy-path customer journey.
+Pending checkout claims and legacy checkout intent fields still exist as fallback and audit records. They are not the happy-path customer journey, and new public checkout sessions should not encode pre-purchase path intent.
 
 ## Express Checkout setup
 
@@ -123,9 +123,9 @@ The happy path is:
 1. checkout completes in Stripe
 2. Stripe forwards `checkout.session.completed`
 3. the webhook grants product access
-4. signed-out buyers prove the checkout email through Clerk email code
-5. `/checkout/success` stops waiting
-6. the buyer reaches `/codebase`
+4. signed-out buyers sign in through Clerk email code with the Stripe checkout email locked
+5. `/checkout/success` stops waiting or redirects immediately
+6. the buyer reaches `/workspace/choose` and then chooses `/codebase`, `/workspace/setup`, or `/tutorials`
 
 ## If this breaks
 
@@ -135,7 +135,7 @@ The most common failures are:
 - `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY`
 - production Convex is missing `STRIPE_SECRET_KEY` or `CLERK_SECRET_KEY`, so the webhook cannot construct Stripe or resolve the checkout email in Clerk even after the signature verifies
 - you changed the webhook secret but did not restart the app
-- Clerk email-code sign-in is disabled or misconfigured, so `/checkout/email-handoff` cannot send or verify the one-time code for the Stripe checkout email
+- Clerk email-code sign-in is disabled or misconfigured, so `/sign-in` cannot send or verify the one-time code for the Stripe checkout email and may show a Clerk `factor_not_found` error
 - Clerk/Convex auth is broken, so the buyer cannot be matched to the right access state
 - Express Checkout does not render because the visitor's browser has no eligible wallet, the Stripe publishable key is missing, the domain is not registered, or Link/wallet payment methods are disabled in that Stripe mode
 

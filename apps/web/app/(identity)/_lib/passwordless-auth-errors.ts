@@ -22,10 +22,10 @@ const invalidEmailCodeCodes = new Set([
 	"verification_code_invalid",
 ]);
 
-const missingAccountMessage =
+export const missingPasswordlessAccountMessage =
 	"We don't have an account for that email. Purchase a license first, then sign in with the checkout email.";
 
-const invalidEmailCodeMessage =
+export const invalidEmailCodeMessage =
 	"That code is incorrect. Use the latest email code or send a new one.";
 
 function getClerkErrorMessage(error: RenderableClerkError | null | undefined) {
@@ -84,12 +84,12 @@ export function getPasswordlessEmailError(
 	error: RenderableClerkError | null | undefined,
 ) {
 	return classifyClerkAuthError(error) === "missing_account"
-		? { message: missingAccountMessage }
+		? { message: missingPasswordlessAccountMessage }
 		: (error ?? null);
 }
 
 export function getMissingPasswordlessAccountError() {
-	return { message: missingAccountMessage };
+	return { message: missingPasswordlessAccountMessage };
 }
 
 export function getPasswordlessCodeError(

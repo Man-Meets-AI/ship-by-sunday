@@ -11,26 +11,25 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/docs`: public builder docs when the docs module is enabled; disabled-state surface when it is off
 - `/blog`: public editorial index plus `/blog/<slug>` article routes for published posts
 - `/sign-in`: branded starter-owned Clerk sign-in surface
-- `/sign-up`: pricing redirect; legacy checkout session links forward to checkout email handoff
+- `/sign-up`: pricing redirect; legacy checkout session links forward back to checkout success
 
 ## Purchase and recovery routes
 
-- `/checkout/success`: post-checkout validation, server-fetched initial product-access state, then live product-access polling
-- `/checkout/email-handoff`: locked checkout-email Clerk code flow after paid guest checkout; validates and fulfills the Stripe session before showing the email-code form
+- `/checkout/success`: transient post-checkout fulfillment and validation route; it retries the webhook fulfillment path and sends signed-out paid buyers to normal passwordless sign-in
 - `/checkout/clear-pending`: route-handler-only stale pending-checkout cookie cleanup, then safe redirect
 - `/checkout/cancel`: checkout cancel return; redirects through pending-cookie cleanup
 - `/checkout/cancel/confirmed`: checkout canceled confirmation surface
 - `/session-tasks/reset-password`: Clerk password-reset task inside the shared identity shell
-- `/codebase`: generated-codebase protected landing after checkout or sign-in when checkout intent resolves to `generated_codebase`
-- `/workspace/choose`: protected legacy-intent choice screen for paid checkouts that predate checkout intent metadata
-- `/workspace/setup`: existing-codebase protected setup console when checkout intent resolves to `existing_codebase_doctor`
+- `/workspace/choose`: first paid product destination after new checkout; lets the buyer choose Generate a codebase, Set up an existing codebase, or Tutorial Videos
+- `/codebase`: generated-codebase protected landing after the buyer chooses the generated-codebase path
+- `/workspace/setup`: existing-codebase protected setup console after the buyer chooses the existing-codebase path
 - `/tutorials`: protected Tutorial Videos library for paid customers who want to watch without choosing or changing a product path
 - `/mission`: protected compatibility entry for the post-review Lesson Map; it stays locked until Review unlocks the post-review branch
 
 ## Protected product routes
 
 - `/codebase`: generated-codebase workspace with the overview block plus the `foundation`, `problem`, `outcome`, `design`, `pricing`, `setup`, and `generated-preview` sections
-- `/workspace/choose`: protected fulfillment choice for missing or legacy checkout intent; saves the selected fulfillment track before redirecting
+- `/workspace/choose`: protected fulfillment choice for new checkout and legacy unresolved access; saves the selected fulfillment track before redirecting
 - `/workspace/setup`: existing-codebase setup console for local runner pairing, Machine Setup readiness, Project Setup readiness, privacy defaults, default open destination, and doctor-pass readiness
 - `/workspace/doctor-pass`: planned existing-codebase doctor-pass progress route after setup; it must not stream raw terminal logs by default
 - `/workspace/findings`: planned Top 9 findings ledger after the doctor pass sync preview is approved
@@ -54,7 +53,7 @@ description: See the main public, protected, and purchase-related routes in one 
 
 Repeat-routing note: `/execute` does not render a bridge page. Review owns the post-download continue action, `/execute` preserves old links by sending unlocked members into Build Lessons, and `/mission` preserves old library links by sending unlocked members into the Review Lesson Map.
 
-These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or codebase-workspace data before the browser resumes live Convex subscriptions. The canonical intake is now one `/codebase` page plus customer-facing `Review`; the old staged URLs survive only as compatibility redirects.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or codebase-workspace data before the browser resumes live Convex subscriptions. The canonical intake is now `/workspace/choose`, then the selected workspace path; the old staged URLs survive only as compatibility redirects.
 
 ## Why this matters
 

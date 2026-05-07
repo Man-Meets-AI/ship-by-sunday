@@ -7,7 +7,6 @@ export const sessionTaskUrls = {
 export type SessionTaskKey = keyof typeof sessionTaskUrls;
 
 const redirectUrlParam = "redirect_url";
-const checkoutSessionIdParam = "session_id";
 
 export function getSafeRedirectPath(rawPath?: string | null) {
 	if (!rawPath) {
@@ -73,27 +72,6 @@ export function buildSignUpHref({
 	return `${routeConfig.signUp}?${params.toString()}`;
 }
 
-export function buildCheckoutEmailHandoffHref({
-	redirectPath,
-	sessionId,
-}: {
-	redirectPath?: string | null;
-	sessionId: string;
-}) {
-	const params = new URLSearchParams();
-	const safeRedirectPath = redirectPath
-		? getSafeRedirectPath(redirectPath)
-		: null;
-
-	params.set(checkoutSessionIdParam, sessionId);
-
-	if (safeRedirectPath) {
-		params.set(redirectUrlParam, safeRedirectPath);
-	}
-
-	return `${routeConfig.checkoutEmailHandoff}?${params.toString()}`;
-}
-
 export function buildClearPendingCheckoutSessionHref(
 	redirectPath?: string | null,
 ) {
@@ -103,35 +81,14 @@ export function buildClearPendingCheckoutSessionHref(
 	return `${routeConfig.checkoutClearPending}?${params.toString()}`;
 }
 
-export function getCheckoutSessionIdFromSuccessRedirectPath(
-	rawPath?: string | null,
-) {
+export function isCheckoutWelcomeRedirectPath(rawPath?: string | null) {
 	const safeRedirectPath = getSafeRedirectPath(rawPath);
 	const redirectUrl = new URL(safeRedirectPath, "https://ship-by-sunday.local");
 
-	if (redirectUrl.pathname !== routeConfig.checkoutSuccess) {
-		return null;
-	}
-
-	const sessionId = redirectUrl.searchParams
-		.get(checkoutSessionIdParam)
-		?.trim();
-
-	return sessionId ? sessionId : null;
-}
-
-export function buildCheckoutEmailHandoffHrefForSuccessRedirect(
-	rawPath?: string | null,
-) {
-	const sessionId = getCheckoutSessionIdFromSuccessRedirectPath(rawPath);
-	if (!sessionId) {
-		return null;
-	}
-
-	return buildCheckoutEmailHandoffHref({
-		redirectPath: getSafeRedirectPath(rawPath),
-		sessionId,
-	});
+	return (
+		redirectUrl.pathname === routeConfig.workspaceChoice &&
+		redirectUrl.searchParams.get("welcome") === "checkout"
+	);
 }
 
 export function getSessionTaskHref(

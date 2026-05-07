@@ -41,7 +41,6 @@ vi.mock("@/platform/convex/server-preload", () => ({
 }));
 
 import { metadata as checkoutSuccessMetadata } from "@/app/checkout/success/page";
-import { metadata as checkoutEmailHandoffMetadata } from "@/app/checkout/email-handoff/page";
 import { metadata as resetPasswordMetadata } from "@/app/(identity)/session-tasks/reset-password/page";
 import { metadata as signInMetadata } from "@/app/(identity)/sign-in/[[...sign-in]]/page";
 
@@ -57,6 +56,5 @@ describe("route metadata", () => {
 		expectNoindexRobots(signInMetadata);
 		expectNoindexRobots(resetPasswordMetadata);
 		expectNoindexRobots(checkoutSuccessMetadata);
-		expectNoindexRobots(checkoutEmailHandoffMetadata);
 	});
 });

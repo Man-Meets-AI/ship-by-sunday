@@ -116,8 +116,6 @@ describe("convex/checkoutClaimsActions", () => {
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "codebase_demo_existing",
 				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
@@ -164,17 +162,10 @@ describe("convex/checkoutClaimsActions", () => {
 				},
 			},
 		});
-		expect(runMutation).toHaveBeenNthCalledWith(
-			1,
-			expect.anything(),
-			expect.objectContaining({
-				stripeCheckoutSessionId: "cs_guest_123",
-				checkoutEmail: "buyer@example.com",
-				buyerStartingPoint: "unspecified",
-				checkoutCtaId: "unspecified",
-				fulfillmentTrack: "unspecified",
-			}),
-		);
+		expect(runMutation.mock.calls[0]?.[1]).toMatchObject({
+			stripeCheckoutSessionId: "cs_guest_123",
+			checkoutEmail: "buyer@example.com",
+		});
 		expect(runMutation).toHaveBeenNthCalledWith(2, expect.anything(), {
 			stripeCheckoutSessionId: "cs_guest_123",
 		});
@@ -378,8 +369,6 @@ describe("convex/checkoutClaimsActions", () => {
 				checkoutEmail: "Buyer@Example.com",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "codebase_demo_existing",
 				fulfillmentTrack: "existing_codebase_doctor",
 				stripeEventId: "evt_123",
 				stripeEventType: "checkout.session.completed",

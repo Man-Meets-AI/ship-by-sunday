@@ -1,3 +1,5 @@
+// Legacy checkout metadata plus the active post-purchase fulfillment track.
+// New public checkout creation must not accept or write buyerStartingPoint or checkoutCtaId.
 export const checkoutBuyerStartingPoints = [
 	"no_codebase",
 	"existing_codebase",
@@ -44,12 +46,6 @@ const checkoutBuyerStartingPointSet = new Set<string>(
 const checkoutFulfillmentTrackSet = new Set<string>(checkoutFulfillmentTracks);
 const checkoutCtaIdSet = new Set<string>(checkoutCtaIds);
 
-export const UNSPECIFIED_CHECKOUT_INTENT = {
-	buyerStartingPoint: "unspecified",
-	checkoutCtaId: "unspecified",
-	fulfillmentTrack: "unspecified",
-} as const satisfies CheckoutIntent;
-
 export function normalizeBuyerStartingPoint(
 	value: unknown,
 ): BuyerStartingPoint {
@@ -83,19 +79,6 @@ export function getFulfillmentTrackForBuyerStartingPoint(
 	}
 }
 
-export function getBuyerStartingPointForFulfillmentTrack(
-	fulfillmentTrack: FulfillmentTrack,
-): BuyerStartingPoint {
-	switch (fulfillmentTrack) {
-		case "generated_codebase":
-			return "no_codebase";
-		case "existing_codebase_doctor":
-			return "existing_codebase";
-		case "unspecified":
-			return "unspecified";
-	}
-}
-
 export function normalizeCheckoutIntent(
 	input: CheckoutIntentInput | null | undefined,
 ): CheckoutIntent {
@@ -117,30 +100,6 @@ export function normalizeCheckoutIntent(
 	};
 }
 
-export function normalizeCheckoutIntentRequestBody(body: unknown) {
-	if (!body || typeof body !== "object" || Array.isArray(body)) {
-		return UNSPECIFIED_CHECKOUT_INTENT;
-	}
-
-	const record = body as {
-		checkoutIntent?: unknown;
-		buyerStartingPoint?: unknown;
-		checkoutCtaId?: unknown;
-		fulfillmentTrack?: unknown;
-	};
-	if (
-		record.checkoutIntent &&
-		typeof record.checkoutIntent === "object" &&
-		!Array.isArray(record.checkoutIntent)
-	) {
-		return normalizeCheckoutIntent(
-			record.checkoutIntent as CheckoutIntentInput,
-		);
-	}
-
-	return normalizeCheckoutIntent(record);
-}
-
 export function readCheckoutIntentFromMetadata(
 	metadata: Record<string, string> | null | undefined,
 ) {
@@ -149,14 +108,6 @@ export function readCheckoutIntentFromMetadata(
 		checkoutCtaId: metadata?.checkoutCtaId,
 		fulfillmentTrack: metadata?.fulfillmentTrack,
 	});
-}
-
-export function getCheckoutIntentMetadata(checkoutIntent: CheckoutIntent) {
-	return {
-		buyerStartingPoint: checkoutIntent.buyerStartingPoint,
-		checkoutCtaId: checkoutIntent.checkoutCtaId,
-		fulfillmentTrack: checkoutIntent.fulfillmentTrack,
-	};
 }
 
 export function getResolvedCheckoutIntentFields(

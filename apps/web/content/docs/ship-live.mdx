@@ -18,7 +18,7 @@ Make sure all of this is true:
 - auth works in the real deployed environment
 - checkout returns to the deployed `/checkout/success`
 - the live webhook is registered and verified
-- users with granted access reach `/codebase`
+- newly paid users reach `/workspace/choose`, and returning generated-codebase users reach `/codebase`
 - the first protected flow is usable after access appears
 
 ## Production checklist
@@ -52,7 +52,7 @@ That verifies the part we actually care about in staging or production:
 - redirect into `/checkout/success`
 - live Stripe webhook delivery
 - Convex product-access grant
-- redirect into `/codebase`
+- redirect into `/workspace/choose`
 
 It does **not** prove live card charging or decline behavior. Keep card-path confidence in sandbox or local Stripe testing.
 
@@ -62,11 +62,11 @@ The live Stripe webhook must target the Convex HTTP-actions route, not the app o
 
 Before trusting production billing, verify `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY` on the production Convex deployment. Use the internal observability runbook for the incident-control drill and Telegram delivery checks.
 
-After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards back into `/codebase` without replaying the Stripe event. On production, that proof should create the Checkout Session directly with a fresh one-time `100% off` coupon already attached instead of depending on manual promotion-code entry inside Stripe’s hosted UI. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
+After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards through passwordless sign-in into `/workspace/choose` without replaying the Stripe event. On production, that proof should create the Checkout Session directly with a fresh one-time `100% off` coupon already attached instead of depending on manual promotion-code entry inside Stripe’s hosted UI. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
 
 ## Keep these in mind
 
-- This repo currently assumes the buyer completes checkout in the same signed-in browser context used to read access state.
+- This repo currently assumes the buyer can receive the one-time code for the Stripe checkout email before entering the paid workspace.
 - If you change auth apps, webhook secrets, or Stripe accounts, re-verify the handoff instead of assuming it still works.
 - Hotfixes are allowed to merge into `main`, but they must come from a focused hotfix branch and pass the same production proof as ordinary releases.
 - If a hotfix changes proof/bootstrap behavior, wait for the new `Production Release Proof` run on the hotfix commit instead of trusting the failed run on the previous `main` head.

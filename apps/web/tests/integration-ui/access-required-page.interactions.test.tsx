@@ -120,7 +120,7 @@ describe("AccessRequiredPage interactions", () => {
 		);
 	});
 
-	it("redirects signed-out paid checkout recovery to the email handoff", () => {
+	it("redirects signed-out paid checkout recovery to normal sign-in", () => {
 		useQueryMock.mockReturnValue({
 			hasAccess: false,
 			status: "signed_out",
@@ -133,7 +133,7 @@ describe("AccessRequiredPage interactions", () => {
 					hasAccess: false,
 					status: "signed_out",
 					pendingCheckoutRecovery: {
-						kind: "checkout_email_handoff_required",
+						kind: "sign_in_required",
 						sessionId: "cs_paid_signed_out",
 						checkoutEmail: "buyer@example.com",
 					},
@@ -142,7 +142,7 @@ describe("AccessRequiredPage interactions", () => {
 		);
 
 		expect(replaceMock).toHaveBeenCalledWith(
-			"/checkout/email-handoff?session_id=cs_paid_signed_out&redirect_url=%2Fmission",
+			"/sign-in?redirect_url=%2Fmission",
 		);
 	});
 

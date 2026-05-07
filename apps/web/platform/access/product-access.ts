@@ -80,7 +80,7 @@ async function getSignedOutPendingCheckoutRecovery(): Promise<PaidCheckoutRecove
 	}
 
 	return {
-		kind: "checkout_email_handoff_required",
+		kind: "sign_in_required",
 		sessionId: pendingCheckoutSessionId,
 		checkoutEmail,
 	};

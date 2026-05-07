@@ -1,3 +1,4 @@
+import { currentUser } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
 	title: "Choose workspace path",
 };
 
-export default async function Page() {
+export default async function Page({
+	searchParams,
+}: {
+	searchParams: Promise<{ welcome?: string }>;
+}) {
+	const { welcome } = await searchParams;
 	const workspaceAccess = await loadWorkspacePageAccess();
 	if (workspaceAccess.kind === "access_required") {
 		return <AccessRequiredPage initialAccess={workspaceAccess.access} />;
@@ -24,5 +30,13 @@ export default async function Page() {
 		redirect(routeConfig.workspaceSetup);
 	}
 
-	return <WorkspaceFulfillmentChoice />;
+	const showCheckoutWelcome = welcome === "checkout";
+	const user = showCheckoutWelcome ? await currentUser() : null;
+
+	return (
+		<WorkspaceFulfillmentChoice
+			showCheckoutWelcome={showCheckoutWelcome}
+			accountEmail={user?.primaryEmailAddress?.emailAddress ?? undefined}
+		/>
+	);
 }

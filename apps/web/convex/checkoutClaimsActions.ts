@@ -480,8 +480,11 @@ function getStripeIds(session: Stripe.Checkout.Session) {
 	};
 }
 
-function getSessionCheckoutIntentFields(session: Stripe.Checkout.Session) {
-	return readCheckoutIntentFromMetadata(session.metadata);
+function getSessionLegacyFulfillmentFields(session: Stripe.Checkout.Session) {
+	const checkoutIntent = readCheckoutIntentFromMetadata(session.metadata);
+	return checkoutIntent.fulfillmentTrack === "unspecified"
+		? {}
+		: { fulfillmentTrack: checkoutIntent.fulfillmentTrack };
 }
 
 async function fulfillPaidCheckoutSessionByEmail({
@@ -523,7 +526,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 	}
 
 	const { stripeCustomerId, stripePaymentIntentId } = getStripeIds(session);
-	const checkoutIntent = getSessionCheckoutIntentFields(session);
+	const checkoutFulfillment = getSessionLegacyFulfillmentFields(session);
 	await ctx.runMutation(
 		internal.checkoutClaims.upsertPendingCheckoutClaimFromStripe,
 		{
@@ -533,7 +536,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 			paymentStatus: session.payment_status,
 			stripeCustomerId,
 			stripePaymentIntentId,
-			...checkoutIntent,
+			...checkoutFulfillment,
 			stripeEventId,
 			stripeEventType,
 		},
@@ -708,6 +711,40 @@ export const fulfillCheckoutSessionByEmail = internalAction({
 	},
 });
 
+export const fulfillCheckoutSessionFromSuccessPage = action({
+	args: {
+		sessionId: v.string(),
+	},
+	returns: checkoutSessionFulfillmentResultValidator,
+	handler: async (ctx, args): Promise<CheckoutSessionFulfillmentResult> => {
+		let session: Stripe.Checkout.Session;
+		try {
+			session = await getStripeClient().checkout.sessions.retrieve(
+				args.sessionId,
+			);
+		} catch (error) {
+			if (
+				error instanceof Stripe.errors.StripeError &&
+				error.type === "StripeInvalidRequestError"
+			) {
+				return {
+					kind: "invalid_session" as const,
+					sessionId: args.sessionId,
+				};
+			}
+
+			throw error;
+		}
+
+		return await fulfillPaidCheckoutSessionByEmail({
+			ctx,
+			session,
+			stripeEventId: `checkout-success:${session.id}`,
+			stripeEventType: "checkout.success.fulfillment",
+		});
+	},
+});
+
 export const claimCheckoutSessionForViewer = action({
 	args: {
 		sessionId: v.string(),
@@ -786,7 +823,7 @@ export const claimCheckoutSessionForViewer = action({
 						typeof session.payment_intent === "string"
 							? session.payment_intent
 							: undefined,
-					...getSessionCheckoutIntentFields(session),
+					...getSessionLegacyFulfillmentFields(session),
 				});
 
 			return {
@@ -817,7 +854,7 @@ export const claimCheckoutSessionForViewer = action({
 					typeof session.payment_intent === "string"
 						? session.payment_intent
 						: undefined,
-				...getSessionCheckoutIntentFields(session),
+				...getSessionLegacyFulfillmentFields(session),
 				stripeEventId: `claim:${session.id}`,
 				stripeEventType: "checkout.success.claim",
 			},

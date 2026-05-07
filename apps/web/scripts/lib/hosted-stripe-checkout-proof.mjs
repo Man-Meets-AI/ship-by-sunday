@@ -67,7 +67,7 @@ export function buildHostedProofCheckoutSessionParams({
 	};
 }
 
-export function buildHostedProofSignInPath({ redirectPath = "/codebase" }) {
+export function buildHostedProofSignInPath({ redirectPath = "/workspace/choose" }) {
 	return `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}`;
 }
 

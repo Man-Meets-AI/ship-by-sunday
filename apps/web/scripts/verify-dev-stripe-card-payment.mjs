@@ -16,11 +16,7 @@ const stripeApiVersion = "2026-02-25.clover";
 const testCardNumber = "4242 4242 4242 4242";
 const testCardExpiry = "12 / 34";
 const testCardCvc = "123";
-const expectedCheckoutMetadata = {
-	buyerStartingPoint: "no_codebase",
-	checkoutCtaId: "codebase_demo_generated",
-	fulfillmentTrack: "generated_codebase",
-};
+const expectedCourseSlug = "ship-by-sunday";
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -349,16 +345,14 @@ try {
 			/Link is accepted/i.test(hostedLinkSignalText),
 		hostedLinkSignalText ?? "missing",
 	);
-	printCheck(
-		"Checkout used generated-codebase CTA metadata",
-		finalSession.metadata?.buyerStartingPoint ===
-			expectedCheckoutMetadata.buyerStartingPoint &&
-			finalSession.metadata?.checkoutCtaId ===
-				expectedCheckoutMetadata.checkoutCtaId &&
-			finalSession.metadata?.fulfillmentTrack ===
-				expectedCheckoutMetadata.fulfillmentTrack,
-		`metadata=${JSON.stringify(finalSession.metadata)}`,
-	);
+		printCheck(
+			"Checkout used neutral product metadata",
+			finalSession.metadata?.courseSlug === expectedCourseSlug &&
+				finalSession.metadata?.buyerStartingPoint === undefined &&
+				finalSession.metadata?.checkoutCtaId === undefined &&
+				finalSession.metadata?.fulfillmentTrack === undefined,
+			`metadata=${JSON.stringify(finalSession.metadata)}`,
+		);
 	printCheck(
 		"Stripe Checkout session paid",
 		finalSession.status === "complete" &&
@@ -421,14 +415,12 @@ try {
 		visibleCheckoutButtonCount <= 0 ||
 		expressCheckoutRequests.length !== 0 ||
 		!checkoutRouteResponses.some((response) => response.ok) ||
-		typeof hostedLinkSignalText !== "string" ||
-		!/Link is accepted/i.test(hostedLinkSignalText) ||
-		finalSession.metadata?.buyerStartingPoint !==
-			expectedCheckoutMetadata.buyerStartingPoint ||
-		finalSession.metadata?.checkoutCtaId !==
-			expectedCheckoutMetadata.checkoutCtaId ||
-		finalSession.metadata?.fulfillmentTrack !==
-			expectedCheckoutMetadata.fulfillmentTrack ||
+			typeof hostedLinkSignalText !== "string" ||
+			!/Link is accepted/i.test(hostedLinkSignalText) ||
+			finalSession.metadata?.courseSlug !== expectedCourseSlug ||
+			finalSession.metadata?.buyerStartingPoint !== undefined ||
+			finalSession.metadata?.checkoutCtaId !== undefined ||
+			finalSession.metadata?.fulfillmentTrack !== undefined ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
 		finalSession.amount_total !== 25_000 ||

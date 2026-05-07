@@ -56,9 +56,10 @@ function renderView(
 				currentAccountEmail?: string;
 		  }
 		| {
-				kind: "checkout_email_handoff_required";
+				kind: "fulfillment_failed";
 				sessionId: string;
-				checkoutEmail: string;
+				checkoutEmail?: string;
+				message: string;
 		  }
 		| {
 				kind: "wrong_account";
@@ -211,10 +212,10 @@ describe("CheckoutSuccessView", () => {
 
 		expect(markup).toContain("Opening fulfillment choice");
 		expect(markup).toContain("Choose path");
-		expect(markup).toContain('href="/workspace/choose"');
+		expect(markup).toContain('href="/workspace/choose?welcome=checkout"');
 	});
 
-	it("renders the email-handoff recovery path for a paid checkout email", () => {
+	it("renders the normal sign-in path for a paid checkout email", () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: false,
 			isLoading: false,
@@ -230,16 +231,17 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Finish access handoff");
 		expect(markup).toContain("Sign in required");
 		expect(markup).toContain("Use the checkout account");
-		expect(markup).toContain("Prove checkout email");
+		expect(markup).toContain("Sign in with checkout email");
 		expect(markup).toContain("Payment is confirmed for buyer@example.com");
 		expect(markup).toContain("Do not buy again");
 		expect(markup).toContain(
-			'href="/checkout/email-handoff?session_id=cs_sign_in&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_sign_in"',
+			'href="/sign-in?redirect_url=%2Fworkspace%2Fchoose%3Fwelcome%3Dcheckout"',
 		);
 		expect(markup).not.toContain("Create account");
+		expect(markup).not.toContain("/checkout/email-handoff");
 	});
 
-	it("renders the narrow email-code handoff after signed-out fulfillment", () => {
+	it("renders fulfillment failure without asking for a second checkout", () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: false,
 			isLoading: false,
@@ -247,21 +249,19 @@ describe("CheckoutSuccessView", () => {
 		useQueryMock.mockReturnValue(undefined);
 
 		const markup = renderView({
-			kind: "checkout_email_handoff_required",
-			sessionId: "cs_handoff",
+			kind: "fulfillment_failed",
+			sessionId: "cs_failed",
 			checkoutEmail: "buyer@example.com",
+			message: "Clerk API unavailable.",
 		});
 
-		expect(markup).toContain("Email proof required");
-		expect(markup).toContain("Prove checkout email");
+		expect(markup).toContain("Access needs support");
+		expect(markup).toContain("Do not buy again");
+		expect(markup).toContain("Clerk API unavailable.");
 		expect(markup).toContain(
-			"Access is waiting for the Clerk user tied to buyer@example.com",
+			'href="/sign-in?redirect_url=%2Fworkspace%2Fchoose%3Fwelcome%3Dcheckout"',
 		);
-		expect(markup).toContain(
-			'href="/checkout/email-handoff?session_id=cs_handoff&amp;redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_handoff"',
-		);
-		expect(markup).not.toContain("Continue with");
-		expect(markup).not.toContain("Create account");
+		expect(markup).not.toContain("/checkout/email-handoff");
 	});
 
 	it("renders the account-mismatch recovery copy", () => {

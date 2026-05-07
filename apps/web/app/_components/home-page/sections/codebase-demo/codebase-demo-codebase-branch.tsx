@@ -71,10 +71,6 @@ export function CodebaseDemoCodebaseBranch({
 					<HomePagePrimaryCta
 						target={{
 							kind: "checkout",
-							checkoutIntent: {
-								buyerStartingPoint: "existing_codebase",
-								checkoutCtaId: "codebase_demo_existing",
-							},
 						}}
 						label={codebaseBranch.cta.label}
 						testId="codebase-demo-existing-checkout-cta"

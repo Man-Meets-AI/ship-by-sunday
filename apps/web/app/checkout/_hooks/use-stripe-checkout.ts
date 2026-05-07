@@ -5,22 +5,15 @@ import { useCallback, useState } from "react";
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
-import {
-	UNSPECIFIED_CHECKOUT_INTENT,
-	normalizeCheckoutIntent,
-	type CheckoutIntent,
-	type CheckoutIntentInput,
-} from "@/platform/billing/checkout/checkout-intent";
 
 export type StripeCheckoutPhase = "idle" | "saving" | "redirecting";
 
 export type StripeCheckoutOptions = {
-	checkoutIntent?: CheckoutIntentInput;
 	onBeforeCheckout?: () => void | Promise<void>;
 };
 
 export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
-	const { checkoutIntent: checkoutIntentInput, onBeforeCheckout } = options;
+	const { onBeforeCheckout } = options;
 	const [phase, setPhase] = useState<StripeCheckoutPhase>("idle");
 	const [error, setError] = useState<string | null>(null);
 
@@ -31,15 +24,11 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 	}, []);
 
 	const startCheckout = useCallback(async () => {
-		const checkoutIntent: CheckoutIntent = checkoutIntentInput
-			? normalizeCheckoutIntent(checkoutIntentInput)
-			: UNSPECIFIED_CHECKOUT_INTENT;
 		setError(null);
 		capturePostHogProductEvent({
 			event: "checkout_started",
 			properties: {
 				surface: "checkout_button",
-				...checkoutIntent,
 			},
 		});
 
@@ -66,9 +55,6 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({
-					checkoutIntent,
-				}),
 			});
 
 			if (!response.ok) {
@@ -99,7 +85,7 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 			);
 			setPhase("idle");
 		}
-	}, [checkoutIntentInput, onBeforeCheckout]);
+	}, [onBeforeCheckout]);
 
 	return { startCheckout, phase, isLoading, error, clearError };
 }
