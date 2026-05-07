@@ -8,12 +8,12 @@ function normalizeBaseUrl(value: string) {
 }
 
 export function getAppBaseUrl(request?: Request) {
-	if (serverEnv.APP_BASE_URL) {
-		return normalizeBaseUrl(serverEnv.APP_BASE_URL);
-	}
-
 	if (request) {
 		return normalizeBaseUrl(new URL(request.url).origin);
+	}
+
+	if (serverEnv.APP_BASE_URL) {
+		return normalizeBaseUrl(serverEnv.APP_BASE_URL);
 	}
 
 	const vercelUrl =

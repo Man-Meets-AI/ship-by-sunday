@@ -18,7 +18,7 @@ afterEach(() => {
 });
 
 describe("getAppBaseUrl", () => {
-	it("uses explicit APP_BASE_URL ahead of the request origin", async () => {
+	it("uses request origin ahead of APP_BASE_URL for route handlers", async () => {
 		const getAppBaseUrl = await getAppBaseUrlWithEnv({
 			APP_BASE_URL: "https://www.man-meets-ai.com/",
 			VERCEL_PROJECT_PRODUCTION_URL: "dev.man-meets-ai.com",
@@ -27,7 +27,7 @@ describe("getAppBaseUrl", () => {
 
 		expect(
 			getAppBaseUrl(new Request("https://preview.vercel.app/api/stripe")),
-		).toBe("https://www.man-meets-ai.com");
+		).toBe("https://preview.vercel.app");
 	});
 
 	it("uses the request origin before Vercel project URLs for route handlers", async () => {
@@ -50,5 +50,15 @@ describe("getAppBaseUrl", () => {
 		});
 
 		expect(getAppBaseUrl()).toBe("https://dev.man-meets-ai.com");
+	});
+
+	it("uses APP_BASE_URL before Vercel URLs when no request is available", async () => {
+		const getAppBaseUrl = await getAppBaseUrlWithEnv({
+			APP_BASE_URL: "https://www.man-meets-ai.com/",
+			VERCEL_PROJECT_PRODUCTION_URL: "dev.man-meets-ai.com",
+			VERCEL_URL: "preview.vercel.app",
+		});
+
+		expect(getAppBaseUrl()).toBe("https://www.man-meets-ai.com");
 	});
 });

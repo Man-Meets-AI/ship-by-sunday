@@ -22,7 +22,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 
 ## Core server runtime
 
-- `APP_BASE_URL`: canonical app URL for checkout success and cancel redirects
+- `APP_BASE_URL`: canonical app URL fallback when no request origin is available; request-scoped route handlers such as checkout use the incoming buyer origin for success and cancel redirects
 - `CLERK_AUTHORIZED_PARTIES`: optional comma-separated origin allowlist passed to Clerk middleware for subdomain cookie-leak protection
 - `CLERK_SECRET_KEY`: server-side Clerk access
 - `CLERK_FRONTEND_API_URL`: Clerk frontend API domain used by the auth chain
