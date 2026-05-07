@@ -9,3 +9,8 @@ Use active docs first:
 - [apps/web/content/docs/index.mdx](../../apps/web/content/docs/index.mdx)
 
 Archive files may mention retired routes, private deployment names, old proof runs, or stale operating models as historical facts. Do not treat those references as current instructions unless an active doc points back to a specific archived report for context.
+
+## Archived Reports
+
+- [Incident reports](incidents/)
+- [Research notes](research-notes/)

@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const fallbackQaPassword = "SBS_QA_Codex_8Yv2!mN4#rL7";
 const releasePersonaLocalPath = path.resolve(
 	__dirname,
 	"../../../..",
@@ -13,7 +12,6 @@ type QaPersonaLocalConfig = {
 		string,
 		{
 			email?: string;
-			password?: string;
 		}
 	>;
 };
@@ -44,38 +42,40 @@ const memberWithAccessAccount = readQaPersonaAccount(
 	"ship-by-sunday-clerk-entitled",
 );
 
-const hasPlaywrightBaseUrl =
-	typeof process.env.PLAYWRIGHT_BASE_URL === "string" &&
-	process.env.PLAYWRIGHT_BASE_URL.length > 0;
+function hasPlaywrightBaseUrl() {
+	return (
+		typeof process.env.PLAYWRIGHT_BASE_URL === "string" &&
+		process.env.PLAYWRIGHT_BASE_URL.length > 0
+	);
+}
+
+function hasClerkPublishableKey() {
+	return (
+		typeof process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY === "string" &&
+		process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 0
+	);
+}
+
+function hasClerkSecretKey() {
+	return (
+		typeof process.env.CLERK_SECRET_KEY === "string" &&
+		process.env.CLERK_SECRET_KEY.length > 0
+	);
+}
 
 export const shouldRunAuthenticatedE2E =
-	hasPlaywrightBaseUrl &&
+	hasPlaywrightBaseUrl() &&
 	(process.env.E2E_RUN_SANDBOX === "1" ||
 		process.env.E2E_RUN_LOCAL_AUTH === "1");
 
-export const sharedPassword =
-	process.env.E2E_SHARED_PASSWORD ??
-	memberWithoutAccessAccount?.password ??
-	memberWithAccessAccount?.password ??
-	fallbackQaPassword;
 export const memberWithoutAccessEmail =
 	process.env.E2E_NON_ENTITLED_EMAIL ??
 	memberWithoutAccessAccount?.email ??
 	"member-no-access@example.test";
-export const memberWithoutAccessPassword =
-	process.env.E2E_NON_ENTITLED_PASSWORD ??
-	process.env.E2E_SHARED_PASSWORD ??
-	memberWithoutAccessAccount?.password ??
-	fallbackQaPassword;
 export const memberWithAccessEmail =
 	process.env.E2E_ENTITLED_EMAIL ??
 	memberWithAccessAccount?.email ??
 	"member-with-access@example.test";
-export const memberWithAccessPassword =
-	process.env.E2E_ENTITLED_PASSWORD ??
-	process.env.E2E_SHARED_PASSWORD ??
-	memberWithAccessAccount?.password ??
-	fallbackQaPassword;
 
 export const authStateDirectory = path.join(__dirname, ".auth");
 export const memberWithoutAccessStorageStatePath = path.join(
@@ -94,9 +94,21 @@ function hasConfiguredCredential(value: string | undefined) {
 export function getAuthenticatedE2EPrereqProblems() {
 	const problems: string[] = [];
 
-	if (!hasPlaywrightBaseUrl) {
+	if (!hasPlaywrightBaseUrl()) {
 		problems.push(
 			"Missing PLAYWRIGHT_BASE_URL. Set it to the target app origin before running authenticated browser tests.",
+		);
+	}
+
+	if (!hasClerkPublishableKey()) {
+		problems.push(
+			"Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY. Clerk testing sign-in tokens need the target Clerk publishable key.",
+		);
+	}
+
+	if (!hasClerkSecretKey()) {
+		problems.push(
+			"Missing CLERK_SECRET_KEY. Clerk testing sign-in tokens need the matching Clerk secret key.",
 		);
 	}
 
@@ -110,31 +122,11 @@ export function getAuthenticatedE2EPrereqProblems() {
 	}
 
 	if (
-		!hasConfiguredCredential(process.env.E2E_NON_ENTITLED_PASSWORD) &&
-		!hasConfiguredCredential(process.env.E2E_SHARED_PASSWORD) &&
-		!memberWithoutAccessAccount?.password
-	) {
-		problems.push(
-			"Missing non-entitled release account password. Add `ship-by-sunday-clerk-instance` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_NON_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
-		);
-	}
-
-	if (
 		!hasConfiguredCredential(process.env.E2E_ENTITLED_EMAIL) &&
 		!memberWithAccessAccount?.email
 	) {
 		problems.push(
 			"Missing entitled release account email. Add `ship-by-sunday-clerk-entitled` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_ENTITLED_EMAIL.",
-		);
-	}
-
-	if (
-		!hasConfiguredCredential(process.env.E2E_ENTITLED_PASSWORD) &&
-		!hasConfiguredCredential(process.env.E2E_SHARED_PASSWORD) &&
-		!memberWithAccessAccount?.password
-	) {
-		problems.push(
-			"Missing entitled release account password. Add `ship-by-sunday-clerk-entitled` to tmp/release-personas.local.json, set RELEASE_PERSONAS_LOCAL_FILE, or set E2E_ENTITLED_PASSWORD / E2E_SHARED_PASSWORD.",
 		);
 	}
 

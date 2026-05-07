@@ -8,7 +8,8 @@ type SignInPageContent = {
 
 function getCredentialsContent(): SignInPageContent {
 	return {
-		description: "Use the account attached to your purchase to continue.",
+		description:
+			"Enter the email tied to your purchase. We’ll send a one-time code.",
 		title: "Sign in",
 	};
 }
@@ -19,31 +20,12 @@ export function getSignInPageContent({
 	step: SignInStep;
 }): SignInPageContent {
 	switch (step.kind) {
-		case "credentials":
+		case "email":
 			return getCredentialsContent();
-		case "reset_request":
+		case "email_code":
 			return {
-				description:
-					"We’ll email a reset code so you can get back into your account.",
-				title: "Reset password",
-			};
-		case "reset_submit":
-			return {
-				description: "Set a new password, then we’ll sign you back in.",
-				title: "Choose a new password",
-			};
-		case "reset_verify":
-			return {
-				description: "Enter the reset code from your inbox to keep going.",
-				title: "Verify reset code",
-			};
-		case "verification":
-			return {
-				description:
-					step.status === "needs_client_trust"
-						? "Verify this device before we complete your sign-in."
-						: "Complete the additional verification step to sign in.",
-				title: "Verify your sign-in",
+				description: "Enter the one-time code from your inbox to continue.",
+				title: "Check your email",
 			};
 		default:
 			return assertNever(step, "Unsupported sign-in step");

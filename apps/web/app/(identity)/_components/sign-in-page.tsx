@@ -1,9 +1,7 @@
 "use client";
 
-import { SignInCredentialsForm } from "@/app/(identity)/_components/sign-in/sign-in-credentials-form";
+import { SignInEmailCodeForm } from "@/app/(identity)/_components/sign-in/sign-in-email-code-form";
 import { getSignInPageContent } from "@/app/(identity)/_components/sign-in/sign-in-page-content";
-import { SignInResetForm } from "@/app/(identity)/_components/sign-in/sign-in-reset-form";
-import { SignInVerificationForm } from "@/app/(identity)/_components/sign-in/sign-in-verification-form";
 import { useSignInFlow } from "@/app/(identity)/_components/sign-in/use-sign-in-flow";
 
 import { AuthPageShell } from "./auth-page-shell";
@@ -16,59 +14,22 @@ export function SignInPage() {
 
 	return (
 		<AuthPageShell title={content.title} description={content.description}>
-			{flow.step.kind === "credentials" ? (
-				<SignInCredentialsForm
-					emailAddress={flow.emailAddress}
-					emailError={flow.emailError}
-					globalErrors={flow.globalErrors}
-					isBusy={flow.isBusy}
-					isLoaded={flow.isLoaded}
-					password={flow.password}
-					passwordError={flow.passwordError}
-					setEmailAddress={flow.setEmailAddress}
-					setPassword={flow.setPassword}
-					startPasswordReset={flow.startPasswordReset}
-					submitPassword={flow.submitPassword}
-				/>
-			) : null}
-			{flow.step.kind === "verification" && flow.activeVerificationMethod ? (
-				<SignInVerificationForm
-					activeVerificationMethod={flow.activeVerificationMethod}
-					availableVerificationMethods={flow.availableVerificationMethods}
-					globalErrors={flow.globalErrors}
-					isBusy={flow.isBusy}
-					verificationCode={flow.verificationCode}
-					verificationError={flow.verificationError}
-					selectVerificationMethod={flow.selectVerificationMethod}
-					resendVerificationCode={flow.resendVerificationCode}
-					setVerificationCode={flow.setVerificationCode}
-					startOver={flow.startOver}
-					status={flow.step.status}
-					submitVerification={flow.submitVerification}
-				/>
-			) : null}
-			{flow.step.kind === "reset_request" ||
-			flow.step.kind === "reset_verify" ||
-			flow.step.kind === "reset_submit" ? (
-				<SignInResetForm
-					emailAddress={flow.emailAddress}
-					emailError={flow.emailError}
-					globalErrors={flow.globalErrors}
-					isBusy={flow.isBusy}
-					newPassword={flow.newPassword}
-					passwordError={flow.passwordError}
-					resetStep={flow.step.kind}
-					setEmailAddress={flow.setEmailAddress}
-					setNewPassword={flow.setNewPassword}
-					setVerificationCode={flow.setVerificationCode}
-					startOver={flow.startOver}
-					submitNewPassword={flow.submitNewPassword}
-					submitPasswordResetRequest={flow.submitPasswordResetRequest}
-					submitResetCode={flow.submitResetCode}
-					verificationCode={flow.verificationCode}
-					verificationError={flow.verificationError}
-				/>
-			) : null}
+			<SignInEmailCodeForm
+				emailAddress={flow.emailAddress}
+				emailError={flow.emailError}
+				globalErrors={flow.globalErrors}
+				isBusy={flow.isBusy}
+				isLoaded={flow.isLoaded}
+				resendEmailCode={flow.resendEmailCode}
+				setEmailAddress={flow.setEmailAddress}
+				setVerificationCode={flow.setVerificationCode}
+				startEmailCode={flow.startEmailCode}
+				startOver={flow.startOver}
+				step={flow.step.kind}
+				submitEmailCode={flow.submitEmailCode}
+				verificationCode={flow.verificationCode}
+				verificationError={flow.verificationError}
+			/>
 		</AuthPageShell>
 	);
 }

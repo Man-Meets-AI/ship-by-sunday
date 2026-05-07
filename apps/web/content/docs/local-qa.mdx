@@ -49,7 +49,7 @@ Use `bun run release:personas:prepare -- --proof=<proof>` when you need the rele
 
 The Playwright sandbox bootstrap is a local test convenience, not a stable auth path. It seeds browser storage state for deterministic personas, but local auth still depends on Clerk syncing into the browser runtime. If the no-access browser lane ever starts behaving like an entitled user, or a signed-in lane flashes `Unauthorized` during hydration, treat that as Convex deployment drift or bootstrap failure first, not as a product-state bug.
 
-The canonical release proof credentials live in ignored `tmp/release-personas.local.json`, or in the file named by `RELEASE_PERSONAS_LOCAL_FILE`. The release proof commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails and passwords.
+The canonical release proof identities live in ignored `tmp/release-personas.local.json`, or in the file named by `RELEASE_PERSONAS_LOCAL_FILE`. The release proof commands and the Playwright sandbox bootstrap both read that file for the no-access and entitled account emails. Browser proof sends the passwordless email-code challenge first, then uses Clerk testing sign-in tokens to create deterministic authenticated storage state.
 
 ## Full paid local handoff
 
@@ -93,7 +93,7 @@ For local targets, the billing pack now runs `bun run stripe:dev:doctor` as a wa
 
 For any non-local target, keep these boundaries straight:
 
-- `tmp/release-personas.local.json` holds the release proof email and password pairs by default.
+- `tmp/release-personas.local.json` holds the release proof account emails by default.
 - `apps/web/.env.local` or `QA_ENV_FILE=<path>` selects the Clerk and Convex environment where those personas will be created or reused.
 - `PLAYWRIGHT_BASE_URL=<target>` selects the site the browser tests will hit.
 
