@@ -19,8 +19,7 @@ import type {
 	DocsOperatingSystemPackagePatchBlockedReason,
 	DocsOperatingSystemPackagePatchOperation,
 } from "./schemas";
-
-type JsonObject = Record<string, unknown>;
+import type { JsonObject, JsonValue } from "../../core/json-value";
 
 export type ExistingWrapperFile = {
 	targetRef: string;
@@ -484,7 +483,7 @@ function validateInstallPlanForPatching(
 }
 
 function isCanonicalScriptName(
-	value: unknown,
+	value: JsonValue | undefined,
 ): value is DocsOperatingSystemCanonicalScript {
 	return (
 		typeof value === "string" &&
@@ -494,7 +493,7 @@ function isCanonicalScriptName(
 	);
 }
 
-function isPackageScriptOperationStatus(value: unknown) {
+function isPackageScriptOperationStatus(value: JsonValue | undefined) {
 	return (
 		value === "keep" ||
 		value === "add" ||
@@ -504,7 +503,7 @@ function isPackageScriptOperationStatus(value: unknown) {
 	);
 }
 
-function isDependencyOperationStatus(value: unknown) {
+function isDependencyOperationStatus(value: JsonValue | undefined) {
 	return (
 		value === "already-present" ||
 		value === "installable" ||
@@ -512,7 +511,7 @@ function isDependencyOperationStatus(value: unknown) {
 	);
 }
 
-function isFileOperationStatus(value: unknown) {
+function isFileOperationStatus(value: JsonValue | undefined) {
 	return (
 		value === "already-present" ||
 		value === "installable" ||
@@ -556,7 +555,7 @@ function parsePackageJson(packageJsonText: string):
 
 function parseJson(value: string) {
 	try {
-		return JSON.parse(value) as unknown;
+		return JSON.parse(value) as JsonValue;
 	} catch {
 		return null;
 	}
@@ -670,7 +669,7 @@ function detectJsonIndent(packageJsonText: string) {
 	return indentMatch?.[1] ?? "\t";
 }
 
-function isJsonObject(value: unknown): value is JsonObject {
+function isJsonObject(value: JsonValue | undefined): value is JsonObject {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 

@@ -60,7 +60,9 @@ export function useSupportChat({
 			setHasLoadedThread(true);
 			setStatus("idle");
 		} catch (error) {
-			setErrorMessage(getErrorMessage(error));
+			setErrorMessage(
+				getErrorMessage(error instanceof Error ? error : String(error)),
+			);
 			setStatus("error");
 		}
 	}, []);
@@ -121,7 +123,8 @@ export function useSupportChat({
 				},
 			});
 		} catch (error) {
-			const nextErrorMessage = getErrorMessage(error);
+			const caughtError = error instanceof Error ? error : String(error);
+			const nextErrorMessage = getErrorMessage(caughtError);
 			setErrorMessage(nextErrorMessage);
 			setStatus("error");
 			capturePostHogProductEvent({
@@ -131,7 +134,7 @@ export function useSupportChat({
 					entrySurface,
 					pagePath: getCurrentPagePath(),
 					threadStatus: threadState.status,
-					failureClass: getSupportFailureAnalyticsClass(error),
+					failureClass: getSupportFailureAnalyticsClass(caughtError),
 				},
 			});
 		}
@@ -193,7 +196,7 @@ export function useSupportChat({
 	};
 }
 
-function getErrorMessage(error: unknown) {
+function getErrorMessage(error: Error | string) {
 	return error instanceof Error && error.message
 		? error.message
 		: "Unable to reach support.";
@@ -215,7 +218,7 @@ function getLatestVisitorDeliveryMetadata(threadState: SupportThreadState) {
 	};
 }
 
-function getSupportFailureAnalyticsClass(error: unknown) {
+function getSupportFailureAnalyticsClass(error: Error | string) {
 	const message = error instanceof Error ? error.message.toLowerCase() : "";
 	if (message.includes("closed")) {
 		return "thread_closed";

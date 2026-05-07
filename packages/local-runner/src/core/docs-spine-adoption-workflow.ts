@@ -1,6 +1,7 @@
 import { lstat, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "./json-value";
 import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
@@ -547,11 +548,11 @@ function buildParityChecklistArtifact(
 	};
 }
 
-function getStringArrayField(value: unknown, fieldName: string) {
+function getStringArrayField(value: JsonValue | undefined, fieldName: string) {
 	if (!value || typeof value !== "object" || !(fieldName in value)) {
 		return [];
 	}
-	const fieldValue = (value as Record<string, unknown>)[fieldName];
+	const fieldValue = (value as JsonObject)[fieldName];
 	if (!Array.isArray(fieldValue)) {
 		return [];
 	}
@@ -700,7 +701,7 @@ async function writeJsonArtifact(
 	repositoryRoot: string,
 	workflowRunId: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	await writeTextArtifact(
 		repositoryRoot,

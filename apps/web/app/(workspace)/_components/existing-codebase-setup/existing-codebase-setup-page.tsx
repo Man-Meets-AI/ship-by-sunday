@@ -119,7 +119,7 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.pairingError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to prepare pairing token.",
 				report: {
 					title: "Workspace setup pairing preparation failed",
@@ -158,7 +158,7 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.cancelPairingError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to cancel pairing.",
 				report: {
 					title: "Workspace setup pairing cancel failed",
@@ -193,7 +193,7 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.openDestinationError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to save open destination.",
 				report: {
 					title: "Workspace setup open destination save failed",
@@ -242,7 +242,7 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.doctorPassError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to start doctor pass.",
 				report: {
 					title: "Workspace setup doctor pass start failed",

@@ -3,6 +3,7 @@ import {
 	getHomePageRenderModel,
 	type HomePageRenderModel,
 } from "@/app/_lib/home-page-render-model";
+import type { JsonObject } from "@/lib/json-value";
 import { getMetadataBase } from "@/platform/next/metadata-base";
 
 const baseUrl = getMetadataBase();
@@ -12,7 +13,7 @@ function getAbsoluteUrl(path: string) {
 }
 
 function createStructuredData(renderModel: HomePageRenderModel) {
-	const graph: Array<Record<string, unknown>> = [
+	const graph: JsonObject[] = [
 		{
 			"@type": "Organization",
 			name: productConfig.name,

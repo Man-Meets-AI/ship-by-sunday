@@ -79,7 +79,7 @@ export async function GET(request: Request) {
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(
-			error,
+			error instanceof Error ? error : String(error),
 			{
 				unauthorized: "Sign in before managing Codex connection.",
 				forbidden:
@@ -93,12 +93,12 @@ export async function GET(request: Request) {
 		}
 
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.codexAccountLoginPoll,
 			source: "codex",
 			defaultMessage: "Unable to poll Codex login state.",
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !(error instanceof Error && isCodexAppServerRuntimeError(error)),
 		});
 	}
 }

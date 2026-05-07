@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import type { JsonValue } from "@/lib/json-value";
 import { normalizeIncidentEvent } from "@/lib/observability/incident";
 import { captureServerError } from "@/platform/observability/capture-server-error";
 import { ingestErrorEvent } from "@/platform/observability/ingest-error-event";
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
 	try {
 		const event = JSON.parse(rawBody) as {
 			type: string;
-			payload?: unknown;
+			payload?: JsonValue;
 		};
 		const incidentInput = buildVercelWebhookIncident(event);
 		if (!incidentInput) {
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
 	} catch (error) {
 		await captureServerError({
 			source: "vercel",
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.observabilityVercel,
 			code: "vercel_webhook_payload_invalid",

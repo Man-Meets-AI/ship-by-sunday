@@ -33,9 +33,9 @@ export type CheckoutIntent = {
 };
 
 export type CheckoutIntentInput = {
-	readonly buyerStartingPoint?: unknown;
-	readonly checkoutCtaId?: unknown;
-	readonly fulfillmentTrack?: unknown;
+	readonly buyerStartingPoint?: JsonValue;
+	readonly checkoutCtaId?: JsonValue;
+	readonly fulfillmentTrack?: JsonValue;
 };
 
 const checkoutBuyerStartingPointSet = new Set<string>(
@@ -51,20 +51,24 @@ export const UNSPECIFIED_CHECKOUT_INTENT = {
 } as const satisfies CheckoutIntent;
 
 export function normalizeBuyerStartingPoint(
-	value: unknown,
+	value: JsonValue | undefined,
 ): BuyerStartingPoint {
 	return typeof value === "string" && checkoutBuyerStartingPointSet.has(value)
 		? (value as BuyerStartingPoint)
 		: "unspecified";
 }
 
-export function normalizeFulfillmentTrack(value: unknown): FulfillmentTrack {
+export function normalizeFulfillmentTrack(
+	value: JsonValue | undefined,
+): FulfillmentTrack {
 	return typeof value === "string" && checkoutFulfillmentTrackSet.has(value)
 		? (value as FulfillmentTrack)
 		: "unspecified";
 }
 
-export function normalizeCheckoutCtaId(value: unknown): CheckoutCtaId {
+export function normalizeCheckoutCtaId(
+	value: JsonValue | undefined,
+): CheckoutCtaId {
 	return typeof value === "string" && checkoutCtaIdSet.has(value)
 		? (value as CheckoutCtaId)
 		: "unspecified";
@@ -117,17 +121,14 @@ export function normalizeCheckoutIntent(
 	};
 }
 
-export function normalizeCheckoutIntentRequestBody(body: unknown) {
+export function normalizeCheckoutIntentRequestBody(
+	body: JsonValue | undefined,
+) {
 	if (!body || typeof body !== "object" || Array.isArray(body)) {
 		return UNSPECIFIED_CHECKOUT_INTENT;
 	}
 
-	const record = body as {
-		checkoutIntent?: unknown;
-		buyerStartingPoint?: unknown;
-		checkoutCtaId?: unknown;
-		fulfillmentTrack?: unknown;
-	};
+	const record = body as JsonObject & CheckoutIntentInput;
 	if (
 		record.checkoutIntent &&
 		typeof record.checkoutIntent === "object" &&
@@ -175,3 +176,4 @@ export function getResolvedCheckoutIntentFields(
 
 	return normalizedIncomingIntent;
 }
+import type { JsonObject, JsonValue } from "@/lib/json-value";

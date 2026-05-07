@@ -1,15 +1,16 @@
 import { spawn } from "node:child_process";
 
+import type { JsonObject, JsonValue } from "./json-value";
 import { writeLocalCodexThreadState } from "./local-project-state";
 
-type JsonRecord = Record<string, unknown>;
+type JsonRecord = JsonObject;
 
 export type CodexExecRunnerResult = {
 	exitCode: number | null;
 	threadId: string | null;
 	events: JsonRecord[];
 	finalAgentMessage: string | null;
-	structuredOutput: unknown;
+	structuredOutput: JsonValue;
 	stderr: string;
 	timedOut: boolean;
 };

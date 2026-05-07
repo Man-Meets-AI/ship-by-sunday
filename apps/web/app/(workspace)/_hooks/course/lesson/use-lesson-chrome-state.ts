@@ -55,7 +55,9 @@ function storageKey(lessonKey: string) {
 	return `sbs:lesson-ui:${lessonKey}`;
 }
 
-function isChromeState(value: unknown): value is LessonChromeState {
+function isChromeState(
+	value: Partial<LessonChromeState> | null,
+): value is LessonChromeState {
 	if (!value || typeof value !== "object") {
 		return false;
 	}
@@ -93,7 +95,7 @@ export function useLessonChromeState({
 		}
 
 		try {
-			const parsed = JSON.parse(stored);
+			const parsed = JSON.parse(stored) as Partial<LessonChromeState> | null;
 			if (!isChromeState(parsed)) {
 				setChromeState(defaults);
 				return;

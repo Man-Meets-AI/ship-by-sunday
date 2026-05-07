@@ -17,7 +17,7 @@ import { isSupportModeBlockedMutationResult } from "@/platform/admin-impersonati
 
 type SaveProjectDefinitionFactsCaller = (
 	args: SaveProjectDefinitionFactsArgs,
-) => Promise<unknown>;
+) => Promise<object | null>;
 
 export type CodebaseLocalDraftSeederOptions = {
 	isAuthenticated: boolean;

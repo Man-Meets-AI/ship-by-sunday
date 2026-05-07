@@ -120,7 +120,7 @@ export function useWorkspacePrivacyActions({
 			setRevokeState("error");
 			showWorkspaceActionErrorToast({
 				id: workspacePrivacyToastIds.revokeRunnerError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to revoke runner.",
 				report: {
 					title: "Workspace privacy runner revoke failed",
@@ -170,7 +170,7 @@ export function useWorkspacePrivacyActions({
 			setDeleteState("error");
 			showWorkspaceActionErrorToast({
 				id: workspacePrivacyToastIds.deleteFindingsError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to delete synced findings.",
 				report: {
 					title: "Workspace privacy synced findings delete failed",
@@ -225,7 +225,7 @@ export function useWorkspacePrivacyActions({
 			setManagedGithubActionState("error");
 			showWorkspaceActionErrorToast({
 				id: workspacePrivacyToastIds.requestManagedGithubError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to request managed GitHub.",
 				report: {
 					title: "Workspace privacy managed GitHub request failed",
@@ -271,7 +271,7 @@ export function useWorkspacePrivacyActions({
 			setManagedGithubActionState("error");
 			showWorkspaceActionErrorToast({
 				id: workspacePrivacyToastIds.revokeManagedGithubError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to revoke managed GitHub.",
 				report: {
 					title: "Workspace privacy managed GitHub revoke failed",

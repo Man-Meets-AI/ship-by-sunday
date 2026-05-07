@@ -61,7 +61,10 @@ export function AdminImpersonationPageClient({
 				const signInResult = (await signIn.create({
 					strategy: "ticket",
 					ticket: result.token,
-				})) as { createdSessionId?: string | null; error?: unknown };
+				})) as {
+					createdSessionId?: string | null;
+					error?: object | string | null;
+				};
 				if (signInResult.error) {
 					throw new Error("Clerk rejected the actor-token ticket.");
 				}

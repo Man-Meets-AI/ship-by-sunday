@@ -2,6 +2,8 @@ import "server-only";
 
 import { PostHog } from "posthog-node";
 
+import type { IncidentError } from "@/lib/observability/incident";
+
 type PostHogServerExceptionProperties = Record<
 	string,
 	string | number | boolean | null
@@ -44,7 +46,7 @@ export function capturePostHogServerException({
 	distinctId,
 	properties,
 }: {
-	error: unknown;
+	error: IncidentError;
 	distinctId?: string;
 	properties?: PostHogServerExceptionProperties;
 }) {

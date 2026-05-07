@@ -85,11 +85,11 @@ export async function requireProductAccessApiSession(): Promise<ApiSession> {
 }
 
 export function getApiAuthErrorResponse(
-	error: unknown,
+	error: Error | string,
 	copy: AuthErrorCopy,
 	requestId: string,
 ) {
-	if (!(error instanceof Error)) {
+	if (typeof error === "string") {
 		return null;
 	}
 

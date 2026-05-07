@@ -4,7 +4,9 @@ export const DOCS_THEME_STORAGE_KEY = "docs:theme";
 export const DOCS_THEME_COOKIE_NAME = "docs-theme";
 const DOCS_THEME_COOKIE_MAX_AGE_SECONDS = 31_536_000;
 
-export function isDocsTheme(value: unknown): value is DocsTheme {
+export function isDocsTheme(
+	value: string | null | undefined,
+): value is DocsTheme {
 	return value === "dark" || value === "light";
 }
 

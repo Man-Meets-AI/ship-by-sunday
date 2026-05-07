@@ -1,6 +1,7 @@
 import { lstat, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "./json-value";
 import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
@@ -721,7 +722,7 @@ async function readApplyReadyFiles(
 			path.join(repositoryRoot, sourceArtifactRef),
 			"utf8",
 		);
-		const parsedDraft = JSON.parse(rawDraft) as unknown;
+		const parsedDraft = JSON.parse(rawDraft) as JsonValue;
 		applyReadyFiles.push(
 			...extractApplyReadyFiles(parsedDraft, sourceArtifactRef),
 		);
@@ -730,21 +731,18 @@ async function readApplyReadyFiles(
 }
 
 export function extractApplyReadyFiles(
-	draft: unknown,
+	draft: JsonValue,
 	sourceArtifactRef: string,
 ): DocsSpineApplyReadyFile[] {
 	if (!draft || typeof draft !== "object" || Array.isArray(draft)) {
 		return [];
 	}
-	const proposedFiles = (draft as Record<string, unknown>).proposedFiles;
+	const draftRecord = draft as JsonObject;
+	const proposedFiles = draftRecord.proposedFiles;
 	const draftStatus =
-		typeof (draft as Record<string, unknown>).status === "string"
-			? String((draft as Record<string, unknown>).status)
-			: null;
-	const draftBlockedReasons = Array.isArray(
-		(draft as Record<string, unknown>).blockedReasons,
-	)
-		? ((draft as Record<string, unknown>).blockedReasons as unknown[]).filter(
+		typeof draftRecord.status === "string" ? String(draftRecord.status) : null;
+	const draftBlockedReasons = Array.isArray(draftRecord.blockedReasons)
+		? draftRecord.blockedReasons.filter(
 				(reason): reason is string => typeof reason === "string",
 			)
 		: [];
@@ -760,7 +758,7 @@ export function extractApplyReadyFiles(
 			) {
 				return null;
 			}
-			const record = proposedFile as Record<string, unknown>;
+			const record = proposedFile as JsonObject;
 			if (
 				typeof record.targetRef !== "string" ||
 				typeof record.markdown !== "string"
@@ -1305,7 +1303,7 @@ async function isPriorDocsSpineAdoptionRunRef(
 	}
 	try {
 		const workflowPacket = JSON.parse(rawWorkflowPacket) as {
-			workflowId?: unknown;
+			workflowId?: string;
 		};
 		return workflowPacket.workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID;
 	} catch {
@@ -1567,7 +1565,7 @@ async function writeJsonArtifact(
 	repositoryRoot: string,
 	workflowRunId: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	await writeTextArtifact(
 		repositoryRoot,

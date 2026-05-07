@@ -10,8 +10,9 @@ import type {
 	DocsSpineScannerArtifact,
 	DocsSpineSynthesisArtifact,
 } from "./schemas";
+import type { JsonObject, JsonValue } from "../../core/json-value";
 
-type ScannerArtifactLookup = Record<string, unknown>;
+type ScannerArtifactLookup = JsonObject;
 
 const INITIAL_PROGRAM_ID = "docs-spine-adoption";
 
@@ -654,7 +655,7 @@ function draftFamily({
 	sourceArtifactRefs: string[];
 	blockedReasons: string[];
 	applyInstructions: string;
-	proposedOperations: Array<Record<string, unknown>>;
+	proposedOperations: JsonObject[];
 	proposedFiles?: Array<{ targetRef: string; markdown: string }>;
 }) {
 	return {
@@ -693,7 +694,7 @@ function artifact(
 		| "performanceTimings"
 		| "parityChecklist"
 	>,
-	value: unknown,
+	value: JsonValue,
 ): DocsSpineSynthesisArtifact {
 	return {
 		repoRelativePath: DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS[key],
@@ -707,12 +708,12 @@ function readObjectArtifact(
 ) {
 	const value = scannerArtifactLookup[repoRelativePath];
 	if (value && typeof value === "object" && !Array.isArray(value)) {
-		return value as Record<string, unknown>;
+		return value as JsonObject;
 	}
 	return {};
 }
 
-function readStringList(value: Record<string, unknown>, key: string) {
+function readStringList(value: JsonObject, key: string) {
 	const maybeList = value[key];
 	if (!Array.isArray(maybeList)) {
 		return [];
@@ -722,7 +723,7 @@ function readStringList(value: Record<string, unknown>, key: string) {
 	);
 }
 
-function readSurfaceRows(value: Record<string, unknown>) {
+function readSurfaceRows(value: JsonObject) {
 	const maybeRows = value.surfaces;
 	if (!Array.isArray(maybeRows)) {
 		return [];
@@ -732,7 +733,7 @@ function readSurfaceRows(value: Record<string, unknown>) {
 			if (!row || typeof row !== "object") {
 				return null;
 			}
-			const record = row as Record<string, unknown>;
+			const record = row as JsonObject;
 			if (
 				typeof record.surfaceId !== "string" ||
 				typeof record.status !== "string"
@@ -775,7 +776,7 @@ function renderDocsIndexMarkdown({
 	nativeGateScriptNames,
 }: {
 	repoFacts: DocsSpineRepoFacts;
-	sourceTruthMap: Record<string, unknown>;
+	sourceTruthMap: JsonObject;
 	missingSurfaces: string[];
 	nativeGateScriptNames: string[];
 }) {

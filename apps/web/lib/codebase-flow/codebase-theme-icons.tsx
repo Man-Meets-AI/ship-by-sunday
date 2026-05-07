@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentProps, ComponentType } from "react";
 import type { PresetConfig } from "shadcn/preset";
 
 import {
@@ -43,7 +43,9 @@ type PreviewIconSet = {
 	Bell: IconComponent;
 };
 
-function hugeicon(iconData: unknown): IconComponent {
+function hugeicon(
+	iconData: ComponentProps<typeof HugeiconsIcon>["icon"],
+): IconComponent {
 	return function HugeWrap({ className }: IconProps) {
 		return (
 			<HugeiconsIcon

@@ -1,4 +1,5 @@
 import type { IncidentEventInput } from "@/lib/observability/incident";
+import type { JsonObject, JsonValue } from "@/lib/json-value";
 
 const escalatedVercelDeploymentEventTypes = [
 	"deployment.error",
@@ -10,7 +11,7 @@ type EscalatedVercelDeploymentEventType =
 
 type VercelDeploymentWebhookEvent = {
 	type: string;
-	payload?: unknown;
+	payload?: JsonValue;
 };
 
 export function buildVercelWebhookIncident(
@@ -97,15 +98,15 @@ function buildVercelNextAction(eventType: EscalatedVercelDeploymentEventType) {
 	return "Open the failing Vercel deployment logs and fix the blocked production build or rollout.";
 }
 
-function readRecord(value: unknown) {
+function readRecord(value: JsonValue | undefined) {
 	if (!value || typeof value !== "object") {
 		return null;
 	}
 
-	return value as Record<string, unknown>;
+	return value as JsonObject;
 }
 
-function requireRecord(value: unknown, fieldName: string) {
+function requireRecord(value: JsonValue | undefined, fieldName: string) {
 	const record = readRecord(value);
 	if (!record) {
 		throw new Error(`Missing ${fieldName}.`);
@@ -114,11 +115,11 @@ function requireRecord(value: unknown, fieldName: string) {
 	return record;
 }
 
-function readString(value: unknown) {
+function readString(value: JsonValue | undefined) {
 	return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
 
-function requireString(value: unknown, fieldName: string) {
+function requireString(value: JsonValue | undefined, fieldName: string) {
 	const stringValue = readString(value);
 	if (!stringValue) {
 		throw new Error(`Missing ${fieldName}.`);

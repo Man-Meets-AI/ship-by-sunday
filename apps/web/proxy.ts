@@ -51,7 +51,7 @@ export default disableClerkMiddleware
 				} catch (error) {
 					await captureServerError({
 						source: "clerk",
-						error,
+						error: error instanceof Error ? error : String(error),
 						pathname: request.nextUrl.pathname,
 						requestId: request.headers.get("x-request-id"),
 						code: "clerk_proxy_failed",

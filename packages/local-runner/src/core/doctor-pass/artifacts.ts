@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "../json-value";
 import { getLocalStateDirectory } from "../local-project-state";
 
 export function createDoctorPassRunId(now = new Date()) {
@@ -58,7 +59,7 @@ export async function writeJsonArtifact({
 	value,
 }: {
 	filePath: string;
-	value: unknown;
+	value: JsonValue;
 }) {
 	await mkdir(path.dirname(filePath), { recursive: true });
 	const temporaryPath = `${filePath}.${process.pid}.tmp`;
@@ -70,7 +71,7 @@ export async function readJsonArtifact<T>(filePath: string): Promise<T> {
 	return JSON.parse(await readFile(filePath, "utf8")) as T;
 }
 
-export function sha256Digest(value: unknown) {
+export function sha256Digest(value: JsonValue) {
 	return `sha256:${createHash("sha256")
 		.update(JSON.stringify(value))
 		.digest("hex")}`;

@@ -39,7 +39,7 @@ export type CheckoutSessionClaimResult =
 	| {
 			kind: "validated";
 			sessionId: string;
-			claimResult: unknown;
+			claimResult: object | null;
 	  };
 
 export type CheckoutEmailClaimResult =
@@ -63,7 +63,7 @@ export type CheckoutEmailClaimResult =
 	| {
 			kind: "validated";
 			sessionId: string;
-			claimResult: unknown;
+			claimResult: object | null;
 	  };
 
 export function getStripeCheckoutSessionEmail(

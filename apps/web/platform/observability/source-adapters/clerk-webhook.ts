@@ -1,7 +1,6 @@
 import type { WebhookEvent } from "@clerk/backend/webhooks";
 
 import type { IncidentEventInput } from "@/lib/observability/incident";
-
 export function buildClerkWebhookIncident(
 	event: WebhookEvent,
 ): IncidentEventInput | null {
@@ -37,12 +36,12 @@ function buildClerkEventKey(eventType: string, entityId: string | null) {
 	return entityId ? `${eventType}:${entityId}` : eventType;
 }
 
-function readString(value: unknown, key: string) {
+function readString(value: object | null | undefined, key: string) {
 	if (!value || typeof value !== "object") {
 		return null;
 	}
 
-	const candidate = (value as Record<string, unknown>)[key];
+	const candidate = (value as Record<string, string | null | undefined>)[key];
 	return typeof candidate === "string" && candidate.length > 0
 		? candidate
 		: null;

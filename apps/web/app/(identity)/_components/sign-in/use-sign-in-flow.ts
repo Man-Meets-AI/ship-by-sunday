@@ -7,6 +7,7 @@ import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { authViewConfig, routeConfig } from "@/config/product";
 import { assertNever } from "@/lib/assert";
 import { reportClientError } from "@/lib/observability/client-error-report";
+import type { IncidentError } from "@/lib/observability/incident";
 
 import {
 	buildSignInHref,
@@ -76,7 +77,7 @@ function getDefaultVerificationMethod(
 }
 
 function getRenderableErrors(
-	errors: Array<unknown> | null,
+	errors: Array<{ message?: string } | null> | null,
 ): Array<{ message?: string }> | null {
 	if (!errors?.length) {
 		return null;
@@ -125,7 +126,7 @@ export function useSignInFlow() {
 		status?: string | null;
 		finalize?: typeof signIn.finalize;
 		createdSessionId?: string | null;
-		error?: unknown;
+		error?: IncidentError;
 	};
 
 	const redirectPath = getSafeRedirectPath(searchParams.get("redirect_url"));
@@ -474,7 +475,9 @@ export function useSignInFlow() {
 		availableVerificationMethods,
 		emailAddress,
 		emailError: errors.fields.identifier,
-		globalErrors: getRenderableErrors(errors.global),
+		globalErrors: getRenderableErrors(
+			errors.global as Array<{ message?: string } | null> | null,
+		),
 		isBusy,
 		isLoaded: Boolean(signIn),
 		newPassword,

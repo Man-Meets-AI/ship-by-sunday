@@ -15,6 +15,7 @@ export {
 
 export type {
 	IncidentEventInput as ObservabilityEventInput,
+	IncidentError,
 	IncidentSeverity as ObservabilitySeverity,
 	IncidentSource as ObservabilitySource,
 	NormalizedIncidentEvent as NormalizedObservabilityEvent,

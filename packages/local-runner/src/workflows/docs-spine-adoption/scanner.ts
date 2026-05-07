@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "../../core/json-value";
 import { runBoundedProcess } from "../../core/bounded-process";
 import {
 	DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS,
@@ -490,7 +491,7 @@ function artifact(
 		| "repoFacts"
 		| "parityChecklist"
 	>,
-	value: unknown,
+	value: JsonValue,
 ): DocsSpineScannerArtifact {
 	return {
 		repoRelativePath: DOCS_SPINE_ADOPTION_LOCAL_ARTIFACT_REFS[key],
@@ -498,12 +499,12 @@ function artifact(
 	};
 }
 
-function withScannerProvenance(value: unknown) {
+function withScannerProvenance(value: JsonValue) {
 	if (!value || typeof value !== "object" || Array.isArray(value)) {
 		return value;
 	}
 	return {
-		...(value as Record<string, unknown>),
+		...(value as JsonObject),
 		provenance: {
 			refSource: "git ls-files",
 			refNormalization: "repo-relative-posix",

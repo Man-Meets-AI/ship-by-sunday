@@ -109,16 +109,14 @@ function excludeAdminCustomers(
 	return customers.filter((customer) => !adminEmailSet.has(customer.email));
 }
 
-function getClerkErrorStatus(error: unknown) {
-	if (typeof error !== "object" || error === null) {
-		return null;
+function getClerkErrorStatus(
+	error: Error | { status?: number; statusCode?: number },
+) {
+	if ("status" in error && typeof error.status === "number") {
+		return error.status;
 	}
-	const errorRecord = error as Record<string, unknown>;
-	if (typeof errorRecord.status === "number") {
-		return errorRecord.status;
-	}
-	if (typeof errorRecord.statusCode === "number") {
-		return errorRecord.statusCode;
+	if ("statusCode" in error && typeof error.statusCode === "number") {
+		return error.statusCode;
 	}
 	return null;
 }
@@ -254,7 +252,11 @@ export async function resolveAdminImpersonationTarget(
 	try {
 		user = await resolvedClient.users.getUser(subjectClerkUserId);
 	} catch (error) {
-		if (getClerkErrorStatus(error) === 404) {
+		const clerkErrorStatus =
+			error instanceof Error || (typeof error === "object" && error !== null)
+				? getClerkErrorStatus(error)
+				: null;
+		if (clerkErrorStatus === 404) {
 			return {
 				ok: false,
 				status: 404,

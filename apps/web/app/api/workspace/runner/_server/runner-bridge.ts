@@ -16,33 +16,26 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import type { JsonObject, JsonValue } from "@/lib/json-value";
 
 const RUNNER_TOKEN_PREFIX = "sbs_run_";
 const VALID_RUNNER_MODES = new Set(["daemon", "one_shot"]);
 
-function readErrorMessage(error: unknown) {
-	if (error instanceof Error) {
-		return error.message;
-	}
-
-	return String(error);
-}
-
-function getString(value: unknown) {
+function getString(value: JsonValue | undefined) {
 	return typeof value === "string" ? value.trim() : "";
 }
 
-function getOptionalString(value: unknown) {
+function getOptionalString(value: JsonValue | undefined) {
 	const text = getString(value);
 	return text.length > 0 ? text : undefined;
 }
 
-function getRunnerMode(value: unknown) {
+function getRunnerMode(value: JsonValue | undefined) {
 	const mode = getString(value);
 	return VALID_RUNNER_MODES.has(mode) ? (mode as "daemon" | "one_shot") : null;
 }
 
-function normalizeRunnerEventBody(body: Record<string, unknown> | null) {
+function normalizeRunnerEventBody(body: JsonObject | null) {
 	const eventId = getString(body?.eventId);
 	const projectId = getString(body?.projectId);
 	const runnerId = getString(body?.runnerId);
@@ -81,7 +74,7 @@ function normalizeRunnerEventBody(body: Record<string, unknown> | null) {
 	};
 }
 
-function normalizeDoctorPassStartBody(body: Record<string, unknown> | null) {
+function normalizeDoctorPassStartBody(body: JsonObject | null) {
 	const projectId = getString(body?.projectId);
 	const runnerId = getString(body?.runnerId);
 	const localRunId = getString(body?.localRunId);
@@ -97,7 +90,7 @@ function normalizeDoctorPassStartBody(body: Record<string, unknown> | null) {
 	};
 }
 
-function normalizeFindingsUploadBody(body: Record<string, unknown> | null) {
+function normalizeFindingsUploadBody(body: JsonObject | null) {
 	const projectId = getString(body?.projectId);
 	const runnerId = getString(body?.runnerId);
 	const doctorPassRunId = getString(body?.doctorPassRunId);
@@ -121,7 +114,7 @@ function normalizeFindingsUploadBody(body: Record<string, unknown> | null) {
 	};
 }
 
-function normalizeWorkflowRunResolveBody(body: Record<string, unknown> | null) {
+function normalizeWorkflowRunResolveBody(body: JsonObject | null) {
 	const projectId = getString(body?.projectId);
 	const runnerId = getString(body?.runnerId);
 	const workflowRunId = getString(body?.workflowRunId);
@@ -135,7 +128,7 @@ function normalizeWorkflowRunResolveBody(body: Record<string, unknown> | null) {
 	};
 }
 
-function normalizeWorkflowRunClaimBody(body: Record<string, unknown> | null) {
+function normalizeWorkflowRunClaimBody(body: JsonObject | null) {
 	const projectId = getString(body?.projectId);
 	const runnerId = getString(body?.runnerId);
 	if (!projectId || !runnerId) {
@@ -151,7 +144,7 @@ async function readJsonObject(request: Request) {
 	try {
 		const body = await request.json();
 		return body && typeof body === "object" && !Array.isArray(body)
-			? (body as Record<string, unknown>)
+			? (body as JsonObject)
 			: null;
 	} catch {
 		return null;
@@ -224,7 +217,7 @@ export async function pairWorkspaceRunnerFromRequest(request: Request) {
 	} catch (error) {
 		return jsonWithRequestId(
 			{
-				error: readErrorMessage(error),
+				error: error instanceof Error ? error.message : String(error),
 				requestId,
 			},
 			{ status: 401 },
@@ -273,7 +266,7 @@ export async function ingestWorkspaceRunnerEventFromRequest(request: Request) {
 	} catch (error) {
 		return jsonWithRequestId(
 			{
-				error: readErrorMessage(error),
+				error: error instanceof Error ? error.message : String(error),
 				requestId,
 			},
 			{ status: 401 },
@@ -321,7 +314,7 @@ export async function startWorkspaceDoctorPassFromRequest(request: Request) {
 	} catch (error) {
 		return jsonWithRequestId(
 			{
-				error: readErrorMessage(error),
+				error: error instanceof Error ? error.message : String(error),
 				requestId,
 			},
 			{ status: 401 },
@@ -371,7 +364,7 @@ export async function uploadWorkspaceRunnerFindingsFromRequest(
 	} catch (error) {
 		return jsonWithRequestId(
 			{
-				error: readErrorMessage(error),
+				error: error instanceof Error ? error.message : String(error),
 				requestId,
 			},
 			{ status: 401 },
@@ -421,7 +414,7 @@ export async function resolveWorkspaceRunnerWorkflowRunFromRequest(
 	} catch (error) {
 		return jsonWithRequestId(
 			{
-				error: readErrorMessage(error),
+				error: error instanceof Error ? error.message : String(error),
 				requestId,
 			},
 			{ status: 401 },
@@ -471,7 +464,7 @@ export async function claimWorkspaceRunnerWorkflowRunFromRequest(
 	} catch (error) {
 		return jsonWithRequestId(
 			{
-				error: readErrorMessage(error),
+				error: error instanceof Error ? error.message : String(error),
 				requestId,
 			},
 			{ status: 401 },

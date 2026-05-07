@@ -2,6 +2,7 @@ import type {
 	DOCS_SPINE_ADOPTION_WORKFLOW_ID,
 	DOCS_SPINE_ADOPTION_WORKFLOW_VERSION,
 } from "./manifest";
+import type { JsonValue } from "../../core/json-value";
 
 export type DocsSpineAdoptionProofCommandResult = {
 	commandName: string;
@@ -50,12 +51,12 @@ export type DocsSpineRepoFacts = {
 
 export type DocsSpineScannerArtifact = {
 	repoRelativePath: string;
-	value: unknown;
+	value: JsonValue;
 };
 
 export type DocsSpineSynthesisArtifact = {
 	repoRelativePath: string;
-	value: unknown;
+	value: JsonValue;
 };
 
 export type DocsSpineDraftFamily =

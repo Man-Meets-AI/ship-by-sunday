@@ -1,6 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "../json-value";
 import { assertSyncSafeValue } from "../redaction";
 import {
 	createRunnerEvent,
@@ -274,7 +275,7 @@ async function readProbeJsonOrBlocked({
 	filePath: string;
 	probeId: string;
 	blockedReason: string;
-}) {
+}): Promise<{ value: JsonValue; blockedReason: string | null }> {
 	try {
 		return {
 			value: await readJsonArtifact(filePath),

@@ -8,6 +8,7 @@ import {
 	type CanonicalProjectFactsDraft,
 } from "./schema";
 import { deriveCodebaseFacts } from "./derived-codebase-facts";
+import type { JsonValue } from "../json-value";
 
 export const CANONICAL_PROJECT_DEFINITION_SCHEMA_VERSION = 1;
 
@@ -30,7 +31,7 @@ type CreateCanonicalProjectDefinitionDraftArgs = {
 };
 
 export function parseCanonicalProjectDefinition(
-	input: unknown,
+	input: JsonValue,
 ): CanonicalProjectDefinition {
 	const parsedInput = canonicalProjectDefinitionDraftSchema.parse(input);
 	return canonicalProjectDefinitionSchema.parse({
@@ -40,13 +41,13 @@ export function parseCanonicalProjectDefinition(
 }
 
 export function parseCanonicalProjectFactsDraft(
-	input: unknown,
+	input: JsonValue,
 ): CanonicalProjectFactsDraft {
 	return canonicalProjectFactsDraftSchema.parse(input);
 }
 
 export function parseCanonicalProjectDefinitionDraft(
-	input: unknown,
+	input: JsonValue,
 ): CanonicalProjectDefinitionDraft {
 	return canonicalProjectDefinitionDraftSchema.parse(input);
 }

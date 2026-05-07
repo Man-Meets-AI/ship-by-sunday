@@ -102,7 +102,7 @@ const DEFAULT_SELECTED_NEXT_SLICE =
 function deriveThemePreset(facts: CanonicalProjectFactsDraft) {
 	const preset = trimText(
 		facts.theme_preset ??
-			((facts as Record<string, unknown>).theme_hex as string | undefined),
+			(facts as CanonicalProjectFactsDraft & { theme_hex?: string }).theme_hex,
 	);
 	if (!preset) {
 		return buildDesignPresetFactSeed(facts.design_preset_id).theme_preset;

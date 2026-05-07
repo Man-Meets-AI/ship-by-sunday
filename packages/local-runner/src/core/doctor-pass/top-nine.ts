@@ -1,6 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "../json-value";
 import { runCodexExec } from "../codex-exec-runner";
 import { assertSyncSafeValue } from "../redaction";
 import { getDoctorPassLocalReportRef, writeJsonArtifact } from "./artifacts";
@@ -17,10 +18,10 @@ type TopNineInput = {
 	runId: string;
 	repositoryRoot: string;
 	reportDirectory: string;
-	codebaseIntakeJson: unknown;
-	commandProofMap: unknown;
-	codexSetupAudit: unknown;
-	sourceTruthAgentReadiness: unknown;
+	codebaseIntakeJson: JsonValue;
+	commandProofMap: JsonValue;
+	codexSetupAudit: JsonValue;
+	sourceTruthAgentReadiness: JsonValue;
 	codexBinary?: string;
 	timeoutMs?: number;
 };
@@ -198,10 +199,10 @@ function createTopNinePrompt({
 	sourceTruthAgentReadiness,
 }: {
 	runId: string;
-	codebaseIntakeJson: unknown;
-	commandProofMap: unknown;
-	codexSetupAudit: unknown;
-	sourceTruthAgentReadiness: unknown;
+	codebaseIntakeJson: JsonValue;
+	commandProofMap: JsonValue;
+	codexSetupAudit: JsonValue;
+	sourceTruthAgentReadiness: JsonValue;
 }) {
 	return [
 		"# Repo Doctor Top Nine",
@@ -236,7 +237,7 @@ function createTopNinePrompt({
 	].join("\n");
 }
 
-function validateTopNineOutput(value: unknown): TopNineOutput {
+function validateTopNineOutput(value: JsonValue): TopNineOutput {
 	if (!value || typeof value !== "object" || Array.isArray(value)) {
 		throw new Error("Codex output must be an object.");
 	}
@@ -316,7 +317,7 @@ function validateFinding(finding: DoctorFinding): DoctorFinding {
 }
 
 function normalizeEvidenceRef(evidenceRef: EvidenceRef): EvidenceRef {
-	const candidate = evidenceRef as EvidenceRef & Record<string, unknown>;
+	const candidate = evidenceRef;
 	switch (candidate.kind) {
 		case "file":
 			return {

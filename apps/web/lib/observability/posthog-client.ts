@@ -1,5 +1,7 @@
 import posthog from "posthog-js";
 
+import type { IncidentError } from "@/lib/observability/incident";
+
 const POSTHOG_DEFAULTS = "2026-01-30";
 const POSTHOG_REPLAY_MASK_SELECTOR =
 	"[data-ph-mask], [data-sensitive], [data-private], .ph-mask, .ph-sensitive";
@@ -65,7 +67,7 @@ export function capturePostHogClientException({
 	error,
 	properties,
 }: {
-	error: unknown;
+	error: IncidentError;
 	properties?: PostHogEventProperties;
 }) {
 	try {

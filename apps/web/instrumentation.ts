@@ -16,9 +16,10 @@ export const onRequestError: Instrumentation.onRequestError = async (
 	const { capturePostHogServerException, flushPostHogServer } =
 		await import("@/platform/observability/posthog-server");
 	const requestId = getRequestIdFromHeaderRecord(errorRequest.headers);
+	const incidentError = error instanceof Error ? error : String(error);
 
 	capturePostHogServerException({
-		error,
+		error: incidentError,
 		distinctId: getPostHogDistinctId(errorRequest.headers.cookie),
 		properties: {
 			source: "next_runtime",
@@ -31,13 +32,13 @@ export const onRequestError: Instrumentation.onRequestError = async (
 			routeType: errorContext.routeType,
 			renderSource: errorContext.renderSource ?? null,
 			revalidateReason: errorContext.revalidateReason ?? null,
-			digest: getErrorDigest(error),
+			digest: error instanceof Error ? getErrorDigest(error) : null,
 		},
 	});
 	await flushPostHogServer();
 };
 
-function getErrorDigest(error: unknown) {
+function getErrorDigest(error: Error & { digest?: string }) {
 	if (!error || typeof error !== "object" || !("digest" in error)) {
 		return null;
 	}
@@ -60,7 +61,7 @@ function getPostHogDistinctId(cookieHeader: string | string[] | undefined) {
 
 	try {
 		const parsedCookie = JSON.parse(decodeURIComponent(cookieMatch[1])) as {
-			distinct_id?: unknown;
+			distinct_id?: string;
 		};
 		return typeof parsedCookie.distinct_id === "string"
 			? parsedCookie.distinct_id

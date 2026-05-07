@@ -3,6 +3,7 @@ import "server-only";
 import { fetchAction, fetchQuery } from "convex/nextjs";
 
 import { api } from "@/convex/_generated/api";
+import type { JsonValue } from "@/lib/json-value";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import {
 	appendSupportSessionCookie,
@@ -11,9 +12,9 @@ import {
 } from "./support-session-cookie";
 
 type SupportMessageRequestBody = {
-	readonly messageText?: unknown;
-	readonly pagePath?: unknown;
-	readonly entrySurface?: unknown;
+	readonly messageText?: JsonValue;
+	readonly pagePath?: JsonValue;
+	readonly entrySurface?: JsonValue;
 };
 
 const SUPPORT_MESSAGE_MAX_LENGTH = 2_000;
@@ -73,9 +74,10 @@ export async function sendSupportMessageFromRequest(request: Request) {
 
 		return jsonWithSupportCookie(threadState, undefined, supportSessionCookie);
 	} catch (error) {
+		const caughtError = error instanceof Error ? error : String(error);
 		return jsonWithSupportCookie(
-			{ error: getSupportMessageError(error) },
-			{ status: getSupportErrorStatus(error) },
+			{ error: getSupportMessageError(caughtError) },
+			{ status: getSupportErrorStatus(caughtError) },
 			supportSessionCookie,
 		);
 	}
@@ -89,7 +91,7 @@ async function readSupportMessageRequestBody(request: Request) {
 	}
 }
 
-function normalizeSupportMessageText(value: unknown) {
+function normalizeSupportMessageText(value: JsonValue | undefined) {
 	if (typeof value !== "string") {
 		return null;
 	}
@@ -102,7 +104,7 @@ function normalizeSupportMessageText(value: unknown) {
 	return normalized;
 }
 
-function normalizePagePath(value: unknown) {
+function normalizePagePath(value: JsonValue | undefined) {
 	if (typeof value !== "string") {
 		return "/";
 	}
@@ -115,7 +117,7 @@ function normalizePagePath(value: unknown) {
 	return normalized.slice(0, 256);
 }
 
-function normalizeEntrySurface(value: unknown) {
+function normalizeEntrySurface(value: JsonValue | undefined) {
 	return typeof value === "string" && value.trim()
 		? value.trim().slice(0, 80)
 		: "homepage_support_widget";
@@ -130,7 +132,7 @@ async function getOptionalConvexAuthToken() {
 	}
 }
 
-function getSupportMessageError(error: unknown) {
+function getSupportMessageError(error: Error | string) {
 	if (error instanceof Error && error.message) {
 		if (error.message.includes("characters or fewer")) {
 			return `Message text must be ${SUPPORT_MESSAGE_MAX_LENGTH} characters or fewer.`;
@@ -152,7 +154,7 @@ function getSupportMessageError(error: unknown) {
 	return "Unable to send support message.";
 }
 
-function getSupportErrorStatus(error: unknown) {
+function getSupportErrorStatus(error: Error | string) {
 	if (!(error instanceof Error)) {
 		return 500;
 	}
@@ -180,7 +182,7 @@ function getSupportErrorStatus(error: unknown) {
 }
 
 function jsonWithSupportCookie(
-	body: unknown,
+	body: object,
 	init: ResponseInit | undefined,
 	supportSessionCookie: SupportSessionCookie,
 ) {

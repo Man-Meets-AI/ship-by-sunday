@@ -6,7 +6,7 @@ export type SupportModeBlockedMutationResult = {
 };
 
 export function isSupportModeBlockedMutationResult(
-	result: unknown,
+	result: object | string | number | boolean | null | undefined,
 ): result is SupportModeBlockedMutationResult {
 	return (
 		typeof result === "object" &&

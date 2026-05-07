@@ -15,30 +15,27 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import type { JsonObject, JsonValue } from "@/lib/json-value";
 
 type BonusLessonViewedRequestBody = {
 	lessonKey: string;
 };
 
-function getConvexErrorMessage(error: unknown) {
+function getConvexErrorMessage(error: Error) {
 	if (error instanceof ConvexError) {
 		return String(error.data);
 	}
 
-	if (error instanceof Error) {
-		return error.message;
-	}
-
-	return null;
+	return error.message;
 }
 
-function normalizeLessonKey(value: unknown) {
+function normalizeLessonKey(value: JsonValue | undefined) {
 	return typeof value === "string" ? value.trim() : null;
 }
 
 async function readBonusLessonViewedRequestBody(request: Request) {
 	try {
-		return (await request.json()) as Record<string, unknown>;
+		return (await request.json()) as JsonObject;
 	} catch {
 		return null;
 	}
@@ -109,7 +106,8 @@ export async function markBonusLessonViewedFromRequest(request: Request) {
 
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {
-		const message = getConvexErrorMessage(error);
+		const message =
+			error instanceof Error ? getConvexErrorMessage(error) : null;
 		if (message?.includes("Execute / Ship is still locked")) {
 			return jsonWithRequestId(
 				{

@@ -1,4 +1,5 @@
 import { routeConfig } from "@/config/product";
+import type { JsonValue } from "@/lib/json-value";
 import type { WorkspaceLocalNavModel } from "@/lib/workspace-navigation/build-secondary-nav-model";
 
 export type SetupCheckStatus = "blocked" | "warning" | "ready";
@@ -127,7 +128,7 @@ type WorkspaceSetupEvent = {
 		| CompletedSetupPayload
 		| {
 				eventType: string;
-				[key: string]: unknown;
+				[key: string]: JsonValue | undefined;
 		  };
 };
 

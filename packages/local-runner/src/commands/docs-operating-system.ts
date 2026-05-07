@@ -3,6 +3,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { runBoundedProcess } from "../core/bounded-process";
+import type { JsonObject, JsonValue } from "../core/json-value";
 import {
 	parseLintCommandArgs,
 	validatePlanPath,
@@ -291,7 +292,7 @@ async function lintProgramMarkdownDocs(repoRootDir: string): Promise<
 			}),
 		};
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return {
 				failed: true,
 				reports: "Missing docs/programs.",
@@ -373,7 +374,7 @@ async function readQualityScoreFile(qualityScorePath: string) {
 	try {
 		return await readFile(qualityScorePath, "utf8");
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return null;
 		}
 		throw error;
@@ -662,7 +663,7 @@ async function runNativeCommandProof(
 async function readNativePackageScripts(
 	repoRootDir: string,
 ): Promise<
-	| { status: "ready"; scripts: Record<string, unknown> }
+	| { status: "ready"; scripts: JsonObject }
 	| { status: "blocked"; reason: string }
 > {
 	const packageJsonPath = path.join(repoRootDir, "package.json");
@@ -670,7 +671,7 @@ async function readNativePackageScripts(
 	try {
 		rawPackageJson = await readFile(packageJsonPath, "utf8");
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return {
 				status: "blocked",
 				reason: "Root package.json was not found.",
@@ -679,9 +680,9 @@ async function readNativePackageScripts(
 		throw error;
 	}
 
-	let parsedPackageJson: unknown;
+	let parsedPackageJson: JsonValue;
 	try {
-		parsedPackageJson = JSON.parse(rawPackageJson);
+		parsedPackageJson = JSON.parse(rawPackageJson) as JsonValue;
 	} catch {
 		return {
 			status: "blocked",
@@ -703,7 +704,7 @@ async function readNativePackageScripts(
 }
 
 function selectNativeCommandScript(
-	scripts: Record<string, unknown>,
+	scripts: JsonObject,
 ):
 	| { status: "ready"; scriptName: string }
 	| { status: "blocked"; reason: string } {
@@ -730,7 +731,7 @@ function selectNativeCommandScript(
 }
 
 function listNativeCommandLifecycleHooks(
-	scripts: Record<string, unknown>,
+	scripts: JsonObject,
 	scriptName: string,
 ) {
 	return [`pre${scriptName}`, `post${scriptName}`].filter((hookName) =>
@@ -870,7 +871,7 @@ function isNativeCommandMissingLine(line: string) {
 	);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(value: JsonValue | undefined): value is JsonObject {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -887,7 +888,7 @@ async function runMarkdownDocsValidation(
 			outputText: formatMarkdownMetadataLintReports(reports),
 		};
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return {
 				exitCode: 1,
 				outputText: "Missing docs/.",
@@ -938,7 +939,7 @@ async function listMarkdownFiles(
 	try {
 		entries = await readdir(absoluteRoot, { withFileTypes: true });
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return [];
 		}
 		throw error;
@@ -1106,7 +1107,7 @@ async function writeChildExecPlan(params: {
 			{ encoding: "utf8", flag: "wx" },
 		);
 	} catch (error) {
-		if (isFileAlreadyExistsError(error)) {
+		if (error instanceof Error && isFileAlreadyExistsError(error)) {
 			throw new Error(`Refusing to overwrite existing ExecPlan: ${planPath}`);
 		}
 		throw error;
@@ -1274,12 +1275,12 @@ function buildChildExecPlanContent(params: {
 	].join("\n");
 }
 
-function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
+function isMissingPathError(error: Error): error is NodeJS.ErrnoException {
 	return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
 
 function isFileAlreadyExistsError(
-	error: unknown,
+	error: Error,
 ): error is NodeJS.ErrnoException {
 	return error instanceof Error && "code" in error && error.code === "EEXIST";
 }

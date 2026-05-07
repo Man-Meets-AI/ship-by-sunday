@@ -18,7 +18,9 @@ let cachedSnapshot: AppShellPreferences = APP_SHELL_PREFERENCES_DEFAULT;
 let isHydrated = false;
 const listeners = new Set<Listener>();
 
-function isAppShellPreferences(value: unknown): value is AppShellPreferences {
+function isAppShellPreferences(
+	value: Partial<AppShellPreferences> | null,
+): value is AppShellPreferences {
 	if (!value || typeof value !== "object") {
 		return false;
 	}
@@ -38,7 +40,7 @@ function readFromStorage(): AppShellPreferences {
 		if (!raw) {
 			return APP_SHELL_PREFERENCES_DEFAULT;
 		}
-		const parsed: unknown = JSON.parse(raw);
+		const parsed = JSON.parse(raw) as Partial<AppShellPreferences> | null;
 		if (isAppShellPreferences(parsed)) {
 			return parsed;
 		}
