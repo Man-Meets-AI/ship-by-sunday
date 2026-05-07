@@ -28,7 +28,7 @@ The initiative is moving in the right direction when visitors can start and cont
 
 The durable packet artifacts for this Program live in `docs/programs/active/2026-05-06-telegram-support-bot/`.
 
-The current research is recorded in `research-pass-telegram-support-widget-and-bot.md`. The normalized implementation direction is `normalized-pass-telegram-support-bot.md`. The locked initiative decisions are in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The latest immutable implementation brief is `planning-brief-5.md`, and `current-planning-brief.txt` points at that brief.
+The current research is recorded in `research-pass-telegram-support-widget-and-bot.md`. The normalized implementation direction is `normalized-pass-telegram-support-bot.md`. The locked initiative decisions are in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The latest immutable implementation brief is `planning-brief-6.md`, and `current-planning-brief.txt` points at that brief.
 
 ## Current State
 
@@ -40,7 +40,7 @@ The homepage has a clear control seam through `apps/web/config/product.ts`, `app
 
 Convex is the natural state owner for support threads and messages because the website widget needs live subscribed messages and Telegram replies need a durable backend target. The implementation must use hosted Convex dev for Convex work and must not switch the repo to Convex local mode.
 
-The current remaining setup gap is external provider configuration. Hosted Convex dev does not yet have the support-specific Telegram env values or `OPENAI_API_KEY`, so the real Telegram topic/reply loop and live AI draft loop are implemented but not live-proven. `apps/web/content/docs/telegram-support-bot.mdx` now owns the setup and verification contract.
+The current remaining setup gap is external provider configuration and proof. The real Telegram topic/reply loop and live AI draft loop are implemented but must be verified against the hosted support-specific Convex env, Telegram bot/group permissions, webhook registration, and `OPENAI_API_KEY`. A 2026-05-06 hosted Convex dev readiness probe found `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY` missing or empty, so Telegram `getWebhookInfo` and live Telegram/OpenAI smoke are currently blocked. `apps/web/content/docs/telegram-support-bot.mdx` owns the setup and verification contract, and `docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md` is the active closeout plan.
 
 ## Progress
 
@@ -76,6 +76,8 @@ The current remaining setup gap is external provider configuration. Hosted Conve
 - [x] 2026-05-06: Completed Slice 4: extracted reusable support widget modules, kept homepage support behavior stable, added the protected workspace `Ask Parker` launcher, passed workspace-scoped support metadata, documented the workspace entry, and validated with focused tests plus repo gates.
 - [x] 2026-05-06: Created `planning-brief-5.md` and child ExecPlan `docs/exec-plans/completed/2026-05-06-operations-analytics-and-hardening.md` for Slice 5.
 - [x] 2026-05-06: Completed Slice 5: added six-hour Convex support retention maintenance, transcript/generated-output purge, Telegram topic cleanup status, bounded manual retry eligibility, a token-protected operations snapshot, metadata-only support analytics proof, runbook docs, hosted Convex codegen, focused tests, and repo gates.
+- [x] 2026-05-06: Created `planning-brief-6.md` and child ExecPlan `docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md` for live provider proof and Program closeout.
+- [x] 2026-05-06: Ran the first live-provider readiness probe with secret values suppressed; hosted Convex dev has all required support provider env names missing or empty, so live Telegram/OpenAI proof is blocked on external setup.
 
 ## Decision Log
 
@@ -208,6 +210,7 @@ Child ExecPlans:
 - `docs/exec-plans/completed/2026-05-06-ai-drafting-and-product-context.md`: completed Slice 3 plan for `AI Drafting And Product Context`.
 - `docs/exec-plans/completed/2026-05-06-authenticated-customer-support-and-workspace-entry.md`: completed Slice 4 plan for `Authenticated Customer Support And Workspace Entry`.
 - `docs/exec-plans/completed/2026-05-06-operations-analytics-and-hardening.md`: completed Slice 5 plan for `Operations, Analytics, And Hardening`.
+- `docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md`: active closeout plan for `Live Provider Proof And Program Closeout`.
 
 Completed Slice 1: Homepage Widget And Telegram Bridge Proof. This homepage-only slice added the dedicated provider env contract, Convex support visitor/thread/message model, homepage widget, HttpOnly anonymous support session bridge, lazy first-message thread creation, no dedicated contact/email field, Telegram forum-topic creation path, store-first visitor message delivery with explicit status, a maintainer-only failed-delivery recovery action, Telegram HTTP action webhook inbound reply path, operator allowlist enforcement, first-slice abuse controls, the `Close thread` operator button, and website reply rendering. The only unproven piece is the live Telegram provider loop because support-specific Convex env setup is still missing.
 
@@ -221,11 +224,9 @@ Completed Slice 5: Operations, Analytics, And Hardening. This slice added retent
 
 ## Next Slice
 
-No child ExecPlan is currently active.
+The active child ExecPlan is `docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md`.
 
-The next recommended slice is Live Provider Proof And Program Closeout. It is next because the code path, retention worker, recovery controls, analytics privacy proof, and docs now exist, but the Program still cannot be complete until the support-specific hosted Convex env values, Telegram bot/group permissions, webhook registration, and `OPENAI_API_KEY` are configured in the target environment and the real Telegram/OpenAI smoke passes.
-
-Before claiming production-ready support confidence, complete the external setup from `apps/web/content/docs/telegram-support-bot.mdx` and verify the real Telegram/OpenAI loop: visitor message to Convex, forum topic creation, Telegram operator reply, website-visible reply, `Close thread`, one customer-visible action button, one AI-backed operator-only action button, and missing-key fallback behavior.
+The remaining outcome is live provider proof after hosted setup. Before claiming production-ready support confidence, complete the external setup from `apps/web/content/docs/telegram-support-bot.mdx` by setting non-empty hosted Convex dev values for `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY`, then verify the real Telegram/OpenAI loop: visitor message to Convex, forum topic creation, Telegram operator reply, website-visible reply, `Close thread`, one customer-visible action button, one AI-backed operator-only action button, and missing-key fallback behavior when it can be tested safely outside production.
 
 Boundary rules remain: do not reuse observability Telegram env values, do not require email before the first message, do not create threads before the first real visitor message, do not add CAPTCHA or Turnstile unless spam proves it necessary, do not auto-open the widget, do not use timed popups, do not imply fake online availability, do not promise response times, do not support uploads or binary attachments, do not expand protected workspace support beyond the completed Slice 4 entry point, do not auto-send AI replies to customers, do not introduce a third-party widget script, do not add broad CRM behavior, do not send support transcript text or generated output to PostHog, do not let AI or Linear buttons perform provider side effects without an explicit new plan, and do not use Convex local mode.
 
