@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	CHECKOUT_SUCCESS_FIXTURE_SLUGS,
 	getCheckoutSuccessFixture,
+	hasCheckoutSuccessFixtureParam,
 } from "@/app/checkout/success/_lib/checkout-success-fixtures";
 
 const ENV_KEY = "CHECKOUT_SUCCESS_FIXTURES";
@@ -47,6 +48,15 @@ describe("getCheckoutSuccessFixture", () => {
 	it("returns null when env is set but no fixture param is provided", () => {
 		expect(getCheckoutSuccessFixture({})).toBeNull();
 		expect(getCheckoutSuccessFixture({ fixture: undefined })).toBeNull();
+	});
+
+	it("detects fixture query presence separately from fixture activation", () => {
+		expect(hasCheckoutSuccessFixtureParam({})).toBe(false);
+		expect(hasCheckoutSuccessFixtureParam({ fixture: undefined })).toBe(false);
+		expect(hasCheckoutSuccessFixtureParam({ fixture: "" })).toBe(true);
+		expect(
+			hasCheckoutSuccessFixtureParam({ fixture: "validated_polling" }),
+		).toBe(true);
 	});
 
 	it("returns null when fixture param is not a known slug", () => {

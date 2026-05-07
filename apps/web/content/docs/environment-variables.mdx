@@ -50,7 +50,7 @@ Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout
 - `TELEGRAM_BOT_TOKEN`: Telegram bot token used for production alerts
 - `TELEGRAM_CHAT_ID`: chat or group id that receives alerts
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
-- `CHECKOUT_SUCCESS_FIXTURES`: test-only switch that enables the `/checkout/success?fixture=<variant>` deterministic in-memory fixture for capturing the polling -> redirect-armed arc in a real browser. The fixture refuses to activate unless this is set to `1` AND `NODE_ENV !== "production"`. Leave unset outside local development and CI screenshot capture; never set it on a production deployment
+- `CHECKOUT_SUCCESS_FIXTURES`: test-only switch that enables the `/checkout/success?fixture=<variant>` deterministic in-memory fixture for capturing the polling -> redirect-armed arc in a real browser. The fixture refuses to activate unless this is set to `1` AND `NODE_ENV !== "production"`. When a `fixture` query is present but the switch is disabled or the slug is invalid, `/checkout/success` returns the normal not-found surface instead of falling through to a customer recovery state. Leave unset outside local development and CI screenshot capture; never set it on a production deployment
 
 `OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so observability and other HTTP-action traffic do not fall back to the browser-only client origin.
 

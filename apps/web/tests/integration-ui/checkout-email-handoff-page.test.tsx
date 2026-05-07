@@ -27,6 +27,8 @@ vi.mock("@/lib/observability/client-error-report", () => ({
 
 import { CheckoutEmailHandoffPage } from "@/app/(identity)/_components/checkout-email-handoff/checkout-email-handoff-page";
 
+type TestClerkError = { code?: string; message?: string } | null;
+
 function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 	const signIn = {
 		create: vi.fn().mockResolvedValue({
@@ -61,16 +63,24 @@ function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 		],
 		...overrides,
 	};
+	const errors: {
+		fields: {
+			code: TestClerkError;
+			identifier: TestClerkError;
+		};
+		global: Array<NonNullable<TestClerkError>> | null;
+		raw: Array<NonNullable<TestClerkError>> | null;
+	} = {
+		fields: {
+			code: null,
+			identifier: null,
+		},
+		global: null,
+		raw: null,
+	};
 
 	return {
-		errors: {
-			fields: {
-				code: null,
-				identifier: null,
-			},
-			global: null,
-			raw: null,
-		},
+		errors,
 		fetchStatus: "idle",
 		signIn,
 	};
@@ -170,6 +180,47 @@ describe("CheckoutEmailHandoffPage", () => {
 				"/checkout/success?session_id=cs_test_123",
 			);
 		});
+	});
+
+	it("shows an invalid checkout email-code error only on the code field", async () => {
+		const signInState = createSignInState();
+		const incorrectCodeError = {
+			code: "form_code_incorrect",
+			message: "is incorrect",
+		};
+		signInState.signIn.emailCode.verifyCode.mockImplementation(async () => {
+			signInState.errors.fields.code = incorrectCodeError;
+			signInState.errors.global = [incorrectCodeError];
+			return {
+				error: incorrectCodeError,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(
+			<CheckoutEmailHandoffPage
+				checkoutEmail="buyer@example.com"
+				redirectPath="/checkout/success?session_id=cs_test_123"
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(
+			await screen.findByText(
+				"That code is incorrect. Use the latest email code or send a new one.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.queryByText("We couldn't prove the checkout email."),
+		).toBeNull();
+		expect(screen.queryByText("is incorrect")).toBeNull();
+		expect(pushMock).not.toHaveBeenCalled();
 	});
 
 	it("fails closed when Clerk requires another factor after checkout email verification", async () => {
