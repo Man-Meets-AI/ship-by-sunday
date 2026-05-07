@@ -1,14 +1,14 @@
 ---
 title: Passwordless Checkout Workspace Choice Hotfix
-status: active
+status: complete
 created_at: 2026-05-07
-completed_at: null
+completed_at: 2026-05-07
 summary: Make every paid checkout lead through passwordless email-code auth into workspace choice, while removing pre-purchase checkout routing intents.
-post_build_recap: null
+post_build_recap: Paid checkout now grants neutral access, creates or finds the Clerk user by checkout email, sends signed-out buyers through passwordless email-code sign-in, lands them on workspace choice, and is proven in dev and production without the old claim page.
 read_when:
-  - Resuming the passwordless checkout hotfix.
-  - Changing checkout success, sign-in, product access, or workspace choice behavior.
-  - Validating dev and production purchase or OTP login proof.
+  - Reviewing the completed passwordless checkout hotfix.
+  - Investigating checkout success, sign-in, product access, or workspace choice regressions.
+  - Reusing the Stripe, Clerk, Convex fulfillment proof pattern.
 ---
 
 # Passwordless Checkout Workspace Choice Hotfix
@@ -61,7 +61,9 @@ The simple desired UX is: a first-time customer buys with Stripe using their ema
 - [x] 2026-05-07 15:12:00 EDT: Completed real dev OTP login proof with `me@parkerrex.com`, because the connected Gmail mailbox exposed that inbox and the user approved using the alternate email. Clerk sent a development verification-code email at `2026-05-07T19:12:18Z`; the app accepted the code and landed on `https://dev.man-meets-ai.com/workspace/choose` with `passwordVisible=false` and `claimPageVisible=false`.
 - [x] 2026-05-07 15:12:00 EDT: Audited `ea@parkerrex.com` in Clerk. Exactly one Clerk user exists for that email, it was created at `2026-05-07T14:02:09.560Z`, the email is verified, and it has not recorded a sign-in yet. Gmail connector searches still returned the `me@parkerrex.com` mailbox rather than EA-addressed OTP mail.
 - [x] 2026-05-07 15:36:47 EDT: Ran the required release-sensitive review swarm. It found and I fixed two P1s before merge: deployed checkout routes no longer trust localhost request origins unless local is explicitly configured or no deployed origin exists, and checkout-success fulfillment re-queries Clerk after a user-creation failure so webhook and success-page races stay idempotent. Focused unit and integration UI slices passed after the fix.
-- [ ] Merge PR #218 after checks stay green, then prove production after merge.
+- [x] 2026-05-07 15:45:32 EDT: Merged PR #218 to `main` at merge commit `57242cf4b55e734be4151008867a5c803cd1a43b`.
+- [x] 2026-05-07 15:46:09 EDT: Convex Production Deploy run `25518235627` deployed the same merge commit to `https://helpful-meadowlark-297.convex.cloud` with no deleted indexes.
+- [x] 2026-05-07 15:51:19 EDT: Production Release Proof run `25518235648` passed `default_ship`, `billing_integration`, and `release_gate` against `57242cf4b55e734be4151008867a5c803cd1a43b`. The live billing proof used Vercel deployment `dpl_EGrcg2cTWg3Avum3EyW6E4ywRSpU`, completed zero-cost live Checkout Session `cs_live_a1M7FnKuiyhVLmFXpRQDnaAqB2uiowe0SQHL0N1zPuhkidRec8Hjn2ve01`, reached `https://www.man-meets-ai.com/workspace/choose`, and verified Convex product access grant `jx7cb9kghakhs3jj9gebhc5wx18685fy` with `source=stripe_webhook`.
 
 ## Surprises & Discoveries
 
@@ -169,7 +171,11 @@ Date: 2026-05-07
 
 ## Outcomes & Retrospective
 
-Implementation is complete locally and the validation suite passed. The remaining work is hosted proof and PR/release flow. The shipped behavior under test is the original P0 failure path: a newly paid user and a returning paid user must authenticate passwordlessly and reach the product without seeing a password prompt, a checkout claim page, duplicated error messages, or a preselected product path.
+The hotfix shipped through PR #218 and is live on production. A paid guest checkout now creates or finds the Clerk user for the Stripe checkout email, grants Convex product access with neutral product metadata, sends signed-out buyers through normal Clerk email-code sign-in, and lands them on `/workspace/choose` instead of `/checkout/email-handoff` or a preselected product path. Returning sign-in is passwordless, missing accounts show one field-level `Purchase a license` path, and invalid OTP errors stay field-local.
+
+The release review found two concrete production risks before merge. Localhost request origins could have poisoned deployed checkout redirect URLs, and concurrent webhook plus checkout-success fulfillment could have raced while creating the same Clerk user. Both were fixed with regression tests before PR #218 merged. The remaining intentional boundary is that this buyer UI does not implement an MFA or Client Trust second-factor screen; Clerk buyer sign-in must keep MFA optional and Client Trust not required unless a future change adds the matching UI.
+
+The final proof is hosted, not local-only. `https://dev.man-meets-ai.com` proved test-mode purchase plus real email-code sign-in. Production then proved the exact `main` merge commit through Vercel production deployment, Convex production deployment, `default_ship`, and live zero-cost billing integration. The production billing proof reached `/workspace/choose`, verified product access in Convex, and confirmed the app checkout route can create and clean up a live hosted Checkout Session.
 
 ## Context and Orientation
 
@@ -638,13 +644,13 @@ Add dev proof artifacts here during implementation:
 
 Add production proof artifacts here during implementation:
 
-    production deployment:
-    production proof timestamp:
-    production login account:
-    production Clerk user id or email:
-    production Convex product access evidence:
-    production final URL after login:
-    production purchase proof, if authorized:
+    production deployment: Vercel production deployment dpl_EGrcg2cTWg3Avum3EyW6E4ywRSpU, promoted for merge commit 57242cf4b55e734be4151008867a5c803cd1a43b
+    production Convex deploy: run 25518235627 deployed to https://helpful-meadowlark-297.convex.cloud at 2026-05-07T19:46:09Z
+    production proof timestamp: Production Release Proof run 25518235648 completed at 2026-05-07T19:51:19Z
+    production login account: release QA buyer account, Clerk user user_3B7gwf605QT4IPbZkRGvd2TuAs5
+    production Convex product access evidence: product access grant jx7cb9kghakhs3jj9gebhc5wx18685fy, status=granted, source=stripe_webhook, fulfillmentTrack=unspecified
+    production final URL after purchase: https://www.man-meets-ai.com/workspace/choose
+    production purchase proof: zero-cost live Checkout Session cs_live_a1M7FnKuiyhVLmFXpRQDnaAqB2uiowe0SQHL0N1zPuhkidRec8Hjn2ve01 completed with status=complete, payment_status=paid, amount_total=0; app checkout-route smoke session cs_live_a1hxzgOPEV2PU7LdGbfq5a0Oz522bA4UiyUnkqKVrPZSPD2jDca3NsuJwd was created and expired successfully.
 
 ## Interfaces and Dependencies
 
