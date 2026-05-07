@@ -25,6 +25,7 @@ function normalizeStripeSecretKey(secretKey) {
 
 function parseArgs(argv) {
 	let baseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim() ?? "";
+	let vercelShareUrl = process.env.VERCEL_PROTECTION_SHARE_URL?.trim() ?? "";
 	let timeoutMs = 120_000;
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -41,6 +42,17 @@ function parseArgs(argv) {
 			continue;
 		}
 
+		if (current?.startsWith("--vercel-share-url=")) {
+			vercelShareUrl = current.slice("--vercel-share-url=".length);
+			continue;
+		}
+
+		if (current === "--vercel-share-url") {
+			vercelShareUrl = argv[index + 1] ?? vercelShareUrl;
+			index += 1;
+			continue;
+		}
+
 		if (current?.startsWith("--timeout-ms=")) {
 			timeoutMs = Number(current.slice("--timeout-ms=".length)) || timeoutMs;
 			continue;
@@ -52,9 +64,15 @@ function parseArgs(argv) {
 		}
 	}
 
+	if (baseUrl.includes("_vercel_share=") && !vercelShareUrl) {
+		vercelShareUrl = baseUrl;
+		baseUrl = new URL(baseUrl).origin;
+	}
+
 	return {
 		baseUrl,
 		timeoutMs,
+		vercelShareUrl,
 	};
 }
 
@@ -62,12 +80,24 @@ function getCheckoutSessionIdFromUrl(urlString) {
 	return urlString.match(/cs_(?:live|test)_[A-Za-z0-9]+/)?.[0] ?? null;
 }
 
-async function primeVercelBypassCookie(page, { baseUrl }) {
+async function primeVercelAccessCookie(page, { baseUrl, vercelShareUrl }) {
+	if (vercelShareUrl) {
+		await page.goto(vercelShareUrl, {
+			waitUntil: "domcontentloaded",
+		});
+
+		return {
+			enabled: true,
+			source: "share-url",
+		};
+	}
+
 	const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
 
 	if (!bypassSecret) {
 		return {
 			enabled: false,
+			source: "none",
 		};
 	}
 
@@ -81,6 +111,7 @@ async function primeVercelBypassCookie(page, { baseUrl }) {
 
 	return {
 		enabled: true,
+		source: "bypass-secret",
 	};
 }
 
@@ -130,20 +161,25 @@ async function selectCardPaymentMethod(page) {
 }
 
 async function uncheckLinkSaveInformation(page) {
-	const saveInformationCheckbox = page
-		.getByRole("checkbox", { name: /save my information/i })
-		.first();
+	const saveInformationCheckboxes = [
+		page.getByRole("checkbox", { name: /save my information/i }).first(),
+		page.locator("input[type='checkbox']:checked").first(),
+	];
 
-	await saveInformationCheckbox
-		.waitFor({ state: "visible", timeout: 2_000 })
-		.catch(() => null);
+	for (const saveInformationCheckbox of saveInformationCheckboxes) {
+		await saveInformationCheckbox
+			.waitFor({ state: "attached", timeout: 2_000 })
+			.catch(() => null);
 
-	if (!(await saveInformationCheckbox.isVisible().catch(() => false))) {
-		return;
-	}
+		if (!(await saveInformationCheckbox.isChecked().catch(() => false))) {
+			continue;
+		}
 
-	if (await saveInformationCheckbox.isChecked().catch(() => false)) {
 		await saveInformationCheckbox.uncheck({ force: true }).catch(() => null);
+
+		if (!(await saveInformationCheckbox.isChecked().catch(() => false))) {
+			return;
+		}
 	}
 }
 
@@ -232,7 +268,7 @@ async function waitForPasswordlessCheckoutHandoff(
 	};
 }
 
-const { baseUrl, timeoutMs } = parseArgs(process.argv.slice(2));
+const { baseUrl, timeoutMs, vercelShareUrl } = parseArgs(process.argv.slice(2));
 
 if (!baseUrl) {
 	throw new Error(
@@ -295,7 +331,10 @@ page.on("response", (response) => {
 });
 
 try {
-	const bypass = await primeVercelBypassCookie(page, { baseUrl });
+	const vercelAccess = await primeVercelAccessCookie(page, {
+		baseUrl,
+		vercelShareUrl,
+	});
 	await page.goto(new URL(HOMEPAGE_CHECKOUT_PROOF_PATH, baseUrl).toString(), {
 		waitUntil: "domcontentloaded",
 	});
@@ -410,7 +449,7 @@ try {
 		JSON.stringify(
 			{
 				baseUrl,
-				bypassEnabled: bypass.enabled,
+				vercelAccess,
 				checkoutRouteResponses,
 				checkoutSession: {
 					amountTotal: finalSession.amount_total,

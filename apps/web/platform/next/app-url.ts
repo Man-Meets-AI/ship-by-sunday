@@ -12,6 +12,10 @@ export function getAppBaseUrl(request?: Request) {
 		return normalizeBaseUrl(serverEnv.APP_BASE_URL);
 	}
 
+	if (request) {
+		return normalizeBaseUrl(new URL(request.url).origin);
+	}
+
 	const vercelUrl =
 		process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
 	if (vercelUrl) {
@@ -19,10 +23,6 @@ export function getAppBaseUrl(request?: Request) {
 			? vercelUrl
 			: `${apiConfig.secureHttpProtocol}${vercelUrl}`;
 		return normalizeBaseUrl(origin);
-	}
-
-	if (request) {
-		return normalizeBaseUrl(new URL(request.url).origin);
 	}
 
 	throw new Error("Missing APP_BASE_URL");
