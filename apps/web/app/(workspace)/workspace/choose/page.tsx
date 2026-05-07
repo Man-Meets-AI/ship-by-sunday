@@ -11,12 +11,13 @@ export const metadata: Metadata = {
 	title: "Choose workspace path",
 };
 
-export default async function Page({
-	searchParams,
-}: {
-	searchParams: Promise<{ welcome?: string }>;
+export default async function Page(props: {
+	searchParams?: Promise<{ welcome?: string }>;
 }) {
-	const { welcome } = await searchParams;
+	const query: { welcome?: string } = props?.searchParams
+		? await props.searchParams
+		: {};
+	const { welcome } = query;
 	const workspaceAccess = await loadWorkspacePageAccess();
 	if (workspaceAccess.kind === "access_required") {
 		return <AccessRequiredPage initialAccess={workspaceAccess.access} />;

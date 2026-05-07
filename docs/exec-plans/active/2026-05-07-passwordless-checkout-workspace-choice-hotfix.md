@@ -53,8 +53,9 @@ The simple desired UX is: a first-time customer buys with Stripe using their ema
 - [x] 2026-05-07 13:18:45 EDT: Passed focused unit, Convex grant, integration UI, Stripe checkout route, app lint/typecheck/format, repo lint/typecheck/format, docs lint, public readiness lint, ExecPlan lint, and whitespace checks.
 - [x] 2026-05-07 13:21:12 EDT: Updated hosted Stripe proof tooling so dev card-payment verification expects neutral product metadata and proof sign-in defaults to `/workspace/choose`.
 - [x] 2026-05-07 13:44:13 EDT: Opened draft PR #218, ran the requested review swarm, removed the stale checkout-handoff integration test, strict-gated course metadata, protected success-page fulfillment with the server-only Stripe webhook secret, and upgraded dev card-payment proof to assert the passwordless workspace handoff.
+- [x] 2026-05-07 13:49:43 EDT: Fixed the PR `static` full-unit regressions by making `/workspace/choose` tolerate the legacy no-argument test render without violating Next.js page prop typing and by updating the pending-checkout external redirect fallback expectation to `/workspace/choose`; full app unit and app typecheck now pass locally.
 - [ ] Prove dev checkout purchase and OTP login with `EA@parkerrex.com`.
-- [ ] Mark PR #218 ready after post-review validation is green, then use dev only as the staging payment lane if needed and prove production after merge.
+- [ ] Re-run PR #218 checks after the CI-fix commit, then use dev only as the staging payment lane if needed and prove production after merge.
 
 ## Surprises & Discoveries
 
@@ -554,6 +555,25 @@ Post-review validation recorded on 2026-05-07 13:44:13 EDT:
     result: passed
 
     bun run --cwd apps/web lint
+    result: passed
+
+    bun run --cwd apps/web typecheck
+    result: passed
+
+PR static follow-up recorded on 2026-05-07 13:49:43 EDT:
+
+    gh pr checks 218 --watch=false
+    result: static failed while integration and Vercel passed. Static failure was in the full unit suite:
+    tests/unit/app-workspace-codebase-review-routes.test.tsx called WorkspaceChoiceRoutePage with no args, exposing that the route page required searchParams.
+    tests/unit/checkout-clear-pending-route.test.ts still expected the retired /codebase fallback.
+
+    bun run --cwd apps/web test:unit -- tests/unit/app-workspace-codebase-review-routes.test.tsx tests/unit/checkout-clear-pending-route.test.ts
+    result: passed, 2 files and 15 tests
+
+    bun run --cwd apps/web test:unit
+    result: passed, 140 files and 665 tests
+
+    bun run --cwd apps/web format:check
     result: passed
 
     bun run --cwd apps/web typecheck
