@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
-import { getCheckoutSuccessFixture } from "@/app/checkout/success/_lib/checkout-success-fixtures";
+import {
+	getCheckoutSuccessFixture,
+	hasCheckoutSuccessFixtureParam,
+} from "@/app/checkout/success/_lib/checkout-success-fixtures";
 import { getCheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
@@ -32,6 +36,9 @@ export default async function Page({
 				}}
 			/>
 		);
+	}
+	if (hasCheckoutSuccessFixtureParam({ fixture })) {
+		notFound();
 	}
 
 	const sessionId =

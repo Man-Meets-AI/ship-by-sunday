@@ -11,6 +11,10 @@ import {
 	getSupportedFirstFactorStrategies,
 	type ClerkSignInWithFirstFactors,
 } from "@/app/(identity)/_lib/email-code-sign-in-factor";
+import {
+	getPasswordlessCodeError,
+	getPasswordlessGlobalErrors,
+} from "@/app/(identity)/_lib/passwordless-auth-errors";
 import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
 
 type CheckoutEmailHandoffStep = "send" | "verify";
@@ -78,9 +82,13 @@ export function useCheckoutEmailHandoffFlow({
 
 	const safeRedirectPath = getSafeRedirectPath(redirectPath);
 	const clerkGlobalErrors = getRenderableErrors(errors.global ?? errors.raw);
+	const verificationError = getPasswordlessCodeError(errors.fields.code);
 	const globalErrors = localError
 		? [{ message: localError }]
-		: clerkGlobalErrors;
+		: getPasswordlessGlobalErrors({
+				fieldErrors: [errors.fields.identifier, errors.fields.code],
+				rootErrors: clerkGlobalErrors,
+			});
 
 	function getCompletionStatus(
 		candidate: ClerkCompletionCandidate | null | undefined,
@@ -316,6 +324,6 @@ export function useCheckoutEmailHandoffFlow({
 		step,
 		submitVerification,
 		verificationCode,
-		verificationError: errors.fields.code,
+		verificationError,
 	};
 }

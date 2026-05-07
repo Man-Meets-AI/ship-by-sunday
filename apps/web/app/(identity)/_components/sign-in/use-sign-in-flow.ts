@@ -9,6 +9,12 @@ import {
 	getSupportedFirstFactorStrategies,
 	type ClerkSignInWithFirstFactors,
 } from "@/app/(identity)/_lib/email-code-sign-in-factor";
+import {
+	getMissingPasswordlessAccountError,
+	getPasswordlessCodeError,
+	getPasswordlessEmailError,
+	getPasswordlessGlobalErrors,
+} from "@/app/(identity)/_lib/passwordless-auth-errors";
 import { authViewConfig, routeConfig } from "@/config/product";
 import { reportClientError } from "@/lib/observability/client-error-report";
 import {
@@ -70,15 +76,27 @@ export function useSignInFlow() {
 	const searchParams = useSearchParams();
 	const [emailAddress, setEmailAddress] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [localEmailErrorMessage, setLocalEmailErrorMessage] = useState<
+		string | null
+	>(null);
 	const [localError, setLocalError] = useState<string | null>(null);
 	const [step, setStep] = useState<"email" | "email_code">("email");
 	const [verificationCode, setVerificationCode] = useState("");
 
 	const redirectPath = getSafeRedirectPath(searchParams.get("redirect_url"));
 	const clerkGlobalErrors = getRenderableErrors(errors.global ?? errors.raw);
+	const localEmailError = localEmailErrorMessage
+		? { message: localEmailErrorMessage }
+		: null;
+	const emailError =
+		localEmailError ?? getPasswordlessEmailError(errors.fields.identifier);
+	const verificationError = getPasswordlessCodeError(errors.fields.code);
 	const globalErrors = localError
 		? [{ message: localError }]
-		: clerkGlobalErrors;
+		: getPasswordlessGlobalErrors({
+				fieldErrors: [errors.fields.identifier, errors.fields.code],
+				rootErrors: clerkGlobalErrors,
+			});
 	const isBusy = fetchStatus === "fetching" || isSubmitting;
 
 	function getCompletionStatus(
@@ -146,6 +164,17 @@ export function useSignInFlow() {
 				supportedFirstFactors,
 			},
 		});
+	}
+
+	function reportMissingAccount() {
+		setLocalEmailErrorMessage(getMissingPasswordlessAccountError().message);
+	}
+
+	function updateEmailAddress(value: string) {
+		setEmailAddress(value);
+		if (localEmailErrorMessage) {
+			setLocalEmailErrorMessage(null);
+		}
 	}
 
 	async function navigateAfterAuth({
@@ -219,6 +248,7 @@ export function useSignInFlow() {
 		}
 
 		setLocalError(null);
+		setLocalEmailErrorMessage(null);
 		setStep("email");
 		setVerificationCode("");
 
@@ -233,6 +263,7 @@ export function useSignInFlow() {
 		}
 
 		setLocalError(null);
+		setLocalEmailErrorMessage(null);
 		setIsSubmitting(true);
 
 		try {
@@ -244,7 +275,7 @@ export function useSignInFlow() {
 			}
 
 			if (signIn.isTransferable) {
-				reportUnsupportedState("transferable");
+				reportMissingAccount();
 				return;
 			}
 
@@ -323,18 +354,18 @@ export function useSignInFlow() {
 
 	return {
 		emailAddress,
-		emailError: errors.fields.identifier,
+		emailError,
 		globalErrors,
 		isBusy,
 		isLoaded: Boolean(signIn),
 		resendEmailCode,
-		setEmailAddress,
+		setEmailAddress: updateEmailAddress,
 		setVerificationCode,
 		startEmailCode,
 		startOver,
 		step: { kind: step },
 		submitEmailCode,
 		verificationCode,
-		verificationError: errors.fields.code,
+		verificationError,
 	};
 }

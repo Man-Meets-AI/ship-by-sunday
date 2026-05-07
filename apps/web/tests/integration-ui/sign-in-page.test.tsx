@@ -75,6 +75,8 @@ vi.mock("@/components/ui/input-otp", () => ({
 
 import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
 
+type TestClerkError = { code?: string; message?: string } | null;
+
 function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 	const signIn = {
 		create: vi.fn().mockResolvedValue({
@@ -110,16 +112,24 @@ function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 		],
 		...overrides,
 	};
+	const errors: {
+		fields: {
+			code: TestClerkError;
+			identifier: TestClerkError;
+		};
+		global: Array<NonNullable<TestClerkError>> | null;
+		raw: Array<NonNullable<TestClerkError>> | null;
+	} = {
+		fields: {
+			code: null,
+			identifier: null,
+		},
+		global: null,
+		raw: null,
+	};
 
 	return {
-		errors: {
-			fields: {
-				code: null,
-				identifier: null,
-			},
-			global: null,
-			raw: null,
-		},
+		errors,
 		fetchStatus: "idle",
 		signIn,
 	};
@@ -222,6 +232,60 @@ describe("SignInPage", () => {
 		expect(screen.queryByLabelText("Password")).toBeNull();
 	});
 
+	it("shows a purchase-license message for an email without an account", async () => {
+		const signInState = createSignInState();
+		const missingAccountError = {
+			code: "form_identifier_not_found",
+			message: "Couldn't find your account.",
+		};
+		signInState.signIn.create.mockImplementation(async () => {
+			signInState.errors.fields.identifier = missingAccountError;
+			signInState.errors.global = [missingAccountError];
+			return {
+				error: missingAccountError,
+				status: null,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "missing@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(
+			await screen.findByText(
+				"We don't have an account for that email. Purchase a license first, then sign in with the checkout email.",
+			),
+		).toBeTruthy();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(screen.queryByText("Couldn't find your account.")).toBeNull();
+	});
+
+	it("shows the purchase-license message when Clerk reports a transferable sign-in", async () => {
+		const signInState = createSignInState({
+			isTransferable: true,
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "missing@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+
+		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(
+			await screen.findByText(
+				"We don't have an account for that email. Purchase a license first, then sign in with the checkout email.",
+			),
+		).toBeTruthy();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(reportClientErrorMock).not.toHaveBeenCalled();
+	});
+
 	it("verifies the email code and returns to the preserved target", async () => {
 		useSearchParamsMock.mockReturnValue(
 			new URLSearchParams("redirect_url=%2Fsettings"),
@@ -246,6 +310,78 @@ describe("SignInPage", () => {
 		await waitFor(() => {
 			expect(pushMock).toHaveBeenCalledWith("/settings");
 		});
+	});
+
+	it("shows an invalid email-code error only on the code field", async () => {
+		const signInState = createSignInState();
+		const incorrectCodeError = {
+			code: "form_code_incorrect",
+			message: "is incorrect",
+		};
+		signInState.signIn.emailCode.verifyCode.mockImplementation(async () => {
+			signInState.errors.fields.code = incorrectCodeError;
+			signInState.errors.global = [incorrectCodeError];
+			return {
+				error: incorrectCodeError,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(
+			await screen.findByText(
+				"That code is incorrect. Use the latest email code or send a new one.",
+			),
+		).toBeTruthy();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(screen.queryByText("is incorrect")).toBeNull();
+		expect(pushMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps generic code format errors field-level without rewriting the copy", async () => {
+		const signInState = createSignInState();
+		const formatError = {
+			code: "form_param_format_invalid",
+			message: "Code must contain only digits.",
+		};
+		signInState.signIn.emailCode.verifyCode.mockImplementation(async () => {
+			signInState.errors.fields.code = formatError;
+			signInState.errors.global = [formatError];
+			return {
+				error: formatError,
+			};
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "abcdef");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(
+			await screen.findByText("Code must contain only digits."),
+		).toBeTruthy();
+		expect(
+			screen.queryByText(
+				"That code is incorrect. Use the latest email code or send a new one.",
+			),
+		).toBeNull();
+		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
+		expect(pushMock).not.toHaveBeenCalled();
 	});
 
 	it("activates the created session when email-code verification completes before the hook state updates", async () => {
