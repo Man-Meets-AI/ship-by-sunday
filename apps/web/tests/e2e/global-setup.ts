@@ -3,16 +3,15 @@ import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { mkdir, writeFile } from "node:fs/promises";
 
+import { clerk, clerkSetup } from "@clerk/testing/playwright";
 import { chromium, type FullConfig, type Page } from "@playwright/test";
 
 import {
 	authStateDirectory,
 	getAuthenticatedE2EPrereqProblems,
 	memberWithAccessEmail,
-	memberWithAccessPassword,
 	memberWithAccessStorageStatePath,
 	memberWithoutAccessEmail,
-	memberWithoutAccessPassword,
 	memberWithoutAccessStorageStatePath,
 	shouldRunAuthenticatedE2E,
 } from "./auth-state";
@@ -37,6 +36,7 @@ export default async function globalSetup(config: FullConfig) {
 		return;
 	}
 
+	loadHostedConvexEnv();
 	const prereqProblems = getAuthenticatedE2EPrereqProblems();
 	if (prereqProblems.length > 0) {
 		throw new Error(
@@ -46,11 +46,10 @@ export default async function globalSetup(config: FullConfig) {
 		);
 	}
 
-	loadHostedConvexEnv();
+	await clerkSetup({ dotenv: false });
 	await mkdir(authStateDirectory, { recursive: true });
 	await createStorageState(baseURL, {
 		email: memberWithoutAccessEmail,
-		password: memberWithoutAccessPassword,
 		storageStatePath: memberWithoutAccessStorageStatePath,
 		syncProductAccessAfterSignIn: async (clerkUserId) => {
 			await syncProductAccessState({
@@ -66,7 +65,6 @@ export default async function globalSetup(config: FullConfig) {
 	});
 	await createStorageState(baseURL, {
 		email: memberWithAccessEmail,
-		password: memberWithAccessPassword,
 		storageStatePath: memberWithAccessStorageStatePath,
 		syncProductAccessAfterSignIn: async (clerkUserId) => {
 			await syncProductAccessState({
@@ -127,12 +125,10 @@ async function createStorageState(
 	baseURL: string,
 	{
 		email,
-		password,
 		storageStatePath,
 		syncProductAccessAfterSignIn,
 	}: {
 		email: string;
-		password: string;
 		storageStatePath: string;
 		syncProductAccessAfterSignIn?: (clerkUserId: string) => Promise<void>;
 	},
@@ -151,7 +147,7 @@ async function createStorageState(
 	try {
 		const clerkUserId = await signIn(
 			page,
-			{ email, password },
+			{ email },
 			{ consoleMessages, pageErrors },
 		);
 		if (syncProductAccessAfterSignIn) {
@@ -178,10 +174,8 @@ async function signIn(
 	page: Page,
 	{
 		email,
-		password,
 	}: {
 		email: string;
-		password: string;
 	},
 	diagnostics: {
 		consoleMessages: string[];
@@ -214,9 +208,10 @@ async function signIn(
 			`Clerk did not finish loading while bootstrapping Playwright auth for ${email} at ${page.url()}. Expected ${signInPath}. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
 		);
 	}
-	await page.getByLabel(/^email$/i).fill(email);
-	await page.getByLabel(/^password$/i).fill(password);
-	await page.getByRole("button", { name: /^sign in$/i }).click();
+	await clerk.signIn({ page, emailAddress: email });
+	await page.goto("/codebase", {
+		waitUntil: "networkidle",
+	});
 	try {
 		await waitForSignedInWorkspaceLanding(page);
 	} catch (error) {

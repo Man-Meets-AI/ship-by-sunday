@@ -36,7 +36,8 @@ NEXT_PUBLIC_CONVEX_URL=
 6. Set `CLERK_AUTHORIZED_PARTIES` to the trusted web origins that should be allowed to present Clerk session cookies.
 7. In every Clerk environment used by this app, enable email sign-in with an email verification code. Both `/sign-in` and the checkout email handoff call Clerk email OTP for the buyer email.
 8. Turn off password sign-up and "Add password to account" unless you intentionally fork this starter back to password-based auth. The shipped buyer path is passwordless.
-9. Disable social and OAuth provider strategies, including Google, in every Clerk environment for this app. The starter no longer ships a social sign-in button or OAuth callback route.
+9. Keep multi-factor authentication optional and do not require Client Trust for the buyer sign-in path. The shipped custom UI intentionally fails closed if Clerk asks for `needs_second_factor`, `needs_client_trust`, or a setup task after the email code.
+10. Disable social and OAuth provider strategies, including Google, in every Clerk environment for this app. The starter no longer ships a social sign-in button or OAuth callback route.
 
 The starter-owned auth routes are:
 
@@ -51,10 +52,11 @@ The starter-owned auth routes are:
 The passwordless sign-in and checkout email handoff both depend on Clerk Dashboard settings, not a new repo env var.
 
 - Where: Clerk Dashboard for local, preview, and production Clerk applications.
-- What: enable email address sign-in and turn on **Email verification code**. Leave email verification link off unless you intentionally add a magic-link flow in code. Turn off password sign-up and adding passwords to accounts for the shipped passwordless buyer path.
+- What: enable email address sign-in and turn on **Email verification code**. Leave email verification link off unless you intentionally add a magic-link flow in code. Turn off password sign-up and adding passwords to accounts for the shipped passwordless buyer path. Do not require MFA or Client Trust on buyer sign-in unless you also add the matching second-factor UI.
 - Callback routes: keep the app-owned sign-in URL at `/sign-in`; the checkout email-code flow itself stays on `/checkout/email-handoff` and returns to `/checkout/success?session_id=...`.
 - Verify: open `/sign-in`, enter a paid-user email, and confirm Clerk sends a one-time code. Then complete a paid test checkout while signed out, click the checkout-email handoff, and confirm Clerk sends a one-time code to the Stripe checkout email.
-- Missing setup looks like: `/sign-in` or the handoff page cannot send or verify an email code, so the buyer cannot prove the paid email.
+- Release proof: release personas use email-code Clerk accounts and the Playwright Clerk testing helper signs them in by email with a short-lived sign-in token; no release proof should fill or require a password field.
+- Missing setup looks like: `/sign-in` or the handoff page cannot send or verify an email code, or Clerk returns an unsupported second factor/task after OTP verification, so the buyer cannot prove the paid email.
 
 ## Social provider setup
 

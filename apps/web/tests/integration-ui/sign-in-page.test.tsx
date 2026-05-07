@@ -339,6 +339,43 @@ describe("SignInPage", () => {
 		});
 	});
 
+	it("fails closed when Clerk requires MFA after the email code", async () => {
+		const signInState = createSignInState({
+			emailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockResolvedValue({
+					error: null,
+					status: "needs_second_factor",
+				}),
+			},
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(<SignInPage />);
+
+		await user.type(screen.getByLabelText("Email"), "buyer@example.com");
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(signInState.signIn.finalize).not.toHaveBeenCalled();
+		expect(setActiveMock).not.toHaveBeenCalled();
+		expect(reportClientErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: "clerk_passwordless_sign_in_unsupported_state",
+				details: expect.objectContaining({
+					status: "needs_second_factor",
+				}),
+			}),
+		);
+		expect(
+			screen.getByText(/Clerk needs another account step before this email/),
+		).toBeTruthy();
+	});
+
 	it("does not call Clerk email-code sending when the sign-in has no email-code factor", async () => {
 		const signInState = createSignInState({
 			supportedFirstFactors: [

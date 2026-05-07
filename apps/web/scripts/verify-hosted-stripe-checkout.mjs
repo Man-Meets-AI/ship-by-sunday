@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 
+import { clerk, clerkSetup } from "@clerk/testing/playwright";
 import { chromium } from "@playwright/test";
 import Stripe from "stripe";
 
@@ -83,15 +84,14 @@ async function loadQaBuyerCredentials() {
 	const parsed = JSON.parse(raw);
 	const account = parsed.accounts?.["ship-by-sunday-clerk-instance"];
 
-	if (!account?.email || !account?.password) {
+	if (!account?.email) {
 		throw new Error(
-			"Missing ship-by-sunday-clerk-instance credentials in tmp/release-personas.local.json or RELEASE_PERSONAS_LOCAL_FILE.",
+			"Missing ship-by-sunday-clerk-instance email in tmp/release-personas.local.json or RELEASE_PERSONAS_LOCAL_FILE.",
 		);
 	}
 
 	return {
 		email: account.email,
-		password: account.password,
 	};
 }
 
@@ -267,7 +267,7 @@ async function submitHostedCheckout(page) {
 	await submitButton.click();
 }
 
-async function signInBuyer(page, { baseUrl, email, password }) {
+async function signInBuyer(page, { baseUrl, email }) {
 	await page.goto(
 		`${baseUrl}${buildHostedProofSignInPath({ redirectPath: "/" })}`,
 		{
@@ -281,9 +281,10 @@ async function signInBuyer(page, { baseUrl, email, password }) {
 		},
 		{ timeout: 15_000 },
 	);
-	await page.getByLabel(/^email$/i).fill(email);
-	await page.getByLabel(/^password$/i).fill(password);
-	await page.getByRole("button", { name: /^sign in$/i }).click();
+	await clerk.signIn({ page, emailAddress: email });
+	await page.goto(`${baseUrl}/`, {
+		waitUntil: "networkidle",
+	});
 	await page.waitForURL((url) => url.pathname === "/", {
 		timeout: 20_000,
 	});
@@ -536,6 +537,7 @@ if (!stripePriceId) {
 }
 
 const buyerCredentials = await loadQaBuyerCredentials();
+await clerkSetup({ dotenv: false });
 const stripe = new Stripe(stripeSecretKey, {
 	apiVersion: "2026-02-25.clover",
 });
@@ -557,7 +559,6 @@ try {
 	const clerkUserId = await signInBuyer(page, {
 		baseUrl,
 		email: buyerCredentials.email,
-		password: buyerCredentials.password,
 	});
 	console.log(`Signed in QA buyer ${buyerCredentials.email}`);
 	console.log(`Authenticated Clerk user ${clerkUserId ?? "missing"}`);

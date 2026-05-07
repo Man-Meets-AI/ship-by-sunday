@@ -111,6 +111,8 @@ async function createClerkUser({
 	apiBaseUrl = DEFAULT_API_BASE_URL,
 	fetchImpl = fetch,
 }) {
+	const passwordPayload =
+		account.authMode === "password" ? { password: account.password } : {};
 	const response = await fetchImpl(new URL("/v1/users", apiBaseUrl), {
 		method: "POST",
 		headers: {
@@ -119,9 +121,10 @@ async function createClerkUser({
 		},
 		body: JSON.stringify({
 			email_address: [account.email],
-			password: account.password,
 			first_name: account.firstName,
 			last_name: account.lastName,
+			skip_password_requirement: true,
+			...passwordPayload,
 		}),
 	});
 
@@ -165,7 +168,7 @@ export async function checkClerkTestUser({
 		});
 	}
 
-	if (account.authMode !== "password") {
+	if (account.authMode !== "password" && account.authMode !== "email_code") {
 		return result("blocked", {
 			...summarizeAccount(account),
 			message: `Unsupported auth mode for repo-local provisioning: ${account.authMode}.`,

@@ -1,12 +1,10 @@
 {
   "accounts": {
     "ship-by-sunday-clerk-instance": {
-      "email": "member-no-access@example.test",
-      "password": "replace-me"
+      "email": "member-no-access@example.test"
     },
     "ship-by-sunday-clerk-entitled": {
-      "email": "member-with-access@example.test",
-      "password": "replace-me"
+      "email": "member-with-access@example.test"
     }
   }
 }

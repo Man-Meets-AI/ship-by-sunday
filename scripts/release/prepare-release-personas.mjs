@@ -19,6 +19,14 @@ import {
 
 const ENTITLED_COURSE_SLUG = "ship-by-sunday";
 const authStateDirectory = path.join(repoRoot, "apps/web/tests/e2e/.auth");
+const signedInNoAccessPersonaKinds = new Set([
+	"clerk_email_code",
+	"clerk_password",
+]);
+const signedInEntitledPersonaKinds = new Set([
+	"clerk_email_code_entitled",
+	"clerk_password_entitled",
+]);
 
 function parseArgs(argv) {
 	const positional = [];
@@ -91,15 +99,17 @@ async function preparePersonas(options) {
 			);
 		}
 
-		if (persona.kind === "clerk_password_entitled") {
+		if (signedInEntitledPersonaKinds.has(persona.kind)) {
 			await grantConvexProductAccess({
 				clerkUserId: ensuredUser.clerkUserId,
 				courseSlug: ENTITLED_COURSE_SLUG,
 			});
-		} else if (persona.kind === "clerk_password") {
+		} else if (signedInNoAccessPersonaKinds.has(persona.kind)) {
 			await resetConvexProductAccess({
 				clerkUserId: ensuredUser.clerkUserId,
 			});
+		} else {
+			throw new Error(`Unsupported signed-in release persona kind: ${persona.kind}`);
 		}
 
 		results.push({
@@ -107,7 +117,7 @@ async function preparePersonas(options) {
 			status: ensuredUser.status,
 			email: persona.account.email,
 			message:
-				persona.kind === "clerk_password_entitled"
+				signedInEntitledPersonaKinds.has(persona.kind)
 					? "Entitled release persona is ready."
 					: "Signed-in no-access release persona is ready.",
 		});
