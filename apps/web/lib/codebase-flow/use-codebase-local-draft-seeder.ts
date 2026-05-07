@@ -13,6 +13,7 @@ import {
 	buildSavePayloadForCodebase,
 } from "@/lib/codebase-flow/codebase-page-draft-model";
 import type { CodebaseWorkspaceState } from "@/lib/codebase-flow/codebase-workspace-types";
+import { isSupportModeBlockedMutationResult } from "@/platform/admin-impersonation";
 
 type SaveProjectDefinitionFactsCaller = (
 	args: SaveProjectDefinitionFactsArgs,
@@ -101,7 +102,11 @@ export function useCodebaseLocalDraftSeeder({
 		hasRunRef.current = true;
 
 		saveProjectDefinitionFacts(savePayload)
-			.then(() => {
+			.then((result) => {
+				if (isSupportModeBlockedMutationResult(result)) {
+					hasRunRef.current = false;
+					return;
+				}
 				clearDraftFromStorage();
 				onSeedSuccessRef.current?.();
 			})

@@ -14,3 +14,8 @@ export {
 	type SupportModeStatus,
 	type SupportModeStatusState,
 } from "./status";
+export {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+	type SupportModeBlockedMutationResult,
+} from "./support-mode-blocked-result";

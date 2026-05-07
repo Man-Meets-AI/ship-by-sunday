@@ -28,6 +28,17 @@ export type AdminImpersonationSearchResult = {
 	query: string;
 };
 
+export type AdminImpersonationTargetResolution =
+	| {
+			ok: true;
+			customer: AdminImpersonationCustomer;
+	  }
+	| {
+			ok: false;
+			status: number;
+			message: string;
+	  };
+
 export type AdminImpersonationPageData = {
 	adminEmail: string;
 	initialCustomers: AdminImpersonationCustomer[];
@@ -96,6 +107,20 @@ function excludeAdminCustomers(
 ) {
 	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
 	return customers.filter((customer) => !adminEmailSet.has(customer.email));
+}
+
+function getClerkErrorStatus(error: unknown) {
+	if (typeof error !== "object" || error === null) {
+		return null;
+	}
+	const errorRecord = error as Record<string, unknown>;
+	if (typeof errorRecord.status === "number") {
+		return errorRecord.status;
+	}
+	if (typeof errorRecord.statusCode === "number") {
+		return errorRecord.statusCode;
+	}
+	return null;
 }
 
 export function getAdminImpersonationActionError(
@@ -208,6 +233,62 @@ export async function searchAdminImpersonationCustomers(
 		totalCount: response.totalCount,
 		query,
 	};
+}
+
+export async function resolveAdminImpersonationTarget(
+	input: { subjectClerkUserId: string; subjectEmail: string },
+	client?: ClerkBackendClient,
+): Promise<AdminImpersonationTargetResolution> {
+	const subjectClerkUserId = input.subjectClerkUserId.trim();
+	if (subjectClerkUserId.length === 0) {
+		return {
+			ok: false,
+			status: 400,
+			message: "Choose a customer before starting impersonation.",
+		};
+	}
+
+	const requestedEmail = normalizeEmail(input.subjectEmail);
+	const resolvedClient = client ?? (await clerkClient());
+	let user: User;
+	try {
+		user = await resolvedClient.users.getUser(subjectClerkUserId);
+	} catch (error) {
+		if (getClerkErrorStatus(error) === 404) {
+			return {
+				ok: false,
+				status: 404,
+				message: "Selected Clerk user was not found.",
+			};
+		}
+		throw error;
+	}
+
+	const customer = toCustomerSummary(user);
+	if (!customer) {
+		return {
+			ok: false,
+			status: 400,
+			message: "Selected Clerk user does not have an email address.",
+		};
+	}
+	if (customer.email !== requestedEmail) {
+		return {
+			ok: false,
+			status: 409,
+			message: "Selected customer changed. Search again before impersonating.",
+		};
+	}
+	const config = readAdminImpersonationConfig();
+	if (excludeAdminCustomers([customer], config.adminEmails).length === 0) {
+		return {
+			ok: false,
+			status: 403,
+			message: "Configured admins cannot be impersonated.",
+		};
+	}
+
+	return { ok: true, customer };
 }
 
 async function getConvexTokenOrThrow() {

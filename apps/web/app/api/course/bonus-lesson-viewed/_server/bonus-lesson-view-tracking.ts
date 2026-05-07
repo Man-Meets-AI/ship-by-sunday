@@ -6,6 +6,10 @@ import { ConvexError } from "convex/values";
 
 import { apiConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 import { BONUS_LESSON_VIEW_ERROR_CODES } from "@/lib/execute-ship/bonus-lesson-view-contract";
 import {
 	getRequestIdFromRequest,
@@ -91,6 +95,17 @@ export async function markBonusLessonViewedFromRequest(request: Request) {
 			{ lessonKey } satisfies BonusLessonViewedRequestBody,
 			{ token },
 		);
+		if (isSupportModeBlockedMutationResult(result)) {
+			return jsonWithRequestId(
+				{
+					error: getSupportModeBlockedMutationMessage(),
+					code: BONUS_LESSON_VIEW_ERROR_CODES.forbidden,
+					requestId,
+				},
+				{ status: 403 },
+				requestId,
+			);
+		}
 
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {

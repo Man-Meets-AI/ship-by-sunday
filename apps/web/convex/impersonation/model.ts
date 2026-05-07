@@ -145,6 +145,25 @@ function getActorClaim(identity: IdentityWithActorClaim): unknown {
 	return claims.act;
 }
 
+function getActorImpersonationSessionId(actorClaim: Record<string, unknown>) {
+	if (typeof actorClaim.impersonationSessionId === "string") {
+		return actorClaim.impersonationSessionId as ImpersonationSessionId;
+	}
+
+	const additionalProperties =
+		actorClaim.additionalProperties ?? actorClaim.additional_properties;
+	if (!isRecord(additionalProperties)) {
+		return null;
+	}
+
+	const nestedSessionId =
+		additionalProperties.impersonationSessionId ??
+		additionalProperties.impersonation_session_id;
+	return typeof nestedSessionId === "string"
+		? (nestedSessionId as ImpersonationSessionId)
+		: null;
+}
+
 function isUsableSessionStatus(session: ImpersonationSession) {
 	return session.status === "starting" || session.status === "active";
 }
@@ -236,10 +255,7 @@ export function parseClerkActorClaim(
 			typeof actorClaim.sid === "string" ? actorClaim.sid : null,
 		clerkActorIssuer:
 			typeof actorClaim.iss === "string" ? actorClaim.iss : null,
-		impersonationSessionId:
-			typeof actorClaim.impersonationSessionId === "string"
-				? (actorClaim.impersonationSessionId as ImpersonationSessionId)
-				: null,
+		impersonationSessionId: getActorImpersonationSessionId(actorClaim),
 	};
 }
 
@@ -768,7 +784,7 @@ async function getStatusForActorSession({
 	}
 
 	if (config.state === "misconfigured") {
-		return createBlockedStatus("misconfigured");
+		return redactStatusForSession("misconfigured", session, now);
 	}
 
 	if (isSessionExpired(session, now)) {
@@ -1013,7 +1029,10 @@ export async function assertSupportModeWriteAllowedHandler(
 		});
 	}
 
-	throw new ConvexError("Action unavailable during support mode.");
+	return {
+		kind: "blocked",
+		blockReason: auditContext.blockReason,
+	};
 }
 
 export async function recordBlockedSupportModeActionHandler(

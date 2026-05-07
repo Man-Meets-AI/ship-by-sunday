@@ -20,6 +20,10 @@ import type {
 } from "@/lib/course/lesson/model/registry";
 import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type CompletionErrorData = {
 	code: "INCOMPLETE_LESSON";
@@ -332,7 +336,12 @@ export function useLessonCompletion({
 
 			setCompletionPhase("submitting");
 			void completeLesson({ lessonKey, fieldValues }).then(
-				(result: { nextLessonKey: string | null }) => {
+				(result) => {
+					if (isSupportModeBlockedMutationResult(result)) {
+						setCompletionPhase("idle");
+						setServerCompletionMessage(getSupportModeBlockedMutationMessage());
+						return;
+					}
 					const nextLesson = result.nextLessonKey
 						? getLessonByKey(result.nextLessonKey)
 						: null;

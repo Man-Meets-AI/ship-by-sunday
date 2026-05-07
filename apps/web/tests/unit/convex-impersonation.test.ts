@@ -77,6 +77,28 @@ describe("convex impersonation model", () => {
 		});
 	});
 
+	it("parses Clerk actor claims when custom metadata is nested by the SDK", async () => {
+		const { parseClerkActorClaim } =
+			await import("@/convex/impersonation/model");
+
+		expect(
+			parseClerkActorClaim({
+				subject: "user_customer",
+				email: "customer@example.com",
+				emailVerified: true,
+				act: {
+					sub: "user_admin",
+					additionalProperties: {
+						impersonationSessionId: "session_nested",
+					},
+				},
+			}),
+		).toMatchObject({
+			kind: "valid",
+			impersonationSessionId: "session_nested",
+		});
+	});
+
 	it("creates a starting session and append-only audit event together", async () => {
 		const { createImpersonationSessionHandler } =
 			await import("@/convex/impersonation/model");
@@ -217,6 +239,33 @@ describe("convex impersonation model", () => {
 		);
 	});
 
+	it("keeps misconfigured actor sessions visible and blocked", async () => {
+		process.env.ADMIN_IMPERSONATION_EMAILS = "";
+		const { observeSupportModeStatusHandler } =
+			await import("@/convex/impersonation/model");
+		const fakeCtx = {
+			auth: {
+				getUserIdentity: vi.fn().mockResolvedValue({
+					subject: "user_customer",
+					email: "customer@example.com",
+					emailVerified: true,
+					act: { sub: "user_admin", impersonationSessionId: "session_1" },
+				}),
+			},
+			db: {
+				get: vi.fn().mockResolvedValue(createSession()),
+			},
+		} as unknown as Parameters<typeof observeSupportModeStatusHandler>[0];
+
+		await expect(
+			observeSupportModeStatusHandler(fakeCtx),
+		).resolves.toMatchObject({
+			state: "misconfigured",
+			stopEligible: true,
+			customerEmail: "customer@example.com",
+		});
+	});
+
 	it("blocks unclassified support-mode writes and records audit", async () => {
 		const { evaluateSupportModeWritePolicyHandler } =
 			await import("@/convex/impersonation/model");
@@ -256,7 +305,7 @@ describe("convex impersonation model", () => {
 		);
 	});
 
-	it("fails allowed write preflight before an expired support-mode mutation runs", async () => {
+	it("records and returns a blocked allowed-write preflight before an expired support-mode mutation runs", async () => {
 		const { assertSupportModeWriteAllowedHandler } =
 			await import("@/convex/impersonation/model");
 		const patch = vi.fn();
@@ -281,7 +330,10 @@ describe("convex impersonation model", () => {
 			assertSupportModeWriteAllowedHandler(fakeCtx, {
 				actionId: "course.lesson.saveDraft",
 			}),
-		).rejects.toThrow("Action unavailable during support mode.");
+		).resolves.toEqual({
+			kind: "blocked",
+			blockReason: "support_session_expired",
+		});
 		expect(patch).toHaveBeenCalledWith("session_1", {
 			status: "expired",
 			updatedAt: 1_000,

@@ -18,6 +18,10 @@ import {
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type PrivacyActionState = "idle" | "submitting" | "done" | "error";
 
@@ -94,11 +98,14 @@ export function useWorkspacePrivacyActions({
 
 		setRevokeState("submitting");
 		try {
-			await revokeRunner({
+			const revokeResult = await revokeRunner({
 				projectId: privacyModel.projectId as Id<"workspaceProjects">,
 				runnerId: privacyModel.runnerId as Id<"workspaceRunnerBindings">,
 				reason: "Revoked from workspace privacy controls",
 			});
+			if (isSupportModeBlockedMutationResult(revokeResult)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setRevokeState("done");
 			showWorkspaceActionSuccessToast({
 				action: {
@@ -134,12 +141,15 @@ export function useWorkspacePrivacyActions({
 
 		setDeleteState("submitting");
 		try {
-			await markFindingsDeleted({
+			const deleteResult = await markFindingsDeleted({
 				projectId: privacyModel.projectId as Id<"workspaceProjects">,
 				findingDocumentIds: privacyModel.syncedFindingIds.map(
 					(findingId) => findingId as Id<"codebaseFindings">,
 				),
 			});
+			if (isSupportModeBlockedMutationResult(deleteResult)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setFindings((currentFindings) =>
 				currentFindings.map((finding) =>
 					privacyModel.syncedFindingIds.includes(finding._id)
@@ -201,6 +211,9 @@ export function useWorkspacePrivacyActions({
 					proofBoundaries: true,
 				},
 			});
+			if (isSupportModeBlockedMutationResult(nextManagedGithubState)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setManagedGithubState(nextManagedGithubState);
 			setManagedGithubActionState("done");
 			showWorkspaceActionSuccessToast({
@@ -244,6 +257,9 @@ export function useWorkspacePrivacyActions({
 					managedGithub.consentId as Id<"managedGithubExecutionConsents">,
 				reason: "Revoked from workspace privacy controls",
 			});
+			if (isSupportModeBlockedMutationResult(nextManagedGithubState)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setManagedGithubState(nextManagedGithubState);
 			setManagedGithubActionState("done");
 			showWorkspaceActionSuccessToast({

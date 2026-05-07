@@ -6,6 +6,10 @@ import { ExistingCodebaseSetupPage } from "@/app/(workspace)/_components/existin
 import { loadWorkspacePageAccess } from "@/app/(workspace)/_server/load-workspace-page-access";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 import { fetchAuthenticatedMutation } from "@/platform/convex/server-preload";
 
 export const metadata: Metadata = {
@@ -34,6 +38,9 @@ export default async function Page() {
 
 	if (!initialSetupState) {
 		throw new Error("Workspace setup requires an authenticated session");
+	}
+	if (isSupportModeBlockedMutationResult(initialSetupState)) {
+		throw new Error(getSupportModeBlockedMutationMessage());
 	}
 
 	return (

@@ -1,4 +1,9 @@
 import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
+import {
+	createSupportModeBlockedMutationResult,
+	supportModeBlockedMutationResultValidator,
+} from "./impersonation/blockedResult";
 import {
 	appendSupportModeWriteSuccessAuditHandler,
 	assertSupportModeWriteAllowedHandler,
@@ -76,10 +81,20 @@ export const getLessonState = query({
 
 export const saveLessonDraft = mutation({
 	args: saveLessonDraftArgs,
-	returns: saveLessonDraftReturns,
+	returns: v.union(
+		saveLessonDraftReturns,
+		supportModeBlockedMutationResultValidator,
+	),
 	handler: async (ctx, args) => {
 		const actionId = "course.lesson.saveDraft";
-		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
 		const result = await saveLessonDraftHandler(ctx, args);
 		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
 		return result;
@@ -88,10 +103,20 @@ export const saveLessonDraft = mutation({
 
 export const markLessonViewed = mutation({
 	args: markLessonViewedArgs,
-	returns: markLessonViewedReturns,
+	returns: v.union(
+		markLessonViewedReturns,
+		supportModeBlockedMutationResultValidator,
+	),
 	handler: async (ctx, args) => {
 		const actionId = "course.lesson.markViewed";
-		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
 		const result = await markLessonViewedHandler(ctx, args);
 		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
 		return result;
@@ -100,10 +125,20 @@ export const markLessonViewed = mutation({
 
 export const markBonusLessonViewed = mutation({
 	args: markBonusLessonViewedArgs,
-	returns: markBonusLessonViewedReturns,
+	returns: v.union(
+		markBonusLessonViewedReturns,
+		supportModeBlockedMutationResultValidator,
+	),
 	handler: async (ctx, args) => {
 		const actionId = "course.bonusLesson.markViewed";
-		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
 		const result = await markBonusLessonViewedHandler(ctx, args);
 		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
 		return result;
@@ -112,10 +147,20 @@ export const markBonusLessonViewed = mutation({
 
 export const completeLesson = mutation({
 	args: completeLessonArgs,
-	returns: completeLessonReturns,
+	returns: v.union(
+		completeLessonReturns,
+		supportModeBlockedMutationResultValidator,
+	),
 	handler: async (ctx, args) => {
 		const actionId = "course.lesson.complete";
-		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
 		const result = await completeLessonHandler(ctx, args);
 		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
 		return result;

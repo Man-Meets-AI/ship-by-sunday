@@ -9,6 +9,10 @@ import { api } from "@/convex/_generated/api";
 import { routeConfig } from "@/config/product";
 import type { FulfillmentTrack } from "@/platform/billing/checkout/checkout-intent";
 import { cn } from "@/lib/utils";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type ChoiceState = FulfillmentTrack | null;
 
@@ -70,10 +74,13 @@ export function WorkspaceFulfillmentChoice() {
 		setErrorMessage(null);
 
 		try {
-			await resolveFulfillmentTrack({
+			const result = await resolveFulfillmentTrack({
 				fulfillmentTrack: choice.fulfillmentTrack,
 				checkoutCtaId: choice.checkoutCtaId,
 			});
+			if (isSupportModeBlockedMutationResult(result)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			router.replace(choice.href);
 		} catch (error) {
 			setErrorMessage(

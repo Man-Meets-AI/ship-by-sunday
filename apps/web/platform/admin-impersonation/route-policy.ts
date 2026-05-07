@@ -16,6 +16,7 @@ function supportModeStatusIsDownloadBlocking(status: SupportModeStatus) {
 		status.state === "expired" ||
 		status.state === "stopped" ||
 		status.state === "invalid_mismatch" ||
+		status.state === "misconfigured" ||
 		status.state === "kill_switch_disabled" ||
 		status.state === "unsupported_clerk_dashboard_impersonation"
 	);
@@ -32,6 +33,9 @@ function getSupportModeRouteBlockReason(
 	}
 	if (status.state === "unsupported_clerk_dashboard_impersonation") {
 		return "unsupported_clerk_dashboard_impersonation";
+	}
+	if (status.state === "misconfigured") {
+		return "external_side_effect_blocked";
 	}
 	return "external_side_effect_blocked";
 }

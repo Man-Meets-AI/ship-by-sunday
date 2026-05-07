@@ -19,6 +19,10 @@ import {
 } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 import { SetupDoctorPassAction } from "./setup-doctor-pass-action";
 import { SetupOpenDestinationControl } from "./setup-open-destination-control";
 import { SetupPairingPanel } from "./setup-pairing-panel";
@@ -101,6 +105,9 @@ export function ExistingCodebaseSetupPage({
 				runnerMode,
 				regenerate: true,
 			});
+			if (isSupportModeBlockedMutationResult(nextState)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setLastMutationState(nextState as WorkspaceSetupState);
 			showWorkspaceActionSuccessToast({
 				id: workspaceSetupToastIds.pairingSuccess,
@@ -140,6 +147,9 @@ export function ExistingCodebaseSetupPage({
 				projectId: setupState.project._id,
 				runnerId: cancelRunnerId,
 			});
+			if (isSupportModeBlockedMutationResult(nextState)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setLastMutationState(nextState as WorkspaceSetupState);
 			showWorkspaceActionSuccessToast({
 				id: workspaceSetupToastIds.cancelPairingSuccess,
@@ -166,7 +176,12 @@ export function ExistingCodebaseSetupPage({
 	) {
 		setPendingAction("open_destination");
 		try {
-			await saveWorkspaceProject({ defaultOpenDestination });
+			const saveResult = await saveWorkspaceProject({
+				defaultOpenDestination,
+			});
+			if (isSupportModeBlockedMutationResult(saveResult)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			showWorkspaceActionSuccessToast({
 				id: workspaceSetupToastIds.openDestinationSuccess,
 				title: "Open destination saved",
@@ -207,12 +222,15 @@ export function ExistingCodebaseSetupPage({
 		try {
 			const runnerId = setupState.activeRunner?._id;
 			const repositoryBindingId = setupState.repositoryBinding?._id;
-			await startDoctorPassRun({
+			const doctorPassRun = await startDoctorPassRun({
 				projectId: setupState.project._id,
 				runnerMode: setupState.activeRunner?.runnerMode ?? "daemon",
 				...(runnerId ? { runnerId } : {}),
 				...(repositoryBindingId ? { repositoryBindingId } : {}),
 			});
+			if (isSupportModeBlockedMutationResult(doctorPassRun)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			showWorkspaceActionSuccessToast({
 				action: {
 					label: "Open Doctor Pass",

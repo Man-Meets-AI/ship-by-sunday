@@ -25,7 +25,7 @@ export function SupportModeBar({
 	const liveStatus = useQuery(api.impersonation.getSupportModeStatus);
 	const stopCurrentSession = useMutation(api.impersonation.stopCurrentSession);
 	const clerk = useClerk();
-	const { session } = useSession();
+	const { isLoaded: sessionIsLoaded, session } = useSession();
 	const [isPending, startTransition] = useTransition();
 	const status = liveStatus ?? initialStatus ?? null;
 	const [remainingMs, setRemainingMs] = useState(
@@ -61,6 +61,11 @@ export function SupportModeBar({
 
 	function stopSupportMode() {
 		setStopError(null);
+		if (!sessionIsLoaded || !session?.id) {
+			setStopError("Clerk session is still loading.");
+			return;
+		}
+		const actorSessionId = session.id;
 		startTransition(async () => {
 			try {
 				if (status?.stopEligible) {
@@ -74,7 +79,7 @@ export function SupportModeBar({
 				);
 			} finally {
 				await clerk.signOut({
-					sessionId: session?.id,
+					sessionId: actorSessionId,
 					redirectUrl: ADMIN_IMPERSONATION_PATH,
 				});
 			}
@@ -122,7 +127,7 @@ export function SupportModeBar({
 					size="sm"
 					className="border-amber-950/40 bg-amber-50 text-amber-950 hover:bg-amber-100"
 					onClick={stopSupportMode}
-					disabled={isPending}
+					disabled={isPending || !sessionIsLoaded || !session?.id}
 				>
 					<Square className="size-3" aria-hidden />
 					Stop impersonating

@@ -24,6 +24,10 @@ import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type ApprovedWorkflowRunCommand = {
 	workflowRunId: string;
@@ -154,6 +158,9 @@ export function WorkspaceFindingDetailPage({
 				stopConditions: approval.stopConditions,
 				rollbackNotes: approval.rollbackNotes,
 			});
+			if (isSupportModeBlockedMutationResult(workflowRun)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setApprovedWorkflowRunCommand({
 				workflowRunId: workflowRun._id,
 				branchName: workflowRun.branchName ?? approval.branchName,

@@ -36,9 +36,9 @@ Convex already validates Clerk JWTs through `apps/web/convex/auth.config.ts` wit
 }
 ```
 
-Clerk includes the `act` claim only during impersonation. The actor object should contain the admin actor user id as `sub`, Clerk's actor session id as `sid` when available, and the app-managed Convex session id as `impersonationSessionId`.
+Clerk includes the `act` claim only during impersonation. The actor object must contain the admin actor user id as `sub`. Clerk's actor session id appears as `sid` when available. The app-managed Convex session id is passed through the installed Clerk Backend SDK actor `additionalProperties.impersonationSessionId` field; Convex accepts that nested shape and the direct `act.impersonationSessionId` shape if Clerk exposes it directly.
 
-The later start UI must create an `impersonationSessions` row before creating the Clerk actor token. It must pass the created Convex session id into Clerk's actor token `actor` object as `impersonationSessionId`, along with the actor `sub`. The customer remains the Clerk session subject.
+The start UI must create an `impersonationSessions` row before creating the Clerk actor token. It must pass the created Convex session id into Clerk's actor token `actor` object, along with the actor `sub`. The customer remains the Clerk session subject.
 
 ## Supported Path
 

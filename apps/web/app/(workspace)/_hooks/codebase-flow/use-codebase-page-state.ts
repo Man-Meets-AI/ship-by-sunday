@@ -9,6 +9,10 @@ import type {
 } from "@shipbysunday/codebase-compiler";
 import { api } from "@/convex/_generated/api";
 import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
+import {
 	areDraftValuesEqual,
 	buildFlattenedDraftValues,
 	buildNextProjectFacts,
@@ -214,7 +218,11 @@ export function useCodebasePageState({
 
 		if (hasUnsavedChanges) {
 			try {
-				await saveProjectDefinitionFactsWithOptimism(savePayload);
+				const saveResult =
+					await saveProjectDefinitionFactsWithOptimism(savePayload);
+				if (isSupportModeBlockedMutationResult(saveResult)) {
+					throw new Error(getSupportModeBlockedMutationMessage());
+				}
 			} catch {
 				setHasSubmitError(true);
 				setIsSaving(false);
@@ -233,7 +241,10 @@ export function useCodebasePageState({
 		}
 
 		try {
-			await unlockExecuteShip({});
+			const unlockResult = await unlockExecuteShip({});
+			if (isSupportModeBlockedMutationResult(unlockResult)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 		} catch {
 			setHasSubmitError(true);
 			setIsSaving(false);

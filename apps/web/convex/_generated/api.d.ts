@@ -36,6 +36,7 @@ import type * as crons from "../crons.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
 import type * as impersonation from "../impersonation.js";
+import type * as impersonation_blockedResult from "../impersonation/blockedResult.js";
 import type * as impersonation_model from "../impersonation/model.js";
 import type * as impersonation_types from "../impersonation/types.js";
 import type * as impersonation_validators from "../impersonation/validators.js";
@@ -94,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   env: typeof env;
   http: typeof http;
   impersonation: typeof impersonation;
+  "impersonation/blockedResult": typeof impersonation_blockedResult;
   "impersonation/model": typeof impersonation_model;
   "impersonation/types": typeof impersonation_types;
   "impersonation/validators": typeof impersonation_validators;

@@ -26,6 +26,9 @@ export function getSupportModeMessage(status: SupportModeStatus) {
 	if (status.state === "kill_switch_disabled") {
 		return "Support mode disabled";
 	}
+	if (status.state === "misconfigured") {
+		return "Support mode misconfigured";
+	}
 	if (status.state === "invalid_mismatch") {
 		return "Support mode mismatch";
 	}
@@ -38,6 +41,7 @@ export function shouldRenderSupportModeStatus(status: SupportModeStatus) {
 		status.state === "expired" ||
 		status.state === "stopped" ||
 		status.state === "invalid_mismatch" ||
+		status.state === "misconfigured" ||
 		status.state === "kill_switch_disabled" ||
 		status.state === "unsupported_clerk_dashboard_impersonation"
 	);

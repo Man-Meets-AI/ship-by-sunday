@@ -33,6 +33,10 @@ import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type WorkspaceSyncPreviewState = FunctionReturnType<
 	typeof api.workspace.getWorkspaceSyncPreviewState
@@ -87,6 +91,9 @@ export function WorkspaceDoctorPassPage({
 				doctorPassRunId: doctorPassRun._id,
 				previewDigest: doctorPassRun.syncPreviewDigest,
 			});
+			if (isSupportModeBlockedMutationResult(nextRun)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setLastMutationState({
 				doctorPassRun: nextRun,
 			});

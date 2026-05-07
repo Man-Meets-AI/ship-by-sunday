@@ -8,6 +8,7 @@ import {
 	markConvexImpersonationHandoffActive,
 	markConvexImpersonationStartFailed,
 	requireAdminImpersonationActionContext,
+	resolveAdminImpersonationTarget,
 	searchAdminImpersonationCustomers,
 } from "./_server/admin-impersonation-server";
 
@@ -59,19 +60,33 @@ export async function startAdminImpersonationAction(input: {
 		};
 	}
 
-	const subjectEmail = input.subjectEmail.trim().toLowerCase();
 	let sessionId: Id<"impersonationSessions"> | null = null;
 
 	try {
+		const target = await resolveAdminImpersonationTarget(
+			{
+				subjectClerkUserId: input.subjectClerkUserId,
+				subjectEmail: input.subjectEmail,
+			},
+			context.client,
+		);
+		if (!target.ok) {
+			return {
+				ok: false,
+				status: target.status,
+				message: target.message,
+			};
+		}
+
 		const session = await beginConvexImpersonationSession({
-			subjectClerkUserId: input.subjectClerkUserId,
-			subjectEmail,
+			subjectClerkUserId: target.customer.clerkUserId,
+			subjectEmail: target.customer.email,
 			reason: input.reason,
 		});
 		sessionId = session.sessionId;
 
 		const actorToken = await context.client.actorTokens.create({
-			userId: input.subjectClerkUserId,
+			userId: target.customer.clerkUserId,
 			actor: {
 				sub: context.admin.clerkUserId,
 				additionalProperties: {
