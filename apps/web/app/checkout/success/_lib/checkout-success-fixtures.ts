@@ -151,3 +151,7 @@ export function getCheckoutSuccessFixture(input: {
 	}
 	return FIXTURE_BUILDERS[slug]();
 }
+
+export function hasCheckoutSuccessFixtureParam(input: { fixture?: string }) {
+	return input.fixture !== undefined;
+}
