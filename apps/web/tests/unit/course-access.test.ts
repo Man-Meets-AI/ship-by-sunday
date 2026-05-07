@@ -97,7 +97,7 @@ describe("product access server helpers", () => {
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 
-	it("keeps a signed-out pending paid checkout on the email handoff recovery path", async () => {
+	it("keeps a signed-out pending paid checkout on the normal sign-in recovery path", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: null,
 			token: null,
@@ -114,7 +114,7 @@ describe("product access server helpers", () => {
 			hasAccess: false,
 			status: "signed_out",
 			pendingCheckoutRecovery: {
-				kind: "checkout_email_handoff_required",
+				kind: "sign_in_required",
 				sessionId: "cs_pending_signed_out",
 				checkoutEmail: "buyer@example.com",
 			},

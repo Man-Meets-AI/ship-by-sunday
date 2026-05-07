@@ -16,11 +16,8 @@ const stripeApiVersion = "2026-02-25.clover";
 const testCardNumber = "4242 4242 4242 4242";
 const testCardExpiry = "12 / 34";
 const testCardCvc = "123";
-const expectedCheckoutMetadata = {
-	buyerStartingPoint: "no_codebase",
-	checkoutCtaId: "codebase_demo_generated",
-	fulfillmentTrack: "generated_codebase",
-};
+const checkoutEmail = `dev-checkout-${Date.now()}@example.com`;
+const expectedCourseSlug = "ship-by-sunday";
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -28,6 +25,7 @@ function normalizeStripeSecretKey(secretKey) {
 
 function parseArgs(argv) {
 	let baseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim() ?? "";
+	let vercelShareUrl = process.env.VERCEL_PROTECTION_SHARE_URL?.trim() ?? "";
 	let timeoutMs = 120_000;
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -44,6 +42,17 @@ function parseArgs(argv) {
 			continue;
 		}
 
+		if (current?.startsWith("--vercel-share-url=")) {
+			vercelShareUrl = current.slice("--vercel-share-url=".length);
+			continue;
+		}
+
+		if (current === "--vercel-share-url") {
+			vercelShareUrl = argv[index + 1] ?? vercelShareUrl;
+			index += 1;
+			continue;
+		}
+
 		if (current?.startsWith("--timeout-ms=")) {
 			timeoutMs = Number(current.slice("--timeout-ms=".length)) || timeoutMs;
 			continue;
@@ -55,9 +64,15 @@ function parseArgs(argv) {
 		}
 	}
 
+	if (baseUrl.includes("_vercel_share=") && !vercelShareUrl) {
+		vercelShareUrl = baseUrl;
+		baseUrl = new URL(baseUrl).origin;
+	}
+
 	return {
 		baseUrl,
 		timeoutMs,
+		vercelShareUrl,
 	};
 }
 
@@ -65,12 +80,24 @@ function getCheckoutSessionIdFromUrl(urlString) {
 	return urlString.match(/cs_(?:live|test)_[A-Za-z0-9]+/)?.[0] ?? null;
 }
 
-async function primeVercelBypassCookie(page, { baseUrl }) {
+async function primeVercelAccessCookie(page, { baseUrl, vercelShareUrl }) {
+	if (vercelShareUrl) {
+		await page.goto(vercelShareUrl, {
+			waitUntil: "domcontentloaded",
+		});
+
+		return {
+			enabled: true,
+			source: "share-url",
+		};
+	}
+
 	const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
 
 	if (!bypassSecret) {
 		return {
 			enabled: false,
+			source: "none",
 		};
 	}
 
@@ -84,6 +111,7 @@ async function primeVercelBypassCookie(page, { baseUrl }) {
 
 	return {
 		enabled: true,
+		source: "bypass-secret",
 	};
 }
 
@@ -133,20 +161,25 @@ async function selectCardPaymentMethod(page) {
 }
 
 async function uncheckLinkSaveInformation(page) {
-	const saveInformationCheckbox = page
-		.getByRole("checkbox", { name: /save my information/i })
-		.first();
+	const saveInformationCheckboxes = [
+		page.getByRole("checkbox", { name: /save my information/i }).first(),
+		page.locator("input[type='checkbox']:checked").first(),
+	];
 
-	await saveInformationCheckbox
-		.waitFor({ state: "visible", timeout: 2_000 })
-		.catch(() => null);
+	for (const saveInformationCheckbox of saveInformationCheckboxes) {
+		await saveInformationCheckbox
+			.waitFor({ state: "attached", timeout: 2_000 })
+			.catch(() => null);
 
-	if (!(await saveInformationCheckbox.isVisible().catch(() => false))) {
-		return;
-	}
+		if (!(await saveInformationCheckbox.isChecked().catch(() => false))) {
+			continue;
+		}
 
-	if (await saveInformationCheckbox.isChecked().catch(() => false)) {
 		await saveInformationCheckbox.uncheck({ force: true }).catch(() => null);
+
+		if (!(await saveInformationCheckbox.isChecked().catch(() => false))) {
+			return;
+		}
 	}
 }
 
@@ -197,7 +230,45 @@ function printCheck(label, passed, detail) {
 	console.log(`- ${passed ? "PASS" : "FAIL"} ${label}: ${detail}`);
 }
 
-const { baseUrl, timeoutMs } = parseArgs(process.argv.slice(2));
+async function waitForPasswordlessCheckoutHandoff(
+	page,
+	{ baseUrl, timeoutMs },
+) {
+	const baseOrigin = new URL(baseUrl).origin;
+
+	await page.waitForURL(
+		(url) => url.origin === baseOrigin && url.pathname === "/sign-in",
+		{
+			timeout: timeoutMs,
+		},
+	);
+
+	const finalUrl = new URL(page.url());
+	const redirectUrl = finalUrl.searchParams.get("redirect_url");
+	const emailField = page.getByLabel("Email").first();
+	await emailField.waitFor({ state: "visible", timeout: timeoutMs });
+
+	return {
+		claimPageVisible:
+			(await page
+				.getByText(/Prove checkout email/i)
+				.isVisible()
+				.catch(() => false)) || page.url().includes("/checkout/email-handoff"),
+		emailLocked: await emailField
+			.isEditable()
+			.then((isEditable) => !isEditable)
+			.catch(() => false),
+		emailValue: await emailField.inputValue(),
+		finalUrl: page.url(),
+		passwordVisible: await page
+			.getByLabel("Password")
+			.isVisible()
+			.catch(() => false),
+		redirectUrl,
+	};
+}
+
+const { baseUrl, timeoutMs, vercelShareUrl } = parseArgs(process.argv.slice(2));
 
 if (!baseUrl) {
 	throw new Error(
@@ -260,7 +331,10 @@ page.on("response", (response) => {
 });
 
 try {
-	const bypass = await primeVercelBypassCookie(page, { baseUrl });
+	const vercelAccess = await primeVercelAccessCookie(page, {
+		baseUrl,
+		vercelShareUrl,
+	});
 	await page.goto(new URL(HOMEPAGE_CHECKOUT_PROOF_PATH, baseUrl).toString(), {
 		waitUntil: "domcontentloaded",
 	});
@@ -300,21 +374,13 @@ try {
 	}
 
 	const hostedLinkSignalText = await waitForHostedLinkSignal(page);
-	await fillVisibleTextBox(
-		page,
-		/^email$/i,
-		`dev-checkout-${Date.now()}@example.com`,
-	);
+	await fillVisibleTextBox(page, /^email$/i, checkoutEmail);
 	await fillStripeCardPayment(page);
 	await page.getByTestId("hosted-payment-submit-button").click();
-	await page.waitForURL(
-		(url) =>
-			url.origin === new URL(baseUrl).origin &&
-			url.pathname === "/checkout/success",
-		{
-			timeout: timeoutMs,
-		},
-	);
+	const checkoutHandoff = await waitForPasswordlessCheckoutHandoff(page, {
+		baseUrl,
+		timeoutMs,
+	});
 
 	const finalSession =
 		await stripe.checkout.sessions.retrieve(checkoutSessionId);
@@ -322,6 +388,14 @@ try {
 		typeof finalSession.payment_intent === "string"
 			? await stripe.paymentIntents.retrieve(finalSession.payment_intent)
 			: null;
+	const checkoutSuccessPath = finalSession.success_url
+		? new URL(finalSession.success_url).pathname
+		: null;
+	const paymentIntentMetadataIsNeutral =
+		paymentIntent?.metadata?.courseSlug === expectedCourseSlug &&
+		paymentIntent?.metadata?.buyerStartingPoint === undefined &&
+		paymentIntent?.metadata?.checkoutCtaId === undefined &&
+		paymentIntent?.metadata?.fulfillmentTrack === undefined;
 
 	printCheck(
 		"Dev staging uses Stripe test mode",
@@ -350,14 +424,18 @@ try {
 		hostedLinkSignalText ?? "missing",
 	);
 	printCheck(
-		"Checkout used generated-codebase CTA metadata",
-		finalSession.metadata?.buyerStartingPoint ===
-			expectedCheckoutMetadata.buyerStartingPoint &&
-			finalSession.metadata?.checkoutCtaId ===
-				expectedCheckoutMetadata.checkoutCtaId &&
-			finalSession.metadata?.fulfillmentTrack ===
-				expectedCheckoutMetadata.fulfillmentTrack,
-		`metadata=${JSON.stringify(finalSession.metadata)}`,
+		"Checkout used neutral product metadata",
+		finalSession.metadata?.courseSlug === expectedCourseSlug &&
+			finalSession.metadata?.buyerStartingPoint === undefined &&
+			finalSession.metadata?.checkoutCtaId === undefined &&
+			finalSession.metadata?.fulfillmentTrack === undefined &&
+			paymentIntentMetadataIsNeutral,
+		`session_metadata=${JSON.stringify(finalSession.metadata)}, payment_intent_metadata=${JSON.stringify(paymentIntent?.metadata)}`,
+	);
+	printCheck(
+		"Checkout returns through shared success route",
+		checkoutSuccessPath === "/checkout/success",
+		`success_url=${finalSession.success_url ?? "missing"}`,
 	);
 	printCheck(
 		"Stripe Checkout session paid",
@@ -372,16 +450,20 @@ try {
 		`status=${paymentIntent?.status ?? "missing"}, amount=${paymentIntent?.amount ?? "missing"}`,
 	);
 	printCheck(
-		"Checkout returned to dev staging",
-		page.url().startsWith(baseUrl),
-		page.url(),
+		"Checkout reached passwordless workspace handoff",
+		checkoutHandoff.redirectUrl === "/workspace/choose?welcome=checkout" &&
+			checkoutHandoff.emailValue === checkoutEmail &&
+			checkoutHandoff.emailLocked &&
+			!checkoutHandoff.passwordVisible &&
+			!checkoutHandoff.claimPageVisible,
+		`url=${checkoutHandoff.finalUrl}, redirect_url=${checkoutHandoff.redirectUrl}, email=${checkoutHandoff.emailValue}, email_locked=${checkoutHandoff.emailLocked}, password_visible=${checkoutHandoff.passwordVisible}, claim_page_visible=${checkoutHandoff.claimPageVisible}`,
 	);
 
 	console.log(
 		JSON.stringify(
 			{
 				baseUrl,
-				bypassEnabled: bypass.enabled,
+				vercelAccess,
 				checkoutRouteResponses,
 				checkoutSession: {
 					amountTotal: finalSession.amount_total,
@@ -393,11 +475,13 @@ try {
 					successOrigin: finalSession.success_url
 						? new URL(finalSession.success_url).origin
 						: null,
+					successPath: checkoutSuccessPath,
 					metadata: finalSession.metadata,
 					uiMode: finalSession.ui_mode ?? null,
 				},
 				expressCheckoutRequestCount: expressCheckoutRequests.length,
-				finalPageUrl: page.url(),
+				finalPageUrl: checkoutHandoff.finalUrl,
+				handoff: checkoutHandoff,
 				hostedLinkSignalText,
 				paymentIntent: paymentIntent
 					? {
@@ -405,6 +489,7 @@ try {
 							currency: paymentIntent.currency,
 							id: paymentIntent.id,
 							livemode: paymentIntent.livemode,
+							metadata: paymentIntent.metadata,
 							status: paymentIntent.status,
 						}
 					: null,
@@ -423,18 +508,22 @@ try {
 		!checkoutRouteResponses.some((response) => response.ok) ||
 		typeof hostedLinkSignalText !== "string" ||
 		!/Link is accepted/i.test(hostedLinkSignalText) ||
-		finalSession.metadata?.buyerStartingPoint !==
-			expectedCheckoutMetadata.buyerStartingPoint ||
-		finalSession.metadata?.checkoutCtaId !==
-			expectedCheckoutMetadata.checkoutCtaId ||
-		finalSession.metadata?.fulfillmentTrack !==
-			expectedCheckoutMetadata.fulfillmentTrack ||
+		finalSession.metadata?.courseSlug !== expectedCourseSlug ||
+		finalSession.metadata?.buyerStartingPoint !== undefined ||
+		finalSession.metadata?.checkoutCtaId !== undefined ||
+		finalSession.metadata?.fulfillmentTrack !== undefined ||
+		!paymentIntentMetadataIsNeutral ||
+		checkoutSuccessPath !== "/checkout/success" ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
 		finalSession.amount_total !== 25_000 ||
 		paymentIntent?.status !== "succeeded" ||
 		paymentIntent.amount !== 25_000 ||
-		!page.url().startsWith(baseUrl)
+		checkoutHandoff.redirectUrl !== "/workspace/choose?welcome=checkout" ||
+		checkoutHandoff.emailValue !== checkoutEmail ||
+		!checkoutHandoff.emailLocked ||
+		checkoutHandoff.passwordVisible ||
+		checkoutHandoff.claimPageVisible
 	) {
 		process.exitCode = 1;
 	}

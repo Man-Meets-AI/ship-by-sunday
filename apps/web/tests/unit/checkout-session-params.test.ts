@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { productConfig } from "@/config/product";
-import { normalizeCheckoutIntent } from "@/platform/billing/checkout/checkout-intent";
 
 vi.mock("server-only", () => ({}));
 
@@ -30,10 +29,6 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			buildStripeCheckoutSessionCreateParams({
 				appBaseUrl: "https://app.example.com",
 				clerkUserId: "user_123",
-				checkoutIntent: normalizeCheckoutIntent({
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "hero_primary",
-				}),
 				customerEmail: "buyer@example.com",
 			}),
 		).toEqual({
@@ -48,19 +43,13 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			discounts: [{ promotion_code: "promo_50_off" }],
 			line_items: [{ price: "price_250_managed", quantity: 1 }],
 			metadata: {
-				buyerStartingPoint: "no_codebase",
-				checkoutCtaId: "hero_primary",
 				clerkUserId: "user_123",
 				courseSlug: productConfig.courseSlug,
-				fulfillmentTrack: "generated_codebase",
 			},
 			payment_intent_data: {
 				metadata: {
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "hero_primary",
 					clerkUserId: "user_123",
 					courseSlug: productConfig.courseSlug,
-					fulfillmentTrack: "generated_codebase",
 				},
 			},
 		});
@@ -73,10 +62,6 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 		const params = buildStripeCheckoutSessionCreateParams({
 			appBaseUrl: "https://app.example.com",
 			clerkUserId: null,
-			checkoutIntent: normalizeCheckoutIntent({
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "codebase_demo_existing",
-			}),
 			customerEmail: null,
 		});
 
@@ -86,17 +71,11 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			customer_email: undefined,
 			discounts: [{ promotion_code: "promo_50_off" }],
 			metadata: {
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "codebase_demo_existing",
 				courseSlug: productConfig.courseSlug,
-				fulfillmentTrack: "existing_codebase_doctor",
 			},
 			payment_intent_data: {
 				metadata: {
-					buyerStartingPoint: "existing_codebase",
-					checkoutCtaId: "codebase_demo_existing",
 					courseSlug: productConfig.courseSlug,
-					fulfillmentTrack: "existing_codebase_doctor",
 				},
 			},
 		});
@@ -115,10 +94,6 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			buildStripeExpressCheckoutSessionCreateParams({
 				appBaseUrl: "https://app.example.com",
 				clerkUserId: "user_123",
-				checkoutIntent: normalizeCheckoutIntent({
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "pricing_primary",
-				}),
 				customerEmail: "buyer@example.com",
 			}),
 		).toEqual({
@@ -133,43 +108,33 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			discounts: [{ promotion_code: "promo_50_off" }],
 			line_items: [{ price: "price_250_managed", quantity: 1 }],
 			metadata: {
-				buyerStartingPoint: "no_codebase",
-				checkoutCtaId: "pricing_primary",
 				clerkUserId: "user_123",
 				courseSlug: productConfig.courseSlug,
-				fulfillmentTrack: "generated_codebase",
 			},
 			payment_intent_data: {
 				metadata: {
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "pricing_primary",
 					clerkUserId: "user_123",
 					courseSlug: productConfig.courseSlug,
-					fulfillmentTrack: "generated_codebase",
 				},
 			},
 		});
 	});
 
-	it("normalizes unknown checkout intent metadata to unspecified", async () => {
+	it("does not write checkout path intent metadata for new sessions", async () => {
 		const { buildStripeCheckoutSessionCreateParams } =
 			await import("@/platform/billing/checkout/checkout-session-params");
 
 		const params = buildStripeCheckoutSessionCreateParams({
 			appBaseUrl: "https://app.example.com",
 			clerkUserId: null,
-			checkoutIntent: normalizeCheckoutIntent({
-				buyerStartingPoint: "mystery",
-				checkoutCtaId: "not-a-surface",
-				fulfillmentTrack: "other",
-			}),
 			customerEmail: null,
 		});
 
-		expect(params.metadata).toMatchObject({
-			buyerStartingPoint: "unspecified",
-			checkoutCtaId: "unspecified",
-			fulfillmentTrack: "unspecified",
+		expect(params.metadata).toEqual({
+			courseSlug: productConfig.courseSlug,
+		});
+		expect(params.payment_intent_data?.metadata).toEqual({
+			courseSlug: productConfig.courseSlug,
 		});
 	});
 });

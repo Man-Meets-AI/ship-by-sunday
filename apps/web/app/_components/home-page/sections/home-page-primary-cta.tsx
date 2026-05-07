@@ -34,7 +34,6 @@ export function HomePagePrimaryCta({
 			return (
 				<HomePageCheckoutCta
 					label={label}
-					checkoutIntent={target.checkoutIntent}
 					className={mergedClassName}
 					testId={testId}
 					onBeforeCheckout={onBeforeCheckout}

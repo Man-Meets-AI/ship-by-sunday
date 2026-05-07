@@ -1,5 +1,3 @@
-import type { CheckoutIntentInput } from "@/platform/billing/checkout/checkout-intent";
-
 export const PRODUCT_APP_ID = "ship-by-sunday" as const;
 export const PRODUCT_COURSE_SLUG = "ship-by-sunday" as const;
 
@@ -32,7 +30,6 @@ export const routeConfig = {
 	signIn: "/sign-in",
 	signUp: "/sign-up",
 	checkoutSuccess: "/checkout/success",
-	checkoutEmailHandoff: "/checkout/email-handoff",
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
@@ -65,7 +62,6 @@ export type HomePageSectionName = (typeof homePageSectionOrder)[number];
 export type HomePageCtaTarget =
 	| {
 			readonly kind: "checkout";
-			readonly checkoutIntent: CheckoutIntentInput;
 	  }
 	| {
 			readonly kind: "link";
@@ -99,17 +95,9 @@ export const starterHomePageConfig = {
 	},
 	heroPrimaryCta: {
 		kind: "checkout",
-		checkoutIntent: {
-			buyerStartingPoint: "no_codebase",
-			checkoutCtaId: "hero_primary",
-		},
 	},
 	pricingPrimaryCta: {
 		kind: "checkout",
-		checkoutIntent: {
-			buyerStartingPoint: "no_codebase",
-			checkoutCtaId: "pricing_primary",
-		},
 	},
 } as const satisfies StarterHomePageConfig;
 
@@ -383,7 +371,7 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	fallbackRedirectUrl: routeConfig.codebase,
+	fallbackRedirectUrl: routeConfig.workspaceChoice,
 } as const;
 
 export function getSignInRedirectHref(redirectPath: string) {

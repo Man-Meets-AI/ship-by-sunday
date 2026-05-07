@@ -49,6 +49,8 @@ describe("convex/checkoutClaimsActions", () => {
 			...originalEnv,
 			CLERK_SECRET_KEY: "sk_clerk_test_123",
 			STRIPE_SECRET_KEY: "sk_test_123",
+			STRIPE_WEBHOOK_SECRET: "whsec_test_123",
+			CHECKOUT_FULFILLMENT_RETRY_SECRET: "checkout_retry_secret_123",
 		};
 		retrieveSessionMock.mockReset();
 		stripeConstructorArgs.length = 0;
@@ -116,8 +118,6 @@ describe("convex/checkoutClaimsActions", () => {
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "codebase_demo_existing",
 				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
@@ -164,17 +164,10 @@ describe("convex/checkoutClaimsActions", () => {
 				},
 			},
 		});
-		expect(runMutation).toHaveBeenNthCalledWith(
-			1,
-			expect.anything(),
-			expect.objectContaining({
-				stripeCheckoutSessionId: "cs_guest_123",
-				checkoutEmail: "buyer@example.com",
-				buyerStartingPoint: "unspecified",
-				checkoutCtaId: "unspecified",
-				fulfillmentTrack: "unspecified",
-			}),
-		);
+		expect(runMutation.mock.calls[0]?.[1]).toMatchObject({
+			stripeCheckoutSessionId: "cs_guest_123",
+			checkoutEmail: "buyer@example.com",
+		});
 		expect(runMutation).toHaveBeenNthCalledWith(2, expect.anything(), {
 			stripeCheckoutSessionId: "cs_guest_123",
 		});
@@ -378,8 +371,6 @@ describe("convex/checkoutClaimsActions", () => {
 				checkoutEmail: "Buyer@Example.com",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
-				buyerStartingPoint: "existing_codebase",
-				checkoutCtaId: "codebase_demo_existing",
 				fulfillmentTrack: "existing_codebase_doctor",
 				stripeEventId: "evt_123",
 				stripeEventType: "checkout.session.completed",
@@ -450,6 +441,71 @@ describe("convex/checkoutClaimsActions", () => {
 				},
 			},
 		});
+	});
+
+	it("refuses success-page fulfillment with an invalid server token", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_guest_token",
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			customer_details: {
+				email: "buyer@example.com",
+			},
+			payment_status: "paid",
+		});
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi.fn();
+		const { fulfillCheckoutSessionFromSuccessPage } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				fulfillmentToken: "wrong-token",
+				sessionId: "cs_guest_token",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "invalid_session",
+			sessionId: "cs_guest_token",
+		});
+		expect(retrieveSessionMock).not.toHaveBeenCalled();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(runMutation).not.toHaveBeenCalled();
+	});
+
+	it("refuses success-page fulfillment when the checkout is missing course metadata", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_missing_course",
+			metadata: {},
+			customer_details: {
+				email: "buyer@example.com",
+			},
+			payment_status: "paid",
+		});
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi.fn();
+		const { fulfillCheckoutSessionFromSuccessPage } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				fulfillmentToken: "checkout_retry_secret_123",
+				sessionId: "cs_missing_course",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "invalid_session",
+			sessionId: "cs_missing_course",
+		});
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(runMutation).not.toHaveBeenCalled();
 	});
 
 	it("refuses fulfillment when multiple Clerk users match the checkout email", async () => {

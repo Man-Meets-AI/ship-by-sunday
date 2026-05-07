@@ -1,9 +1,7 @@
 import { ConvexError, v } from "convex/values";
 
 import {
-	getBuyerStartingPointForFulfillmentTrack,
 	getResolvedCheckoutIntentFields,
-	normalizeCheckoutCtaId,
 	normalizeCheckoutIntent,
 	type BuyerStartingPoint,
 	type CheckoutCtaId,
@@ -175,8 +173,6 @@ export async function upsertProductAccessGrant(
 			stripeCustomerId: input.stripeCustomerId,
 			stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 			stripePaymentIntentId: input.stripePaymentIntentId,
-			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
-			checkoutCtaId: checkoutIntent.checkoutCtaId,
 			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			updatedAt: now,
 			revokedAt: undefined,
@@ -193,8 +189,6 @@ export async function upsertProductAccessGrant(
 		stripeCustomerId: input.stripeCustomerId,
 		stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 		stripePaymentIntentId: input.stripePaymentIntentId,
-		buyerStartingPoint: checkoutIntent.buyerStartingPoint,
-		checkoutCtaId: checkoutIntent.checkoutCtaId,
 		fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 		grantedAt: now,
 		updatedAt: now,
@@ -295,7 +289,6 @@ export async function grantProductAccessFromStripeHandler(
 
 export const resolveViewerFulfillmentTrackArgs = {
 	fulfillmentTrack: checkoutResolvedFulfillmentTrackValidator,
-	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 };
 export const resolveViewerFulfillmentTrackReturns = v.object({
 	fulfillmentTrack: checkoutResolvedFulfillmentTrackValidator,
@@ -305,7 +298,6 @@ export async function resolveViewerFulfillmentTrackHandler(
 	ctx: AccessMutationCtx,
 	args: {
 		fulfillmentTrack: Exclude<FulfillmentTrack, "unspecified">;
-		checkoutCtaId?: CheckoutCtaId;
 	},
 ) {
 	const clerkUserId = await requireGrantedProductAccess(ctx);
@@ -322,12 +314,7 @@ export async function resolveViewerFulfillmentTrackHandler(
 	}
 
 	const now = Date.now();
-	const buyerStartingPoint = getBuyerStartingPointForFulfillmentTrack(
-		args.fulfillmentTrack,
-	);
 	await ctx.db.patch(accessGrant._id, {
-		buyerStartingPoint,
-		checkoutCtaId: normalizeCheckoutCtaId(args.checkoutCtaId),
 		fulfillmentTrack: args.fulfillmentTrack,
 		updatedAt: now,
 	});

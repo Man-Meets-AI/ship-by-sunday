@@ -29,7 +29,7 @@ describe("checkout clear pending route", () => {
 		);
 
 		expect(response.headers.get("location")).toBe(
-			"https://shipbysunday.test/codebase",
+			"https://shipbysunday.test/workspace/choose",
 		);
 	});
 });

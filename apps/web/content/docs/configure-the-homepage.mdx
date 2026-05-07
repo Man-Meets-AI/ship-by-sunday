@@ -137,8 +137,8 @@ Current target kinds:
 Safe rules:
 
 - if you need a normal link CTA, use `kind: "link"` with `href`
-- if you need checkout, use `kind: "checkout"` with a `checkoutIntent` containing `buyerStartingPoint` and `checkoutCtaId`
-- use `buyerStartingPoint: "no_codebase"` for generated-codebase checkout and `buyerStartingPoint: "existing_codebase"` for existing-codebase setup checkout
+- if you need checkout, use `kind: "checkout"` with no path-routing payload
+- do not add `checkoutIntent`, `buyerStartingPoint`, or CTA-specific checkout metadata to new public CTAs; the buyer chooses the workspace path after payment on `/workspace/choose`
 - do not import `CheckoutButton` straight into hero or pricing again
 - homepage checkout CTAs use hosted Stripe Checkout; keep Link enabled through Stripe's hosted payment method surface instead of precreating custom Express Checkout Sessions on page load
 - if you add a new CTA target kind, update the target union, the render model, the CTA renderer, and the tests together
@@ -199,7 +199,8 @@ pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
 "Generate my codebase" persists the latest demo draft to `localStorage` (key
-`sbs:home-codebase-draft:v1`) before starting Stripe checkout, and a
+`sbs:home-codebase-draft:v1`) before starting Stripe checkout. After payment,
+the buyer lands on `/workspace/choose`; if they choose Generate a codebase, a
 workspace-mounted seeder hydrates that draft into Convex on the first
 authenticated `/codebase` load when the buyer has no saved facts.
 
@@ -310,8 +311,9 @@ The product-preview CTA is now a real checkout action. Browser proof must
 include a desktop and mobile viewport at `/?marketing=1` (so
 `redirectGrantedHomeVisitor` does not bounce an entitled local account).
 Verify the demo draft is written to `localStorage` immediately before the
-Stripe redirect, survives the round trip, and prefills `/codebase` on the
-first authenticated load when the buyer has no saved facts.
+Stripe redirect, survives the round trip through `/workspace/choose`, and
+prefills `/codebase` on the first authenticated generated-codebase load when
+the buyer has no saved facts.
 
 ## What a future AI agent should preserve
 

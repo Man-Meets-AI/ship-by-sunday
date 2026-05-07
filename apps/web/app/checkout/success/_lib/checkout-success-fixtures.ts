@@ -14,7 +14,6 @@ export const CHECKOUT_SUCCESS_FIXTURE_SLUGS = [
 	"validated_arc",
 	"validated_redirect",
 	"wrong_account",
-	"checkout_email_handoff_required",
 	"sign_in_required",
 	"payment_pending",
 	"invalid_session",
@@ -88,15 +87,6 @@ const FIXTURE_BUILDERS: Record<
 		checkoutSessionState: {
 			kind: "sign_in_required",
 			sessionId: "fixture_sign_in_required",
-			checkoutEmail: FIXTURE_BUYER_EMAIL,
-		},
-		initialProductAccess: null,
-	}),
-	checkout_email_handoff_required: () => ({
-		fixtureSlug: "checkout_email_handoff_required",
-		checkoutSessionState: {
-			kind: "checkout_email_handoff_required",
-			sessionId: "fixture_checkout_email_handoff",
 			checkoutEmail: FIXTURE_BUYER_EMAIL,
 		},
 		initialProductAccess: null,

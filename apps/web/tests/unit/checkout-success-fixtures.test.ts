@@ -14,7 +14,6 @@ const expectedKindBySlug = {
 	validated_arc: "validated",
 	validated_redirect: "validated",
 	wrong_account: "wrong_account",
-	checkout_email_handoff_required: "checkout_email_handoff_required",
 	sign_in_required: "sign_in_required",
 	payment_pending: "payment_pending",
 	invalid_session: "invalid_session",
@@ -112,7 +111,6 @@ describe("getCheckoutSuccessFixture", () => {
 			(typeof CHECKOUT_SUCCESS_FIXTURE_SLUGS)[number]
 		> = [
 			"wrong_account",
-			"checkout_email_handoff_required",
 			"sign_in_required",
 			"payment_pending",
 			"invalid_session",
