@@ -31,6 +31,7 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - [x] 2026-05-07: Re-ran the hosted Convex dev env presence probe with secret values suppressed; all required support provider values are still missing or empty.
 - [x] 2026-05-07: Checked local shell readiness without printing values; `TELEGRAM_SUPPORT_BOT_TOKEN` and `NEXT_PUBLIC_CONVEX_SITE_URL` are missing or empty, so Telegram `getWebhookInfo` and live support-loop proof remain blocked.
 - [x] 2026-05-07: Added a presence-only readiness probe to `apps/web/content/docs/telegram-support-bot.mdx` so the next operator can verify setup without leaking provider values.
+- [x] 2026-05-07: Re-ran provider readiness after bug fixes; hosted Convex dev and production both still have all required support provider values missing or empty. `apps/web/.env.local` has `NEXT_PUBLIC_CONVEX_SITE_URL`, but neither hosted Convex nor the local shell has a support bot token, so Telegram `getWebhookInfo` remains blocked.
 - [ ] 2026-05-06: Exercise the live support loop from website widget to Telegram topic and Telegram reply back to the widget when provider setup is present.
 - [ ] 2026-05-06: Exercise one customer-visible Telegram action and one OpenAI-backed operator-only action when provider setup is present.
 - [x] 2026-05-07: Updated the support docs and Program with the exact hosted setup blocker.
@@ -42,6 +43,7 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - 2026-05-06: `npx convex env get NAME` exits with status 0 even for a missing variable. The proof probe must treat non-empty stdout as the presence signal, not command success.
 - 2026-05-06: The corrected hosted Convex dev probe showed `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY` are all missing or empty. Telegram `getWebhookInfo` cannot run until at least the bot token is configured.
 - 2026-05-07: The repeated hosted Convex dev probe produced the same missing-or-empty result for every required support provider env name. The local shell also lacks `TELEGRAM_SUPPORT_BOT_TOKEN`, so webhook verification cannot safely call Telegram yet.
+- 2026-05-07: Production Convex has the same missing-or-empty support provider env state as hosted Convex dev. `apps/web/.env.local` contains a Convex site URL, but no support bot token or OpenAI key is available locally, so no safe read-only Telegram or OpenAI provider proof can run from this checkout.
 
 ## Decision Log
 
@@ -192,6 +194,25 @@ Provider readiness results from 2026-05-07:
 - Local `TELEGRAM_SUPPORT_BOT_TOKEN`: `missing_or_empty`
 - Local `NEXT_PUBLIC_CONVEX_SITE_URL`: `missing_or_empty`
 - Telegram `getWebhookInfo`: `blocked`, because neither hosted Convex dev nor the local shell has a bot token available for read-only webhook verification.
+
+Provider readiness results after bug-fix follow-up on 2026-05-07:
+
+- Hosted Convex dev `TELEGRAM_SUPPORT_BOT_TOKEN`: `missing_or_empty`
+- Hosted Convex dev `TELEGRAM_SUPPORT_CHAT_ID`: `missing_or_empty`
+- Hosted Convex dev `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`: `missing_or_empty`
+- Hosted Convex dev `TELEGRAM_SUPPORT_WEBHOOK_SECRET`: `missing_or_empty`
+- Hosted Convex dev `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: `missing_or_empty`
+- Hosted Convex dev `OPENAI_API_KEY`: `missing_or_empty`
+- Production Convex `TELEGRAM_SUPPORT_BOT_TOKEN`: `missing_or_empty`
+- Production Convex `TELEGRAM_SUPPORT_CHAT_ID`: `missing_or_empty`
+- Production Convex `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`: `missing_or_empty`
+- Production Convex `TELEGRAM_SUPPORT_WEBHOOK_SECRET`: `missing_or_empty`
+- Production Convex `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: `missing_or_empty`
+- Production Convex `OPENAI_API_KEY`: `missing_or_empty`
+- Local shell `TELEGRAM_SUPPORT_BOT_TOKEN`: `missing_or_empty`
+- Local shell `OPENAI_API_KEY`: `missing_or_empty`
+- `apps/web/.env.local` `NEXT_PUBLIC_CONVEX_SITE_URL`: `present`
+- Telegram `getWebhookInfo`: `blocked`, because no support bot token is available from hosted Convex dev, production Convex, or the local shell.
 
 ## Interfaces and Dependencies
 
