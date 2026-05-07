@@ -13,6 +13,7 @@ import { ExecLoopSectionBlock } from "./sections/exec-loop-section";
 import { PlansMdSectionBlock } from "./sections/plans-md-section";
 import { ProgramsSectionBlock } from "./sections/programs-section";
 import { StarterSystemSectionBlock } from "./sections/starter-system-section";
+import { HomePageSupportWidget } from "./support/home-page-support-widget";
 
 export default async function HomePage() {
 	const homePageRenderModel = getHomePageRenderModel();
@@ -69,6 +70,11 @@ export default async function HomePage() {
 					<FooterSection footerWordmark={homePageRenderModel.footer.wordmark} />
 				) : null}
 			</div>
+			{homePageRenderModel.supportWidget.isEnabled ? (
+				<HomePageSupportWidget
+					supportWidget={homePageRenderModel.supportWidget}
+				/>
+			) : null}
 		</main>
 	);
 }

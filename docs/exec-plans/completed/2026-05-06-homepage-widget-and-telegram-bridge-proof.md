@@ -1,10 +1,10 @@
 ---
 title: Homepage Widget And Telegram Bridge Proof
-status: active
+status: complete
 created_at: 2026-05-06
-completed_at: null
+completed_at: 2026-05-06
 summary: Build the first homepage support chat loop so a visitor can message Parker on the site and Parker can reply from Telegram.
-post_build_recap: null
+post_build_recap: The homepage now has a first-party Message Parker widget, HttpOnly support-session bridge, Convex support model, Telegram webhook/provider path, setup docs, replay masking proof, and focused validation; live Telegram provider proof is pending support-specific Convex env setup.
 program_id: telegram-support-bot
 planning_brief: docs/programs/active/2026-05-06-telegram-support-bot/planning-brief-1.md
 read_when:
@@ -31,15 +31,23 @@ The visible proof is the core loop: open the homepage, open `Message Parker`, se
 - [x] 2026-05-06 EDT: Read root `AGENTS.md`, `apps/web/AGENTS.md`, `docs/exec-plans/PLANS.md`, `apps/web/convex/_generated/ai/guidelines.md`, the Program packet, and the first planning brief.
 - [x] 2026-05-06 EDT: Inspected the homepage route, homepage render model, homepage content, Convex HTTP router, Convex env helper, Convex schema, root Convex client provider, observability Telegram code, PostHog client, app docs registry, and focused test layout.
 - [x] 2026-05-06 EDT: Incorporated review hardening for main-checkout execution, HttpOnly support session storage, exact Telegram setup, retry-safe webhook responses, exact forum-topic permissions, and PostHog replay masking proof.
-- [ ] Implement the Convex support schema, validators, token hashing, lifecycle model, abuse controls, delivery state, and Telegram bridge helpers.
-- [ ] Implement the Telegram HTTP action webhook, outbound forum-topic creation, visitor-message delivery, inbound operator replies, operator allowlist, and `Close thread` callback.
-- [ ] Implement the homepage-only widget, HttpOnly support session cookie bridge, delivery states, closed state, fallback link, and metadata-only analytics with replay masking proof.
-- [ ] Document Telegram support setup in app docs, update the env contract, and record verification and failure modes.
-- [ ] Add focused tests, desktop/mobile browser proof, broad gates, Program writeback, and this ExecPlan closeout before marking complete.
+- [x] 2026-05-06 EDT: Implemented the Convex support schema, validators, support session token hashing, lifecycle model, abuse controls, delivery state, Telegram provider helpers, maintainer recovery action, and generated Convex bindings.
+- [x] 2026-05-06 EDT: Implemented the Telegram support HTTP action at `/telegram/support/webhook`, outbound forum-topic creation and visitor-message delivery, inbound operator reply parsing, operator allowlisting, authenticated ignored-update behavior, and the `Close thread` callback.
+- [x] 2026-05-06 EDT: Implemented the homepage-only Message Parker widget, Next support-session routes backed by the HttpOnly `__Host-sbs_support_session` cookie, message reads/sends, delivery/closed/fallback states, metadata-only analytics, and PostHog replay masking attributes.
+- [x] 2026-05-06 EDT: Documented Telegram support setup in `apps/web/content/docs/telegram-support-bot.mdx`, registered the docs page, updated environment-variable docs, and updated `apps/web/.env.local.example`.
+- [x] 2026-05-06 EDT: Ran `bun --cwd apps/web convex codegen`, which generated bindings and uploaded the support Convex functions to hosted Convex dev.
+- [x] 2026-05-06 EDT: Focused validation passed: support unit tests, widget integration-ui test, `bun --cwd apps/web lint`, `bun --cwd apps/web format:check`, `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md`, `bun run programs:lint`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md docs/programs/active/2026-05-06-telegram-support-bot apps/web/content/docs`, and `git diff --check`.
+- [x] 2026-05-06 EDT: Browser proof passed on `http://localhost:3105/`: desktop `1440x900` and mobile `390x844` screenshots showed the launcher and open panel within the viewport, no console errors, `data-ph-no-capture="true"` on the transcript log, and `data-ph-mask="true"` on the input.
+- [x] 2026-05-06 EDT: Repo completion gates passed: `bun run format`, `bun lint`, and `bun typecheck`.
+- [x] 2026-05-06 EDT: Confirmed support-specific Convex env keys are not configured yet in hosted dev, so the live Telegram topic/reply loop remains blocked on provider setup. The setup doc now records exact env, webhook, permission, and verification steps.
 
 ## Surprises & Discoveries
 
-No implementation surprises yet. Code inspection confirmed the root app already mounts `ConvexProviderWithClerk` in `apps/web/platform/convex/convex-client-provider.tsx`, but review found that using a JavaScript-readable bearer token for transcript access would create an unnecessary XSS and local-device exposure. The widget should use a narrow Next support-session bridge backed by an HttpOnly cookie for transcript reads and sends, while Convex remains the durable state owner. Code inspection also confirmed `apps/web/convex/http.ts` already owns provider HTTP actions, so the Telegram webhook belongs there rather than in a Next route.
+Code inspection confirmed the root app already mounts `ConvexProviderWithClerk` in `apps/web/platform/convex/convex-client-provider.tsx`, but review found that using a JavaScript-readable bearer token for transcript access would create an unnecessary XSS and local-device exposure. The shipped widget uses a narrow Next support-session bridge backed by an HttpOnly cookie for transcript reads and sends, while Convex remains the durable state owner. Code inspection also confirmed `apps/web/convex/http.ts` already owns provider HTTP actions, so the Telegram webhook belongs there rather than in a Next route.
+
+Convex functions that call other functions in the same file through `internal.support.*` need explicit return annotations to avoid TypeScript circular inference. The support action and webhook action now annotate `Promise<SupportThreadState>` and `Promise<TelegramSupportWebhookResult>` where needed.
+
+`bun --cwd apps/web convex codegen` both regenerated bindings and uploaded functions to hosted Convex dev. The deployment does not yet have `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, or `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, so live Telegram provider proof could not be run without completing the documented setup.
 
 ## Decision Log
 
@@ -85,7 +93,15 @@ Date: 2026-05-06
 
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the exact behavior that shipped, the files changed, validation evidence, browser proof, setup docs written, remaining gaps, and whether the first real Telegram loop worked against the hosted Convex dev deployment.
+This slice shipped the first-party support loop foundation. The public homepage now renders a passive `Message Parker` launcher from the homepage render-model contract. Opening it shows a compact desktop panel or mobile bottom sheet, reads thread state through `/api/support/messages`, and sends visitor text through the same route without exposing a browser-readable support token. The route creates or reuses the HttpOnly `__Host-sbs_support_session` cookie, sets `Cache-Control: no-store`, and calls Convex server-side.
+
+Convex now owns `supportVisitors`, `supportThreads`, `supportMessages`, `supportOperatorActions`, and `supportRateLimitBuckets`. The model hashes the support session token before lookup or storage, creates visitor/thread/message records lazily on first send, enforces message length, cooldown, pending-message cap, global hourly cap, and kill-switch behavior, records explicit delivery status, and exposes a maintainer-only failed-delivery recovery action protected by `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`.
+
+Telegram support now has a dedicated provider path separate from incident observability. The Convex HTTP action at `/telegram/support/webhook` verifies `X-Telegram-Bot-Api-Secret-Token`, returns non-2xx for auth failures or invalid JSON, returns 200 ignored responses for authenticated noise, maps allowlisted operator text replies into website-visible operator messages, and audits the `Close thread` callback. Outbound delivery stores visitor messages first, creates a forum topic when needed, posts a safe header with `Close thread`, sends the visitor message, and records delivered or failed metadata.
+
+Setup docs now live in `apps/web/content/docs/telegram-support-bot.mdx`, with registry entries and environment docs updated. The docs name BotFather setup, dedicated supergroup/forum-topic requirements, `setWebhook.secret_token`, `X-Telegram-Bot-Api-Secret-Token`, Telegram's secret-token character and length constraints, `allowed_updates`, `getWebhookInfo` checks, `can_manage_topics`, and `can_delete_messages`.
+
+Validation passed for focused support tests, widget integration UI, docs/plan/program linting, browser proof, and the repo gates. Desktop and mobile browser proof on `http://localhost:3105/` showed the widget correctly framed with no console errors, and proved replay masking attributes on transcript and input DOM. The remaining gap is provider setup: hosted Convex dev does not yet have the support-specific Telegram env values, so the real Telegram topic/reply loop is implemented but not live-proven.
 
 ## Context and Orientation
 

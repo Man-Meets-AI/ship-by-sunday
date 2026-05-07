@@ -14,6 +14,21 @@ import {
 	observabilitySourceValidator,
 } from "./observability/validators";
 import {
+	supportAiDraftGenerationStatusValidator,
+	supportDeliveryFailureClassValidator,
+	supportDeliveryStatusValidator,
+	supportGeneratedOutputSourceValidator,
+	supportMessageSourceValidator,
+	supportOperatorNoteDeliveryStatusValidator,
+	supportOperatorActionStatusValidator,
+	supportTelegramTopicCleanupStatusValidator,
+	supportOperatorActionTypeValidator,
+	supportThreadLeadStatusValidator,
+	supportThreadStatusValidator,
+	supportVisitorKindValidator,
+	supportVisitorStatusValidator,
+} from "./support/validators";
+import {
 	codebaseFindingFields,
 	doctorPassRunFields,
 	managedGithubAuditEventFields,
@@ -291,6 +306,120 @@ export default defineSchema({
 	})
 		.index("by_user_id", ["userId"])
 		.index("by_user_id_and_template_id", ["userId", "templateId"]),
+	supportVisitors: defineTable({
+		sessionTokenHash: v.string(),
+		status: supportVisitorStatusValidator,
+		visitorKind: supportVisitorKindValidator,
+		clerkUserId: v.optional(v.string()),
+		firstSeenAt: v.number(),
+		lastSeenAt: v.number(),
+		lastPagePath: v.string(),
+	})
+		.index("by_session_token_hash", ["sessionTokenHash"])
+		.index("by_clerk_user_id_and_last_seen_at", ["clerkUserId", "lastSeenAt"]),
+	supportThreads: defineTable({
+		visitorId: v.id("supportVisitors"),
+		supportId: v.string(),
+		status: supportThreadStatusValidator,
+		entrySurface: v.string(),
+		pagePath: v.string(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		lastMessageAt: v.number(),
+		lastVisitorMessageAt: v.optional(v.number()),
+		leadStatus: v.optional(supportThreadLeadStatusValidator),
+		pendingVisitorMessageCount: v.number(),
+		telegramChatId: v.optional(v.string()),
+		telegramMessageThreadId: v.optional(v.number()),
+		telegramHeaderMessageId: v.optional(v.number()),
+		closedAt: v.optional(v.number()),
+		idleCloseAfter: v.number(),
+		retainUntil: v.optional(v.number()),
+		purgeAfter: v.optional(v.number()),
+		purgedAt: v.optional(v.number()),
+		telegramTopicCleanupStatus: v.optional(
+			supportTelegramTopicCleanupStatusValidator,
+		),
+		telegramTopicCleanupAttemptedAt: v.optional(v.number()),
+		telegramTopicCleanupFailureReason: v.optional(v.string()),
+	})
+		.index("by_visitor_id_and_status", ["visitorId", "status"])
+		.index("by_support_id", ["supportId"])
+		.index("by_telegram_chat_id_and_message_thread_id", [
+			"telegramChatId",
+			"telegramMessageThreadId",
+		])
+		.index("by_status_and_idle_close_after", ["status", "idleCloseAfter"])
+		.index("by_status_and_purge_after", ["status", "purgeAfter"])
+		.index("by_telegram_topic_cleanup_status_and_updated_at", [
+			"telegramTopicCleanupStatus",
+			"updatedAt",
+		]),
+	supportMessages: defineTable({
+		threadId: v.id("supportThreads"),
+		visitorId: v.id("supportVisitors"),
+		source: supportMessageSourceValidator,
+		body: v.optional(v.string()),
+		createdAt: v.number(),
+		deliveryStatus: supportDeliveryStatusValidator,
+		deliveryAttemptCount: v.number(),
+		lastDeliveryAttemptAt: v.optional(v.number()),
+		lastDeliveryError: v.optional(v.string()),
+		deliveryFailureClass: v.optional(supportDeliveryFailureClassValidator),
+		telegramMessageId: v.optional(v.number()),
+		telegramUpdateId: v.optional(v.number()),
+		telegramOperatorUserId: v.optional(v.number()),
+		bodyPurgedAt: v.optional(v.number()),
+	})
+		.index("by_thread_id_and_created_at", ["threadId", "createdAt"])
+		.index("by_thread_id_and_telegram_message_id", [
+			"threadId",
+			"telegramMessageId",
+		])
+		.index("by_delivery_status_and_created_at", [
+			"deliveryStatus",
+			"createdAt",
+		]),
+	supportOperatorActions: defineTable({
+		threadId: v.id("supportThreads"),
+		actionType: supportOperatorActionTypeValidator,
+		status: supportOperatorActionStatusValidator,
+		operatorTelegramUserId: v.number(),
+		telegramCallbackQueryId: v.string(),
+		telegramUpdateId: v.number(),
+		sourceMessageId: v.optional(v.id("supportMessages")),
+		customerVisibleMessageId: v.optional(v.id("supportMessages")),
+		aiDraftGenerationStatus: v.optional(
+			supportAiDraftGenerationStatusValidator,
+		),
+		generatedOutput: v.optional(v.string()),
+		generatedOutputSource: v.optional(supportGeneratedOutputSourceValidator),
+		generatedOutputModel: v.optional(v.string()),
+		generatedOutputPurgedAt: v.optional(v.number()),
+		generationFailureReason: v.optional(v.string()),
+		operatorNoteDeliveryStatus: v.optional(
+			supportOperatorNoteDeliveryStatusValidator,
+		),
+		operatorNoteTelegramMessageId: v.optional(v.number()),
+		operatorNoteDeliveryFailureReason: v.optional(v.string()),
+		failureReason: v.optional(v.string()),
+		createdAt: v.number(),
+		completedAt: v.optional(v.number()),
+	})
+		.index("by_thread_id_and_created_at", ["threadId", "createdAt"])
+		.index("by_telegram_callback_query_id", ["telegramCallbackQueryId"])
+		.index("by_operator_note_delivery_status_and_created_at", [
+			"operatorNoteDeliveryStatus",
+			"createdAt",
+		]),
+	supportRateLimitBuckets: defineTable({
+		bucketKey: v.string(),
+		windowStartedAt: v.number(),
+		messageCount: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_bucket_key", ["bucketKey"])
+		.index("by_updated_at", ["updatedAt"]),
 	errorEvents: defineTable({
 		fingerprint: v.string(),
 		fingerprintKey: v.string(),

@@ -69,6 +69,8 @@ const docsMdxModuleLoaders: Record<string, DocsMdxModuleLoader> = {
 		import("@/content/docs/ship-live.mdx") as Promise<DocsMdxModule>,
 	"stripe-checkout-webhook": () =>
 		import("@/content/docs/stripe-checkout-webhook.mdx") as Promise<DocsMdxModule>,
+	"telegram-support-bot": () =>
+		import("@/content/docs/telegram-support-bot.mdx") as Promise<DocsMdxModule>,
 	"test-the-buyer-journey": () =>
 		import("@/content/docs/test-the-buyer-journey.mdx") as Promise<DocsMdxModule>,
 	"the-build-loop": () =>

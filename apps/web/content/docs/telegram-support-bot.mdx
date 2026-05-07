@@ -1,0 +1,161 @@
+---
+title: Telegram Support Bot
+description: Set up the first-party homepage support widget and the dedicated Telegram support bot that backs it.
+---
+
+# Telegram Support Bot
+
+The homepage support widget is first-party UI. Visitors stay on the landing page, and Parker replies from a dedicated Telegram bot in a forum-topic support group.
+
+The browser never receives a support bearer token. The widget talks to `/api/support/messages`, and the Next.js route stores the support session in an HttpOnly, Secure `__Host-sbs_support_session` cookie.
+
+## Create the Telegram side
+
+1. In `@BotFather`, create a dedicated support bot. Store the token as `TELEGRAM_SUPPORT_BOT_TOKEN` in Convex.
+2. In `@BotFather`, disable privacy mode for this bot so normal operator replies in the support group are delivered as `message` updates. Verify with `getMe`; `can_read_all_group_messages` should be `true`.
+3. Create a dedicated Telegram supergroup for support and enable Topics.
+4. Add the support bot to the group as an administrator.
+5. Grant these bot rights:
+   - `can_manage_topics`: required for `createForumTopic` and for closing or reopening topics.
+   - `can_delete_messages`: required for `deleteForumTopic` when retention cleanup starts deleting closed support topics.
+6. Find the support group chat id and store it as `TELEGRAM_SUPPORT_CHAT_ID` in Convex. Supergroup ids usually look like `-100...`.
+7. Find each allowed operator's Telegram user id and store a comma-separated list as `TELEGRAM_SUPPORT_OPERATOR_USER_IDS` in Convex.
+
+## Configure Convex env
+
+Set these on the hosted Convex deployment that owns the web app data:
+
+```bash
+npx convex env set TELEGRAM_SUPPORT_BOT_TOKEN "<bot-token>"
+npx convex env set TELEGRAM_SUPPORT_CHAT_ID "<support-group-id>"
+npx convex env set TELEGRAM_SUPPORT_OPERATOR_USER_IDS "<telegram-user-id>,<telegram-user-id>"
+npx convex env set TELEGRAM_SUPPORT_WEBHOOK_SECRET "<secret-token>"
+npx convex env set TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN "<random-recovery-token>"
+npx convex env set OPENAI_API_KEY "<openai-api-key>"
+```
+
+`TELEGRAM_SUPPORT_WEBHOOK_SECRET` must be the same value sent to Telegram as `setWebhook.secret_token`. Telegram will echo it back in the `X-Telegram-Bot-Api-Secret-Token` header. Telegram requires this token to be 1-256 characters and only `A-Z`, `a-z`, `0-9`, `_`, and `-`.
+
+Optional kill switch:
+
+```bash
+npx convex env set SUPPORT_CHAT_DISABLED "1"
+```
+
+Unset `SUPPORT_CHAT_DISABLED` or set it to `0` to re-enable the widget bridge.
+
+Optional AI model override:
+
+```bash
+npx convex env set SUPPORT_AI_DRAFT_MODEL "gpt-5.4-mini-2026-03-17"
+```
+
+If `SUPPORT_AI_DRAFT_MODEL` is unset, support drafts use `gpt-5.4-mini-2026-03-17`.
+
+## Register the webhook
+
+Use the Convex site URL, not the browser client URL:
+
+```bash
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_SUPPORT_BOT_TOKEN/setWebhook" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://<your-convex-site>.convex.site/telegram/support/webhook",
+    "secret_token": "'"$TELEGRAM_SUPPORT_WEBHOOK_SECRET"'",
+    "allowed_updates": ["message", "callback_query"],
+    "drop_pending_updates": false
+  }'
+```
+
+Keep `allowed_updates` narrow. This bridge only accepts `message` replies and `callback_query` actions from the support topic inline keyboard.
+
+## Operator action buttons
+
+Every support topic starts with a bot-authored header and an inline keyboard. Normal Telegram replies from allowlisted operators still become website-visible replies.
+
+These buttons also send website-visible operator messages after an allowlisted operator taps them:
+
+- `Ask email`: asks for the best email if the visitor gets disconnected
+- `Ask context`: asks for product, stack, and blocker context
+- `Pricing`: sends the visitor to the homepage pricing section
+- `Checkout`: sends the visitor to the homepage pricing section to start checkout
+
+These buttons are operator-only and AI-backed when `OPENAI_API_KEY` is configured:
+
+- `Draft reply`: posts a private AI draft in the Telegram topic only
+- `Summary`: posts a private AI lead summary in the Telegram topic only
+- `Codex prompt`: posts a private paste-ready Codex prompt in the Telegram topic only
+- `Linear draft`: posts a private paste-ready Linear issue draft in the Telegram topic only
+
+This operator-only button does not use AI:
+
+- `Hot lead`: marks the Convex support thread as a hot lead and posts a Telegram note
+
+`Close thread` closes the website thread and starts the closed-transcript retention window.
+
+The AI and Linear buttons are draft-only. They do not create a Linear issue and do not send generated text to the visitor. Each button creates a `supportOperatorActions` audit record with the operator id, callback query id, source message when available, AI generation status, generated output when applicable, generated output source, model, generation failure reason, operator-note delivery status, Telegram note message id or delivery failure reason, and customer-visible message id when one is created.
+
+When Parker taps an AI-backed button, the callback mutation stores a deterministic private fallback and schedules OpenAI Responses API generation in the same Convex transaction, then the webhook answers Telegram with `answerCallbackQuery`. The Responses request sets `store: false`. If generation succeeds, Convex patches the same audit record with `generatedOutputSource: "openai_responses"` and posts the generated text as a private Telegram topic note. If `OPENAI_API_KEY` is missing or OpenAI fails, Convex keeps `generatedOutputSource: "deterministic"`, records `generationFailureReason`, and posts the deterministic fallback note instead. If Telegram cannot receive that private note, Convex records `operatorNoteDeliveryStatus: "delivery_failed"` and leaves the AI generation result intact.
+
+AI output is never inserted into `supportMessages`, never shown in the homepage widget transcript automatically, and must not be sent to PostHog. Parker can still send a normal Telegram reply manually after reading or editing a draft; that manual reply is what becomes visitor-visible.
+
+Telegram inline keyboard callback data is limited to 1-64 bytes, so the app uses compact `support:<support-id>:<action>` callback data. The webhook answers callback queries with `answerCallbackQuery` so Telegram clients do not leave a spinner running.
+
+## Verify setup
+
+Run:
+
+```bash
+curl "https://api.telegram.org/bot$TELEGRAM_SUPPORT_BOT_TOKEN/getWebhookInfo"
+```
+
+Check that:
+
+- `url` is `https://<your-convex-site>.convex.site/telegram/support/webhook`
+- `allowed_updates` is exactly `["message", "callback_query"]`
+- `pending_update_count` is not growing after test messages
+- `last_error_message` is absent
+
+Then open the homepage, open the Message Parker launcher, and send a test message. A new Telegram topic named with the `SBS-...` support id and safe entry label should appear, such as `homepage` or `workspace`. Reply in that topic from an operator user listed in `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`; the reply should appear in the widget on the next refresh or poll. Signed-in buyers also get an `Ask Parker` launcher inside protected workspace routes; messages from that launcher use the same support thread bridge with `entrySurface: "workspace_support_widget"` and do not send workspace source, findings, logs, local paths, or payment details automatically.
+
+Click `Ask email` or `Pricing` in Telegram. The widget should show a new operator message after refresh. Click `Draft reply` or `Summary`; Telegram should first acknowledge the button tap, then receive an operator-only AI note. The widget should not receive a new message from the AI action. Click `Close thread`; the widget should show the closed state after refresh.
+
+To verify the AI provider path, set `OPENAI_API_KEY`, tap `Draft reply`, and inspect the `supportOperatorActions` record for that callback. It should keep the same action row, set `aiDraftGenerationStatus` to `completed`, set `generatedOutputSource` to `openai_responses`, set `generatedOutputModel` to the active support draft model, record `operatorNoteDeliveryStatus`, and leave `supportMessages` unchanged. Unset `OPENAI_API_KEY` and tap a new AI button to prove the fallback path: Telegram should receive the deterministic fallback note and the action row should contain `generationFailureReason`.
+
+## Operations runbook
+
+Convex runs `support retention maintenance` every six hours from `apps/web/convex/crons.ts` on the hosted deployment. It closes idle anonymous open threads after 14 days, retains closed transcript bodies for 90 days, purges `supportMessages.body` and `supportOperatorActions.generatedOutput` after the retention window, and then attempts Telegram `deleteForumTopic` when the thread has a known Telegram topic id. The support audit rows remain; purge removes transcript content and generated operator output, not the fact that the thread or action existed.
+
+Signed-in workspace support threads are not auto-closed by this retention worker. Their `idleCloseAfter` timestamp is moved forward so they stay visible until a later account-history plan defines a signed-in retention policy.
+
+Use the token-protected operations snapshot before a recovery session:
+
+```bash
+npx convex run supportAdmin:getOperationsSnapshot '{"recoveryToken":"<random-recovery-token>"}'
+```
+
+The snapshot returns bounded metadata only: failed visitor message ids, support ids, failure classes, delivery attempt counts, operator-note delivery failures, idle threads due for close, transcripts due for purge, and Telegram topic cleanup failures. It does not return support message bodies, emails, Telegram user ids, visitor session tokens, or AI-generated output.
+
+Manual visitor-message retry remains explicit:
+
+```bash
+npx convex run supportAdmin:retryFailedVisitorMessage '{"messageId":"<supportMessages-id>","recoveryToken":"<random-recovery-token>"}'
+```
+
+Retry is allowed only when the message is visitor-authored, still has an unpurged body, belongs to an open unpurged thread, has `deliveryStatus: "delivery_failed"`, has a retryable failure class, and has fewer than five recorded delivery attempts. Convex claims the message by moving it back to `sending` before calling Telegram, so repeated retry commands for the same message are rejected while one delivery attempt is in flight. `content_rejected` messages, closed threads, purged messages, in-flight messages, and over-attempted messages are not retried. Fix the provider setup first, then retry once and inspect the returned thread state.
+
+Support PostHog events are metadata-only. They may include support surface, entry surface, page path, thread status, message count, latest delivery status, delivery failure class, and generic failure class. They must not include message text, email addresses, Telegram ids, raw support session tokens, transcript DOM, or generated AI output. The transcript log keeps `data-ph-no-capture="true"` plus `ph-no-capture ph-sensitive`, and the textarea keeps `data-ph-mask="true"` plus `ph-mask ph-sensitive`.
+
+## Failure shapes
+
+- Missing or wrong `X-Telegram-Bot-Api-Secret-Token`: Convex returns `401`, and Telegram will retry.
+- Invalid JSON: Convex returns `400`, and Telegram will retry.
+- Missing support chat id or operator allowlist after a valid webhook secret: Convex returns `200` with an ignored setup reason so Telegram does not retry a non-actionable update.
+- Unsupported update shape, unknown chat, unknown operator, missing topic, command, or media-only message: Convex returns `200` with an ignored reason so Telegram does not retry noise.
+- Missing `OPENAI_API_KEY` or OpenAI provider failure: the webhook still returns `200`, the AI action keeps deterministic private output, `generationFailureReason` is recorded, and no website-visible message is created.
+- Private Telegram note delivery failure: the webhook still returns `200`, the action row records `operatorNoteDeliveryStatus: "delivery_failed"` with the failure reason, and no generated output is inserted into `supportMessages`.
+- Retention cleanup failure: the thread records `telegramTopicCleanupStatus: "failed"` with `telegramTopicCleanupFailureReason`; transcript bodies remain purged, but the Telegram topic may need manual cleanup after bot permissions are repaired.
+- `Forbidden: not enough rights` from Telegram delivery usually means the bot is missing `can_manage_topics` or was not added as an administrator.
+- Closed-topic cleanup failures usually mean the bot is missing `can_delete_messages`.
+
+Telegram API references: [setWebhook](https://core.telegram.org/bots/api#setwebhook), [getWebhookInfo](https://core.telegram.org/bots/api#getwebhookinfo), [createForumTopic](https://core.telegram.org/bots/api#createforumtopic), [deleteForumTopic](https://core.telegram.org/bots/api#deleteforumtopic), [InlineKeyboardButton](https://core.telegram.org/bots/api#inlinekeyboardbutton), and [answerCallbackQuery](https://core.telegram.org/bots/api#answercallbackquery).

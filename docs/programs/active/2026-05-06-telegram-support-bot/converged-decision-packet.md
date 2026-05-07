@@ -37,7 +37,7 @@ Decision: Do not add a dedicated contact or email field in Slice 1.
 Rationale: The landing-page widget should reduce support friction and behave like chat, not a lead form. Visitors can volunteer contact details in the message body. Email collection can become an audited `Ask for email` operator action in Slice 2.
 
 Decision: Use HttpOnly anonymous support session cookies with Convex-stored token hashes.
-Rationale: Session-scoped access lets unauthenticated visitors read and write only their own support thread while preserving a future path to attach Clerk identity. The browser should not hold a JavaScript-readable bearer token for support transcripts. The server should mint the token, set it as `__Host-sbs_support_session` with `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Secure` in production, and store only a hash in Convex.
+Rationale: Session-scoped access lets unauthenticated visitors read and write only their own support thread while preserving a future path to attach Clerk identity. The browser should not hold a JavaScript-readable bearer token for support transcripts. The server should mint the token, set it as `__Host-sbs_support_session` with `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, and no `Domain`, and store only a hash in Convex.
 
 Decision: Create the support visitor, Convex thread, and Telegram forum topic on first real message.
 Rationale: Widget open state is not a durable conversation. Lazy creation avoids empty backend records and empty Telegram topics.

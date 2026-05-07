@@ -605,6 +605,23 @@ export const homePageContent = {
 				"A 30-video workflow course included free for faster build reps after the sprint.",
 		},
 	},
+	supportWidget: {
+		launcherLabel: "Message Parker",
+		panelTitle: "Message Parker",
+		panelSubtitle: "Ask about fit, scope, or what to do next.",
+		starterMessage:
+			"Send a note here. Parker replies from Telegram and the thread stays on this page.",
+		messagePlaceholder: "Type your question...",
+		sendLabel: "Send",
+		closeLabel: "Close support chat",
+		fallbackLabel: "Open Telegram",
+		directTelegramLabel: "Use Telegram directly",
+		loadingLabel: "Loading conversation",
+		sendingLabel: "Sending",
+		deliveredLabel: "Delivered to Parker",
+		failedLabel: "Parker may not have seen this.",
+		closedLabel: "This thread is closed.",
+	},
 	footerWordmark: productName,
 } as const;
 

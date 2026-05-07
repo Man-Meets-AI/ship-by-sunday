@@ -63,6 +63,11 @@ export type HomePageRenderModel = {
 		readonly isEnabled: boolean;
 		readonly wordmark: HomePageContent["footerWordmark"];
 	};
+	readonly supportWidget: {
+		readonly isEnabled: boolean;
+		readonly fallbackHref: string;
+		readonly content: HomePageContent["supportWidget"];
+	};
 };
 
 type CreateHomePageRenderModelArgs = {
@@ -126,6 +131,11 @@ export function createHomePageRenderModel({
 		footer: {
 			isEnabled: homePageConfig.sections.footer,
 			wordmark: content.footerWordmark,
+		},
+		supportWidget: {
+			isEnabled: homePageConfig.supportWidget.enabled,
+			fallbackHref: homePageConfig.supportWidget.fallbackHref,
+			content: content.supportWidget,
 		},
 	};
 }

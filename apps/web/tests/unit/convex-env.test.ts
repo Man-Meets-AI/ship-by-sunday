@@ -33,4 +33,14 @@ describe("convex env", () => {
 			"Missing required Convex environment variable: STRIPE_SECRET_KEY",
 		);
 	});
+
+	it("reads optional support env without requiring unrelated provider keys", async () => {
+		process.env = {
+			TELEGRAM_SUPPORT_CHAT_ID: "-100123",
+		};
+		const { readOptionalConvexEnv } = await import("@/convex/env");
+
+		expect(readOptionalConvexEnv("TELEGRAM_SUPPORT_CHAT_ID")).toBe("-100123");
+		expect(readOptionalConvexEnv("TELEGRAM_SUPPORT_BOT_TOKEN")).toBeUndefined();
+	});
 });

@@ -88,6 +88,13 @@ describe("home page render model", () => {
 				checkoutCtaId: "pricing_primary",
 			},
 		});
+		expect(renderModel.supportWidget).toMatchObject({
+			isEnabled: true,
+			fallbackHref: "https://t.me/parkerrex",
+			content: {
+				launcherLabel: "Message Parker",
+			},
+		});
 	});
 
 	it("derives non-default section toggles and link CTA targets", () => {
@@ -101,6 +108,10 @@ describe("home page render model", () => {
 				socialProof: false,
 				programs: false,
 				plansMd: false,
+			},
+			supportWidget: {
+				enabled: false,
+				fallbackHref: "https://t.me/example",
 			},
 			heroPrimaryCta: {
 				kind: "link",
@@ -126,6 +137,10 @@ describe("home page render model", () => {
 		expect(renderModel.pricing.primaryCtaTarget).toEqual({
 			kind: "link",
 			href: routeConfig.signIn,
+		});
+		expect(renderModel.supportWidget).toMatchObject({
+			isEnabled: false,
+			fallbackHref: "https://t.me/example",
 		});
 	});
 });

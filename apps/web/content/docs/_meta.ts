@@ -93,6 +93,9 @@ export default {
 	"environment-variables": {
 		title: "Environment Variables",
 	},
+	"telegram-support-bot": {
+		title: "Telegram Support Bot",
+	},
 	commands: {
 		title: "Commands",
 	},

@@ -52,6 +52,21 @@ Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
 - `CHECKOUT_SUCCESS_FIXTURES`: test-only switch that enables the `/checkout/success?fixture=<variant>` deterministic in-memory fixture for capturing the polling -> redirect-armed arc in a real browser. The fixture refuses to activate unless this is set to `1` AND `NODE_ENV !== "production"`. Leave unset outside local development and CI screenshot capture; never set it on a production deployment
 
+## Telegram support bot
+
+These values live in the hosted Convex deployment because the support webhook and Telegram delivery run inside Convex:
+
+- `TELEGRAM_SUPPORT_BOT_TOKEN`: dedicated Telegram bot token for homepage support
+- `TELEGRAM_SUPPORT_CHAT_ID`: dedicated support supergroup id, usually `-100...`
+- `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`: comma-separated Telegram user ids allowed to reply or close support threads
+- `TELEGRAM_SUPPORT_WEBHOOK_SECRET`: shared Telegram webhook secret; use the same value as `setWebhook.secret_token`
+- `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: maintainer-only token for retrying failed support deliveries
+- `OPENAI_API_KEY`: OpenAI key used by Convex for private support draft generation
+- `SUPPORT_AI_DRAFT_MODEL`: optional OpenAI model override for private support drafts; defaults to `gpt-5.4-mini-2026-03-17`
+- `SUPPORT_CHAT_DISABLED`: optional kill switch; set to `1` or `true` to make the widget fall back to direct Telegram
+
+See [Telegram Support Bot](/docs/telegram-support-bot) for the webhook command, exact Telegram permission names, AI draft setup, and verification steps.
+
 `OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so observability and other HTTP-action traffic do not fall back to the browser-only client origin.
 
 `POSTHOG_API_KEY` is not the browser project token and must not use all-access permissions. Use a separate personal API key for MCP or agent tooling if OAuth is unavailable.

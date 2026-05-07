@@ -74,6 +74,10 @@ export type HomePageCtaTarget =
 
 export type StarterHomePageConfig = {
 	readonly sections: Readonly<Record<HomePageSectionName, boolean>>;
+	readonly supportWidget: {
+		readonly enabled: boolean;
+		readonly fallbackHref: string;
+	};
 	readonly heroPrimaryCta: HomePageCtaTarget;
 	readonly pricingPrimaryCta: HomePageCtaTarget;
 };
@@ -96,6 +100,10 @@ export const starterHomePageConfig = {
 		plansMd: true,
 		pricing: true,
 		footer: true,
+	},
+	supportWidget: {
+		enabled: true,
+		fallbackHref: "https://t.me/parkerrex",
 	},
 	heroPrimaryCta: {
 		kind: "checkout",

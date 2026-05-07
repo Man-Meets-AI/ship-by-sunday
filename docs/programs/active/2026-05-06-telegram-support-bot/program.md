@@ -28,17 +28,19 @@ The initiative is moving in the right direction when visitors can start and cont
 
 The durable packet artifacts for this Program live in `docs/programs/active/2026-05-06-telegram-support-bot/`.
 
-The current research is recorded in `research-pass-telegram-support-widget-and-bot.md`. The normalized implementation direction is `normalized-pass-telegram-support-bot.md`. The locked initiative decisions are in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The current immutable implementation brief is `planning-brief-1.md`, and `current-planning-brief.txt` points at that brief.
+The current research is recorded in `research-pass-telegram-support-widget-and-bot.md`. The normalized implementation direction is `normalized-pass-telegram-support-bot.md`. The locked initiative decisions are in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The latest immutable implementation brief is `planning-brief-5.md`, and `current-planning-brief.txt` points at that brief.
 
 ## Current State
 
-No custom customer-support chat exists yet. The homepage can render CTAs and interactive product-preview surfaces, but there is no support widget, no support thread state, no support message schema, no Telegram support webhook, and no operator action model.
+Slices 1 through 5 have landed the custom customer-support foundation, structured Telegram operator actions, private AI-backed operator drafts, authenticated workspace entry, and operations hardening. The homepage renders a first-party `Message Parker` widget, signed-in buyers get a protected workspace `Ask Parker` launcher, anonymous visitor transcript access goes through an HttpOnly Secure support-session cookie and Next support routes, Convex owns support visitors, threads, messages, delivery metadata, operator actions, retention maintenance, and rate-limit buckets, and the dedicated Telegram support webhook/provider path is implemented separately from incident observability. Telegram support topics now include audited buttons for safe canned visitor replies, AI-backed private draft/prompt output, hot-lead marking, and close-thread lifecycle control. Post-review Telegram hardening now schedules AI generation in the same mutation that creates the action row, treats authenticated missing support env as `200` ignored webhook results, records operator-note delivery status on the action audit row, purges retained transcript bodies/generated output after the retention window, rejects duplicate manual retry while a retry is in flight, and exposes a token-protected operations snapshot.
 
 The repo does have an observability Telegram path. It is intentionally for production incident delivery, not customer support. The observability bot reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, renders incident messages, and stores delivery metadata on incident records. This Program must not reuse that bot or data path.
 
 The homepage has a clear control seam through `apps/web/config/product.ts`, `apps/web/app/_content/home-page.ts`, `apps/web/app/_lib/home-page-render-model.ts`, and `apps/web/app/_components/home-page/home-page.tsx`. A support widget should enter through the same content/render-model pattern so future agents can find and test it.
 
 Convex is the natural state owner for support threads and messages because the website widget needs live subscribed messages and Telegram replies need a durable backend target. The implementation must use hosted Convex dev for Convex work and must not switch the repo to Convex local mode.
+
+The current remaining setup gap is external provider configuration. Hosted Convex dev does not yet have the support-specific Telegram env values or `OPENAI_API_KEY`, so the real Telegram topic/reply loop and live AI draft loop are implemented but not live-proven. `apps/web/content/docs/telegram-support-bot.mdx` now owns the setup and verification contract.
 
 ## Progress
 
@@ -64,6 +66,16 @@ Convex is the natural state owner for support threads and messages because the w
 - [x] 2026-05-06: Locked Slice 1 contact capture scope: no dedicated email or contact field, no validation gate, and `Ask for email` remains a later structured operator action.
 - [x] 2026-05-06: Created child ExecPlan `docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md` for Slice 1.
 - [x] 2026-05-06: Incorporated review hardening into the Program and Slice 1 plan: main-checkout execution, HttpOnly support session storage, exact Telegram webhook setup, exact forum-topic permissions, retry-safe webhook responses, and PostHog replay masking proof.
+- [x] 2026-05-06: Completed Slice 1 in `docs/exec-plans/completed/2026-05-06-homepage-widget-and-telegram-bridge-proof.md`: homepage widget, HttpOnly support-session bridge, Convex support model, Telegram webhook/provider path, maintainer recovery action, setup docs, focused tests, desktop/mobile browser proof, and repo gates all landed. Live Telegram provider proof remains blocked on support-specific Convex env setup.
+- [x] 2026-05-06: Created `planning-brief-2.md` and child ExecPlan `docs/exec-plans/completed/2026-05-06-operator-actions-and-prompt-buttons.md` for Slice 2.
+- [x] 2026-05-06: Completed Slice 2: expanded Telegram support topic buttons, generalized callback parsing, audited action records, duplicate callback protection, customer-visible canned sends, operator-only draft/prompt/summary/Linear-draft output, hot-lead marking, setup docs, hosted Convex codegen, focused support tests, widget integration-ui proof, docs/plan/program linting, and repo gates landed. Live Telegram button proof remains blocked on support-specific Convex env setup.
+- [x] 2026-05-06: Created `planning-brief-3.md` and child ExecPlan `docs/exec-plans/completed/2026-05-06-ai-drafting-and-product-context.md` for Slice 3.
+- [x] 2026-05-06: Completed Slice 3 in `docs/exec-plans/completed/2026-05-06-ai-drafting-and-product-context.md`: private OpenAI Responses API draft generation, scheduled Convex AI action handling, same-record support action audit patching, deterministic fallback notes, model/failure metadata, OpenAI env docs, focused AI/support tests, hosted Convex codegen, docs/plan/program linting, lint, typecheck, and touched-file formatting landed. Live Telegram/OpenAI proof remains blocked on support-specific Convex env and `OPENAI_API_KEY` setup.
+- [x] 2026-05-06: Applied Telegram support hardening from review findings: atomic AI scheduling from the callback mutation, legacy stranded duplicate callback re-drive, authenticated setup-gap `200` ignored webhook behavior, operator-note delivery audit fields, delivery-failure tests, and corrected AI-scope docs.
+- [x] 2026-05-06: Created `planning-brief-4.md` and child ExecPlan `docs/exec-plans/completed/2026-05-06-authenticated-customer-support-and-workspace-entry.md` for Slice 4.
+- [x] 2026-05-06: Completed Slice 4: extracted reusable support widget modules, kept homepage support behavior stable, added the protected workspace `Ask Parker` launcher, passed workspace-scoped support metadata, documented the workspace entry, and validated with focused tests plus repo gates.
+- [x] 2026-05-06: Created `planning-brief-5.md` and child ExecPlan `docs/exec-plans/completed/2026-05-06-operations-analytics-and-hardening.md` for Slice 5.
+- [x] 2026-05-06: Completed Slice 5: added six-hour Convex support retention maintenance, transcript/generated-output purge, Telegram topic cleanup status, bounded manual retry eligibility, a token-protected operations snapshot, metadata-only support analytics proof, runbook docs, hosted Convex codegen, focused tests, and repo gates.
 
 ## Decision Log
 
@@ -103,8 +115,8 @@ Decision: Do not add a dedicated contact or email field in Slice 1.
 Rationale: The widget should reduce support friction on the landing page and behave like chat, not a lead form. Visitors can volunteer contact details in the message body if they want. If Parker needs an email later, Slice 2 can add an audited `Ask for email` operator action.
 Date: 2026-05-06
 
-Decision: Identify anonymous support visitors with an HttpOnly support session cookie and a Convex-stored token hash.
-Rationale: The widget can support unauthenticated visitors without exposing arbitrary thread access, while avoiding a JavaScript-readable bearer token for support transcripts. The server mints the support session token, sets it as `__Host-sbs_support_session` with `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, and `Secure` in production, and Convex stores only its hash. Authenticated identity can be associated later without becoming the Slice 1 thread authority.
+Decision: Identify anonymous support visitors with an HttpOnly Secure support session cookie and a Convex-stored token hash.
+Rationale: The widget can support unauthenticated visitors without exposing arbitrary thread access, while avoiding a JavaScript-readable bearer token for support transcripts. The server mints the support session token, sets it as `__Host-sbs_support_session` with `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, and no `Domain`, and Convex stores only its hash. Authenticated identity is derived from Convex auth when the support route has a Clerk Convex token; it is metadata, not the thread authority.
 Date: 2026-05-06
 
 Decision: Create the support visitor, Convex thread, and Telegram forum topic on first real visitor message.
@@ -172,7 +184,7 @@ Rationale: Uploads would introduce storage, scanning, Telegram file mapping, ret
 Date: 2026-05-06
 
 Decision: Attach Clerk identity only as optional support metadata in Slice 1.
-Rationale: Signed-in visitors can provide useful context for Parker, but the homepage support thread should still be authorized by the HttpOnly support session cookie. Clerk association should not become a requirement for thread access until a later authenticated-support slice designs account-level support history and privacy rules.
+Rationale: Signed-in visitors can provide useful context for Parker, but the homepage support thread should still be authorized by the HttpOnly support session cookie. Clerk association must be derived server-side from Convex auth and should not become a requirement for thread access until a later authenticated-support slice designs account-level support history and privacy rules.
 Date: 2026-05-06
 
 Decision: Keep Slice 1 homepage-only.
@@ -180,7 +192,7 @@ Rationale: The public homepage support bridge should be proven before adding pro
 Date: 2026-05-06
 
 Decision: Keep Telegram topic titles free of user-supplied text.
-Rationale: Forum topic names are durable, visible operator chrome. They should use generated support ids and safe routing metadata only, such as `SBS-0421 · homepage · May 6`, while richer visitor context stays inside support messages governed by retention and audit rules.
+Rationale: Forum topic names are durable, visible operator chrome. They should use generated support ids and safe routing metadata only, such as `SBS-0421 homepage May 6` or `SBS-0421 workspace May 6`, while richer visitor context stays inside support messages governed by retention and audit rules.
 Date: 2026-05-06
 
 Decision: Start each Telegram topic with a safe bot-authored context header.
@@ -191,25 +203,31 @@ Date: 2026-05-06
 
 Child ExecPlans:
 
-- `docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md`: active Slice 1 plan for `Homepage Widget And Telegram Bridge Proof`.
+- `docs/exec-plans/completed/2026-05-06-homepage-widget-and-telegram-bridge-proof.md`: completed Slice 1 plan for `Homepage Widget And Telegram Bridge Proof`.
+- `docs/exec-plans/completed/2026-05-06-operator-actions-and-prompt-buttons.md`: completed Slice 2 plan for `Operator Actions And Prompt Buttons`.
+- `docs/exec-plans/completed/2026-05-06-ai-drafting-and-product-context.md`: completed Slice 3 plan for `AI Drafting And Product Context`.
+- `docs/exec-plans/completed/2026-05-06-authenticated-customer-support-and-workspace-entry.md`: completed Slice 4 plan for `Authenticated Customer Support And Workspace Entry`.
+- `docs/exec-plans/completed/2026-05-06-operations-analytics-and-hardening.md`: completed Slice 5 plan for `Operations, Analytics, And Hardening`.
 
-Recommended Slice 1: Homepage Widget And Telegram Bridge Proof. This homepage-only slice should add the dedicated provider env contract, Convex support visitor/thread/message model, homepage widget, HttpOnly anonymous support session bridge, lazy first-message thread creation, no dedicated contact/email field, Telegram forum-topic creation, store-first visitor message delivery with explicit status, a maintainer-only failed-delivery recovery action, Telegram HTTP action webhook inbound reply, operator allowlist enforcement, first-slice abuse controls, the `Close thread` operator button, and live website reply rendering.
+Completed Slice 1: Homepage Widget And Telegram Bridge Proof. This homepage-only slice added the dedicated provider env contract, Convex support visitor/thread/message model, homepage widget, HttpOnly anonymous support session bridge, lazy first-message thread creation, no dedicated contact/email field, Telegram forum-topic creation path, store-first visitor message delivery with explicit status, a maintainer-only failed-delivery recovery action, Telegram HTTP action webhook inbound reply path, operator allowlist enforcement, first-slice abuse controls, the `Close thread` operator button, and website reply rendering. The only unproven piece is the live Telegram provider loop because support-specific Convex env setup is still missing.
 
-Recommended Slice 2: Operator Actions And Prompt Buttons. This slice should build on the callback/audit plumbing from `Close thread` and add safe buttons such as draft reply, ask for email, ask for context, send pricing link, send checkout link, summarize lead, generate Codex prompt, create Linear draft, or mark hot lead.
+Completed Slice 2: Operator Actions And Prompt Buttons. This slice built on the callback/audit plumbing from `Close thread` and added safe buttons for draft reply, ask for email, ask for context, send pricing link, send checkout link, summarize lead, generate Codex prompt, create Linear draft, and mark hot lead. Customer-visible actions create normal Convex operator messages. Draft, summary, Codex prompt, Linear draft, and hot-lead actions remain operator-only and deterministic; they do not call AI or Linear.
 
-Recommended Slice 3: AI Drafting And Product Context. This slice should use support thread context and product context to generate Parker-side drafts and prompts while proving that AI output is not sent automatically.
+Completed Slice 3: AI Drafting And Product Context. This slice uses support thread context and safe public product context to generate Parker-side drafts and prompts while proving that AI output is not sent automatically. AI-capable buttons now schedule private OpenAI-backed generation in the same mutation that creates the action audit row, patch the existing action audit row with output source, model, and failure metadata, and fall back to deterministic private notes when OpenAI is unavailable. No AI output is inserted into visitor-visible support messages automatically.
 
-Recommended Slice 4: Authenticated Customer Support And Workspace Entry. This slice should decide whether support history becomes account-level, expose support inside protected product routes if it earns the surface area, and define privacy/access rules beyond the optional Clerk metadata captured in Slice 1.
+Completed Slice 4: Authenticated Customer Support And Workspace Entry. This slice added a protected workspace support entry point, keeps support transcripts session-scoped, and defers account-wide support history or automatic workspace context until privacy rules are deliberately designed.
 
-Recommended Slice 5: Operations, Analytics, And Hardening. This slice should deepen rate limits, spam controls, retention automation, metadata-only PostHog support events, failure dashboards, delivery retry rules, operator runbook, production smoke, and release proof.
+Completed Slice 5: Operations, Analytics, And Hardening. This slice added retention automation, bounded retry policy, metadata-only PostHog support events, admin failure snapshots, operator runbook updates, and production smoke guidance.
 
 ## Next Slice
 
-The active child ExecPlan for the next recommended slice is `docs/exec-plans/active/2026-05-06-homepage-widget-and-telegram-bridge-proof.md`, written from `planning-brief-1.md`.
+No child ExecPlan is currently active.
 
-It is next because every later operator button, AI draft, Linear draft, or authenticated support feature depends on the basic loop being real: website visitor message to Convex to Telegram, then Telegram operator reply back to Convex and the website.
+The next recommended slice is Live Provider Proof And Program Closeout. It is next because the code path, retention worker, recovery controls, analytics privacy proof, and docs now exist, but the Program still cannot be complete until the support-specific hosted Convex env values, Telegram bot/group permissions, webhook registration, and `OPENAI_API_KEY` are configured in the target environment and the real Telegram/OpenAI smoke passes.
 
-Boundary rules for the first slice: do not reuse observability Telegram env values, do not require email before the first message, do not add a dedicated contact or email field, do not create threads before the first real visitor message, do not add CAPTCHA or Turnstile, do not auto-open the widget, do not use timed popups, do not imply fake online availability, do not promise response times, do not ship operator buttons beyond `Close thread`, do not support uploads or binary attachments, do not add protected workspace support surfaces, do not auto-send AI replies to customers, do not introduce a third-party widget script, do not add broad CRM behavior, and do not use Convex local mode.
+Before claiming production-ready support confidence, complete the external setup from `apps/web/content/docs/telegram-support-bot.mdx` and verify the real Telegram/OpenAI loop: visitor message to Convex, forum topic creation, Telegram operator reply, website-visible reply, `Close thread`, one customer-visible action button, one AI-backed operator-only action button, and missing-key fallback behavior.
+
+Boundary rules remain: do not reuse observability Telegram env values, do not require email before the first message, do not create threads before the first real visitor message, do not add CAPTCHA or Turnstile unless spam proves it necessary, do not auto-open the widget, do not use timed popups, do not imply fake online availability, do not promise response times, do not support uploads or binary attachments, do not expand protected workspace support beyond the completed Slice 4 entry point, do not auto-send AI replies to customers, do not introduce a third-party widget script, do not add broad CRM behavior, do not send support transcript text or generated output to PostHog, do not let AI or Linear buttons perform provider side effects without an explicit new plan, and do not use Convex local mode.
 
 ## Risks and Watchpoints
 

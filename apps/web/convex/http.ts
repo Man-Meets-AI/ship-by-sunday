@@ -205,6 +205,33 @@ http.route({
 });
 
 http.route({
+	path: "/telegram/support/webhook",
+	method: "POST",
+	handler: httpAction(async (ctx, request) => {
+		const expectedSecret = requireConvexEnv("TELEGRAM_SUPPORT_WEBHOOK_SECRET");
+		const actualSecret = request.headers.get("x-telegram-bot-api-secret-token");
+		if (actualSecret !== expectedSecret) {
+			return jsonResponse({ error: "Unauthorized." }, { status: 401 });
+		}
+
+		const payload = (await request.json().catch(() => null)) as unknown;
+		if (!payload) {
+			return jsonResponse(
+				{ error: "Invalid Telegram update payload." },
+				{ status: 400 },
+			);
+		}
+
+		const result = await ctx.runAction(
+			internal.support.processTelegramSupportWebhookUpdate,
+			{ payload },
+		);
+
+		return jsonResponse(result, { status: 200 });
+	}),
+});
+
+http.route({
 	path: "/observability/events",
 	method: "POST",
 	handler: httpAction(async (ctx, request) => {

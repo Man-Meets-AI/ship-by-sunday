@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 
 import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
 import { WorkspaceDoctorPassToastWatcher } from "@/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-toast-watcher";
+import { WorkspaceSupportWidget } from "@/app/(workspace)/_components/workspace-support/workspace-support-widget";
+import { starterHomePageConfig } from "@/config/product";
 import { getServerProductAccess } from "@/platform/access/product-access";
 
 export const metadata: Metadata = {
@@ -26,6 +28,11 @@ export default async function WorkspaceLayout({
 					<WorkspaceDoctorPassToastWatcher />
 				) : null}
 				{children}
+				{starterHomePageConfig.supportWidget.enabled ? (
+					<WorkspaceSupportWidget
+						fallbackHref={starterHomePageConfig.supportWidget.fallbackHref}
+					/>
+				) : null}
 			</>
 		);
 	}
