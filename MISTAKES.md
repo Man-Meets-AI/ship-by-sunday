@@ -1,5 +1,23 @@
 # Mistakes
 
+## 2026-05-07 Passwordless Checkout Account Handoff
+
+- Mistake: The paid-buyer path depended on a Clerk email-code factor that was not proven against the actual Clerk dev and production settings before customers hit it.
+  Impact: New paid users could buy access but then see `factor_not_found` while trying to prove their checkout email, blocking login.
+  Corrective action: Keep the custom buyer sign-in flow aligned with the Clerk Dashboard contract: email sign-in enabled, email verification code enabled, passwords not required for buyers, MFA and Client Trust not required unless the app implements those second-factor screens.
+
+- Mistake: The app routed paid buyers through a separate checkout email handoff / claim page instead of the product destination.
+  Impact: The first paid experience became a confusing recovery page, and the account handoff had its own failure mode separate from normal sign-in.
+  Corrective action: Stripe checkout success is now only a transient fulfillment step; signed-out buyers go through passwordless sign-in and then land on `/workspace/choose`.
+
+- Mistake: Checkout intent metadata tried to pre-classify the buyer's post-purchase path before the buyer had chosen one.
+  Impact: Extra intent branches made checkout, fulfillment, tests, and debugging more complicated without improving the customer experience.
+  Corrective action: New public checkout creation uses a neutral purchase; the buyer chooses the next path inside the product.
+
+- Mistake: Existing proof did not initially cover the exact signed-out paid buyer flow from hosted Checkout to passwordless sign-in to workspace choice.
+  Impact: The failure escaped despite separate auth and billing checks.
+  Corrective action: Dev staging now has a paid-card Checkout proof, production release proof covers the hosted checkout handoff, and real OTP login was manually verified during the incident.
+
 ## 2026-05-07 Codex Edit Discipline
 
 - Mistake: I used a Perl in-place replacement to update Convex helper imports instead of `apply_patch`.

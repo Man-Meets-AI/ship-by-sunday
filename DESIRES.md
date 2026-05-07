@@ -1,5 +1,19 @@
 # Desires
 
+## 2026-05-07 Passwordless Checkout Account Handoff
+
+- Missing context/tool: A Clerk configuration audit that checks dev and production for buyer-auth invariants: email sign-in enabled, email verification code enabled, password not required for buyer sign-in, MFA optional, and Client Trust not required.
+  Why it would help: The app would fail CI or release proof before shipping a custom auth UI that asks Clerk for a disabled factor.
+
+- Missing context/tool: A first-class browser + mailbox E2E test skill for paid-buyer login, with a stable test inbox and safe OTP handling.
+  Why it would help: The exact customer path from checkout to inbox code to `/workspace/choose` could be rerun without improvised Gmail/plugin setup during an incident.
+
+- Missing context/tool: Release proof that asserts forbidden UX states after checkout: no `/checkout/email-handoff`, no claim page, no password field for buyer sign-in, and exactly one customer-facing error surface for invalid OTP.
+  Why it would help: It turns the product decisions from this incident into durable regression checks.
+
+- Missing context/tool: A fulfillment-race probe that runs webhook and success-page retry for the same Checkout Session concurrently.
+  Why it would help: Stripe webhooks and browser success-page finalization naturally race; proving the race makes Clerk user creation and Convex access grants stay idempotent.
+
 ## 2026-05-06 Stripe Link Express Checkout Stall
 
 - Missing context/tool: Production-safe observability for checkout session creation and confirmation start, including request ID, session ID, CTA ID, and fulfillment track without PII.

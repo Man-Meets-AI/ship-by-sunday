@@ -1,5 +1,22 @@
 # Learnings
 
+## 2026-05-07 Passwordless Checkout Account Handoff
+
+- Fact: A Stripe Checkout payment cannot safely create an authenticated browser session by itself.
+  Verified by: The hotfix design and production proof for PR #218. The server can create or reconcile the Clerk user and grant access, but the browser still needs Clerk to establish a session by proving control of the email.
+
+- Fact: For Clerk custom UI, the app must ask for an actually supported first factor instead of assuming `email_code` exists.
+  Verified by: The original `factor_not_found` failure and the replacement sign-in flow, which reads supported first factors, reports a high-severity client error when email code is missing, and documents the required Clerk Dashboard settings.
+
+- Fact: The checkout success route should be a transient finalization route, not a product destination or claim experience.
+  Verified by: PR #218 and production release proof. Paid buyers now finalize fulfillment, sign in passwordlessly when needed, and land on `/workspace/choose`.
+
+- Fact: Webhook and success-page fulfillment can race, so Clerk user creation must be idempotent at the domain boundary.
+  Verified by: The review-swarm P1 finding and follow-up fix in PR #218, which re-queries Clerk after create failure and keeps both fulfillment paths on the same access-grant flow.
+
+- Fact: Neutral checkout improves the product and the code.
+  Verified by: Removing active checkout intents from new public checkout creation while still preserving legacy readers for old records. Buyers discover the available workspace paths after purchase instead of being locked into a pre-checkout branch.
+
 ## 2026-05-06 Stripe Link Express Checkout Stall
 
 - Fact: For Stripe custom Checkout Sessions, `payment_intent=null` on repeated `open` / `unpaid` sessions means confirmation did not progress far enough to create a PaymentIntent.
