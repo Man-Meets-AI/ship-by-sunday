@@ -183,31 +183,15 @@ async function signIn(
 	},
 ) {
 	const signInPath = "/sign-in?redirect_url=%2Fcodebase";
+	await assertPasswordlessOtpCanSend(page, {
+		diagnostics,
+		email,
+		signInPath,
+	});
 	await page.goto(signInPath, {
 		waitUntil: "networkidle",
 	});
-	try {
-		await page.waitForFunction(
-			() => {
-				const runtimeWindow = window as Window & {
-					Clerk?: {
-						loaded?: boolean;
-						user?: { id?: string | null };
-						session?: { id?: string | null };
-					};
-				};
-
-				return runtimeWindow.Clerk?.loaded === true;
-			},
-			{
-				timeout: 15_000,
-			},
-		);
-	} catch (error) {
-		throw new Error(
-			`Clerk did not finish loading while bootstrapping Playwright auth for ${email} at ${page.url()}. Expected ${signInPath}. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
-		);
-	}
+	await waitForClerkLoaded(page, { diagnostics, email, signInPath });
 	await clerk.signIn({ page, emailAddress: email });
 	await page.goto("/codebase", {
 		waitUntil: "networkidle",
@@ -259,6 +243,83 @@ async function signIn(
 	}
 
 	return clerkUserId;
+}
+
+async function waitForClerkLoaded(
+	page: Page,
+	{
+		diagnostics,
+		email,
+		signInPath,
+	}: {
+		diagnostics: {
+			consoleMessages: string[];
+			pageErrors: string[];
+		};
+		email: string;
+		signInPath: string;
+	},
+) {
+	try {
+		await page.waitForFunction(
+			() => {
+				const runtimeWindow = window as Window & {
+					Clerk?: {
+						loaded?: boolean;
+					};
+				};
+
+				return runtimeWindow.Clerk?.loaded === true;
+			},
+			{
+				timeout: 15_000,
+			},
+		);
+	} catch (error) {
+		throw new Error(
+			`Clerk did not finish loading while bootstrapping Playwright auth for ${email} at ${page.url()}. Expected ${signInPath}. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+		);
+	}
+}
+
+async function assertPasswordlessOtpCanSend(
+	page: Page,
+	{
+		diagnostics,
+		email,
+		signInPath,
+	}: {
+		diagnostics: {
+			consoleMessages: string[];
+			pageErrors: string[];
+		};
+		email: string;
+		signInPath: string;
+	},
+) {
+	await page.goto(signInPath, {
+		waitUntil: "networkidle",
+	});
+	await waitForClerkLoaded(page, { diagnostics, email, signInPath });
+
+	const passwordFieldCount = await page.getByLabel(/^password$/i).count();
+	if (passwordFieldCount > 0) {
+		throw new Error(
+			`Passwordless release proof found ${passwordFieldCount} password field(s) on ${signInPath} for ${email}.`,
+		);
+	}
+
+	await page.getByLabel(/^email$/i).fill(email);
+	await page.getByRole("button", { name: /^send email code$/i }).click();
+	try {
+		await page
+			.getByLabel(/^email code$/i)
+			.waitFor({ state: "visible", timeout: 20_000 });
+	} catch (error) {
+		throw new Error(
+			`Passwordless release proof could not send an email code for ${email}. ${await describeAuthBootstrapPage(page, diagnostics)}. ${formatAuthBootstrapError(error)}`,
+		);
+	}
 }
 
 async function waitForSignedInWorkspaceLanding(page: Page) {

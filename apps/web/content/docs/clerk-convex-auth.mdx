@@ -55,7 +55,7 @@ The passwordless sign-in and checkout email handoff both depend on Clerk Dashboa
 - What: enable email address sign-in and turn on **Email verification code**. Leave email verification link off unless you intentionally add a magic-link flow in code. Turn off password sign-up and adding passwords to accounts for the shipped passwordless buyer path. Do not require MFA or Client Trust on buyer sign-in unless you also add the matching second-factor UI.
 - Callback routes: keep the app-owned sign-in URL at `/sign-in`; the checkout email-code flow itself stays on `/checkout/email-handoff` and returns to `/checkout/success?session_id=...`.
 - Verify: open `/sign-in`, enter a paid-user email, and confirm Clerk sends a one-time code. Then complete a paid test checkout while signed out, click the checkout-email handoff, and confirm Clerk sends a one-time code to the Stripe checkout email.
-- Release proof: release personas use email-code Clerk accounts and the Playwright Clerk testing helper signs them in by email with a short-lived sign-in token; no release proof should fill or require a password field.
+- Release proof: release personas use email-code Clerk accounts. Browser proof first sends the real email-code challenge through `/sign-in`, then the Playwright Clerk testing helper signs the persona in by email with a short-lived sign-in token so storage state is deterministic; no release proof should fill or require a password field.
 - Missing setup looks like: `/sign-in` or the handoff page cannot send or verify an email code, or Clerk returns an unsupported second factor/task after OTP verification, so the buyer cannot prove the paid email.
 
 ## Social provider setup

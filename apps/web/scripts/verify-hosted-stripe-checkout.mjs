@@ -268,19 +268,14 @@ async function submitHostedCheckout(page) {
 }
 
 async function signInBuyer(page, { baseUrl, email }) {
-	await page.goto(
-		`${baseUrl}${buildHostedProofSignInPath({ redirectPath: "/" })}`,
-		{
-			waitUntil: "networkidle",
-		},
-	);
-	await page.waitForFunction(
-		() => {
-			const runtimeWindow = window;
-			return runtimeWindow.Clerk?.loaded === true;
-		},
-		{ timeout: 15_000 },
-	);
+	const signInUrl = `${baseUrl}${buildHostedProofSignInPath({
+		redirectPath: "/",
+	})}`;
+	await assertPasswordlessOtpCanSend(page, { email, signInUrl });
+	await page.goto(signInUrl, {
+		waitUntil: "networkidle",
+	});
+	await waitForClerkLoaded(page);
 	await clerk.signIn({ page, emailAddress: email });
 	await page.goto(`${baseUrl}/`, {
 		waitUntil: "networkidle",
@@ -296,6 +291,36 @@ async function signInBuyer(page, { baseUrl, email }) {
 	);
 
 	return await page.evaluate(() => window.Clerk?.user?.id ?? null);
+}
+
+async function waitForClerkLoaded(page) {
+	await page.waitForFunction(
+		() => {
+			const runtimeWindow = window;
+			return runtimeWindow.Clerk?.loaded === true;
+		},
+		{ timeout: 15_000 },
+	);
+}
+
+async function assertPasswordlessOtpCanSend(page, { email, signInUrl }) {
+	await page.goto(signInUrl, {
+		waitUntil: "networkidle",
+	});
+	await waitForClerkLoaded(page);
+
+	const passwordFieldCount = await page.getByLabel(/^password$/i).count();
+	if (passwordFieldCount > 0) {
+		throw new Error(
+			`Hosted passwordless proof found ${passwordFieldCount} password field(s) on ${signInUrl} for ${email}.`,
+		);
+	}
+
+	await page.getByLabel(/^email$/i).fill(email);
+	await page.getByRole("button", { name: /^send email code$/i }).click();
+	await page
+		.getByLabel(/^email code$/i)
+		.waitFor({ state: "visible", timeout: 20_000 });
 }
 
 async function createAppCheckoutSession(page) {
