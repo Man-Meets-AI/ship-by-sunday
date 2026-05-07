@@ -44,6 +44,15 @@ import {
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 } from "./checkoutIntentValidators";
+import {
+	impersonationAuditEventTypeValidator,
+	impersonationAuditResultValidator,
+	impersonationBlockReasonValidator,
+	impersonationFailureReasonValidator,
+	impersonationSessionInvalidationReasonValidator,
+	impersonationSessionStatusValidator,
+	impersonationSetupIntegrityIssueValidator,
+} from "./impersonation/validators";
 
 const projectDefinitionFactValueValidator = v.union(
 	v.string(),
@@ -240,6 +249,61 @@ export default defineSchema({
 	managedGithubAuditEvents: defineTable(managedGithubAuditEventFields)
 		.index("by_project_id_and_created_at", ["projectId", "createdAt"])
 		.index("by_consent_id_and_created_at", ["consentId", "createdAt"]),
+	impersonationSessions: defineTable({
+		actorClerkUserId: v.string(),
+		actorEmail: v.string(),
+		subjectClerkUserId: v.string(),
+		subjectEmail: v.optional(v.string()),
+		reason: v.string(),
+		status: impersonationSessionStatusValidator,
+		setupIntegrityIssues: v.array(impersonationSetupIntegrityIssueValidator),
+		startedAt: v.number(),
+		updatedAt: v.number(),
+		expiresAt: v.number(),
+		stoppedAt: v.optional(v.number()),
+		failedAt: v.optional(v.number()),
+		invalidatedAt: v.optional(v.number()),
+		failureReason: v.optional(impersonationFailureReasonValidator),
+		invalidationReason: v.optional(
+			impersonationSessionInvalidationReasonValidator,
+		),
+		requestId: v.optional(v.string()),
+		userAgent: v.optional(v.string()),
+		ipHash: v.optional(v.string()),
+	})
+		.index("by_actor_and_subject_and_status_and_updated_at", [
+			"actorClerkUserId",
+			"subjectClerkUserId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_subject_clerk_user_id_and_status_and_updated_at", [
+			"subjectClerkUserId",
+			"status",
+			"updatedAt",
+		])
+		.index("by_status_and_expires_at", ["status", "expiresAt"]),
+	impersonationAuditEvents: defineTable({
+		sessionId: v.id("impersonationSessions"),
+		eventType: impersonationAuditEventTypeValidator,
+		actionId: v.string(),
+		result: impersonationAuditResultValidator,
+		actorClerkUserId: v.string(),
+		actorEmail: v.string(),
+		subjectClerkUserId: v.string(),
+		subjectEmail: v.optional(v.string()),
+		changedRecordIds: v.optional(v.array(v.string())),
+		blockReason: v.optional(impersonationBlockReasonValidator),
+		failureReason: v.optional(impersonationFailureReasonValidator),
+		requestId: v.optional(v.string()),
+		userAgent: v.optional(v.string()),
+		ipHash: v.optional(v.string()),
+		setupIntegrityIssues: v.array(impersonationSetupIntegrityIssueValidator),
+		createdAt: v.number(),
+	})
+		.index("by_session_id_and_created_at", ["sessionId", "createdAt"])
+		.index("by_result_and_created_at", ["result", "createdAt"])
+		.index("by_event_type_and_created_at", ["eventType", "createdAt"]),
 	lessonStates: defineTable({
 		clerkUserId: v.string(),
 		courseSlug: v.string(),

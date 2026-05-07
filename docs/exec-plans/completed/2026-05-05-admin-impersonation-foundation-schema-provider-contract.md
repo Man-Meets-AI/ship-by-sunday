@@ -1,10 +1,10 @@
 ---
 title: Admin Impersonation Foundation Schema And Provider Contract
-status: active
+status: complete
 created_at: 2026-05-05
-completed_at: null
+completed_at: 2026-05-07
 summary: Build the backend, provider, and documentation foundation that makes Clerk actor-token support mode safe to implement in the UI.
-post_build_recap: null
+post_build_recap: Added explicit admin impersonation env gating, allowlisted-admin classification, Convex session/audit schema and handlers, actor-claim parsing, UI-safe support-mode status, fail-closed write policy, provider docs, generated Convex API bindings, and focused tests.
 program_id: admin-user-impersonation
 planning_brief: docs/programs/active/2026-05-05-admin-user-impersonation/planning-brief-1.md
 read_when:
@@ -28,16 +28,18 @@ After this slice, the app should have a testable contract that says when imperso
 ## Progress
 
 - [x] 2026-05-05 EDT: Created this ExecPlan from `docs/programs/active/2026-05-05-admin-user-impersonation/planning-brief-1.md`.
-- [ ] Read the required implementation context before editing: root `AGENTS.md`, `apps/web/AGENTS.md`, `docs/release-workflow.md`, `apps/web/convex/_generated/ai/guidelines.md`, and this ExecPlan.
-- [ ] Implement server runtime feature gating and admin allowlist helpers.
-- [ ] Implement Convex schema, validators, model helpers, and narrow public functions for support sessions and audit events.
-- [ ] Implement the UI-safe support-mode status model and fail-closed classification.
-- [ ] Document Clerk/Convex provider setup and unsupported Clerk Dashboard impersonation.
-- [ ] Add focused tests and update this ExecPlan and the Program with implementation proof.
+- [x] 2026-05-07: Read root `AGENTS.md`, `apps/web/AGENTS.md`, `docs/release-workflow.md`, `apps/web/convex/_generated/ai/guidelines.md`, the Convex auth skill, official Clerk impersonation/session-token docs, official Convex Clerk/auth-in-functions docs, and this ExecPlan before editing.
+- [x] 2026-05-07: Implemented server runtime feature gating and verified-email admin allowlist helpers under `apps/web/platform/admin-impersonation/`.
+- [x] 2026-05-07: Implemented Convex impersonation validators, schema tables, model helpers, generated API bindings, and narrow status/session/audit functions under `apps/web/convex/impersonation*`.
+- [x] 2026-05-07: Implemented the UI-safe support-mode status model and fail-closed write classification for unsupported dashboard impersonation, missing sessions, expired sessions, mismatches, kill-switch invalidation, and unclassified writes.
+- [x] 2026-05-07: Documented Clerk/Convex provider setup, env ownership, `{{session.actor}}` JWT template setup, app-managed session pointer, unsupported Clerk Dashboard impersonation, verification, and failure modes in `docs/internal/admin-impersonation.md`.
+- [x] 2026-05-07: Added focused config, admin, status, and Convex model tests; ran codegen, focused tests, docs/plan/program validation, app lint/format/typecheck, repo gates, and `git diff --check`.
 
 ## Surprises & Discoveries
 
-No implementation discoveries yet. Record exact findings here as soon as code inspection or tests reveal something that changes the plan.
+- 2026-05-07: Clerk's current impersonation docs confirm that actor tokens place actor metadata in the `act` claim, and custom JWT templates must expose `{{session.actor}}` for Convex to see it. Convex auth docs confirm `ctx.auth.getUserIdentity()` returns the fields configured in the Clerk integration.
+- 2026-05-07: `bunx --cwd apps/web convex codegen` is not the right local invocation here because Bun treated `apps/web` as a package target. Running `bunx convex codegen` from `apps/web` reached hosted Convex dev and generated bindings.
+- 2026-05-07: Hosted Convex rejected the first session index name because Convex identifiers must be 64 characters or fewer. The implementation keeps the same indexed fields and uses `by_actor_and_subject_and_status_and_updated_at`.
 
 ## Decision Log
 
@@ -59,7 +61,9 @@ Date: 2026-05-05
 
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section after implementation with the files changed, the exact behavior that now exists, the tests that passed, and any remaining gaps before the UI handoff slice starts.
+This plan is complete. The foundation now has explicit `ADMIN_IMPERSONATION_ENABLED` and `ADMIN_IMPERSONATION_EMAILS` parsing, verified-email admin classification, additive `impersonationSessions` and `impersonationAuditEvents` tables, fixed enum validators, actor-claim parsing for Clerk's `act` claim, UI-safe support-mode status, lazy mutation-path expiry and kill-switch invalidation, append-only audit helpers, and an internal fail-closed write policy that blocks unclassified support-mode writes.
+
+No clickable `/admin/impersonation` UI shipped in this slice. The next slice should create the app-managed start/stop browser flow that creates an `impersonationSessions` row, mints the Clerk actor token with `impersonationSessionId` in the actor object, renders the persistent support-mode bar, and proves stop behavior.
 
 ## Context and Orientation
 
@@ -156,7 +160,7 @@ Before editing, read the required implementation context:
     sed -n '1,220p' apps/web/AGENTS.md
     sed -n '1,220p' docs/release-workflow.md
     sed -n '1,220p' apps/web/convex/_generated/ai/guidelines.md
-    sed -n '1,260p' docs/exec-plans/active/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md
+    sed -n '1,260p' docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md
 
 Inspect current auth and ownership code before writing:
 
@@ -192,9 +196,9 @@ Run focused tests first from the repository root:
 
 Run plan and docs validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md docs/programs/active/2026-05-05-admin-user-impersonation docs/internal/admin-impersonation.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md docs/programs/active/2026-05-05-admin-user-impersonation docs/internal/admin-impersonation.md
     git diff --check
 
 Before marking the plan complete after code changes, run the repo completion gates unless a concrete blocker is recorded in this plan:
@@ -204,6 +208,20 @@ Before marking the plan complete after code changes, run the repo completion gat
     bun typecheck
 
 Expected success means every command exits with code 0. If a command fails because a named test file changed during implementation, update the command list to the actual focused test files and record why.
+
+Validation passed on 2026-05-07:
+
+    bunx convex codegen
+    bun run --cwd apps/web test:unit -- tests/unit/admin-impersonation-config.test.ts tests/unit/admin-impersonation-admin.test.ts tests/unit/admin-impersonation-status.test.ts tests/unit/convex-impersonation.test.ts
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md
+    bun run programs:lint
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md docs/programs/active/2026-05-05-admin-user-impersonation docs/internal/admin-impersonation.md
+    bun run format
+    bun lint
+    bun run --cwd apps/web lint
+    bun run --cwd apps/web format:check
+    bun typecheck
+    git diff --check
 
 ## Idempotence and Recovery
 
@@ -227,12 +245,19 @@ Important Program artifacts:
 
 Important implementation anchors:
 
+    apps/web/platform/admin-impersonation/config.ts
+    apps/web/platform/admin-impersonation/status.ts
+    apps/web/convex/impersonation.ts
+    apps/web/convex/impersonation/model.ts
+    apps/web/convex/impersonation/validators.ts
+    apps/web/convex/impersonation/types.ts
     apps/web/platform/auth/convex-auth.ts
     apps/web/platform/access/product-access.ts
     apps/web/convex/auth.config.ts
     apps/web/convex/schema.ts
     apps/web/convex/access/model.ts
     apps/web/platform/observability/request-id.ts
+    docs/internal/admin-impersonation.md
 
 Provider setup summary for docs: Clerk actor tokens identify Parker as the actor and the customer as the active session subject. The Clerk `convex` JWT template must expose the actor claim so Convex can distinguish actor from subject. Raw Clerk Dashboard impersonation is not supported for customer support because it bypasses the app-managed reason, session id bridge, and Convex audit trail.
 

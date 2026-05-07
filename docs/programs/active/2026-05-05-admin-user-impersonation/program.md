@@ -36,11 +36,11 @@ The local codebase research is recorded in `research-pass-codebase-auth-boundari
 
 The app currently uses Clerk for authentication and Convex for the backend. `ClerkProvider` wraps the app, `ConvexProviderWithClerk` passes Clerk auth to Convex, and Convex auth is configured through `apps/web/convex/auth.config.ts`.
 
-Runtime ownership is single-principal today. Convex helpers derive the viewer from `ctx.auth.getUserIdentity()`, and app state tables use `clerkUserId` as the owner key. There is no admin table, no support-mode UI, no impersonation session model, and no runtime special case for `me@parkerrex.com`.
+Runtime ownership is still customer-subject-first. Convex helpers derive the viewer from `ctx.auth.getUserIdentity()`, and app state tables use `clerkUserId` as the owner key. The foundation slice added explicit admin impersonation runtime gates, a verified-email allowlist for `me@parkerrex.com`, `impersonationSessions`, `impersonationAuditEvents`, actor-claim parsing, UI-safe support-mode status, and fail-closed write policy helpers. There is still no `/admin/impersonation` start/stop UI and no persistent support-mode bar.
 
 The workspace shell already has the right UI insertion points: `apps/web/app/(workspace)/_components/app-shell.tsx` for a persistent top bar and account/header components for an admin-only entry point. The backend has several mutation families that need actor-aware audit decisions before support mode can ship.
 
-Clerk supports the needed provider primitive through actor tokens. Convex does not ship an impersonation template, but Convex can receive custom Clerk JWT claims when the Clerk Convex JWT template includes the actor claim.
+Clerk supports the needed provider primitive through actor tokens. Convex does not ship an impersonation template, but Convex can receive custom Clerk JWT claims when the Clerk Convex JWT template includes the actor claim. `docs/internal/admin-impersonation.md` now owns the setup contract for `ADMIN_IMPERSONATION_ENABLED`, `ADMIN_IMPERSONATION_EMAILS`, the Clerk `convex` JWT template `act` claim, app-managed `impersonationSessionId`, unsupported raw Clerk Dashboard impersonation, and verification/failure modes.
 
 ## Progress
 
@@ -51,6 +51,7 @@ Clerk supports the needed provider primitive through actor tokens. Convex does n
 - [x] 2026-05-05: Locked the second interview decision set covering raw Clerk Dashboard impersonation, allowed write families, downloads, internal generation, destructive actions, secrets, repository operations, billing UI, authorization, integrity warnings, environments, allowlist requirements, and the feature kill switch.
 - [x] 2026-05-05: Locked the third interview decision set covering rollout availability, runtime env reads, support bar rendering, admin-page behavior during impersonation, multi-tab behavior, status read model, request metadata, retention, customer notification policy, start/stop UX, admin access responses, customer search behavior, integrity-check timing, and schema enums.
 - [x] 2026-05-05: Locked the fourth interview decision set covering release proof, real Clerk provider proof, dedicated test customers, production smoke, kill-switch invalidation, and splitting the original first implementation slice into smaller foundation and UI proof ExecPlans.
+- [x] 2026-05-07: Completed Slice 1 in `docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md`: env gating, admin allowlist classification, Convex session/audit schema, actor/session parsing, UI-safe support-mode status, mutation-path expiry and kill-switch invalidation, fail-closed unclassified write policy, provider docs, generated Convex API bindings, focused tests, and repo gates landed.
 
 ## Decision Log
 
@@ -88,11 +89,13 @@ Date: 2026-05-05
 
 ## Slice Ledger
 
-No child ExecPlans exist yet.
+Completed child ExecPlans:
 
-Active child ExecPlan: `docs/exec-plans/active/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md`.
+- `docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md`: completed Slice 1 foundation/schema/provider contract.
 
-Recommended Slice 1: Foundation/schema/provider contract. This slice should add the environment gate, admin helper, Convex session/audit schema, actor-claim parsing, support-mode status model, kill-switch behavior, provider setup docs, and focused tests before UI handoff depends on them.
+No active child ExecPlan currently exists.
+
+Completed Slice 1: Foundation/schema/provider contract. This slice added the environment gate, admin helper, Convex session/audit schema, actor-claim parsing, support-mode status model, kill-switch behavior, provider setup docs, generated Convex API bindings, and focused tests before UI handoff depends on them.
 
 Recommended Slice 2: Start/stop minimal UI proof. This slice should add `/admin/impersonation`, eligible customer picker, reason capture, final confirmation, Clerk actor-token handoff, persistent support-mode bar, stop flow, read-only history skeleton, and browser proof.
 
@@ -102,9 +105,9 @@ Recommended Slice 4: Release proof, docs, and operator workflow. This slice shou
 
 ## Next Slice
 
-The active next slice is `docs/exec-plans/active/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md`, written from `planning-brief-1.md`. It implements the foundation/schema/provider contract first because every later support UI, audit, and side-effect rule needs a trustworthy actor/subject/session/status contract.
+No active child ExecPlan currently exists. The next recommended slice is Slice 2: Start/stop minimal UI proof. It should create a new versioned planning brief and child ExecPlan for `/admin/impersonation`, eligible customer picker, reason capture, final confirmation, Clerk actor-token handoff, persistent support-mode bar, stop flow, read-only history skeleton, and browser proof.
 
-Boundary rules for the first slice: do not replace Clerk session handling, do not add broad role management, do not fake Clerk user data in React, do not let public functions accept arbitrary target user ids, and do not silently permit impersonated external side effects without audit metadata.
+Boundary rules for the next slice: use the completed foundation instead of replacing it, do not replace Clerk session handling, do not add broad role management, do not fake Clerk user data in React, do not let public functions accept arbitrary target user ids, do not support raw Clerk Dashboard impersonation, and do not silently permit impersonated external side effects without audit metadata.
 
 ## Risks and Watchpoints
 
@@ -159,14 +162,20 @@ UI pattern anchors:
 Important repo anchors:
 
 - `apps/web/platform/auth/convex-auth.ts`
+- `apps/web/platform/admin-impersonation/config.ts`
+- `apps/web/platform/admin-impersonation/status.ts`
 - `apps/web/platform/access/product-access.ts`
 - `apps/web/convex/auth.config.ts`
 - `apps/web/convex/access.ts`
 - `apps/web/convex/access/model.ts`
+- `apps/web/convex/impersonation.ts`
+- `apps/web/convex/impersonation/model.ts`
+- `apps/web/convex/impersonation/validators.ts`
 - `apps/web/convex/schema.ts`
 - `apps/web/app/(workspace)/_components/app-shell.tsx`
 - `apps/web/app/(workspace)/_components/app-shell-header-trailing.tsx`
 - `apps/web/app/(workspace)/_components/app-shell-user-menu.tsx`
+- `docs/internal/admin-impersonation.md`
 
 Locked decision anchor:
 
