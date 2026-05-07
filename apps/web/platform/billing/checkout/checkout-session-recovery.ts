@@ -199,7 +199,7 @@ export async function fulfillCheckoutSessionFromSuccessPage(
 	return (await fetchAction(
 		api.checkoutClaimsActions.fulfillCheckoutSessionFromSuccessPage,
 		{
-			fulfillmentToken: requireServerEnv("STRIPE_WEBHOOK_SECRET"),
+			fulfillmentToken: requireServerEnv("CHECKOUT_FULFILLMENT_RETRY_SECRET"),
 			sessionId,
 		},
 	)) as CheckoutSessionFulfillmentResult;

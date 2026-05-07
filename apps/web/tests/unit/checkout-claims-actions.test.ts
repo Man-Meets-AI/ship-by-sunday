@@ -50,6 +50,7 @@ describe("convex/checkoutClaimsActions", () => {
 			CLERK_SECRET_KEY: "sk_clerk_test_123",
 			STRIPE_SECRET_KEY: "sk_test_123",
 			STRIPE_WEBHOOK_SECRET: "whsec_test_123",
+			CHECKOUT_FULFILLMENT_RETRY_SECRET: "checkout_retry_secret_123",
 		};
 		retrieveSessionMock.mockReset();
 		stripeConstructorArgs.length = 0;
@@ -494,7 +495,7 @@ describe("convex/checkoutClaimsActions", () => {
 		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
 			createActionCtx({ runMutation }) as never,
 			{
-				fulfillmentToken: "whsec_test_123",
+				fulfillmentToken: "checkout_retry_secret_123",
 				sessionId: "cs_missing_course",
 			},
 		);

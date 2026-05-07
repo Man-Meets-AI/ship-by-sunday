@@ -222,6 +222,9 @@ describe("getCheckoutSessionState", () => {
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: undefined,
 		});
+		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
+			"cs_guest_signed_out_email",
+		);
 	});
 
 	it("returns validated when guest checkout fulfillment belongs to the signed-in viewer", async () => {

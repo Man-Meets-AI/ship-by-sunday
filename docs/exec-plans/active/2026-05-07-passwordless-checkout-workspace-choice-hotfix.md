@@ -23,7 +23,7 @@ Paid users should not have to understand account claiming, passwords, checkout i
 
 This matters because the current production flow exposes implementation details. Some buyers see a password form even though the product is configured for passwordless login, and some paid checkout paths render "Prove checkout email" or a checkout email handoff screen instead of taking the user toward the product. The implementation also stores pre-purchase routing intent, such as `buyerStartingPoint: "no_codebase"`, and then silently sends buyers to a specific path. Removing that pre-purchase routing simplifies the system and improves product discovery because the buyer can choose the path after purchase.
 
-The visible proof is two end-to-end browser tests on dev, then the same smoke on production after release. Test one buys with `EA@parkerrex.com` in the dev Stripe checkout and confirms the flow reaches `/workspace/choose` with the expected three choices. Test two logs out, signs back in with email OTP, retrieves the Clerk code from Gmail if the connector can see it, and confirms the user lands on the chooser or their already-selected workspace path.
+The visible proof is two end-to-end browser tests on dev, then the same smoke on production after release. Test one buys with `{{TEST_CHECKOUT_EMAIL}}` in the dev Stripe checkout and confirms the flow reaches `/workspace/choose` with the expected three choices. Test two logs out, signs back in with email OTP, retrieves the Clerk code from Gmail if the connector can see it, and confirms the user lands on the chooser or their already-selected workspace path.
 
 The provider-backed architecture is now fixed. Stripe Checkout fulfillment is webhook-backed and also triggered from the checkout return page using the same idempotent fulfillment function. Clerk email OTP is the only buyer identity proof when the browser is not already signed in. Convex grants product access only from server-validated Stripe checkout data or from an authenticated Clerk identity with a verified email. There is no separate claim page in the desired product.
 
@@ -52,9 +52,10 @@ The simple desired UX is: a first-time customer buys with Stripe using their ema
 - [x] 2026-05-07 13:11:18 EDT: Updated focused checkout, sign-in, route, access, workspace choice, Convex grant, and webhook tests plus the active auth/checkout/release docs for the new contract.
 - [x] 2026-05-07 13:18:45 EDT: Passed focused unit, Convex grant, integration UI, Stripe checkout route, app lint/typecheck/format, repo lint/typecheck/format, docs lint, public readiness lint, ExecPlan lint, and whitespace checks.
 - [x] 2026-05-07 13:21:12 EDT: Updated hosted Stripe proof tooling so dev card-payment verification expects neutral product metadata and proof sign-in defaults to `/workspace/choose`.
-- [x] 2026-05-07 13:44:13 EDT: Opened draft PR #218, ran the requested review swarm, removed the stale checkout-handoff integration test, strict-gated course metadata, protected success-page fulfillment with the server-only Stripe webhook secret, and upgraded dev card-payment proof to assert the passwordless workspace handoff.
+- [x] 2026-05-07 13:44:13 EDT: Opened draft PR #218, ran the requested review swarm, removed the stale checkout-handoff integration test, strict-gated course metadata, protected success-page fulfillment with a server-only token, and upgraded dev card-payment proof to assert the passwordless workspace handoff.
 - [x] 2026-05-07 13:49:43 EDT: Fixed the PR `static` full-unit regressions by making `/workspace/choose` tolerate the legacy no-argument test render without violating Next.js page prop typing and by updating the pending-checkout external redirect fallback expectation to `/workspace/choose`; full app unit and app typecheck now pass locally.
-- [ ] Prove dev checkout purchase and OTP login with `EA@parkerrex.com`.
+- [x] 2026-05-07 14:02:24 EDT: Addressed CodeRabbit follow-up by splitting checkout-success fulfillment retry auth to `CHECKOUT_FULFILLMENT_RETRY_SECRET`, tightening checkout-welcome redirect classification, removing personal test-email literals from the committed ExecPlan, and adding the missing proof/test assertions.
+- [ ] Prove dev checkout purchase and OTP login with `{{TEST_CHECKOUT_EMAIL}}`.
 - [ ] Re-run PR #218 checks after the CI-fix commit, then use dev only as the staging payment lane if needed and prove production after merge.
 
 ## Surprises & Discoveries
@@ -75,7 +76,7 @@ Clerk's current custom email OTP flow supports passwordless sign-in with `signIn
 
 Convex authentication exposes the current Clerk identity through `ctx.auth.getUserIdentity()`. With the Clerk integration, that identity can include `email` and `emailVerified`. The repo already uses this correctly in `claimLatestPendingCheckoutForViewer`, which refuses to claim pending checkout access unless the authenticated viewer has a verified email matching the normalized checkout email. This should remain the entitlement recovery guard after normal OTP sign-in.
 
-The Gmail connector is callable after plugin reinstall, but searches for `to:ea@parkerrex.com newer_than:30d` returned no messages during research. A broader search found mail in the connected mailbox mentioning the EA setup. During real OTP proof, trigger a fresh Clerk code first and then search recent Man Meets AI or Clerk auth mail. If no EA OTP arrives through the connector, record the account-scope limitation and use browser mailbox access or user-assisted login.
+The Gmail connector is callable after plugin reinstall, but searches for `to:{{TEST_CHECKOUT_EMAIL}} newer_than:30d` returned no messages during research. A broader search found mail in the connected mailbox mentioning the checkout test setup. During real OTP proof, trigger a fresh Clerk code first and then search recent Man Meets AI or Clerk auth mail. If no OTP arrives through the connector, record the account-scope limitation and use browser mailbox access or user-assisted login.
 
 The current release workflow in `docs/release-workflow.md` no longer treats `dev` as release authority. `dev` is a branch-backed Vercel Preview payment staging lane for `https://dev.man-meets-ai.com`; production release authority is `main`. This plan must therefore use `dev` for hosted Stripe test-mode proof only and keep the release PR into `main`.
 
@@ -109,6 +110,10 @@ Date: 2026-05-07
 
 Decision: Use Stripe webhook fulfillment plus checkout-success fulfillment, both backed by the same idempotent Convex function.
 Rationale: Stripe explicitly requires webhooks for reliable fulfillment because buyers might never reach the return page, and recommends return-page fulfillment because webhooks can be delayed while the buyer is present. Calling one shared function from both sources gives immediate UX without creating two entitlement systems.
+Date: 2026-05-07
+
+Decision: Use a dedicated `CHECKOUT_FULFILLMENT_RETRY_SECRET` for checkout-success fulfillment retries.
+Rationale: The Stripe webhook signing secret should verify Stripe webhook signatures only. The success-page retry is a server-to-Convex bearer check, so it gets a separate high-entropy secret mirrored into Vercel and Convex for each environment.
 Date: 2026-05-07
 
 Decision: Clerk email OTP is the only checkout email ownership proof.
@@ -221,7 +226,7 @@ Update docs. At minimum, update `apps/web/content/docs/clerk-convex-auth.mdx`, `
 
 Update tests incrementally. Start with unit tests for checkout model simplification, sign-in redirect, and auth fallback. Then update integration UI tests for checkout success and sign-in. Finally update Stripe checkout route tests and Convex access tests so new grants do not carry pre-purchase routing intent and old grants remain compatible if legacy decoding remains.
 
-After implementation, validate on hosted dev staging without treating `dev` as release authority. The normal release PR targets `main`. If `https://dev.man-meets-ai.com` must be refreshed, update or PR the same focused commit into the `dev` branch only as a payment-staging step, wait for the Vercel dev deployment, use the Vercel protected-access share URL if needed, buy through Stripe test checkout with `EA@parkerrex.com`, and confirm the flow reaches `/workspace/choose?welcome=checkout` then cleans itself to `/workspace/choose`. Log out, sign in with OTP, fetch the newest code from Gmail if possible, and confirm return behavior without `welcome=checkout`. After dev validation, run the review swarm on the release PR into `main`, merge only after required checks pass, deploy, and repeat production smoke with the appropriate safe production proof path.
+After implementation, validate on hosted dev staging without treating `dev` as release authority. The normal release PR targets `main`. If `https://dev.man-meets-ai.com` must be refreshed, update or PR the same focused commit into the `dev` branch only as a payment-staging step, wait for the Vercel dev deployment, use the Vercel protected-access share URL if needed, buy through Stripe test checkout with `{{TEST_CHECKOUT_EMAIL}}`, and confirm the flow reaches `/workspace/choose?welcome=checkout` then cleans itself to `/workspace/choose`. Log out, sign in with OTP, fetch the newest code from Gmail if possible, and confirm return behavior without `welcome=checkout`. After dev validation, run the review swarm on the release PR into `main`, merge only after required checks pass, deploy, and repeat production smoke with the appropriate safe production proof path.
 
 ## Milestones
 
@@ -370,8 +375,8 @@ Update `docs/release-workflow.md` in this pass because its hosted proof language
 For dev browser proof, use the in-app browser and Vercel protected access if necessary. If a Vercel login wall appears, use the Vercel connector to get access to the dev URL before asking the user to log in. For OTP, trigger a fresh code first, then search Gmail:
 
     newer_than:1d (from:accounts.dev OR from:clerk.com OR subject:code OR subject:verification)
-    to:ea@parkerrex.com newer_than:1d
-    newer_than:1d EA@parkerrex.com
+    to:{{TEST_CHECKOUT_EMAIL}} newer_than:1d
+    newer_than:1d {{TEST_CHECKOUT_EMAIL}}
 
 Expected observation: a fresh Man Meets AI or Clerk email contains a six-digit code. If the Gmail connector cannot see the EA inbox, record that limitation and use browser mailbox access or user-assisted code retrieval.
 
@@ -387,7 +392,7 @@ Compatibility is accepted when already-resolved paid users still land on their s
 
 Docs are accepted when the app docs describe the external setup contract: Clerk email sign-in with email verification code must be enabled in dev and production, password sign-in is not the paid buyer flow, Stripe checkout grants neutral access, checkout success is a transient finalization route backed by webhook and landing-page fulfillment, and workspace choice is the first paid product destination. The docs must also say what failure looks like when Clerk email-code auth is missing and must not describe `/checkout/email-handoff` as an active buyer route.
 
-Hosted proof is accepted when dev has both purchase proof and OTP login proof with timestamps, then production has the same smoke after merge. If Gmail cannot see the `EA@parkerrex.com` OTP, the proof record must state the connector limitation and how the OTP was retrieved instead.
+Hosted proof is accepted when dev has both purchase proof and OTP login proof with timestamps, then production has the same smoke after merge. If Gmail cannot see the `{{TEST_CHECKOUT_EMAIL}}` OTP, the proof record must state the connector limitation and how the OTP was retrieved instead.
 
 ### Test Commands
 
@@ -579,6 +584,39 @@ PR static follow-up recorded on 2026-05-07 13:49:43 EDT:
     bun run --cwd apps/web typecheck
     result: passed
 
+CodeRabbit follow-up validation recorded on 2026-05-07 14:03:59 EDT:
+
+    bun run --cwd apps/web test:unit -- tests/unit/sign-in-route-utils.test.ts tests/unit/checkout-session.test.ts tests/unit/checkout-claims-actions.test.ts tests/unit/stripe-webhook-action.test.ts tests/unit/hosted-stripe-checkout-proof.test.ts
+    result: passed, 5 files and 54 tests
+
+    node --check apps/web/scripts/verify-dev-stripe-card-payment.mjs
+    result: passed
+
+    bun run --cwd apps/web test:unit
+    result: passed, 140 files and 665 tests
+
+    bun run --cwd apps/web format:check
+    result: passed
+
+    bun run --cwd apps/web lint
+    result: passed
+
+    bun run --cwd apps/web typecheck
+    result: passed
+
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-07-passwordless-checkout-workspace-choice-hotfix.md apps/web/content/docs/environment-variables.mdx apps/web/content/docs/stripe-checkout-webhook.mdx apps/web/content/docs/deploy-to-vercel.mdx apps/web/content/docs/ship-live.mdx
+    result: passed
+
+    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-07-passwordless-checkout-workspace-choice-hotfix.md
+    result: passed
+
+    git diff --check
+    result: passed
+
+External setup added by the CodeRabbit follow-up:
+
+    CHECKOUT_FULFILLMENT_RETRY_SECRET must be created as a high-entropy server-only value and mirrored into Vercel plus the matching Convex deployment for local, preview/dev, and production. It must not be public or exposed with a NEXT_PUBLIC_ prefix.
+
 Add dev proof artifacts here during implementation:
 
     dev deployment:
@@ -609,10 +647,12 @@ Stripe is the payment provider. Checkout session creation lives in Next.js route
 
 Convex is the backend. Access grants and checkout claims live in `apps/web/convex/access/model.ts`, `apps/web/convex/checkoutClaims.ts`, and `apps/web/convex/checkoutClaimsActions.ts`. Convex functions must use validators, must derive identity server-side, and must be validated against hosted Convex dev. Do not use Convex local mode. The shared fulfillment function must retrieve Stripe server-side, validate product metadata and payment status, derive checkout email from Stripe, and never trust client-supplied email or Clerk user id.
 
+The checkout-success retry path depends on `CHECKOUT_FULFILLMENT_RETRY_SECRET` being set to the same value in the Next.js runtime and the target Convex deployment. If it is missing or mismatched, the webhook can still grant access eventually, but `/checkout/success` cannot safely perform the immediate retry and the first buyer handoff may stall or show the fulfillment-failed state.
+
 Next.js App Router owns route behavior. Routes touched by this plan include `apps/web/app/checkout/success/page.tsx`, deletion of `apps/web/app/checkout/email-handoff/page.tsx`, `apps/web/app/(identity)/sign-in/[[...sign-in]]/page.tsx`, and `apps/web/app/(workspace)/workspace/choose/page.tsx`. Before implementation changes App Router behavior, read the relevant local Next.js docs under `node_modules/next/dist/docs/` for route handlers, redirects, and server/client boundaries.
 
 Vercel hosts dev and production. Dev may be protected by Vercel access, so browser proof can require a Vercel share or bypass URL. The `dev` branch and `https://dev.man-meets-ai.com` are payment staging surfaces, not release authority. The user can log in to Vercel if needed, but use the available Vercel connector first when possible.
 
-Gmail is used only for test OTP retrieval. It is not part of the application runtime. Search recent Man Meets AI, Clerk, or auth code mail after triggering a fresh code. If the connector cannot see `EA@parkerrex.com`, use browser mailbox access or user-assisted retrieval and record the limitation.
+Gmail is used only for test OTP retrieval. It is not part of the application runtime. Search recent Man Meets AI, Clerk, or auth code mail after triggering a fresh code. If the connector cannot see `{{TEST_CHECKOUT_EMAIL}}`, use browser mailbox access or user-assisted retrieval and record the limitation.
 
 GitHub owns PR and review flow. The release PR targets `main`. If the dev staging domain needs to be refreshed for payment proof, do that as a staging-only branch operation with the same focused commit and record the exact commit used; do not treat `dev` as the merge authority. Before merging release-sensitive changes to `main`, run the repo's multi-agent review workflow: "Review this branch against main. Have pr_explorer map the affected code paths, reviewer find real risks, and docs_researcher verify the framework APIs that the patch relies on."

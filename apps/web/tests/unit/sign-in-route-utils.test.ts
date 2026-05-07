@@ -44,6 +44,10 @@ describe("sign-in route utils", () => {
 		expect(
 			isCheckoutWelcomeRedirectPath("/workspace/choose?welcome=returning"),
 		).toBe(false);
+		expect(isCheckoutWelcomeRedirectPath(null)).toBe(false);
+		expect(
+			isCheckoutWelcomeRedirectPath("https://example.com/workspace/choose"),
+		).toBe(false);
 		expect(isCheckoutWelcomeRedirectPath("/workspace/choose")).toBe(false);
 		expect(isCheckoutWelcomeRedirectPath("/checkout/success")).toBe(false);
 	});

@@ -64,7 +64,6 @@ export function WorkspaceFulfillmentChoice({
 	);
 	const [pendingChoice, setPendingChoice] = useState<ChoiceState>(null);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const [isCheckoutWelcomeVisible] = useState(showCheckoutWelcome);
 
 	useEffect(() => {
 		if (!showCheckoutWelcome) {
@@ -111,7 +110,7 @@ export function WorkspaceFulfillmentChoice({
 					</p>
 				</div>
 
-				{isCheckoutWelcomeVisible ? (
+				{showCheckoutWelcome ? (
 					<div className="relative mt-6 overflow-hidden rounded-xl border border-border/60 bg-card p-4 shadow-sm shadow-foreground/5">
 						<div className="pointer-events-none absolute inset-x-0 top-0 flex justify-around px-4 pt-2 text-xs text-foreground/40 motion-safe:animate-pulse">
 							<span>*</span>

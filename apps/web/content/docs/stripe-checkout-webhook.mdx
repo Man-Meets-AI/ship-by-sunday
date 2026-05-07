@@ -29,6 +29,7 @@ STRIPE_PUBLISHABLE_KEY=
 STRIPE_PRODUCT_ID=
 STRIPE_PRICE_ID=
 STRIPE_WEBHOOK_SECRET=
+CHECKOUT_FULFILLMENT_RETRY_SECRET=
 APP_BASE_URL=
 CLERK_SECRET_KEY=
 ```
@@ -67,7 +68,7 @@ That helper:
 - writes that secret into `.env.local`
 - syncs that secret, `STRIPE_SECRET_KEY`, and `CLERK_SECRET_KEY` into the active hosted Convex dev env
 
-The app also uses the same `STRIPE_WEBHOOK_SECRET` as a server-only token when `/checkout/success` asks Convex to retry paid-session fulfillment. Do not expose it to the browser. Missing or mismatched values make the webhook fail signature verification and make the success-page retry return an invalid checkout session.
+The app also uses `CHECKOUT_FULFILLMENT_RETRY_SECRET` as a separate server-only token when `/checkout/success` asks Convex to retry paid-session fulfillment. Set the same value in `.env.local`, Vercel, and the active Convex deployment. Do not expose it to the browser. Missing or mismatched webhook values make the webhook fail signature verification; missing or mismatched retry-secret values make the success-page retry return an invalid checkout session.
 
 It also expects `.env.local` to contain the `CONVEX_DEPLOYMENT` value that `bun run dev:convex` writes.
 In this repo, that same `bun run dev:convex` sync also needs to leave `NEXT_PUBLIC_CONVEX_SITE_URL` in `.env.local`, because Stripe forwards into the Convex HTTP-actions origin instead of the `.convex.cloud` client origin.
@@ -134,7 +135,7 @@ The happy path is:
 The most common failures are:
 
 - the pinned Stripe CLI project `ship-by-sunday` is missing or logged into a different Stripe account than `STRIPE_SECRET_KEY`
-- `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET` or `STRIPE_SECRET_KEY`
+- `.env.local` and Convex do not match on `STRIPE_WEBHOOK_SECRET`, `CHECKOUT_FULFILLMENT_RETRY_SECRET`, or `STRIPE_SECRET_KEY`
 - production Convex is missing `STRIPE_SECRET_KEY` or `CLERK_SECRET_KEY`, so the webhook cannot construct Stripe or resolve the checkout email in Clerk even after the signature verifies
 - you changed the webhook secret but did not restart the app
 - Clerk email-code sign-in is disabled or misconfigured, so `/sign-in` cannot send or verify the one-time code for the Stripe checkout email and may show a Clerk `factor_not_found` error

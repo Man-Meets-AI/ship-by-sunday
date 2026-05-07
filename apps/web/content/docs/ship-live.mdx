@@ -60,7 +60,7 @@ The live Stripe webhook must target the Convex HTTP-actions route, not the app o
 
 `https://<your-convex-production-deployment>.convex.site/stripe/webhook`
 
-Before trusting production billing, verify `STRIPE_WEBHOOK_SECRET` and `STRIPE_SECRET_KEY` on the production Convex deployment. Use the internal observability runbook for the incident-control drill and Telegram delivery checks.
+Before trusting production billing, verify `STRIPE_WEBHOOK_SECRET`, `CHECKOUT_FULFILLMENT_RETRY_SECRET`, and `STRIPE_SECRET_KEY` on the production Convex deployment. Use the internal observability runbook for the incident-control drill and Telegram delivery checks.
 
 After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards through passwordless sign-in into `/workspace/choose` without replaying the Stripe event. On production, that proof should create the Checkout Session directly with a fresh one-time `100% off` coupon already attached instead of depending on manual promotion-code entry inside Stripe’s hosted UI. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
 

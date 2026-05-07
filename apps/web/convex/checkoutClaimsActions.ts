@@ -717,7 +717,10 @@ export const fulfillCheckoutSessionFromSuccessPage = action({
 	},
 	returns: checkoutSessionFulfillmentResultValidator,
 	handler: async (ctx, args): Promise<CheckoutSessionFulfillmentResult> => {
-		if (args.fulfillmentToken !== requireConvexEnv("STRIPE_WEBHOOK_SECRET")) {
+		if (
+			args.fulfillmentToken !==
+			requireConvexEnv("CHECKOUT_FULFILLMENT_RETRY_SECRET")
+		) {
 			return {
 				kind: "invalid_session" as const,
 				sessionId: args.sessionId,

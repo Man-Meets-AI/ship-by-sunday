@@ -218,7 +218,10 @@ async function waitForPasswordlessCheckoutHandoff(
 				.getByText(/Prove checkout email/i)
 				.isVisible()
 				.catch(() => false)) || page.url().includes("/checkout/email-handoff"),
-		emailLocked: await emailField.isDisabled().catch(() => false),
+		emailLocked: await emailField
+			.isEditable()
+			.then((isEditable) => !isEditable)
+			.catch(() => false),
 		emailValue: await emailField.inputValue(),
 		finalUrl: page.url(),
 		passwordVisible: await page

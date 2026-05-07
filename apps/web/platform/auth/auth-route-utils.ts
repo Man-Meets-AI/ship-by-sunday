@@ -82,8 +82,16 @@ export function buildClearPendingCheckoutSessionHref(
 }
 
 export function isCheckoutWelcomeRedirectPath(rawPath?: string | null) {
-	const safeRedirectPath = getSafeRedirectPath(rawPath);
-	const redirectUrl = new URL(safeRedirectPath, "https://ship-by-sunday.local");
+	if (!rawPath || !rawPath.startsWith("/") || rawPath.startsWith("//")) {
+		return false;
+	}
+
+	let redirectUrl: URL;
+	try {
+		redirectUrl = new URL(rawPath, "https://ship-by-sunday.local");
+	} catch {
+		return false;
+	}
 
 	return (
 		redirectUrl.pathname === routeConfig.workspaceChoice &&
