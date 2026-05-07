@@ -1,4 +1,5 @@
 import type { GenericId } from "convex/values";
+import { ConvexError } from "convex/values";
 
 import {
 	classifyAdminImpersonationAuthority,
@@ -23,6 +24,7 @@ const IMPERSONATION_REASON_MAX_LENGTH = 500;
 
 type ImpersonationSessionId = GenericId<"impersonationSessions">;
 type ImpersonationSession = Doc<"impersonationSessions">;
+type ImpersonationAuditEvent = Doc<"impersonationAuditEvents">;
 type IdentityWithActorClaim = {
 	subject: string;
 	email?: string;
@@ -104,6 +106,27 @@ export type SupportModeWritePolicy =
 			kind: "not_impersonating";
 	  };
 
+export type ImpersonationSessionHistoryItem = {
+	sessionId: ImpersonationSessionId;
+	customerEmail: string | null;
+	reason: string;
+	status: ImpersonationSession["status"];
+	startedAt: number;
+	updatedAt: number;
+	stoppedAt: number | null;
+	failedAt: number | null;
+	invalidatedAt: number | null;
+	expiresAt: number;
+	blockedEventCount: number;
+	eventCount: number;
+	integrityWarnings: ImpersonationSetupIntegrityIssue[];
+};
+
+export type RecordSupportModeAuditResult =
+	| { kind: "recorded"; sessionId: ImpersonationSessionId }
+	| { kind: "not_impersonating" }
+	| { kind: "not_recorded"; reason: ImpersonationBlockReason };
+
 function normalizeOptionalString(value: string | null | undefined) {
 	const normalized = value?.trim();
 	return normalized && normalized.length > 0 ? normalized : undefined;
@@ -126,6 +149,10 @@ function isUsableSessionStatus(session: ImpersonationSession) {
 	return session.status === "starting" || session.status === "active";
 }
 
+function isAdminEmail(configAdminEmails: string[], email: string) {
+	return configAdminEmails.includes(normalizeEmail(email));
+}
+
 function isSessionExpired(session: ImpersonationSession, now: number) {
 	return isUsableSessionStatus(session) && session.expiresAt <= now;
 }
@@ -141,7 +168,7 @@ function redactStatusForSession(
 	return createSupportModeStatus({
 		state,
 		startEligible: false,
-		stopEligible: state === "active",
+		stopEligible: state !== "stopped",
 		customerEmail: session.subjectEmail ?? null,
 		reason: session.reason,
 		timeRemainingMs,
@@ -214,6 +241,74 @@ export function parseClerkActorClaim(
 				? (actorClaim.impersonationSessionId as ImpersonationSessionId)
 				: null,
 	};
+}
+
+async function requireCurrentImpersonationAdmin(ctx: QueryCtx | MutationCtx) {
+	const identity = await ctx.auth.getUserIdentity();
+	const config = readAdminImpersonationConfig();
+	const authority = classifyAdminImpersonationAuthority({
+		config,
+		identity,
+	});
+
+	if (authority.state === "admin") {
+		return authority;
+	}
+
+	if (identity) {
+		const actorClaim = parseClerkActorClaim(identity);
+		if (actorClaim.kind === "valid" && actorClaim.impersonationSessionId) {
+			const session = await ctx.db.get(actorClaim.impersonationSessionId);
+			if (
+				session &&
+				session.actorClerkUserId === actorClaim.actorClerkUserId &&
+				config.state === "enabled" &&
+				isAdminEmail(config.adminEmails, session.actorEmail)
+			) {
+				return {
+					state: "admin" as const,
+					canStartImpersonation: true as const,
+					issue: null,
+					clerkUserId: session.actorClerkUserId,
+					email: session.actorEmail,
+				};
+			}
+		}
+	}
+
+	if (!identity) {
+		throw new ConvexError("Unauthorized");
+	}
+
+	throw new ConvexError("Admin impersonation access denied");
+}
+
+async function getSetupIntegrityIssuesForSubject(
+	ctx: QueryCtx | MutationCtx,
+	subjectClerkUserId: string,
+): Promise<ImpersonationSetupIntegrityIssue[]> {
+	const issues = new Set<ImpersonationSetupIntegrityIssue>();
+	const accessGrant = await ctx.db
+		.query("productAccessGrants")
+		.withIndex("by_clerk_user_id", (query) =>
+			query.eq("clerkUserId", subjectClerkUserId),
+		)
+		.unique();
+	if (!accessGrant || accessGrant.status !== "granted") {
+		issues.add("missing_product_access_grant");
+	}
+
+	const workspaceProjects = await ctx.db
+		.query("workspaceProjects")
+		.withIndex("by_clerk_user_id_and_updated_at", (query) =>
+			query.eq("clerkUserId", subjectClerkUserId),
+		)
+		.take(1);
+	if (workspaceProjects.length === 0) {
+		issues.add("missing_workspace_project");
+	}
+
+	return Array.from(issues);
 }
 
 export async function appendImpersonationAuditEventHandler(
@@ -291,6 +386,95 @@ export async function createImpersonationSessionHandler(
 	};
 }
 
+export async function beginAdminImpersonationSessionHandler(
+	ctx: MutationCtx,
+	args: {
+		subjectClerkUserId: string;
+		subjectEmail?: string | null;
+		reason: string;
+		requestId?: string | null;
+		userAgent?: string | null;
+		ipHash?: string | null;
+	},
+): Promise<CreateImpersonationSessionResult> {
+	const identity = await ctx.auth.getUserIdentity();
+	if (!identity) {
+		throw new ConvexError("Unauthorized");
+	}
+	const currentActorClaim = parseClerkActorClaim(identity);
+	if (currentActorClaim.kind === "valid") {
+		throw new ConvexError("Stop the current impersonation session first.");
+	}
+
+	const admin = await requireCurrentImpersonationAdmin(ctx);
+	const config = readAdminImpersonationConfig();
+	if (config.state !== "enabled") {
+		throw new ConvexError("Admin impersonation is not enabled.");
+	}
+
+	if (args.subjectClerkUserId === admin.clerkUserId) {
+		throw new ConvexError("Admins cannot impersonate themselves.");
+	}
+
+	if (
+		args.subjectEmail &&
+		isAdminEmail(config.adminEmails, args.subjectEmail)
+	) {
+		throw new ConvexError("Configured admins cannot be impersonated.");
+	}
+
+	const setupIntegrityIssues = await getSetupIntegrityIssuesForSubject(
+		ctx,
+		args.subjectClerkUserId,
+	);
+
+	return await createImpersonationSessionHandler(ctx, {
+		actorClerkUserId: admin.clerkUserId,
+		actorEmail: admin.email,
+		subjectClerkUserId: args.subjectClerkUserId,
+		subjectEmail: args.subjectEmail,
+		reason: args.reason,
+		requestId: args.requestId,
+		userAgent: args.userAgent,
+		ipHash: args.ipHash,
+		setupIntegrityIssues,
+	});
+}
+
+export async function markCurrentImpersonationSessionActiveHandler(
+	ctx: MutationCtx,
+) {
+	const identity = await ctx.auth.getUserIdentity();
+	if (!identity) {
+		throw new ConvexError("Unauthorized");
+	}
+
+	const actorClaim = parseClerkActorClaim(identity);
+	if (actorClaim.kind !== "valid" || !actorClaim.impersonationSessionId) {
+		throw new ConvexError("Support mode session not found.");
+	}
+
+	const session = await ctx.db.get(actorClaim.impersonationSessionId);
+	if (!session) {
+		throw new ConvexError("Support mode session not found.");
+	}
+
+	if (
+		session.actorClerkUserId !== actorClaim.actorClerkUserId ||
+		session.subjectClerkUserId !== identity.subject
+	) {
+		throw new ConvexError("Support mode session mismatch.");
+	}
+
+	if (session.status !== "starting" && session.status !== "active") {
+		throw new ConvexError("Support mode session is no longer active.");
+	}
+
+	return await markImpersonationSessionActiveHandler(ctx, {
+		sessionId: session._id,
+	});
+}
+
 export async function markImpersonationSessionActiveHandler(
 	ctx: MutationCtx,
 	args: { sessionId: ImpersonationSessionId },
@@ -334,6 +518,39 @@ export async function markImpersonationSessionStoppedHandler(
 	return await ctx.db.get(args.sessionId);
 }
 
+export async function stopCurrentImpersonationSessionHandler(ctx: MutationCtx) {
+	const identity = await ctx.auth.getUserIdentity();
+	if (!identity) {
+		throw new ConvexError("Unauthorized");
+	}
+
+	const actorClaim = parseClerkActorClaim(identity);
+	if (actorClaim.kind !== "valid" || !actorClaim.impersonationSessionId) {
+		throw new ConvexError("Support mode session not found.");
+	}
+
+	const session = await ctx.db.get(actorClaim.impersonationSessionId);
+	if (!session) {
+		throw new ConvexError("Support mode session not found.");
+	}
+
+	if (
+		session.actorClerkUserId !== actorClaim.actorClerkUserId ||
+		session.subjectClerkUserId !== identity.subject
+	) {
+		await invalidateSession(ctx, session, "session_mismatch", Date.now());
+		throw new ConvexError("Support mode session mismatch.");
+	}
+
+	if (session.status === "stopped") {
+		return session;
+	}
+
+	return await markImpersonationSessionStoppedHandler(ctx, {
+		sessionId: session._id,
+	});
+}
+
 export async function markImpersonationSessionStartFailedHandler(
 	ctx: MutationCtx,
 	args: {
@@ -368,6 +585,25 @@ export async function markImpersonationSessionStartFailedHandler(
 	});
 
 	return await ctx.db.get(args.sessionId);
+}
+
+export async function markAdminImpersonationSessionStartFailedHandler(
+	ctx: MutationCtx,
+	args: {
+		sessionId: ImpersonationSessionId;
+		failureReason: ImpersonationFailureReason;
+	},
+) {
+	const admin = await requireCurrentImpersonationAdmin(ctx);
+	const session = await ctx.db.get(args.sessionId);
+	if (!session) {
+		throw new ConvexError("Impersonation session not found.");
+	}
+	if (session.actorClerkUserId !== admin.clerkUserId) {
+		throw new ConvexError("Admin impersonation access denied");
+	}
+
+	return await markImpersonationSessionStartFailedHandler(ctx, args);
 }
 
 async function expireSessionIfNeeded(
@@ -636,6 +872,337 @@ export async function observeSupportModeStatusHandler(
 	});
 }
 
+function getSupportModeBlockReasonForStatus(
+	status: SupportModeStatus,
+): ImpersonationBlockReason {
+	if (status.state === "active") {
+		return "unclassified_write";
+	}
+	if (status.state === "expired") {
+		return "support_session_expired";
+	}
+	if (status.state === "invalid_mismatch") {
+		return "support_session_mismatch";
+	}
+	if (status.state === "kill_switch_disabled") {
+		return "external_side_effect_blocked";
+	}
+	return "unsupported_clerk_dashboard_impersonation";
+}
+
+async function getCurrentActorSessionForAudit(ctx: MutationCtx): Promise<
+	| {
+			kind: "active";
+			session: ImpersonationSession;
+	  }
+	| {
+			kind: "not_impersonating";
+	  }
+	| {
+			kind: "blocked";
+			session: ImpersonationSession | null;
+			blockReason: ImpersonationBlockReason;
+	  }
+> {
+	const identity = await ctx.auth.getUserIdentity();
+	if (!identity) {
+		return { kind: "not_impersonating" };
+	}
+
+	const actorClaim = parseClerkActorClaim(identity);
+	if (actorClaim.kind === "none") {
+		return { kind: "not_impersonating" };
+	}
+	if (actorClaim.kind === "malformed" || !actorClaim.impersonationSessionId) {
+		return {
+			kind: "blocked",
+			session: null,
+			blockReason: "unsupported_clerk_dashboard_impersonation",
+		};
+	}
+
+	const session = await ctx.db.get(actorClaim.impersonationSessionId);
+	if (!session) {
+		return {
+			kind: "blocked",
+			session: null,
+			blockReason: "unsupported_clerk_dashboard_impersonation",
+		};
+	}
+
+	const status = await observeSupportModeStatusHandler(ctx);
+	if (status.state !== "active") {
+		return {
+			kind: "blocked",
+			session,
+			blockReason: getSupportModeBlockReasonForStatus(status),
+		};
+	}
+
+	return { kind: "active", session };
+}
+
+export async function appendSupportModeWriteSuccessAuditHandler(
+	ctx: MutationCtx,
+	args: { actionId: string; changedRecordIds?: string[] | null },
+): Promise<RecordSupportModeAuditResult> {
+	const auditContext = await getCurrentActorSessionForAudit(ctx);
+	if (auditContext.kind === "not_impersonating") {
+		return { kind: "not_impersonating" };
+	}
+	if (auditContext.kind === "blocked") {
+		return {
+			kind: "not_recorded",
+			reason: auditContext.blockReason,
+		};
+	}
+
+	const session = auditContext.session;
+	if (!session) {
+		return {
+			kind: "not_recorded",
+			reason: "unsupported_clerk_dashboard_impersonation",
+		};
+	}
+	await appendImpersonationAuditEventHandler(ctx, {
+		sessionId: session._id,
+		eventType: "write_attempted",
+		actionId: args.actionId,
+		result: "success",
+		actorClerkUserId: session.actorClerkUserId,
+		actorEmail: session.actorEmail,
+		subjectClerkUserId: session.subjectClerkUserId,
+		subjectEmail: session.subjectEmail,
+		changedRecordIds: args.changedRecordIds,
+		setupIntegrityIssues: session.setupIntegrityIssues,
+	});
+
+	return { kind: "recorded", sessionId: session._id };
+}
+
+export async function assertSupportModeWriteAllowedHandler(
+	ctx: MutationCtx,
+	args: { actionId: string },
+): Promise<SupportModeWritePolicy> {
+	const auditContext = await getCurrentActorSessionForAudit(ctx);
+	if (auditContext.kind === "not_impersonating") {
+		return { kind: "not_impersonating" };
+	}
+	if (auditContext.kind === "active") {
+		return {
+			kind: "allowed",
+			sessionId: auditContext.session._id,
+			actorClerkUserId: auditContext.session.actorClerkUserId,
+			subjectClerkUserId: auditContext.session.subjectClerkUserId,
+		};
+	}
+
+	const session = auditContext.session;
+	if (session) {
+		await appendImpersonationAuditEventHandler(ctx, {
+			sessionId: session._id,
+			eventType: "write_attempted",
+			actionId: args.actionId,
+			result: "blocked",
+			actorClerkUserId: session.actorClerkUserId,
+			actorEmail: session.actorEmail,
+			subjectClerkUserId: session.subjectClerkUserId,
+			subjectEmail: session.subjectEmail,
+			blockReason: auditContext.blockReason,
+			setupIntegrityIssues: session.setupIntegrityIssues,
+		});
+	}
+
+	throw new ConvexError("Action unavailable during support mode.");
+}
+
+export async function recordBlockedSupportModeActionHandler(
+	ctx: MutationCtx,
+	args: {
+		actionId: string;
+		blockReason: ImpersonationBlockReason;
+		eventType: ImpersonationAuditEventType;
+		requestId?: string | null;
+		userAgent?: string | null;
+		ipHash?: string | null;
+	},
+): Promise<RecordSupportModeAuditResult> {
+	const auditContext = await getCurrentActorSessionForAudit(ctx);
+	if (auditContext.kind === "not_impersonating") {
+		return { kind: "not_impersonating" };
+	}
+	if (auditContext.kind === "blocked" && !auditContext.session) {
+		return {
+			kind: "not_recorded",
+			reason: auditContext.blockReason,
+		};
+	}
+
+	const session = auditContext.session;
+	if (!session) {
+		return {
+			kind: "not_recorded",
+			reason:
+				auditContext.kind === "blocked"
+					? auditContext.blockReason
+					: "unsupported_clerk_dashboard_impersonation",
+		};
+	}
+	const blockReason =
+		auditContext.kind === "blocked"
+			? auditContext.blockReason
+			: args.blockReason;
+	await appendImpersonationAuditEventHandler(ctx, {
+		sessionId: session._id,
+		eventType: args.eventType,
+		actionId: args.actionId,
+		result: "blocked",
+		actorClerkUserId: session.actorClerkUserId,
+		actorEmail: session.actorEmail,
+		subjectClerkUserId: session.subjectClerkUserId,
+		subjectEmail: session.subjectEmail,
+		blockReason,
+		requestId: args.requestId,
+		userAgent: args.userAgent,
+		ipHash: args.ipHash,
+		setupIntegrityIssues: session.setupIntegrityIssues,
+	});
+
+	return { kind: "recorded", sessionId: session._id };
+}
+
+export async function recordSupportModeDownloadAttemptHandler(
+	ctx: MutationCtx,
+	args: {
+		actionId: string;
+		result: "success" | "blocked";
+		blockReason?: ImpersonationBlockReason | null;
+		changedRecordIds?: string[] | null;
+		requestId?: string | null;
+		userAgent?: string | null;
+		ipHash?: string | null;
+	},
+): Promise<RecordSupportModeAuditResult> {
+	const auditContext = await getCurrentActorSessionForAudit(ctx);
+	if (auditContext.kind === "not_impersonating") {
+		return { kind: "not_impersonating" };
+	}
+	if (auditContext.kind === "blocked" && !auditContext.session) {
+		return {
+			kind: "not_recorded",
+			reason: auditContext.blockReason,
+		};
+	}
+
+	const session = auditContext.session;
+	if (!session) {
+		return {
+			kind: "not_recorded",
+			reason:
+				auditContext.kind === "blocked"
+					? auditContext.blockReason
+					: "unsupported_clerk_dashboard_impersonation",
+		};
+	}
+	if (auditContext.kind === "blocked" && args.result === "success") {
+		await appendImpersonationAuditEventHandler(ctx, {
+			sessionId: session._id,
+			eventType: "download_attempted",
+			actionId: args.actionId,
+			result: "blocked",
+			actorClerkUserId: session.actorClerkUserId,
+			actorEmail: session.actorEmail,
+			subjectClerkUserId: session.subjectClerkUserId,
+			subjectEmail: session.subjectEmail,
+			changedRecordIds: args.changedRecordIds,
+			blockReason: auditContext.blockReason,
+			requestId: args.requestId,
+			userAgent: args.userAgent,
+			ipHash: args.ipHash,
+			setupIntegrityIssues: session.setupIntegrityIssues,
+		});
+		return {
+			kind: "not_recorded",
+			reason: auditContext.blockReason,
+		};
+	}
+	const blockReason =
+		args.result === "blocked"
+			? (args.blockReason ??
+				(auditContext.kind === "blocked"
+					? auditContext.blockReason
+					: "unclassified_write"))
+			: undefined;
+	await appendImpersonationAuditEventHandler(ctx, {
+		sessionId: session._id,
+		eventType: "download_attempted",
+		actionId: args.actionId,
+		result: args.result,
+		actorClerkUserId: session.actorClerkUserId,
+		actorEmail: session.actorEmail,
+		subjectClerkUserId: session.subjectClerkUserId,
+		subjectEmail: session.subjectEmail,
+		changedRecordIds: args.changedRecordIds,
+		blockReason,
+		requestId: args.requestId,
+		userAgent: args.userAgent,
+		ipHash: args.ipHash,
+		setupIntegrityIssues: session.setupIntegrityIssues,
+	});
+
+	return { kind: "recorded", sessionId: session._id };
+}
+
+function toHistoryItem({
+	session,
+	events,
+}: {
+	session: ImpersonationSession;
+	events: ImpersonationAuditEvent[];
+}): ImpersonationSessionHistoryItem {
+	return {
+		sessionId: session._id,
+		customerEmail: session.subjectEmail ?? null,
+		reason: session.reason,
+		status: session.status,
+		startedAt: session.startedAt,
+		updatedAt: session.updatedAt,
+		stoppedAt: session.stoppedAt ?? null,
+		failedAt: session.failedAt ?? null,
+		invalidatedAt: session.invalidatedAt ?? null,
+		expiresAt: session.expiresAt,
+		blockedEventCount: events.filter((event) => event.result === "blocked")
+			.length,
+		eventCount: events.length,
+		integrityWarnings: session.setupIntegrityIssues,
+	};
+}
+
+export async function listAdminImpersonationSessionHistoryHandler(
+	ctx: QueryCtx,
+): Promise<ImpersonationSessionHistoryItem[]> {
+	const admin = await requireCurrentImpersonationAdmin(ctx);
+	const sessions = await ctx.db
+		.query("impersonationSessions")
+		.withIndex("by_actor_clerk_user_id_and_updated_at", (query) =>
+			query.eq("actorClerkUserId", admin.clerkUserId),
+		)
+		.order("desc")
+		.take(12);
+
+	return await Promise.all(
+		sessions.map(async (session) => {
+			const events = await ctx.db
+				.query("impersonationAuditEvents")
+				.withIndex("by_session_id_and_created_at", (query) =>
+					query.eq("sessionId", session._id),
+				)
+				.collect();
+			return toHistoryItem({ session, events });
+		}),
+	);
+}
+
 export async function evaluateSupportModeWritePolicyHandler(
 	ctx: MutationCtx,
 	args: { actionId: string },
@@ -665,17 +1232,7 @@ export async function evaluateSupportModeWritePolicyHandler(
 	}
 
 	const status = await observeSupportModeStatusHandler(ctx);
-	let blockReason: ImpersonationBlockReason =
-		"unsupported_clerk_dashboard_impersonation";
-	if (status.state === "active") {
-		blockReason = "unclassified_write";
-	}
-	if (status.state === "expired") {
-		blockReason = "support_session_expired";
-	}
-	if (status.state === "invalid_mismatch") {
-		blockReason = "support_session_mismatch";
-	}
+	const blockReason = getSupportModeBlockReasonForStatus(status);
 
 	await appendImpersonationAuditEventHandler(ctx, {
 		sessionId: session._id,

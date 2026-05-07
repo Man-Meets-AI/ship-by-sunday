@@ -128,6 +128,58 @@ describe("convex impersonation model", () => {
 		);
 	});
 
+	it("begins admin sessions with setup-integrity warnings", async () => {
+		const { beginAdminImpersonationSessionHandler } =
+			await import("@/convex/impersonation/model");
+		const insert = vi
+			.fn()
+			.mockResolvedValueOnce("session_1")
+			.mockResolvedValueOnce("audit_1");
+		const query = vi.fn((table: string) => {
+			if (table === "productAccessGrants") {
+				return {
+					withIndex: vi.fn(() => ({
+						unique: vi.fn().mockResolvedValue(null),
+					})),
+				};
+			}
+			return {
+				withIndex: vi.fn(() => ({
+					take: vi.fn().mockResolvedValue([]),
+				})),
+			};
+		});
+		const fakeCtx = {
+			auth: {
+				getUserIdentity: vi.fn().mockResolvedValue({
+					subject: "user_admin",
+					email: "me@parkerrex.com",
+					emailVerified: true,
+				}),
+			},
+			db: { insert, query },
+		} as unknown as Parameters<typeof beginAdminImpersonationSessionHandler>[0];
+
+		const result = await beginAdminImpersonationSessionHandler(fakeCtx, {
+			subjectClerkUserId: "user_customer",
+			subjectEmail: "customer@example.com",
+			reason: "Debugging customer setup",
+		});
+
+		expect(result.sessionId).toBe("session_1");
+		expect(insert).toHaveBeenNthCalledWith(
+			1,
+			"impersonationSessions",
+			expect.objectContaining({
+				actorClerkUserId: "user_admin",
+				setupIntegrityIssues: [
+					"missing_product_access_grant",
+					"missing_workspace_project",
+				],
+			}),
+		);
+	});
+
 	it("lazily expires active sessions when observed through the mutation path", async () => {
 		const { observeSupportModeStatusHandler } =
 			await import("@/convex/impersonation/model");
@@ -200,6 +252,91 @@ describe("convex impersonation model", () => {
 				actionId: "workspace.project.update",
 				result: "blocked",
 				blockReason: "unclassified_write",
+			}),
+		);
+	});
+
+	it("fails allowed write preflight before an expired support-mode mutation runs", async () => {
+		const { assertSupportModeWriteAllowedHandler } =
+			await import("@/convex/impersonation/model");
+		const patch = vi.fn();
+		const insert = vi.fn().mockResolvedValue("audit_1");
+		const fakeCtx = {
+			auth: {
+				getUserIdentity: vi.fn().mockResolvedValue({
+					subject: "user_customer",
+					email: "customer@example.com",
+					emailVerified: true,
+					act: { sub: "user_admin", impersonationSessionId: "session_1" },
+				}),
+			},
+			db: {
+				get: vi.fn().mockResolvedValue(createSession({ expiresAt: 999 })),
+				patch,
+				insert,
+			},
+		} as unknown as Parameters<typeof assertSupportModeWriteAllowedHandler>[0];
+
+		await expect(
+			assertSupportModeWriteAllowedHandler(fakeCtx, {
+				actionId: "course.lesson.saveDraft",
+			}),
+		).rejects.toThrow("Action unavailable during support mode.");
+		expect(patch).toHaveBeenCalledWith("session_1", {
+			status: "expired",
+			updatedAt: 1_000,
+		});
+		expect(insert).toHaveBeenCalledWith(
+			"impersonationAuditEvents",
+			expect.objectContaining({
+				eventType: "write_attempted",
+				actionId: "course.lesson.saveDraft",
+				result: "blocked",
+				blockReason: "support_session_expired",
+			}),
+		);
+	});
+
+	it("does not record successful downloads for expired support-mode sessions", async () => {
+		const { recordSupportModeDownloadAttemptHandler } =
+			await import("@/convex/impersonation/model");
+		const patch = vi.fn();
+		const insert = vi.fn().mockResolvedValue("audit_1");
+		const fakeCtx = {
+			auth: {
+				getUserIdentity: vi.fn().mockResolvedValue({
+					subject: "user_customer",
+					email: "customer@example.com",
+					emailVerified: true,
+					act: { sub: "user_admin", impersonationSessionId: "session_1" },
+				}),
+			},
+			db: {
+				get: vi.fn().mockResolvedValue(createSession({ expiresAt: 999 })),
+				patch,
+				insert,
+			},
+		} as unknown as Parameters<
+			typeof recordSupportModeDownloadAttemptHandler
+		>[0];
+
+		await expect(
+			recordSupportModeDownloadAttemptHandler(fakeCtx, {
+				actionId: "download.reviewRepo",
+				result: "success",
+				changedRecordIds: ["product_1"],
+			}),
+		).resolves.toEqual({
+			kind: "not_recorded",
+			reason: "support_session_expired",
+		});
+		expect(insert).toHaveBeenCalledWith(
+			"impersonationAuditEvents",
+			expect.objectContaining({
+				eventType: "download_attempted",
+				actionId: "download.reviewRepo",
+				result: "blocked",
+				blockReason: "support_session_expired",
 			}),
 		);
 	});

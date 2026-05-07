@@ -36,6 +36,7 @@ const compatibilityWorkspaceRoutes = [
 const isProtectedRoute = createRouteMatcher([
 	...canonicalWorkspaceRoutes.map((route) => `${route}(.*)`),
 	...compatibilityWorkspaceRoutes.map((route) => `${route}(.*)`),
+	`${routeConfig.adminImpersonation}(.*)`,
 	"/lesson(.*)",
 ]);
 

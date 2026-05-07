@@ -14,6 +14,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,18 @@ export async function POST(request: Request) {
 
 	try {
 		const session = await requireProductAccessApiSession();
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.account.logout",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex account logout is unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 
 		await withCodexAppServerClient(
 			{

@@ -1,5 +1,9 @@
 import { mutation, query } from "./_generated/server";
 import {
+	appendSupportModeWriteSuccessAuditHandler,
+	assertSupportModeWriteAllowedHandler,
+} from "./impersonation/model";
+import {
 	listArtifactsArgs,
 	listArtifactsHandler,
 	listArtifactsReturns,
@@ -73,25 +77,49 @@ export const getLessonState = query({
 export const saveLessonDraft = mutation({
 	args: saveLessonDraftArgs,
 	returns: saveLessonDraftReturns,
-	handler: saveLessonDraftHandler,
+	handler: async (ctx, args) => {
+		const actionId = "course.lesson.saveDraft";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await saveLessonDraftHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const markLessonViewed = mutation({
 	args: markLessonViewedArgs,
 	returns: markLessonViewedReturns,
-	handler: markLessonViewedHandler,
+	handler: async (ctx, args) => {
+		const actionId = "course.lesson.markViewed";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await markLessonViewedHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const markBonusLessonViewed = mutation({
 	args: markBonusLessonViewedArgs,
 	returns: markBonusLessonViewedReturns,
-	handler: markBonusLessonViewedHandler,
+	handler: async (ctx, args) => {
+		const actionId = "course.bonusLesson.markViewed";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await markBonusLessonViewedHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const completeLesson = mutation({
 	args: completeLessonArgs,
 	returns: completeLessonReturns,
-	handler: completeLessonHandler,
+	handler: async (ctx, args) => {
+		const actionId = "course.lesson.complete";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await completeLessonHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const listArtifacts = query({

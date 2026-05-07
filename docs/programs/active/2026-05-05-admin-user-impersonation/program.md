@@ -30,15 +30,15 @@ The initiative is moving in the right direction when the support flow has no cus
 
 The durable packet artifacts for this Program live in `docs/programs/active/2026-05-05-admin-user-impersonation/`.
 
-The local codebase research is recorded in `research-pass-codebase-auth-boundaries.md`. The provider and UI-pattern research is recorded in `research-pass-clerk-convex-impersonation-primitives.md`. The normalized implementation direction is `normalized-pass-clerk-actor-token-support-mode.md`. The locked interview decisions are recorded in `decision-interview-log.md`. The initiative decision is in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The current immutable implementation brief is `planning-brief-1.md`, and `current-planning-brief.txt` points at that brief.
+The local codebase research is recorded in `research-pass-codebase-auth-boundaries.md`. The provider and UI-pattern research is recorded in `research-pass-clerk-convex-impersonation-primitives.md`. The normalized implementation direction is `normalized-pass-clerk-actor-token-support-mode.md`. The locked interview decisions are recorded in `decision-interview-log.md`. The initiative decision is in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The completed foundation brief is `planning-brief-1.md`; the current closeout/proof brief is `planning-brief-2.md`, and `current-planning-brief.txt` points at that brief.
 
 ## Current State
 
 The app currently uses Clerk for authentication and Convex for the backend. `ClerkProvider` wraps the app, `ConvexProviderWithClerk` passes Clerk auth to Convex, and Convex auth is configured through `apps/web/convex/auth.config.ts`.
 
-Runtime ownership is still customer-subject-first. Convex helpers derive the viewer from `ctx.auth.getUserIdentity()`, and app state tables use `clerkUserId` as the owner key. The foundation slice added explicit admin impersonation runtime gates, a verified-email allowlist for `me@parkerrex.com`, `impersonationSessions`, `impersonationAuditEvents`, actor-claim parsing, UI-safe support-mode status, and fail-closed write policy helpers. There is still no `/admin/impersonation` start/stop UI and no persistent support-mode bar.
+Runtime ownership is customer-subject-first. Convex helpers derive the viewer from `ctx.auth.getUserIdentity()`, and app state tables use `clerkUserId` as the owner key. The foundation slice added explicit admin impersonation runtime gates, a verified-email allowlist for `me@parkerrex.com`, `impersonationSessions`, `impersonationAuditEvents`, actor-claim parsing, UI-safe support-mode status, and fail-closed write policy helpers. The closeout implementation added `/admin/impersonation`, server-side Clerk customer search, actor-token ticket handoff, persistent support-mode bar, stop flow, read-only history, allowed-write preflight and audit, blocked side-effect audit, gated download audit, and route protection.
 
-The workspace shell already has the right UI insertion points: `apps/web/app/(workspace)/_components/app-shell.tsx` for a persistent top bar and account/header components for an admin-only entry point. The backend has several mutation families that need actor-aware audit decisions before support mode can ship.
+The remaining Program blocker is external proof, not local implementation. This checkout lacks `ADMIN_IMPERSONATION_ENABLED`, `ADMIN_IMPERSONATION_EMAILS`, and dedicated Clerk test-user env values, so the required real Clerk actor-token proof and production smoke cannot be honestly claimed yet.
 
 Clerk supports the needed provider primitive through actor tokens. Convex does not ship an impersonation template, but Convex can receive custom Clerk JWT claims when the Clerk Convex JWT template includes the actor claim. `docs/internal/admin-impersonation.md` now owns the setup contract for `ADMIN_IMPERSONATION_ENABLED`, `ADMIN_IMPERSONATION_EMAILS`, the Clerk `convex` JWT template `act` claim, app-managed `impersonationSessionId`, unsupported raw Clerk Dashboard impersonation, and verification/failure modes.
 
@@ -52,6 +52,8 @@ Clerk supports the needed provider primitive through actor tokens. Convex does n
 - [x] 2026-05-05: Locked the third interview decision set covering rollout availability, runtime env reads, support bar rendering, admin-page behavior during impersonation, multi-tab behavior, status read model, request metadata, retention, customer notification policy, start/stop UX, admin access responses, customer search behavior, integrity-check timing, and schema enums.
 - [x] 2026-05-05: Locked the fourth interview decision set covering release proof, real Clerk provider proof, dedicated test customers, production smoke, kill-switch invalidation, and splitting the original first implementation slice into smaller foundation and UI proof ExecPlans.
 - [x] 2026-05-07: Completed Slice 1 in `docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md`: env gating, admin allowlist classification, Convex session/audit schema, actor/session parsing, UI-safe support-mode status, mutation-path expiry and kill-switch invalidation, fail-closed unclassified write policy, provider docs, generated Convex API bindings, focused tests, and repo gates landed.
+- [x] 2026-05-07: Implemented the closeout code path in `docs/exec-plans/active/2026-05-07-admin-impersonation-ui-policy-release-closeout.md`: admin page, Clerk-backed customer search, actor-token ticket handoff, persistent support bar, stop flow, history, allowed-write preflight and audit, blocked route side effects, gated download audit, protected admin route, focused tests, Convex codegen, lint, and typecheck.
+- [ ] 2026-05-07: Real-provider proof remains blocked by missing environment-owned impersonation enablement and dedicated Clerk test-customer inputs in this checkout.
 
 ## Decision Log
 
@@ -93,21 +95,23 @@ Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-05-05-admin-impersonation-foundation-schema-provider-contract.md`: completed Slice 1 foundation/schema/provider contract.
 
-No active child ExecPlan currently exists.
+Active child ExecPlans:
+
+- `docs/exec-plans/active/2026-05-07-admin-impersonation-ui-policy-release-closeout.md`: closeout implementation is locally complete; real-provider and production-smoke proof remain open.
 
 Completed Slice 1: Foundation/schema/provider contract. This slice added the environment gate, admin helper, Convex session/audit schema, actor-claim parsing, support-mode status model, kill-switch behavior, provider setup docs, generated Convex API bindings, and focused tests before UI handoff depends on them.
 
-Recommended Slice 2: Start/stop minimal UI proof. This slice should add `/admin/impersonation`, eligible customer picker, reason capture, final confirmation, Clerk actor-token handoff, persistent support-mode bar, stop flow, read-only history skeleton, and browser proof.
+Completed local implementation for Slice 2: Start/stop minimal UI proof. This added `/admin/impersonation`, eligible customer picker, reason capture, final confirmation, Clerk actor-token ticket handoff, persistent support-mode bar, stop flow, read-only history, and focused mocked UI proof.
 
-Recommended Slice 3: Mutation audit and side-effect policy. This slice should classify customer-impacting mutations, record actor/subject/reason/session metadata, and block or confirm risky external side effects.
+Completed local implementation for Slice 3: Mutation audit and side-effect policy. This classified ordinary in-app product/customer setup writes as allowed after session preflight and audited after success, blocked billing/Codex/managed-GitHub/workflow/destructive side effects at the reachable app boundary, and added gated review-download audit.
 
-Recommended Slice 4: Release proof, docs, and operator workflow. This slice should document required Clerk configuration, prove the support journey, and wire the relevant release validation.
+Remaining Slice 4 proof: Release proof and operator workflow are documented, but the required real Clerk actor-token proof and production smoke are blocked until environment-owned support-mode config and dedicated test customers exist.
 
 ## Next Slice
 
-No active child ExecPlan currently exists. The next recommended slice is Slice 2: Start/stop minimal UI proof. It should create a new versioned planning brief and child ExecPlan for `/admin/impersonation`, eligible customer picker, reason capture, final confirmation, Clerk actor-token handoff, persistent support-mode bar, stop flow, read-only history skeleton, and browser proof.
+The next step is not a new code slice. Configure non-production support-mode env and dedicated test customers, then run the real-provider proof in `docs/internal/admin-impersonation.md`. After that, run the production smoke with a dedicated internal production test customer. Only then move this Program to `docs/programs/completed/`.
 
-Boundary rules for the next slice: use the completed foundation instead of replacing it, do not replace Clerk session handling, do not add broad role management, do not fake Clerk user data in React, do not let public functions accept arbitrary target user ids, do not support raw Clerk Dashboard impersonation, and do not silently permit impersonated external side effects without audit metadata.
+Boundary rules for proof: do not use a real customer, do not use raw Clerk Dashboard impersonation, do not enable production support mode without the dedicated production test customer, and do not mark the Program complete without the required real-provider evidence.
 
 ## Risks and Watchpoints
 

@@ -29,6 +29,7 @@ export const routeConfig = {
 	mission: "/mission",
 	artifacts: "/artifacts",
 	settings: "/settings",
+	adminImpersonation: "/admin/impersonation",
 	signIn: "/sign-in",
 	signUp: "/sign-up",
 	checkoutSuccess: "/checkout/success",

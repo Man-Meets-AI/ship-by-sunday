@@ -2,20 +2,29 @@ import { v } from "convex/values";
 
 import { internalMutation, mutation, query } from "./_generated/server";
 import {
+	appendSupportModeWriteSuccessAuditHandler,
 	appendImpersonationAuditEventHandler,
+	beginAdminImpersonationSessionHandler,
 	createImpersonationSessionHandler,
 	evaluateSupportModeWritePolicyHandler,
 	getSupportModeStatusHandler,
+	listAdminImpersonationSessionHistoryHandler,
+	markAdminImpersonationSessionStartFailedHandler,
+	markCurrentImpersonationSessionActiveHandler,
 	markImpersonationSessionActiveHandler,
 	markImpersonationSessionStartFailedHandler,
 	markImpersonationSessionStoppedHandler,
 	observeSupportModeStatusHandler,
+	recordBlockedSupportModeActionHandler,
+	recordSupportModeDownloadAttemptHandler,
+	stopCurrentImpersonationSessionHandler,
 } from "./impersonation/model";
 import {
 	impersonationAuditEventTypeValidator,
 	impersonationAuditResultValidator,
 	impersonationBlockReasonValidator,
 	impersonationFailureReasonValidator,
+	impersonationSessionHistoryItemValidator,
 	impersonationSetupIntegrityIssueValidator,
 	supportModeStatusValidator,
 } from "./impersonation/validators";
@@ -44,6 +53,44 @@ export const observeSupportModeStatus = mutation({
 	args: {},
 	returns: supportModeStatusValidator,
 	handler: observeSupportModeStatusHandler,
+});
+
+export const beginAdminSession = mutation({
+	args: {
+		subjectClerkUserId: v.string(),
+		subjectEmail: nullableStringArg,
+		reason: v.string(),
+		...requestMetadataArgs,
+	},
+	returns: createImpersonationSessionResultValidator,
+	handler: beginAdminImpersonationSessionHandler,
+});
+
+export const markCurrentSessionActive = mutation({
+	args: {},
+	returns: v.union(v.null(), v.any()),
+	handler: markCurrentImpersonationSessionActiveHandler,
+});
+
+export const stopCurrentSession = mutation({
+	args: {},
+	returns: v.union(v.null(), v.any()),
+	handler: stopCurrentImpersonationSessionHandler,
+});
+
+export const markAdminSessionStartFailed = mutation({
+	args: {
+		sessionId: v.id("impersonationSessions"),
+		failureReason: impersonationFailureReasonValidator,
+	},
+	returns: v.union(v.null(), v.any()),
+	handler: markAdminImpersonationSessionStartFailedHandler,
+});
+
+export const listAdminSessionHistory = query({
+	args: {},
+	returns: v.array(impersonationSessionHistoryItemValidator),
+	handler: listAdminImpersonationSessionHistoryHandler,
 });
 
 export const createStartingSession = internalMutation({
@@ -134,4 +181,50 @@ export const evaluateSupportModeWritePolicy = internalMutation({
 	args: { actionId: v.string() },
 	returns: supportModeWritePolicyValidator,
 	handler: evaluateSupportModeWritePolicyHandler,
+});
+
+const supportModeAuditResultValidator = v.union(
+	v.object({
+		kind: v.literal("recorded"),
+		sessionId: v.id("impersonationSessions"),
+	}),
+	v.object({ kind: v.literal("not_impersonating") }),
+	v.object({
+		kind: v.literal("not_recorded"),
+		reason: impersonationBlockReasonValidator,
+	}),
+);
+
+export const appendSupportModeWriteSuccessAudit = mutation({
+	args: {
+		actionId: v.string(),
+		changedRecordIds: v.optional(v.union(v.array(v.string()), v.null())),
+	},
+	returns: supportModeAuditResultValidator,
+	handler: appendSupportModeWriteSuccessAuditHandler,
+});
+
+export const recordBlockedSupportModeAction = mutation({
+	args: {
+		actionId: v.string(),
+		blockReason: impersonationBlockReasonValidator,
+		eventType: impersonationAuditEventTypeValidator,
+		...requestMetadataArgs,
+	},
+	returns: supportModeAuditResultValidator,
+	handler: recordBlockedSupportModeActionHandler,
+});
+
+export const recordSupportModeDownloadAttempt = mutation({
+	args: {
+		actionId: v.string(),
+		result: v.union(v.literal("success"), v.literal("blocked")),
+		blockReason: v.optional(
+			v.union(impersonationBlockReasonValidator, v.null()),
+		),
+		changedRecordIds: v.optional(v.union(v.array(v.string()), v.null())),
+		...requestMetadataArgs,
+	},
+	returns: supportModeAuditResultValidator,
+	handler: recordSupportModeDownloadAttemptHandler,
 });

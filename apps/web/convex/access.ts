@@ -5,6 +5,10 @@ import {
 	query,
 } from "./_generated/server";
 import {
+	appendSupportModeWriteSuccessAuditHandler,
+	assertSupportModeWriteAllowedHandler,
+} from "./impersonation/model";
+import {
 	getProductAccessDebugArgs,
 	getProductAccessDebugHandler,
 	getProductAccessDebugReturns,
@@ -46,7 +50,13 @@ export const grantProductAccessFromStripe = internalMutation({
 export const resolveViewerFulfillmentTrack = mutation({
 	args: resolveViewerFulfillmentTrackArgs,
 	returns: resolveViewerFulfillmentTrackReturns,
-	handler: resolveViewerFulfillmentTrackHandler,
+	handler: async (ctx, args) => {
+		const actionId = "access.fulfillmentTrack.resolve";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await resolveViewerFulfillmentTrackHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const resetProductAccess = internalMutation({

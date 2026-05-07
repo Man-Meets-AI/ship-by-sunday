@@ -2,7 +2,7 @@
 
 Admin impersonation is an app-managed support mode built on Clerk actor tokens and Convex audit state. Clerk owns the browser session. Convex continues to authorize product data as the customer subject while the app records Parker as the actor for support-mode policy and audit.
 
-This foundation does not ship the `/admin/impersonation` UI. It defines the provider setup, runtime gates, Convex session and audit contract, and failure modes that the UI slice must use.
+The supported entry point is `/admin/impersonation`. It searches Clerk users server-side, requires a support reason, creates a Convex `impersonationSessions` record, mints a Clerk actor token, signs the browser into the customer session with Clerk's ticket strategy, and shows a persistent support-mode bar until Parker stops the session.
 
 ## Runtime Env
 
@@ -42,9 +42,21 @@ The later start UI must create an `impersonationSessions` row before creating th
 
 ## Supported Path
 
-Only the future app-managed `/admin/impersonation` flow is supported for customer support.
+Only the app-managed `/admin/impersonation` flow is supported for customer support.
 
 Raw Clerk Dashboard impersonation is not supported. It can create an impersonated Clerk session, but it bypasses Ship by Sunday's reason capture, Convex session bridge, setup-integrity checks, and audit trail. When Convex sees an actor claim without a valid `impersonationSessionId`, support-mode status reports `unsupported_clerk_dashboard_impersonation`, and support-mode write policy fails closed.
+
+## Operator Flow
+
+1. Sign in as an allowlisted admin, initially `me@parkerrex.com`.
+2. Open `/admin/impersonation` from the account menu or directly.
+3. Search by customer email and select a non-admin Clerk user.
+4. Enter a 10-500 character reason. Do not paste secrets, tokens, private repo contents, sensitive stack traces, or unnecessary personal data.
+5. Confirm `Start impersonating customer`.
+6. After Clerk handoff, use the customer workspace with the high-contrast support-mode bar visible.
+7. Use `Stop impersonating` to close the Convex session record and sign out the active actor-token Clerk session.
+
+Starting a second customer session is blocked until the current session is stopped. The admin page remains reachable during support mode, but it is locked to current-session controls.
 
 ## Convex Contract
 
@@ -54,12 +66,23 @@ Raw Clerk Dashboard impersonation is not supported. It can create an impersonate
 
 The status model is UI-safe. It can return state, customer email, reason, time remaining, start/stop eligibility, and setup-integrity warnings. It must not return raw cookies, raw JWTs, actor-token URLs, Clerk secret keys, raw token claims, or internal session pointer details.
 
-## Verify Foundation
+`/admin/impersonation` history is read-only. It shows recent app-managed sessions for the admin actor with customer email, reason, status, timing, event count, blocked event count, and setup-integrity warnings. There is no resume or reopen action.
 
-Run the focused foundation tests:
+## Write And Side-Effect Policy
+
+Allowed support-mode writes are ordinary in-app product state and customer setup changes that stay inside Convex, including course progress, codebase definition facts, fulfillment-track resolution, workspace setup/pairing metadata, and repository metadata binding. These preflight the current support-mode session before mutating customer state, then append `write_attempted` audit events with result `success` when the request runs under a valid app-managed support-mode session.
+
+High-impact external side effects are blocked while impersonating. Stripe checkout session creation, express checkout, Codex account login/logout, Codex generation, managed GitHub consent changes, workspace workflow/run starts, sync approval, finding/project deletes, and runner revocation are unavailable during support mode. Route-level blockers write a support-mode audit event before returning an HTTP error so the evidence is not lost with a rolled-back mutation.
+
+Review repo downloads are allowed when the customer can otherwise download the artifact and any active support-mode session is still valid. The route checks support-mode status before building the zip and rechecks audit state before returning it. Successful downloads append a `download_attempted` audit event.
+
+## Verify Implementation
+
+Run the focused implementation tests:
 
 ```bash
 bun run --cwd apps/web test:unit -- tests/unit/admin-impersonation-config.test.ts tests/unit/admin-impersonation-admin.test.ts tests/unit/admin-impersonation-status.test.ts tests/unit/convex-impersonation.test.ts
+bun run --cwd apps/web test:integration:ui -- tests/integration-ui/support-mode-bar.test.tsx tests/integration-ui/admin-impersonation-page.test.tsx
 ```
 
 After schema changes, regenerate Convex types against hosted Convex dev:
@@ -89,3 +112,25 @@ git diff --check
 - Actor claim/session mismatch: support-mode status reports invalid mismatch and write policy blocks.
 - Expired session: the mutation path lazily marks the session expired and write policy blocks.
 - Kill switch disabled during an active session: the mutation path lazily invalidates the session with `feature_disabled` and write policy blocks.
+- Clerk actor-token creation failure: the Convex session is marked `start_failed`.
+- Browser ticket handoff failure: the start UI marks the Convex session `start_failed` where it still has the session id.
+- Stop failure: the UI still signs out the active actor-token Clerk session and lands on `/admin/impersonation`.
+
+## Release Proof
+
+Before production enablement, prove one complete non-production flow with a dedicated eligible Clerk test customer:
+
+- feature flag and allowlist configured in the app runtime and hosted Convex dev environment
+- customer has a Clerk user, product access, and workspace state
+- admin opens `/admin/impersonation`, selects the customer, enters a reason, and starts
+- Clerk ticket handoff lands on the customer workspace
+- support bar shows customer email, reason preview, time remaining, and stop action
+- one allowed in-app write succeeds and writes audit
+- one blocked side effect returns unavailable and writes audit
+- one review download succeeds and writes audit
+- stop returns to `/admin/impersonation`
+- history shows the session and blocked event count
+
+Production enablement also requires a non-destructive post-deploy smoke using a dedicated internal production test customer. Do not use a real customer for either proof.
+
+Current checkout limitation, 2026-05-07: `.env.local` does not define `ADMIN_IMPERSONATION_ENABLED`, `ADMIN_IMPERSONATION_EMAILS`, or dedicated Clerk test-user credentials. The implementation and mocked tests can be validated here, but the required real Clerk actor-token proof remains blocked until those environment-owned inputs and dedicated test customers exist.

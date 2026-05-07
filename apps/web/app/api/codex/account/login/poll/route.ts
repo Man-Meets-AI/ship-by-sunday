@@ -15,6 +15,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,18 @@ export async function GET(request: Request) {
 
 	try {
 		const session = await requireProductAccessApiSession();
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.account.login.poll",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex login polling is unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 		const url = new URL(request.url);
 		const loginId = url.searchParams.get("loginId");
 		const refresh = url.searchParams.get("refresh");

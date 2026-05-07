@@ -131,3 +131,19 @@ export const supportModeStatusValidator = v.object({
 	timeRemainingMs: v.union(v.number(), v.null()),
 	integrityWarnings: v.array(impersonationSetupIntegrityIssueValidator),
 });
+
+export const impersonationSessionHistoryItemValidator = v.object({
+	sessionId: v.id("impersonationSessions"),
+	customerEmail: v.union(v.string(), v.null()),
+	reason: v.string(),
+	status: impersonationSessionStatusValidator,
+	startedAt: v.number(),
+	updatedAt: v.number(),
+	stoppedAt: v.union(v.number(), v.null()),
+	failedAt: v.union(v.number(), v.null()),
+	invalidatedAt: v.union(v.number(), v.null()),
+	expiresAt: v.number(),
+	blockedEventCount: v.number(),
+	eventCount: v.number(),
+	integrityWarnings: v.array(impersonationSetupIntegrityIssueValidator),
+});

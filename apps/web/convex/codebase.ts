@@ -1,5 +1,9 @@
 import { internalMutation, mutation, query } from "./_generated/server";
 import {
+	appendSupportModeWriteSuccessAuditHandler,
+	assertSupportModeWriteAllowedHandler,
+} from "./impersonation/model";
+import {
 	getProjectDefinitionArgs,
 	getProjectDefinitionHandler,
 	getProjectDefinitionReturns,
@@ -36,7 +40,13 @@ export const getProjectDefinition = query({
 export const saveProjectDefinitionFacts = mutation({
 	args: saveProjectDefinitionFactsArgs,
 	returns: saveProjectDefinitionFactsReturns,
-	handler: saveProjectDefinitionFactsHandler,
+	handler: async (ctx, args) => {
+		const actionId = "codebase.projectDefinition.saveFacts";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await saveProjectDefinitionFactsHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const seedCompleteProjectDefinitionForQa = internalMutation({
@@ -54,7 +64,13 @@ export const resetProjectDefinitionForQa = internalMutation({
 export const unlockExecuteShip = mutation({
 	args: unlockExecuteShipArgs,
 	returns: unlockExecuteShipReturns,
-	handler: unlockExecuteShipHandler,
+	handler: async (ctx) => {
+		const actionId = "codebase.workflow.unlockExecuteShip";
+		await assertSupportModeWriteAllowedHandler(ctx, { actionId });
+		const result = await unlockExecuteShipHandler(ctx);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const getCodebaseWorkspaceState = query({

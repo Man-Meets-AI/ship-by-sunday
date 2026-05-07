@@ -16,6 +16,7 @@ import {
 	getStripe,
 } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
@@ -31,6 +32,19 @@ export async function POST(request: Request) {
 	});
 
 	try {
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "stripe.checkout.createSession",
+				blockReason: "billing_action_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Checkout is unavailable during support mode.", requestId },
+				{ status: 403 },
+				requestId,
+			);
+		}
+
 		const stripe = getStripe();
 		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;

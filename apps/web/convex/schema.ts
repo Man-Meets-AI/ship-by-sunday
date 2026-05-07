@@ -277,6 +277,10 @@ export default defineSchema({
 			"status",
 			"updatedAt",
 		])
+		.index("by_actor_clerk_user_id_and_updated_at", [
+			"actorClerkUserId",
+			"updatedAt",
+		])
 		.index("by_subject_clerk_user_id_and_status_and_updated_at", [
 			"subjectClerkUserId",
 			"status",

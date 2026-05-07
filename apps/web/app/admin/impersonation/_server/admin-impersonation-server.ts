@@ -1,0 +1,312 @@
+import "server-only";
+
+import type { User } from "@clerk/backend";
+import { auth, clerkClient } from "@clerk/nextjs/server";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { headers } from "next/headers";
+
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import {
+	classifyAdminImpersonationAuthority,
+	readAdminImpersonationConfig,
+	type AdminImpersonationAuthority,
+} from "@/platform/admin-impersonation";
+import { getConvexServerSession } from "@/platform/auth/convex-auth";
+
+export type AdminImpersonationCustomer = {
+	clerkUserId: string;
+	email: string;
+	name: string | null;
+	imageUrl: string | null;
+	createdAt: number;
+};
+
+export type AdminImpersonationSearchResult = {
+	customers: AdminImpersonationCustomer[];
+	totalCount: number;
+	query: string;
+};
+
+export type AdminImpersonationPageData = {
+	adminEmail: string;
+	initialCustomers: AdminImpersonationCustomer[];
+	customerTotalCount: number;
+	history: Awaited<ReturnType<typeof listAdminImpersonationHistory>>;
+	status: Awaited<ReturnType<typeof getSupportModeStatusForAdminPage>>;
+};
+
+export const ADMIN_IMPERSONATION_PATH = "/admin/impersonation" as const;
+export const ADMIN_IMPERSONATION_WORKSPACE_DESTINATION =
+	"/workspace/choose" as const;
+
+type ClerkBackendClient = Awaited<ReturnType<typeof clerkClient>>;
+
+function normalizeEmail(value: string) {
+	return value.trim().toLowerCase();
+}
+
+function getPrimaryEmail(user: User) {
+	const primaryEmail =
+		user.emailAddresses.find(
+			(emailAddress) => emailAddress.id === user.primaryEmailAddressId,
+		) ??
+		user.emailAddresses.find(
+			(emailAddress) => emailAddress.verification?.status === "verified",
+		) ??
+		user.emailAddresses[0] ??
+		null;
+
+	if (!primaryEmail) {
+		return null;
+	}
+
+	return {
+		email: normalizeEmail(primaryEmail.emailAddress),
+		verified: primaryEmail.verification?.status === "verified",
+	};
+}
+
+function formatClerkName(user: User) {
+	const fullName = [user.firstName, user.lastName]
+		.map((part) => part?.trim())
+		.filter(Boolean)
+		.join(" ");
+	return fullName.length > 0 ? fullName : null;
+}
+
+function toCustomerSummary(user: User): AdminImpersonationCustomer | null {
+	const primaryEmail = getPrimaryEmail(user);
+	if (!primaryEmail?.email) {
+		return null;
+	}
+
+	return {
+		clerkUserId: user.id,
+		email: primaryEmail.email,
+		name: formatClerkName(user),
+		imageUrl: user.imageUrl || null,
+		createdAt: user.createdAt,
+	};
+}
+
+function excludeAdminCustomers(
+	customers: AdminImpersonationCustomer[],
+	adminEmails: string[],
+) {
+	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
+	return customers.filter((customer) => !adminEmailSet.has(customer.email));
+}
+
+export function getAdminImpersonationActionError(
+	authority: AdminImpersonationAuthority,
+) {
+	if (authority.state === "disabled") {
+		return {
+			status: 404,
+			message: "Admin impersonation is disabled.",
+		} as const;
+	}
+	if (authority.state === "misconfigured") {
+		return {
+			status: 503,
+			message: "Admin impersonation is misconfigured.",
+		} as const;
+	}
+	if (authority.state === "not_admin") {
+		return {
+			status: 403,
+			message: "Admin impersonation access denied.",
+		} as const;
+	}
+
+	return null;
+}
+
+export async function getCurrentAdminImpersonationAuthority() {
+	const authState = await auth();
+	if (!authState.userId) {
+		return {
+			kind: "unauthenticated" as const,
+			authority: null,
+		};
+	}
+
+	const client = await clerkClient();
+	const user = await client.users.getUser(authState.userId);
+	const primaryEmail = getPrimaryEmail(user);
+	const authority = classifyAdminImpersonationAuthority({
+		config: readAdminImpersonationConfig(),
+		identity: {
+			subject: user.id,
+			email: primaryEmail?.email,
+			emailVerified: primaryEmail?.verified,
+		},
+	});
+
+	return {
+		kind: "authenticated" as const,
+		authority,
+		client,
+		user,
+	};
+}
+
+export async function requireAdminImpersonationActionContext() {
+	const authContext = await getCurrentAdminImpersonationAuthority();
+	if (authContext.kind === "unauthenticated") {
+		return {
+			ok: false as const,
+			status: 401,
+			message: "Sign in before using admin impersonation.",
+		};
+	}
+
+	const error = getAdminImpersonationActionError(authContext.authority);
+	if (error || authContext.authority.state !== "admin") {
+		return {
+			ok: false as const,
+			...(error ?? {
+				status: 403,
+				message: "Admin impersonation access denied.",
+			}),
+		};
+	}
+
+	return {
+		ok: true as const,
+		client: authContext.client,
+		admin: authContext.authority,
+		user: authContext.user,
+	};
+}
+
+export async function searchAdminImpersonationCustomers(
+	input: { query?: string | null; limit?: number },
+	client?: ClerkBackendClient,
+): Promise<AdminImpersonationSearchResult> {
+	const resolvedClient = client ?? (await clerkClient());
+	const query = input.query?.trim().toLowerCase() ?? "";
+	const limit = Math.min(Math.max(input.limit ?? 8, 1), 20);
+	const config = readAdminImpersonationConfig();
+	const response = await resolvedClient.users.getUserList({
+		limit,
+		offset: 0,
+		orderBy: "-created_at",
+		...(query ? { query } : undefined),
+	});
+	const customers = excludeAdminCustomers(
+		response.data.flatMap((user) => {
+			const customer = toCustomerSummary(user);
+			return customer ? [customer] : [];
+		}),
+		config.adminEmails,
+	);
+
+	return {
+		customers,
+		totalCount: response.totalCount,
+		query,
+	};
+}
+
+async function getConvexTokenOrThrow() {
+	const session = await getConvexServerSession();
+	if (!session.token) {
+		throw new Error("Missing Convex auth token.");
+	}
+	return session.token;
+}
+
+export async function listAdminImpersonationHistory() {
+	const token = await getConvexTokenOrThrow();
+	return await fetchQuery(
+		api.impersonation.listAdminSessionHistory,
+		{},
+		{ token },
+	);
+}
+
+export async function getSupportModeStatusForAdminPage() {
+	const token = await getConvexTokenOrThrow();
+	return await fetchQuery(
+		api.impersonation.getSupportModeStatus,
+		{},
+		{ token },
+	);
+}
+
+export async function loadAdminImpersonationPageData(): Promise<
+	{ ok: true; data: AdminImpersonationPageData } | { ok: false; status: number }
+> {
+	const context = await requireAdminImpersonationActionContext();
+	if (!context.ok) {
+		return { ok: false, status: context.status };
+	}
+
+	const [customerSearch, history, status] = await Promise.all([
+		searchAdminImpersonationCustomers({ limit: 8 }, context.client),
+		listAdminImpersonationHistory(),
+		getSupportModeStatusForAdminPage(),
+	]);
+
+	return {
+		ok: true,
+		data: {
+			adminEmail: context.admin.email,
+			initialCustomers: customerSearch.customers,
+			customerTotalCount: customerSearch.totalCount,
+			history,
+			status,
+		},
+	};
+}
+
+export async function getRequestMetadata() {
+	const requestHeaders = await headers();
+	return {
+		requestId: requestHeaders.get("x-request-id"),
+		userAgent: requestHeaders.get("user-agent"),
+		ipHash: null,
+	};
+}
+
+export async function beginConvexImpersonationSession(input: {
+	subjectClerkUserId: string;
+	subjectEmail: string;
+	reason: string;
+}) {
+	const token = await getConvexTokenOrThrow();
+	return await fetchMutation(
+		api.impersonation.beginAdminSession,
+		{
+			...input,
+			...(await getRequestMetadata()),
+		},
+		{ token },
+	);
+}
+
+export async function markConvexImpersonationStartFailed(input: {
+	sessionId: Id<"impersonationSessions">;
+	failureReason:
+		| "clerk_actor_token_failed"
+		| "session_handoff_failed"
+		| "unexpected_error";
+}) {
+	const token = await getConvexTokenOrThrow();
+	return await fetchMutation(
+		api.impersonation.markAdminSessionStartFailed,
+		input,
+		{ token },
+	);
+}
+
+export async function markConvexImpersonationHandoffActive() {
+	const token = await getConvexTokenOrThrow();
+	return await fetchMutation(
+		api.impersonation.markCurrentSessionActive,
+		{},
+		{ token },
+	);
+}

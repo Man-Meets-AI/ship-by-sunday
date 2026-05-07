@@ -22,6 +22,7 @@ import {
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
 import { codebaseSectionDraftTemplateIdValues } from "@/lib/codebase-flow/codebase-section-draft-assistant";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 const codexGenerateTemplateIds = [
 	...codebaseSectionDraftTemplateIdValues,
@@ -51,6 +52,18 @@ export async function POST(request: Request) {
 	try {
 		const productAccessSession = await requireProductAccessApiSession();
 		session = productAccessSession;
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.generate",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex generation is unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 		const body = (await request.json().catch(() => null)) as unknown;
 		const parsed = generateRequestSchema.safeParse(body);
 		if (!parsed.success) {
