@@ -106,4 +106,12 @@ describe("env helpers", () => {
 		expect(serverEnv.POSTHOG_PROJECT_ID).toBe("317852");
 		expect(serverEnv.POSTHOG_API_KEY).toBe("phx_source_map_key");
 	});
+
+	it("requires a high-entropy checkout fulfillment retry secret", async () => {
+		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET = "short";
+
+		const { loadServerEnv } = await import("@/platform/env/server");
+
+		expect(() => loadServerEnv()).toThrow("CHECKOUT_FULFILLMENT_RETRY_SECRET");
+	});
 });

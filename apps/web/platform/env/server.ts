@@ -28,7 +28,7 @@ const serverEnvSchema = z.object({
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
 	STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
-	CHECKOUT_FULFILLMENT_RETRY_SECRET: z.string().min(1).optional(),
+	CHECKOUT_FULFILLMENT_RETRY_SECRET: z.string().min(32).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
 	STRIPE_PRODUCT_ID: z.string().min(1).optional(),
 	STRIPE_PROMOTION_CODE_ID: z.string().min(1).optional(),

@@ -22,7 +22,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 
 ## Core server runtime
 
-- `APP_BASE_URL`: canonical app URL fallback when no request origin is available; request-scoped route handlers such as checkout use the incoming buyer origin for success and cancel redirects
+- `APP_BASE_URL`: canonical app URL fallback when no trusted request origin is available; request-scoped route handlers such as checkout use the incoming buyer origin for success and cancel redirects only when it matches `APP_BASE_URL`, `VERCEL_BRANCH_URL`, `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, or a local development origin
 - `CLERK_AUTHORIZED_PARTIES`: optional comma-separated origin allowlist passed to Clerk middleware for subdomain cookie-leak protection
 - `CLERK_SECRET_KEY`: server-side Clerk access
 - `CLERK_FRONTEND_API_URL`: Clerk frontend API domain used by the auth chain
@@ -33,14 +33,14 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `STRIPE_SECRET_KEY`: Stripe API access
 - `STRIPE_PUBLISHABLE_KEY`: safe-to-expose Stripe key used by homepage Express Checkout
 - `STRIPE_WEBHOOK_SECRET`: verifies Stripe webhook signatures
-- `CHECKOUT_FULFILLMENT_RETRY_SECRET`: server-only shared secret used by Next.js and Convex when `/checkout/success` retries paid-session fulfillment while webhook delivery catches up
+- `CHECKOUT_FULFILLMENT_RETRY_SECRET`: server-only shared secret used by Next.js and Convex when `/checkout/success` retries paid-session fulfillment while webhook delivery catches up; use at least 32 random characters and mirror the same value into the matching Convex deployment
 - `STRIPE_PRICE_ID`: optional dashboard-managed price; leave it unset locally until your test account has a managed `$500` price that matches the live list-price contract
 - `STRIPE_PRODUCT_ID`: optional product id emitted by the Stripe script
 - `STRIPE_PROMOTION_CODE_ID`: required when the active public pricing offer is auto-applied at checkout; use the Stripe promotion-code ID, not the customer-facing code string
 
 With the current Pilot Member pricing slice, the app truth is a `$500` list price plus a `50%` auto-applied offer. That means local/test Stripe parity now has two moving parts: a matching `$500` test price and a matching test promotion code. Until those assets exist in the test account, keep `STRIPE_PRICE_ID` unset locally so checkout uses inline `price_data`, and do not hard-code a guessed public code name like `EARLYSHIP` into repo config. The repo consumes Stripe resource IDs and lets dashboard state own the customer-facing code string.
 
-Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout email. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `CHECKOUT_FULFILLMENT_RETRY_SECRET` synced into the active Convex deployment as well as the Next.js runtime. If `STRIPE_WEBHOOK_SECRET` is missing or mismatched, the webhook cannot verify Stripe events. If `CHECKOUT_FULFILLMENT_RETRY_SECRET` is missing or mismatched, the checkout success page cannot safely trigger the same server-side fulfillment retry.
+Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout email. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `CHECKOUT_FULFILLMENT_RETRY_SECRET` synced into the active Convex deployment as well as the Next.js runtime. If `STRIPE_WEBHOOK_SECRET` is missing or mismatched, the webhook cannot verify Stripe events. If `CHECKOUT_FULFILLMENT_RETRY_SECRET` is missing, too short, or mismatched, the checkout success page cannot safely trigger the same server-side fulfillment retry.
 
 ## PostHog and Telegram observability
 

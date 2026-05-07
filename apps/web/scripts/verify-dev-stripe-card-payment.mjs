@@ -246,7 +246,7 @@ async function waitForPasswordlessCheckoutHandoff(
 	const finalUrl = new URL(page.url());
 	const redirectUrl = finalUrl.searchParams.get("redirect_url");
 	const emailField = page.getByLabel("Email").first();
-	await emailField.waitFor({ state: "visible", timeout: 10_000 });
+	await emailField.waitFor({ state: "visible", timeout: timeoutMs });
 
 	return {
 		claimPageVisible:
@@ -388,6 +388,14 @@ try {
 		typeof finalSession.payment_intent === "string"
 			? await stripe.paymentIntents.retrieve(finalSession.payment_intent)
 			: null;
+	const checkoutSuccessPath = finalSession.success_url
+		? new URL(finalSession.success_url).pathname
+		: null;
+	const paymentIntentMetadataIsNeutral =
+		paymentIntent?.metadata?.courseSlug === expectedCourseSlug &&
+		paymentIntent?.metadata?.buyerStartingPoint === undefined &&
+		paymentIntent?.metadata?.checkoutCtaId === undefined &&
+		paymentIntent?.metadata?.fulfillmentTrack === undefined;
 
 	printCheck(
 		"Dev staging uses Stripe test mode",
@@ -420,8 +428,14 @@ try {
 		finalSession.metadata?.courseSlug === expectedCourseSlug &&
 			finalSession.metadata?.buyerStartingPoint === undefined &&
 			finalSession.metadata?.checkoutCtaId === undefined &&
-			finalSession.metadata?.fulfillmentTrack === undefined,
-		`metadata=${JSON.stringify(finalSession.metadata)}`,
+			finalSession.metadata?.fulfillmentTrack === undefined &&
+			paymentIntentMetadataIsNeutral,
+		`session_metadata=${JSON.stringify(finalSession.metadata)}, payment_intent_metadata=${JSON.stringify(paymentIntent?.metadata)}`,
+	);
+	printCheck(
+		"Checkout returns through shared success route",
+		checkoutSuccessPath === "/checkout/success",
+		`success_url=${finalSession.success_url ?? "missing"}`,
 	);
 	printCheck(
 		"Stripe Checkout session paid",
@@ -461,6 +475,7 @@ try {
 					successOrigin: finalSession.success_url
 						? new URL(finalSession.success_url).origin
 						: null,
+					successPath: checkoutSuccessPath,
 					metadata: finalSession.metadata,
 					uiMode: finalSession.ui_mode ?? null,
 				},
@@ -474,6 +489,7 @@ try {
 							currency: paymentIntent.currency,
 							id: paymentIntent.id,
 							livemode: paymentIntent.livemode,
+							metadata: paymentIntent.metadata,
 							status: paymentIntent.status,
 						}
 					: null,
@@ -496,6 +512,8 @@ try {
 		finalSession.metadata?.buyerStartingPoint !== undefined ||
 		finalSession.metadata?.checkoutCtaId !== undefined ||
 		finalSession.metadata?.fulfillmentTrack !== undefined ||
+		!paymentIntentMetadataIsNeutral ||
+		checkoutSuccessPath !== "/checkout/success" ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
 		finalSession.amount_total !== 25_000 ||

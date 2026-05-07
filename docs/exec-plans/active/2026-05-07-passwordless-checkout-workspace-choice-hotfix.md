@@ -55,8 +55,10 @@ The simple desired UX is: a first-time customer buys with Stripe using their ema
 - [x] 2026-05-07 13:44:13 EDT: Opened draft PR #218, ran the requested review swarm, removed the stale checkout-handoff integration test, strict-gated course metadata, protected success-page fulfillment with a server-only token, and upgraded dev card-payment proof to assert the passwordless workspace handoff.
 - [x] 2026-05-07 13:49:43 EDT: Fixed the PR `static` full-unit regressions by making `/workspace/choose` tolerate the legacy no-argument test render without violating Next.js page prop typing and by updating the pending-checkout external redirect fallback expectation to `/workspace/choose`; full app unit and app typecheck now pass locally.
 - [x] 2026-05-07 14:02:24 EDT: Addressed CodeRabbit follow-up by splitting checkout-success fulfillment retry auth to `CHECKOUT_FULFILLMENT_RETRY_SECRET`, tightening checkout-welcome redirect classification, removing personal test-email literals from the committed ExecPlan, and adding the missing proof/test assertions.
-- [ ] Prove dev checkout purchase and OTP login with `{{TEST_CHECKOUT_EMAIL}}`.
-- [ ] Re-run PR #218 checks after the CI-fix commit, then use dev only as the staging payment lane if needed and prove production after merge.
+- [x] 2026-05-07 14:45:00 EDT: Proved hosted Stripe test-mode purchase on the Vercel PR preview. Session `cs_test_a1zp6FwaGGjX7u9hyhO4WX8ONSxOSwIa4ZX13HQnGNTDwB9W4c9HSO47Cr` completed for `25000` cents, PaymentIntent `pi_3TUWvvELhKLJkXlW1wYQP2uN` succeeded, new metadata was neutral, and the signed-out buyer landed on `/sign-in?redirect_url=/workspace/choose?welcome=checkout` with email locked, password hidden, and no checkout claim page.
+- [x] 2026-05-07 15:06:00 EDT: Tightened checkout redirect origin selection so request-scoped checkout URLs only use trusted app, Vercel branch, Vercel deployment, Vercel production, or local-development origins, while retaining the buyer-origin fix that made preview proof work.
+- [ ] Complete OTP login proof with `{{TEST_CHECKOUT_EMAIL}}`. Current blocker: the connected Gmail scope does not expose the target inbox, though Clerk accepted the account and reached the email-code challenge.
+- [ ] Re-run PR #218 checks after the redirect-origin hardening commit, refresh the `dev` staging lane if needed, and prove production after merge.
 
 ## Surprises & Discoveries
 

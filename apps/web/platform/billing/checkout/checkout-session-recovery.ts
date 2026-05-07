@@ -68,11 +68,17 @@ export type CheckoutSessionFulfillmentResult =
 			sessionId: string;
 	  }
 	| {
-			kind: "clerk_lookup_failed" | "clerk_create_failed" | "grant_failed";
+			kind: "clerk_lookup_failed" | "clerk_create_failed";
 			sessionId: string;
 			checkoutEmail: string;
 			message: string;
-			clerkUserId?: string;
+	  }
+	| {
+			kind: "grant_failed";
+			sessionId: string;
+			checkoutEmail: string;
+			clerkUserId: string;
+			message: string;
 	  }
 	| {
 			kind: "clerk_user_conflict";
