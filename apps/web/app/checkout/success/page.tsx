@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 import {
@@ -9,6 +9,7 @@ import {
 import { getCheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checkout/checkout-session-recovery";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
+import { getSignInRedirectHref, routeConfig } from "@/config/product";
 
 export const metadata: Metadata = {
 	robots: {
@@ -46,6 +47,12 @@ export default async function Page({
 		(await getPendingCheckoutSessionIdFromCookie()) ??
 		undefined;
 	const checkoutSessionState = await getCheckoutSessionState(sessionId);
+	if (checkoutSessionState.kind === "sign_in_required") {
+		redirect(
+			getSignInRedirectHref(`${routeConfig.workspaceChoice}?welcome=checkout`),
+		);
+	}
+
 	const initialProductAccess =
 		checkoutSessionState.kind === "validated"
 			? await fetchAuthenticatedQuery(api.access.viewerProductAccess, {})

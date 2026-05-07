@@ -20,24 +20,17 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 		label,
 		className,
 		testId,
-		checkoutIntent,
 		onBeforeCheckout,
 	}: {
 		label: string;
 		className?: string;
 		testId?: string;
-		checkoutIntent?: {
-			buyerStartingPoint?: string;
-			checkoutCtaId?: string;
-		};
 		onBeforeCheckout?: () => void | Promise<void>;
 	}) => (
 		<button
 			type="button"
 			data-kind="checkout"
 			data-testid={testId}
-			data-buyer-starting-point={checkoutIntent?.buyerStartingPoint}
-			data-checkout-cta-id={checkoutIntent?.checkoutCtaId}
 			className={className}
 			onClick={() => void onBeforeCheckout?.()}
 		>
@@ -204,16 +197,6 @@ describe("CodebaseDemoSectionBlock", () => {
 		expect(
 			screen.getByTestId("codebase-demo-existing-checkout-cta"),
 		).toBeTruthy();
-		expect(
-			screen
-				.getByTestId("codebase-demo-existing-checkout-cta")
-				.getAttribute("data-buyer-starting-point"),
-		).toBe("existing_codebase");
-		expect(
-			screen
-				.getByTestId("codebase-demo-existing-checkout-cta")
-				.getAttribute("data-checkout-cta-id"),
-		).toBe("codebase_demo_existing");
 	});
 
 	it("keeps the shared homepage sections visible for the codebase starting point", async () => {

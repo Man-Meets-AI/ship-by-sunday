@@ -69,12 +69,18 @@ async function navigateWithRouter(
 	router.push(url);
 }
 
-export function useSignInFlow() {
+export function useSignInFlow({
+	initialEmail = "",
+	isInitialEmailLocked = false,
+}: {
+	initialEmail?: string;
+	isInitialEmailLocked?: boolean;
+} = {}) {
 	const clerk = useClerk();
 	const { errors, fetchStatus, signIn } = useSignIn();
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const [emailAddress, setEmailAddress] = useState("");
+	const [emailAddress, setEmailAddress] = useState(initialEmail);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [localEmailErrorMessage, setLocalEmailErrorMessage] = useState<
 		string | null
@@ -171,6 +177,10 @@ export function useSignInFlow() {
 	}
 
 	function updateEmailAddress(value: string) {
+		if (isInitialEmailLocked) {
+			return;
+		}
+
 		setEmailAddress(value);
 		if (localEmailErrorMessage) {
 			setLocalEmailErrorMessage(null);
@@ -251,6 +261,7 @@ export function useSignInFlow() {
 		setLocalEmailErrorMessage(null);
 		setStep("email");
 		setVerificationCode("");
+		setEmailAddress(initialEmail);
 
 		startTransition(() => {
 			router.replace(buildSignInHref({ redirectPath }));
@@ -357,6 +368,7 @@ export function useSignInFlow() {
 		emailError,
 		globalErrors,
 		isBusy,
+		isEmailLocked: isInitialEmailLocked,
 		isLoaded: Boolean(signIn),
 		resendEmailCode,
 		setEmailAddress: updateEmailAddress,

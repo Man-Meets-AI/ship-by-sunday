@@ -16,8 +16,8 @@ Make sure `apps/web/.env.local` has these values:
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/codebase
-NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/codebase
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/workspace/choose
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/workspace/choose
 CLERK_SECRET_KEY=
 CLERK_FRONTEND_API_URL=
 CLERK_AUTHORIZED_PARTIES=http://localhost:3000
@@ -31,32 +31,31 @@ NEXT_PUBLIC_CONVEX_URL=
 1. Create a Clerk app.
 2. Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `CLERK_FRONTEND_API_URL`.
 3. If you keep the starter’s custom login page, set `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in` so Clerk redirects resolve to the right route.
-4. Set the Clerk fallback redirect URLs to `/codebase` so direct visits to auth routes land in the codebase-first protected shell.
+4. Set the Clerk fallback redirect URLs to `/workspace/choose` so direct visits to auth routes land in the paid workspace-choice shell.
 5. Keep the Clerk frontend API domain consistent everywhere you wire auth.
 6. Set `CLERK_AUTHORIZED_PARTIES` to the trusted web origins that should be allowed to present Clerk session cookies.
-7. In every Clerk environment used by this app, enable email sign-in with an email verification code. Both `/sign-in` and the checkout email handoff call Clerk email OTP for the buyer email.
+7. In every Clerk environment used by this app, enable email sign-in with an email verification code. `/sign-in` calls Clerk email OTP for both returning users and immediate post-checkout buyers.
 8. Turn off password sign-up and "Add password to account" unless you intentionally fork this starter back to password-based auth. The shipped buyer path is passwordless.
 9. Keep multi-factor authentication optional and do not require Client Trust for the buyer sign-in path. The shipped custom UI intentionally fails closed if Clerk asks for `needs_second_factor`, `needs_client_trust`, or a setup task after the email code.
 10. Disable social and OAuth provider strategies, including Google, in every Clerk environment for this app. The starter no longer ships a social sign-in button or OAuth callback route.
 
 The starter-owned auth routes are:
 
-- `/sign-in`: the branded Ship by Sunday sign-in surface
-- `/checkout/email-handoff`: the post-checkout email-code handoff for paid guest checkout
+- `/sign-in`: the branded Ship by Sunday passwordless sign-in surface
 - `/session-tasks/reset-password`: the Clerk reset-password task inside the same identity shell
 
-`/sign-up` is not a custom starter sign-up UI in this repo. Direct visits redirect to pricing, and legacy checkout links such as `/sign-up?session_id=...` redirect to `/checkout/email-handoff`.
+`/sign-up` is not a custom starter sign-up UI in this repo. Direct visits redirect to pricing, and legacy checkout links such as `/sign-up?session_id=...` redirect back to `/checkout/success?session_id=...`.
 
 ## Checkout email-code setup
 
-The passwordless sign-in and checkout email handoff both depend on Clerk Dashboard settings, not a new repo env var.
+Passwordless sign-in depends on Clerk Dashboard settings, not a new repo env var.
 
 - Where: Clerk Dashboard for local, preview, and production Clerk applications.
 - What: enable email address sign-in and turn on **Email verification code**. Leave email verification link off unless you intentionally add a magic-link flow in code. Turn off password sign-up and adding passwords to accounts for the shipped passwordless buyer path. Do not require MFA or Client Trust on buyer sign-in unless you also add the matching second-factor UI.
-- Callback routes: keep the app-owned sign-in URL at `/sign-in`; the checkout email-code flow itself stays on `/checkout/email-handoff` and returns to `/checkout/success?session_id=...`.
-- Verify: open `/sign-in`, enter a paid-user email, and confirm Clerk sends a one-time code. Then complete a paid test checkout while signed out, click the checkout-email handoff, and confirm Clerk sends a one-time code to the Stripe checkout email.
+- Callback routes: keep the app-owned sign-in URL at `/sign-in`. Immediate post-checkout sign-in uses `/sign-in?redirect_url=/workspace/choose?welcome=checkout`; the server validates the pending checkout session cookie before locking the email field.
+- Verify: open `/sign-in`, enter a paid-user email, and confirm Clerk sends a one-time code. Then complete a paid test checkout while signed out and confirm checkout success forwards to sign-in with the Stripe checkout email prefilled and locked.
 - Release proof: release personas use email-code Clerk accounts. Browser proof first sends the real email-code challenge through `/sign-in`, then the Playwright Clerk testing helper signs the persona in by email with a short-lived sign-in token so storage state is deterministic; no release proof should fill or require a password field.
-- Missing setup looks like: `/sign-in` or the handoff page cannot send or verify an email code, or Clerk returns an unsupported second factor/task after OTP verification, so the buyer cannot prove the paid email.
+- Missing setup looks like: `/sign-in` cannot send or verify an email code, Clerk returns `factor_not_found` for the email code strategy, or Clerk returns an unsupported second factor/task after OTP verification. The buyer should never be asked for a password in the shipped buyer flow.
 
 ## Social provider setup
 
@@ -106,7 +105,7 @@ You are correctly wired when:
 - sign-in from a deep link returns the user to that exact page after auth or after any Clerk task
 - `/sign-in` and `/session-tasks/reset-password` render cleanly in local smoke runs
 - `/sign-in` sends a Clerk email code without showing password fields
-- `/checkout/email-handoff` sends a Clerk email code to the Stripe checkout email and returns to `/checkout/success`
+- immediate post-checkout sign-in locks the email field to the Stripe checkout email and returns to `/workspace/choose?welcome=checkout`
 - protected routes can read server-side state
 - protected pages do not throw `Unauthorized` during the first client hydration pass
 - the workspace gate can tell the difference between signed-out and signed-in users

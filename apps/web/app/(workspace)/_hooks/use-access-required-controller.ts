@@ -6,10 +6,7 @@ import { startTransition, useEffect, useRef, useState } from "react";
 
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
-import {
-	buildCheckoutEmailHandoffHref,
-	buildSignInHref,
-} from "@/platform/auth/auth-route-utils";
+import { buildSignInHref } from "@/platform/auth/auth-route-utils";
 import type { ProductAccess } from "@/lib/product-access";
 import {
 	formatRefreshTime,
@@ -47,17 +44,6 @@ export function useAccessRequiredController(initialAccess?: ProductAccess) {
 	const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
 	const currentPath = getCurrentPath(pathname, searchParams);
 	const signInHref = buildSignInHref({ redirectPath: currentPath });
-	const checkoutEmailHandoffRecovery =
-		initialAccess?.pendingCheckoutRecovery?.kind ===
-		"checkout_email_handoff_required"
-			? initialAccess.pendingCheckoutRecovery
-			: null;
-	const checkoutEmailHandoffHref = checkoutEmailHandoffRecovery
-		? buildCheckoutEmailHandoffHref({
-				redirectPath: currentPath,
-				sessionId: checkoutEmailHandoffRecovery.sessionId,
-			})
-		: null;
 	const pricingHref = `${routeConfig.home}${routeConfig.pricingHash}`;
 	const access =
 		liveAccess &&
@@ -83,7 +69,6 @@ export function useAccessRequiredController(initialAccess?: ProductAccess) {
 		signInHref,
 		homeHref: routeConfig.home,
 		pricingHref,
-		checkoutEmailHandoffHref,
 	});
 	const lastRefreshLabel = formatRefreshTime(lastRefreshAt);
 
@@ -135,9 +120,9 @@ export function useAccessRequiredController(initialAccess?: ProductAccess) {
 
 		hasRedirectedSignedOutRef.current = true;
 		startTransition(() => {
-			router.replace(checkoutEmailHandoffHref ?? signInHref);
+			router.replace(signInHref);
 		});
-	}, [access?.status, checkoutEmailHandoffHref, router, signInHref]);
+	}, [access?.status, router, signInHref]);
 
 	useEffect(() => {
 		if (!isRetryingAccess) {

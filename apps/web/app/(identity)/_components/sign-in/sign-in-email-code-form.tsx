@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,14 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 import { SignInBanners } from "@/app/(identity)/_components/sign-in/sign-in-banners";
+import { missingPasswordlessAccountMessage } from "@/app/(identity)/_lib/passwordless-auth-errors";
+import { routeConfig } from "@/config/product";
 
 type SignInEmailCodeFormProps = {
 	emailAddress: string;
 	emailError: { message?: string } | null;
 	globalErrors: Array<{ message?: string }> | null;
+	isEmailLocked: boolean;
 	isBusy: boolean;
 	isLoaded: boolean;
 	resendEmailCode: () => Promise<void>;
@@ -41,6 +45,7 @@ export function SignInEmailCodeForm({
 	emailAddress,
 	emailError,
 	globalErrors,
+	isEmailLocked,
 	isBusy,
 	isLoaded,
 	resendEmailCode,
@@ -64,6 +69,9 @@ export function SignInEmailCodeForm({
 		await submitEmailCode();
 	}
 
+	const missingAccountError =
+		emailError?.message === missingPasswordlessAccountMessage;
+
 	return (
 		<div className="flex flex-col gap-5">
 			<SignInBanners globalErrors={globalErrors} />
@@ -74,15 +82,30 @@ export function SignInEmailCodeForm({
 						<Input
 							id="sign-in-email"
 							autoComplete="email"
-							disabled={!isLoaded || isBusy || step === "email_code"}
-							readOnly={step === "email_code"}
+							disabled={
+								!isLoaded || isBusy || isEmailLocked || step === "email_code"
+							}
+							readOnly={isEmailLocked || step === "email_code"}
 							aria-invalid={Boolean(emailError) || undefined}
 							placeholder="you@company.com"
 							type="email"
 							value={emailAddress}
 							onChange={(event) => setEmailAddress(event.target.value)}
 						/>
-						<FieldError errors={[emailError ?? undefined]} />
+						{missingAccountError ? (
+							<FieldError>
+								We don&apos;t have an account for that email.{" "}
+								<Link
+									href={`${routeConfig.home}${routeConfig.pricingHash}`}
+									className="underline underline-offset-4 hover:text-destructive/80"
+								>
+									Purchase a license
+								</Link>{" "}
+								first, then sign in with the checkout email.
+							</FieldError>
+						) : (
+							<FieldError errors={[emailError ?? undefined]} />
+						)}
 					</Field>
 					{step === "email_code" ? (
 						<Field data-invalid={Boolean(verificationError) || undefined}>
@@ -135,7 +158,7 @@ export function SignInEmailCodeForm({
 						disabled={!isLoaded || isBusy}
 						onClick={() => void startOver()}
 					>
-						Use a different email
+						{isEmailLocked ? "Start over" : "Use a different email"}
 					</Button>
 				</div>
 			) : (

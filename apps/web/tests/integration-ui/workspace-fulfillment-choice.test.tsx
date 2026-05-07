@@ -28,6 +28,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	vi.restoreAllMocks();
 	replaceMock.mockClear();
 	resolveFulfillmentTrackMock.mockReset();
 });
@@ -53,8 +54,29 @@ describe("WorkspaceFulfillmentChoice", () => {
 
 		expect(resolveFulfillmentTrackMock).toHaveBeenCalledWith({
 			fulfillmentTrack: "generated_codebase",
-			checkoutCtaId: "choice_generated",
 		});
 		expect(replaceMock).toHaveBeenCalledWith("/codebase");
+	});
+
+	it("shows the checkout welcome banner while cleaning the URL", () => {
+		const replaceStateMock = vi
+			.spyOn(window.history, "replaceState")
+			.mockImplementation(() => undefined);
+
+		render(
+			<WorkspaceFulfillmentChoice
+				showCheckoutWelcome
+				accountEmail="buyer@example.com"
+			/>,
+		);
+
+		expect(
+			screen.getByText(/access is active for buyer@example.com/i),
+		).toBeTruthy();
+		expect(replaceStateMock).toHaveBeenCalledWith(
+			null,
+			"",
+			"/workspace/choose",
+		);
 	});
 });

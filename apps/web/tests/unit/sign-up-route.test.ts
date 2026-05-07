@@ -21,17 +21,17 @@ describe("sign-up route", () => {
 		expect(redirectMock).toHaveBeenCalledWith("/#pricing");
 	});
 
-	it("redirects checkout sessions through the email handoff", async () => {
+	it("redirects checkout sessions back to checkout success", async () => {
 		await Page({
 			searchParams: Promise.resolve({ session_id: "cs_test_123" }),
 		});
 
 		expect(redirectMock).toHaveBeenCalledWith(
-			"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123",
+			"/checkout/success?session_id=cs_test_123",
 		);
 	});
 
-	it("preserves a safe post-handoff redirect path", async () => {
+	it("preserves a safe post-checkout redirect path", async () => {
 		await Page({
 			searchParams: Promise.resolve({
 				redirect_url: "/codebase",
@@ -39,8 +39,6 @@ describe("sign-up route", () => {
 			}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith(
-			"/checkout/email-handoff?session_id=cs_test_123&redirect_url=%2Fcodebase",
-		);
+		expect(redirectMock).toHaveBeenCalledWith("/codebase");
 	});
 });

@@ -5,6 +5,7 @@ import type Stripe from "stripe";
 
 import {
 	claimCheckoutSessionForViewer,
+	fulfillCheckoutSessionFromSuccessPage,
 	getCheckoutSessionForRecovery,
 	isStripeCheckoutSessionForCourse,
 	isStripeCheckoutSessionPaid,
@@ -29,9 +30,10 @@ export type CheckoutSessionState =
 			currentAccountEmail?: string;
 	  }
 	| {
-			kind: "checkout_email_handoff_required";
+			kind: "fulfillment_failed";
 			sessionId: string;
-			checkoutEmail: string;
+			checkoutEmail?: string;
+			message: string;
 	  }
 	| {
 			kind: "wrong_account";
@@ -103,6 +105,75 @@ async function getCurrentAccountEmail() {
 	return user?.primaryEmailAddress?.emailAddress ?? undefined;
 }
 
+async function getCheckoutStateFromEmailFulfillment({
+	authUserId,
+	currentAccountEmail,
+	fulfillmentTrack,
+	sessionId,
+}: {
+	authUserId: string | null;
+	currentAccountEmail: string | undefined;
+	fulfillmentTrack: FulfillmentTrack;
+	sessionId: string;
+}): Promise<CheckoutSessionState> {
+	const fulfillmentResult =
+		await fulfillCheckoutSessionFromSuccessPage(sessionId);
+
+	switch (fulfillmentResult.kind) {
+		case "fulfilled":
+			if (!authUserId) {
+				return {
+					kind: "sign_in_required",
+					sessionId,
+					checkoutEmail: fulfillmentResult.checkoutEmail,
+					currentAccountEmail,
+				};
+			}
+
+			if (authUserId !== fulfillmentResult.clerkUserId) {
+				return {
+					kind: "wrong_account",
+					sessionId,
+					checkoutEmail: fulfillmentResult.checkoutEmail,
+					currentAccountEmail,
+				};
+			}
+
+			return {
+				kind: "validated",
+				sessionId,
+				fulfillmentTrack,
+			};
+		case "payment_pending":
+			return {
+				kind: "payment_pending",
+				sessionId,
+				paymentStatus: fulfillmentResult.paymentStatus,
+			};
+		case "invalid_session":
+		case "missing_checkout_email":
+			return {
+				kind: "invalid_session",
+				sessionId,
+			};
+		case "clerk_lookup_failed":
+		case "clerk_create_failed":
+		case "clerk_user_conflict":
+		case "grant_failed":
+			return {
+				kind: "fulfillment_failed",
+				sessionId,
+				checkoutEmail: fulfillmentResult.checkoutEmail,
+				message:
+					fulfillmentResult.kind === "clerk_user_conflict"
+						? `Multiple Clerk users match ${fulfillmentResult.checkoutEmail}. Contact support before retrying checkout.`
+						: fulfillmentResult.message,
+			};
+		default:
+			return fulfillmentResult satisfies never;
+	}
+}
+
 export async function getCheckoutSessionState(
 	sessionId: string | undefined,
 ): Promise<CheckoutSessionState> {
@@ -147,31 +218,12 @@ export async function getCheckoutSessionState(
 		const currentAccountEmail = authState.userId
 			? await getCurrentAccountEmail()
 			: undefined;
-		if (!authState.userId) {
-			if (safeCheckoutEmail) {
-				return {
-					kind: "checkout_email_handoff_required",
-					sessionId,
-					checkoutEmail: safeCheckoutEmail,
-				};
-			}
-
-			return {
-				kind: "sign_in_required",
-				sessionId,
-				checkoutEmail: safeCheckoutEmail,
-				currentAccountEmail,
-			};
-		}
-
-		const claimResult = await claimCheckoutSessionForViewer(sessionId);
-		return getCheckoutStateFromClaimResult(
-			claimResult,
-			sessionId,
-			fulfillmentTrack,
-			safeCheckoutEmail,
+		return await getCheckoutStateFromEmailFulfillment({
+			authUserId: authState.userId,
 			currentAccountEmail,
-		);
+			fulfillmentTrack,
+			sessionId,
+		});
 	}
 
 	const authState = await auth();

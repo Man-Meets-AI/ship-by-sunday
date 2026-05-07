@@ -5,7 +5,7 @@ description: Get the starter running, understand the real handoff, and choose th
 
 # Start Here
 
-Ship by Sunday Docs is the shortest path to running, customizing, and shipping this repo without guessing. Start with local setup, then wire auth, payments, and the `/codebase -> /review` handoff before you touch the rest of the surface.
+Ship by Sunday Docs is the shortest path to running, customizing, and shipping this repo without guessing. Start with local setup, then wire auth, payments, and the `/workspace/choose -> /codebase -> /review` handoff before you touch the rest of the surface.
 
 If you are new to this stack, do not start by rewriting auth, payments, or access logic. Get the repo running cleanly, confirm the paid handoff works, and then change the obvious product surfaces first.
 
@@ -13,8 +13,8 @@ If you are new to this stack, do not start by rewriting auth, payments, or acces
 
 - a public marketing surface on `/`
 - a docs surface on `/docs`
-- a protected product surface on `/codebase`, compatibility redirects at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` handoff on `/review`, optional `/execute` after review unlock, and `/settings`
-- a custom Clerk sign-in surface on `/sign-in` plus `/checkout/email-handoff` for paid checkout email-code proof
+- a protected workspace-choice surface on `/workspace/choose`, generated-codebase surface on `/codebase`, compatibility redirects at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` handoff on `/review`, optional `/execute` after review unlock, and `/settings`
+- a custom Clerk passwordless sign-in surface on `/sign-in`
 - Stripe-hosted checkout plus success and cancel flows
 - Convex-backed product-access and resume state
 - a starter contract and module flags in `config/product.ts`
@@ -72,6 +72,6 @@ You are in a good place to customize once you can say all of this is true:
 - the app boots locally
 - you can sign in
 - a user without access sees the right locked state
-- a user with granted access reaches `/codebase`
+- a newly paid user reaches `/workspace/choose`, and a returning generated-codebase user reaches `/codebase`
 - the `Review` handoff behaves like the final delivery surface, not a manual download dashboard
 - checkout and webhook wiring are understood, even if you have not changed them yet

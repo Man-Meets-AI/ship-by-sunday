@@ -98,14 +98,7 @@ describe("ExpressCheckoutButton", () => {
 		);
 		checkoutElementsResultMock.mockReturnValue({ type: "loading" });
 
-		render(
-			<ExpressCheckoutButton
-				checkoutIntent={{
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "codebase_demo_generated",
-				}}
-			/>,
-		);
+		render(<ExpressCheckoutButton />);
 
 		await screen.findByTestId("checkout-elements-provider");
 
@@ -113,42 +106,21 @@ describe("ExpressCheckoutButton", () => {
 		expect(checkoutConfirmMock).not.toHaveBeenCalled();
 	});
 
-	it("does not recreate the Checkout Session when an inline checkout intent re-renders with the same values", async () => {
+	it("does not recreate the Checkout Session when it re-renders", async () => {
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
 			.mockResolvedValue(createExpressCheckoutResponse("cs_express_123"));
-		const { rerender } = render(
-			<ExpressCheckoutButton
-				checkoutIntent={{
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "codebase_demo_generated",
-				}}
-			/>,
-		);
+		const { rerender } = render(<ExpressCheckoutButton />);
 
 		await screen.findByTestId("express-checkout-link");
 		expect(screen.getByText("Total US$250.00")).toBeTruthy();
 
-		rerender(
-			<ExpressCheckoutButton
-				checkoutIntent={{
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "codebase_demo_generated",
-				}}
-			/>,
-		);
+		rerender(<ExpressCheckoutButton />);
 
 		await act(async () => {});
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		expect(fetchMock).toHaveBeenCalledWith("/api/stripe/checkout/express", {
-			body: JSON.stringify({
-				checkoutIntent: {
-					buyerStartingPoint: "no_codebase",
-					checkoutCtaId: "codebase_demo_generated",
-					fulfillmentTrack: "generated_codebase",
-				},
-			}),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -167,10 +139,6 @@ describe("ExpressCheckoutButton", () => {
 			return (
 				<div data-saved-at={savedAt}>
 					<ExpressCheckoutButton
-						checkoutIntent={{
-							buyerStartingPoint: "no_codebase",
-							checkoutCtaId: "codebase_demo_generated",
-						}}
 						onBeforeCheckout={() => {
 							setSavedAt(Date.now());
 						}}
@@ -194,9 +162,6 @@ describe("ExpressCheckoutButton", () => {
 			event: "checkout_started",
 			properties: {
 				surface: "express_checkout",
-				buyerStartingPoint: "no_codebase",
-				checkoutCtaId: "codebase_demo_generated",
-				fulfillmentTrack: "generated_codebase",
 			},
 		});
 	});

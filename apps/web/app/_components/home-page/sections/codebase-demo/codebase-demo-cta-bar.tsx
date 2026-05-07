@@ -76,10 +76,6 @@ export function CodebaseDemoCtaBar({
 				<HomePagePrimaryCta
 					target={{
 						kind: "checkout",
-						checkoutIntent: {
-							buyerStartingPoint: "no_codebase",
-							checkoutCtaId: "codebase_demo_generated",
-						},
 					}}
 					label={cta.label}
 					testId="codebase-demo-checkout-cta"

@@ -13,12 +13,6 @@ import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 import { cn } from "@/lib/utils";
-import {
-	UNSPECIFIED_CHECKOUT_INTENT,
-	normalizeCheckoutIntent,
-	type CheckoutIntent,
-	type CheckoutIntentInput,
-} from "@/platform/billing/checkout/checkout-intent";
 
 const STRIPE_EXPRESS_CHECKOUT_MIN_BUTTON_HEIGHT = 40;
 const STRIPE_EXPRESS_CHECKOUT_MAX_BUTTON_HEIGHT = 55;
@@ -47,7 +41,6 @@ type ExpressCheckoutButtonState =
 type ExpressCheckoutButtonProps = {
 	readonly className?: string;
 	readonly testId?: string;
-	readonly checkoutIntent?: CheckoutIntentInput;
 	readonly buttonHeight?: number;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
 	readonly onAvailableChange?: (isAvailable: boolean) => void;
@@ -57,7 +50,6 @@ type ExpressCheckoutButtonProps = {
 export function ExpressCheckoutButton({
 	className,
 	testId,
-	checkoutIntent: checkoutIntentInput,
 	buttonHeight = 44,
 	onBeforeCheckout,
 	onAvailableChange,
@@ -66,19 +58,9 @@ export function ExpressCheckoutButton({
 	const [state, setState] = useState<ExpressCheckoutButtonState>({
 		kind: "loading",
 	});
-	const checkoutIntent: CheckoutIntent = checkoutIntentInput
-		? normalizeCheckoutIntent(checkoutIntentInput)
-		: UNSPECIFIED_CHECKOUT_INTENT;
-	const { buyerStartingPoint, checkoutCtaId, fulfillmentTrack } =
-		checkoutIntent;
 
 	useEffect(() => {
 		let isMounted = true;
-		const normalizedCheckoutIntent = {
-			buyerStartingPoint,
-			checkoutCtaId,
-			fulfillmentTrack,
-		};
 
 		async function prepareExpressCheckout() {
 			try {
@@ -87,9 +69,6 @@ export function ExpressCheckoutButton({
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body: JSON.stringify({
-						checkoutIntent: normalizedCheckoutIntent,
-					}),
 				});
 
 				if (!response.ok) {
@@ -125,7 +104,7 @@ export function ExpressCheckoutButton({
 		return () => {
 			isMounted = false;
 		};
-	}, [buyerStartingPoint, checkoutCtaId, fulfillmentTrack]);
+	}, []);
 
 	useEffect(() => {
 		if (state.kind !== "unavailable") {
@@ -158,7 +137,6 @@ export function ExpressCheckoutButton({
 					buttonHeight={buttonHeight}
 					returnUrl={state.returnUrl}
 					onBeforeCheckout={onBeforeCheckout}
-					checkoutIntent={checkoutIntent}
 					onAvailableChange={onAvailableChange}
 					onError={onError}
 				/>
@@ -170,22 +148,18 @@ export function ExpressCheckoutButton({
 function ExpressCheckoutElementController({
 	buttonHeight,
 	returnUrl,
-	checkoutIntent,
 	onBeforeCheckout,
 	onAvailableChange,
 	onError,
 }: {
 	readonly buttonHeight: number;
 	readonly returnUrl: string;
-	readonly checkoutIntent: CheckoutIntent;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
 	readonly onAvailableChange?: (isAvailable: boolean) => void;
 	readonly onError?: (message: string | null) => void;
 }) {
 	const checkoutResult = useCheckoutElements();
 	const [isVisible, setIsVisible] = useState(false);
-	const { buyerStartingPoint, checkoutCtaId, fulfillmentTrack } =
-		checkoutIntent;
 	const checkoutTotal =
 		checkoutResult.type === "success"
 			? checkoutResult.checkout.total.total.amount
@@ -242,9 +216,6 @@ function ExpressCheckoutElementController({
 				event: "checkout_started",
 				properties: {
 					surface: "express_checkout",
-					buyerStartingPoint,
-					checkoutCtaId,
-					fulfillmentTrack,
 				},
 			});
 
@@ -275,15 +246,7 @@ function ExpressCheckoutElementController({
 				onError?.(result.error.message);
 			}
 		},
-		[
-			buyerStartingPoint,
-			checkoutCtaId,
-			checkoutResult,
-			fulfillmentTrack,
-			onBeforeCheckout,
-			onError,
-			returnUrl,
-		],
+		[checkoutResult, onBeforeCheckout, onError, returnUrl],
 	);
 
 	if (checkoutResult.type !== "success") {
