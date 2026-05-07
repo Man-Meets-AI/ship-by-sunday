@@ -1,11 +1,11 @@
 ---
 program_id: worker-grade-docs-operating-system-adoption
 title: Worker-Grade Docs Operating System Adoption
-status: active
+status: complete
 created_at: 2026-05-06
-completed_at: null
+completed_at: 2026-05-06
 summary: Make the local runner install a Worker-grade docs operating system in arbitrary customer codebases, including docs spine, Programs, ExecPlans, validators, scripts, and proof surfaces.
-post_build_recap: null
+post_build_recap: 'Shipped the portable docs operating-system adoption loop: dry-run install planning, bounded package-script and wrapper patching, shared validator commands, lockfile refresh proof, local package artifact proof, evidence-bound quality refresh, and explicit native command proof without runtime or provider setup.'
 read_when:
   - Extending docs-spine adoption beyond Markdown docs into portable docs scripts, package dependencies, validators, and proof.
   - Deciding how the local runner should install Worker-style Program, ExecPlan, docs-spine, and markdown lint systems in another codebase.
@@ -28,9 +28,9 @@ The effort is moving correctly when the runner can install or propose only the p
 
 ## Program Inputs
 
-The durable packet artifacts for this Program live in `docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/`.
+The durable packet artifacts for this Program live in `docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/`.
 
-The primary research input is `track-1-worker-grade-docs-operating-system.md`, which captures the Worker surfaces the user named: path-family markdown linting, docs-spine validation, specialized validators, planning scripts, runtime wrapper scripts, worktree-local runtime state, and proof artifacts. The accepted direction now keeps only the portable docs core in this Program. Runtime installation and Worker-specific operating state are out of scope. The normalized direction is `normalized-track-1.md`. The accepted direction is `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo risks are recorded in `cross-repo-review.md`. The current immutable planning brief is `planning-brief-1.md`, and `current-planning-brief.txt` points at that filename.
+The primary research input is `track-1-worker-grade-docs-operating-system.md`, which captures the Worker surfaces the user named: path-family markdown linting, docs-spine validation, specialized validators, planning scripts, runtime wrapper scripts, worktree-local runtime state, and proof artifacts. The accepted direction now keeps only the portable docs core in this Program. Runtime installation and Worker-specific operating state are out of scope. The normalized direction is `normalized-track-1.md`. The accepted direction is `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo risks are recorded in `cross-repo-review.md`. The first tooling boundary used `planning-brief-1.md`. The final immutable planning brief is `planning-brief-4.md`, and `current-planning-brief.txt` points at that filename.
 
 Completed prerequisite Programs are `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/program.md` and `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/program.md`. Those Programs shipped the docs-only adoption and apply loop, deterministic quality gates, contract-grade Program and ExecPlan rendering, and Arena CRM proof. They intentionally left package scripts, dependencies, CI mutation, root instruction mutation, runtime code installation, and Worker-specific operating state outside scope.
 
@@ -44,11 +44,13 @@ The first tooling boundary now exists as a dry-run workflow. `docs-operating-sys
 
 The first tooling-apply authority now covers package scripts, exact shared tooling dependency metadata, and generated wrappers. `docs-operating-system-package-script-patching` consumes `.sbs/docs-operating-system-adoption/tooling-plan/install-plan.json`, validates the live `package.json` against the dry-run conflict contract, writes only `package.json`, `scripts/sbs-docs/**`, `.sbs/runs/<workflow-run-id>/**`, and `.sbs/docs-operating-system-adoption/tooling-apply/**`, and blocks stale plans or unrecognized same-name canonical scripts before source writes. It does not run package-manager installs, mutate lockfiles, implement shared validator internals, apply docs, edit root instructions, configure CI/providers, touch runtime state, or wire app-stack commands.
 
-The shared validator command surface now exists behind those wrappers. `ship-by-sunday docs-operating-system programs-lint`, `exec-plans-lint`, `markdown-lint`, and `docs-validate` run bundled validator code from the target repo root; `write-child-plan` creates one Program-linked active ExecPlan without overwriting an existing plan; and `docs-refresh-quality` is recognized but explicitly blocked until a later evidence-bound quality refresh workflow exists.
+The shared validator command surface now exists behind those wrappers. `ship-by-sunday docs-operating-system programs-lint`, `exec-plans-lint`, `markdown-lint`, and `docs-validate` run bundled validator code from the target repo root; `write-child-plan` creates one Program-linked active ExecPlan without overwriting an existing plan; `docs-refresh-quality` updates only `docs/QUALITY_SCORE.md` with evidence from `docs-validate` while preserving owner-authored content outside its managed block; and `native-command-proof` explicitly runs one existing repo-native validation script as passed, failed, or blocked proof without installing an app-stack convention.
 
 The dependency lockfile proof authority now exists behind the package metadata. `docs-operating-system-lockfile-refresh` consumes clean committed dry-run install-plan and package-script apply-summary inputs, re-checks live package scripts and wrappers, requires the pinned `ship-by-sunday` dependency metadata, runs only a bounded lockfile-refresh package-manager command with lifecycle scripts and pnpmfile hooks disabled where supported, writes manager-specific lockfile-refresh artifacts, and fails proof if the package manager mutates guarded package or wrapper inputs or writes the wrong manager's lockfile. It supports Bun, npm, and pnpm bounded lockfile commands, and blocks Yarn until a safe bounded mode exists.
 
-What is still missing is package distribution, full quality refresh mutation, and native command integration. The runner can install command entries and wrapper files, expose package-owned docs commands, and run lockfile-refresh proof, but this Program still does not publish or distribute the runner, configure runtime state, configure CI/providers, or wire app-stack commands.
+The package distribution strategy now exists as local package artifact proof. The `ship-by-sunday` package is shaped as an npm-compatible CLI package with `dist/cli.js` as the shipped bin, a minimal package file whitelist, a `prepack` build hook, and package smoke that proves tarball contents, `bunx` setup pairing, `npx` setup pairing, and installed-package docs command execution. This is not public registry publication, package signing, release automation, or an update channel.
+
+No portable docs-core outcome remains open in this Program. The runner can install command entries and wrapper files, expose package-owned docs commands, run lockfile-refresh proof, prove the local package artifact shape, refresh quality evidence, and run explicit native command proof. This Program still does not publish the runner to a registry, configure runtime state, configure CI/providers, or wire app-stack commands; those remain separate authority classes.
 
 The important boundary is authority. The existing `docs-spine-apply-and-proof` workflow must remain a docs mutation packet. This Program owns the next authority class: a tooling install path that can read package manifests and repo scripts, propose or apply structured package/script/dependency changes, add portable docs validator files, and prove what was installed. Runtime bootstrap, runtime health, `.runtime` state, target-stack process management, CI/provider setup, app-stack command installation, broad root `AGENTS.md` rewrites, and Worker-specific operating state are explicitly out of scope for this Program.
 
@@ -64,6 +66,10 @@ The important boundary is authority. The existing `docs-spine-apply-and-proof` w
 - [x] 2026-05-06 EDT: Implemented the package-owned `ship-by-sunday docs-operating-system` command surface for bundled docs validators and bounded child-plan creation.
 - [x] 2026-05-06 EDT: Hardened command and package-script boundaries after review: child-plan paths are normalized and create-only, `bun run <file>` script recognition is blocked, non-string canonical scripts block, invalid install-plan statuses block, and late partial source writes are reported honestly.
 - [x] 2026-05-06 EDT: Implemented `docs-operating-system-lockfile-refresh` as the package-manager lockfile proof authority after package-script patching, with guarded package inputs and bounded lockfile refs.
+- [x] 2026-05-06 EDT: Implemented package distribution proof for the shared CLI artifact: minimal packed files, `prepack` build, `bunx` and `npx` setup pairing, and installed-package docs command smoke.
+- [x] 2026-05-06 EDT: Implemented evidence-bound `docs-refresh-quality` behavior that creates or updates `docs/QUALITY_SCORE.md`, preserves owner content outside a managed block, records `docs-validate` status, and keeps the current score `not scored`.
+- [x] 2026-05-06 EDT: Implemented explicit `native-command-proof` behavior that selects one existing repo-native validation script, runs it through the detected package manager, and classifies passed, failed, or setup-blocked proof without printing script bodies.
+- [x] 2026-05-06 EDT: Completed this Program and moved it to the completed Program lane after focused package, Program, plan, markdown, and diff validation passed.
 
 ## Decision Log
 
@@ -135,15 +141,29 @@ Decision: Keep `worker-grade` as a quality name, not a Worker clone.
 Rationale: The install profile name should communicate the bar: Worker-grade docs memory, plans, prompts, validators, scripts, and proof. In this Program it resolves only to the portable docs core and does not imply Worker runtime, Worker state, app-stack commands, CI/provider setup, or broad instruction rewrites.
 Date: 2026-05-06
 
+Decision: Treat package distribution as local package artifact proof in this Program.
+Rationale: Generated wrappers need a real `ship-by-sunday` binary to call, so the package tarball must be shaped and smoke-tested. Public registry publication, package signing, release automation, and update channels require separate setup and authority.
+Date: 2026-05-06
+
+Decision: Expose native validation as explicit command proof, not as a generated root script.
+Rationale: The runner should prove a target repo's existing broad validation command when asked, but it should not install or impose app-stack run conventions in customer package manifests.
+Date: 2026-05-06
+
 ## Slice Ledger
 
-The first completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md`. It carries `program_id: worker-grade-docs-operating-system-adoption` and `planning_brief: docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/planning-brief-1.md`.
+The first completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md`. It carries `program_id: worker-grade-docs-operating-system-adoption` and `planning_brief: docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/planning-brief-1.md`.
 
 The second completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-package-script-patching.md`. It carries the same `program_id` and consumes the first child's dry-run install plan.
 
 The third completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-shared-validator-commands.md`. It carries the same `program_id` and implements the package-owned command surface that generated wrappers call.
 
 The fourth completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-lockfile-refresh-proof.md`. It carries the same `program_id` and implements the bounded package-manager lockfile refresh proof after package-script patching.
+
+The fifth completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-package-distribution-proof.md`. It carries the same `program_id` and proves the shared `ship-by-sunday` CLI package artifact shape and docs-command execution path without publishing the package.
+
+The sixth completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-quality-refresh.md`. It carries the same `program_id` and implements the evidence-bound quality refresh command that updates only `docs/QUALITY_SCORE.md` with docs validation status and non-numeric review routing.
+
+The seventh completed child ExecPlan is `docs/exec-plans/completed/2026-05-06-docs-operating-system-native-command-proof.md`. It carries the same `program_id` and implements explicit native command proof for existing repo package scripts without installing app-stack conventions.
 
 Completed prerequisite child ExecPlans from the earlier docs-spine Programs remain useful context:
 
@@ -158,9 +178,9 @@ Completed prerequisite child ExecPlans from the earlier docs-spine Programs rema
 
 ## Next Slice
 
-The next remaining authority slice should be chosen from the unresolved non-runtime Program outcomes: package distribution strategy, evidence-bound quality refresh mutation, or native command integration. Distribution remains intentionally deferred until the local workflows prove useful end to end, and quality refresh should stay separate because it mutates score evidence.
+No required next slice remains in this Program. Future work should start a separate Program or ExecPlan for public package publication, package signing, release automation, CI/provider setup, runtime bootstrap, or app-stack command conventions.
 
-Any next child slice must preserve the dry-run, package-script, shared-command, and lockfile-refresh conflict contracts. Same-name scripts with unrecognized bodies stay blocked unless a later approval explicitly chooses a rename or replacement. Runtime bootstrap, Worker-specific state, CI/provider setup, app-stack command wiring, and broad root `AGENTS.md` rewrites remain out of scope.
+Any future follow-up must preserve the dry-run, package-script, shared-command, lockfile-refresh, package-distribution, quality-refresh, and native-command-proof contracts. Same-name scripts with unrecognized bodies stay blocked unless a later approval explicitly chooses a rename or replacement. Runtime bootstrap, Worker-specific state, CI/provider setup, app-stack command wiring, and broad root `AGENTS.md` rewrites remain out of scope unless a new workflow packet grants that authority.
 
 ## Risks and Watchpoints
 
@@ -180,7 +200,9 @@ Do not call the install complete until a fresh agent can run the documented comm
 
 ## Outcomes & Retrospective
 
-This Program is active. The first shipped outcome is the dry-run install boundary: a customer or operator can ask the local runner for a Worker-grade portable docs tooling plan and see exactly what would be installed, what is already present, what is blocked by owner-defined script names, and what is out of scope. The second shipped outcome is the package-script patching boundary: an approved runner can apply only conflict-free package script, dependency metadata, and wrapper-file operations from that plan while preserving repo ownership and reporting blocked stale/conflicting states. The third shipped outcome is the shared command surface: generated wrappers now call package-owned docs validators and bounded child-plan creation instead of an unknown CLI command. The fourth shipped outcome is lockfile refresh proof: an approved runner can run a bounded package-manager lockfile command, prove only manager-specific touched lockfile refs, and fail honestly if distribution, package-manager behavior, or prior package-patch state is not ready. Remaining Program outcomes are package distribution strategy, evidence-bound quality refresh, and native command integration without widening into runtime or provider setup.
+This Program is complete. The first shipped outcome is the dry-run install boundary: a customer or operator can ask the local runner for a Worker-grade portable docs tooling plan and see exactly what would be installed, what is already present, what is blocked by owner-defined script names, and what is out of scope. The second shipped outcome is the package-script patching boundary: an approved runner can apply only conflict-free package script, dependency metadata, and wrapper-file operations from that plan while preserving repo ownership and reporting blocked stale/conflicting states. The third shipped outcome is the shared command surface: generated wrappers now call package-owned docs validators and bounded child-plan creation instead of an unknown CLI command. The fourth shipped outcome is lockfile refresh proof: an approved runner can run a bounded package-manager lockfile command, prove only manager-specific touched lockfile refs, and fail honestly if package-manager behavior or prior package-patch state is not ready. The fifth shipped outcome is package artifact proof: the shared CLI package now packs only the built command surface and package metadata, and smoke proof runs setup plus docs commands from the packed artifact. The sixth shipped outcome is evidence-bound quality refresh: `docs-refresh-quality` now creates or updates `docs/QUALITY_SCORE.md`, records docs validation status, and preserves non-numeric review routing. The seventh shipped outcome is native command proof: `native-command-proof` runs one existing broad package script through the detected package manager and reports passed, failed, or blocked proof without printing script bodies.
+
+Residual risks are accepted and scoped. The package is npm-format compatible but still requires Bun at runtime because the shipped `dist/cli.js` has a Bun shebang. Package smoke proves local packed-tarball behavior, not registry publication, signing, CI release automation, update channels, or non-Bun hosts. Native command proof can run a repo's existing package script and report status, but it does not install missing dependencies, clean up script side effects, or bless app-stack conventions.
 
 ## Validation and Acceptance
 
@@ -193,6 +215,9 @@ Program-level acceptance requires the local runner to support a portable docs op
 - install profiles resolved into explicit module states
 - `worker-grade` resolved into portable docs core modules only
 - root script wrappers or equivalent package-manager-specific command wiring
+- package artifact proof for the shared `ship-by-sunday` command surface that generated wrappers call
+- evidence-bound `docs-refresh-quality` behavior that mutates only `docs/QUALITY_SCORE.md` and keeps `## Current Score` non-numeric
+- explicit `native-command-proof` behavior that runs existing repo-native validation scripts as passed, failed, or blocked proof without installing app-stack conventions
 - first-class proof artifacts for install, validation, and blocked native setup
 - same-name file conflict behavior covered by tests and proof
 - real-repo dry runs against Worker, Ship by Sunday, Arena CRM, and a sparse repo fixture
@@ -201,11 +226,11 @@ Validation commands for this Program packet are:
 
 ```bash
 bun run programs:lint
-bun run markdown:lint -- --paths docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption docs/programs/active/index.md
+bun run markdown:lint -- --paths docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption docs/programs/active/index.md docs/programs/completed/index.md
 git diff --check
 ```
 
-Child ExecPlans must add focused local-runner tests for scanner facts, install-plan synthesis, conflict detection, package-script patching, validator installation, proof artifacts, and real-repo dry-run fixtures.
+Child ExecPlans added focused local-runner tests for scanner facts, install-plan synthesis, conflict detection, package-script patching, validator installation, lockfile proof, package artifact proof, quality refresh, native command proof, and real-repo dry-run fixtures.
 
 ## Artifacts and Notes
 

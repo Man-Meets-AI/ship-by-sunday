@@ -27,7 +27,7 @@ After this slice, Parker should be able to run one local-runner workflow and ins
 
 ## Progress
 
-- [x] 2026-05-06 EDT: Created this ExecPlan from `docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/planning-brief-1.md`.
+- [x] 2026-05-06 EDT: Created this ExecPlan from `docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/planning-brief-1.md`.
 - [x] 2026-05-06 EDT: Read the required implementation context before editing: root `AGENTS.md`, `docs/exec-plans/PLANS.md`, the owning Program packet, `docs/internal/workflow-packets.md`, and the local-runner workflow dispatch files.
 - [x] 2026-05-06 EDT: Added the dry-run `docs-operating-system-adoption` workflow packet, manifest constants, workflow dispatch, daemon dispatch, and proof artifacts.
 - [x] 2026-05-06 EDT: Added the portable docs install-plan schema and deterministic planner.
@@ -123,8 +123,8 @@ Work from `/Users/bazelrex/Developer/ship-by-sunday`.
 
 Read the context first:
 
-    sed -n '1,240p' docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
-    sed -n '1,140p' docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/planning-brief-1.md
+    sed -n '1,240p' docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
+    sed -n '1,140p' docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/planning-brief-1.md
     sed -n '1,260p' docs/exec-plans/PLANS.md
 
 Add workflow constants and schemas under:
@@ -197,9 +197,9 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run --cwd packages/local-runner lint
     bun run --cwd packages/local-runner typecheck
     bun run --cwd packages/local-runner format:check
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-06-worker-grade-docs-tooling-install-boundary.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/active/2026-05-06-worker-grade-docs-tooling-install-boundary.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md
     git diff --check
 
 If the real-repo eval cannot run because a local comparison repo is missing, record the missing path in this ExecPlan and in the Program before calling the slice complete. Do not substitute synthetic confidence for the real-repo proof unless Parker explicitly changes the acceptance bar.

@@ -1,6 +1,8 @@
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { runBoundedProcess } from "../core/bounded-process";
 import {
 	parseLintCommandArgs,
 	validatePlanPath,
@@ -9,7 +11,6 @@ import {
 	formatExecPlanLintReports,
 	lintExecPlans,
 } from "../../../../scripts/exec-plan/plan-lint";
-import { runExecPlanLint } from "../../../../scripts/exec-plan/run-lint";
 import {
 	formatMarkdownMetadataLintReports,
 	lintMarkdownMetadata,
@@ -33,6 +34,7 @@ Usage:
   ship-by-sunday docs-operating-system markdown-lint [--paths <path...>] [--format text|json] [--repo <path>]
   ship-by-sunday docs-operating-system docs-validate [--repo <path>]
   ship-by-sunday docs-operating-system docs-refresh-quality [--repo <path>]
+  ship-by-sunday docs-operating-system native-command-proof [--repo <path>]
   ship-by-sunday docs-operating-system write-child-plan --program-id <id> --plan <path> --title <title> --summary <summary> [--repo <path>]
 `;
 
@@ -57,6 +59,22 @@ type WriteChildPlanOptions = {
 	summary: string;
 	title: string;
 };
+
+const QUALITY_SCORE_REF = "docs/QUALITY_SCORE.md";
+const QUALITY_REFRESH_START = "<!-- sbs-docs-quality-refresh:start -->";
+const QUALITY_REFRESH_END = "<!-- sbs-docs-quality-refresh:end -->";
+const QUALITY_VALIDATE_COMMAND =
+	"ship-by-sunday docs-operating-system docs-validate";
+const NATIVE_COMMAND_SCRIPT_PRIORITY = [
+	"gate",
+	"check",
+	"ci",
+	"proof",
+	"test",
+	"lint",
+	"typecheck",
+	"build",
+] as const;
 
 export async function runDocsOperatingSystemCommand(
 	argv = process.argv.slice(2),
@@ -85,7 +103,7 @@ export async function runDocsOperatingSystemCommand(
 			return 0;
 		}
 
-		const result = await runExecPlanLint({
+		const result = await runExecPlansLint({
 			repoRootDir,
 			planPaths: parseResult.options.planPaths,
 		});
@@ -126,16 +144,23 @@ export async function runDocsOperatingSystemCommand(
 	}
 
 	if (subcommand === "docs-refresh-quality") {
-		const { remainingArgs } = parseRepoArgs(subcommandArgs);
+		const { repoRootDir, remainingArgs } = parseRepoArgs(subcommandArgs);
 		if (remainingArgs.includes("--help")) {
 			console.log(buildDocsRefreshQualityUsage());
 			return 0;
 		}
 		assertNoArgs(remainingArgs, buildDocsRefreshQualityUsage());
-		console.error(
-			"docs-refresh-quality requires a later evidence-bound quality refresh workflow. Run docs-validate for read-only docs proof.",
-		);
-		return 1;
+		return printValidationResult(await runDocsRefreshQuality(repoRootDir));
+	}
+
+	if (subcommand === "native-command-proof") {
+		const { repoRootDir, remainingArgs } = parseRepoArgs(subcommandArgs);
+		if (remainingArgs.includes("--help")) {
+			console.log(buildNativeCommandProofUsage());
+			return 0;
+		}
+		assertNoArgs(remainingArgs, buildNativeCommandProofUsage());
+		return printValidationResult(await runNativeCommandProof(repoRootDir));
 	}
 
 	if (subcommand === "write-child-plan") {
@@ -232,6 +257,21 @@ async function runProgramsLint(repoRootDir: string): Promise<ValidationResult> {
 	};
 }
 
+async function runExecPlansLint(params: {
+	planPaths: string[];
+	repoRootDir: string;
+}) {
+	const reports = await lintExecPlans({
+		repoRootDir: params.repoRootDir,
+		planPaths: params.planPaths,
+	});
+	return {
+		reportText: formatExecPlanLintReports(reports).trimEnd(),
+		failedPlanCount: reports.filter((report) => report.issues.length > 0)
+			.length,
+	};
+}
+
 async function lintProgramMarkdownDocs(repoRootDir: string): Promise<
 	| {
 			failed: false;
@@ -299,6 +339,539 @@ async function runDocsValidate(repoRootDir: string): Promise<ValidationResult> {
 		exitCode,
 		outputText,
 	};
+}
+
+async function runDocsRefreshQuality(
+	repoRootDir: string,
+): Promise<ValidationResult> {
+	const qualityScorePath = path.join(repoRootDir, QUALITY_SCORE_REF);
+	await mkdir(path.dirname(qualityScorePath), { recursive: true });
+	const existingContent = await readQualityScoreFile(qualityScorePath);
+	const baseContent = existingContent ?? buildQualityScoreScaffold();
+	await writeFile(qualityScorePath, baseContent, "utf8");
+
+	const validationResult = await runDocsValidate(repoRootDir);
+	const refreshedContent = mergeQualityRefreshBlock({
+		markdown: baseContent,
+		refreshedAt: new Date().toISOString(),
+		validationResult,
+	});
+	await writeFile(qualityScorePath, refreshedContent, "utf8");
+
+	const status = validationResult.exitCode === 0 ? "passed" : "failed";
+	return {
+		exitCode: validationResult.exitCode,
+		outputText: [
+			`Refreshed ${QUALITY_SCORE_REF}.`,
+			`${QUALITY_VALIDATE_COMMAND}: ${status}`,
+			`Summary: ${summarizeValidationResult(validationResult)}`,
+		].join("\n"),
+	};
+}
+
+async function readQualityScoreFile(qualityScorePath: string) {
+	try {
+		return await readFile(qualityScorePath, "utf8");
+	} catch (error) {
+		if (isMissingPathError(error)) {
+			return null;
+		}
+		throw error;
+	}
+}
+
+function buildQualityScoreScaffold() {
+	return [
+		"---",
+		"title: 'Quality Score'",
+		"summary: 'Evidence-bound docs operating-system quality evidence for this repository.'",
+		"docType: 'guide'",
+		"status: 'active'",
+		"read_when:",
+		"  - 'Refreshing docs operating-system quality evidence.'",
+		"  - 'Reviewing the latest docs validation status.'",
+		"---",
+		"",
+		"# Quality Score",
+		"",
+		"This file records evidence-bound docs quality status for this repository.",
+		"",
+		"## Owns",
+		"",
+		"- repo-wide docs quality evidence refreshed by Ship by Sunday docs operating-system commands",
+		"- routing from validation results to durable Program or ExecPlan follow-up",
+		"",
+		"## Does Not Own",
+		"",
+		"- invented numeric quality scores",
+		"- runtime setup, provider setup, package publication, or app-stack command wiring",
+		"",
+		"## Next",
+		"",
+		"- Use the managed review block for the latest docs operating-system quality evidence.",
+		"",
+	].join("\n");
+}
+
+function mergeQualityRefreshBlock(params: {
+	markdown: string;
+	refreshedAt: string;
+	validationResult: ValidationResult;
+}) {
+	const markdownWithoutOldBlock = stripExistingQualityRefreshBlock(
+		params.markdown,
+	);
+	const block = buildQualityRefreshBlock({
+		includeCurrentFindings: !hasMarkdownHeading(
+			markdownWithoutOldBlock,
+			"Current Findings",
+		),
+		includeCurrentScore: !hasMarkdownHeading(
+			markdownWithoutOldBlock,
+			"Current Score",
+		),
+		includeLayerSummary: !hasMarkdownHeading(
+			markdownWithoutOldBlock,
+			"Architectural Layers",
+		),
+		includeProductSummary: !hasMarkdownHeading(
+			markdownWithoutOldBlock,
+			"Product Domains",
+		),
+		includeSeverityFramework: !hasMarkdownHeading(
+			markdownWithoutOldBlock,
+			"Severity Framework",
+		),
+		refreshedAt: params.refreshedAt,
+		validationResult: params.validationResult,
+	});
+
+	const normalizedBlock = `${block.trimEnd()}\n`;
+	if (markdownWithoutOldBlock !== params.markdown) {
+		return `${markdownWithoutOldBlock.trimEnd()}\n\n${normalizedBlock}`;
+	}
+	return `${params.markdown.trimEnd()}\n\n${normalizedBlock}`;
+}
+
+function stripExistingQualityRefreshBlock(markdown: string) {
+	const startIndex = markdown.indexOf(QUALITY_REFRESH_START);
+	if (startIndex === -1) {
+		return markdown;
+	}
+	const endIndex = markdown.indexOf(QUALITY_REFRESH_END, startIndex);
+	if (endIndex === -1) {
+		return `${markdown.slice(0, startIndex).trimEnd()}\n`;
+	}
+	const afterEndIndex = endIndex + QUALITY_REFRESH_END.length;
+	const before = markdown.slice(0, startIndex).trimEnd();
+	const after = markdown.slice(afterEndIndex).trimStart();
+	if (before === "") {
+		return after;
+	}
+	if (after === "") {
+		return `${before}\n`;
+	}
+	return `${before}\n\n${after}`;
+}
+
+function buildQualityRefreshBlock(params: {
+	includeCurrentFindings: boolean;
+	includeCurrentScore: boolean;
+	includeLayerSummary: boolean;
+	includeProductSummary: boolean;
+	includeSeverityFramework: boolean;
+	refreshedAt: string;
+	validationResult: ValidationResult;
+}) {
+	const status = params.validationResult.exitCode === 0 ? "passed" : "failed";
+	const lines = [QUALITY_REFRESH_START];
+
+	if (params.includeCurrentScore) {
+		lines.push(
+			"",
+			"## Current Score",
+			"",
+			"`not scored` until a quality audit records evidence refs, reviewer, date, score rationale, and scoring rules.",
+		);
+	}
+
+	if (params.includeProductSummary) {
+		lines.push(
+			"",
+			"## Product Domains",
+			"",
+			"- Not assessed by this docs operating-system refresh.",
+		);
+	}
+
+	if (params.includeLayerSummary) {
+		lines.push(
+			"",
+			"## Architectural Layers",
+			"",
+			"- Not assessed by this docs operating-system refresh.",
+		);
+	}
+
+	if (params.includeCurrentFindings) {
+		lines.push(
+			"",
+			"## Current Findings",
+			"",
+			"- The latest managed refresh records docs validation evidence below.",
+		);
+	}
+
+	if (params.includeSeverityFramework) {
+		lines.push(
+			"",
+			"## Severity Framework",
+			"",
+			"- `passed`: the docs validation command returned zero.",
+			"- `failed`: the docs validation command returned non-zero and needs follow-up.",
+			"- `blocked`: a required docs surface or local setup was missing.",
+		);
+	}
+
+	lines.push(
+		"",
+		"## QUALITY_SCORE.review",
+		"",
+		`Last refreshed: ${params.refreshedAt}`,
+		"",
+		"Reviewer: `ship-by-sunday docs-operating-system docs-refresh-quality`",
+		"",
+		"Current score: `not scored`",
+		"",
+		"### Evidence Commands",
+		"",
+		`- \`${QUALITY_VALIDATE_COMMAND}\`: ${status}`,
+		"  Evidence refs: `docs/`, `docs/programs/`, `docs/exec-plans/active/`",
+		`  Summary: ${summarizeValidationResult(params.validationResult)}`,
+		"",
+		"### Follow-Up Routing",
+		"",
+		status === "passed"
+			? "- Keep this file refreshed after docs operating-system changes."
+			: "- Run `ship-by-sunday docs-operating-system docs-validate` for full local detail, then route durable follow-up into Program or ExecPlan docs.",
+		"",
+		QUALITY_REFRESH_END,
+	);
+
+	return lines.join("\n");
+}
+
+function hasMarkdownHeading(markdown: string, heading: string) {
+	const escapedHeading = escapeRegExp(heading);
+	return new RegExp(`^##\\s+${escapedHeading}\\s*$`, "m").test(markdown);
+}
+
+function escapeRegExp(value: string) {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function summarizeValidationResult(result: ValidationResult) {
+	if (result.exitCode === 0) {
+		return "All docs operating-system validation checks passed.";
+	}
+	const lines = result.outputText
+		.split(/\r?\n/)
+		.map((line) => sanitizeEvidenceLine(line))
+		.filter((line) => line !== "");
+	const firstIssue = lines.find(
+		(line) =>
+			/(missing|failed|invalid|error|required|frontmatter|issue)/i.test(line) &&
+			!/: ok$/i.test(line),
+	);
+	return (
+		firstIssue ??
+		"Docs validation failed; run the validation command locally for details."
+	);
+}
+
+function sanitizeEvidenceLine(line: string) {
+	return line
+		.replace(/\/Users\/[^\s`'")]+/g, "<local-path>")
+		.replace(/\/private\/var\/[^\s`'")]+/g, "<local-path>")
+		.replace(/[A-Za-z]:\\[^\s`'")]+/g, "<local-path>")
+		.replace(/\s+/g, " ")
+		.trim()
+		.slice(0, 220);
+}
+
+async function runNativeCommandProof(
+	repoRootDir: string,
+): Promise<ValidationResult> {
+	const packageScripts = await readNativePackageScripts(repoRootDir);
+	if (packageScripts.status === "blocked") {
+		return buildNativeCommandProofResult({
+			commandName: "none",
+			status: "blocked",
+			summary: packageScripts.reason,
+		});
+	}
+	const scriptSelection = selectNativeCommandScript(packageScripts.scripts);
+	if (scriptSelection.status === "blocked") {
+		return buildNativeCommandProofResult({
+			commandName: "none",
+			status: "blocked",
+			summary: scriptSelection.reason,
+		});
+	}
+	const lifecycleHooks = listNativeCommandLifecycleHooks(
+		packageScripts.scripts,
+		scriptSelection.scriptName,
+	);
+	if (lifecycleHooks.length > 0) {
+		return buildNativeCommandProofResult({
+			commandName: "none",
+			status: "blocked",
+			summary: `Native validation script '${scriptSelection.scriptName}' has lifecycle hooks that would run outside the selected script: ${lifecycleHooks.join(", ")}.`,
+		});
+	}
+
+	const nativeCommand = buildNativePackageCommand({
+		packageManager: detectNativePackageManager(repoRootDir),
+		scriptName: scriptSelection.scriptName,
+	});
+	const result = await runBoundedProcess({
+		command: nativeCommand.command,
+		args: nativeCommand.args,
+		cwd: repoRootDir,
+		timeoutMs: 120_000,
+	});
+	if (result.succeeded) {
+		return buildNativeCommandProofResult({
+			commandName: nativeCommand.commandName,
+			status: "passed",
+			summary: "passed",
+		});
+	}
+
+	const outputSummary = summarizeNativeCommandOutput(result);
+	const blockedBySetup = isNativeCommandSetupBlocker(outputSummary);
+	return buildNativeCommandProofResult({
+		commandName: nativeCommand.commandName,
+		status: blockedBySetup ? "blocked" : "failed",
+		summary: result.timedOut
+			? "command timed out"
+			: outputSummary || (result.failureCode ?? "native command failed"),
+	});
+}
+
+async function readNativePackageScripts(
+	repoRootDir: string,
+): Promise<
+	| { status: "ready"; scripts: Record<string, unknown> }
+	| { status: "blocked"; reason: string }
+> {
+	const packageJsonPath = path.join(repoRootDir, "package.json");
+	let rawPackageJson: string;
+	try {
+		rawPackageJson = await readFile(packageJsonPath, "utf8");
+	} catch (error) {
+		if (isMissingPathError(error)) {
+			return {
+				status: "blocked",
+				reason: "Root package.json was not found.",
+			};
+		}
+		throw error;
+	}
+
+	let parsedPackageJson: unknown;
+	try {
+		parsedPackageJson = JSON.parse(rawPackageJson);
+	} catch {
+		return {
+			status: "blocked",
+			reason: "Root package.json is not valid JSON.",
+		};
+	}
+
+	if (!isRecord(parsedPackageJson) || !isRecord(parsedPackageJson.scripts)) {
+		return {
+			status: "blocked",
+			reason: "Root package.json does not define scripts.",
+		};
+	}
+
+	return {
+		status: "ready",
+		scripts: parsedPackageJson.scripts,
+	};
+}
+
+function selectNativeCommandScript(
+	scripts: Record<string, unknown>,
+):
+	| { status: "ready"; scriptName: string }
+	| { status: "blocked"; reason: string } {
+	const scriptName = NATIVE_COMMAND_SCRIPT_PRIORITY.find((candidate) =>
+		Object.hasOwn(scripts, candidate),
+	);
+	if (!scriptName) {
+		return {
+			status: "blocked",
+			reason:
+				"No recognized native validation script was found. Expected one of: gate, check, ci, proof, test, lint, typecheck, build.",
+		};
+	}
+	if (typeof scripts[scriptName] !== "string") {
+		return {
+			status: "blocked",
+			reason: `Native validation script '${scriptName}' is not a string.`,
+		};
+	}
+	return {
+		status: "ready",
+		scriptName,
+	};
+}
+
+function listNativeCommandLifecycleHooks(
+	scripts: Record<string, unknown>,
+	scriptName: string,
+) {
+	return [`pre${scriptName}`, `post${scriptName}`].filter((hookName) =>
+		Object.hasOwn(scripts, hookName),
+	);
+}
+
+function detectNativePackageManager(repoRootDir: string) {
+	if (
+		existsSync(path.join(repoRootDir, "bun.lock")) ||
+		existsSync(path.join(repoRootDir, "bun.lockb"))
+	) {
+		return "bun";
+	}
+	if (existsSync(path.join(repoRootDir, "pnpm-lock.yaml"))) {
+		return "pnpm";
+	}
+	if (existsSync(path.join(repoRootDir, "yarn.lock"))) {
+		return "yarn";
+	}
+	return "npm";
+}
+
+function buildNativePackageCommand({
+	packageManager,
+	scriptName,
+}: {
+	packageManager: string;
+	scriptName: string;
+}) {
+	if (packageManager === "bun") {
+		return {
+			command: "bun",
+			args: ["run", "--silent", scriptName],
+			commandName: `bun run ${scriptName}`,
+		};
+	}
+	if (packageManager === "pnpm") {
+		return {
+			command: "pnpm",
+			args: ["run", scriptName],
+			commandName: `pnpm run ${scriptName}`,
+		};
+	}
+	if (packageManager === "yarn") {
+		return {
+			command: "yarn",
+			args: [scriptName],
+			commandName: `yarn ${scriptName}`,
+		};
+	}
+	return {
+		command: "npm",
+		args: ["run", "--ignore-scripts", scriptName],
+		commandName: `npm run ${scriptName}`,
+	};
+}
+
+function buildNativeCommandProofResult(params: {
+	commandName: string;
+	status: "passed" | "failed" | "blocked";
+	summary: string;
+}): ValidationResult {
+	return {
+		exitCode: params.status === "passed" ? 0 : 1,
+		outputText: [
+			`Native command: ${params.commandName}`,
+			`Status: ${params.status}`,
+			`Summary: ${sanitizeEvidenceLine(params.summary)}`,
+		].join("\n"),
+	};
+}
+
+function summarizeNativeCommandOutput(result: {
+	stdout: string;
+	stderr: string;
+	timedOut: boolean;
+	exitCode?: number;
+	failureCode?: string;
+}) {
+	if (result.timedOut) {
+		return "command timed out";
+	}
+	const outputLines = [result.stderr, result.stdout]
+		.join("\n")
+		.split(/\r?\n/)
+		.map((line) => sanitizeEvidenceLine(line))
+		.filter(
+			(line) => line !== "" && !line.startsWith(">") && !line.startsWith("$ "),
+		);
+	const explicitSetupBlockerLines = outputLines.filter((line) =>
+		/(error: cannot find package|cannot find (module|package)|could not resolve|module not found|missing dependency|enoent|spawnsync? .*enoent|failed to run biome|happy-dom)/i.test(
+			line,
+		),
+	);
+	const setupBlockerLines = outputLines.filter(
+		(line) =>
+			isNativeCommandMissingLine(line) &&
+			!explicitSetupBlockerLines.includes(line),
+	);
+	const genericFailureLines = outputLines.filter(
+		(line) =>
+			/(error|failed|failure|timed out|assertion)/i.test(line) &&
+			!explicitSetupBlockerLines.includes(line) &&
+			!setupBlockerLines.includes(line),
+	);
+	const classifiedOutput = [
+		...explicitSetupBlockerLines.slice(0, 4),
+		...setupBlockerLines.slice(0, 2),
+		...genericFailureLines.slice(0, 2),
+	].slice(0, 6);
+	const combinedOutput = (
+		classifiedOutput.length > 0 ? classifiedOutput : outputLines.slice(0, 2)
+	).join(" | ");
+	const exitCodeSummary =
+		typeof result.exitCode === "number"
+			? `exit ${result.exitCode}`
+			: (result.failureCode ?? "failed");
+	if (!combinedOutput) {
+		return exitCodeSummary;
+	}
+	return `${exitCodeSummary}: ${combinedOutput}`.slice(0, 700);
+}
+
+function isNativeCommandSetupBlocker(outputSummary: string) {
+	return (
+		/(cannot find (module|package)|could not resolve|module not found|missing dependency|enoent|spawn .* enoent|failed to run biome)/i.test(
+			outputSummary,
+		) || isNativeCommandMissingLine(outputSummary)
+	);
+}
+
+function isNativeCommandMissingLine(line: string) {
+	return (
+		/\bcommand not found\b/i.test(line) ||
+		/\bnot found:\s*[^\s|]+(?:\s*\|.*)?$/i.test(line)
+	);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 async function runMarkdownDocsValidation(
@@ -721,6 +1294,10 @@ function buildDocsValidateUsage() {
 
 function buildDocsRefreshQualityUsage() {
 	return "Usage: ship-by-sunday docs-operating-system docs-refresh-quality [--repo <path>]";
+}
+
+function buildNativeCommandProofUsage() {
+	return "Usage: ship-by-sunday docs-operating-system native-command-proof [--repo <path>]";
 }
 
 function buildMarkdownLintUsage() {

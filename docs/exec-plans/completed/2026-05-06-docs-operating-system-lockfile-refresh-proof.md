@@ -69,7 +69,7 @@ Hosted approval, resolve, claim, proof-ref validation, and the workspace finding
 
 ## Context and Orientation
 
-The docs operating-system Program lives at `docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/program.md`. It says the next remaining authority slice is package-manager install proof and lockfile refresh, and it explicitly excludes runner distribution, runtime setup, Worker-specific state, CI/provider setup, app-stack command wiring, and broad root `AGENTS.md` rewrites.
+The docs operating-system Program lives at `docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md`. It says the next remaining authority slice is package-manager install proof and lockfile refresh, and it explicitly excludes runner distribution, runtime setup, Worker-specific state, CI/provider setup, app-stack command wiring, and broad root `AGENTS.md` rewrites.
 
 The dry-run workflow is `packages/local-runner/src/core/docs-operating-system-adoption-workflow.ts`. It writes `.sbs/docs-operating-system-adoption/tooling-plan/install-plan.json` and does not mutate package manifests or lockfiles.
 
@@ -155,7 +155,7 @@ If hosted approval is touched, update focused app tests:
 Update durable docs:
 
     docs/internal/workflow-packets.md
-    docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
+    docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
     docs/exec-plans/completed/2026-05-06-docs-operating-system-lockfile-refresh-proof.md
 
 ## Validation and Acceptance
@@ -175,7 +175,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
 - bun run --cwd packages/local-runner format:check
 - bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-06-docs-operating-system-lockfile-refresh-proof.md
 - bun run programs:lint
-- bun run markdown:lint -- --paths docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-docs-operating-system-lockfile-refresh-proof.md docs/internal/workflow-packets.md
+- bun run markdown:lint -- --paths docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-docs-operating-system-lockfile-refresh-proof.md docs/internal/workflow-packets.md
 - git diff --check
 
 If hosted app code is touched, also run:

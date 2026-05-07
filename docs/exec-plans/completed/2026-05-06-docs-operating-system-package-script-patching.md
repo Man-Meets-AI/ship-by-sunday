@@ -112,7 +112,7 @@ Work from `/Users/bazelrex/Developer/ship-by-sunday`.
 
 Read the implementation context:
 
-    sed -n '1,260p' docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
+    sed -n '1,260p' docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
     sed -n '1,320p' docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md
     sed -n '1,260p' packages/local-runner/src/workflows/docs-operating-system-adoption/manifest.ts
     sed -n '1,360p' packages/local-runner/src/workflows/docs-operating-system-adoption/install-plan.ts
@@ -138,7 +138,7 @@ Add focused tests:
 Update durable docs:
 
     docs/internal/workflow-packets.md
-    docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
+    docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
     docs/exec-plans/completed/2026-05-06-docs-operating-system-package-script-patching.md
 
 If hosted approval surfaces are included, first read `apps/web/AGENTS.md` and `apps/web/convex/_generated/ai/guidelines.md`, then update the minimal app files and their focused unit tests.
@@ -160,7 +160,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run --cwd packages/local-runner format:check
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-06-docs-operating-system-package-script-patching.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-docs-operating-system-package-script-patching.md docs/internal/workflow-packets.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-docs-operating-system-package-script-patching.md docs/internal/workflow-packets.md
     git diff --check
 
 If app-hosted approval code is touched, also run the focused app tests for workflow runner events and findings read models.

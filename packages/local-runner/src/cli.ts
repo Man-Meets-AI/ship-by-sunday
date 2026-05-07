@@ -24,7 +24,7 @@ Usage:
   ship-by-sunday one-shot [--repo <path>] [--json]
   ship-by-sunday doctor-pass run [--repo <path>] [--json] [--local-only]
   ship-by-sunday doctor-pass upload --run-id <id> [--repo <path>] [--json]
-  ship-by-sunday docs-operating-system <programs-lint|exec-plans-lint|markdown-lint|docs-validate|docs-refresh-quality|write-child-plan> [--repo <path>]
+  ship-by-sunday docs-operating-system <programs-lint|exec-plans-lint|markdown-lint|docs-validate|docs-refresh-quality|native-command-proof|write-child-plan> [--repo <path>]
   ship-by-sunday workflow source-truth-readiness run --workflow-run-id <id> --confirm-local-writes [--repo <path>] [--json]
   ship-by-sunday workflow observability-debuggability run --workflow-run-id <id> --confirm-observability-audit [--repo <path>] [--json]
   ship-by-sunday workflow broken-app-triage run --workflow-run-id <id> --confirm-read-only-reproduction [--repo <path>] [--json]

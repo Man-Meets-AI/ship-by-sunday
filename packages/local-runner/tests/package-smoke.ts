@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
@@ -97,10 +97,12 @@ try {
 		);
 	}
 	const packageTarballPath = readPackedTarballPath(packagePackResult.stdout);
+	await assertPackedTarballContents(packageTarballPath);
 	const bunxRepositoryRoot = await createSmokeRepository(
 		"sbs-bunx-smoke-repo-",
 	);
 	const npxRepositoryRoot = await createSmokeRepository("sbs-npx-smoke-repo-");
+	const docsCommandRepositoryRoot = await createDocsCommandRepository();
 
 	await runSmokePairCommand({
 		commandName: "bunx",
@@ -140,6 +142,10 @@ try {
 		],
 		repositoryRoot: npxRepositoryRoot,
 	});
+	await runInstalledDocsCommandSmoke({
+		packageTarballPath,
+		repositoryRoot: docsCommandRepositoryRoot,
+	});
 	if (!existsSync(path.join(runnerHome, "credentials.json"))) {
 		throw new Error("package smoke did not write runner credentials");
 	}
@@ -157,6 +163,36 @@ async function createSmokeRepository(prefix: string) {
 	await writeFile(
 		path.join(repositoryRoot, "package.json"),
 		'{"name":"smoke"}\n',
+	);
+	return repositoryRoot;
+}
+
+async function createDocsCommandRepository() {
+	const repositoryRoot = await mkdtemp(
+		path.join(os.tmpdir(), "sbs-docs-command-smoke-repo-"),
+	);
+	await writeFile(
+		path.join(repositoryRoot, "package.json"),
+		'{"name":"docs-command-smoke","private":true}\n',
+	);
+	await mkdir(path.join(repositoryRoot, "docs"), { recursive: true });
+	await writeFile(
+		path.join(repositoryRoot, "docs", "index.md"),
+		[
+			"---",
+			"title: Docs Index",
+			"summary: First-hop map for package distribution smoke proof.",
+			"docType: readme",
+			"status: active",
+			"read_when:",
+			"  - Verifying package-distributed docs tooling.",
+			"---",
+			"",
+			"# Docs Index",
+			"",
+			"This file proves the packed CLI can run docs operating-system commands.",
+			"",
+		].join("\n"),
 	);
 	return repositoryRoot;
 }
@@ -182,6 +218,91 @@ async function runSmokePairCommand({
 		throw new Error(
 			`${commandName} package smoke did not write .sbs/config.json`,
 		);
+	}
+}
+
+async function runInstalledDocsCommandSmoke({
+	packageTarballPath,
+	repositoryRoot,
+}: {
+	packageTarballPath: string;
+	repositoryRoot: string;
+}) {
+	const installResult = await runProcess(
+		"npm",
+		[
+			"install",
+			"--ignore-scripts",
+			"--audit=false",
+			"--fund=false",
+			"--save-dev",
+			packageTarballPath,
+		],
+		{ cwd: repositoryRoot },
+	);
+	if (installResult.exitCode !== 0) {
+		throw new Error(
+			`installed package smoke dependency install failed with ${installResult.exitCode}\nSTDOUT:\n${installResult.stdout}\nSTDERR:\n${installResult.stderr}`,
+		);
+	}
+
+	const docsCommandResult = await runProcess(
+		"npm",
+		[
+			"exec",
+			"--",
+			"ship-by-sunday",
+			"docs-operating-system",
+			"markdown-lint",
+			"--repo",
+			repositoryRoot,
+			"--paths",
+			"docs/index.md",
+		],
+		{ cwd: repositoryRoot },
+	);
+	if (docsCommandResult.exitCode !== 0) {
+		throw new Error(
+			`installed package docs command smoke failed with ${docsCommandResult.exitCode}\nSTDOUT:\n${docsCommandResult.stdout}\nSTDERR:\n${docsCommandResult.stderr}`,
+		);
+	}
+	if (!docsCommandResult.stdout.includes("docs/index.md: ok")) {
+		throw new Error(
+			`installed package docs command smoke did not lint docs/index.md\nSTDOUT:\n${docsCommandResult.stdout}\nSTDERR:\n${docsCommandResult.stderr}`,
+		);
+	}
+}
+
+async function assertPackedTarballContents(packageTarballPath: string) {
+	const listResult = await runProcess("tar", ["-tf", packageTarballPath]);
+	if (listResult.exitCode !== 0) {
+		throw new Error(
+			`package tarball listing failed with ${listResult.exitCode}\nSTDOUT:\n${listResult.stdout}\nSTDERR:\n${listResult.stderr}`,
+		);
+	}
+	const entries = listResult.stdout
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.filter(Boolean);
+	const requiredEntries = ["package/package.json", "package/dist/cli.js"];
+	for (const requiredEntry of requiredEntries) {
+		if (!entries.includes(requiredEntry)) {
+			throw new Error(
+				`package tarball is missing ${requiredEntry}\nEntries:\n${entries.join("\n")}`,
+			);
+		}
+	}
+	const forbiddenPrefixes = [
+		"package/src/",
+		"package/tests/",
+		"package/node_modules/",
+	];
+	for (const forbiddenPrefix of forbiddenPrefixes) {
+		if (entries.some((entry) => entry.startsWith(forbiddenPrefix))) {
+			throw new Error(
+				`package tarball included forbidden ${forbiddenPrefix} entries\nEntries:\n${entries.join("\n")}`,
+			);
+		}
 	}
 }
 

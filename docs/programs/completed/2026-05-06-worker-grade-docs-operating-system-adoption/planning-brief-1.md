@@ -58,9 +58,9 @@ SBS_DOCS_SPINE_REAL_REPO_EVAL=1 bun run --cwd packages/local-runner test -- docs
 bun run --cwd packages/local-runner lint
 bun run --cwd packages/local-runner typecheck
 bun run --cwd packages/local-runner format:check
-bun run plans:lint -- --plan docs/exec-plans/active/2026-05-06-worker-grade-docs-tooling-install-boundary.md
+bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md
 bun run programs:lint
-bun run markdown:lint -- --paths docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/active/2026-05-06-worker-grade-docs-tooling-install-boundary.md
+bun run markdown:lint -- --paths docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-worker-grade-docs-tooling-install-boundary.md
 git diff --check
 ```
 

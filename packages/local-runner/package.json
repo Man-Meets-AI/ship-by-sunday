@@ -6,9 +6,13 @@
 	"bin": {
 		"ship-by-sunday": "./dist/cli.js"
 	},
+	"files": [
+		"dist/cli.js"
+	],
 	"scripts": {
 		"ship-by-sunday": "bun src/cli.ts",
 		"build": "bun build ./src/cli.ts --target=bun --outfile=dist/cli.js && chmod +x dist/cli.js",
+		"prepack": "bun run build",
 		"lint": "oxlint -c ../../.oxlintrc.json --deny-warnings src tests vitest.config.ts",
 		"format": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore .",
 		"format:check": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore --check .",

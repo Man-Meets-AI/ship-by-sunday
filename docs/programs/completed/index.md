@@ -18,6 +18,7 @@ The Program must satisfy [PROGRAMS.md](../PROGRAMS.md), use `status: complete`, 
 
 Completed Program folders:
 
+- `docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/`: completed local-runner docs operating-system adoption that added dry-run install planning, bounded package-script and wrapper patching, shared validator commands, lockfile refresh proof, package artifact proof, quality refresh, and native command proof.
 - `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`: completed docs-spine adoption reset that added deterministic evals, source-truth scanner repair, contract-grade rendering, apply proof hardening, weak-output replacement, and live Arena CRM acceptance with quality score 100.
 - `docs/programs/completed/2026-05-05-docs-spine-adoption-operating-loop/`: historical v1 deterministic local-runner docs-spine adoption Program. Its Arena CRM output is now treated as insufficient and superseded by `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`.
 - `docs/programs/completed/2026-05-02-one-click-paid-access/`: completed one-click paid access Program that made checkout fulfillment immediate by purchase email, added Express Checkout as progressive enhancement over hosted Checkout fallback, and replaced post-payment generic auth recovery with Clerk email OTP for the checkout email.

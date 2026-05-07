@@ -230,11 +230,9 @@ describe("docs operating-system command", () => {
 		).rejects.toThrow();
 	});
 
-	it("recognizes quality refresh as blocked pending evidence-bound workflow", async () => {
+	it("refreshes quality score evidence and returns validation status", async () => {
 		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
-		const errorSpy = vi
-			.spyOn(console, "error")
-			.mockImplementation(() => undefined);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
 		await expect(
 			runDocsOperatingSystemCommand([
@@ -244,11 +242,250 @@ describe("docs operating-system command", () => {
 			]),
 		).resolves.toBe(1);
 
-		expect(errorSpy.mock.calls.join("\n")).toContain(
-			"later evidence-bound quality refresh workflow",
+		const qualityScore = await readFile(
+			path.join(repositoryRoot, "docs/QUALITY_SCORE.md"),
+			"utf8",
+		);
+		expect(qualityScore).toContain("## Current Score");
+		expect(qualityScore).toContain("`not scored`");
+		expect(qualityScore).toContain("## QUALITY_SCORE.review");
+		expect(qualityScore).toContain(
+			"`ship-by-sunday docs-operating-system docs-validate`: failed",
+		);
+		expect(qualityScore).toContain(
+			"Evidence refs: `docs/`, `docs/programs/`, `docs/exec-plans/active/`",
+		);
+		expect(qualityScore).toContain("Missing docs/programs.");
+		expect(qualityScore).not.toContain(repositoryRoot);
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Refreshed docs/QUALITY_SCORE.md.",
 		);
 	});
+
+	it("preserves owner quality content and replaces the managed refresh block", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writeRepoFile(
+			repositoryRoot,
+			"docs/QUALITY_SCORE.md",
+			[
+				"---",
+				"title: Quality Score",
+				"summary: Owner-authored quality notes for this target repository.",
+				"docType: guide",
+				"status: active",
+				"read_when:",
+				"  - Reviewing owner quality notes.",
+				"---",
+				"",
+				"# Quality Score",
+				"",
+				"Owner-authored quality note.",
+				"",
+				QUALITY_REFRESH_START_FIXTURE,
+				"stale managed evidence",
+				QUALITY_REFRESH_END_FIXTURE,
+				"",
+			].join("\n"),
+		);
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"docs-refresh-quality",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+		await expect(
+			runDocsOperatingSystemCommand([
+				"docs-refresh-quality",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const qualityScore = await readFile(
+			path.join(repositoryRoot, "docs/QUALITY_SCORE.md"),
+			"utf8",
+		);
+		expect(qualityScore).toContain("Owner-authored quality note.");
+		expect(qualityScore).not.toContain("stale managed evidence");
+		expect(qualityScore.match(/sbs-docs-quality-refresh:start/g)).toHaveLength(
+			1,
+		);
+		expect(qualityScore.match(/sbs-docs-quality-refresh:end/g)).toHaveLength(1);
+		expect(qualityScore).not.toContain(repositoryRoot);
+	});
+
+	it("runs the selected repo-native command proof", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			gate: 'node -e "if (process.env.SECRET_SCRIPT_BODY_SHOULD_NOT_SYNC) process.exit(1)"',
+			lint: 'node -e "process.exit(1)"',
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(0);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: npm run gate");
+		expect(output).toContain("Status: passed");
+		expect(output).not.toContain("SECRET_SCRIPT_BODY_SHOULD_NOT_SYNC");
+		expect(output).not.toContain(repositoryRoot);
+	});
+
+	it("classifies native setup failures as blocked proof", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			gate: "node -e \"console.error('Cannot find package happy-dom'); process.exit(1)\"",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: npm run gate");
+		expect(output).toContain("Status: blocked");
+		expect(output).toContain("happy-dom");
+		expect(output).not.toContain(repositoryRoot);
+	});
+
+	it("classifies ordinary native command failures as failed proof", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			gate: "node -e \"console.error('assertion failed'); process.exit(1)\"",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: npm run gate");
+		expect(output).toContain("Status: failed");
+		expect(output).toContain("assertion failed");
+	});
+
+	it("keeps not-found assertion text as failed native proof", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			gate: "node -e \"console.error('not found: expected route'); process.exit(1)\"",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: npm run gate");
+		expect(output).toContain("Status: failed");
+		expect(output).toContain("not found: expected route");
+	});
+
+	it("does not print Bun native script bodies", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			gate: "node -e \"if (process.env.SECRET_BUN_SCRIPT_BODY_SHOULD_NOT_SYNC) process.exit(2); console.error('assertion failed'); process.exit(1)\"",
+		});
+		await writeRepoFile(repositoryRoot, "bun.lock", "");
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: bun run gate");
+		expect(output).toContain("Status: failed");
+		expect(output).toContain("assertion failed");
+		expect(output).not.toContain("SECRET_BUN_SCRIPT_BODY_SHOULD_NOT_SYNC");
+	});
+
+	it("blocks native command proof when lifecycle hooks would run", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			pregate:
+				"node -e \"require('node:fs').writeFileSync('prehook.txt', 'ran')\"",
+			gate: "node -e \"require('node:fs').writeFileSync('gate.txt', 'ran')\"",
+			postgate:
+				"node -e \"require('node:fs').writeFileSync('posthook.txt', 'ran')\"",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: none");
+		expect(output).toContain("Status: blocked");
+		expect(output).toContain("pregate, postgate");
+		await expect(
+			readFile(path.join(repositoryRoot, "gate.txt"), "utf8"),
+		).rejects.toThrow();
+		await expect(
+			readFile(path.join(repositoryRoot, "prehook.txt"), "utf8"),
+		).rejects.toThrow();
+		await expect(
+			readFile(path.join(repositoryRoot, "posthook.txt"), "utf8"),
+		).rejects.toThrow();
+	});
+
+	it("blocks native command proof when no recognized script exists", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-docs-command-");
+		await writePackageManifest(repositoryRoot, {
+			start: "node server.js",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runDocsOperatingSystemCommand([
+				"native-command-proof",
+				"--repo",
+				repositoryRoot,
+			]),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Native command: none");
+		expect(output).toContain("Status: blocked");
+		expect(output).toContain("No recognized native validation script");
+		expect(output).not.toContain("node server.js");
+	});
 });
+
+const QUALITY_REFRESH_START_FIXTURE = "<!-- sbs-docs-quality-refresh:start -->";
+const QUALITY_REFRESH_END_FIXTURE = "<!-- sbs-docs-quality-refresh:end -->";
 
 async function writeRepoFile(
 	repositoryRoot: string,
@@ -258,6 +495,17 @@ async function writeRepoFile(
 	const absolutePath = path.join(repositoryRoot, repoPath);
 	await mkdir(path.dirname(absolutePath), { recursive: true });
 	await writeFile(absolutePath, content, "utf8");
+}
+
+async function writePackageManifest(
+	repositoryRoot: string,
+	scripts: Record<string, string>,
+) {
+	await writeRepoFile(
+		repositoryRoot,
+		"package.json",
+		`${JSON.stringify({ scripts }, null, 2)}\n`,
+	);
 }
 
 function buildValidExecPlan(params: {

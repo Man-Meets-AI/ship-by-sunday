@@ -129,7 +129,7 @@ Add or update focused tests:
 Update durable docs after behavior exists:
 
     docs/internal/workflow-packets.md
-    docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
+    docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
     docs/exec-plans/completed/2026-05-06-docs-operating-system-shared-validator-commands.md
 
 ## Validation and Acceptance
@@ -150,7 +150,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
 - bun run --cwd packages/local-runner build
 - bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-06-docs-operating-system-shared-validator-commands.md
 - bun run programs:lint
-- bun run markdown:lint -- --paths docs/programs/active/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-docs-operating-system-shared-validator-commands.md docs/internal/workflow-packets.md
+- bun run markdown:lint -- --paths docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption docs/exec-plans/completed/2026-05-06-docs-operating-system-shared-validator-commands.md docs/internal/workflow-packets.md
 - git diff --check
 
 ## Idempotence and Recovery
