@@ -34,6 +34,22 @@ npx convex env set TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN "<random-recovery-token
 npx convex env set OPENAI_API_KEY "<openai-api-key>"
 ```
 
+Before registering the webhook, run a presence-only readiness probe from `apps/web`.
+Do not print raw values:
+
+```bash
+for name in TELEGRAM_SUPPORT_BOT_TOKEN TELEGRAM_SUPPORT_CHAT_ID TELEGRAM_SUPPORT_OPERATOR_USER_IDS TELEGRAM_SUPPORT_WEBHOOK_SECRET TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN OPENAI_API_KEY; do
+  value="$(npx convex env get "$name" 2>/dev/null)"
+  if [ -n "$value" ]; then
+    printf "%s present\n" "$name"
+  else
+    printf "%s missing_or_empty\n" "$name"
+  fi
+done
+```
+
+Every required name must print `present` before live Telegram/OpenAI proof can run.
+
 `TELEGRAM_SUPPORT_WEBHOOK_SECRET` must be the same value sent to Telegram as `setWebhook.secret_token`. Telegram will echo it back in the `X-Telegram-Bot-Api-Secret-Token` header. Telegram requires this token to be 1-256 characters and only `A-Z`, `a-z`, `0-9`, `_`, and `-`.
 
 Optional kill switch:

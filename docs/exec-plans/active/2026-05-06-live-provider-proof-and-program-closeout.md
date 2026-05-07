@@ -28,16 +28,20 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - [x] 2026-05-06: Created `planning-brief-6.md`, updated `current-planning-brief.txt`, and created this child ExecPlan for live provider proof and Program closeout.
 - [x] 2026-05-06: Probed hosted Convex dev env variable presence without printing secret values; all required support provider values are missing or empty.
 - [x] 2026-05-06: Attempted Telegram webhook verification without exposing the bot token; blocked because `TELEGRAM_SUPPORT_BOT_TOKEN` is missing or empty in hosted Convex dev.
+- [x] 2026-05-07: Re-ran the hosted Convex dev env presence probe with secret values suppressed; all required support provider values are still missing or empty.
+- [x] 2026-05-07: Checked local shell readiness without printing values; `TELEGRAM_SUPPORT_BOT_TOKEN` and `NEXT_PUBLIC_CONVEX_SITE_URL` are missing or empty, so Telegram `getWebhookInfo` and live support-loop proof remain blocked.
+- [x] 2026-05-07: Added a presence-only readiness probe to `apps/web/content/docs/telegram-support-bot.mdx` so the next operator can verify setup without leaking provider values.
 - [ ] 2026-05-06: Exercise the live support loop from website widget to Telegram topic and Telegram reply back to the widget when provider setup is present.
 - [ ] 2026-05-06: Exercise one customer-visible Telegram action and one OpenAI-backed operator-only action when provider setup is present.
-- [ ] 2026-05-06: Update the support docs and Program with proof evidence or the exact blocker.
-- [ ] 2026-05-06: Run focused support validation and docs/program/plan linting for this slice.
+- [x] 2026-05-07: Updated the support docs and Program with the exact hosted setup blocker.
+- [x] 2026-05-07: Passed plan/program/markdown linting and `git diff --check` for this proof-record slice.
 
 ## Surprises & Discoveries
 
 - 2026-05-06: The Program is code-complete through Slice 5, but it intentionally remains active because hosted Convex dev provider env and real Telegram/OpenAI smoke proof were not available during those slices.
 - 2026-05-06: `npx convex env get NAME` exits with status 0 even for a missing variable. The proof probe must treat non-empty stdout as the presence signal, not command success.
 - 2026-05-06: The corrected hosted Convex dev probe showed `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY` are all missing or empty. Telegram `getWebhookInfo` cannot run until at least the bot token is configured.
+- 2026-05-07: The repeated hosted Convex dev probe produced the same missing-or-empty result for every required support provider env name. The local shell also lacks `TELEGRAM_SUPPORT_BOT_TOKEN`, so webhook verification cannot safely call Telegram yet.
 
 ## Decision Log
 
@@ -131,7 +135,7 @@ Run docs and Program validation before stopping:
 
 This plan is accepted as complete only if the real provider loop is proven or the blocker is recorded precisely enough for a maintainer with Telegram and OpenAI access to finish it without rediscovering the setup. Live completion requires a visitor message to create a Telegram topic, a Telegram reply to appear in the widget, `Close thread` to close the website thread, one customer-visible action to create a normal support message, one AI-backed operator-only action to stay private, and no provider proof output to leak secrets, transcript text, Telegram ids, visitor tokens, or generated output.
 
-If hosted provider access is unavailable, this plan must remain active. In that case acceptance for the current stopping point is a clean commit or diff that adds the plan, updates the Program truth, records which readiness probes were possible, and passes plan/program/markdown lint plus `git diff --check`.
+If hosted provider access is unavailable, this plan must remain active. In that case acceptance for the current stopping point is a clean commit or diff that updates the plan, updates the Program truth, records which readiness probes were possible, and passes plan/program/markdown lint plus `git diff --check`.
 
 ### Test Commands
 
@@ -176,6 +180,18 @@ Provider readiness results from 2026-05-06:
 - `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: `missing_or_empty`
 - `OPENAI_API_KEY`: `missing_or_empty`
 - Telegram `getWebhookInfo`: `blocked`, because the hosted Convex dev bot token is missing or empty.
+
+Provider readiness results from 2026-05-07:
+
+- `TELEGRAM_SUPPORT_BOT_TOKEN`: `missing_or_empty`
+- `TELEGRAM_SUPPORT_CHAT_ID`: `missing_or_empty`
+- `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`: `missing_or_empty`
+- `TELEGRAM_SUPPORT_WEBHOOK_SECRET`: `missing_or_empty`
+- `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: `missing_or_empty`
+- `OPENAI_API_KEY`: `missing_or_empty`
+- Local `TELEGRAM_SUPPORT_BOT_TOKEN`: `missing_or_empty`
+- Local `NEXT_PUBLIC_CONVEX_SITE_URL`: `missing_or_empty`
+- Telegram `getWebhookInfo`: `blocked`, because neither hosted Convex dev nor the local shell has a bot token available for read-only webhook verification.
 
 ## Interfaces and Dependencies
 
