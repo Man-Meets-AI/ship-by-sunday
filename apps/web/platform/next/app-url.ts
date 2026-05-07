@@ -72,10 +72,11 @@ export function getAppBaseUrl(request?: Request) {
 		const requestOrigin = normalizeBaseUrl(new URL(request.url).origin);
 		const trustedOrigins = getTrustedRequestOrigins();
 
-		if (
-			trustedOrigins.has(requestOrigin) ||
-			isLocalRequestOrigin(requestOrigin)
-		) {
+		if (trustedOrigins.has(requestOrigin)) {
+			return requestOrigin;
+		}
+
+		if (trustedOrigins.size === 0 && isLocalRequestOrigin(requestOrigin)) {
 			return requestOrigin;
 		}
 	}
