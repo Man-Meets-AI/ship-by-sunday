@@ -1,6 +1,7 @@
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "./json-value";
 import {
 	runBoundedProcess,
 	type BoundedProcessResult,
@@ -831,7 +832,7 @@ function parsePackageJson(packageJsonText: string | null) {
 		return null;
 	}
 	try {
-		return JSON.parse(packageJsonText) as unknown;
+		return JSON.parse(packageJsonText) as JsonValue;
 	} catch {
 		return null;
 	}
@@ -1100,7 +1101,7 @@ async function writeJsonArtifact(
 	repositoryRoot: string,
 	workflowRunId: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	await writeTextArtifact(
 		repositoryRoot,

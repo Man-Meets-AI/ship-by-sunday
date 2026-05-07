@@ -185,7 +185,7 @@ http.route({
 				ctx,
 				normalizeIncidentEvent({
 					source: "stripe",
-					error,
+					error: error instanceof Error ? error : String(error),
 					pathname: "/stripe/webhook",
 					code: "stripe_webhook_failed",
 					severity: "high",

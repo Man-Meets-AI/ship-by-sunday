@@ -26,6 +26,12 @@ type CompletionErrorData = {
 	message: string;
 	issues?: CompletionIssue[];
 };
+type CompletionMutationError =
+	| {
+			data?: Partial<CompletionErrorData> | null;
+	  }
+	| null
+	| undefined;
 
 type CompletionPhase = "idle" | "submitting" | "celebrating";
 
@@ -36,12 +42,14 @@ type CompletionPayload = {
 	nextLessonLabel: string | null;
 };
 
-function getCompletionErrorData(error: unknown): CompletionErrorData | null {
+function getCompletionErrorData(
+	error: CompletionMutationError,
+): CompletionErrorData | null {
 	if (!error || typeof error !== "object" || !("data" in error)) {
 		return null;
 	}
 
-	const data = (error as { data?: unknown }).data;
+	const data = error.data;
 	if (!data || typeof data !== "object") {
 		return null;
 	}
@@ -355,7 +363,7 @@ export function useLessonCompletion({
 						navigateToNextStep(result.nextLessonKey);
 					}, getCompletionNavigationDelayMs());
 				},
-				(error: unknown) => {
+				(error) => {
 					setCompletionPhase("idle");
 					const completionError = getCompletionErrorData(error);
 					if (completionError) {

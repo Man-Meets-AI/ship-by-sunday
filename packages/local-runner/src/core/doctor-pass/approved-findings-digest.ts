@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import type { JsonObject, JsonValue } from "../json-value";
 import {
 	DOCTOR_PASS_ARTIFACT_SCHEMA_VERSION,
 	type DoctorFinding,
@@ -98,11 +99,13 @@ function normalizeEvidenceRefForDigest(evidenceRef: EvidenceRef) {
 	}
 }
 
-export function stableStringifyApprovedFindingsPayload(value: unknown): string {
+export function stableStringifyApprovedFindingsPayload(
+	value: JsonValue,
+): string {
 	return stringifyCanonicalJson(value);
 }
 
-function stringifyCanonicalJson(value: unknown): string {
+function stringifyCanonicalJson(value: JsonValue | undefined): string {
 	if (value === null) {
 		return "null";
 	}
@@ -136,7 +139,7 @@ function stringifyCanonicalJson(value: unknown): string {
 		throw new Error("Approved findings digest value must be JSON-compatible.");
 	}
 
-	const record = value as Record<string, unknown>;
+	const record = value as JsonObject;
 	const fields = Object.keys(record)
 		.filter((key) => record[key] !== undefined)
 		.sort()
@@ -147,7 +150,7 @@ function stringifyCanonicalJson(value: unknown): string {
 	return `{${fields.join(",")}}`;
 }
 
-function stringifyCanonicalArrayItem(value: unknown): string {
+function stringifyCanonicalArrayItem(value: JsonValue | undefined): string {
 	if (value === undefined) {
 		throw new Error(
 			"Approved findings digest arrays cannot include undefined.",

@@ -16,7 +16,7 @@ import type { CodebaseWorkspaceState } from "@/lib/codebase-flow/codebase-worksp
 
 type SaveProjectDefinitionFactsCaller = (
 	args: SaveProjectDefinitionFactsArgs,
-) => Promise<unknown>;
+) => Promise<object | null>;
 
 export type CodebaseLocalDraftSeederOptions = {
 	isAuthenticated: boolean;

@@ -50,9 +50,9 @@ export async function runBoundedProcess({
 		};
 	} catch (error) {
 		const processError = error as {
-			code?: unknown;
-			stdout?: unknown;
-			stderr?: unknown;
+			code?: string | number;
+			stdout?: string;
+			stderr?: string;
 			killed?: boolean;
 			signal?: string | null;
 		};

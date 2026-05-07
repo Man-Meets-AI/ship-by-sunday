@@ -51,6 +51,8 @@ git diff --check
 
 `markdown:lint` currently validates the repo-owned frontmatter-backed docs families under the canonical `docs/` spine, `docs/programs/`, `docs/exec-plans/`, `apps/web/content/docs/`, and `apps/web/content/blog/`. `plans:lint` applies the stricter ExecPlan body contract from `docs/exec-plans/PLANS.md`. `programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
 
+`bun run lint` includes the repo-wide unknown-boundary lint before app lint. Explicit TypeScript `unknown` belongs only in route handlers and DB-loading boundaries; validate there, then pass typed values through the rest of the source tree.
+
 ## Review Expectations
 
 Multi-step, risky, or cross-cutting work should use the checked-in ExecPlan loop and should re-run proof after each meaningful milestone. Fresh-eyes review is part of the reliability model for risky changes, not optional polish.

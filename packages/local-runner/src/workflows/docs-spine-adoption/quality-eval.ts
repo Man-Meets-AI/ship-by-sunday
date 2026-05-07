@@ -7,6 +7,7 @@ import {
 	DOCS_SPINE_APPLY_WORKFLOW_ID,
 	DOCS_SPINE_APPLY_WORKFLOW_VERSION,
 } from "../docs-spine-apply-and-proof/manifest";
+import type { JsonObject, JsonValue } from "../../core/json-value";
 import type { DocsSpineRepoFacts } from "./schemas";
 
 const REQUIRED_PROGRAM_PROMPT_REFS = [
@@ -69,7 +70,7 @@ export type DocsSpineQualityReport = {
 
 type DraftArtifact = {
 	repoRelativePath: string;
-	value: unknown;
+	value: JsonValue;
 };
 
 export type DocsSpineMarkdownFile = {
@@ -1078,7 +1079,7 @@ function evaluateRequiredSections(
 }
 
 function extractDraftMarkdownFiles(
-	draft: unknown,
+	draft: JsonValue,
 	sourceArtifactRef: string,
 ): DocsSpineMarkdownFile[] {
 	const record = toRecord(draft);
@@ -1216,18 +1217,18 @@ function passedRule({
 	};
 }
 
-function readStringArray(value: unknown) {
+function readStringArray(value: JsonValue | undefined) {
 	if (!Array.isArray(value)) {
 		return [];
 	}
 	return value.filter((entry): entry is string => typeof entry === "string");
 }
 
-function toRecord(value: unknown) {
+function toRecord(value: JsonValue | undefined) {
 	if (!value || typeof value !== "object" || Array.isArray(value)) {
 		return null;
 	}
-	return value as Record<string, unknown>;
+	return value as JsonObject;
 }
 
 function escapeRegExp(value: string) {

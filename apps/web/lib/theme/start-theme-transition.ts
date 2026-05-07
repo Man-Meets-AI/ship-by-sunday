@@ -4,7 +4,7 @@ type StartThemeTransitionInput = {
 };
 
 type DocumentWithViewTransition = Document & {
-	startViewTransition?: (callback: () => void) => unknown;
+	startViewTransition?: (callback: () => void) => void;
 };
 
 export function startThemeTransition({

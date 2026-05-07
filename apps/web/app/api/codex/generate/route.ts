@@ -175,7 +175,7 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(
-			error,
+			error instanceof Error ? error : String(error),
 			{
 				unauthorized: "Sign in before using Codex generation.",
 				forbidden: "Product access is required before using Codex generation.",
@@ -199,7 +199,8 @@ export async function POST(request: Request) {
 			} catch (persistError) {
 				await captureServerError({
 					source: "codex",
-					error: persistError,
+					error:
+						persistError instanceof Error ? persistError : String(persistError),
 					requestId,
 					pathname: apiRouteConfig.codexGenerate,
 					userId: session.userId,
@@ -209,13 +210,13 @@ export async function POST(request: Request) {
 		}
 
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.codexGenerate,
 			source: "codex",
 			defaultMessage: "Codex generation failed.",
 			userId: session?.userId ?? null,
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !(error instanceof Error && isCodexAppServerRuntimeError(error)),
 		});
 	}
 }

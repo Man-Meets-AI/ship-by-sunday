@@ -251,7 +251,7 @@ async function lintProgramMarkdownDocs(repoRootDir: string): Promise<
 			}),
 		};
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return {
 				failed: true,
 				reports: "Missing docs/programs.",
@@ -314,7 +314,7 @@ async function runMarkdownDocsValidation(
 			outputText: formatMarkdownMetadataLintReports(reports),
 		};
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return {
 				exitCode: 1,
 				outputText: "Missing docs/.",
@@ -365,7 +365,7 @@ async function listMarkdownFiles(
 	try {
 		entries = await readdir(absoluteRoot, { withFileTypes: true });
 	} catch (error) {
-		if (isMissingPathError(error)) {
+		if (error instanceof Error && isMissingPathError(error)) {
 			return [];
 		}
 		throw error;
@@ -533,7 +533,7 @@ async function writeChildExecPlan(params: {
 			{ encoding: "utf8", flag: "wx" },
 		);
 	} catch (error) {
-		if (isFileAlreadyExistsError(error)) {
+		if (error instanceof Error && isFileAlreadyExistsError(error)) {
 			throw new Error(`Refusing to overwrite existing ExecPlan: ${planPath}`);
 		}
 		throw error;
@@ -701,12 +701,12 @@ function buildChildExecPlanContent(params: {
 	].join("\n");
 }
 
-function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
+function isMissingPathError(error: Error): error is NodeJS.ErrnoException {
 	return error instanceof Error && "code" in error && error.code === "ENOENT";
 }
 
 function isFileAlreadyExistsError(
-	error: unknown,
+	error: Error,
 ): error is NodeJS.ErrnoException {
 	return error instanceof Error && "code" in error && error.code === "EEXIST";
 }

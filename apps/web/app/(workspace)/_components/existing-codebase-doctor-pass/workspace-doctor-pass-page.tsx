@@ -103,7 +103,7 @@ export function WorkspaceDoctorPassPage({
 			setApprovalState("errored");
 			showWorkspaceActionErrorToast({
 				id: workspaceDoctorPassToastIds.approvePreviewError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to approve sync preview.",
 				report: {
 					title: "Workspace doctor pass sync preview approval failed",

@@ -548,7 +548,8 @@ describe("workspace findings read model", () => {
 				createFinding({
 					findingId: "finding-docs-operating-system-lockfile",
 					category: "other",
-					title: "Docs operating system dependency metadata needs lockfile proof",
+					title:
+						"Docs operating system dependency metadata needs lockfile proof",
 					permissionRequired: "workspace_write",
 					recommendedWorkflowId: "docs-operating-system-lockfile-refresh",
 				}),

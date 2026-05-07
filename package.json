@@ -18,7 +18,7 @@
 		"build": "bun run --cwd apps/web build",
 		"start": "bun run --cwd apps/web start",
 		"typecheck": "bun run --cwd apps/web typecheck",
-		"lint": "bun run --cwd apps/web lint",
+		"lint": "bun run scripts/static-analysis/unknown-boundary-lint.ts && bun run --cwd apps/web lint",
 		"lint:fix": "bun run --cwd apps/web lint:fix",
 		"markdown:lint": "bun run scripts/markdown-metadata/run-lint.ts",
 		"public-readiness:lint": "bun run scripts/public-readiness/run-lint.ts",

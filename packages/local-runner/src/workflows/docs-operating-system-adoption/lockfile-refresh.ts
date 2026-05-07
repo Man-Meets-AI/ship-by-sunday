@@ -7,6 +7,7 @@ import type {
 	DocsOperatingSystemLockfileRefreshBlockedReason,
 	DocsOperatingSystemLockfileRefreshCommand,
 } from "./schemas";
+import type { JsonObject, JsonValue } from "../../core/json-value";
 
 export function resolveDocsOperatingSystemLockfileRefreshCommand(
 	packageManager: string,
@@ -74,13 +75,15 @@ export function listDocsOperatingSystemLockfileRefs() {
 	return [...DOCS_OPERATING_SYSTEM_LOCKFILE_REFS];
 }
 
-export function hasPinnedSharedToolingDependency(packageJson: unknown) {
+export function hasPinnedSharedToolingDependency(
+	packageJson: JsonValue | undefined,
+) {
 	if (!packageJson || typeof packageJson !== "object") {
 		return false;
 	}
 	const manifest = packageJson as {
-		dependencies?: Record<string, unknown>;
-		devDependencies?: Record<string, unknown>;
+		dependencies?: JsonObject;
+		devDependencies?: JsonObject;
 	};
 	const devDependencyVersion =
 		manifest.devDependencies?.[

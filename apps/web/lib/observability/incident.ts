@@ -1,4 +1,5 @@
 import { productConfig } from "@/config/product";
+import type { JsonObject } from "@/lib/json-value";
 
 const MAX_TITLE_LENGTH = 160;
 const MAX_SUMMARY_LENGTH = 320;
@@ -54,16 +55,18 @@ export type IncidentStatus = (typeof incidentStatusValues)[number];
 export type IncidentControlStatus =
 	(typeof incidentControlStatusValues)[number];
 
+export type IncidentError = Error | string | null | undefined;
+
 export type IncidentEventInput = {
 	source: IncidentSource;
-	error: unknown;
+	error: IncidentError;
 	requestId?: string | null;
 	pathname?: string | null;
 	userId?: string | null;
 	code?: string | null;
 	severity?: IncidentSeverity;
 	surface?: IncidentSurface;
-	details?: Record<string, unknown> | null;
+	details?: JsonObject | null;
 	externalEventId?: string | null;
 	deploymentId?: string | null;
 	nativeUrl?: string | null;
@@ -103,7 +106,7 @@ export function getIncidentEnvironment(): IncidentEnvironment {
 	return rawEnvironment === "production" ? "prod" : "dev";
 }
 
-export function normalizeErrorTitle(error: unknown) {
+export function normalizeErrorTitle(error: IncidentError) {
 	if (error instanceof Error) {
 		return trimToLength(error.message, MAX_TITLE_LENGTH);
 	}
@@ -115,7 +118,7 @@ export function normalizeErrorTitle(error: unknown) {
 	return "Unexpected error";
 }
 
-export function normalizeErrorStack(error: unknown) {
+export function normalizeErrorStack(error: IncidentError) {
 	if (!(error instanceof Error) || typeof error.stack !== "string") {
 		return null;
 	}
@@ -123,9 +126,7 @@ export function normalizeErrorStack(error: unknown) {
 	return trimToLength(error.stack, MAX_STACK_LENGTH);
 }
 
-export function formatIncidentDetails(
-	details: Record<string, unknown> | null | undefined,
-) {
+export function formatIncidentDetails(details: JsonObject | null | undefined) {
 	if (!details) {
 		return null;
 	}
@@ -137,7 +138,7 @@ export function formatIncidentDetails(
 	}
 }
 
-export function getErrorCode(error: unknown) {
+export function getErrorCode(error: IncidentError) {
 	if (error instanceof Error && typeof error.name === "string") {
 		return error.name;
 	}
@@ -145,7 +146,7 @@ export function getErrorCode(error: unknown) {
 	return null;
 }
 
-export function isNextControlFlowError(error: unknown) {
+export function isNextControlFlowError(error: IncidentError) {
 	if (!(error instanceof Error)) {
 		return false;
 	}

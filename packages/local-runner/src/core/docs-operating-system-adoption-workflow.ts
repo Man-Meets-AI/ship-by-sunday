@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "./json-value";
 import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
@@ -64,7 +65,7 @@ type RunDocsOperatingSystemAdoptionWorkflowOptions = {
 
 type RootPackageManifestFacts = {
 	name?: string;
-	scripts: Record<string, unknown>;
+	scripts: JsonObject;
 };
 
 export async function runDocsOperatingSystemAdoptionWorkflow({
@@ -647,14 +648,14 @@ async function readRootPackageManifest(
 		return null;
 	}
 	const parsed = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
-		name?: unknown;
-		scripts?: unknown;
+		name?: string;
+		scripts?: JsonValue;
 	};
 	const scripts =
 		parsed.scripts &&
 		typeof parsed.scripts === "object" &&
 		!Array.isArray(parsed.scripts)
-			? { ...(parsed.scripts as Record<string, unknown>) }
+			? { ...(parsed.scripts as JsonObject) }
 			: {};
 	return {
 		name: typeof parsed.name === "string" ? parsed.name : undefined,
@@ -687,7 +688,7 @@ async function writeJsonArtifact(
 	repositoryRoot: string,
 	workflowRunId: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	await writeTextArtifact(
 		repositoryRoot,

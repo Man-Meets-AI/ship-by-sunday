@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { routeConfig } from "@/config/product";
 import { reportClientError } from "@/lib/observability/client-error-report";
+import type { IncidentError } from "@/lib/observability/incident";
 import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
 
 type CheckoutEmailHandoffStep = "send" | "verify";
@@ -16,18 +17,18 @@ type RenderableError = {
 
 type ClerkCompletionCandidate = {
 	createdSessionId?: string | null;
-	error?: unknown;
+	error?: IncidentError;
 	finalize?: (args: {
 		navigate: (params: {
 			decorateUrl: (url: string) => string;
 			session?: { currentTask?: { key: string } | null } | null;
 		}) => Promise<void>;
-	}) => Promise<unknown>;
+	}) => Promise<object | void>;
 	status?: string | null;
 };
 
 function getRenderableErrors(
-	errors: Array<unknown> | null,
+	errors: Array<RenderableError | null> | null,
 ): RenderableError[] | null {
 	if (!errors?.length) {
 		return null;
@@ -67,7 +68,9 @@ export function useCheckoutEmailHandoffFlow({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const safeRedirectPath = getSafeRedirectPath(redirectPath);
-	const clerkGlobalErrors = getRenderableErrors(errors.global ?? errors.raw);
+	const clerkGlobalErrors = getRenderableErrors(
+		(errors.global ?? errors.raw) as Array<RenderableError | null> | null,
+	);
 	const globalErrors = localError
 		? [{ message: localError }]
 		: clerkGlobalErrors;

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "./json-value";
 import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
@@ -985,7 +986,7 @@ async function runGit(repositoryRoot: string, args: string[]) {
 async function writeJsonArtifact(
 	repositoryRoot: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	const artifactPath = path.join(repositoryRoot, repoRelativePath);
 	await mkdir(path.dirname(artifactPath), { recursive: true });

@@ -1,3 +1,5 @@
+import type { JsonValue } from "./json-value";
+
 const SECRET_PATTERNS = [
 	/(sbs_run_)[A-Za-z0-9_-]+/g,
 	/(sbs_pair_)[A-Za-z0-9_-]+/g,
@@ -52,14 +54,17 @@ export function normalizeFieldName(fieldName: string) {
 	return fieldName.replace(/[_-]/g, "").toLowerCase();
 }
 
-export function assertSyncSafeValue(value: unknown, context: string) {
+export function assertSyncSafeValue(
+	value: JsonValue | undefined,
+	context: string,
+) {
 	const unsafeReason = findUnsafeValueReason(value);
 	if (unsafeReason) {
 		throw new Error(`${context} is not sync-safe: ${unsafeReason}`);
 	}
 }
 
-function findUnsafeValueReason(value: unknown): string | null {
+function findUnsafeValueReason(value: JsonValue | undefined): string | null {
 	if (typeof value === "string") {
 		if (
 			POSIX_ABSOLUTE_PATH_PATTERN.test(value) ||

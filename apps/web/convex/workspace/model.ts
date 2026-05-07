@@ -1313,7 +1313,9 @@ function assertDocsOperatingSystemLockfileRefreshWorkflowApprovalPacket(args: {
 		DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_STOP_CONDITIONS,
 		"Docs operating system lockfile refresh stopConditions",
 	);
-	if (args.rollbackNotes !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES) {
+	if (
+		args.rollbackNotes !== DOCS_OPERATING_SYSTEM_LOCKFILE_REFRESH_ROLLBACK_NOTES
+	) {
 		throw new ConvexError(
 			"Docs operating system lockfile refresh rollbackNotes does not match the approved workflow packet",
 		);

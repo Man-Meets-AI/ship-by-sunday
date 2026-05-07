@@ -9,14 +9,14 @@ import {
 } from "@/app/_content/public-content-inventory";
 
 type DocsMdxModule = {
-	default: ComponentType<Record<string, unknown>>;
+	default: ComponentType<object>;
 };
 
 type DocsMdxModuleLoader = () => Promise<DocsMdxModule>;
 
 export type DocsContentPageModel = {
 	entry: DocsContentEntry;
-	Content: ComponentType<Record<string, unknown>>;
+	Content: ComponentType<object>;
 };
 
 const docsMdxModuleLoaders: Record<string, DocsMdxModuleLoader> = {

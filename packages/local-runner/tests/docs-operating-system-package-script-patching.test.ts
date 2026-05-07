@@ -188,7 +188,7 @@ async function writePackageJson(
 async function writeInstallPlan(repositoryRoot: string, scripts = {}) {
 	const rootPackageManifest = {
 		name: "customer-repo",
-		scripts: scripts as Record<string, unknown>,
+		scripts: scripts as Record<string, string>,
 	};
 	const installPlan = buildDocsOperatingSystemInstallPlan({
 		repoFacts: createRepoFacts(Object.keys(rootPackageManifest.scripts)),

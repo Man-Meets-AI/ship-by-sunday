@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "./json-value";
 import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
@@ -788,7 +789,7 @@ async function writeJsonArtifact(
 	repositoryRoot: string,
 	workflowRunId: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	await writeTextArtifact(
 		repositoryRoot,

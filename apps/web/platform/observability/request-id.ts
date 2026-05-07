@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import type { JsonValue } from "@/lib/json-value";
+
 export const REQUEST_ID_HEADER = "x-request-id" as const;
 
 export function createRequestId() {
@@ -35,7 +37,7 @@ export function getRequestIdFromHeaderRecord(
 }
 
 export function jsonWithRequestId(
-	body: unknown,
+	body: JsonValue,
 	init: ResponseInit | undefined,
 	requestId: string,
 ) {

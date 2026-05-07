@@ -161,7 +161,11 @@ export function WorkspaceFindingDetailPage({
 			});
 			setActionState("approved");
 		} catch (error) {
-			setActionError(getWorkflowRequestErrorMessage(error));
+			setActionError(
+				getWorkflowRequestErrorMessage(
+					error instanceof Error ? error : String(error),
+				),
+			);
 			setActionState("error");
 		}
 	}
@@ -414,7 +418,7 @@ function getUnavailableWorkflowMessage(detail: WorkspaceFindingDetailModel) {
 	return unavailableWorkflowMessages[detail.status];
 }
 
-function getWorkflowRequestErrorMessage(error: unknown) {
+function getWorkflowRequestErrorMessage(error: Error | string) {
 	const message = error instanceof Error ? error.message : String(error);
 	if (message.includes("Blocked findings cannot start workflows")) {
 		return unavailableWorkflowMessages.blocked;

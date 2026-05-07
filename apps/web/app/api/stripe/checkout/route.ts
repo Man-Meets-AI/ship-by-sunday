@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 		return response;
 	} catch (error) {
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.stripeCheckout,
 			source: "stripe",

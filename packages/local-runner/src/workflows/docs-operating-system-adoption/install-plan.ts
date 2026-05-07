@@ -20,10 +20,11 @@ import type {
 	DocsOperatingSystemScriptOperation,
 } from "./schemas";
 import type { DocsSpineRepoFacts } from "../docs-spine-adoption/schemas";
+import type { JsonObject } from "../../core/json-value";
 
 type RootPackageManifestFacts = {
 	name?: string;
-	scripts: Record<string, unknown>;
+	scripts: JsonObject;
 };
 
 export type BuildDocsOperatingSystemInstallPlanOptions = {

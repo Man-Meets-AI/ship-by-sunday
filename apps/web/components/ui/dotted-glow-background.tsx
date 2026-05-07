@@ -230,7 +230,7 @@ export const DottedGlowBackground = ({
 					1,
 					`rgba(17,17,17,${Math.min(Math.max(backgroundOpacity, 0), 1)})`,
 				);
-				ctx.fillStyle = grad as unknown as CanvasGradient;
+				ctx.fillStyle = grad;
 				ctx.fillRect(0, 0, width, height);
 			}
 

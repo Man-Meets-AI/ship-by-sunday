@@ -52,7 +52,7 @@ export function CodebaseThemeAdvancedOptions({
 					<ThemeDropdownKnob
 						label="Base color"
 						value={config.baseColor}
-						options={BASE_COLOR_OPTIONS as unknown as string[]}
+						options={BASE_COLOR_OPTIONS}
 						onSelect={(v) =>
 							onUpdate("baseColor", v as PresetConfig["baseColor"])
 						}
@@ -60,7 +60,7 @@ export function CodebaseThemeAdvancedOptions({
 					<ThemeDropdownKnob
 						label="Icon library"
 						value={config.iconLibrary}
-						options={ICON_LIBRARY_OPTIONS as unknown as string[]}
+						options={ICON_LIBRARY_OPTIONS}
 						onSelect={(v) =>
 							onUpdate("iconLibrary", v as PresetConfig["iconLibrary"])
 						}
@@ -68,7 +68,7 @@ export function CodebaseThemeAdvancedOptions({
 					<ThemeDropdownKnob
 						label="Menu accent"
 						value={config.menuAccent}
-						options={MENU_ACCENT_OPTIONS as unknown as string[]}
+						options={MENU_ACCENT_OPTIONS}
 						onSelect={(v) =>
 							onUpdate("menuAccent", v as PresetConfig["menuAccent"])
 						}
@@ -76,7 +76,7 @@ export function CodebaseThemeAdvancedOptions({
 					<ThemeDropdownKnob
 						label="Menu color"
 						value={config.menuColor}
-						options={MENU_COLOR_OPTIONS as unknown as string[]}
+						options={MENU_COLOR_OPTIONS}
 						onSelect={(v) =>
 							onUpdate("menuColor", v as PresetConfig["menuColor"])
 						}

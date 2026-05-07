@@ -3,6 +3,8 @@
 import { toast } from "sonner";
 
 import { reportClientError } from "@/lib/observability/client-error-report";
+import type { IncidentError } from "@/lib/observability/incident";
+import type { JsonObject } from "@/lib/json-value";
 
 const WORKSPACE_SUCCESS_TOAST_DURATION_MS = 1800;
 export const WORKSPACE_ERROR_TOAST_DURATION_MS = 6000;
@@ -44,12 +46,12 @@ export function showWorkspaceActionErrorToast({
 	report,
 }: {
 	action?: WorkspaceToastAction;
-	error: unknown;
+	error: IncidentError;
 	fallbackMessage: string;
 	id: WorkspaceToastId;
 	report: {
 		code: string;
-		details?: Record<string, unknown>;
+		details?: JsonObject;
 		pathname: string;
 		title: string;
 	};

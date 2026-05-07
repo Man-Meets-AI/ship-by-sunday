@@ -1,3 +1,5 @@
+import type { JsonObject } from "@/lib/json-value";
+
 export const CODEX_APP_SERVER_DISABLED_ERROR = "CODEX_APP_SERVER_DISABLED";
 
 export type CodexAppServerClientOptions = {
@@ -84,7 +86,7 @@ export class CodexAppServerRuntimeError extends Error {
 	constructor(
 		public readonly incidentCode: CodexRuntimeIncidentCode,
 		message: string,
-		public readonly incidentDetails: Record<string, unknown> | null = null,
+		public readonly incidentDetails: JsonObject | null = null,
 	) {
 		super(message);
 		this.name = incidentCode;
@@ -92,7 +94,7 @@ export class CodexAppServerRuntimeError extends Error {
 }
 
 export function isCodexAppServerRuntimeError(
-	error: unknown,
+	error: Error | null | undefined,
 ): error is CodexAppServerRuntimeError {
 	return error instanceof CodexAppServerRuntimeError;
 }

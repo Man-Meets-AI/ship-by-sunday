@@ -23,7 +23,7 @@ export function ThemeDropdownKnob({
 }: {
 	label: string;
 	value: string;
-	options: string[];
+	options: readonly string[];
 	onSelect: (v: string) => void;
 	formatLabel?: (v: string) => string;
 }) {
