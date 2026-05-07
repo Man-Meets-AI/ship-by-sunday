@@ -83,9 +83,11 @@ function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 		}),
 		emailCode: {
 			sendCode: vi.fn().mockResolvedValue({ error: null }),
-			verifyCode: vi.fn().mockResolvedValue({
-				error: null,
-				status: "complete",
+			verifyCode: vi.fn().mockImplementation(async () => {
+				signIn.status = "complete";
+				return {
+					error: null,
+				};
 			}),
 		},
 		existingSession: undefined,
@@ -253,10 +255,12 @@ describe("SignInPage", () => {
 		const signInState = createSignInState({
 			emailCode: {
 				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({
-					createdSessionId: "sess_123",
-					error: null,
-					status: "complete",
+				verifyCode: vi.fn().mockImplementation(async () => {
+					signInState.signIn.createdSessionId = "sess_123";
+					signInState.signIn.status = "complete";
+					return {
+						error: null,
+					};
 				}),
 			},
 		});
@@ -343,11 +347,16 @@ describe("SignInPage", () => {
 		const signInState = createSignInState({
 			emailCode: {
 				sendCode: vi.fn().mockResolvedValue({ error: null }),
-				verifyCode: vi.fn().mockResolvedValue({
-					error: null,
-					status: "needs_second_factor",
+				verifyCode: vi.fn().mockImplementation(async () => {
+					signInState.signIn.status = "needs_second_factor";
+					return {
+						error: null,
+					};
 				}),
 			},
+			finalize: vi.fn().mockResolvedValue({
+				error: new Error("needs_second_factor"),
+			}),
 		});
 		useSignInMock.mockReturnValue(signInState);
 		const user = userEvent.setup();
@@ -361,7 +370,7 @@ describe("SignInPage", () => {
 			screen.getByRole("button", { name: "Verify and continue" }),
 		);
 
-		expect(signInState.signIn.finalize).not.toHaveBeenCalled();
+		expect(signInState.signIn.finalize).toHaveBeenCalled();
 		expect(setActiveMock).not.toHaveBeenCalled();
 		expect(reportClientErrorMock).toHaveBeenCalledWith(
 			expect.objectContaining({

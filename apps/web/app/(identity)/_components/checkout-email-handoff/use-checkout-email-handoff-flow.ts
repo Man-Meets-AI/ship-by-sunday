@@ -32,6 +32,10 @@ type ClerkCompletionCandidate = {
 	supportedFirstFactors?: ClerkSignInWithFirstFactors["supportedFirstFactors"];
 };
 
+type ClerkFutureMutationResult = {
+	error?: unknown;
+};
+
 function getRenderableErrors(
 	errors: Array<unknown> | null,
 ): RenderableError[] | null {
@@ -188,14 +192,17 @@ export function useCheckoutEmailHandoffFlow({
 
 		const finalize = getFinalizeFunction(candidate);
 		const completionStatus = getCompletionStatus(candidate);
-		if (!finalize || completionStatus !== "complete") {
+		if (!finalize) {
 			handleUnsupportedState(completionStatus);
 			return;
 		}
 
-		await finalize({
+		const finalizeResponse = (await finalize({
 			navigate: navigateAfterAuth,
-		});
+		})) as ClerkFutureMutationResult;
+		if (finalizeResponse?.error) {
+			handleUnsupportedState(completionStatus);
+		}
 	}
 
 	async function startEmailCode() {
@@ -207,9 +214,9 @@ export function useCheckoutEmailHandoffFlow({
 		setIsSubmitting(true);
 
 		try {
-			const createResponse = (await signIn.create({
+			const createResponse = await signIn.create({
 				identifier: lockedEmailAddress,
-			})) as ClerkCompletionCandidate;
+			});
 			if (createResponse.error) {
 				return;
 			}
@@ -219,16 +226,17 @@ export function useCheckoutEmailHandoffFlow({
 				return;
 			}
 
-			if (getCompletionStatus(createResponse) === "complete") {
-				await finalizeSignIn(createResponse);
+			if (getCompletionStatus(signIn) === "complete") {
+				await finalizeSignIn(signIn);
 				return;
 			}
 
-			const emailCodeFactor =
-				getEmailCodeFirstFactor(createResponse, lockedEmailAddress) ??
-				getEmailCodeFirstFactor(signIn, lockedEmailAddress);
+			const emailCodeFactor = getEmailCodeFirstFactor(
+				signIn,
+				lockedEmailAddress,
+			);
 			if (!emailCodeFactor) {
-				handleMissingEmailCodeFactor(createResponse);
+				handleMissingEmailCodeFactor(signIn);
 				return;
 			}
 
@@ -255,19 +263,14 @@ export function useCheckoutEmailHandoffFlow({
 		setIsSubmitting(true);
 
 		try {
-			const response = (await signIn.emailCode.verifyCode({
+			const response = await signIn.emailCode.verifyCode({
 				code: verificationCode,
-			})) as ClerkCompletionCandidate;
+			});
 			if (response.error) {
 				return;
 			}
 
-			if (getCompletionStatus(response) !== "complete") {
-				handleUnsupportedState(getCompletionStatus(response));
-				return;
-			}
-
-			await finalizeSignIn(response);
+			await finalizeSignIn(signIn);
 		} finally {
 			setIsSubmitting(false);
 		}

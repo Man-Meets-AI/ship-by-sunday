@@ -39,7 +39,6 @@ function createSignInState(overrides?: Partial<Record<string, unknown>>) {
 				signIn.status = "complete";
 				return {
 					error: null,
-					status: "complete",
 				};
 			}),
 		},
@@ -171,6 +170,49 @@ describe("CheckoutEmailHandoffPage", () => {
 				"/checkout/success?session_id=cs_test_123",
 			);
 		});
+	});
+
+	it("fails closed when Clerk requires another factor after checkout email verification", async () => {
+		const signInState = createSignInState({
+			emailCode: {
+				sendCode: vi.fn().mockResolvedValue({ error: null }),
+				verifyCode: vi.fn().mockImplementation(async () => {
+					signInState.signIn.status = "needs_second_factor";
+					return {
+						error: null,
+					};
+				}),
+			},
+			finalize: vi.fn().mockResolvedValue({
+				error: new Error("needs_second_factor"),
+			}),
+		});
+		useSignInMock.mockReturnValue(signInState);
+		const user = userEvent.setup();
+
+		render(
+			<CheckoutEmailHandoffPage
+				checkoutEmail="buyer@example.com"
+				redirectPath="/checkout/success?session_id=cs_test_123"
+			/>,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Send email code" }));
+		await user.type(screen.getByLabelText("Email code"), "123456");
+		await user.click(
+			screen.getByRole("button", { name: "Verify and continue" }),
+		);
+
+		expect(signInState.signIn.finalize).toHaveBeenCalled();
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(reportClientErrorMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				code: "clerk_checkout_email_handoff_unsupported_state",
+				details: expect.objectContaining({
+					status: "needs_second_factor",
+				}),
+			}),
+		);
 	});
 
 	it("does not fall back to transfer sign-in or password setup when Clerk reports a transferable state", async () => {

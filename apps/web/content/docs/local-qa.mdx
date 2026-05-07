@@ -93,7 +93,7 @@ For local targets, the billing pack now runs `bun run stripe:dev:doctor` as a wa
 
 For any non-local target, keep these boundaries straight:
 
-- `tmp/release-personas.local.json` holds the release proof email and password pairs by default.
+- `tmp/release-personas.local.json` holds the release proof account emails by default.
 - `apps/web/.env.local` or `QA_ENV_FILE=<path>` selects the Clerk and Convex environment where those personas will be created or reused.
 - `PLAYWRIGHT_BASE_URL=<target>` selects the site the browser tests will hit.
 

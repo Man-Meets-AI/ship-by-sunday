@@ -34,6 +34,10 @@ type SignInCompletionCandidate = {
 	supportedFirstFactors?: ClerkSignInWithFirstFactors["supportedFirstFactors"];
 };
 
+type ClerkFutureMutationResult = {
+	error?: unknown;
+};
+
 function getRenderableErrors(
 	errors: Array<unknown> | null,
 ): RenderableError[] | null {
@@ -196,14 +200,17 @@ export function useSignInFlow() {
 
 		const finalize = getFinalizeFunction(candidate);
 		const completionStatus = getCompletionStatus(candidate);
-		if (!finalize || completionStatus !== "complete") {
+		if (!finalize) {
 			reportUnsupportedState(completionStatus);
 			return;
 		}
 
-		await finalize({
+		const finalizeResponse = (await finalize({
 			navigate: navigateAfterAuth,
-		});
+		})) as ClerkFutureMutationResult;
+		if (finalizeResponse?.error) {
+			reportUnsupportedState(completionStatus);
+		}
 	}
 
 	async function startOver() {
@@ -229,9 +236,9 @@ export function useSignInFlow() {
 		setIsSubmitting(true);
 
 		try {
-			const createResponse = (await signIn.create({
+			const createResponse = await signIn.create({
 				identifier: emailAddress,
-			})) as SignInCompletionCandidate;
+			});
 			if (createResponse.error) {
 				return;
 			}
@@ -241,16 +248,14 @@ export function useSignInFlow() {
 				return;
 			}
 
-			if (getCompletionStatus(createResponse) === "complete") {
-				await finalizeSignIn(createResponse);
+			if (getCompletionStatus(signIn) === "complete") {
+				await finalizeSignIn(signIn);
 				return;
 			}
 
-			const emailCodeFactor =
-				getEmailCodeFirstFactor(createResponse, emailAddress) ??
-				getEmailCodeFirstFactor(signIn, emailAddress);
+			const emailCodeFactor = getEmailCodeFirstFactor(signIn, emailAddress);
 			if (!emailCodeFactor) {
-				reportMissingEmailCodeFactor(createResponse);
+				reportMissingEmailCodeFactor(signIn);
 				return;
 			}
 
@@ -277,19 +282,14 @@ export function useSignInFlow() {
 		setIsSubmitting(true);
 
 		try {
-			const response = (await signIn.emailCode.verifyCode({
+			const response = await signIn.emailCode.verifyCode({
 				code: verificationCode,
-			})) as SignInCompletionCandidate;
+			});
 			if (response.error) {
 				return;
 			}
 
-			if (getCompletionStatus(response) !== "complete") {
-				reportUnsupportedState(getCompletionStatus(response));
-				return;
-			}
-
-			await finalizeSignIn(response);
+			await finalizeSignIn(signIn);
 		} finally {
 			setIsSubmitting(false);
 		}
