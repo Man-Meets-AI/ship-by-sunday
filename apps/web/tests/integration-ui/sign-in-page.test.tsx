@@ -256,9 +256,14 @@ describe("SignInPage", () => {
 
 		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
 		expect(
-			await screen.findByText(
-				"We don't have an account for that email. Purchase a license first, then sign in with the checkout email.",
-			),
+			await screen.findByText(/We don't have an account for that email/),
+		).toBeTruthy();
+		const purchaseLink = screen.getByRole("link", {
+			name: "Purchase a license",
+		}) as HTMLAnchorElement;
+		expect(purchaseLink.getAttribute("href")).toBe("/#pricing");
+		expect(
+			screen.getByText(/first, then sign in with the checkout email/),
 		).toBeTruthy();
 		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
 		expect(screen.queryByText("Couldn't find your account.")).toBeNull();
@@ -278,9 +283,17 @@ describe("SignInPage", () => {
 
 		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
 		expect(
-			await screen.findByText(
-				"We don't have an account for that email. Purchase a license first, then sign in with the checkout email.",
-			),
+			await screen.findByText(/We don't have an account for that email/),
+		).toBeTruthy();
+		expect(
+			(
+				screen.getByRole("link", {
+					name: "Purchase a license",
+				}) as HTMLAnchorElement
+			).getAttribute("href"),
+		).toBe("/#pricing");
+		expect(
+			screen.getByText(/first, then sign in with the checkout email/),
 		).toBeTruthy();
 		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
 		expect(reportClientErrorMock).not.toHaveBeenCalled();

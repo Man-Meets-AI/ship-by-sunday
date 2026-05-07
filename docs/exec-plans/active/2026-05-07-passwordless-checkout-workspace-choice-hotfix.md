@@ -52,8 +52,9 @@ The simple desired UX is: a first-time customer buys with Stripe using their ema
 - [x] 2026-05-07 13:11:18 EDT: Updated focused checkout, sign-in, route, access, workspace choice, Convex grant, and webhook tests plus the active auth/checkout/release docs for the new contract.
 - [x] 2026-05-07 13:18:45 EDT: Passed focused unit, Convex grant, integration UI, Stripe checkout route, app lint/typecheck/format, repo lint/typecheck/format, docs lint, public readiness lint, ExecPlan lint, and whitespace checks.
 - [x] 2026-05-07 13:21:12 EDT: Updated hosted Stripe proof tooling so dev card-payment verification expects neutral product metadata and proof sign-in defaults to `/workspace/choose`.
+- [x] 2026-05-07 13:44:13 EDT: Opened draft PR #218, ran the requested review swarm, removed the stale checkout-handoff integration test, strict-gated course metadata, protected success-page fulfillment with the server-only Stripe webhook secret, and upgraded dev card-payment proof to assert the passwordless workspace handoff.
 - [ ] Prove dev checkout purchase and OTP login with `EA@parkerrex.com`.
-- [ ] Open the release PR into `main`, use `dev` only as the staging payment lane if needed, then prove production after merge.
+- [ ] Mark PR #218 ready after post-review validation is green, then use dev only as the staging payment lane if needed and prove production after merge.
 
 ## Surprises & Discoveries
 
@@ -536,6 +537,26 @@ Hosted proof tooling validation recorded on 2026-05-07 13:21:12 EDT:
     result: passed
 
     node --check apps/web/scripts/lib/hosted-stripe-checkout-proof.mjs
+    result: passed
+
+Post-review validation recorded on 2026-05-07 13:44:13 EDT:
+
+    bun run --cwd apps/web test:unit -- tests/unit/checkout-session.test.ts tests/unit/checkout-claims-actions.test.ts tests/unit/stripe-webhook-action.test.ts tests/unit/course-access.test.ts tests/unit/convex-product-access-grant.test.ts tests/unit/hosted-stripe-checkout-proof.test.ts
+    result: passed, 6 files and 65 tests
+
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/sign-in-page.test.tsx tests/integration-ui/checkout-success-view.test.tsx tests/integration-ui/checkout-success-view.interactions.test.tsx
+    result: passed, 3 files and 30 tests
+
+    test ! -e apps/web/tests/integration-ui/checkout-email-handoff-page.test.tsx
+    result: passed
+
+    node --check apps/web/scripts/verify-dev-stripe-card-payment.mjs
+    result: passed
+
+    bun run --cwd apps/web lint
+    result: passed
+
+    bun run --cwd apps/web typecheck
     result: passed
 
 Add dev proof artifacts here during implementation:

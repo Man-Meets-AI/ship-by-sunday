@@ -498,8 +498,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 	stripeEventId: string;
 	stripeEventType: string;
 }): Promise<CheckoutSessionFulfillmentResult> {
-	const sessionCourseSlug = session.metadata?.courseSlug ?? PRODUCT_COURSE_SLUG;
-	if (sessionCourseSlug !== PRODUCT_COURSE_SLUG) {
+	if (session.metadata?.courseSlug !== PRODUCT_COURSE_SLUG) {
 		return {
 			kind: "invalid_session",
 			sessionId: session.id,
@@ -532,7 +531,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 		{
 			stripeCheckoutSessionId: session.id,
 			checkoutEmail,
-			courseSlug: sessionCourseSlug,
+			courseSlug: PRODUCT_COURSE_SLUG,
 			paymentStatus: session.payment_status,
 			stripeCustomerId,
 			stripePaymentIntentId,
@@ -713,10 +712,18 @@ export const fulfillCheckoutSessionByEmail = internalAction({
 
 export const fulfillCheckoutSessionFromSuccessPage = action({
 	args: {
+		fulfillmentToken: v.string(),
 		sessionId: v.string(),
 	},
 	returns: checkoutSessionFulfillmentResultValidator,
 	handler: async (ctx, args): Promise<CheckoutSessionFulfillmentResult> => {
+		if (args.fulfillmentToken !== requireConvexEnv("STRIPE_WEBHOOK_SECRET")) {
+			return {
+				kind: "invalid_session" as const,
+				sessionId: args.sessionId,
+			};
+		}
+
 		let session: Stripe.Checkout.Session;
 		try {
 			session = await getStripeClient().checkout.sessions.retrieve(
@@ -778,9 +785,7 @@ export const claimCheckoutSessionForViewer = action({
 			throw error;
 		}
 
-		const sessionCourseSlug =
-			session.metadata?.courseSlug ?? PRODUCT_COURSE_SLUG;
-		if (sessionCourseSlug !== PRODUCT_COURSE_SLUG) {
+		if (session.metadata?.courseSlug !== PRODUCT_COURSE_SLUG) {
 			return {
 				kind: "invalid_session" as const,
 				sessionId: session.id,
@@ -846,7 +851,7 @@ export const claimCheckoutSessionForViewer = action({
 			{
 				stripeCheckoutSessionId: session.id,
 				checkoutEmail,
-				courseSlug: sessionCourseSlug,
+				courseSlug: PRODUCT_COURSE_SLUG,
 				paymentStatus: session.payment_status,
 				stripeCustomerId:
 					typeof session.customer === "string" ? session.customer : undefined,

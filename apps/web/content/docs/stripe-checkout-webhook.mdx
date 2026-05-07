@@ -67,6 +67,8 @@ That helper:
 - writes that secret into `.env.local`
 - syncs that secret, `STRIPE_SECRET_KEY`, and `CLERK_SECRET_KEY` into the active hosted Convex dev env
 
+The app also uses the same `STRIPE_WEBHOOK_SECRET` as a server-only token when `/checkout/success` asks Convex to retry paid-session fulfillment. Do not expose it to the browser. Missing or mismatched values make the webhook fail signature verification and make the success-page retry return an invalid checkout session.
+
 It also expects `.env.local` to contain the `CONVEX_DEPLOYMENT` value that `bun run dev:convex` writes.
 In this repo, that same `bun run dev:convex` sync also needs to leave `NEXT_PUBLIC_CONVEX_SITE_URL` in `.env.local`, because Stripe forwards into the Convex HTTP-actions origin instead of the `.convex.cloud` client origin.
 

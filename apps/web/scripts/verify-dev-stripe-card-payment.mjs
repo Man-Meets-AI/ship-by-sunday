@@ -16,6 +16,7 @@ const stripeApiVersion = "2026-02-25.clover";
 const testCardNumber = "4242 4242 4242 4242";
 const testCardExpiry = "12 / 34";
 const testCardCvc = "123";
+const checkoutEmail = `dev-checkout-${Date.now()}@example.com`;
 const expectedCourseSlug = "ship-by-sunday";
 
 function normalizeStripeSecretKey(secretKey) {
@@ -193,6 +194,41 @@ function printCheck(label, passed, detail) {
 	console.log(`- ${passed ? "PASS" : "FAIL"} ${label}: ${detail}`);
 }
 
+async function waitForPasswordlessCheckoutHandoff(
+	page,
+	{ baseUrl, timeoutMs },
+) {
+	const baseOrigin = new URL(baseUrl).origin;
+
+	await page.waitForURL(
+		(url) => url.origin === baseOrigin && url.pathname === "/sign-in",
+		{
+			timeout: timeoutMs,
+		},
+	);
+
+	const finalUrl = new URL(page.url());
+	const redirectUrl = finalUrl.searchParams.get("redirect_url");
+	const emailField = page.getByLabel("Email").first();
+	await emailField.waitFor({ state: "visible", timeout: 10_000 });
+
+	return {
+		claimPageVisible:
+			(await page
+				.getByText(/Prove checkout email/i)
+				.isVisible()
+				.catch(() => false)) || page.url().includes("/checkout/email-handoff"),
+		emailLocked: await emailField.isDisabled().catch(() => false),
+		emailValue: await emailField.inputValue(),
+		finalUrl: page.url(),
+		passwordVisible: await page
+			.getByLabel("Password")
+			.isVisible()
+			.catch(() => false),
+		redirectUrl,
+	};
+}
+
 const { baseUrl, timeoutMs } = parseArgs(process.argv.slice(2));
 
 if (!baseUrl) {
@@ -296,21 +332,13 @@ try {
 	}
 
 	const hostedLinkSignalText = await waitForHostedLinkSignal(page);
-	await fillVisibleTextBox(
-		page,
-		/^email$/i,
-		`dev-checkout-${Date.now()}@example.com`,
-	);
+	await fillVisibleTextBox(page, /^email$/i, checkoutEmail);
 	await fillStripeCardPayment(page);
 	await page.getByTestId("hosted-payment-submit-button").click();
-	await page.waitForURL(
-		(url) =>
-			url.origin === new URL(baseUrl).origin &&
-			url.pathname === "/checkout/success",
-		{
-			timeout: timeoutMs,
-		},
-	);
+	const checkoutHandoff = await waitForPasswordlessCheckoutHandoff(page, {
+		baseUrl,
+		timeoutMs,
+	});
 
 	const finalSession =
 		await stripe.checkout.sessions.retrieve(checkoutSessionId);
@@ -345,14 +373,14 @@ try {
 			/Link is accepted/i.test(hostedLinkSignalText),
 		hostedLinkSignalText ?? "missing",
 	);
-		printCheck(
-			"Checkout used neutral product metadata",
-			finalSession.metadata?.courseSlug === expectedCourseSlug &&
-				finalSession.metadata?.buyerStartingPoint === undefined &&
-				finalSession.metadata?.checkoutCtaId === undefined &&
-				finalSession.metadata?.fulfillmentTrack === undefined,
-			`metadata=${JSON.stringify(finalSession.metadata)}`,
-		);
+	printCheck(
+		"Checkout used neutral product metadata",
+		finalSession.metadata?.courseSlug === expectedCourseSlug &&
+			finalSession.metadata?.buyerStartingPoint === undefined &&
+			finalSession.metadata?.checkoutCtaId === undefined &&
+			finalSession.metadata?.fulfillmentTrack === undefined,
+		`metadata=${JSON.stringify(finalSession.metadata)}`,
+	);
 	printCheck(
 		"Stripe Checkout session paid",
 		finalSession.status === "complete" &&
@@ -366,9 +394,13 @@ try {
 		`status=${paymentIntent?.status ?? "missing"}, amount=${paymentIntent?.amount ?? "missing"}`,
 	);
 	printCheck(
-		"Checkout returned to dev staging",
-		page.url().startsWith(baseUrl),
-		page.url(),
+		"Checkout reached passwordless workspace handoff",
+		checkoutHandoff.redirectUrl === "/workspace/choose?welcome=checkout" &&
+			checkoutHandoff.emailValue === checkoutEmail &&
+			checkoutHandoff.emailLocked &&
+			!checkoutHandoff.passwordVisible &&
+			!checkoutHandoff.claimPageVisible,
+		`url=${checkoutHandoff.finalUrl}, redirect_url=${checkoutHandoff.redirectUrl}, email=${checkoutHandoff.emailValue}, email_locked=${checkoutHandoff.emailLocked}, password_visible=${checkoutHandoff.passwordVisible}, claim_page_visible=${checkoutHandoff.claimPageVisible}`,
 	);
 
 	console.log(
@@ -391,7 +423,8 @@ try {
 					uiMode: finalSession.ui_mode ?? null,
 				},
 				expressCheckoutRequestCount: expressCheckoutRequests.length,
-				finalPageUrl: page.url(),
+				finalPageUrl: checkoutHandoff.finalUrl,
+				handoff: checkoutHandoff,
 				hostedLinkSignalText,
 				paymentIntent: paymentIntent
 					? {
@@ -415,18 +448,22 @@ try {
 		visibleCheckoutButtonCount <= 0 ||
 		expressCheckoutRequests.length !== 0 ||
 		!checkoutRouteResponses.some((response) => response.ok) ||
-			typeof hostedLinkSignalText !== "string" ||
-			!/Link is accepted/i.test(hostedLinkSignalText) ||
-			finalSession.metadata?.courseSlug !== expectedCourseSlug ||
-			finalSession.metadata?.buyerStartingPoint !== undefined ||
-			finalSession.metadata?.checkoutCtaId !== undefined ||
-			finalSession.metadata?.fulfillmentTrack !== undefined ||
+		typeof hostedLinkSignalText !== "string" ||
+		!/Link is accepted/i.test(hostedLinkSignalText) ||
+		finalSession.metadata?.courseSlug !== expectedCourseSlug ||
+		finalSession.metadata?.buyerStartingPoint !== undefined ||
+		finalSession.metadata?.checkoutCtaId !== undefined ||
+		finalSession.metadata?.fulfillmentTrack !== undefined ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
 		finalSession.amount_total !== 25_000 ||
 		paymentIntent?.status !== "succeeded" ||
 		paymentIntent.amount !== 25_000 ||
-		!page.url().startsWith(baseUrl)
+		checkoutHandoff.redirectUrl !== "/workspace/choose?welcome=checkout" ||
+		checkoutHandoff.emailValue !== checkoutEmail ||
+		!checkoutHandoff.emailLocked ||
+		checkoutHandoff.passwordVisible ||
+		checkoutHandoff.claimPageVisible
 	) {
 		process.exitCode = 1;
 	}

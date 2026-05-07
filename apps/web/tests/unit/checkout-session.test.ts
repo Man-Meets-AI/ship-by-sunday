@@ -122,6 +122,27 @@ describe("getCheckoutSessionState", () => {
 		expect(authMock).not.toHaveBeenCalled();
 	});
 
+	it("returns invalid_session when the checkout is missing course metadata", async () => {
+		retrieveSessionMock.mockResolvedValue(
+			createCheckoutSession({
+				metadata: {
+					clerkUserId: "user_123",
+				},
+			}),
+		);
+
+		const { getCheckoutSessionState } =
+			await import("@/platform/billing/checkout/checkout-session");
+
+		await expect(
+			getCheckoutSessionState("cs_missing_course_metadata"),
+		).resolves.toEqual({
+			kind: "invalid_session",
+			sessionId: "cs_missing_course_metadata",
+		});
+		expect(authMock).not.toHaveBeenCalled();
+	});
+
 	it("returns sign_in_required when the checkout is valid but no user is signed in", async () => {
 		retrieveSessionMock.mockResolvedValue(createCheckoutSession());
 		authMock.mockResolvedValue({ userId: null });

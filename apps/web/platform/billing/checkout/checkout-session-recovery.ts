@@ -9,6 +9,7 @@ import { PENDING_CHECKOUT_SESSION_COOKIE_NAME } from "@/platform/billing/checkou
 import { COURSE_SLUG } from "@/lib/course/lesson/model/registry";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import { getStripe } from "@/platform/billing/stripe";
+import { requireServerEnv } from "@/platform/env/server";
 
 export type CheckoutSessionClaimResult =
 	| {
@@ -125,7 +126,7 @@ export function isStripeCheckoutSessionPaid(
 export function isStripeCheckoutSessionForCourse(
 	session: Stripe.Checkout.Session,
 ): boolean {
-	return (session.metadata?.courseSlug ?? COURSE_SLUG) === COURSE_SLUG;
+	return session.metadata?.courseSlug === COURSE_SLUG;
 }
 
 export async function getCheckoutSessionForRecovery(
@@ -197,7 +198,10 @@ export async function fulfillCheckoutSessionFromSuccessPage(
 ): Promise<CheckoutSessionFulfillmentResult> {
 	return (await fetchAction(
 		api.checkoutClaimsActions.fulfillCheckoutSessionFromSuccessPage,
-		{ sessionId },
+		{
+			fulfillmentToken: requireServerEnv("STRIPE_WEBHOOK_SECRET"),
+			sessionId,
+		},
 	)) as CheckoutSessionFulfillmentResult;
 }
 

@@ -49,6 +49,7 @@ describe("convex/checkoutClaimsActions", () => {
 			...originalEnv,
 			CLERK_SECRET_KEY: "sk_clerk_test_123",
 			STRIPE_SECRET_KEY: "sk_test_123",
+			STRIPE_WEBHOOK_SECRET: "whsec_test_123",
 		};
 		retrieveSessionMock.mockReset();
 		stripeConstructorArgs.length = 0;
@@ -439,6 +440,71 @@ describe("convex/checkoutClaimsActions", () => {
 				},
 			},
 		});
+	});
+
+	it("refuses success-page fulfillment with an invalid server token", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_guest_token",
+			metadata: {
+				courseSlug: "ship-by-sunday",
+			},
+			customer_details: {
+				email: "buyer@example.com",
+			},
+			payment_status: "paid",
+		});
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi.fn();
+		const { fulfillCheckoutSessionFromSuccessPage } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				fulfillmentToken: "wrong-token",
+				sessionId: "cs_guest_token",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "invalid_session",
+			sessionId: "cs_guest_token",
+		});
+		expect(retrieveSessionMock).not.toHaveBeenCalled();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(runMutation).not.toHaveBeenCalled();
+	});
+
+	it("refuses success-page fulfillment when the checkout is missing course metadata", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_missing_course",
+			metadata: {},
+			customer_details: {
+				email: "buyer@example.com",
+			},
+			payment_status: "paid",
+		});
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		const runMutation = vi.fn();
+		const { fulfillCheckoutSessionFromSuccessPage } =
+			await import("@/convex/checkoutClaimsActions");
+
+		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
+			createActionCtx({ runMutation }) as never,
+			{
+				fulfillmentToken: "whsec_test_123",
+				sessionId: "cs_missing_course",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "invalid_session",
+			sessionId: "cs_missing_course",
+		});
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(runMutation).not.toHaveBeenCalled();
 	});
 
 	it("refuses fulfillment when multiple Clerk users match the checkout email", async () => {
