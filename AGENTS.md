@@ -32,6 +32,13 @@
 7. Update docs or ExecPlans when behavior, public contracts, commands, or operator workflow changes.
 8. Stop and repair failing validation before continuing to unrelated work.
 
+## Agent Notes
+
+- When you make a mistake, append a concise note to root `MISTAKES.md` with the mistake, impact, and corrective action.
+- When you wish you had more context or tools, append a concise note to root `DESIRES.md` with the missing context or capability and why it would have helped.
+- When you learn something durable about the local environment, append a concise note to root `LEARNINGS.md` with the fact and how it was verified.
+- Create these files if they do not exist. Do not include secrets, credentials, or private user data in these notes.
+
 ## Path Triggers
 
 - Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
