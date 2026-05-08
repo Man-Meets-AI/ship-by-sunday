@@ -110,9 +110,9 @@ Run focused validation:
 
 Complete the plan only after docs validation passes:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Validation and Acceptance
@@ -145,9 +145,9 @@ Completion result: full tests passed with 24 files passed and 2 skipped; build p
 
 Run Program and docs validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 Read-only runner-test smoke:

@@ -263,9 +263,9 @@ Before closeout, run build, package, and docs validation:
 
     bun run --cwd packages/local-runner build
     bun run --cwd packages/local-runner package:smoke
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-07-install-worker-foundations.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-07-install-worker-foundations.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-07-install-worker-foundations.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/completed/2026-05-07-install-worker-foundations.md
     git diff --check
 
 ## Validation and Acceptance
@@ -301,9 +301,9 @@ Run package build and smoke when CLI packaging changes:
 
 Run planning docs validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-07-install-worker-foundations.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-07-install-worker-foundations.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-07-install-worker-foundations.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/completed/2026-05-07-install-worker-foundations.md
     git diff --check
 
 ## Idempotence and Recovery

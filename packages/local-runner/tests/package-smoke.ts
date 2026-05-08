@@ -406,6 +406,61 @@ async function runPackedWorkerInstallCommandSmoke({
 	if (existsSync(path.join(repositoryRoot, "apps", "worker"))) {
 		throw new Error("packed package install dry-run wrote apps/worker");
 	}
+
+	const mutatingInstallResult = await runProcess(
+		"bunx",
+		[
+			"--bun",
+			"--package",
+			packageTarballPath,
+			"shipbysunday",
+			"install",
+			"--repo",
+			repositoryRoot,
+			"--yes",
+			"--json",
+			"--no-kickoff",
+		],
+		{
+			env: {
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			},
+		},
+	);
+	if (mutatingInstallResult.exitCode !== 0) {
+		throw new Error(
+			`packed package mutating install smoke failed with ${mutatingInstallResult.exitCode}\nSTDOUT:\n${mutatingInstallResult.stdout}\nSTDERR:\n${mutatingInstallResult.stderr}`,
+		);
+	}
+	const mutatingInstall = JSON.parse(mutatingInstallResult.stdout) as {
+		outcome?: string;
+		workflowId?: string;
+	};
+	if (
+		mutatingInstall.outcome !== "installed" ||
+		mutatingInstall.workflowId !== "worker-foundations-install"
+	) {
+		throw new Error(
+			`packed package mutating install smoke returned an unexpected result\nSTDOUT:\n${mutatingInstallResult.stdout}\nSTDERR:\n${mutatingInstallResult.stderr}`,
+		);
+	}
+	if (
+		!existsSync(
+			path.join(repositoryRoot, "docs", "worker", "install-report.md"),
+		)
+	) {
+		throw new Error(
+			"packed package mutating install did not write install report",
+		);
+	}
+	const installStatus = await runProcess("git", ["status", "--short"], {
+		cwd: repositoryRoot,
+	});
+	if (installStatus.exitCode !== 0 || installStatus.stdout.trim() !== "") {
+		throw new Error(
+			`packed package mutating install left dirty worktree\nSTDOUT:\n${installStatus.stdout}\nSTDERR:\n${installStatus.stderr}`,
+		);
+	}
 }
 
 async function runNativeWorkerInstallCommandSmoke({

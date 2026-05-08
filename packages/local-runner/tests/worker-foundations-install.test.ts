@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -8,6 +9,12 @@ import { promisify } from "node:util";
 import { runInstallCommand } from "../src/commands/install";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
 import {
+	runWorkerFoundationsInstall,
+	type WorkerInstallOptions,
+	type WorkerInstallResult,
+} from "../src/workflows/worker-foundations-install/workflow";
+import {
+	WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR,
 	WORKER_BUN_DOWNLOAD_URL_ENV_VAR,
 	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
 	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
@@ -356,9 +363,8 @@ describe("Worker Foundations install command", () => {
 		const pathWithoutBun = await createTemporaryDirectory(
 			"worker-no-bun-path-",
 		);
-		const bunDownloadServer = await createBunDownloadServer(
-			await readFile(findExecutableOnPath("bun")),
-		);
+		const bunPayload = await readFile(findExecutableOnPath("bun"));
+		const bunDownloadServer = await createBunDownloadServer(bunPayload);
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
 		try {
@@ -376,6 +382,7 @@ describe("Worker Foundations install command", () => {
 						...process.env,
 						PATH: pathWithoutBun,
 						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunPayload),
 						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
 					},
 				),
@@ -418,9 +425,8 @@ describe("Worker Foundations install command", () => {
 		const pathWithoutBun = await createTemporaryDirectory(
 			"worker-no-bun-path-",
 		);
-		const bunDownloadServer = await createBunDownloadServer(
-			Buffer.from("#!/bin/sh\nexit 99\n"),
-		);
+		const bunPayload = Buffer.from("#!/bin/sh\necho 1.2.3\n");
+		const bunDownloadServer = await createBunDownloadServer(bunPayload);
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
 		try {
@@ -438,6 +444,7 @@ describe("Worker Foundations install command", () => {
 						...process.env,
 						PATH: pathWithoutBun,
 						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunPayload),
 						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
 					},
 				),
@@ -454,6 +461,98 @@ describe("Worker Foundations install command", () => {
 		expect(output).not.toContain(bunDownloadServer.url);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("rejects unsafe downloaded Bun zip entries before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const pathWithoutBun = await createTemporaryDirectory(
+			"worker-no-bun-path-",
+		);
+		const bunArchiveAssetName = currentBunArchiveAssetName();
+		const archiveRoot = bunArchiveAssetName.replace(/\.zip$/u, "");
+		const executableName = process.platform === "win32" ? "bun.exe" : "bun";
+		const bunArchive = createStoredZip([
+			{
+				name: `${archiveRoot}/`,
+				content: Buffer.alloc(0),
+				unixMode: 0o040755,
+			},
+			{
+				name: `${archiveRoot}/${executableName}`,
+				content: Buffer.from("#!/bin/sh\necho 1.3.5\n"),
+				unixMode: 0o100755,
+			},
+			{
+				name: "../escape",
+				content: Buffer.from("unsafe"),
+				unixMode: 0o100644,
+			},
+		]);
+		const bunDownloadServer = await createBunDownloadServer(bunArchive, {
+			contentType: "application/zip",
+			route: `/${bunArchiveAssetName}`,
+		});
+		let result: WorkerInstallResult | null = null;
+
+		try {
+			result = await runWorkerFoundationsInstall({
+				options: workerInstallOptions({
+					repoPath: repositoryRoot,
+				}),
+				env: {
+					...process.env,
+					PATH: pathWithoutBun,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+					[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunArchive),
+					[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
+				},
+			});
+		} finally {
+			await bunDownloadServer.close();
+		}
+
+		if (!result)
+			throw new Error("Unsafe archive test did not produce a result.");
+		expect(result.outcome).toBe("failed");
+		expect(result.summary).toContain("unsafe entries");
+		expect(JSON.stringify(result.report)).not.toContain("escape");
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("fails before repo mutation when downloaded Bun checksum mismatches", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const pathWithoutBun = await createTemporaryDirectory(
+			"worker-no-bun-path-",
+		);
+		const bunPayload = await readFile(findExecutableOnPath("bun"));
+		const bunDownloadServer = await createBunDownloadServer(bunPayload);
+		let result: WorkerInstallResult | null = null;
+
+		try {
+			result = await runWorkerFoundationsInstall({
+				options: workerInstallOptions({
+					repoPath: repositoryRoot,
+				}),
+				env: {
+					...process.env,
+					PATH: pathWithoutBun,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+					[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: "0".repeat(64),
+					[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
+				},
+			});
+		} finally {
+			await bunDownloadServer.close();
+		}
+
+		if (!result) throw new Error("Checksum test did not produce a result.");
+		expect(result.outcome).toBe("failed");
+		expect(result.summary).toContain("integrity validation");
+		expect(JSON.stringify(result.report)).not.toContain(bunDownloadServer.url);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
 	it("blocks unrecognized same-name scripts without leaking script bodies", async () => {
@@ -643,6 +742,44 @@ describe("Worker Foundations install command", () => {
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(true);
 	});
 
+	it("reports fixed activation denial reasons without server-controlled text", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome(null);
+		const activationServer = await createActivationServer({
+			status: "denied",
+			reason:
+				"visit https://example.test/secret?token=sbs_run_should_not_leak sk-should-not-leak",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+		vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+		const restoreInteractiveInput = mockInteractiveInstallInput("y\n");
+
+		try {
+			await expect(
+				runInstallCommand(
+					["--repo", repositoryRoot, "--no-kickoff", "--no-commit"],
+					{
+						...process.env,
+						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[WORKER_LICENSE_API_BASE_URL_ENV_VAR]: activationServer.baseUrl,
+						[WORKER_LICENSE_OPEN_BROWSER_ENV_VAR]: "0",
+					},
+				),
+			).resolves.toBe(2);
+		} finally {
+			restoreInteractiveInput();
+			await activationServer.close();
+		}
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Worker license activation was denied.");
+		expect(output).not.toContain("https://example.test/secret");
+		expect(output).not.toContain("sbs_run_should_not_leak");
+		expect(output).not.toContain("sk-should-not-leak");
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
 	it("blocks JSON installs without --yes before prompting", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
@@ -673,6 +810,43 @@ describe("Worker Foundations install command", () => {
 			]),
 		);
 		expect(stdoutWriteSpy).not.toHaveBeenCalled();
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
+	it("blocks JSON actual installs unless kickoff is explicitly disabled", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const codexHome = await createTemporaryDirectory("worker-codex-home-");
+		const kickoffProbeFile = path.join(codexHome, "kickoff-probe.txt");
+		const fakeBinDirectory = await createSuccessfulCodexBin({
+			kickoffProbeFile,
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(["--repo", repositoryRoot, "--yes", "--json"], {
+				...process.env,
+				CODEX_HOME: codexHome,
+				PATH: `${fakeBinDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			}),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "json-kickoff",
+					reason: expect.stringContaining("JSON install requires --no-kickoff"),
+				}),
+			]),
+		);
+		expect(existsSync(kickoffProbeFile)).toBe(false);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
@@ -727,6 +901,43 @@ describe("Worker Foundations install command", () => {
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
+	it("starts foreground Codex kickoff after proof and commit", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const codexHome = await createTemporaryDirectory("worker-codex-home-");
+		const kickoffProbeFile = path.join(codexHome, "kickoff-probe.txt");
+		const fakeBinDirectory = await createSuccessfulCodexBin({
+			kickoffProbeFile,
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(["--repo", repositoryRoot, "--yes"], {
+				...process.env,
+				CODEX_HOME: codexHome,
+				PATH: `${fakeBinDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			}),
+		).resolves.toBe(0);
+
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Worker Foundations installed.",
+		);
+		expect(await readFile(kickoffProbeFile, "utf8")).toBe("present\n");
+
+		const installReport = await readFile(
+			path.join(repositoryRoot, "docs/worker/install-report.md"),
+			"utf8",
+		);
+		expect(installReport).toContain("Outcome: `installed`");
+		expect(installReport).toContain("Status: `started`");
+
+		const status = await execFileAsync("git", ["status", "--porcelain"], {
+			cwd: repositoryRoot,
+		});
+		expect(status.stdout.trim()).toBe("");
+	});
+
 	it("fails honestly when kickoff is blocked and does not leak secrets to Codex", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
@@ -740,7 +951,7 @@ describe("Worker Foundations install command", () => {
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
 		await expect(
-			runInstallCommand(["--repo", repositoryRoot, "--yes", "--json"], {
+			runInstallCommand(["--repo", repositoryRoot, "--yes"], {
 				...process.env,
 				CODEX_HOME: codexHome,
 				GITHUB_TOKEN: "gho_should_not_leak",
@@ -750,13 +961,9 @@ describe("Worker Foundations install command", () => {
 			}),
 		).resolves.toBe(1);
 
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-			kickoff: { status: string };
-		};
-		expect(result.outcome).toBe("failed");
-		expect(result.kickoff.status).toBe("blocked");
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Worker Foundations kickoff failed.",
+		);
 		expect(await readFile(reportProbeFile, "utf8")).toBe("present\n");
 
 		const installReport = await readFile(
@@ -840,6 +1047,19 @@ function activeWorkerLicense() {
 	};
 }
 
+function workerInstallOptions(
+	options: Pick<WorkerInstallOptions, "repoPath">,
+): WorkerInstallOptions {
+	return {
+		dryRun: false,
+		json: true,
+		noCommit: true,
+		noKickoff: true,
+		yes: true,
+		...options,
+	};
+}
+
 function mockInteractiveInstallInput(answer: string) {
 	const originalIsTty = process.stdin.isTTY;
 	const stdinOnceSpy = vi
@@ -867,14 +1087,18 @@ function mockInteractiveInstallInput(answer: string) {
 	};
 }
 
-async function createBunDownloadServer(payload: Buffer) {
+async function createBunDownloadServer(
+	payload: Buffer,
+	options: { contentType?: string; route?: string } = {},
+) {
 	let requestCount = 0;
+	const route = options.route ?? "/bun";
 	const server = createServer(async (request, response) => {
 		await readRequestBody(request);
-		if (request.method === "GET" && request.url === "/bun") {
+		if (request.method === "GET" && request.url === route) {
 			requestCount += 1;
 			response.writeHead(200, {
-				"Content-Type": "application/octet-stream",
+				"Content-Type": options.contentType ?? "application/octet-stream",
 			});
 			response.end(payload);
 			return;
@@ -891,12 +1115,14 @@ async function createBunDownloadServer(payload: Buffer) {
 		get requestCount() {
 			return requestCount;
 		},
-		url: `http://127.0.0.1:${address.port}/bun`,
+		url: `http://127.0.0.1:${address.port}${route}`,
 		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
 	};
 }
 
-async function createActivationServer() {
+async function createActivationServer(
+	pollResponse: Record<string, unknown> | null = null,
+) {
 	let startRequests = 0;
 	let pollRequests = 0;
 	const server = createServer(async (request, response) => {
@@ -925,13 +1151,15 @@ async function createActivationServer() {
 			pollRequests += 1;
 			response.writeHead(200, { "Content-Type": "application/json" });
 			response.end(
-				JSON.stringify({
-					status: "approved",
-					license: {
-						...activeWorkerLicense(),
-						machineCredential: "sbs_machine_activated_test",
+				JSON.stringify(
+					pollResponse ?? {
+						status: "approved",
+						license: {
+							...activeWorkerLicense(),
+							machineCredential: "sbs_machine_activated_test",
+						},
 					},
-				}),
+				),
 			);
 			return;
 		}
@@ -980,6 +1208,32 @@ async function commitFixtureFiles(repositoryRoot: string, refs: string[]) {
 	});
 }
 
+async function createSuccessfulCodexBin({
+	kickoffProbeFile,
+}: {
+	kickoffProbeFile: string;
+}) {
+	const binDirectory = await createTemporaryDirectory("worker-codex-bin-");
+	const codexPath = path.join(binDirectory, "codex");
+	await writeFile(
+		codexPath,
+		[
+			"#!/bin/sh",
+			'if [ "$1" = "--version" ]; then echo "codex 1.0.0"; exit 0; fi',
+			'if [ "$1" = "login" ] && [ "$2" = "status" ]; then echo "Logged in"; exit 0; fi',
+			'if [ -f "docs/worker/install-report.md" ]; then',
+			`  echo "present" > ${shellQuote(kickoffProbeFile)}`,
+			"else",
+			`  echo "missing" > ${shellQuote(kickoffProbeFile)}`,
+			"fi",
+			"exit 0",
+			"",
+		].join("\n"),
+	);
+	await chmod(codexPath, 0o755);
+	return binDirectory;
+}
+
 async function createFailingCodexBin({
 	codexEnvFile,
 	reportProbeFile,
@@ -1012,6 +1266,102 @@ async function createFailingCodexBin({
 function shellQuote(value: string) {
 	return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }
+
+function sha256(value: Buffer) {
+	return createHash("sha256").update(value).digest("hex");
+}
+
+function currentBunArchiveAssetName() {
+	if (process.platform === "darwin") {
+		if (process.arch === "arm64") return "bun-darwin-aarch64.zip";
+		if (process.arch === "x64") return "bun-darwin-x64.zip";
+	}
+	if (process.platform === "linux") {
+		if (process.arch === "arm64") return "bun-linux-aarch64.zip";
+		if (process.arch === "x64") return "bun-linux-x64.zip";
+	}
+	if (process.platform === "win32" && process.arch === "x64") {
+		return "bun-windows-x64.zip";
+	}
+	throw new Error(
+		`Unsupported Bun archive platform ${process.platform}/${process.arch}`,
+	);
+}
+
+function createStoredZip(
+	entries: Array<{ content: Buffer; name: string; unixMode: number }>,
+) {
+	const localFileParts: Buffer[] = [];
+	const centralDirectoryParts: Buffer[] = [];
+	let offset = 0;
+	for (const entry of entries) {
+		const name = Buffer.from(entry.name);
+		const crc = crc32(entry.content);
+		const localHeader = Buffer.alloc(30);
+		localHeader.writeUInt32LE(0x04034b50, 0);
+		localHeader.writeUInt16LE(20, 4);
+		localHeader.writeUInt16LE(0, 6);
+		localHeader.writeUInt16LE(0, 8);
+		localHeader.writeUInt16LE(0, 10);
+		localHeader.writeUInt16LE(0, 12);
+		localHeader.writeUInt32LE(crc, 14);
+		localHeader.writeUInt32LE(entry.content.length, 18);
+		localHeader.writeUInt32LE(entry.content.length, 22);
+		localHeader.writeUInt16LE(name.length, 26);
+		localHeader.writeUInt16LE(0, 28);
+		localFileParts.push(localHeader, name, entry.content);
+
+		const centralDirectoryHeader = Buffer.alloc(46);
+		centralDirectoryHeader.writeUInt32LE(0x02014b50, 0);
+		centralDirectoryHeader.writeUInt16LE((3 << 8) | 20, 4);
+		centralDirectoryHeader.writeUInt16LE(20, 6);
+		centralDirectoryHeader.writeUInt16LE(0, 8);
+		centralDirectoryHeader.writeUInt16LE(0, 10);
+		centralDirectoryHeader.writeUInt16LE(0, 12);
+		centralDirectoryHeader.writeUInt16LE(0, 14);
+		centralDirectoryHeader.writeUInt32LE(crc, 16);
+		centralDirectoryHeader.writeUInt32LE(entry.content.length, 20);
+		centralDirectoryHeader.writeUInt32LE(entry.content.length, 24);
+		centralDirectoryHeader.writeUInt16LE(name.length, 28);
+		centralDirectoryHeader.writeUInt16LE(0, 30);
+		centralDirectoryHeader.writeUInt16LE(0, 32);
+		centralDirectoryHeader.writeUInt16LE(0, 34);
+		centralDirectoryHeader.writeUInt16LE(0, 36);
+		centralDirectoryHeader.writeUInt32LE((entry.unixMode << 16) >>> 0, 38);
+		centralDirectoryHeader.writeUInt32LE(offset, 42);
+		centralDirectoryParts.push(centralDirectoryHeader, name);
+
+		offset += localHeader.length + name.length + entry.content.length;
+	}
+	const centralDirectory = Buffer.concat(centralDirectoryParts);
+	const localFiles = Buffer.concat(localFileParts);
+	const endOfCentralDirectory = Buffer.alloc(22);
+	endOfCentralDirectory.writeUInt32LE(0x06054b50, 0);
+	endOfCentralDirectory.writeUInt16LE(0, 4);
+	endOfCentralDirectory.writeUInt16LE(0, 6);
+	endOfCentralDirectory.writeUInt16LE(entries.length, 8);
+	endOfCentralDirectory.writeUInt16LE(entries.length, 10);
+	endOfCentralDirectory.writeUInt32LE(centralDirectory.length, 12);
+	endOfCentralDirectory.writeUInt32LE(localFiles.length, 16);
+	endOfCentralDirectory.writeUInt16LE(0, 20);
+	return Buffer.concat([localFiles, centralDirectory, endOfCentralDirectory]);
+}
+
+function crc32(value: Buffer) {
+	let crc = 0xffffffff;
+	for (const byte of value) {
+		crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ byte) & 0xff];
+	}
+	return (crc ^ 0xffffffff) >>> 0;
+}
+
+const CRC32_TABLE = Array.from({ length: 256 }, (_value, index) => {
+	let crc = index;
+	for (let bit = 0; bit < 8; bit += 1) {
+		crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+	}
+	return crc >>> 0;
+});
 
 function findExecutableOnPath(executableName: string) {
 	for (const directory of (process.env.PATH ?? "").split(path.delimiter)) {

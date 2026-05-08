@@ -1,5 +1,10 @@
 # Learnings
 
+## 2026-05-08 Root Typecheck
+
+- Fact: `bun typecheck` at the repo root runs the web production build path and the PostHog sourcemap upload hook when the local PostHog token is present.
+  Verified by: Running `bun typecheck` during Worker installer hardening validation; the command completed successfully after the Next build printed PostHog release and sourcemap upload output.
+
 ## 2026-05-08 Vitest Runner
 
 - Fact: Tests that import `vi.hoisted` must run through the repo Vitest scripts, not `bun test`, because Bun's test runner does not provide `vi.hoisted`.

@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-05-08
 completed_at: 2026-05-08
 summary: Let shipbysunday install prepare a Worker-managed Bun runtime when no usable local Bun source exists.
-post_build_recap: The installer now supports a download-origin Worker-managed Bun fallback, validates the prepared executable before repo writes, keeps download URLs and absolute paths out of JSON/report output, and has focused success/failure coverage for no-local-Bun paths.
+post_build_recap: The installer now supports a download-origin Worker-managed Bun fallback, validates downloaded bytes and the prepared executable before repo writes, keeps download URLs and absolute paths out of JSON/report output, and has focused success/failure coverage for no-local-Bun paths.
 program_id: sbs-worker-foundations-installer
 planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
@@ -23,13 +23,14 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 The installer can currently use an existing Worker-managed Bun, a compatible `bun` on `PATH`, an explicit `SHIPBYSUNDAY_WORKER_BUN`, or the current Bun runtime. That is enough for development and package smoke, but it is not enough for the customer distribution promise: a native `shipbysunday` installer should be able to prepare the private Worker runtime on a machine that has no global Bun and no local Bun executable to copy.
 
-After this slice, `shipbysunday install` should have a deterministic fallback that downloads or unpacks a pinned Bun runtime into `<worker-home>/toolchains/bun/bin/bun`, verifies it by running `--version`, and then uses it for `apps/worker` proof. Reports and JSON output should continue to describe only sync-safe origin/status fields, not absolute paths or download URLs with secrets.
+After this slice, `shipbysunday install` should have a deterministic fallback that downloads or unpacks a pinned Bun runtime into `<worker-home>/toolchains/bun/bin/bun`, verifies downloaded bytes and exact `bun --version` output, and then uses it for `apps/worker` proof. Reports and JSON output should continue to describe only sync-safe origin/status fields, not absolute paths or download URLs with secrets.
 
 ## Progress
 
 - [x] 2026-05-08: Created this Program-linked child ExecPlan after completing the grouped interactive checklist slice.
 - [x] 2026-05-08: Implemented a bounded Worker-managed Bun download fallback with sync-safe `origin: download` reporting.
 - [x] 2026-05-08: Added focused tests for no-PATH/no-explicit-Bun fallback success and invalid downloaded Bun failure before repo mutation.
+- [x] 2026-05-08: Hardened the fallback with per-platform Bun release SHA-256 validation, exact version checks, explicit override checksums, and zip entry preflight before extraction.
 - [x] 2026-05-08: Ran local-runner validation, package smoke, and a fresh `runner-test` dry-run.
 
 ## Surprises & Discoveries
@@ -48,9 +49,9 @@ Date: 2026-05-08
 
 ## Outcomes & Retrospective
 
-This plan is complete. The Worker toolchain plan now supports `origin: download` when no managed, PATH, explicit, or current-runtime Bun source should be used. A Worker-specific `SHIPBYSUNDAY_WORKER_BUN_DOWNLOAD_URL` override gives tests and support smoke a deterministic download source, while the default fallback resolves a pinned Bun release asset for the current platform.
+This plan is complete. The Worker toolchain plan now supports `origin: download` when no managed, PATH, explicit, or current-runtime Bun source should be used. A Worker-specific `SHIPBYSUNDAY_WORKER_BUN_DOWNLOAD_URL` override gives tests and support smoke a deterministic download source when paired with `SHIPBYSUNDAY_WORKER_BUN_DOWNLOAD_SHA256`, while the default fallback resolves a pinned Bun release asset and checked SHA-256 for the current platform.
 
-Provisioning writes the downloaded executable or extracts a zip archive into the Worker home, sets executable permissions, and validates the resulting managed Bun with `--version` before repo mutation continues. Failed downloads or invalid executables return a failed install result without creating `apps/worker`, `docs/worker`, branch changes, or tracked reports. JSON output records only `origin: download` and the stable Worker-managed target ref; it does not include the URL or local absolute paths.
+Provisioning validates downloaded bytes before writing, preflights zip archive entries before extraction, extracts only the expected Bun binary, sets executable permissions, and validates the resulting managed Bun reports the exact pinned version before repo mutation continues. Failed downloads, checksum mismatches, unsafe archives, or invalid executables return a failed install result without creating `apps/worker`, `docs/worker`, branch changes, or tracked reports. JSON output records only `origin: download` and the stable Worker-managed target ref; it does not include the URL or local absolute paths.
 
 The Program remains active for native executable packaging and broader real-project smoke.
 
@@ -116,9 +117,9 @@ Before completing this plan, run:
     bun run --cwd packages/local-runner test
     bun run --cwd packages/local-runner build
     bun run --cwd packages/local-runner package:smoke
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Validation and Acceptance
@@ -146,9 +147,9 @@ Completion result: full tests passed with 24 files passed and 2 skipped; lint fo
 
 Run Program and docs validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 Read-only runner-test smoke:

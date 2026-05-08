@@ -38,9 +38,9 @@ Ship by Sunday already has strong Program, ExecPlan, prompt, markdown, and local
 
 Arena CRM proved a different path. The useful spike removed the temporary harness layer, installed Worker-style root scripts, added a forwarding script, created an `apps/runtime` package, added YAML-backed Program and ExecPlan validation modules, added prompt contracts, added `program:write-child-plan`, added bounded ExecPlan commands, and dogfooded the system with a real Program plus child ExecPlans. The productized version should keep the proven behavior but use cleaner public names: `shipbysunday install`, `apps/worker`, `scripts/run-worker.sh`, and `.worker/` local state.
 
-The local-runner now has a first `shipbysunday install` / `shipbysunday i` implementation. It can inspect a target repo, emit sync-safe dry-run JSON, require clean Git state, validate or interactively activate a machine-level license outside the repo, prepare Worker-managed Codex profiles, prepare a Worker-managed Bun toolchain from safe local sources, install visible `apps/worker` source, patch root forwarding scripts, protect `.worker/`, create the starter Program, use the installed `program:write-child-plan` command to create the first child ExecPlan, run proof commands, write `docs/worker/install-report.md`, and create a local commit when proof passes.
+The local-runner now has a first `shipbysunday install` / `shipbysunday i` implementation. It can inspect a target repo, emit sync-safe JSON, require clean Git state, validate or interactively activate a machine-level license outside the repo, prepare Worker-managed Codex profiles, prepare a Worker-managed Bun toolchain from pinned local, explicit, current-runtime, or integrity-checked download sources, install visible `apps/worker` source, patch root forwarding scripts, protect `.worker/`, create the starter Program, use the installed `program:write-child-plan` command to create the first child ExecPlan, run proof commands, write `docs/worker/install-report.md`, and create a local commit when proof passes.
 
-This first product path is still not the final customer distribution path. Native executable packaging, grouped interactive checklist polish, broader real-project smoke, and bundled or downloaded Worker-managed Bun provisioning are product gaps. The implementation can use an existing managed Bun, a compatible `bun` on `PATH`, an explicit `SHIPBYSUNDAY_WORKER_BUN`, or the current Bun runtime; it still blocks when there is no usable local Bun source to import into the Worker home.
+The completed product path now includes grouped interactive checklist polish, package-distributed install smoke, native executable smoke, and downloaded Worker-managed Bun provisioning. It remains a seed Worker substrate rather than the final full Worker product, but the installer surface recorded in this Program is no longer blocked on native packaging, checklist polish, package smoke, or Bun download fallback.
 
 ## Progress
 
@@ -57,6 +57,7 @@ This first product path is still not the final customer distribution path. Nativ
 - [x] 2026-05-08: Completed grouped interactive checklist polish in `docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md`; normal interactive installs now preview all required phases before continue/cancel while JSON and `--yes` remain prompt-free.
 - [x] 2026-05-08: Completed Worker-managed Bun download fallback in `docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md`; no-local-Bun fixture coverage installs through `origin: download` and invalid downloads fail before repo mutation.
 - [x] 2026-05-08: Completed native/distributable smoke in `docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md`; package smoke now compiles a standalone CLI, runs a native actual install in a disposable repo, and dry-runs a pnpm-shaped disposable repo.
+- [x] 2026-05-08: Closed review gaps by blocking JSON actual installs unless `--no-kickoff` is explicit, adding successful fake-Codex kickoff proof, proving the packed package mutating install path, and hardening downloaded Bun integrity, archive entry validation, exact version checks, and activation-denial reporting.
 - [x] 2026-05-08: Verified Program-level acceptance and prepared this Program for completed archive.
 
 ## Decision Log
@@ -146,7 +147,7 @@ Rationale: Worker Foundations needs every core phase to be useful: Worker source
 Date: 2026-05-08
 
 Decision: Make noninteractive agent/dev mode a v1 requirement.
-Rationale: The default customer path should be interactive, but coding agents, tests, and support smoke need deterministic commands. `shipbysunday install --yes`, `shipbysunday install --json`, `shipbysunday install --repo <path> --yes --json`, and `shipbysunday install --dry-run --json` should run the full required install, fail on conflicts instead of prompting, preserve the same clean-worktree/license/proof gates, and emit machine-readable status. Because auto-commit and auto-kickoff are part of the golden path, `--yes` should commit and kick off after proof passes unless the caller passes explicit developer/test flags such as `--no-commit` or `--no-kickoff`.
+Rationale: The default customer path should be interactive, but coding agents, tests, and support smoke need deterministic commands. `shipbysunday install --yes` should run the full required install, fail on conflicts instead of prompting, preserve the same clean-worktree/license/proof gates, commit after proof, and kick off Codex in the foreground. `shipbysunday install --dry-run --json` remains read-only and machine-readable. A mutating JSON install must pass `--no-kickoff` explicitly, such as `shipbysunday install --repo <path> --yes --json --no-kickoff`, because foreground Codex inherits stdio and would break the single-object JSON stdout contract.
 Date: 2026-05-08
 
 Decision: Keep `--dry-run` read-only against the target repo and machine.
@@ -237,9 +238,9 @@ Do not broaden this completed Program into unrelated Worker runtime state, provi
 
 This Program is complete. It converted the Arena Worker-foundations proof into a repeatable `shipbysunday install` path that installs visible repo-local Worker source, Program/ExecPlan/prompt contracts, root command scripts, proof, and a durable install report into another repository.
 
-The shipped installer supports sync-safe dry-run JSON, noninteractive `--yes`/`--json` modes, browser/device license activation stored outside the repo, grouped all-required interactive confirmation, clean-worktree and conflict gates, Worker-managed Codex safety profiles with rollback behavior, private Worker-managed Bun provisioning from local, explicit, current-runtime, or download sources, dogfood child-plan proof, proof-gated local commit, and foreground Codex kickoff for the normal path.
+The shipped installer supports sync-safe dry-run JSON, noninteractive `--yes`, mutating JSON installs with explicit `--no-kickoff`, browser/device license activation stored outside the repo, grouped all-required interactive confirmation, clean-worktree and conflict gates, Worker-managed Codex safety profiles with rollback behavior, private Worker-managed Bun provisioning from local, explicit, current-runtime, or integrity-checked download sources, dogfood child-plan proof, proof-gated local commit, and foreground Codex kickoff for the normal path.
 
-Validation covered focused fixture tests, full local-runner tests, package smoke, native compiled CLI smoke, `runner-test` empty/minimal/install proof, and Program/ExecPlan/markdown contract linting. Arena CRM was not touched after the user redirected smoke to disposable repos.
+Validation covered focused fixture tests, successful and blocked fake-Codex kickoff paths, full local-runner tests, package smoke through the packed tarball including a mutating install, native compiled CLI smoke, `runner-test` empty/minimal/install proof, and Program/ExecPlan/markdown contract linting. Arena CRM was not touched after the user redirected mutating smoke to disposable repos; its role in final evidence is the earlier read-only dry-run plus the checked disposable fixtures that reproduce the harness-to-Worker-foundations install shape.
 
 ## Validation and Acceptance
 
@@ -248,7 +249,7 @@ Program-level acceptance requires the installer to support at least one native i
 - a documented CLI shape for `shipbysunday install` and `shipbysunday i`
 - no user-visible install profile picker in the golden path
 - a grouped confirmation checklist that shows all required install phases, blocks conflicted phases with reasons, and allows continue or cancel rather than partial deselection
-- noninteractive `--yes`, `--json`, `--repo <path>`, and `--dry-run --json` support for agents, tests, and support smoke
+- noninteractive `--yes`, `--repo <path>`, `--dry-run --json`, and mutating `--yes --json --no-kickoff` support for agents, tests, and support smoke
 - license activation stored outside the repo under `~/.worker/`
 - Codex prerequisite checks and Worker-managed Codex permission profiles installed through a marked, reversible block in `~/.codex/config.toml`
 - visible target-repo source for Program, ExecPlan, prompt, validation, and Worker command behavior under `apps/worker`
@@ -261,8 +262,8 @@ Program-level acceptance requires the installer to support at least one native i
 - dogfood proof that creates a target Program packet and creates the child ExecPlan through installed `program:write-child-plan`
 - local proof under `.worker/` and a concise tracked report under `docs/worker/install-report.md`
 - a local commit on `shipbysunday/install` only after selected proof passes
-- foreground Codex auto-kickoff through the Worker-managed project-write profile after proof and commit
-- Arena CRM smoke evidence or an equivalent checked fixture that reproduces the harness-to-Worker-foundations migration
+- foreground Codex auto-kickoff through the Worker-managed project-write profile after proof and commit, with JSON actual installs blocked unless `--no-kickoff` is explicit
+- read-only Arena CRM smoke evidence plus equivalent checked disposable fixtures that reproduce the harness-to-Worker-foundations migration without mutating Arena CRM
 
 All acceptance bullets are satisfied by the completed child slices and validation evidence recorded below.
 
@@ -286,7 +287,7 @@ The Arena dry-run produced a sync-safe blocked result without mutating the repo.
 
 The fresh `~/Developer/runner-test` smoke proved the current local-runner path without using Arena CRM: an empty Git repo blocked on missing root `package.json`; after adding and committing a minimal package file, dry-run returned `ready`; the real install with an isolated Worker home returned `installed`, passed all proof commands, and committed `45f8d85` on `shipbysunday/install`.
 
-The native package smoke compiles a standalone `shipbysunday` executable with `bun build --compile`, runs an actual `shipbysunday install --yes --json --no-kickoff` into a disposable repo, verifies the tracked install report and clean worktree, then dry-runs a second pnpm-shaped disposable repo through the same native artifact.
+Focused fixture proof covers both blocked and successful foreground Codex kickoff. Package smoke now runs a packed-tarball `shipbysunday install --yes --json --no-kickoff` into a disposable repo, verifies the tracked install report, and asserts a clean worktree. The native package smoke compiles a standalone `shipbysunday` executable with `bun build --compile`, runs an actual `shipbysunday install --yes --json --no-kickoff` into a disposable repo, verifies the tracked install report and clean worktree, then dry-runs a second pnpm-shaped disposable repo through the same native artifact.
 
 The first local-runner implementation is in `packages/local-runner/src/commands/install.ts` and `packages/local-runner/src/workflows/worker-foundations-install/`. Its installed Worker source is intentionally minimal but visible and dogfoodable. Treat it as the seed substrate to harden, not as the final full Worker product.
 

@@ -51,8 +51,8 @@ Decision: Treat `--yes` and `--json` installs as noninteractive for missing-lice
 Rationale: The JSON contract requires one machine-readable object on stdout and no prompts, and agent/support commands must block with setup instructions instead of trying to open a browser or poll indefinitely.
 Date: 2026-05-08
 
-Decision: Extend package smoke with the Worker install command using a prepared local license and `--dry-run --json --no-kickoff`.
-Rationale: Full install proof is already covered by focused fixture tests. Package smoke should add distribution coverage without mutating external services, launching Codex, or requiring a real customer account.
+Decision: Extend package smoke with the Worker install command using a prepared local license.
+Rationale: Package smoke should add distribution coverage without mutating external services, launching Codex, or requiring a real customer account. It now covers both `--dry-run --json --no-kickoff` and a mutating `--yes --json --no-kickoff` install through the packed tarball.
 Date: 2026-05-08
 
 ## Outcomes & Retrospective
@@ -61,7 +61,7 @@ This plan is complete. The installer now treats `license.json` as a validated v1
 
 Noninteractive paths remain deterministic. `--yes`, `--json`, and `--dry-run` do not attempt browser activation; they report blocked state when the license is missing or invalid. JSON stdout remains one sync-safe object. Invalid legacy `{ "status": "active" }` licenses now block before repo mutation.
 
-The package smoke now exercises the packed `shipbysunday install --dry-run --json --no-kickoff` command against a disposable committed repo with an isolated Worker home, proving the distributed bin reaches the Worker installer path. A fresh `~/Developer/runner-test` repo also proved the customer-shaped path: empty repo blocked on missing `package.json`; after adding a minimal committed `package.json`, dry-run returned `ready`; the real install with an isolated test Worker home completed on `shipbysunday/install`, committed `45f8d85`, and passed `npm run programs:lint`, `npm run plans:lint`, `npm run markdown:lint`, `npm run docs:validate`, and `npm run worker:test`.
+The package smoke now exercises the packed `shipbysunday install --dry-run --json --no-kickoff` command and the packed `shipbysunday install --yes --json --no-kickoff` mutating path against a disposable committed repo with an isolated Worker home, proving the distributed bin reaches the Worker installer apply, proof, report, and commit path. A fresh `~/Developer/runner-test` repo also proved the customer-shaped path: empty repo blocked on missing `package.json`; after adding a minimal committed `package.json`, dry-run returned `ready`; the real install with an isolated test Worker home completed on `shipbysunday/install`, committed `45f8d85`, and passed `npm run programs:lint`, `npm run plans:lint`, `npm run markdown:lint`, `npm run docs:validate`, and `npm run worker:test`.
 
 The Program remains active. Native executable packaging, bundled or downloaded Bun provisioning for machines with no usable local Bun source, grouped interactive checklist polish, and broader real-project smoke are still outside this completed slice.
 
@@ -97,7 +97,7 @@ Next, add small activation helpers inside the Worker installer workflow or a fea
 
 Then, tighten tests. Add a local HTTP activation server for the success path, a noninteractive missing-license test, a malformed-license test, and a JSON stdout safety test. Update existing fixture helper licenses to include a machine credential so tests reflect the new persisted license contract.
 
-Finally, extend `package-smoke.ts` so the packed CLI proves `shipbysunday install --dry-run --json --no-kickoff` works from an installed package against a disposable repo with an isolated Worker home and valid license.
+Finally, extend `package-smoke.ts` so the packed CLI proves `shipbysunday install --dry-run --json --no-kickoff` and `shipbysunday install --yes --json --no-kickoff` work from the packed package against a disposable repo with an isolated Worker home and valid license.
 
 ## Milestones
 
@@ -149,9 +149,9 @@ Run full local-runner validation:
 
 Run Program and docs validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md
     git diff --check
 
 Smoke a fresh disposable repo if installer behavior changes:
@@ -205,13 +205,13 @@ Completion validation on 2026-05-08:
     bun run --cwd packages/local-runner package:smoke
     package smoke passed
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md
-    docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md: ok
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md
+    docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md: ok
 
     bun run programs:lint
     Program docs, packets, and prompts: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     Both paths ok.
 
     git diff --check

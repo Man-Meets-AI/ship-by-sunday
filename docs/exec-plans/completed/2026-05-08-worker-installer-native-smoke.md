@@ -58,7 +58,7 @@ This closes the final Program acceptance gap, so the Program can move to complet
 
 The local-runner package is `packages/local-runner`. Its package scripts currently include `build` and `package:smoke`. The CLI entry is `packages/local-runner/src/cli.ts`, built to `packages/local-runner/dist/cli.js`. Package distribution smoke lives in `packages/local-runner/tests/package-smoke.ts`.
 
-The existing package smoke proves `bunx`, `npx`, installed docs commands, and packed `shipbysunday install --dry-run --json --no-kickoff`. This slice should add the native/distributable proof that Program acceptance still lacks.
+The existing package smoke proves `bunx`, `npx`, installed docs commands, packed `shipbysunday install --dry-run --json --no-kickoff`, and packed `shipbysunday install --yes --json --no-kickoff`. This slice should add the native/distributable proof that Program acceptance still lacks.
 
 ### In Scope
 
@@ -109,9 +109,9 @@ Run validation:
     bun run --cwd packages/local-runner format:check
     bun run --cwd packages/local-runner build
     bun run --cwd packages/local-runner package:smoke
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Validation and Acceptance
@@ -129,13 +129,13 @@ Run full package validation:
     bun run --cwd packages/local-runner build
     bun run --cwd packages/local-runner package:smoke
 
-Completion result: full tests passed with 24 files passed and 2 skipped; lint found 0 warnings and 0 errors; typecheck passed; format:check passed; build produced `dist/cli.js`; package smoke passed, including native actual install and pnpm-shaped dry-run.
+Completion result: full tests passed with 24 files passed and 2 skipped; lint found 0 warnings and 0 errors; typecheck passed; format:check passed; build produced `dist/cli.js`; package smoke passed, including packed mutating install, native actual install, and pnpm-shaped dry-run.
 
 Run docs validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Idempotence and Recovery
