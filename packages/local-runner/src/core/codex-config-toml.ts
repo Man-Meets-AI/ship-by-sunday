@@ -12,17 +12,12 @@ export function parseCodexConfigToml(contents: string): ParsedCodexConfigToml {
 			continue;
 		}
 
-		if (trimmedLine.startsWith("[")) {
-			const match = trimmedLine.match(/^\[([^\]]+)\]\s*(?:#.*)?$/);
+		if (trimmedLine.startsWith("[[") || trimmedLine.startsWith("[")) {
+			const match = trimmedLine.match(/^\[{1,2}([^\]]+)\]{1,2}\s*(?:#.*)?$/);
 			if (!match) {
 				throw new Error(`Unsupported TOML table syntax: ${trimmedLine}`);
 			}
 			tableNames.add(match[1].trim());
-			continue;
-		}
-
-		if (!trimmedLine.includes("=") || trimmedLine.startsWith("=")) {
-			throw new Error(`Unsupported TOML assignment syntax: ${trimmedLine}`);
 		}
 	}
 

@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -27,6 +27,8 @@ export const SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS =
 	"shipbysunday-worker-readonly";
 export const SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS =
 	"shipbysunday-worker-project-write";
+const SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES =
+	'["*KEY*", "*SECRET*", "*TOKEN*", "OPENAI_*", "ANTHROPIC_*", "GITHUB_TOKEN", "GH_TOKEN"]';
 
 export type CodexConfigInspection = {
 	configPath: string;
@@ -106,6 +108,7 @@ export async function inspectCodexConfig({
 		writeProfileName: "sbs-workspace-write",
 		readonlyPermissionsName: "sbs-readonly",
 		writePermissionsName: "sbs-workspace-write",
+		requireShellEnvironmentPolicy: false,
 	});
 
 	return {
@@ -147,6 +150,7 @@ export async function inspectShipbysundayWorkerCodexConfig({
 		writeProfileName: SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE,
 		readonlyPermissionsName: SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS,
 		writePermissionsName: SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS,
+		requireShellEnvironmentPolicy: true,
 	});
 
 	return {
@@ -206,12 +210,20 @@ export function renderShipbysundayWorkerCodexConfigBlock() {
 		'web_search = "disabled"',
 		'model_reasoning_effort = "medium"',
 		"",
+		`[profiles.${SHIPBYSUNDAY_WORKER_READONLY_PROFILE}.shell_environment_policy]`,
+		'inherit = "core"',
+		`exclude = ${SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES}`,
+		"",
 		`[profiles.${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE}]`,
 		'approval_policy = "on-request"',
 		'sandbox_mode = "workspace-write"',
 		`default_permissions = "${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS}"`,
 		'web_search = "disabled"',
 		'model_reasoning_effort = "medium"',
+		"",
+		`[profiles.${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE}.shell_environment_policy]`,
+		'inherit = "core"',
+		`exclude = ${SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES}`,
 		"",
 		`[permissions.${SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS}.filesystem.":project_roots"]`,
 		'"." = "read"',
@@ -239,6 +251,7 @@ function inspectManagedCodexProfileSet({
 	writeProfileName,
 	readonlyPermissionsName,
 	writePermissionsName,
+	requireShellEnvironmentPolicy,
 }: {
 	contents: string;
 	repositoryRoot?: string;
@@ -246,6 +259,7 @@ function inspectManagedCodexProfileSet({
 	writeProfileName: string;
 	readonlyPermissionsName: string;
 	writePermissionsName: string;
+	requireShellEnvironmentPolicy: boolean;
 }): ManagedCodexProfileSetInspection {
 	const parsedConfig = parseCodexConfigToml(contents);
 	return {
@@ -255,6 +269,7 @@ function inspectManagedCodexProfileSet({
 			profileName: readonlyProfileName,
 			sandboxMode: '"read-only"',
 			permissionsName: readonlyPermissionsName,
+			requireShellEnvironmentPolicy,
 		}),
 		hasWriteProfile: hasManagedCodexProfile({
 			contents,
@@ -262,6 +277,7 @@ function inspectManagedCodexProfileSet({
 			profileName: writeProfileName,
 			sandboxMode: '"workspace-write"',
 			permissionsName: writePermissionsName,
+			requireShellEnvironmentPolicy,
 		}),
 		hasReadonlyPermissions: hasManagedCodexPermissions({
 			contents,
@@ -287,14 +303,17 @@ function hasManagedCodexProfile({
 	profileName,
 	sandboxMode,
 	permissionsName,
+	requireShellEnvironmentPolicy,
 }: {
 	contents: string;
 	parsedConfig: ParsedCodexConfigToml;
 	profileName: string;
 	sandboxMode: string;
 	permissionsName: string;
+	requireShellEnvironmentPolicy: boolean;
 }) {
 	const profileTableName = `profiles.${profileName}`;
+	const environmentPolicyTableName = `${profileTableName}.shell_environment_policy`;
 	return (
 		hasParsedTomlTable(parsedConfig, profileTableName) &&
 		hasTomlAssignment(contents, profileTableName, {
@@ -304,7 +323,17 @@ function hasManagedCodexProfile({
 		hasTomlAssignment(contents, profileTableName, {
 			key: "default_permissions",
 			value: `"${permissionsName}"`,
-		})
+		}) &&
+		(!requireShellEnvironmentPolicy ||
+			(hasParsedTomlTable(parsedConfig, environmentPolicyTableName) &&
+				hasTomlAssignment(contents, environmentPolicyTableName, {
+					key: "inherit",
+					value: '"core"',
+				}) &&
+				hasTomlAssignment(contents, environmentPolicyTableName, {
+					key: "exclude",
+					value: SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES,
+				})))
 	);
 }
 
@@ -517,9 +546,12 @@ async function applyCodexConfigPatchPreview({
 	}
 
 	await mkdir(path.dirname(preview.configPath), { recursive: true });
-	const backupPath = `${preview.configPath}.${backupFileLabel}-backup-${Date.now()}`;
-	if (existsSync(preview.configPath)) {
+	const configExists = existsSync(preview.configPath);
+	const backupPath = `${preview.configPath}.${backupFileLabel}-backup-${Date.now()}${configExists ? "" : "-missing"}`;
+	if (configExists) {
 		await copyFile(preview.configPath, backupPath);
+	} else {
+		await writeFile(backupPath, "");
 	}
 	await writeFile(preview.configPath, preview.after);
 	return { ...preview, backupPath };
@@ -574,7 +606,11 @@ async function rollbackCodexConfigPatch({
 	if (existsSync(configPath)) {
 		await copyFile(configPath, rollbackBackupPath);
 	}
-	await writeFile(configPath, backupContents);
+	if (backupPath.endsWith("-missing")) {
+		await rm(configPath, { force: true });
+	} else {
+		await writeFile(configPath, backupContents);
+	}
 	return {
 		configPath,
 		backupPath,

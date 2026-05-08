@@ -1,10 +1,11 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
 import { runInstallCommand } from "../src/commands/install";
+import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
 import {
 	createTemporaryDirectory,
 	initializeGitRepository,
@@ -89,15 +90,32 @@ describe("Worker Foundations install command", () => {
 				"utf8",
 			),
 		).toContain("program:write-child-plan");
-		expect(
-			await readFile(
-				path.join(
-					repositoryRoot,
-					"docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md",
-				),
-				"utf8",
+		const activeChildPlan = await readFile(
+			path.join(
+				repositoryRoot,
+				"docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md",
 			),
-		).toContain("program_id: worker-foundations-adoption");
+			"utf8",
+		);
+		expect(activeChildPlan).toContain(
+			"program_id: worker-foundations-adoption",
+		);
+		const completedPlanRef =
+			"docs/exec-plans/completed/2026-05-08-worker-foundations-complete.md";
+		await writeFixtureFile(
+			repositoryRoot,
+			completedPlanRef,
+			activeChildPlan.replace("status: active", "status: complete"),
+		);
+		await expect(
+			execFileAsync(
+				"bun",
+				["run", "plans:lint", "--", "--plan", completedPlanRef],
+				{ cwd: repositoryRoot },
+			),
+		).resolves.toMatchObject({
+			stdout: expect.stringContaining(`${completedPlanRef}: ok`),
+		});
 		expect(
 			await readFile(
 				path.join(repositoryRoot, "docs/worker/install-report.md"),
@@ -131,6 +149,47 @@ describe("Worker Foundations install command", () => {
 		expect(committedFiles.stdout).toContain("docs/worker/install-report.md");
 		expect(committedFiles.stdout).toContain("apps/worker/package.json");
 		expect(committedFiles.stdout).not.toContain(".worker/");
+
+		const installReport = await readFile(
+			path.join(repositoryRoot, "docs/worker/install-report.md"),
+			"utf8",
+		);
+		expect(installReport).toContain(
+			"Commit: `current branch HEAD after install`",
+		);
+		expect(installReport).not.toContain("Commit: `not-created`");
+
+		const status = await execFileAsync("git", ["status", "--porcelain"], {
+			cwd: repositoryRoot,
+		});
+		expect(status.stdout.trim()).toBe("");
+	});
+
+	it("reruns a committed install without failing on the existing starter child plan", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		const env = { ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome };
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				env,
+			),
+		).resolves.toBe(0);
+
+		logSpy.mockClear();
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				env,
+			),
+		).resolves.toBe(0);
+
+		const result = JSON.parse(logSpy.mock.calls.join("\n")) as {
+			outcome: string;
+		};
+		expect(result.outcome).toBe("installed");
 
 		const status = await execFileAsync("git", ["status", "--porcelain"], {
 			cwd: repositoryRoot,
@@ -240,6 +299,153 @@ describe("Worker Foundations install command", () => {
 		expect(output).toContain("Existing legacy Worker runtime script");
 		expect(output).not.toContain("run-runtime.sh programs:lint");
 	});
+
+	it("blocks invalid licenses before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome({
+			expires_at: "2000-01-01T00:00:00.000Z",
+			status: "active",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "license",
+					reason: expect.stringContaining("invalid"),
+				}),
+			]),
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("blocks unrecognized starter child plans during preflight", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const planRef =
+			"docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md";
+		await writeFixtureFile(repositoryRoot, planRef, "# Owner plan\n");
+		await commitFixtureFiles(repositoryRoot, [planRef]);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("starter child ExecPlan");
+		expect(output).not.toContain(path.join(repositoryRoot, planRef));
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
+	it("blocks incomplete managed AGENTS markers during preflight", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		await writeFixtureFile(
+			repositoryRoot,
+			"AGENTS.md",
+			"# Root Agents\n\n<!-- shipbysunday-worker:start -->\n",
+		);
+		await commitFixtureFiles(repositoryRoot, ["AGENTS.md"]);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("incomplete Worker managed markers");
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
+	it("fails honestly when kickoff is blocked and does not leak secrets to Codex", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const codexHome = await createTemporaryDirectory("worker-codex-home-");
+		const codexEnvFile = path.join(codexHome, "kickoff-env.txt");
+		const reportProbeFile = path.join(codexHome, "report-probe.txt");
+		const fakeBinDirectory = await createFailingCodexBin({
+			codexEnvFile,
+			reportProbeFile,
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(["--repo", repositoryRoot, "--yes", "--json"], {
+				...process.env,
+				CODEX_HOME: codexHome,
+				GITHUB_TOKEN: "gho_should_not_leak",
+				OPENAI_API_KEY: "sk-should-not-leak",
+				PATH: `${fakeBinDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			}),
+		).resolves.toBe(1);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			kickoff: { status: string };
+		};
+		expect(result.outcome).toBe("failed");
+		expect(result.kickoff.status).toBe("blocked");
+		expect(await readFile(reportProbeFile, "utf8")).toBe("present\n");
+
+		const installReport = await readFile(
+			path.join(repositoryRoot, "docs/worker/install-report.md"),
+			"utf8",
+		);
+		expect(installReport).toContain("Outcome: `failed`");
+		expect(installReport).toContain("Status: `blocked`");
+		expect(installReport).not.toContain("Commit: `not-created`");
+
+		const kickoffEnv = await readFile(codexEnvFile, "utf8");
+		expect(kickoffEnv).toContain("SHIPBYSUNDAY_WORKER_HOME=");
+		expect(kickoffEnv).not.toContain("OPENAI_API_KEY=");
+		expect(kickoffEnv).not.toContain("GITHUB_TOKEN=");
+		expect(kickoffEnv).not.toContain("sk-should-not-leak");
+		expect(kickoffEnv).not.toContain("gho_should_not_leak");
+
+		const codexConfigPath = path.join(codexHome, "config.toml");
+		if (existsSync(codexConfigPath)) {
+			expect(await readFile(codexConfigPath, "utf8")).not.toContain(
+				SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START,
+			);
+		}
+
+		const status = await execFileAsync("git", ["status", "--porcelain"], {
+			cwd: repositoryRoot,
+		});
+		expect(status.stdout.trim()).toBe("");
+	});
 });
 
 async function createFixtureRepository({
@@ -269,14 +475,68 @@ async function createFixtureRepository({
 	return repositoryRoot;
 }
 
-async function createWorkerHome() {
+async function createWorkerHome(
+	license: Record<string, string> | string | null = { status: "active" },
+) {
 	const workerHome = await createTemporaryDirectory("worker-install-home-");
 	await mkdir(workerHome, { recursive: true });
-	await writeFile(
-		path.join(workerHome, "license.json"),
-		JSON.stringify({ status: "active" }),
-	);
+	if (license !== null) {
+		await writeFile(
+			path.join(workerHome, "license.json"),
+			typeof license === "string" ? license : JSON.stringify(license),
+		);
+	}
 	return workerHome;
+}
+
+async function writeFixtureFile(
+	repositoryRoot: string,
+	ref: string,
+	contents: string,
+) {
+	const absolutePath = path.join(repositoryRoot, ref);
+	await mkdir(path.dirname(absolutePath), { recursive: true });
+	await writeFile(absolutePath, contents);
+}
+
+async function commitFixtureFiles(repositoryRoot: string, refs: string[]) {
+	await execFileAsync("git", ["add", ...refs], { cwd: repositoryRoot });
+	await execFileAsync("git", ["commit", "-m", "fixture update"], {
+		cwd: repositoryRoot,
+	});
+}
+
+async function createFailingCodexBin({
+	codexEnvFile,
+	reportProbeFile,
+}: {
+	codexEnvFile: string;
+	reportProbeFile: string;
+}) {
+	const binDirectory = await createTemporaryDirectory("worker-codex-bin-");
+	const codexPath = path.join(binDirectory, "codex");
+	await writeFile(
+		codexPath,
+		[
+			"#!/bin/sh",
+			'if [ "$1" = "--version" ]; then echo "codex 1.0.0"; exit 0; fi',
+			'if [ "$1" = "login" ] && [ "$2" = "status" ]; then echo "Logged in"; exit 0; fi',
+			'if [ -f "docs/worker/install-report.md" ]; then',
+			`  echo "present" > ${shellQuote(reportProbeFile)}`,
+			"else",
+			`  echo "missing" > ${shellQuote(reportProbeFile)}`,
+			"fi",
+			`env > ${shellQuote(codexEnvFile)}`,
+			"exit 42",
+			"",
+		].join("\n"),
+	);
+	await chmod(codexPath, 0o755);
+	return binDirectory;
+}
+
+function shellQuote(value: string) {
+	return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }
 
 function findExecutableOnPath(executableName: string) {

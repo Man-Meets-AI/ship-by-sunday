@@ -69,6 +69,9 @@ describe("codex config manager", () => {
 			[
 				'model = "gpt-5.5"',
 				'approval_policy = "on-request"',
+				"notify = [",
+				'  "terminal-notifier",',
+				"]",
 				"",
 				"[profiles.personal-audit]",
 				'sandbox_mode = "read-only"',
@@ -101,8 +104,16 @@ describe("codex config manager", () => {
 		expect(contents).toContain(SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START);
 		expect(contents).toContain(SHIPBYSUNDAY_WORKER_CODEX_BLOCK_END);
 		expect(contents).toContain("[profiles.personal-audit]");
+		expect(contents).toContain('notify = [\n  "terminal-notifier",\n]');
 		expect(contents).toContain("[profiles.shipbysunday-worker-readonly]");
 		expect(contents).toContain("[profiles.shipbysunday-worker-project-write]");
+		expect(contents).toContain(
+			"[profiles.shipbysunday-worker-project-write.shell_environment_policy]",
+		);
+		expect(contents).toContain('inherit = "core"');
+		expect(contents).toContain(
+			'exclude = ["*KEY*", "*SECRET*", "*TOKEN*", "OPENAI_*", "ANTHROPIC_*", "GITHUB_TOKEN", "GH_TOKEN"]',
+		);
 		expect(inspection.hasReadonlyProfile).toBe(true);
 		expect(inspection.hasProjectWriteProfile).toBe(true);
 		expect(inspection.hasReadonlyPermissions).toBe(true);

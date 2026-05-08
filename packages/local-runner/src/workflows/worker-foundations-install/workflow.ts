@@ -8,6 +8,7 @@ import { runBoundedProcess } from "../../core/bounded-process";
 import {
 	applyShipbysundayWorkerCodexConfigPatch,
 	inspectShipbysundayWorkerCodexConfig,
+	rollbackShipbysundayWorkerCodexConfigPatch,
 } from "../../core/codex-config-manager";
 import type { JsonObject, JsonValue } from "../../core/json-value";
 import { assertSyncSafeValue } from "../../core/redaction";
@@ -327,123 +328,214 @@ export async function runWorkerFoundationsInstall({
 		});
 	}
 
-	if (!options.noKickoff) {
-		await applyShipbysundayWorkerCodexConfigPatch({ env });
-	}
+	let codexConfigBackupPath: string | null = null;
+	try {
+		if (!options.noKickoff) {
+			const codexConfigPatch = await applyShipbysundayWorkerCodexConfigPatch({
+				env,
+			});
+			codexConfigBackupPath = codexConfigPatch.backupPath;
+		}
 
-	const applyResult = await applyWorkerFoundations(context);
-	const dogfoodResult = await runDogfoodChildPlan(
-		context,
-		inspection.packageManager,
-	);
-	if (!dogfoodResult.succeeded) {
-		const proof = [
-			{ command: dogfoodResult.command, status: "failed" as const },
-		];
+		const applyResult = await applyWorkerFoundations(context);
+		const childPlanExistedBeforeDogfood = existsSync(
+			path.join(context.repositoryRoot, STARTER_CHILD_PLAN_REF),
+		);
+		const dogfoodResult = await runDogfoodChildPlan(
+			context,
+			inspection.packageManager,
+		);
+		const dogfoodCreatedRefs = childPlanExistedBeforeDogfood
+			? []
+			: [STARTER_CHILD_PLAN_REF];
+		if (!dogfoodResult.succeeded) {
+			const proof = [
+				{ command: dogfoodResult.command, status: "failed" as const },
+			];
+			const kickoff = buildSkippedKickoff("failed");
+			await rollbackWorkerCodexConfig({
+				env,
+				backupPath: codexConfigBackupPath,
+			});
+			await writeTrackedInstallReport({
+				context,
+				result: buildReport({
+					context,
+					outcome: "failed",
+					branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
+					commit: null,
+					plan,
+					proof,
+					createdRefs: applyResult.createdRefs,
+					changedRefs: applyResult.changedRefs,
+					localProofRef: null,
+					reportRef: INSTALL_REPORT_REF,
+					kickoff,
+				}),
+			});
+			return finishResult({
+				outcome: "failed",
+				exitCode: 1,
+				summary: "Worker Foundations dogfood proof failed.",
+				context,
+				plan,
+				proof,
+				createdRefs: applyResult.createdRefs,
+				changedRefs: [...applyResult.changedRefs, INSTALL_REPORT_REF],
+				branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
+				commit: null,
+				localProofRef: null,
+				reportRef: INSTALL_REPORT_REF,
+				kickoff,
+			});
+		}
+
+		const proof = await runProofCommands(context, inspection.packageManager);
+		const proofFailed = proof.some((status) => status.status === "failed");
+		const localProofRef = await writeLocalProof({ context, plan, proof });
+		const installedRefs = [...applyResult.createdRefs, ...dogfoodCreatedRefs];
+		if (proofFailed) {
+			const kickoff = buildSkippedKickoff("failed");
+			await rollbackWorkerCodexConfig({
+				env,
+				backupPath: codexConfigBackupPath,
+			});
+			await writeTrackedInstallReport({
+				context,
+				result: buildReport({
+					context,
+					outcome: "failed",
+					branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
+					commit: null,
+					plan,
+					proof,
+					createdRefs: installedRefs,
+					changedRefs: applyResult.changedRefs,
+					localProofRef,
+					reportRef: INSTALL_REPORT_REF,
+					kickoff,
+				}),
+			});
+			return finishResult({
+				outcome: "failed",
+				exitCode: 1,
+				summary: "Worker Foundations proof failed.",
+				context,
+				plan,
+				proof,
+				createdRefs: installedRefs,
+				changedRefs: [...applyResult.changedRefs, INSTALL_REPORT_REF],
+				branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
+				commit: null,
+				localProofRef,
+				reportRef: INSTALL_REPORT_REF,
+				kickoff,
+			});
+		}
+
+		let commit: string | null = null;
+		let kickoff = context.options.noKickoff
+			? buildSkippedKickoff("disabled")
+			: buildSkippedKickoff("post-commit");
 		await writeTrackedInstallReport({
 			context,
 			result: buildReport({
 				context,
-				outcome: "failed",
+				outcome: "installed",
 				branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
 				commit: null,
 				plan,
 				proof,
-				createdRefs: applyResult.createdRefs,
+				createdRefs: installedRefs,
 				changedRefs: applyResult.changedRefs,
-				localProofRef: null,
+				localProofRef,
 				reportRef: INSTALL_REPORT_REF,
-				kickoff: buildSkippedKickoff("failed"),
+				kickoff,
 			}),
 		});
-		return finishResult({
-			outcome: "failed",
-			exitCode: 1,
-			summary: "Worker Foundations dogfood proof failed.",
-			context,
-			plan,
-			proof,
-			createdRefs: applyResult.createdRefs,
-			changedRefs: [...applyResult.changedRefs, INSTALL_REPORT_REF],
-			branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
-			commit: null,
-			localProofRef: null,
-			reportRef: INSTALL_REPORT_REF,
-			kickoff: buildSkippedKickoff("failed"),
-		});
-	}
+		if (!options.noCommit) {
+			commit = await commitInstallChanges({
+				context,
+				touchedRefs: [
+					...installedRefs,
+					...applyResult.changedRefs,
+					INSTALL_REPORT_REF,
+				],
+			});
+		}
 
-	const proof = await runProofCommands(context, inspection.packageManager);
-	const proofFailed = proof.some((status) => status.status === "failed");
-	const localProofRef = await writeLocalProof({ context, plan, proof });
-	const preCommitKickoff = proofFailed
-		? buildSkippedKickoff("failed")
-		: context.options.noKickoff
-			? buildSkippedKickoff("disabled")
-			: buildSkippedKickoff("post-commit");
-	await writeTrackedInstallReport({
-		context,
-		result: buildReport({
+		if (!context.options.noKickoff) {
+			kickoff = await maybeRunKickoff(context);
+		}
+		const outcome = kickoff.status === "blocked" ? "failed" : "installed";
+		const exitCode = outcome === "failed" ? 1 : 0;
+		if (outcome === "failed") {
+			await rollbackWorkerCodexConfig({
+				env,
+				backupPath: codexConfigBackupPath,
+			});
+		}
+		await writeTrackedInstallReport({
 			context,
-			outcome: proofFailed ? "failed" : "installed",
+			result: buildReport({
+				context,
+				outcome,
+				branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
+				commit,
+				plan,
+				proof,
+				createdRefs: installedRefs,
+				changedRefs: applyResult.changedRefs,
+				localProofRef,
+				reportRef: INSTALL_REPORT_REF,
+				kickoff,
+			}),
+		});
+		if (commit) {
+			commit = await amendTrackedInstallReport(context);
+		} else if (!options.noCommit) {
+			commit = await commitInstallChanges({
+				context,
+				touchedRefs: [INSTALL_REPORT_REF],
+			});
+		}
+
+		const report = buildReport({
+			context,
+			outcome,
 			branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
-			commit: null,
+			commit,
 			plan,
 			proof,
-			createdRefs: [...applyResult.createdRefs, STARTER_CHILD_PLAN_REF],
+			createdRefs: installedRefs,
 			changedRefs: applyResult.changedRefs,
 			localProofRef,
 			reportRef: INSTALL_REPORT_REF,
-			kickoff: preCommitKickoff,
-		}),
-	});
-	const commit =
-		proofFailed || options.noCommit
-			? null
-			: await commitInstallChanges({
-					context,
-					touchedRefs: [
-						...applyResult.createdRefs,
-						...applyResult.changedRefs,
-						STARTER_CHILD_PLAN_REF,
-						INSTALL_REPORT_REF,
-					],
-				});
-	const kickoff = proofFailed
-		? preCommitKickoff
-		: await maybeRunKickoff(context);
-	const outcome = proofFailed ? "failed" : "installed";
-	const report = buildReport({
-		context,
-		outcome,
-		branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
-		commit,
-		plan,
-		proof,
-		createdRefs: [...applyResult.createdRefs, STARTER_CHILD_PLAN_REF],
-		changedRefs: applyResult.changedRefs,
-		localProofRef,
-		reportRef: INSTALL_REPORT_REF,
-		kickoff,
-	});
+			kickoff,
+		});
 
-	return finishResult({
-		outcome,
-		exitCode: proofFailed ? 1 : 0,
-		summary: proofFailed
-			? "Worker Foundations proof failed."
-			: "Worker Foundations installed.",
-		context,
-		plan,
-		proof,
-		createdRefs: report.createdRefs,
-		changedRefs: [...report.changedRefs, INSTALL_REPORT_REF],
-		branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
-		commit,
-		localProofRef,
-		reportRef: INSTALL_REPORT_REF,
-		kickoff,
-	});
+		return finishResult({
+			outcome,
+			exitCode,
+			summary:
+				outcome === "failed"
+					? "Worker Foundations kickoff failed."
+					: "Worker Foundations installed.",
+			context,
+			plan,
+			proof,
+			createdRefs: report.createdRefs,
+			changedRefs: [...report.changedRefs, INSTALL_REPORT_REF],
+			branch: WORKER_FOUNDATIONS_INSTALL_BRANCH,
+			commit,
+			localProofRef,
+			reportRef: INSTALL_REPORT_REF,
+			kickoff,
+		});
+	} catch (error) {
+		await rollbackWorkerCodexConfig({ env, backupPath: codexConfigBackupPath });
+		throw error;
+	}
 }
 
 function resolveWorkerHome(env: NodeJS.ProcessEnv) {
@@ -488,12 +580,15 @@ async function inspectTargetRepository(
 		});
 	}
 
-	const hasLicense = existsSync(path.join(context.workerHome, "license.json"));
-	if (!hasLicense) {
+	const licenseStatus = await inspectWorkerLicense(context);
+	const hasLicense = licenseStatus === "active";
+	if (licenseStatus !== "active") {
 		blockers.push({
 			blockerId: "license",
 			reason:
-				"License activation is missing. Run shipbysunday install interactively after signing in.",
+				licenseStatus === "missing"
+					? "License activation is missing. Run shipbysunday install interactively after signing in."
+					: "License activation is invalid. Re-run shipbysunday install after signing in.",
 		});
 	}
 
@@ -580,6 +675,31 @@ async function inspectCodexAvailability(context: WorkerInstallContext) {
 		env: context.env,
 	});
 	return loginResult.succeeded ? ("ready" as const) : ("blocked" as const);
+}
+
+async function inspectWorkerLicense(context: WorkerInstallContext) {
+	const licensePath = path.join(context.workerHome, "license.json");
+	if (!existsSync(licensePath)) {
+		return "missing" as const;
+	}
+	try {
+		const parsed = parseJsonObject(await readFile(licensePath, "utf8"));
+		if (!parsed || parsed.status !== "active") {
+			return "invalid" as const;
+		}
+		if (parsed.expires_at !== undefined) {
+			if (typeof parsed.expires_at !== "string") {
+				return "invalid" as const;
+			}
+			const expiresAtMs = Date.parse(parsed.expires_at);
+			if (!Number.isFinite(expiresAtMs) || expiresAtMs <= context.now) {
+				return "invalid" as const;
+			}
+		}
+		return "active" as const;
+	} catch {
+		return "invalid" as const;
+	}
 }
 
 async function inspectWorkerBunToolchain(
@@ -1012,11 +1132,18 @@ async function writeManagedFileSet(
 async function findManagedFileBlockers(context: WorkerInstallContext) {
 	const blockers: WorkerInstallBlocker[] = [];
 	for (const file of buildManagedFiles()) {
-		if (file.targetRef.endsWith("AGENTS.md")) {
-			continue;
-		}
 		const absolutePath = path.join(context.repositoryRoot, file.targetRef);
 		if (!existsSync(absolutePath)) {
+			continue;
+		}
+		if (file.targetRef.endsWith("AGENTS.md")) {
+			if (hasIncompleteManagedBlock(await readFile(absolutePath, "utf8"))) {
+				blockers.push({
+					blockerId: `file-conflict:${file.targetRef}`,
+					targetRef: file.targetRef,
+					reason: "Existing AGENTS.md has incomplete Worker managed markers.",
+				});
+			}
 			continue;
 		}
 		if (file.preserveIfExists) {
@@ -1031,6 +1158,21 @@ async function findManagedFileBlockers(context: WorkerInstallContext) {
 				blockerId: `file-conflict:${file.targetRef}`,
 				targetRef: file.targetRef,
 				reason: "Existing same-name file is not recognized as Worker-managed.",
+			});
+		}
+	}
+	const childPlanPath = path.join(
+		context.repositoryRoot,
+		STARTER_CHILD_PLAN_REF,
+	);
+	if (existsSync(childPlanPath)) {
+		const currentContent = await readFile(childPlanPath, "utf8");
+		if (!isRecognizedStarterChildPlan(currentContent)) {
+			blockers.push({
+				blockerId: `file-conflict:${STARTER_CHILD_PLAN_REF}`,
+				targetRef: STARTER_CHILD_PLAN_REF,
+				reason:
+					"Existing starter child ExecPlan is not recognized as Worker-managed.",
 			});
 		}
 	}
@@ -1133,6 +1275,22 @@ async function runDogfoodChildPlan(
 	context: WorkerInstallContext,
 	packageManager: RootPackageManager,
 ) {
+	const childPlanPath = path.join(
+		context.repositoryRoot,
+		STARTER_CHILD_PLAN_REF,
+	);
+	if (existsSync(childPlanPath)) {
+		const currentContent = await readFile(childPlanPath, "utf8");
+		if (isRecognizedStarterChildPlan(currentContent)) {
+			return {
+				succeeded: true,
+				stdout: "",
+				stderr: "",
+				timedOut: false,
+				command: `${packageManager} run program:write-child-plan`,
+			};
+		}
+	}
 	return await runPackageScript({
 		context,
 		packageManager,
@@ -1362,7 +1520,7 @@ function renderInstallReport(result: WorkerInstallReport) {
 		`Outcome: \`${result.outcome}\``,
 		`Worker bundle version: \`${result.workerBundleVersion}\``,
 		`Branch: \`${result.branch ?? "not-created"}\``,
-		`Commit: \`${result.commit ?? "not-created"}\``,
+		`Commit: \`${result.commit ? "current branch HEAD after install" : "not-created"}\``,
 		`Local proof: \`${result.localProofRef ?? "not-written"}\``,
 		"",
 		"## Proof",
@@ -1404,7 +1562,7 @@ async function maybeRunKickoff(
 		],
 		{
 			cwd: context.repositoryRoot,
-			env: context.env,
+			env: buildCodexKickoffEnv(context),
 			stdio: "inherit",
 		},
 	);
@@ -1452,6 +1610,42 @@ async function commitInstallChanges({
 	if (!commitResult.succeeded) {
 		throw new Error("Could not create Worker Foundations install commit.");
 	}
+	const hashResult = await runGit(context.repositoryRoot, [
+		"rev-parse",
+		"--short",
+		"HEAD",
+	]);
+	return hashResult.succeeded ? hashResult.stdout.trim() : null;
+}
+
+async function amendTrackedInstallReport(context: WorkerInstallContext) {
+	const addResult = await runGit(context.repositoryRoot, [
+		"add",
+		INSTALL_REPORT_REF,
+	]);
+	if (!addResult.succeeded) {
+		throw new Error("Could not stage final Worker Foundations install report.");
+	}
+	const diffResult = await runGit(context.repositoryRoot, [
+		"diff",
+		"--cached",
+		"--quiet",
+	]);
+	if (diffResult.succeeded) {
+		return await readHeadCommit(context);
+	}
+	const amendResult = await runGit(context.repositoryRoot, [
+		"commit",
+		"--amend",
+		"--no-edit",
+	]);
+	if (!amendResult.succeeded) {
+		throw new Error("Could not amend final Worker Foundations install report.");
+	}
+	return await readHeadCommit(context);
+}
+
+async function readHeadCommit(context: WorkerInstallContext) {
 	const hashResult = await runGit(context.repositoryRoot, [
 		"rev-parse",
 		"--short",
@@ -1832,16 +2026,30 @@ async function lintPrograms(): Promise<LintReport[]> {
 				"plan-split-recommendation.md",
 				"cross-repo-review.md",
 				"current-planning-brief.txt",
-			]) {
-				if (!existsSync(path.join(dir, required))) issues.push("Missing " + required + ".");
+				]) {
+					if (!existsSync(path.join(dir, required))) issues.push("Missing " + required + ".");
+				}
+				const files = await safeReaddir(dir);
+				if (!files.some((file) => /^planning-brief-\d+\.md$/.test(file))) issues.push("Missing versioned planning brief.");
+				if (!files.some((file) => /^research-pass-.+\.md$/.test(file) || /^track-\d+-.+\.md$/.test(file))) issues.push("Missing research pass.");
+				if (!files.some((file) => /^normalized-pass-.+\.md$/.test(file) || /^normalized-track-\d+\.md$/.test(file))) issues.push("Missing normalized pass.");
+				const programPath = path.join(dir, "program.md");
+				if (existsSync(programPath)) {
+					const parsed = parseFrontmatter(await readFile(programPath, "utf8"));
+					if (!parsed) {
+						issues.push("program.md is missing YAML frontmatter.");
+					} else {
+						for (const key of ["program_id", "title", "status", "created_at", "completed_at", "summary", "post_build_recap", "read_when"]) {
+							if (!parsed.metadata.has(key)) issues.push("program.md missing frontmatter " + key + ".");
+						}
+						for (const heading of ["## Purpose / Big Picture", "## Program Inputs", "## Current State", "## Progress", "## Decision Log", "## Slice Ledger", "## Next Slice", "## Risks and Watchpoints", "## Outcomes & Retrospective", "## Validation and Acceptance", "## Artifacts and Notes", "## Interfaces and Dependencies"]) {
+							if (!parsed.body.includes(heading)) issues.push("program.md missing " + heading + ".");
+						}
+					}
+				}
+				reports.push({ ref, issues });
 			}
-			const files = await safeReaddir(dir);
-			if (!files.some((file) => /^planning-brief-\d+\.md$/.test(file))) issues.push("Missing versioned planning brief.");
-			if (!files.some((file) => /^research-pass-.+\.md$/.test(file) || /^track-\d+-.+\.md$/.test(file))) issues.push("Missing research pass.");
-			if (!files.some((file) => /^normalized-pass-.+\.md$/.test(file) || /^normalized-track-\d+\.md$/.test(file))) issues.push("Missing normalized pass.");
-			reports.push({ ref, issues });
 		}
-	}
 	if (reports.length === 0) reports.push({ ref: "docs/programs", issues: ["No Program packets found."] });
 	return reports;
 }
@@ -1862,21 +2070,21 @@ async function lintExecPlans(args: string[]): Promise<LintReport[]> {
 		const parsed = parseFrontmatter(await readFile(absolutePath, "utf8"));
 		if (!parsed) {
 			issues.push("Missing YAML frontmatter block.");
-		} else {
-			for (const key of ["title", "status", "created_at", "summary"]) {
-				if (!parsed.metadata.has(key)) issues.push("Missing frontmatter " + key + ".");
+			} else {
+				for (const key of ["title", "status", "created_at", "completed_at", "summary", "post_build_recap", "read_when"]) {
+					if (!parsed.metadata.has(key)) issues.push("Missing frontmatter " + key + ".");
+				}
+				const status = parsed.metadata.get("status");
+				if (ref.includes("/active/") && status !== "active") issues.push("Active ExecPlan path must use status: active.");
+				if (ref.includes("/completed/") && status !== "complete") issues.push("Completed ExecPlan path must use status: complete.");
+				const planningBrief = parsed.metadata.get("planning_brief");
+				if (typeof planningBrief === "string" && planningBrief.endsWith("current-planning-brief.txt")) {
+					issues.push("planning_brief must point at an immutable planning-brief-N.md file.");
+				}
+				for (const heading of ["## Purpose / Big Picture", "## Progress", "## Surprises & Discoveries", "## Decision Log", "## Outcomes & Retrospective", "## Context and Orientation", "### In Scope", "### Out Of Scope", "## Plan of Work", "## Milestones", "## Concrete Steps", "## Validation and Acceptance", "### Test Commands", "## Idempotence and Recovery", "## Artifacts and Notes", "## Interfaces and Dependencies"]) {
+					if (!parsed.body.includes(heading)) issues.push("Missing " + heading + ".");
+				}
 			}
-			const status = parsed.metadata.get("status");
-			if (ref.includes("/active/") && status !== "active") issues.push("Active ExecPlan path must use status: active.");
-			if (ref.includes("/completed/") && status !== "completed") issues.push("Completed ExecPlan path must use status: completed.");
-			const planningBrief = parsed.metadata.get("planning_brief");
-			if (typeof planningBrief === "string" && planningBrief.endsWith("current-planning-brief.txt")) {
-				issues.push("planning_brief must point at an immutable planning-brief-N.md file.");
-			}
-			for (const heading of ["### In Scope", "### Out Of Scope", "### Test Commands"]) {
-				if (!parsed.body.includes(heading)) issues.push("Missing " + heading + ".");
-			}
-		}
 		reports.push({ ref, issues });
 	}
 	return reports;
@@ -1934,11 +2142,33 @@ function renderChildPlan(input: { title: string; summary: string; programId: str
 		"",
 		"# " + input.title,
 		"",
+		"This is a living execution plan for continuing the installed Worker Foundations loop.",
+		"",
+		"This ExecPlan must be maintained in accordance with docs/exec-plans/PLANS.md.",
+		"",
 		"## Purpose / Big Picture",
 		"",
 		input.summary,
 		"",
-		"## Plan of Work",
+		"## Progress",
+		"",
+		"- [ ] Continue from the installed Worker Foundations handoff.",
+		"",
+		"## Surprises & Discoveries",
+		"",
+		"No surprises have been recorded yet.",
+		"",
+		"## Decision Log",
+		"",
+		"Decision: Continue through the installed Worker Program and ExecPlan surfaces.",
+		"Rationale: The installer proved that the target repo can create Program-linked child plans from local source.",
+		"Date: 2026-05-08",
+		"",
+		"## Outcomes & Retrospective",
+		"",
+		"This plan is active. Record the final outcome here before moving it to completed.",
+		"",
+		"## Context and Orientation",
 		"",
 		"Follow the linked Program packet and keep proof in checked-in docs plus ignored .worker runs.",
 		"",
@@ -1950,9 +2180,37 @@ function renderChildPlan(input: { title: string; summary: string; programId: str
 		"",
 		"- Do not configure external providers without a separate plan.",
 		"",
+		"## Plan of Work",
+		"",
+		"Read the linked Program, inspect the current target repo, make the smallest safe change, and update this plan as work proceeds.",
+		"",
+		"## Milestones",
+		"",
+		"Milestone 1 keeps the Worker Foundations loop current by choosing one bounded next slice and validating it with installed commands.",
+		"",
+		"## Concrete Steps",
+		"",
+		"From the repo root, inspect docs/worker/install-report.md, this ExecPlan, and the owning Program packet. Then run the commands listed below after each meaningful change.",
+		"",
+		"## Validation and Acceptance",
+		"",
+		"Acceptance requires this plan to remain linked to an immutable planning brief and for installed Worker validation to pass before completion.",
+		"",
 		"### Test Commands",
 		"",
 		"- npm run docs:validate",
+		"",
+		"## Idempotence and Recovery",
+		"",
+		"Rerun installed validation after edits. If a step fails, keep the worktree reviewable and update this plan with the recovery path.",
+		"",
+		"## Artifacts and Notes",
+		"",
+		"- Planning brief: " + input.briefRef,
+		"",
+		"## Interfaces and Dependencies",
+		"",
+		"This plan depends on the installed Worker command surface, the owning Program packet, and the local package scripts installed by Shipbysunday Worker Foundations.",
 		"",
 	].join("\n");
 }
@@ -2193,14 +2451,61 @@ function starterProgramMd() {
 		"",
 		"# Worker Foundations Adoption",
 		"",
+		"This Program is a living initiative document for continuing the installed Worker Foundations operating system.",
+		"",
+		"This Program must be maintained in accordance with `docs/programs/PROGRAMS.md`.",
+		"",
 		"## Purpose / Big Picture",
 		"",
 		"This Program dogfoods the installed Worker Foundations operating system in this repository.",
+		"",
+		"## Program Inputs",
+		"",
+		"The initial Program packet was created by `shipbysunday install` and is driven by `planning-brief-1.md`.",
+		"",
+		"## Current State",
+		"",
+		"Worker Foundations source, scripts, local proof, and this Program packet are installed in the target repo.",
 		"",
 		"## Progress",
 		"",
 		"- [x] Worker Foundations installer created the starter Program packet.",
 		"- [ ] Continue implementation through child ExecPlans.",
+		"",
+		"## Decision Log",
+		"",
+		"Decision: Continue future work through Program-linked ExecPlans.",
+		"Rationale: The installer proved that child plans can record immutable planning brief provenance.",
+		"Date: 2026-05-08",
+		"",
+		"## Slice Ledger",
+		"",
+		"The first child ExecPlan is `docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md`.",
+		"",
+		"## Next Slice",
+		"",
+		"Continue from the active child ExecPlan and keep the installed validation commands passing.",
+		"",
+		"## Risks and Watchpoints",
+		"",
+		"Do not store secrets, raw logs, Codex transcripts, or local absolute paths in checked-in Worker proof.",
+		"",
+		"## Outcomes & Retrospective",
+		"",
+		"This Program is active. Record outcomes here when the adoption loop is complete.",
+		"",
+		"## Validation and Acceptance",
+		"",
+		"The installed Worker command surface should pass `docs:validate` and `worker:test` before this Program is considered healthy.",
+		"",
+		"## Artifacts and Notes",
+		"",
+		"- Install report: `docs/worker/install-report.md`",
+		"- Local proof root: `.worker/`",
+		"",
+		"## Interfaces and Dependencies",
+		"",
+		"This Program depends on `scripts/run-worker.sh`, `apps/worker`, root package scripts, and the installed Worker planning brief.",
 		"",
 	].join("\n");
 }
@@ -2444,6 +2749,51 @@ function buildWorkerProcessEnv(
 	};
 }
 
+function buildCodexKickoffEnv(
+	context: WorkerInstallContext,
+): NodeJS.ProcessEnv {
+	const allowedKeys = [
+		"CODEX_HOME",
+		"HOME",
+		"LANG",
+		"LC_ALL",
+		"LOGNAME",
+		"PATH",
+		"SHELL",
+		"TERM",
+		"TMPDIR",
+		"USER",
+		"XDG_CONFIG_HOME",
+		"XDG_DATA_HOME",
+	] as const;
+	const nextEnv: NodeJS.ProcessEnv = {};
+	for (const key of allowedKeys) {
+		const value = context.env[key];
+		if (value) {
+			nextEnv[key] = value;
+		}
+	}
+	nextEnv[WORKER_MACHINE_HOME_ENV_VAR] = context.workerHome;
+	return nextEnv;
+}
+
+async function rollbackWorkerCodexConfig({
+	env,
+	backupPath,
+}: {
+	env: NodeJS.ProcessEnv;
+	backupPath: string | null;
+}) {
+	if (!backupPath) {
+		return;
+	}
+	try {
+		await rollbackShipbysundayWorkerCodexConfigPatch({ env, backupPath });
+	} catch {
+		// Keep the install failure path focused on the original failure.
+	}
+}
+
 async function writeRepoFile(
 	context: WorkerInstallContext,
 	targetRef: string,
@@ -2468,6 +2818,13 @@ function extractManagedBlock(content: string) {
 	return normalized.slice(startIndex, endIndex + ROOT_AGENT_END.length);
 }
 
+function hasIncompleteManagedBlock(content: string) {
+	const normalized = normalizeManagedContent(content);
+	const startIndex = normalized.indexOf(ROOT_AGENT_START);
+	const endIndex = normalized.indexOf(ROOT_AGENT_END);
+	return (startIndex === -1) !== (endIndex === -1) || endIndex < startIndex;
+}
+
 function replaceOrAppendManagedBlock({
 	currentContent,
 	managedBlock,
@@ -2487,6 +2844,16 @@ function replaceOrAppendManagedBlock({
 		);
 	}
 	return `${normalized.slice(0, startIndex).trimEnd()}\n\n${managedBlock}\n\n${normalized.slice(endIndex + ROOT_AGENT_END.length).trimStart()}`;
+}
+
+function isRecognizedStarterChildPlan(content: string) {
+	return (
+		content.includes("program_id: worker-foundations-adoption") &&
+		content.includes(
+			`planning_brief: ${STARTER_PROGRAM_ROOT}/planning-brief-1.md`,
+		) &&
+		content.includes("# Continue Worker Foundations Adoption")
+	);
 }
 
 function uniqueRefs(refs: string[]) {
