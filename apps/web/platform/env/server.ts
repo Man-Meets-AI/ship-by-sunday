@@ -37,6 +37,7 @@ const serverEnvSchema = z.object({
 	CODEX_APP_SERVER_HOME_ROOT: z.string().min(1).optional(),
 	CODEX_APP_SERVER_MODEL: z.string().min(1).optional(),
 	CODEX_APP_SERVER_TIMEOUT_MS: z.string().min(1).optional(),
+	ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET: z.string().min(32).optional(),
 });
 
 export function loadServerEnv() {
@@ -97,6 +98,9 @@ export function loadServerEnv() {
 		),
 		CODEX_APP_SERVER_TIMEOUT_MS: normalizeEnvValue(
 			process.env.CODEX_APP_SERVER_TIMEOUT_MS,
+		),
+		ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET: normalizeEnvValue(
+			process.env.ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET,
 		),
 	});
 }

@@ -15,8 +15,8 @@ import {
 	markImpersonationSessionStartFailedHandler,
 	markImpersonationSessionStoppedHandler,
 	observeSupportModeStatusHandler,
-	recordBlockedSupportModeActionHandler,
-	recordSupportModeDownloadAttemptHandler,
+	recordServerBlockedSupportModeActionHandler,
+	recordServerSupportModeDownloadAttemptHandler,
 	stopCurrentImpersonationSessionHandler,
 } from "./impersonation/model";
 import {
@@ -42,6 +42,13 @@ const requestMetadataArgs = {
 	userAgent: nullableStringArg,
 	ipHash: nullableStringArg,
 };
+
+const supportModeRouteAuditServerAssertionValidator = v.object({
+	issuedAt: v.number(),
+	nonce: v.string(),
+	payload: v.string(),
+	signature: v.string(),
+});
 
 export const getSupportModeStatus = query({
 	args: {},
@@ -195,7 +202,7 @@ const supportModeAuditResultValidator = v.union(
 	}),
 );
 
-export const appendSupportModeWriteSuccessAudit = mutation({
+export const appendSupportModeWriteSuccessAudit = internalMutation({
 	args: {
 		actionId: v.string(),
 		changedRecordIds: v.optional(v.union(v.array(v.string()), v.null())),
@@ -209,10 +216,11 @@ export const recordBlockedSupportModeAction = mutation({
 		actionId: v.string(),
 		blockReason: impersonationBlockReasonValidator,
 		eventType: impersonationAuditEventTypeValidator,
+		serverAssertion: supportModeRouteAuditServerAssertionValidator,
 		...requestMetadataArgs,
 	},
 	returns: supportModeAuditResultValidator,
-	handler: recordBlockedSupportModeActionHandler,
+	handler: recordServerBlockedSupportModeActionHandler,
 });
 
 export const recordSupportModeDownloadAttempt = mutation({
@@ -223,8 +231,9 @@ export const recordSupportModeDownloadAttempt = mutation({
 			v.union(impersonationBlockReasonValidator, v.null()),
 		),
 		changedRecordIds: v.optional(v.union(v.array(v.string()), v.null())),
+		serverAssertion: supportModeRouteAuditServerAssertionValidator,
 		...requestMetadataArgs,
 	},
 	returns: supportModeAuditResultValidator,
-	handler: recordSupportModeDownloadAttemptHandler,
+	handler: recordServerSupportModeDownloadAttemptHandler,
 });

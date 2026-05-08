@@ -49,7 +49,7 @@ describe("SupportModeBar", () => {
 		useMutationMock.mockReset().mockReturnValue(stopCurrentSessionMock);
 		useSessionMock.mockReset().mockReturnValue({
 			isLoaded: true,
-			session: { id: "sess_actor" },
+			session: { id: "sess_actor", actor: { sub: "user_admin" } },
 		});
 	});
 
@@ -80,6 +80,34 @@ describe("SupportModeBar", () => {
 			session: undefined,
 		});
 		render(<SupportModeBar initialStatus={activeStatus()} />);
+
+		const stopButton = screen.getByRole("button", { name: /stop/i });
+		expect((stopButton as HTMLButtonElement).disabled).toBe(true);
+
+		await userEvent.click(stopButton);
+
+		expect(stopCurrentSessionMock).not.toHaveBeenCalled();
+		expect(signOutMock).not.toHaveBeenCalled();
+	});
+
+	it("does not sign out a normal admin session for misconfigured status", async () => {
+		useSessionMock.mockReturnValue({
+			isLoaded: true,
+			session: { id: "sess_admin", actor: null },
+		});
+		render(
+			<SupportModeBar
+				initialStatus={{
+					state: "misconfigured",
+					startEligible: false,
+					stopEligible: false,
+					customerEmail: null,
+					reason: null,
+					timeRemainingMs: null,
+					integrityWarnings: [],
+				}}
+			/>,
+		);
 
 		const stopButton = screen.getByRole("button", { name: /stop/i });
 		expect((stopButton as HTMLButtonElement).disabled).toBe(true);

@@ -78,6 +78,37 @@ function getPrimaryEmail(user: User) {
 	};
 }
 
+function getNormalizedUserEmails(user: User) {
+	return user.emailAddresses.map((emailAddress) =>
+		normalizeEmail(emailAddress.emailAddress),
+	);
+}
+
+function userHasConfiguredAdminEmail(user: User, adminEmails: string[]) {
+	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
+	return getNormalizedUserEmails(user).some((email) =>
+		adminEmailSet.has(email),
+	);
+}
+
+function getVerifiedAllowlistedEmail(user: User, adminEmails: string[]) {
+	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
+	const emailAddress = user.emailAddresses.find((candidate) => {
+		const email = normalizeEmail(candidate.emailAddress);
+		return (
+			adminEmailSet.has(email) && candidate.verification?.status === "verified"
+		);
+	});
+	if (!emailAddress) {
+		return null;
+	}
+
+	return {
+		email: normalizeEmail(emailAddress.emailAddress),
+		verified: true,
+	};
+}
+
 function formatClerkName(user: User) {
 	const fullName = [user.firstName, user.lastName]
 		.map((part) => part?.trim())
@@ -99,14 +130,6 @@ function toCustomerSummary(user: User): AdminImpersonationCustomer | null {
 		imageUrl: user.imageUrl || null,
 		createdAt: user.createdAt,
 	};
-}
-
-function excludeAdminCustomers(
-	customers: AdminImpersonationCustomer[],
-	adminEmails: string[],
-) {
-	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
-	return customers.filter((customer) => !adminEmailSet.has(customer.email));
 }
 
 function getClerkErrorStatus(
@@ -148,7 +171,13 @@ export function getAdminImpersonationActionError(
 
 export async function getCurrentAdminImpersonationAuthority() {
 	const authState = await auth();
-	if (!authState.userId) {
+	const actorClerkUserId =
+		typeof authState.actor?.sub === "string" &&
+		authState.actor.sub.trim().length > 0
+			? authState.actor.sub
+			: null;
+	const authorityClerkUserId = actorClerkUserId ?? authState.userId;
+	if (!authorityClerkUserId) {
 		return {
 			kind: "unauthenticated" as const,
 			authority: null,
@@ -156,10 +185,15 @@ export async function getCurrentAdminImpersonationAuthority() {
 	}
 
 	const client = await clerkClient();
-	const user = await client.users.getUser(authState.userId);
-	const primaryEmail = getPrimaryEmail(user);
+	const user = await client.users.getUser(authorityClerkUserId);
+	const config = readAdminImpersonationConfig();
+	const primaryEmail =
+		config.state === "enabled"
+			? (getVerifiedAllowlistedEmail(user, config.adminEmails) ??
+				getPrimaryEmail(user))
+			: getPrimaryEmail(user);
 	const authority = classifyAdminImpersonationAuthority({
-		config: readAdminImpersonationConfig(),
+		config,
 		identity: {
 			subject: user.id,
 			email: primaryEmail?.email,
@@ -218,13 +252,14 @@ export async function searchAdminImpersonationCustomers(
 		orderBy: "-created_at",
 		...(query ? { query } : undefined),
 	});
-	const customers = excludeAdminCustomers(
-		response.data.flatMap((user) => {
-			const customer = toCustomerSummary(user);
-			return customer ? [customer] : [];
-		}),
-		config.adminEmails,
-	);
+	const customers = response.data.flatMap((user) => {
+		if (userHasConfiguredAdminEmail(user, config.adminEmails)) {
+			return [];
+		}
+
+		const customer = toCustomerSummary(user);
+		return customer ? [customer] : [];
+	});
 
 	return {
 		customers,
@@ -282,7 +317,7 @@ export async function resolveAdminImpersonationTarget(
 		};
 	}
 	const config = readAdminImpersonationConfig();
-	if (excludeAdminCustomers([customer], config.adminEmails).length === 0) {
+	if (userHasConfiguredAdminEmail(user, config.adminEmails)) {
 		return {
 			ok: false,
 			status: 403,

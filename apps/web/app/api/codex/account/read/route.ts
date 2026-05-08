@@ -15,6 +15,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,18 @@ export async function GET(request: Request) {
 
 	try {
 		const session = await requireProductAccessApiSession();
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.account.read",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex account reads are unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 
 		const result = await withCodexAppServerClient(
 			{

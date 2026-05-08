@@ -14,6 +14,7 @@ const convexEnvShape = {
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
 	ADMIN_IMPERSONATION_EMAILS: z.string().min(1).optional(),
 	ADMIN_IMPERSONATION_ENABLED: z.string().min(1).optional(),
+	ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET: z.string().min(32).optional(),
 	OBSERVABILITY_INGEST_TOKEN: z.string().min(1).optional(),
 	OPENAI_API_KEY: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),

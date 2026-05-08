@@ -65,6 +65,10 @@ export function SupportModeBar({
 			setStopError("Clerk session is still loading.");
 			return;
 		}
+		if (!session.actor) {
+			setStopError("No Clerk actor session is active.");
+			return;
+		}
 		const actorSessionId = session.id;
 		startTransition(async () => {
 			try {
@@ -127,7 +131,9 @@ export function SupportModeBar({
 					size="sm"
 					className="border-amber-950/40 bg-amber-50 text-amber-950 hover:bg-amber-100"
 					onClick={stopSupportMode}
-					disabled={isPending || !sessionIsLoaded || !session?.id}
+					disabled={
+						isPending || !sessionIsLoaded || !session?.id || !session.actor
+					}
 				>
 					<Square className="size-3" aria-hidden />
 					Stop impersonating

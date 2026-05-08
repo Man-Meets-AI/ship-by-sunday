@@ -9,6 +9,15 @@ export {
 	type AdminImpersonationIdentity,
 } from "./config";
 export {
+	ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET_ENV,
+	createSupportModeRouteAuditPayload,
+	parseSupportModeRouteAuditPayload,
+	supportModeRouteAuditPayloadMatches,
+	type SupportModeRouteAuditAssertion,
+	type SupportModeRouteAuditPayload,
+	type SupportModeRouteAuditPurpose,
+} from "./route-audit-assertion";
+export {
 	createSupportModeStatus,
 	type SupportModeIntegrityWarning,
 	type SupportModeStatus,

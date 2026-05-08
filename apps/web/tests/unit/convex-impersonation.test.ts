@@ -392,4 +392,60 @@ describe("convex impersonation model", () => {
 			}),
 		);
 	});
+
+	it("does not record route audit events without a valid server assertion", async () => {
+		process.env.ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET = "a".repeat(32);
+		const {
+			recordServerBlockedSupportModeActionHandler,
+			recordServerSupportModeDownloadAttemptHandler,
+		} = await import("@/convex/impersonation/model");
+		const insert = vi.fn().mockResolvedValue("audit_1");
+		const fakeCtx = {
+			auth: {
+				getUserIdentity: vi.fn().mockResolvedValue({
+					subject: "user_customer",
+					email: "customer@example.com",
+					emailVerified: true,
+					act: { sub: "user_admin", impersonationSessionId: "session_1" },
+				}),
+			},
+			db: {
+				get: vi.fn().mockResolvedValue(createSession()),
+				patch: vi.fn(),
+				insert,
+			},
+		} as unknown as Parameters<
+			typeof recordServerBlockedSupportModeActionHandler
+		>[0];
+		const serverAssertion = {
+			issuedAt: 1_000,
+			nonce: "nonce_1",
+			payload: "{}",
+			signature: "not-a-valid-signature",
+		};
+
+		await expect(
+			recordServerBlockedSupportModeActionHandler(fakeCtx, {
+				actionId: "codex.account.read",
+				blockReason: "external_side_effect_blocked",
+				eventType: "external_action_blocked",
+				serverAssertion,
+			}),
+		).resolves.toEqual({
+			kind: "not_recorded",
+			reason: "secret_access_blocked",
+		});
+		await expect(
+			recordServerSupportModeDownloadAttemptHandler(fakeCtx, {
+				actionId: "download.reviewRepo",
+				result: "success",
+				changedRecordIds: ["product_1"],
+				serverAssertion,
+			}),
+		).resolves.toEqual({
+			kind: "not_recorded",
+			reason: "secret_access_blocked",
+		});
+		expect(insert).not.toHaveBeenCalled();
+	});
 });

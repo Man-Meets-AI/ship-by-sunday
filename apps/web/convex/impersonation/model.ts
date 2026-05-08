@@ -4,11 +4,15 @@ import { ConvexError } from "convex/values";
 import {
 	classifyAdminImpersonationAuthority,
 	createSupportModeStatus,
+	parseSupportModeRouteAuditPayload,
 	readAdminImpersonationConfig,
+	supportModeRouteAuditPayloadMatches,
+	type SupportModeRouteAuditAssertion,
 	type SupportModeStatus,
 } from "../../platform/admin-impersonation";
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { readOptionalConvexEnv } from "../env";
 import type {
 	ImpersonationAuditEventType,
 	ImpersonationAuditResult,
@@ -21,6 +25,7 @@ import type {
 const IMPERSONATION_SESSION_DURATION_MS = 2 * 60 * 60 * 1_000;
 const IMPERSONATION_REASON_MIN_LENGTH = 10;
 const IMPERSONATION_REASON_MAX_LENGTH = 500;
+const ROUTE_AUDIT_ASSERTION_MAX_AGE_MS = 5 * 60 * 1_000;
 
 type ImpersonationSessionId = GenericId<"impersonationSessions">;
 type ImpersonationSession = Doc<"impersonationSessions">;
@@ -127,6 +132,15 @@ export type RecordSupportModeAuditResult =
 	| { kind: "not_impersonating" }
 	| { kind: "not_recorded"; reason: ImpersonationBlockReason };
 
+type RouteAuditExpectedInput = {
+	purpose: "blocked_action" | "download_attempt";
+	actionId: string;
+	eventType?: ImpersonationAuditEventType | null;
+	result?: "success" | "blocked" | null;
+	blockReason?: ImpersonationBlockReason | null;
+	changedRecordIds?: string[] | null;
+};
+
 function normalizeOptionalString(value: string | null | undefined) {
 	const normalized = value?.trim();
 	return normalized && normalized.length > 0 ? normalized : undefined;
@@ -138,6 +152,84 @@ function normalizeEmail(value: string) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function bytesToHex(bytes: ArrayBuffer) {
+	return Array.from(new Uint8Array(bytes))
+		.map((byte) => byte.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+function constantTimeEqual(left: string, right: string) {
+	if (left.length !== right.length) {
+		return false;
+	}
+
+	let difference = 0;
+	for (let index = 0; index < left.length; index += 1) {
+		difference |= left.charCodeAt(index) ^ right.charCodeAt(index);
+	}
+	return difference === 0;
+}
+
+async function createRouteAuditSignature(secret: string, payload: string) {
+	const encoder = new TextEncoder();
+	const key = await crypto.subtle.importKey(
+		"raw",
+		encoder.encode(secret),
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"],
+	);
+	const signature = await crypto.subtle.sign(
+		"HMAC",
+		key,
+		encoder.encode(payload),
+	);
+
+	return bytesToHex(signature);
+}
+
+function readRouteAuditSecret() {
+	return (
+		readOptionalConvexEnv("ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET") ??
+		readOptionalConvexEnv("CLERK_SECRET_KEY")
+	);
+}
+
+async function routeAuditServerAssertionIsValid(
+	assertion: SupportModeRouteAuditAssertion | null | undefined,
+	expected: RouteAuditExpectedInput,
+) {
+	const secret = readRouteAuditSecret();
+	if (!assertion || !secret) {
+		return false;
+	}
+
+	if (
+		!Number.isFinite(assertion.issuedAt) ||
+		assertion.issuedAt <= 0 ||
+		Date.now() - assertion.issuedAt > ROUTE_AUDIT_ASSERTION_MAX_AGE_MS ||
+		Math.abs(assertion.issuedAt - Date.now()) > ROUTE_AUDIT_ASSERTION_MAX_AGE_MS
+	) {
+		return false;
+	}
+
+	const payload = parseSupportModeRouteAuditPayload(assertion.payload);
+	if (
+		!payload ||
+		payload.issuedAt !== assertion.issuedAt ||
+		payload.nonce !== assertion.nonce ||
+		!supportModeRouteAuditPayloadMatches(payload, expected)
+	) {
+		return false;
+	}
+
+	const expectedSignature = await createRouteAuditSignature(
+		secret,
+		assertion.payload,
+	);
+	return constantTimeEqual(expectedSignature, assertion.signature);
 }
 
 function getActorClaim(identity: IdentityWithActorClaim): unknown {
@@ -1090,6 +1182,40 @@ export async function recordBlockedSupportModeActionHandler(
 	return { kind: "recorded", sessionId: session._id };
 }
 
+export async function recordServerBlockedSupportModeActionHandler(
+	ctx: MutationCtx,
+	args: {
+		actionId: string;
+		blockReason: ImpersonationBlockReason;
+		eventType: ImpersonationAuditEventType;
+		serverAssertion: SupportModeRouteAuditAssertion;
+		requestId?: string | null;
+		userAgent?: string | null;
+		ipHash?: string | null;
+	},
+): Promise<RecordSupportModeAuditResult> {
+	const auditContext = await getCurrentActorSessionForAudit(ctx);
+	if (auditContext.kind === "not_impersonating") {
+		return { kind: "not_impersonating" };
+	}
+
+	const assertionIsValid = await routeAuditServerAssertionIsValid(
+		args.serverAssertion,
+		{
+			purpose: "blocked_action",
+			actionId: args.actionId,
+			eventType: args.eventType,
+			result: "blocked",
+			blockReason: args.blockReason,
+		},
+	);
+	if (!assertionIsValid) {
+		return { kind: "not_recorded", reason: "secret_access_blocked" };
+	}
+
+	return await recordBlockedSupportModeActionHandler(ctx, args);
+}
+
 export async function recordSupportModeDownloadAttemptHandler(
 	ctx: MutationCtx,
 	args: {
@@ -1170,6 +1296,41 @@ export async function recordSupportModeDownloadAttemptHandler(
 	});
 
 	return { kind: "recorded", sessionId: session._id };
+}
+
+export async function recordServerSupportModeDownloadAttemptHandler(
+	ctx: MutationCtx,
+	args: {
+		actionId: string;
+		result: "success" | "blocked";
+		blockReason?: ImpersonationBlockReason | null;
+		changedRecordIds?: string[] | null;
+		serverAssertion: SupportModeRouteAuditAssertion;
+		requestId?: string | null;
+		userAgent?: string | null;
+		ipHash?: string | null;
+	},
+): Promise<RecordSupportModeAuditResult> {
+	const auditContext = await getCurrentActorSessionForAudit(ctx);
+	if (auditContext.kind === "not_impersonating") {
+		return { kind: "not_impersonating" };
+	}
+
+	const assertionIsValid = await routeAuditServerAssertionIsValid(
+		args.serverAssertion,
+		{
+			purpose: "download_attempt",
+			actionId: args.actionId,
+			result: args.result,
+			blockReason: args.blockReason ?? null,
+			changedRecordIds: args.changedRecordIds ?? null,
+		},
+	);
+	if (!assertionIsValid) {
+		return { kind: "not_recorded", reason: "secret_access_blocked" };
+	}
+
+	return await recordSupportModeDownloadAttemptHandler(ctx, args);
 }
 
 function toHistoryItem({

@@ -11,17 +11,21 @@ Set these values in every environment where support mode should be available:
 ```bash
 ADMIN_IMPERSONATION_ENABLED=true
 ADMIN_IMPERSONATION_EMAILS=me@parkerrex.com
+ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET=<openssl rand -hex 32>
 ```
 
 `ADMIN_IMPERSONATION_ENABLED` must be exactly `true` to enable support mode. Missing, empty, or `false` disables the feature. Any other value is misconfigured.
 
 `ADMIN_IMPERSONATION_EMAILS` is a comma-separated allowlist of verified Clerk emails that may start app-managed impersonation. The first supported production allowlist is `me@parkerrex.com`. When the feature is enabled, an empty allowlist is misconfigured.
 
+`ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET` signs server-originated route audit writes so an impersonated browser session cannot forge Codex, billing, or download audit evidence. Use one random value per environment, store the same value in the Next.js runtime and matching hosted Convex deployment, and rotate it like any other server-only secret. If it is omitted, the implementation falls back to `CLERK_SECRET_KEY` for compatibility, but a dedicated secret is preferred.
+
 Local, preview, and production may each enable support mode, but none of them defaults open. Store the values with the same environment owner that runs the app server and Convex functions for that environment. In hosted Convex, set matching values with:
 
 ```bash
 npx convex env set ADMIN_IMPERSONATION_ENABLED true
 npx convex env set ADMIN_IMPERSONATION_EMAILS me@parkerrex.com
+npx convex env set ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET "<same random value as app runtime>"
 ```
 
 ## Clerk And Convex Setup
@@ -74,6 +78,8 @@ Allowed support-mode writes are ordinary in-app product state and customer setup
 
 High-impact external side effects are blocked while impersonating. Stripe checkout session creation, express checkout, Codex account login/logout, Codex generation, managed GitHub consent changes, workspace workflow/run starts, sync approval, finding/project deletes, and runner revocation are unavailable during support mode. Route-level blockers write a support-mode audit event before returning an HTTP error so the evidence is not lost with a rolled-back mutation.
 
+Route-level support-mode audit mutations require a signed server assertion from the app route. Browser-callable Convex clients cannot create arbitrary write, blocked-route, or download audit evidence.
+
 Review repo downloads are allowed when the customer can otherwise download the artifact and any active support-mode session is still valid. The route checks support-mode status before building the zip and rechecks audit state before returning it. Successful downloads append a `download_attempted` audit event.
 
 ## Verify Implementation
@@ -106,6 +112,7 @@ git diff --check
 - Missing or false `ADMIN_IMPERSONATION_ENABLED`: support mode is disabled.
 - `ADMIN_IMPERSONATION_ENABLED` set to anything other than `true` or `false`: support mode is misconfigured.
 - Enabled feature with empty `ADMIN_IMPERSONATION_EMAILS`: support mode is misconfigured.
+- Missing `ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET` and missing Convex/app `CLERK_SECRET_KEY`: route-level audit assertions cannot be signed, so side-effect routes fail closed instead of calling the external provider.
 - Signed-in user email missing, unverified, or not allowlisted: the user is not an impersonation admin.
 - Clerk `convex` JWT template missing `act`: Convex cannot see actor metadata, so support-mode audit cannot prove the actor.
 - Actor claim present without `impersonationSessionId`: unsupported Clerk Dashboard impersonation.
@@ -133,4 +140,4 @@ Before production enablement, prove one complete non-production flow with a dedi
 
 Production enablement also requires a non-destructive post-deploy smoke using a dedicated internal production test customer. Do not use a real customer for either proof.
 
-Current checkout limitation, 2026-05-07: `.env.local` does not define `ADMIN_IMPERSONATION_ENABLED`, `ADMIN_IMPERSONATION_EMAILS`, or dedicated Clerk test-user credentials. The implementation and mocked tests can be validated here, but the required real Clerk actor-token proof remains blocked until those environment-owned inputs and dedicated test customers exist.
+Current checkout limitation, 2026-05-07: `.env.local` does not define `ADMIN_IMPERSONATION_ENABLED`, `ADMIN_IMPERSONATION_EMAILS`, `ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET`, or dedicated Clerk test-user credentials. The implementation and mocked tests can be validated here, but the required real Clerk actor-token proof remains blocked until those environment-owned inputs and dedicated test customers exist.
