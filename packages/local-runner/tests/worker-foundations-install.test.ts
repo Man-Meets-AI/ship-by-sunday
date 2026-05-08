@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 import { runInstallCommand } from "../src/commands/install";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
 import {
+	WORKER_BUN_DOWNLOAD_URL_ENV_VAR,
 	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
 	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
 } from "../src/workflows/worker-foundations-install/manifest";
@@ -347,6 +348,112 @@ describe("Worker Foundations install command", () => {
 				{ command: "bun run docs:validate", status: "passed" },
 			]),
 		);
+	});
+
+	it("downloads a Worker-managed Bun toolchain when no local Bun source is usable", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const pathWithoutBun = await createTemporaryDirectory(
+			"worker-no-bun-path-",
+		);
+		const bunDownloadServer = await createBunDownloadServer(
+			await readFile(findExecutableOnPath("bun")),
+		);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		try {
+			await expect(
+				runInstallCommand(
+					[
+						"--repo",
+						repositoryRoot,
+						"--yes",
+						"--json",
+						"--no-kickoff",
+						"--no-commit",
+					],
+					{
+						...process.env,
+						PATH: pathWithoutBun,
+						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
+					},
+				),
+			).resolves.toBe(0);
+		} finally {
+			await bunDownloadServer.close();
+		}
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: {
+				toolchain: {
+					origin: string;
+					status: string;
+				};
+			};
+			proof: Array<{ command: string; status: string }>;
+		};
+		expect(result.outcome).toBe("installed");
+		expect(result.plan.toolchain).toMatchObject({
+			origin: "download",
+			status: "provisionable",
+		});
+		expect(output).not.toContain(workerHome);
+		expect(output).not.toContain(bunDownloadServer.url);
+		expect(existsSync(path.join(workerHome, "toolchains/bun/bin/bun"))).toBe(
+			true,
+		);
+		expect(result.proof).toEqual(
+			expect.arrayContaining([
+				{ command: "bun run docs:validate", status: "passed" },
+			]),
+		);
+	});
+
+	it("fails before repo mutation when downloaded Bun does not run", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const pathWithoutBun = await createTemporaryDirectory(
+			"worker-no-bun-path-",
+		);
+		const bunDownloadServer = await createBunDownloadServer(
+			Buffer.from("#!/bin/sh\nexit 99\n"),
+		);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		try {
+			await expect(
+				runInstallCommand(
+					[
+						"--repo",
+						repositoryRoot,
+						"--yes",
+						"--json",
+						"--no-kickoff",
+						"--no-commit",
+					],
+					{
+						...process.env,
+						PATH: pathWithoutBun,
+						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
+					},
+				),
+			).resolves.toBe(1);
+		} finally {
+			await bunDownloadServer.close();
+		}
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+		};
+		expect(result.outcome).toBe("failed");
+		expect(output).not.toContain(bunDownloadServer.url);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
 	});
 
 	it("blocks unrecognized same-name scripts without leaking script bodies", async () => {
@@ -757,6 +864,35 @@ function mockInteractiveInstallInput(answer: string) {
 			configurable: true,
 			value: originalIsTty,
 		});
+	};
+}
+
+async function createBunDownloadServer(payload: Buffer) {
+	let requestCount = 0;
+	const server = createServer(async (request, response) => {
+		await readRequestBody(request);
+		if (request.method === "GET" && request.url === "/bun") {
+			requestCount += 1;
+			response.writeHead(200, {
+				"Content-Type": "application/octet-stream",
+			});
+			response.end(payload);
+			return;
+		}
+		response.writeHead(404);
+		response.end();
+	});
+	await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+	const address = server.address();
+	if (!address || typeof address === "string") {
+		throw new Error("Bun download test server did not expose a TCP port.");
+	}
+	return {
+		get requestCount() {
+			return requestCount;
+		},
+		url: `http://127.0.0.1:${address.port}/bun`,
+		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
 	};
 }
 

@@ -1,6 +1,15 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { chmod, copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	copyFile,
+	mkdir,
+	mkdtemp,
+	readdir,
+	readFile,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -23,6 +32,7 @@ import {
 	WORKER_FOUNDATIONS_INSTALL_WORKFLOW_VERSION,
 	WORKER_FOUNDATIONS_PROOF_SCRIPTS,
 	WORKER_FOUNDATIONS_ROOT_SCRIPTS,
+	WORKER_BUN_DOWNLOAD_URL_ENV_VAR,
 	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
 	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
 	WORKER_MACHINE_HOME_ENV_VAR,
@@ -92,6 +102,7 @@ type WorkerBunToolchainPlan = {
 		| "worker-managed"
 		| "current-runtime"
 		| "explicit-env"
+		| "download"
 		| "missing";
 	targetRef: "worker-home/toolchains/bun/bin/bun";
 };
@@ -222,6 +233,7 @@ const WORKER_LICENSE_ACTIVATION_POLL_PATH = "/api/worker/license/device/poll";
 const MIN_ACTIVATION_POLL_INTERVAL_MS = 1_000;
 const MAX_ACTIVATION_POLL_INTERVAL_MS = 10_000;
 const DEFAULT_ACTIVATION_TIMEOUT_MS = 5 * 60_000;
+const WORKER_MANAGED_BUN_VERSION = "1.3.5";
 
 export async function runWorkerFoundationsInstall({
 	options,
@@ -384,7 +396,28 @@ export async function runWorkerFoundationsInstall({
 		}
 	}
 
-	await ensureWorkerBunToolchain(context, inspection.bunToolchain);
+	try {
+		await ensureWorkerBunToolchain(context, inspection.bunToolchain);
+	} catch (error) {
+		return finishResult({
+			outcome: "failed",
+			exitCode: 1,
+			summary:
+				error instanceof Error
+					? error.message
+					: "Worker-managed Bun toolchain could not be prepared.",
+			context,
+			plan,
+			proof: [],
+			createdRefs: [],
+			changedRefs: [],
+			branch: null,
+			commit: null,
+			localProofRef: null,
+			reportRef: null,
+			kickoff: buildSkippedKickoff("failed"),
+		});
+	}
 
 	const branchResult = await prepareInstallBranch(context);
 	if (branchResult.status === "blocked") {
@@ -1181,9 +1214,17 @@ async function inspectWorkerBunToolchain(
 }
 
 type ProvisionableBunCandidate = {
-	absolutePath: string;
-	origin: "current-runtime" | "explicit-env";
-};
+	origin: "current-runtime" | "download" | "explicit-env";
+} & (
+	| {
+			absolutePath: string;
+			origin: "current-runtime" | "explicit-env";
+	  }
+	| {
+			downloadUrl: string;
+			origin: "download";
+	  }
+);
 
 async function resolveProvisionableBunCandidate(
 	context: WorkerInstallContext,
@@ -1196,6 +1237,11 @@ async function resolveProvisionableBunCandidate(
 		return { absolutePath: explicitBunPath, origin: "explicit-env" };
 	}
 
+	const explicitDownloadUrl = resolveExplicitBunDownloadUrl(context.env);
+	if (explicitDownloadUrl) {
+		return { downloadUrl: explicitDownloadUrl, origin: "download" };
+	}
+
 	const processVersions = process.versions as NodeJS.ProcessVersions & {
 		bun?: string;
 	};
@@ -1204,6 +1250,51 @@ async function resolveProvisionableBunCandidate(
 		(await commandSucceeds(process.execPath, ["--version"], context.env))
 	) {
 		return { absolutePath: process.execPath, origin: "current-runtime" };
+	}
+	const defaultDownloadUrl = resolveDefaultBunDownloadUrl();
+	if (defaultDownloadUrl) {
+		return { downloadUrl: defaultDownloadUrl, origin: "download" };
+	}
+	return null;
+}
+
+function resolveExplicitBunDownloadUrl(env: NodeJS.ProcessEnv) {
+	const value = env[WORKER_BUN_DOWNLOAD_URL_ENV_VAR];
+	if (!value) {
+		return null;
+	}
+	try {
+		const url = new URL(value);
+		return url.protocol === "http:" || url.protocol === "https:"
+			? url.toString()
+			: null;
+	} catch {
+		return null;
+	}
+}
+
+function resolveDefaultBunDownloadUrl() {
+	const assetName = resolveBunReleaseAssetName();
+	if (!assetName) {
+		return null;
+	}
+	return `https://github.com/oven-sh/bun/releases/download/bun-v${WORKER_MANAGED_BUN_VERSION}/${assetName}`;
+}
+
+function resolveBunReleaseAssetName() {
+	if (process.platform === "darwin") {
+		if (process.arch === "arm64") return "bun-darwin-aarch64.zip";
+		if (process.arch === "x64") return "bun-darwin-x64.zip";
+		return null;
+	}
+	if (process.platform === "linux") {
+		if (process.arch === "arm64") return "bun-linux-aarch64.zip";
+		if (process.arch === "x64") return "bun-linux-x64.zip";
+		return null;
+	}
+	if (process.platform === "win32") {
+		if (process.arch === "x64") return "bun-windows-x64.zip";
+		return null;
 	}
 	return null;
 }
@@ -1474,7 +1565,15 @@ async function ensureWorkerBunToolchain(
 	}
 	const managedBunPath = resolveManagedBunPath(context);
 	await mkdir(path.dirname(managedBunPath), { recursive: true });
-	await copyFile(candidate.absolutePath, managedBunPath);
+	if (candidate.origin === "download") {
+		await installDownloadedBun({
+			context,
+			downloadUrl: candidate.downloadUrl,
+			managedBunPath,
+		});
+	} else {
+		await copyFile(candidate.absolutePath, managedBunPath);
+	}
 	await chmod(managedBunPath, 0o755);
 	if (
 		!(await commandSucceeds(
@@ -1485,6 +1584,95 @@ async function ensureWorkerBunToolchain(
 	) {
 		throw new Error("Prepared Worker-managed Bun toolchain did not run.");
 	}
+}
+
+async function installDownloadedBun({
+	context,
+	downloadUrl,
+	managedBunPath,
+}: {
+	context: WorkerInstallContext;
+	downloadUrl: string;
+	managedBunPath: string;
+}) {
+	const downloadDirectory = await mkdtemp(
+		path.join(os.tmpdir(), "shipbysunday-worker-bun-"),
+	);
+	try {
+		const response = await fetch(downloadUrl);
+		if (!response.ok) {
+			throw new Error(
+				`Worker-managed Bun download failed with HTTP ${response.status}.`,
+			);
+		}
+		const payload = Buffer.from(await response.arrayBuffer());
+		if (shouldTreatBunDownloadAsZip(downloadUrl, response)) {
+			await installBunFromZip({
+				archiveBytes: payload,
+				context,
+				downloadDirectory,
+				managedBunPath,
+			});
+			return;
+		}
+		await writeFile(managedBunPath, payload, { mode: 0o755 });
+	} finally {
+		await rm(downloadDirectory, { force: true, recursive: true });
+	}
+}
+
+function shouldTreatBunDownloadAsZip(downloadUrl: string, response: Response) {
+	const contentType = response.headers.get("content-type") ?? "";
+	return downloadUrl.endsWith(".zip") || contentType.includes("zip");
+}
+
+async function installBunFromZip({
+	archiveBytes,
+	context,
+	downloadDirectory,
+	managedBunPath,
+}: {
+	archiveBytes: Buffer;
+	context: WorkerInstallContext;
+	downloadDirectory: string;
+	managedBunPath: string;
+}) {
+	const archivePath = path.join(downloadDirectory, "bun.zip");
+	const extractDirectory = path.join(downloadDirectory, "extract");
+	await mkdir(extractDirectory, { recursive: true });
+	await writeFile(archivePath, archiveBytes);
+	const unzipResult = await runBoundedProcess({
+		command: "unzip",
+		args: ["-q", archivePath, "-d", extractDirectory],
+		env: context.env,
+		timeoutMs: 30_000,
+	});
+	if (!unzipResult.succeeded) {
+		throw new Error("Worker-managed Bun archive could not be extracted.");
+	}
+	const extractedBunPath = await findBunExecutable(extractDirectory);
+	if (!extractedBunPath) {
+		throw new Error("Worker-managed Bun archive did not contain bun.");
+	}
+	await copyFile(extractedBunPath, managedBunPath);
+}
+
+async function findBunExecutable(directory: string): Promise<string | null> {
+	const entries = await readdir(directory, { withFileTypes: true });
+	for (const entry of entries) {
+		const entryPath = path.join(directory, entry.name);
+		if (entry.isDirectory()) {
+			const nestedResult = await findBunExecutable(entryPath);
+			if (nestedResult) {
+				return nestedResult;
+			}
+			continue;
+		}
+		if (entry.name === "bun" || entry.name === "bun.exe") {
+			return entryPath;
+		}
+	}
+	return null;
 }
 
 async function applyWorkerFoundations(
