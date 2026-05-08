@@ -23,6 +23,8 @@ import {
 	WORKER_FOUNDATIONS_INSTALL_WORKFLOW_VERSION,
 	WORKER_FOUNDATIONS_PROOF_SCRIPTS,
 	WORKER_FOUNDATIONS_ROOT_SCRIPTS,
+	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
+	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
 	WORKER_MACHINE_HOME_ENV_VAR,
 	type WorkerFoundationsRootScript,
 } from "./manifest";
@@ -145,12 +147,44 @@ type TargetRepoInspection = {
 	gitClean: boolean;
 	currentBranch: string | null;
 	installBranchExists: boolean;
-	hasLicense: boolean;
+	licenseStatus: WorkerLicenseStatus;
 	bunToolchain: WorkerBunToolchainPlan;
 	codexStatus: "ready" | "blocked" | "skipped";
 	codexProfileStatus: "ready" | "planned" | "blocked" | "skipped";
 	blockers: WorkerInstallBlocker[];
 };
+
+type WorkerLicenseStatus =
+	| { status: "active" }
+	| { reason: string; status: "missing" | "invalid" };
+
+type WorkerLicenseFile = {
+	accountId?: string;
+	expires_at?: string;
+	issued_at?: string;
+	machineCredential: string;
+	machineId?: string;
+	schemaVersion: "shipbysunday-worker-license.v1";
+	status: "active";
+};
+
+type WorkerActivationStartResponse = {
+	deviceCode: string;
+	expiresAt: number;
+	intervalMs: number;
+	userCode: string;
+	verificationUrl: string;
+	verificationUrlComplete?: string;
+};
+
+type WorkerActivationPollResponse =
+	| { status: "pending" }
+	| { reason: string; status: "denied" | "expired" }
+	| { license: WorkerLicenseFile; status: "approved" };
+
+type WorkerLicenseActivationResult =
+	| { status: "activated" }
+	| { reason: string; status: "blocked" | "failed" };
 
 type ApplyResult = {
 	createdRefs: string[];
@@ -182,6 +216,12 @@ const WORKER_MANIFEST_MANAGED_REFS = [
 	"apps/worker/src/worker-cli.ts",
 	"apps/worker/tests/smoke.test.ts",
 ] as const;
+const DEFAULT_WORKER_LICENSE_API_BASE_URL = "https://www.man-meets-ai.com";
+const WORKER_LICENSE_ACTIVATION_START_PATH = "/api/worker/license/device/start";
+const WORKER_LICENSE_ACTIVATION_POLL_PATH = "/api/worker/license/device/poll";
+const MIN_ACTIVATION_POLL_INTERVAL_MS = 1_000;
+const MAX_ACTIVATION_POLL_INTERVAL_MS = 10_000;
+const DEFAULT_ACTIVATION_TIMEOUT_MS = 5 * 60_000;
 
 export async function runWorkerFoundationsInstall({
 	options,
@@ -221,7 +261,45 @@ export async function runWorkerFoundationsInstall({
 		workerHome: resolveWorkerHome(env),
 		runId: `worker-install-${now}`,
 	};
-	const inspection = await inspectTargetRepository(context);
+	let inspection = await inspectTargetRepository(context);
+	const activationBlockers = inspection.blockers.filter(
+		(blocker) => blocker.blockerId !== "license",
+	);
+	if (
+		!options.dryRun &&
+		shouldAttemptInteractiveLicenseActivation(context, inspection) &&
+		activationBlockers.length === 0
+	) {
+		const activationResult = await activateWorkerLicense(context);
+		if (activationResult.status !== "activated") {
+			const plan = buildInstallPlan({
+				...inspection,
+				blockers: [
+					...activationBlockers,
+					{
+						blockerId: "license",
+						reason: activationResult.reason,
+					},
+				],
+			});
+			return finishResult({
+				outcome: activationResult.status === "blocked" ? "blocked" : "failed",
+				exitCode: activationResult.status === "blocked" ? 2 : 1,
+				summary: "Worker license activation did not complete.",
+				context,
+				plan,
+				proof: [],
+				createdRefs: [],
+				changedRefs: [],
+				branch: null,
+				commit: null,
+				localProofRef: null,
+				reportRef: null,
+				kickoff: buildSkippedKickoff("blocked"),
+			});
+		}
+		inspection = await inspectTargetRepository(context);
+	}
 	const plan = buildInstallPlan(inspection);
 	if (options.dryRun) {
 		return finishResult({
@@ -262,7 +340,7 @@ export async function runWorkerFoundationsInstall({
 		});
 	}
 
-	if (!options.yes && !process.stdin.isTTY) {
+	if (!options.yes && (options.json || !process.stdin.isTTY)) {
 		return finishResult({
 			outcome: "blocked",
 			exitCode: 2,
@@ -270,7 +348,9 @@ export async function runWorkerFoundationsInstall({
 			context,
 			plan: addPlanBlocker(plan, {
 				blockerId: "confirmation",
-				reason: "Noninteractive install requires --yes.",
+				reason: options.json
+					? "JSON install requires --yes so stdout remains one machine-readable object."
+					: "Noninteractive install requires --yes.",
 			}),
 			proof: [],
 			createdRefs: [],
@@ -581,14 +661,13 @@ async function inspectTargetRepository(
 	}
 
 	const licenseStatus = await inspectWorkerLicense(context);
-	const hasLicense = licenseStatus === "active";
-	if (licenseStatus !== "active") {
+	if (licenseStatus.status !== "active") {
 		blockers.push({
 			blockerId: "license",
 			reason:
-				licenseStatus === "missing"
+				licenseStatus.status === "missing"
 					? "License activation is missing. Run shipbysunday install interactively after signing in."
-					: "License activation is invalid. Re-run shipbysunday install after signing in.",
+					: licenseStatus.reason,
 		});
 	}
 
@@ -650,7 +729,7 @@ async function inspectTargetRepository(
 		gitClean,
 		currentBranch: await readCurrentBranch(context.repositoryRoot),
 		installBranchExists: await gitBranchExists(context.repositoryRoot),
-		hasLicense,
+		licenseStatus,
 		bunToolchain,
 		codexStatus,
 		codexProfileStatus,
@@ -680,26 +759,385 @@ async function inspectCodexAvailability(context: WorkerInstallContext) {
 async function inspectWorkerLicense(context: WorkerInstallContext) {
 	const licensePath = path.join(context.workerHome, "license.json");
 	if (!existsSync(licensePath)) {
-		return "missing" as const;
+		return {
+			status: "missing",
+			reason:
+				"License activation is missing. Run shipbysunday install interactively after signing in.",
+		} satisfies WorkerLicenseStatus;
 	}
 	try {
-		const parsed = parseJsonObject(await readFile(licensePath, "utf8"));
-		if (!parsed || parsed.status !== "active") {
-			return "invalid" as const;
+		const validation = validateWorkerLicenseFile(
+			await readFile(licensePath, "utf8"),
+		);
+		if (!validation.valid) {
+			return {
+				status: "invalid",
+				reason: validation.reason,
+			} satisfies WorkerLicenseStatus;
 		}
-		if (parsed.expires_at !== undefined) {
-			if (typeof parsed.expires_at !== "string") {
-				return "invalid" as const;
-			}
-			const expiresAtMs = Date.parse(parsed.expires_at);
-			if (!Number.isFinite(expiresAtMs) || expiresAtMs <= context.now) {
-				return "invalid" as const;
-			}
+		const expiresAtMs = validation.license.expires_at
+			? Date.parse(validation.license.expires_at)
+			: null;
+		if (expiresAtMs !== null && expiresAtMs <= context.now) {
+			return {
+				status: "invalid",
+				reason: "License activation is invalid because it has expired.",
+			} satisfies WorkerLicenseStatus;
 		}
-		return "active" as const;
+		return { status: "active" } satisfies WorkerLicenseStatus;
 	} catch {
-		return "invalid" as const;
+		return {
+			status: "invalid",
+			reason:
+				"License activation is invalid because license.json cannot be read.",
+		} satisfies WorkerLicenseStatus;
 	}
+}
+
+function validateWorkerLicenseFile(
+	text: string,
+):
+	| { license: WorkerLicenseFile; valid: true }
+	| { reason: string; valid: false } {
+	const parsed = parseJsonObject(text);
+	if (!parsed) {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because license.json is not a JSON object.",
+		};
+	}
+	if (parsed.schemaVersion !== "shipbysunday-worker-license.v1") {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because the schema version is unsupported.",
+		};
+	}
+	if (parsed.status !== "active") {
+		return {
+			valid: false,
+			reason: "License activation is invalid because it is not active.",
+		};
+	}
+	if (
+		typeof parsed.machineCredential !== "string" ||
+		parsed.machineCredential.trim() === ""
+	) {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because the machine credential is missing.",
+		};
+	}
+	for (const key of ["issued_at", "expires_at"] as const) {
+		if (parsed[key] === undefined) {
+			continue;
+		}
+		if (typeof parsed[key] !== "string") {
+			return {
+				valid: false,
+				reason: `License activation is invalid because ${key} must be an ISO timestamp.`,
+			};
+		}
+		const timestamp = Date.parse(parsed[key]);
+		if (!Number.isFinite(timestamp)) {
+			return {
+				valid: false,
+				reason: `License activation is invalid because ${key} is not a valid timestamp.`,
+			};
+		}
+	}
+	return {
+		valid: true,
+		license: {
+			schemaVersion: parsed.schemaVersion,
+			status: parsed.status,
+			machineCredential: parsed.machineCredential,
+			...(typeof parsed.accountId === "string"
+				? { accountId: parsed.accountId }
+				: {}),
+			...(typeof parsed.machineId === "string"
+				? { machineId: parsed.machineId }
+				: {}),
+			...(typeof parsed.issued_at === "string"
+				? { issued_at: parsed.issued_at }
+				: {}),
+			...(typeof parsed.expires_at === "string"
+				? { expires_at: parsed.expires_at }
+				: {}),
+		},
+	};
+}
+
+function shouldAttemptInteractiveLicenseActivation(
+	context: WorkerInstallContext,
+	inspection: TargetRepoInspection,
+) {
+	return (
+		inspection.licenseStatus.status === "missing" &&
+		!context.options.yes &&
+		!context.options.json &&
+		Boolean(process.stdin.isTTY)
+	);
+}
+
+async function activateWorkerLicense(
+	context: WorkerInstallContext,
+): Promise<WorkerLicenseActivationResult> {
+	let startResponse: WorkerActivationStartResponse;
+	try {
+		startResponse = await startWorkerLicenseActivation(context);
+	} catch (error) {
+		return {
+			status: "failed",
+			reason:
+				error instanceof Error
+					? error.message
+					: "Worker license activation could not start.",
+		};
+	}
+
+	const browserUrl =
+		startResponse.verificationUrlComplete ?? startResponse.verificationUrl;
+	process.stderr.write(
+		[
+			"Shipbysunday Worker license activation is required before install.",
+			`Open: ${browserUrl}`,
+			`Code: ${startResponse.userCode}`,
+			"",
+		].join("\n"),
+	);
+	openActivationUrl(context, browserUrl);
+
+	const pollResult = await pollWorkerLicenseActivation({
+		context,
+		deviceCode: startResponse.deviceCode,
+		expiresAt: startResponse.expiresAt,
+		intervalMs: startResponse.intervalMs,
+	});
+	if (pollResult.status !== "approved") {
+		return {
+			status: pollResult.status === "pending" ? "failed" : "blocked",
+			reason:
+				pollResult.status === "pending"
+					? "Worker license activation timed out before approval."
+					: pollResult.reason,
+		};
+	}
+
+	const serializedLicense = `${JSON.stringify(pollResult.license, null, "\t")}\n`;
+	const validation = validateWorkerLicenseFile(serializedLicense);
+	if (!validation.valid) {
+		return {
+			status: "failed",
+			reason: validation.reason,
+		};
+	}
+	await mkdir(context.workerHome, { recursive: true });
+	await writeFile(
+		path.join(context.workerHome, "license.json"),
+		serializedLicense,
+		{ mode: 0o600 },
+	);
+	process.stderr.write("Worker license activated on this machine.\n");
+	return { status: "activated" };
+}
+
+async function startWorkerLicenseActivation(
+	context: WorkerInstallContext,
+): Promise<WorkerActivationStartResponse> {
+	const response = await postWorkerActivationJson({
+		context,
+		pathname: WORKER_LICENSE_ACTIVATION_START_PATH,
+		body: {
+			activationKind: "worker-foundations-install",
+			installerVersion: WORKER_FOUNDATIONS_INSTALL_WORKFLOW_VERSION,
+			workerBundleVersion: WORKER_FOUNDATIONS_BUNDLE_VERSION,
+		},
+	});
+	const parsed = parseActivationStartResponse(response);
+	if (!parsed) {
+		throw new Error("Worker license activation start response was invalid.");
+	}
+	return parsed;
+}
+
+async function pollWorkerLicenseActivation({
+	context,
+	deviceCode,
+	expiresAt,
+	intervalMs,
+}: {
+	context: WorkerInstallContext;
+	deviceCode: string;
+	expiresAt: number;
+	intervalMs: number;
+}): Promise<WorkerActivationPollResponse> {
+	const deadline = Math.min(
+		expiresAt,
+		context.now + DEFAULT_ACTIVATION_TIMEOUT_MS,
+	);
+	let nextDelayMs = intervalMs;
+	while (Date.now() < deadline) {
+		await delay(nextDelayMs);
+		const response = await postWorkerActivationJson({
+			context,
+			pathname: WORKER_LICENSE_ACTIVATION_POLL_PATH,
+			body: { deviceCode },
+		});
+		const parsed = parseActivationPollResponse(response);
+		if (!parsed) {
+			return {
+				status: "denied",
+				reason: "Worker license activation poll response was invalid.",
+			};
+		}
+		if (parsed.status !== "pending") {
+			return parsed;
+		}
+		nextDelayMs = Math.min(nextDelayMs + 500, MAX_ACTIVATION_POLL_INTERVAL_MS);
+	}
+	return { status: "pending" };
+}
+
+async function postWorkerActivationJson({
+	context,
+	pathname,
+	body,
+}: {
+	context: WorkerInstallContext;
+	pathname: string;
+	body: JsonObject;
+}) {
+	const response = await fetch(
+		new URL(pathname, resolveWorkerLicenseApiBaseUrl(context.env)),
+		{
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+		},
+	);
+	if (!response.ok) {
+		throw new Error(
+			`Worker license activation failed with HTTP ${response.status}.`,
+		);
+	}
+	return (await response.json()) as JsonValue;
+}
+
+function parseActivationStartResponse(
+	value: JsonValue,
+): WorkerActivationStartResponse | null {
+	if (!isJsonObject(value)) {
+		return null;
+	}
+	const deviceCode = readStringValue(value, "deviceCode");
+	const userCode = readStringValue(value, "userCode");
+	const verificationUrl = readStringValue(value, "verificationUrl");
+	const verificationUrlComplete = readOptionalStringValue(
+		value,
+		"verificationUrlComplete",
+	);
+	const expiresAtValue = value.expiresAt;
+	const expiresAt =
+		typeof expiresAtValue === "string"
+			? Date.parse(expiresAtValue)
+			: typeof expiresAtValue === "number"
+				? expiresAtValue
+				: Number.NaN;
+	const intervalSeconds =
+		typeof value.intervalSeconds === "number" ? value.intervalSeconds : 2;
+	if (
+		!deviceCode ||
+		!userCode ||
+		!verificationUrl ||
+		!Number.isFinite(expiresAt)
+	) {
+		return null;
+	}
+	return {
+		deviceCode,
+		userCode,
+		verificationUrl,
+		...(verificationUrlComplete ? { verificationUrlComplete } : {}),
+		expiresAt,
+		intervalMs: Math.min(
+			Math.max(intervalSeconds * 1_000, MIN_ACTIVATION_POLL_INTERVAL_MS),
+			MAX_ACTIVATION_POLL_INTERVAL_MS,
+		),
+	};
+}
+
+function parseActivationPollResponse(
+	value: JsonValue,
+): WorkerActivationPollResponse | null {
+	if (!isJsonObject(value)) {
+		return null;
+	}
+	if (value.status === "pending") {
+		return { status: "pending" };
+	}
+	if (value.status === "denied" || value.status === "expired") {
+		return {
+			status: value.status,
+			reason:
+				readOptionalStringValue(value, "reason") ??
+				`Worker license activation was ${value.status}.`,
+		};
+	}
+	if (value.status === "approved" && isJsonObject(value.license)) {
+		const licenseText = `${JSON.stringify(value.license)}\n`;
+		const validation = validateWorkerLicenseFile(licenseText);
+		if (!validation.valid) {
+			return null;
+		}
+		return { status: "approved", license: validation.license };
+	}
+	return null;
+}
+
+function readStringValue(value: JsonObject, key: string) {
+	const item = value[key];
+	return typeof item === "string" && item.trim() !== "" ? item : null;
+}
+
+function readOptionalStringValue(value: JsonObject, key: string) {
+	const item = value[key];
+	return typeof item === "string" && item.trim() !== "" ? item : null;
+}
+
+function resolveWorkerLicenseApiBaseUrl(env: NodeJS.ProcessEnv) {
+	return new URL(
+		env[WORKER_LICENSE_API_BASE_URL_ENV_VAR] ??
+			DEFAULT_WORKER_LICENSE_API_BASE_URL,
+	).toString();
+}
+
+function openActivationUrl(
+	context: WorkerInstallContext,
+	activationUrl: string,
+) {
+	if (
+		context.env[WORKER_LICENSE_OPEN_BROWSER_ENV_VAR] === "0" ||
+		context.env.CI === "true"
+	) {
+		return;
+	}
+	const opener =
+		process.platform === "darwin"
+			? { args: [activationUrl], command: "open" }
+			: process.platform === "win32"
+				? { args: ["/c", "start", "", activationUrl], command: "cmd" }
+				: { args: [activationUrl], command: "xdg-open" };
+	spawnSync(opener.command, opener.args, {
+		stdio: "ignore",
+		env: buildCodexKickoffEnv(context),
+	});
+}
+
+async function delay(ms: number) {
+	await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function inspectWorkerBunToolchain(

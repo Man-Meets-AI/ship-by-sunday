@@ -38,9 +38,9 @@ Ship by Sunday already has strong Program, ExecPlan, prompt, markdown, and local
 
 Arena CRM proved a different path. The useful spike removed the temporary harness layer, installed Worker-style root scripts, added a forwarding script, created an `apps/runtime` package, added YAML-backed Program and ExecPlan validation modules, added prompt contracts, added `program:write-child-plan`, added bounded ExecPlan commands, and dogfooded the system with a real Program plus child ExecPlans. The productized version should keep the proven behavior but use cleaner public names: `shipbysunday install`, `apps/worker`, `scripts/run-worker.sh`, and `.worker/` local state.
 
-The local-runner now has a first `shipbysunday install` / `shipbysunday i` implementation. It can inspect a target repo, emit sync-safe dry-run JSON, require clean Git state, require a machine-level license file, prepare Worker-managed Codex profiles, prepare a Worker-managed Bun toolchain from safe local sources, install visible `apps/worker` source, patch root forwarding scripts, protect `.worker/`, create the starter Program, use the installed `program:write-child-plan` command to create the first child ExecPlan, run proof commands, write `docs/worker/install-report.md`, and create a local commit when proof passes.
+The local-runner now has a first `shipbysunday install` / `shipbysunday i` implementation. It can inspect a target repo, emit sync-safe dry-run JSON, require clean Git state, validate or interactively activate a machine-level license outside the repo, prepare Worker-managed Codex profiles, prepare a Worker-managed Bun toolchain from safe local sources, install visible `apps/worker` source, patch root forwarding scripts, protect `.worker/`, create the starter Program, use the installed `program:write-child-plan` command to create the first child ExecPlan, run proof commands, write `docs/worker/install-report.md`, and create a local commit when proof passes.
 
-This first slice is still not the final customer distribution path. Browser/device license activation, native executable packaging, and bundled or downloaded Worker-managed Bun provisioning are product gaps. The implementation can use an existing managed Bun, a compatible `bun` on `PATH`, an explicit `SHIPBYSUNDAY_WORKER_BUN`, or the current Bun runtime; it still blocks when license state is missing instead of launching the full activation flow.
+This first product path is still not the final customer distribution path. Native executable packaging, grouped interactive checklist polish, broader real-project smoke, and bundled or downloaded Worker-managed Bun provisioning are product gaps. The implementation can use an existing managed Bun, a compatible `bun` on `PATH`, an explicit `SHIPBYSUNDAY_WORKER_BUN`, or the current Bun runtime; it still blocks when there is no usable local Bun source to import into the Worker home.
 
 ## Progress
 
@@ -53,7 +53,9 @@ This first slice is still not the final customer distribution path. Browser/devi
 - [x] 2026-05-08: Smoke-tested read-only dry-run against Arena CRM. It stayed sync-safe and read-only, recognized legacy `scripts/run-runtime.sh` commands as managed updates, and blocked only on missing local license activation.
 - [x] 2026-05-08: Added Worker-managed Bun toolchain import for existing managed Bun, compatible PATH Bun, explicit `SHIPBYSUNDAY_WORKER_BUN`, and current Bun runtime; fixture proof covers install and dogfood with no `bun` on PATH.
 - [x] 2026-05-08: Completed the first installer child ExecPlan and moved it to `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`.
-- [ ] Harden native distribution, license activation, and package-manager fallback after the local installer path is proven.
+- [x] 2026-05-08: Completed browser/device license activation and package smoke coverage in `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`; fresh `~/Developer/runner-test` smoke proved empty-repo blocking, minimal-package dry-run readiness, proof-gated install, and commit `45f8d85` on `shipbysunday/install`.
+- [ ] 2026-05-08: Started the grouped interactive checklist child ExecPlan at `docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md`.
+- [ ] Harden native distribution, grouped checklist polish, bundled/downloaded Bun provisioning, and package-manager fallback after the local installer path is proven.
 
 ## Decision Log
 
@@ -201,11 +203,15 @@ Date: 2026-05-07
 
 The first child ExecPlan is complete at `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
+The second child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+
+The third child ExecPlan is active at `docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+
 Expected later slices are Worker template extraction and hardening, Arena golden smoke automation, update/idempotence handling for already-installed repos, native distribution and licensing hardening, and optional CI wiring. Worker-specific state, provider setup, app-stack process management, dashboards, Telegram/Discord/control-panel surfaces, and full Worker operating state remain outside this first Program until a later brief explicitly admits them.
 
 ## Next Slice
 
-No child ExecPlan is currently active for this Program. The next recommended slice is browser/device license activation for `shipbysunday install`, because Arena and fixture proof now show the installer path works but real customer installs still block on missing local license state. That slice should keep the completed installer boundary intact, avoid provider or CI scope creep, and preserve sync-safe JSON/proof behavior.
+The active child ExecPlan is `docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md`. Its required outcome is that a normal interactive install previews all required phases in a concise grouped checklist, blocks conflicted phases with reasons, allows continue or cancel without partial deselection, and keeps JSON/noninteractive output unchanged.
 
 ## Risks and Watchpoints
 
@@ -223,7 +229,7 @@ Do not claim bundled or downloaded Bun provisioning is complete yet. The current
 
 ## Outcomes & Retrospective
 
-This Program is active. The first implementation now installs the seed Worker operating system into another repository and leaves behind local source, commands, proof, and a durable handoff prompt that another agent can use without chat history. The remaining Program work is hardening the customer distribution surface: native executable packaging, browser/device license activation, bundled or downloaded Bun provisioning, full interactive checklist polish, and broader real-repo smoke.
+This Program is active. The first implementation now installs the seed Worker operating system into another repository and leaves behind local source, commands, proof, and a durable handoff prompt that another agent can use without chat history. Browser/device license activation is complete for the local-runner installer path. The remaining Program work is hardening the customer distribution surface: native executable packaging, bundled or downloaded Bun provisioning, full interactive checklist polish, and broader real-repo smoke.
 
 ## Validation and Acceptance
 
@@ -265,6 +271,8 @@ Read-only Arena CRM smoke command:
     bun --cwd packages/local-runner src/cli.ts install --repo <arena-crm-checkout> --dry-run --json --no-kickoff
 
 The Arena dry-run produced a sync-safe blocked result without mutating the repo. After legacy script recognition, the remaining blocker was missing local license activation.
+
+The fresh `~/Developer/runner-test` smoke proved the current local-runner path without using Arena CRM: an empty Git repo blocked on missing root `package.json`; after adding and committing a minimal package file, dry-run returned `ready`; the real install with an isolated Worker home returned `installed`, passed all proof commands, and committed `45f8d85` on `shipbysunday/install`.
 
 The first local-runner implementation is in `packages/local-runner/src/commands/install.ts` and `packages/local-runner/src/workflows/worker-foundations-install/`. Its installed Worker source is intentionally minimal but visible and dogfoodable. Treat it as the seed substrate to harden, not as the final full Worker product.
 

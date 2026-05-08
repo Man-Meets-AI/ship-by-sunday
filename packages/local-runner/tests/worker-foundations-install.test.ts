@@ -1,11 +1,16 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
 
 import { runInstallCommand } from "../src/commands/install";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
+import {
+	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
+	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
+} from "../src/workflows/worker-foundations-install/manifest";
 import {
 	createTemporaryDirectory,
 	initializeGitRepository,
@@ -304,6 +309,8 @@ describe("Worker Foundations install command", () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome({
 			expires_at: "2000-01-01T00:00:00.000Z",
+			machineCredential: "sbs_machine_test_credential",
+			schemaVersion: "shipbysunday-worker-license.v1",
 			status: "active",
 		});
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
@@ -334,6 +341,160 @@ describe("Worker Foundations install command", () => {
 		);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("blocks legacy status-only licenses before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome({ status: "active" });
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "license",
+					reason: expect.stringContaining("schema version"),
+				}),
+			]),
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("blocks missing licenses in noninteractive installs without repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome(null);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "license",
+					reason: expect.stringContaining("missing"),
+				}),
+			]),
+		);
+		expect(existsSync(path.join(workerHome, "license.json"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
+	it("activates missing licenses interactively before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome(null);
+		const activationServer = await createActivationServer();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+		vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+		const originalIsTty = process.stdin.isTTY;
+		const stdinOnceSpy = vi
+			.spyOn(process.stdin, "once")
+			.mockImplementation((eventName, listener) => {
+				if (eventName === "data") {
+					queueMicrotask(() => {
+						if (typeof listener === "function") {
+							listener(Buffer.from("y\n"));
+						}
+					});
+				}
+				return process.stdin;
+			});
+		Object.defineProperty(process.stdin, "isTTY", {
+			configurable: true,
+			value: true,
+		});
+
+		try {
+			await expect(
+				runInstallCommand(
+					["--repo", repositoryRoot, "--no-kickoff", "--no-commit"],
+					{
+						...process.env,
+						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[WORKER_LICENSE_API_BASE_URL_ENV_VAR]: activationServer.baseUrl,
+						[WORKER_LICENSE_OPEN_BROWSER_ENV_VAR]: "0",
+					},
+				),
+			).resolves.toBe(0);
+		} finally {
+			stdinOnceSpy.mockRestore();
+			Object.defineProperty(process.stdin, "isTTY", {
+				configurable: true,
+				value: originalIsTty,
+			});
+			await activationServer.close();
+		}
+
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Worker Foundations installed.",
+		);
+		expect(activationServer.startRequests).toBe(1);
+		expect(activationServer.pollRequests).toBe(1);
+		const license = JSON.parse(
+			await readFile(path.join(workerHome, "license.json"), "utf8"),
+		) as { machineCredential?: string; schemaVersion?: string };
+		expect(license.schemaVersion).toBe("shipbysunday-worker-license.v1");
+		expect(license.machineCredential).toBe("sbs_machine_activated_test");
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(true);
+	});
+
+	it("blocks JSON installs without --yes before prompting", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(["--repo", repositoryRoot, "--json", "--no-kickoff"], {
+				...process.env,
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			}),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "confirmation",
+					reason: expect.stringContaining("JSON install requires --yes"),
+				}),
+			]),
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
 	it("blocks unrecognized starter child plans during preflight", async () => {
@@ -476,7 +637,7 @@ async function createFixtureRepository({
 }
 
 async function createWorkerHome(
-	license: Record<string, string> | string | null = { status: "active" },
+	license: Record<string, string> | string | null = activeWorkerLicense(),
 ) {
 	const workerHome = await createTemporaryDirectory("worker-install-home-");
 	await mkdir(workerHome, { recursive: true });
@@ -487,6 +648,84 @@ async function createWorkerHome(
 		);
 	}
 	return workerHome;
+}
+
+function activeWorkerLicense() {
+	return {
+		expires_at: "2999-01-01T00:00:00.000Z",
+		issued_at: "2026-05-08T00:00:00.000Z",
+		machineCredential: "sbs_machine_test_credential",
+		machineId: "machine_test",
+		schemaVersion: "shipbysunday-worker-license.v1",
+		status: "active",
+	};
+}
+
+async function createActivationServer() {
+	let startRequests = 0;
+	let pollRequests = 0;
+	const server = createServer(async (request, response) => {
+		await readRequestBody(request);
+		if (
+			request.method === "POST" &&
+			request.url === "/api/worker/license/device/start"
+		) {
+			startRequests += 1;
+			response.writeHead(200, { "Content-Type": "application/json" });
+			response.end(
+				JSON.stringify({
+					deviceCode: "device_test",
+					expiresAt: Date.now() + 60_000,
+					intervalSeconds: 0.001,
+					userCode: "SBS-TEST",
+					verificationUrl: "https://example.test/activate",
+				}),
+			);
+			return;
+		}
+		if (
+			request.method === "POST" &&
+			request.url === "/api/worker/license/device/poll"
+		) {
+			pollRequests += 1;
+			response.writeHead(200, { "Content-Type": "application/json" });
+			response.end(
+				JSON.stringify({
+					status: "approved",
+					license: {
+						...activeWorkerLicense(),
+						machineCredential: "sbs_machine_activated_test",
+					},
+				}),
+			);
+			return;
+		}
+		response.writeHead(404);
+		response.end();
+	});
+	await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+	const address = server.address();
+	if (!address || typeof address === "string") {
+		throw new Error("Activation test server did not expose a TCP port.");
+	}
+	return {
+		get pollRequests() {
+			return pollRequests;
+		},
+		get startRequests() {
+			return startRequests;
+		},
+		baseUrl: `http://127.0.0.1:${address.port}`,
+		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+	};
+}
+
+async function readRequestBody(request: NodeJS.ReadableStream) {
+	let body = "";
+	for await (const chunk of request) {
+		body += Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
+	}
+	return body;
 }
 
 async function writeFixtureFile(

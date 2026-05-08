@@ -103,6 +103,9 @@ try {
 	);
 	const npxRepositoryRoot = await createSmokeRepository("sbs-npx-smoke-repo-");
 	const docsCommandRepositoryRoot = await createDocsCommandRepository();
+	const installCommandRepositoryRoot =
+		await createWorkerInstallSmokeRepository();
+	const installCommandWorkerHome = await createWorkerInstallWorkerHome();
 
 	await runSmokePairCommand({
 		commandName: "bunx",
@@ -146,6 +149,11 @@ try {
 		packageTarballPath,
 		repositoryRoot: docsCommandRepositoryRoot,
 	});
+	await runPackedWorkerInstallCommandSmoke({
+		packageTarballPath,
+		repositoryRoot: installCommandRepositoryRoot,
+		workerHome: installCommandWorkerHome,
+	});
 	if (!existsSync(path.join(runnerHome, "credentials.json"))) {
 		throw new Error("package smoke did not write runner credentials");
 	}
@@ -165,6 +173,43 @@ async function createSmokeRepository(prefix: string) {
 		'{"name":"smoke"}\n',
 	);
 	return repositoryRoot;
+}
+
+async function createWorkerInstallSmokeRepository() {
+	const repositoryRoot = await createSmokeRepository(
+		"sbs-install-command-smoke-repo-",
+	);
+	await runRequiredProcess("git", ["add", "package.json"], {
+		cwd: repositoryRoot,
+		label: "install smoke git add",
+	});
+	await runRequiredProcess("git", ["commit", "-m", "smoke fixture"], {
+		cwd: repositoryRoot,
+		label: "install smoke git commit",
+	});
+	return repositoryRoot;
+}
+
+async function createWorkerInstallWorkerHome() {
+	const workerHome = await mkdtemp(
+		path.join(os.tmpdir(), "sbs-install-smoke-worker-home-"),
+	);
+	await writeFile(
+		path.join(workerHome, "license.json"),
+		`${JSON.stringify(
+			{
+				expires_at: "2999-01-01T00:00:00.000Z",
+				issued_at: "2026-05-08T00:00:00.000Z",
+				machineCredential: "sbs_machine_package_smoke",
+				machineId: "machine_package_smoke",
+				schemaVersion: "shipbysunday-worker-license.v1",
+				status: "active",
+			},
+			null,
+			"\t",
+		)}\n`,
+	);
+	return workerHome;
 }
 
 async function createDocsCommandRepository() {
@@ -273,6 +318,57 @@ async function runInstalledDocsCommandSmoke({
 	}
 }
 
+async function runPackedWorkerInstallCommandSmoke({
+	packageTarballPath,
+	repositoryRoot,
+	workerHome,
+}: {
+	packageTarballPath: string;
+	repositoryRoot: string;
+	workerHome: string;
+}) {
+	const installCommandResult = await runProcess(
+		"bunx",
+		[
+			"--bun",
+			"--package",
+			packageTarballPath,
+			"shipbysunday",
+			"install",
+			"--repo",
+			repositoryRoot,
+			"--dry-run",
+			"--json",
+			"--no-kickoff",
+		],
+		{
+			env: {
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			},
+		},
+	);
+	if (installCommandResult.exitCode !== 0) {
+		throw new Error(
+			`packed package install command smoke failed with ${installCommandResult.exitCode}\nSTDOUT:\n${installCommandResult.stdout}\nSTDERR:\n${installCommandResult.stderr}`,
+		);
+	}
+	const parsed = JSON.parse(installCommandResult.stdout) as {
+		outcome?: string;
+		workflowId?: string;
+	};
+	if (
+		parsed.outcome !== "ready" ||
+		parsed.workflowId !== "worker-foundations-install"
+	) {
+		throw new Error(
+			`packed package install command smoke returned an unexpected result\nSTDOUT:\n${installCommandResult.stdout}\nSTDERR:\n${installCommandResult.stderr}`,
+		);
+	}
+	if (existsSync(path.join(repositoryRoot, "apps", "worker"))) {
+		throw new Error("packed package install dry-run wrote apps/worker");
+	}
+}
+
 async function assertPackedTarballContents(packageTarballPath: string) {
 	const listResult = await runProcess("tar", ["-tf", packageTarballPath]);
 	if (listResult.exitCode !== 0) {
@@ -309,7 +405,7 @@ async function assertPackedTarballContents(packageTarballPath: string) {
 async function runProcess(
 	command: string,
 	args: string[],
-	options: { cwd?: string } = {},
+	options: { cwd?: string; env?: NodeJS.ProcessEnv } = {},
 ) {
 	const child = spawn(command, args, {
 		cwd: options.cwd,
@@ -318,6 +414,7 @@ async function runProcess(
 			PATH: `${binDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
 			CODEX_HOME: codexHome,
 			SBS_RUNNER_HOME: runnerHome,
+			...options.env,
 		},
 	});
 	let stdout = "";
@@ -343,6 +440,19 @@ async function runProcess(
 		);
 	}
 	return { exitCode, stdout, stderr };
+}
+
+async function runRequiredProcess(
+	command: string,
+	args: string[],
+	options: { cwd?: string; env?: NodeJS.ProcessEnv; label: string },
+) {
+	const result = await runProcess(command, args, options);
+	if (result.exitCode !== 0) {
+		throw new Error(
+			`${options.label} failed with ${result.exitCode}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
+		);
+	}
 }
 
 function readPackedTarballPath(stdout: string) {
