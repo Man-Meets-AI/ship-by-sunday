@@ -1,10 +1,10 @@
 ---
 title: AppShell Chrome Polish
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Polish the workspace AppShell chrome (header, primary nav, local nav rail, user menu, theme toggle, footer rail) so it reads as one coherent system across every workspace view and rhymes with the marketing top-bar, without touching any nav model, active-block calculation, leave-guard, or theme-provider contract.
-post_build_recap: null
+post_build_recap: The AppShell polish pass tightened workspace shell chrome, navigation states, theme-toggle parity, reduced-motion handling, and skip-to-content behavior, with automated validation recorded and manual browser proof left as a handoff note.
 read_when:
   - Resuming the AppShell chrome polish pass mid-flight.
   - Reviewing the polish-pass diff against the locked behavior contract.

@@ -1,10 +1,10 @@
 ---
 title: Settings Page Polish
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Polish the workspace settings surface with a sticky lg+ section TOC, first-class Codex connection UI, confirmed disconnect, motion-gated feedback, split starter-repo card, and semantic headings without touching AppShell or data contracts.
-post_build_recap: null
+post_build_recap: This historical settings polish plan is administratively closed in the completed archive; no new implementation evidence was added during the 2026-05-08 closeout pass.
 read_when:
   - Resuming settings polish implementation or validation.
   - Regressing Codex disconnect, starter repo form, or Clerk manage-account on /settings.
@@ -23,16 +23,16 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 ## Progress
 
 - [x] 2026-05-02: Author this ExecPlan in repo.
-- [ ] Slice 0: Baseline browser capture (optional; see Outcomes).
-- [ ] Slice 1: Page TOC + anchors + intro.
-- [ ] Slice 2–5: Codex status, skeleton, rate limits, actions+dialog, feedback motion.
-- [ ] Slice 6–7: Starter repo split + form a11y.
-- [ ] Slice 8: Account card.
-- [ ] Slice 9: Full validation matrix and recap.
+- [x] 2026-05-08: Baseline browser capture follow-up administratively closed with this historical plan.
+- [x] 2026-05-08: Page TOC, anchors, and intro follow-up administratively closed with this historical plan.
+- [x] 2026-05-08: Codex status, skeleton, rate limits, actions, dialog, and feedback-motion follow-up administratively closed with this historical plan.
+- [x] 2026-05-08: Starter repo split and form accessibility follow-up administratively closed with this historical plan.
+- [x] 2026-05-08: Account card follow-up administratively closed with this historical plan.
+- [x] 2026-05-08: Full validation matrix and recap follow-up administratively closed with this historical plan.
 
 ## Surprises & Discoveries
 
-- (Filled during implementation.)
+On 2026-05-08 Parker chose to close this historical completed-path plan instead of moving it back to active. No fresh implementation evidence was added during that metadata cleanup.
 
 ## Decision Log
 
@@ -44,7 +44,7 @@ Date: 2026-05-02
 
 ## Outcomes & Retrospective
 
-- (Complete when work is merged and `status: complete`.)
+This plan is complete as a historical archive. It records the intended settings polish scope and constraints, but the 2026-05-08 closeout did not add new implementation, validation, or browser-proof evidence.
 
 ## Context and Orientation
 

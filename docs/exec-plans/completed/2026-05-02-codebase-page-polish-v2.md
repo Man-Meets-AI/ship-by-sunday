@@ -1,10 +1,10 @@
 ---
 title: Codebase Page Polish V2
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Take the `/codebase` authoring surface from "polished" to "remarkable" by addressing every craft dimension in the v2 brief - theme-preview audit and reduced-motion compliance, character-count hints and validation fade-in on long-form fields, section-card mount choreography, an inline `last saved Xs ago` derived from existing Convex state, a Customized-pill `AnimatePresence`, plus an audit-only second pass on accessibility, performance, mobile, focus rings, and the section draft assistant.
-post_build_recap: null
+post_build_recap: The v2 Codebase page polish pass shipped the theme-preview split, reduced-motion fixes, character counters, validation fade-in, section-card mount stagger, save-bar relative time, Customized pill animation, audit notes, and validation matrix.
 read_when:
   - Resuming the v2 codebase-page polish pass mid-flight.
   - Reviewing the v2 polish diff against the v1 contract recorded in `2026-05-02-codebase-page-polish.md`.
@@ -27,7 +27,7 @@ A human can prove this by signing into the dev workspace at `/codebase`, walking
 
 ## Progress
 
-- [ ] 2026-05-02: Author this ExecPlan (Slice 0).
+- [x] 2026-05-02: Author this ExecPlan (Slice 0).
 - [x] 2026-05-02: Slice 1 - theme preview audit, reduced-motion compliance, structural split into `codebase-theme-preview{,-frame,-stack}.tsx`. Outcome: file split from 305 lines into `codebase-theme-preview.tsx` (95), `codebase-theme-preview-frame.tsx` (88), `codebase-theme-preview-stack.tsx` (130). Every Tailwind `transition-all duration-300` and `transition-colors duration-300|200` inside the preview now appends `motion-reduce:transition-none` (10 sites). Hard-coded `oklch(0.6 0 0)` / `oklch(0.45 0 0)` greys preserved as inactive-nav fallbacks (Linear follow-up). Tests: 2 files / 15 tests green; lint + typecheck + format clean; `bg-primary|text-primary` grep clean.
 - [x] 2026-05-02: Slice 2 - character-count budgets on long-form textareas + validation error fade-in across text/array/scale fields. Outcome: new helper `apps/web/lib/codebase-flow/codebase-field-character-budgets.ts` (22 lines), new presentational sub-components `codebase-field-character-counter.tsx` (24 lines) and `codebase-field-error-region.tsx` (29 lines), text/array/scale fields now use the shared `CodebaseFieldErrorRegion` for the fade-in (gated by `useCodebasePageReducedMotion`). `codebase-stage-text-field.tsx` 86 -> 108 lines (counter + describedby chain). `codebase-stage-array-field.tsx` 75 -> 78. `codebase-stage-scale-field.tsx` 118 -> 121. All under cap. Tests: 2 files / 2 tests green; lint/typecheck/format clean; `bg-primary|text-primary` grep clean.
 - [x] 2026-05-02: Slice 3 - section-card mount stagger gated by reduced motion; sidebar smooth-scroll documented as already free. Outcome: `codebase-page-body.tsx` now wraps each `<CodebasePageSectionCard>` in a `motion.div` with `initial={{ opacity: 0, y: 6 }}` -> `animate={{ opacity: 1, y: 0 }}`, 18ms duration, 30ms stagger per section (210ms total); reduced-motion collapses `initial` to `false` and zero delay. File 93 -> 116 lines. Sidebar `<Link href="#id">` smooth-scroll confirmed already free via `apps/web/app/globals.css` line 124. Tests: 2 files / 6 tests green; lint/typecheck/format clean; `bg-primary|text-primary` grep clean. Note: an isolated test in `codebase-page.test.tsx` showed a transient 5s timeout when run together with the file's other tests on first attempt; re-running the same test bundle cleanly passed in 3.58s, suggesting jsdom timing flake under combined load rather than a real perf issue from the stagger.

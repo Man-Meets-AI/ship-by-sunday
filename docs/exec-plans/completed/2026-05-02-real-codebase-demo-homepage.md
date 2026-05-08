@@ -1,10 +1,10 @@
 ---
 title: Real Codebase Demo Homepage
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Replace the static worker-layer preview on the public homepage with an interactive Codebase demo that mirrors the real /codebase workspace, persists Foundation/Design/Pricing answers to localStorage before Stripe checkout, and seeds those answers into the buyer's first authenticated /codebase load only when their Convex facts are empty.
-post_build_recap: null
+post_build_recap: The real Codebase demo homepage shipped interactive demo sections, versioned local draft storage, before-checkout persistence, authenticated seeding into empty workspace facts, tests, docs, and desktop/mobile manual proof.
 read_when:
   - Resuming implementation of the real Codebase demo homepage slice.
   - Validating the post-checkout localStorage seeder before release.

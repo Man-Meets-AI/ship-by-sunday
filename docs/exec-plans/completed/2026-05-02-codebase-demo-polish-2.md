@@ -1,10 +1,10 @@
 ---
 title: Codebase Demo Polish Pass
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Raise the craft layer on the freshly-shipped Codebase demo, the shared CTA seam, and the post-checkout localStorage-to-Convex seeder. Treat behavior, contracts, and data flow as locked; polish motion, microinteractions, typography, dark-mode parity, mobile reflow, accessibility, form micro-UX, locked-card affordance, design preview presentation, CTA loading and error surfaces, and the post-checkout aha-moment.
-post_build_recap: null
+post_build_recap: The Codebase demo polish pass added reduced-motion-aware motion, pricing and preset microinteractions, local draft feedback, design preview polish, CTA loading/error states, mobile sticky CTA behavior, seeder success feedback, tests, and viewport proof.
 read_when:
   - Resuming the Codebase demo polish pass mid-flight.
   - Reviewing the polish-pass diff against the locked behavior contract.

@@ -1,10 +1,10 @@
 ---
 title: Codebase Page Polish
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Polish the `/codebase` authoring surface end-to-end so every input, section transition, and save moment feels handcrafted in light and dark mode at desktop and mobile, without changing the Convex contracts, the workspace draft state hook, the leave-guard, the local-draft seeder, the canonical project-fact keys, or any compiler-owned types.
-post_build_recap: null
+post_build_recap: The Codebase page polish pass shipped the page shell, sidebar scroll-spy, section completion motion, list-field microinteractions, design and theme polish, save-bar and leave-dialog improvements, dark-mode and reflow audit, and validation matrix.
 read_when:
   - Resuming the codebase-page polish pass mid-flight.
   - Reviewing the polish diff against the locked behavior contract.
