@@ -577,17 +577,19 @@ export const processTelegramSupportWebhookUpdate = internalAction({
 		}
 
 		if (update.kind === "operator_message") {
+			const { kind: _kind, ...operatorReply } = update;
 			const result: TelegramSupportWebhookResult = await ctx.runMutation(
 				internal.support.recordOperatorReply,
-				update,
+				operatorReply,
 			);
 			return result;
 		}
 
+		const { kind: _kind, ...operatorAction } = update;
 		const actionResult: ApplySupportOperatorActionResult =
 			await ctx.runMutation(
 				internal.support.applyOperatorActionFromTelegram,
-				update,
+				operatorAction,
 			);
 		await answerTelegramCallback(
 			update.callbackQueryId,

@@ -5,13 +5,13 @@ description: Set up the first-party homepage support widget and the dedicated Te
 
 # Telegram Support Bot
 
-The homepage support widget is first-party UI. Visitors stay on the landing page, and Parker replies from a dedicated Telegram bot in a forum-topic support group.
+The homepage support widget is first-party UI. Visitors stay on the landing page, and Parker replies from a support-configured Telegram bot in a forum-topic support group.
 
 The browser never receives a support bearer token. The widget talks to `/api/support/messages`, and the Next.js route stores the support session in an HttpOnly, Secure `__Host-sbs_support_session` cookie.
 
 ## Create the Telegram side
 
-1. In `@BotFather`, create a dedicated support bot. Store the token as `TELEGRAM_SUPPORT_BOT_TOKEN` in Convex.
+1. In `@BotFather`, create a dedicated support bot or deliberately reuse an existing bot that is already allowed to create forum topics. Store the token as `TELEGRAM_SUPPORT_BOT_TOKEN` in Convex.
 2. In `@BotFather`, disable privacy mode for this bot so normal operator replies in the support group are delivered as `message` updates. Verify with `getMe`; `can_read_all_group_messages` should be `true`.
 3. Create a dedicated Telegram supergroup for support and enable Topics.
 4. Add the support bot to the group as an administrator.
@@ -21,17 +21,19 @@ The browser never receives a support bearer token. The widget talks to `/api/sup
 6. Find the support group chat id and store it as `TELEGRAM_SUPPORT_CHAT_ID` in Convex. Supergroup ids usually look like `-100...`.
 7. Find each allowed operator's Telegram user id and store a comma-separated list as `TELEGRAM_SUPPORT_OPERATOR_USER_IDS` in Convex.
 
+The 2026-05-07 hosted dev smoke reused the existing Worker forum bot and forum group instead of creating a new support-only bot. That bot had no webhook configured before support setup, was already an admin in a forum supergroup, and had `can_manage_topics` plus `can_delete_messages`. Reusing an existing bot is only safe when nothing else depends on long polling for that bot, because Telegram allows either a webhook or `getUpdates` polling, not both.
+
 ## Configure Convex env
 
 Set these on the hosted Convex deployment that owns the web app data:
 
 ```bash
-npx convex env set TELEGRAM_SUPPORT_BOT_TOKEN "<bot-token>"
-npx convex env set TELEGRAM_SUPPORT_CHAT_ID "<support-group-id>"
-npx convex env set TELEGRAM_SUPPORT_OPERATOR_USER_IDS "<telegram-user-id>,<telegram-user-id>"
-npx convex env set TELEGRAM_SUPPORT_WEBHOOK_SECRET "<secret-token>"
-npx convex env set TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN "<random-recovery-token>"
-npx convex env set OPENAI_API_KEY "<openai-api-key>"
+bunx convex env set TELEGRAM_SUPPORT_BOT_TOKEN "<bot-token>"
+bunx convex env set TELEGRAM_SUPPORT_CHAT_ID "<support-group-id>"
+bunx convex env set TELEGRAM_SUPPORT_OPERATOR_USER_IDS "<telegram-user-id>,<telegram-user-id>"
+bunx convex env set TELEGRAM_SUPPORT_WEBHOOK_SECRET "<secret-token>"
+bunx convex env set TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN "<random-recovery-token>"
+bunx convex env set OPENAI_API_KEY "<openai-api-key>"
 ```
 
 Before registering the webhook, run a presence-only readiness probe from `apps/web`.
@@ -39,7 +41,7 @@ Do not print raw values:
 
 ```bash
 for name in TELEGRAM_SUPPORT_BOT_TOKEN TELEGRAM_SUPPORT_CHAT_ID TELEGRAM_SUPPORT_OPERATOR_USER_IDS TELEGRAM_SUPPORT_WEBHOOK_SECRET TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN OPENAI_API_KEY; do
-  value="$(npx convex env get "$name" 2>/dev/null)"
+  value="$(bunx convex env get "$name" 2>/dev/null)"
   if [ -n "$value" ]; then
     printf "%s present\n" "$name"
   else
@@ -48,14 +50,14 @@ for name in TELEGRAM_SUPPORT_BOT_TOKEN TELEGRAM_SUPPORT_CHAT_ID TELEGRAM_SUPPORT
 done
 ```
 
-Every required name must print `present` before live Telegram/OpenAI proof can run.
+Every Telegram support name must print `present` before Telegram proof can run. `OPENAI_API_KEY` must print `present` before live OpenAI draft proof can run; if it is missing, AI-backed buttons should use the deterministic private fallback path.
 
 `TELEGRAM_SUPPORT_WEBHOOK_SECRET` must be the same value sent to Telegram as `setWebhook.secret_token`. Telegram will echo it back in the `X-Telegram-Bot-Api-Secret-Token` header. Telegram requires this token to be 1-256 characters and only `A-Z`, `a-z`, `0-9`, `_`, and `-`.
 
 Optional kill switch:
 
 ```bash
-npx convex env set SUPPORT_CHAT_DISABLED "1"
+bunx convex env set SUPPORT_CHAT_DISABLED "1"
 ```
 
 Unset `SUPPORT_CHAT_DISABLED` or set it to `0` to re-enable the widget bridge.
@@ -63,7 +65,7 @@ Unset `SUPPORT_CHAT_DISABLED` or set it to `0` to re-enable the widget bridge.
 Optional AI model override:
 
 ```bash
-npx convex env set SUPPORT_AI_DRAFT_MODEL "gpt-5.4-mini-2026-03-17"
+bunx convex env set SUPPORT_AI_DRAFT_MODEL "gpt-5.4-mini-2026-03-17"
 ```
 
 If `SUPPORT_AI_DRAFT_MODEL` is unset, support drafts use `gpt-5.4-mini-2026-03-17`.
@@ -147,7 +149,7 @@ Signed-in workspace support threads are not auto-closed by this retention worker
 Use the token-protected operations snapshot before a recovery session:
 
 ```bash
-npx convex run supportAdmin:getOperationsSnapshot '{"recoveryToken":"<random-recovery-token>"}'
+bunx convex run supportAdmin:getOperationsSnapshot '{"recoveryToken":"<random-recovery-token>"}'
 ```
 
 The snapshot returns bounded metadata only: failed visitor message ids, support ids, failure classes, delivery attempt counts, operator-note delivery failures, idle threads due for close, transcripts due for purge, and Telegram topic cleanup failures. It does not return support message bodies, emails, Telegram user ids, visitor session tokens, or AI-generated output.
@@ -155,7 +157,7 @@ The snapshot returns bounded metadata only: failed visitor message ids, support 
 Manual visitor-message retry remains explicit:
 
 ```bash
-npx convex run supportAdmin:retryFailedVisitorMessage '{"messageId":"<supportMessages-id>","recoveryToken":"<random-recovery-token>"}'
+bunx convex run supportAdmin:retryFailedVisitorMessage '{"messageId":"<supportMessages-id>","recoveryToken":"<random-recovery-token>"}'
 ```
 
 Retry is allowed only when the message is visitor-authored, still has an unpurged body, belongs to an open unpurged thread, has `deliveryStatus: "delivery_failed"`, has a retryable failure class, and has fewer than five recorded delivery attempts. Convex claims the message by moving it back to `sending` before calling Telegram, so repeated retry commands for the same message are rejected while one delivery attempt is in flight. `content_rejected` messages, closed threads, purged messages, in-flight messages, and over-attempted messages are not retried. Fix the provider setup first, then retry once and inspect the returned thread state.

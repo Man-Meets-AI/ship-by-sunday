@@ -32,18 +32,27 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - [x] 2026-05-07: Checked local shell readiness without printing values; `TELEGRAM_SUPPORT_BOT_TOKEN` and `NEXT_PUBLIC_CONVEX_SITE_URL` are missing or empty, so Telegram `getWebhookInfo` and live support-loop proof remain blocked.
 - [x] 2026-05-07: Added a presence-only readiness probe to `apps/web/content/docs/telegram-support-bot.mdx` so the next operator can verify setup without leaking provider values.
 - [x] 2026-05-07: Re-ran provider readiness after bug fixes; hosted Convex dev and production both still have all required support provider values missing or empty. `apps/web/.env.local` has `NEXT_PUBLIC_CONVEX_SITE_URL`, but neither hosted Convex nor the local shell has a support bot token, so Telegram `getWebhookInfo` remains blocked.
-- [ ] 2026-05-06: Exercise the live support loop from website widget to Telegram topic and Telegram reply back to the widget when provider setup is present.
-- [ ] 2026-05-06: Exercise one customer-visible Telegram action and one OpenAI-backed operator-only action when provider setup is present.
+- [x] 2026-05-07: Configured hosted Convex dev support Telegram env from the existing Worker forum bot/group using `bunx convex env set`; generated fresh support webhook and admin recovery tokens without printing values. `OPENAI_API_KEY` remains missing.
+- [x] 2026-05-07: Registered the Worker forum bot webhook to the hosted Convex dev support endpoint. `getWebhookInfo` reports the support path, expected `message` and `callback_query` updates, zero pending updates, and no last error.
+- [x] 2026-05-07: Exercised the live Telegram delivery loop through Convex: `support:sendVisitorMessage` created a support thread, created a Telegram forum topic, posted the visitor message, and returned `delivered_to_parker`.
+- [x] 2026-05-07: Exercised the signed inbound webhook path with a Telegram-shaped operator reply; Convex recorded an operator message with `deliveryStatus: "not_required"`.
+- [x] 2026-05-07: Exercised one customer-visible callback action and one AI-backed callback action. The customer-visible action inserted an operator message. The AI-backed action used deterministic fallback because `OPENAI_API_KEY` is missing, recorded `aiDraftGenerationStatus: "failed"`, `generatedOutputSource: "deterministic"`, and delivered the private Telegram operator note.
+- [x] 2026-05-07: Closed the smoke support thread through the callback path and verified the thread status moved to `closed` with retention timestamps.
+- [x] 2026-05-07: Verified the support operations snapshot returns metadata only and did not contain the smoke message text.
 - [x] 2026-05-07: Updated the support docs and Program with the exact hosted setup blocker.
 - [x] 2026-05-07: Passed plan/program/markdown linting and `git diff --check` for this proof-record slice.
 
 ## Surprises & Discoveries
 
 - 2026-05-06: The Program is code-complete through Slice 5, but it intentionally remains active because hosted Convex dev provider env and real Telegram/OpenAI smoke proof were not available during those slices.
-- 2026-05-06: `npx convex env get NAME` exits with status 0 even for a missing variable. The proof probe must treat non-empty stdout as the presence signal, not command success.
+- 2026-05-06: `bunx convex env get NAME` exits with status 0 even for a missing variable. The proof probe must treat non-empty stdout as the presence signal, not command success.
 - 2026-05-06: The corrected hosted Convex dev probe showed `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY` are all missing or empty. Telegram `getWebhookInfo` cannot run until at least the bot token is configured.
 - 2026-05-07: The repeated hosted Convex dev probe produced the same missing-or-empty result for every required support provider env name. The local shell also lacks `TELEGRAM_SUPPORT_BOT_TOKEN`, so webhook verification cannot safely call Telegram yet.
 - 2026-05-07: Production Convex has the same missing-or-empty support provider env state as hosted Convex dev. `apps/web/.env.local` contains a Convex site URL, but no support bot token or OpenAI key is available locally, so no safe read-only Telegram or OpenAI provider proof can run from this checkout.
+- 2026-05-07: The current Convex observability `TELEGRAM_CHAT_ID` points at a private chat, not a forum supergroup, so it cannot host support topics. The Worker Telegram config has the reusable forum bot/group: the bot has no webhook, the group is a forum supergroup, the bot is an admin, and it can manage topics and delete messages.
+- 2026-05-07: Reusing the Worker forum bot required registering a webhook. This is safe only if Worker is not relying on `getUpdates` polling for the same bot while support is active, because Telegram does not support webhook delivery and polling at the same time for one bot.
+- 2026-05-07: `support:sendVisitorMessage` was unavailable until `bunx convex dev --once --typecheck disable` pushed the current support functions to hosted Convex dev. After that deploy, the support function and webhook smoke passed.
+- 2026-05-07: A signed inbound webhook smoke found and fixed a real argument validation bug: parsed operator-message updates included a local `kind` discriminator, but `recordOperatorReply` rejected that extra field. The fix strips parser discriminators before calling internal Convex mutations.
 
 ## Decision Log
 
@@ -58,6 +67,8 @@ Date: 2026-05-06
 ## Outcomes & Retrospective
 
 This plan is active. The expected finished state is either a completed Program with concise live proof evidence, or an explicit active Program blocker naming which hosted Convex env values, Telegram webhook registration, bot permissions, operator access, or OpenAI setup remain missing.
+
+The Telegram side is now smoke-proven on hosted Convex dev with the Worker forum bot/group. The Program remains active because live OpenAI Responses proof is still blocked by missing `OPENAI_API_KEY`, and a human Telegram-client reply has not been manually exercised even though the signed webhook path now records operator replies correctly.
 
 ## Context and Orientation
 
@@ -77,7 +88,7 @@ This plan does not add new support product behavior, new Telegram buttons, autom
 
 ## Plan of Work
 
-First, establish the hosted Convex dev provider state without exposing values. From `apps/web`, capture `npx convex env get NAME` into a shell variable and treat the name as present only when stdout is non-empty. Convex CLI can exit successfully for missing names, so command success alone is not proof. Record only `present` or `missing_or_empty` in this plan. The required names are `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY`. Also check whether `NEXT_PUBLIC_CONVEX_SITE_URL` is available in the app environment or derive the Convex site URL from the deployment when possible.
+First, establish the hosted Convex dev provider state without exposing values. From `apps/web`, capture `bunx convex env get NAME` into a shell variable and treat the name as present only when stdout is non-empty. Convex CLI can exit successfully for missing names, so command success alone is not proof. Record only `present` or `missing_or_empty` in this plan. The required names are `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY`. Also check whether `NEXT_PUBLIC_CONVEX_SITE_URL` is available in the app environment or derive the Convex site URL from the deployment when possible.
 
 Next, verify Telegram webhook registration when the bot token is available through the local operator environment. Use `curl` against Telegram `getWebhookInfo`, but do not echo the token. Record only safe fields: whether the configured URL ends in `/telegram/support/webhook`, whether `allowed_updates` is exactly `message` and `callback_query`, whether `pending_update_count` is zero or not growing, and whether `last_error_message` is absent. Do not paste raw Telegram chat ids or operator user ids into this plan.
 
@@ -107,7 +118,7 @@ Check hosted Convex dev env presence without printing values:
 
     cd apps/web
     for name in TELEGRAM_SUPPORT_BOT_TOKEN TELEGRAM_SUPPORT_CHAT_ID TELEGRAM_SUPPORT_OPERATOR_USER_IDS TELEGRAM_SUPPORT_WEBHOOK_SECRET TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN OPENAI_API_KEY; do
-      value="$(npx convex env get "$name" 2>/dev/null)"
+      value="$(bunx convex env get "$name" 2>/dev/null)"
       if [ -n "$value" ]; then
         printf "%s present\n" "$name"
       else
@@ -213,6 +224,23 @@ Provider readiness results after bug-fix follow-up on 2026-05-07:
 - Local shell `OPENAI_API_KEY`: `missing_or_empty`
 - `apps/web/.env.local` `NEXT_PUBLIC_CONVEX_SITE_URL`: `present`
 - Telegram `getWebhookInfo`: `blocked`, because no support bot token is available from hosted Convex dev, production Convex, or the local shell.
+
+Telegram setup and smoke results after Worker bot reuse on 2026-05-07:
+
+- Hosted Convex dev `TELEGRAM_SUPPORT_BOT_TOKEN`: `present`
+- Hosted Convex dev `TELEGRAM_SUPPORT_CHAT_ID`: `present`
+- Hosted Convex dev `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`: `present`
+- Hosted Convex dev `TELEGRAM_SUPPORT_WEBHOOK_SECRET`: `present`
+- Hosted Convex dev `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: `present`
+- Hosted Convex dev `OPENAI_API_KEY`: `missing_or_empty`
+- Source bot readiness: `verified` as a forum bot with topic-management and delete-message admin rights.
+- Webhook registration: `verified` for `/telegram/support/webhook`, `message` plus `callback_query`, zero pending updates, and no last error.
+- Visitor send smoke: `verified`; Convex returned `delivered_to_parker`.
+- Signed operator reply webhook smoke: `verified`; Convex recorded an operator message.
+- Customer-visible callback smoke: `verified`; Convex inserted an operator message.
+- AI-backed callback fallback smoke: `verified`; missing OpenAI key produced deterministic private output and delivered the private Telegram note.
+- Close-thread callback smoke: `verified`; Convex closed the thread and set retention timestamps.
+- Operations snapshot privacy smoke: `verified`; snapshot contained no smoke message text.
 
 ## Interfaces and Dependencies
 

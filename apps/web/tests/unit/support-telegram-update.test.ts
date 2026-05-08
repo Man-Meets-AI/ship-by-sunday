@@ -283,6 +283,59 @@ describe("telegram support updates", () => {
 		expect(runMutation).not.toHaveBeenCalled();
 	});
 
+	it("records operator replies without forwarding the parser discriminator", async () => {
+		process.env.TELEGRAM_SUPPORT_BOT_TOKEN = "support-token";
+		process.env.TELEGRAM_SUPPORT_CHAT_ID = "-100123";
+		process.env.TELEGRAM_SUPPORT_OPERATOR_USER_IDS = "42";
+		const runMutation = vi.fn().mockResolvedValue({
+			ok: true,
+			ignored: false,
+			reason: null,
+		});
+		const { processTelegramSupportWebhookUpdate } =
+			await import("@/convex/support");
+		const action = processTelegramSupportWebhookUpdate as unknown as {
+			_handler: (
+				ctx: { runMutation: ReturnType<typeof vi.fn> },
+				args: { payload: unknown },
+			) => Promise<unknown>;
+		};
+
+		await expect(
+			action._handler(
+				{ runMutation },
+				{
+					payload: {
+						update_id: 108,
+						message: {
+							message_id: 208,
+							message_thread_id: 308,
+							chat: { id: "-100123" },
+							from: { id: 42, is_bot: false },
+							text: "Yes, I can see this support thread.",
+						},
+					},
+				},
+			),
+		).resolves.toEqual({
+			ok: true,
+			ignored: false,
+			reason: null,
+		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.not.objectContaining({ kind: expect.any(String) }),
+		);
+		expect(runMutation.mock.calls[0]?.[1]).toMatchObject({
+			updateId: 108,
+			chatId: "-100123",
+			messageThreadId: 308,
+			telegramMessageId: 208,
+			operatorTelegramUserId: 42,
+			text: "Yes, I can see this support thread.",
+		});
+	});
+
 	it("acknowledges AI draft callbacks scheduled by the mutation without sending fallback immediately", async () => {
 		process.env.TELEGRAM_SUPPORT_BOT_TOKEN = "support-token";
 		process.env.TELEGRAM_SUPPORT_CHAT_ID = "-100123";
