@@ -54,8 +54,9 @@ This first product path is still not the final customer distribution path. Nativ
 - [x] 2026-05-08: Added Worker-managed Bun toolchain import for existing managed Bun, compatible PATH Bun, explicit `SHIPBYSUNDAY_WORKER_BUN`, and current Bun runtime; fixture proof covers install and dogfood with no `bun` on PATH.
 - [x] 2026-05-08: Completed the first installer child ExecPlan and moved it to `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`.
 - [x] 2026-05-08: Completed browser/device license activation and package smoke coverage in `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`; fresh `~/Developer/runner-test` smoke proved empty-repo blocking, minimal-package dry-run readiness, proof-gated install, and commit `45f8d85` on `shipbysunday/install`.
-- [ ] 2026-05-08: Started the grouped interactive checklist child ExecPlan at `docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md`.
-- [ ] Harden native distribution, grouped checklist polish, bundled/downloaded Bun provisioning, and package-manager fallback after the local installer path is proven.
+- [x] 2026-05-08: Completed grouped interactive checklist polish in `docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md`; normal interactive installs now preview all required phases before continue/cancel while JSON and `--yes` remain prompt-free.
+- [ ] 2026-05-08: Started the Worker-managed Bun provisioning fallback child ExecPlan at `docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md`.
+- [ ] Harden native distribution, bundled/downloaded Bun provisioning, and package-manager fallback after the local installer path is proven.
 
 ## Decision Log
 
@@ -205,13 +206,15 @@ The first child ExecPlan is complete at `docs/exec-plans/completed/2026-05-07-in
 
 The second child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
-The third child ExecPlan is active at `docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The third child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+
+The fourth child ExecPlan is active at `docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
 Expected later slices are Worker template extraction and hardening, Arena golden smoke automation, update/idempotence handling for already-installed repos, native distribution and licensing hardening, and optional CI wiring. Worker-specific state, provider setup, app-stack process management, dashboards, Telegram/Discord/control-panel surfaces, and full Worker operating state remain outside this first Program until a later brief explicitly admits them.
 
 ## Next Slice
 
-The active child ExecPlan is `docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md`. Its required outcome is that a normal interactive install previews all required phases in a concise grouped checklist, blocks conflicted phases with reasons, allows continue or cancel without partial deselection, and keeps JSON/noninteractive output unchanged.
+The active child ExecPlan is `docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md`. Its required outcome is that a machine with no usable local Bun source can still prepare a private Worker-managed Bun runtime for `apps/worker` without requiring a global Bun install or leaking absolute toolchain paths into tracked reports.
 
 ## Risks and Watchpoints
 
@@ -229,7 +232,7 @@ Do not claim bundled or downloaded Bun provisioning is complete yet. The current
 
 ## Outcomes & Retrospective
 
-This Program is active. The first implementation now installs the seed Worker operating system into another repository and leaves behind local source, commands, proof, and a durable handoff prompt that another agent can use without chat history. Browser/device license activation is complete for the local-runner installer path. The remaining Program work is hardening the customer distribution surface: native executable packaging, bundled or downloaded Bun provisioning, full interactive checklist polish, and broader real-repo smoke.
+This Program is active. The first implementation now installs the seed Worker operating system into another repository and leaves behind local source, commands, proof, and a durable handoff prompt that another agent can use without chat history. Browser/device license activation and grouped interactive checklist polish are complete for the local-runner installer path. The remaining Program work is hardening the customer distribution surface: native executable packaging, bundled or downloaded Bun provisioning, and broader real-repo smoke.
 
 ## Validation and Acceptance
 

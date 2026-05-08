@@ -48,6 +48,94 @@ describe("Worker Foundations install command", () => {
 		expect(existsSync(path.join(repositoryRoot, ".worker"))).toBe(false);
 	});
 
+	it("shows a grouped checklist before interactive confirmation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		const stdoutWriteSpy = vi
+			.spyOn(process.stdout, "write")
+			.mockImplementation(() => true);
+		const restoreInteractiveInput = mockInteractiveInstallInput("y\n");
+
+		try {
+			await expect(
+				runInstallCommand(
+					["--repo", repositoryRoot, "--no-kickoff", "--no-commit"],
+					{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+				),
+			).resolves.toBe(0);
+		} finally {
+			restoreInteractiveInput();
+		}
+
+		const stdout = stdoutWriteSpy.mock.calls.join("\n");
+		expect(stdout).toContain(
+			"Shipbysunday Worker Foundations install checklist",
+		);
+		expect(stdout).toContain("Preflight");
+		expect(stdout).toContain("Root command scripts");
+		expect(stdout).toContain("Worker-managed files");
+		expect(stdout).toContain("Proof");
+		expect(stdout).toContain("Local commit skipped by --no-commit.");
+		expect(stdout).toContain("Codex kickoff skipped by --no-kickoff.");
+		expect(stdout).toContain("Continue? [y/N]");
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Worker Foundations installed.",
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(true);
+	});
+
+	it("cancels from the grouped checklist before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		const stdoutWriteSpy = vi
+			.spyOn(process.stdout, "write")
+			.mockImplementation(() => true);
+		const restoreInteractiveInput = mockInteractiveInstallInput("n\n");
+
+		try {
+			await expect(
+				runInstallCommand(
+					["--repo", repositoryRoot, "--no-kickoff", "--no-commit"],
+					{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+				),
+			).resolves.toBe(130);
+		} finally {
+			restoreInteractiveInput();
+		}
+
+		expect(stdoutWriteSpy.mock.calls.join("\n")).toContain(
+			"Shipbysunday Worker Foundations install checklist",
+		);
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Worker Foundations install cancelled.",
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("skips the interactive checklist when --yes is set", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		const stdoutWriteSpy = vi
+			.spyOn(process.stdout, "write")
+			.mockImplementation(() => true);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--no-kickoff", "--no-commit"],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		expect(stdoutWriteSpy).not.toHaveBeenCalled();
+		expect(logSpy.mock.calls.join("\n")).toContain(
+			"Worker Foundations installed.",
+		);
+	});
+
 	it("installs visible Worker source and dogfoods the child plan writer", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
@@ -416,23 +504,7 @@ describe("Worker Foundations install command", () => {
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 		vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 		vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-		const originalIsTty = process.stdin.isTTY;
-		const stdinOnceSpy = vi
-			.spyOn(process.stdin, "once")
-			.mockImplementation((eventName, listener) => {
-				if (eventName === "data") {
-					queueMicrotask(() => {
-						if (typeof listener === "function") {
-							listener(Buffer.from("y\n"));
-						}
-					});
-				}
-				return process.stdin;
-			});
-		Object.defineProperty(process.stdin, "isTTY", {
-			configurable: true,
-			value: true,
-		});
+		const restoreInteractiveInput = mockInteractiveInstallInput("y\n");
 
 		try {
 			await expect(
@@ -447,11 +519,7 @@ describe("Worker Foundations install command", () => {
 				),
 			).resolves.toBe(0);
 		} finally {
-			stdinOnceSpy.mockRestore();
-			Object.defineProperty(process.stdin, "isTTY", {
-				configurable: true,
-				value: originalIsTty,
-			});
+			restoreInteractiveInput();
 			await activationServer.close();
 		}
 
@@ -472,6 +540,9 @@ describe("Worker Foundations install command", () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+		const stdoutWriteSpy = vi
+			.spyOn(process.stdout, "write")
+			.mockImplementation(() => true);
 
 		await expect(
 			runInstallCommand(["--repo", repositoryRoot, "--json", "--no-kickoff"], {
@@ -494,6 +565,7 @@ describe("Worker Foundations install command", () => {
 				}),
 			]),
 		);
+		expect(stdoutWriteSpy).not.toHaveBeenCalled();
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
@@ -658,6 +730,33 @@ function activeWorkerLicense() {
 		machineId: "machine_test",
 		schemaVersion: "shipbysunday-worker-license.v1",
 		status: "active",
+	};
+}
+
+function mockInteractiveInstallInput(answer: string) {
+	const originalIsTty = process.stdin.isTTY;
+	const stdinOnceSpy = vi
+		.spyOn(process.stdin, "once")
+		.mockImplementation((eventName, listener) => {
+			if (eventName === "data") {
+				queueMicrotask(() => {
+					if (typeof listener === "function") {
+						listener(Buffer.from(answer));
+					}
+				});
+			}
+			return process.stdin;
+		});
+	Object.defineProperty(process.stdin, "isTTY", {
+		configurable: true,
+		value: true,
+	});
+	return () => {
+		stdinOnceSpy.mockRestore();
+		Object.defineProperty(process.stdin, "isTTY", {
+			configurable: true,
+			value: originalIsTty,
+		});
 	};
 }
 
