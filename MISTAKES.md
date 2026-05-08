@@ -1,5 +1,17 @@
 # Mistakes
 
+## 2026-05-07 Bun Command Standard
+
+- Mistake: I copied `npx convex` commands into Telegram support docs and briefly reused that command form after Parker clarified this repo uses Bun.
+  Impact: Low to runtime, but it violated the repo/operator command convention and made smoke-test instructions annoying.
+  Corrective action: Use `bunx convex ...` in setup docs, ExecPlans, and operator commands for this repo.
+
+## 2026-05-07 Program Packet YAML Frontmatter
+
+- Mistake: I initially wrote the new planning brief frontmatter title as an unquoted string containing a colon.
+  Impact: `bun run programs:lint` rejected the new Program packet until the YAML was corrected.
+  Corrective action: Quote frontmatter strings that contain colons when authoring Program packet artifacts, then rerun Program lint before closeout.
+
 ## 2026-05-07 Passwordless Checkout Account Handoff
 
 - Mistake: The paid-buyer path depended on a Clerk email-code factor that was not proven against the actual Clerk dev and production settings before customers hit it.
