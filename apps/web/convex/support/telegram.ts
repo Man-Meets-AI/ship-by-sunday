@@ -1,9 +1,12 @@
 import { z } from "zod";
+import type { GenericId } from "convex/values";
 
 import { requireConvexEnv } from "../env";
 import type { SupportDeliveryFailureClass } from "./types";
 import {
 	parseSupportActionCallbackData,
+	parseSupportDraftDecisionCallbackData,
+	type SupportDraftDecision,
 	type SupportOperatorActionType,
 } from "./operatorActions";
 
@@ -59,6 +62,16 @@ export type ParsedTelegramSupportUpdate =
 			operatorTelegramUserId: number;
 			supportId: string;
 			actionType: SupportOperatorActionType;
+	  }
+	| {
+			kind: "draft_decision";
+			updateId: number;
+			callbackQueryId: string;
+			chatId: string;
+			messageThreadId: number;
+			operatorTelegramUserId: number;
+			operatorActionId: GenericId<"supportOperatorActions">;
+			decision: SupportDraftDecision;
 	  }
 	| {
 			kind: "ignored";
@@ -158,19 +171,34 @@ export function parseTelegramSupportUpdate(
 		const parsedCallbackData = parseSupportActionCallbackData(
 			callback.data ?? "",
 		);
-		if (!parsedCallbackData) {
+		if (parsedCallbackData) {
+			return {
+				kind: "operator_action",
+				updateId: update.update_id,
+				callbackQueryId: callback.id,
+				chatId,
+				messageThreadId: message.message_thread_id,
+				operatorTelegramUserId: callback.from.id,
+				supportId: parsedCallbackData.supportId,
+				actionType: parsedCallbackData.actionType,
+			};
+		}
+		const parsedDraftDecision = parseSupportDraftDecisionCallbackData(
+			callback.data ?? "",
+		);
+		if (!parsedDraftDecision) {
 			return createIgnoredCallbackUpdate("unsupported_callback", callback.id);
 		}
 
 		return {
-			kind: "operator_action",
+			kind: "draft_decision",
 			updateId: update.update_id,
 			callbackQueryId: callback.id,
 			chatId,
 			messageThreadId: message.message_thread_id,
 			operatorTelegramUserId: callback.from.id,
-			supportId: parsedCallbackData.supportId,
-			actionType: parsedCallbackData.actionType,
+			operatorActionId: parsedDraftDecision.operatorActionId,
+			decision: parsedDraftDecision.decision,
 		};
 	}
 

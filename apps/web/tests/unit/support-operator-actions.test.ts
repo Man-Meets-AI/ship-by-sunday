@@ -3,10 +3,13 @@ import type { GenericId } from "convex/values";
 
 import {
 	buildSupportActionCallbackData,
+	buildSupportDraftDecisionCallbackData,
 	buildSupportOperatorActionEffect,
+	buildTelegramDraftDecisionKeyboard,
 	buildTelegramSupportActionKeyboard,
 	isSupportAiDraftActionType,
 	parseSupportActionCallbackData,
+	parseSupportDraftDecisionCallbackData,
 	supportAiDraftActionTypeValues,
 	supportOperatorActionTypeValues,
 	type SupportActionThreadContext,
@@ -55,24 +58,33 @@ describe("support operator actions", () => {
 			.flat()
 			.map((button) => button.callback_data);
 
-		expect(callbackDataValues).toHaveLength(
-			supportOperatorActionTypeValues.length,
-		);
-		expect(callbackDataValues.map(parseSupportActionCallbackData)).toEqual(
-			expect.arrayContaining(
-				supportOperatorActionTypeValues.map((actionType) => ({
-					supportId: threadContext.supportId,
-					actionType,
-				})),
-			),
-		);
+		expect(
+			keyboard.inline_keyboard.map((row) => row.map((button) => button.text)),
+		).toEqual([["Yoooo", "Whatcha"], ["Draft Parker"], ["Close"]]);
+		expect(callbackDataValues).toHaveLength(4);
+		expect(callbackDataValues.map(parseSupportActionCallbackData)).toEqual([
+			{ supportId: threadContext.supportId, actionType: "ask_how_found" },
+			{
+				supportId: threadContext.supportId,
+				actionType: "ask_what_building",
+			},
+			{ supportId: threadContext.supportId, actionType: "draft_reply" },
+			{ supportId: threadContext.supportId, actionType: "close_thread" },
+		]);
 	});
 
 	it("separates customer-visible canned sends from operator-only output", () => {
 		expect(
-			buildSupportOperatorActionEffect("ask_for_email", threadContext),
+			buildSupportOperatorActionEffect("ask_how_found", threadContext),
 		).toMatchObject({
-			customerMessageText: expect.stringContaining("best email"),
+			customerMessageText: "Yooo - how'd you find my site?",
+			generatedOutput: null,
+			operatorNoteText: expect.stringContaining("Sent to visitor"),
+		});
+		expect(
+			buildSupportOperatorActionEffect("ask_what_building", threadContext),
+		).toMatchObject({
+			customerMessageText: "Whatcha trying to make?",
 			generatedOutput: null,
 			operatorNoteText: expect.stringContaining("Sent to visitor"),
 		});
@@ -92,6 +104,35 @@ describe("support operator actions", () => {
 		).toEqual([...supportAiDraftActionTypeValues]);
 		expect(isSupportAiDraftActionType("mark_hot_lead")).toBe(false);
 		expect(isSupportAiDraftActionType("send_pricing_link")).toBe(false);
+	});
+
+	it("builds compact draft decision callbacks for reviewable AI replies", () => {
+		const operatorActionId =
+			"kg2a1a1a1a1a1a1a1a1a1a1a1a6ab123" as GenericId<"supportOperatorActions">;
+		const sendCallbackData = buildSupportDraftDecisionCallbackData(
+			operatorActionId,
+			"send",
+		);
+		const discardCallbackData = buildSupportDraftDecisionCallbackData(
+			operatorActionId,
+			"discard",
+		);
+		const keyboard = buildTelegramDraftDecisionKeyboard(operatorActionId);
+
+		expect(
+			new TextEncoder().encode(sendCallbackData).byteLength,
+		).toBeLessThanOrEqual(64);
+		expect(parseSupportDraftDecisionCallbackData(sendCallbackData)).toEqual({
+			operatorActionId,
+			decision: "send",
+		});
+		expect(parseSupportDraftDecisionCallbackData(discardCallbackData)).toEqual({
+			operatorActionId,
+			decision: "discard",
+		});
+		expect(
+			keyboard.inline_keyboard.map((row) => row.map((button) => button.text)),
+		).toEqual([["Send draft", "Discard"]]);
 	});
 
 	it("uses the canonical production host for customer-facing pricing links", () => {

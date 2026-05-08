@@ -43,6 +43,48 @@ describe("convex support model", () => {
 		);
 	});
 
+	it("adds first-thread website acknowledgements after the visitor message", async () => {
+		const { createVisitorMessageForDeliveryHandler } =
+			await import("@/convex/support/model");
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+			id: string;
+		}> = [];
+		const fakeCtx = createFirstVisitorMessageContext(
+			inserted,
+		) as unknown as Parameters<
+			typeof createVisitorMessageForDeliveryHandler
+		>[0];
+
+		const state = await createVisitorMessageForDeliveryHandler(fakeCtx, {
+			sessionToken: "a".repeat(64),
+			messageText: "Can this help me launch?",
+			pagePath: "/",
+			entrySurface: "homepage_support_widget",
+			clerkUserId: null,
+		});
+
+		const insertedMessages = inserted.filter(
+			(record) => record.table === "supportMessages",
+		);
+		expect(insertedMessages.map((record) => record.document.source)).toEqual([
+			"visitor",
+			"system",
+			"system",
+		]);
+		expect(insertedMessages.map((record) => record.document.body)).toEqual([
+			"Can this help me launch?",
+			"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+			"Parker usually catches these pretty quickly when he's near his phone.",
+		]);
+		expect(state.state.messages.map((message) => message.body)).toEqual([
+			"Can this help me launch?",
+			"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+			"Parker usually catches these pretty quickly when he's near his phone.",
+		]);
+	});
+
 	it("returns the disabled support state when no existing thread is found", async () => {
 		process.env.SUPPORT_CHAT_DISABLED = "true";
 		const { getThreadBySessionHandler } =
@@ -577,6 +619,152 @@ describe("convex support model", () => {
 		);
 	});
 
+	it("sends a completed draft to the visitor exactly once", async () => {
+		const { applySupportDraftDecisionFromTelegramHandler } =
+			await import("@/convex/support/model");
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+		}> = [];
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = createDraftDecisionContext({
+			action: {
+				_id: "action_1",
+				threadId: "thread_1",
+				actionType: "draft_reply",
+				status: "completed",
+				aiDraftGenerationStatus: "completed",
+				generatedOutput: "Yooo - what are you trying to make?",
+			},
+			thread: {
+				_id: "thread_1",
+				visitorId: "visitor_1",
+				status: "open",
+				telegramChatId: "-100123",
+				telegramMessageThreadId: 300,
+			},
+			inserted,
+			patches,
+		}) as unknown as Parameters<
+			typeof applySupportDraftDecisionFromTelegramHandler
+		>[0];
+
+		await expect(
+			applySupportDraftDecisionFromTelegramHandler(fakeCtx, {
+				updateId: 111,
+				callbackQueryId: "callback_send_draft",
+				chatId: "-100123",
+				messageThreadId: 300,
+				operatorTelegramUserId: 42,
+				operatorActionId: "action_1",
+				decision: "send",
+			}),
+		).resolves.toMatchObject({
+			ok: true,
+			ignored: false,
+			callbackAnswerText: "Sent draft.",
+		});
+		expect(inserted).toEqual([
+			expect.objectContaining({
+				table: "supportMessages",
+				document: expect.objectContaining({
+					source: "operator",
+					body: "Yooo - what are you trying to make?",
+					telegramUpdateId: 111,
+				}),
+			}),
+		]);
+		expect(patches).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "thread_1",
+					patch: expect.objectContaining({
+						pendingVisitorMessageCount: 0,
+					}),
+				}),
+				expect.objectContaining({
+					id: "action_1",
+					patch: expect.objectContaining({
+						customerVisibleMessageId: "supportMessages_inserted",
+						draftDecisionStatus: "sent",
+						draftDecisionTelegramUpdateId: 111,
+					}),
+				}),
+			]),
+		);
+	});
+
+	it("does not send discarded or already sent drafts", async () => {
+		const { applySupportDraftDecisionFromTelegramHandler } =
+			await import("@/convex/support/model");
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+		}> = [];
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = createDraftDecisionContext({
+			action: {
+				_id: "action_1",
+				threadId: "thread_1",
+				actionType: "draft_reply",
+				status: "completed",
+				aiDraftGenerationStatus: "completed",
+				generatedOutput: "Draft body",
+			},
+			thread: {
+				_id: "thread_1",
+				visitorId: "visitor_1",
+				status: "open",
+				telegramChatId: "-100123",
+				telegramMessageThreadId: 300,
+			},
+			inserted,
+			patches,
+		}) as unknown as Parameters<
+			typeof applySupportDraftDecisionFromTelegramHandler
+		>[0];
+
+		await expect(
+			applySupportDraftDecisionFromTelegramHandler(fakeCtx, {
+				updateId: 112,
+				callbackQueryId: "callback_discard_draft",
+				chatId: "-100123",
+				messageThreadId: 300,
+				operatorTelegramUserId: 42,
+				operatorActionId: "action_1",
+				decision: "discard",
+			}),
+		).resolves.toMatchObject({
+			ok: true,
+			ignored: false,
+			callbackAnswerText: "Draft discarded.",
+		});
+		await expect(
+			applySupportDraftDecisionFromTelegramHandler(fakeCtx, {
+				updateId: 113,
+				callbackQueryId: "callback_send_after_discard",
+				chatId: "-100123",
+				messageThreadId: 300,
+				operatorTelegramUserId: 42,
+				operatorActionId: "action_1",
+				decision: "send",
+			}),
+		).resolves.toMatchObject({
+			ignored: true,
+			reason: "draft_discarded",
+		});
+		expect(inserted).toEqual([]);
+		expect(patches).toEqual([
+			expect.objectContaining({
+				id: "action_1",
+				patch: expect.objectContaining({
+					draftDecisionStatus: "discarded",
+					draftDecisionTelegramUpdateId: 112,
+				}),
+			}),
+		]);
+	});
+
 	it("loads AI draft context from the latest bounded thread messages", async () => {
 		const { getOperatorActionAiDraftContextHandler } =
 			await import("@/convex/support/model");
@@ -1089,6 +1277,97 @@ describe("convex support model", () => {
 	});
 });
 
+function createFirstVisitorMessageContext(
+	inserted: Array<{
+		table: string;
+		document: Record<string, unknown>;
+		id: string;
+	}>,
+) {
+	let visitor: Record<string, unknown> | null = null;
+	let thread: Record<string, unknown> | null = null;
+	let supportMessageCount = 0;
+
+	return {
+		db: {
+			query: (table: string) => ({
+				withIndex: (indexName: string) => {
+					if (
+						table === "supportVisitors" &&
+						indexName === "by_session_token_hash"
+					) {
+						return { unique: async () => null };
+					}
+					if (
+						table === "supportThreads" &&
+						indexName === "by_visitor_id_and_status"
+					) {
+						return {
+							unique: async () => null,
+							order: () => ({ take: async () => [] }),
+						};
+					}
+					if (
+						table === "supportRateLimitBuckets" &&
+						indexName === "by_bucket_key"
+					) {
+						return { unique: async () => null };
+					}
+					if (
+						table === "supportMessages" &&
+						indexName === "by_thread_id_and_created_at"
+					) {
+						return {
+							order: () => ({
+								take: async () =>
+									inserted
+										.filter((record) => record.table === "supportMessages")
+										.map((record) => ({
+											_id: record.id,
+											...record.document,
+										}))
+										.sort(
+											(left, right) =>
+												Number(right.createdAt) - Number(left.createdAt),
+										),
+							}),
+						};
+					}
+					throw new Error(`Unexpected query: ${table}.${indexName}`);
+				},
+			}),
+			get: async (id: string) => {
+				if (visitor?._id === id) {
+					return visitor;
+				}
+				if (thread?._id === id) {
+					return thread;
+				}
+				return null;
+			},
+			insert: async (table: string, document: Record<string, unknown>) => {
+				const id =
+					table === "supportMessages"
+						? `message_${(supportMessageCount += 1)}`
+						: `${table}_inserted`;
+				inserted.push({ table, document, id });
+				if (table === "supportVisitors") {
+					visitor = { _id: id, visitorKind: "anonymous", ...document };
+				}
+				if (table === "supportThreads") {
+					thread = { _id: id, ...document };
+				}
+				return id;
+			},
+			patch: async (id: string, patch: Record<string, unknown>) => {
+				if (thread?._id === id) {
+					thread = { ...thread, ...patch };
+				}
+			},
+		},
+	};
+}
+
 function createSupportMessage({
 	id,
 	body,
@@ -1107,6 +1386,58 @@ function createSupportMessage({
 		createdAt: at,
 		deliveryStatus: "delivered_to_parker",
 		deliveryFailureClass: undefined,
+	};
+}
+
+function createDraftDecisionContext({
+	action,
+	thread,
+	inserted,
+	patches,
+}: {
+	action: Record<string, unknown>;
+	thread: Record<string, unknown>;
+	inserted: Array<{ table: string; document: Record<string, unknown> }>;
+	patches: Array<{ id: string; patch: Record<string, unknown> }>;
+}) {
+	let currentAction = { ...action };
+	let currentThread = { ...thread };
+	return {
+		db: {
+			query: (table: string) => ({
+				withIndex: (indexName: string) => {
+					if (
+						table === "supportOperatorActions" &&
+						indexName === "by_telegram_callback_query_id"
+					) {
+						return { unique: async () => null };
+					}
+					throw new Error(`Unexpected query: ${table}.${indexName}`);
+				},
+			}),
+			get: async (id: string) => {
+				if (id === currentAction._id) {
+					return currentAction;
+				}
+				if (id === currentThread._id) {
+					return currentThread;
+				}
+				return null;
+			},
+			insert: async (table: string, document: Record<string, unknown>) => {
+				inserted.push({ table, document });
+				return `${table}_inserted`;
+			},
+			patch: async (id: string, patch: Record<string, unknown>) => {
+				patches.push({ id, patch });
+				if (id === currentAction._id) {
+					currentAction = { ...currentAction, ...patch };
+				}
+				if (id === currentThread._id) {
+					currentThread = { ...currentThread, ...patch };
+				}
+			},
+		},
 	};
 }
 

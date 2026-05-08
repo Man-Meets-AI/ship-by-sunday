@@ -49,6 +49,22 @@ function createThreadState(messageText = "Can this help my SaaS?") {
 				deliveryStatus: "delivered_to_parker",
 				deliveryFailureClass: null,
 			},
+			{
+				id: "message_2",
+				source: "system",
+				body: "Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+				createdAt: 2,
+				deliveryStatus: "not_required",
+				deliveryFailureClass: null,
+			},
+			{
+				id: "message_3",
+				source: "system",
+				body: "Parker usually catches these pretty quickly when he's near his phone.",
+				createdAt: 3,
+				deliveryStatus: "not_required",
+				deliveryFailureClass: null,
+			},
 		],
 	};
 }
@@ -108,6 +124,16 @@ describe("HomePageSupportWidget", () => {
 		await waitFor(() =>
 			expect(screen.getByText("Delivered to Parker")).toBeTruthy(),
 		);
+		expect(
+			screen.getByText(
+				"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByText(
+				"Parker usually catches these pretty quickly when he's near his phone.",
+			),
+		).toBeTruthy();
 		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/messages", {
 			method: "GET",
 			headers: {
@@ -134,7 +160,7 @@ describe("HomePageSupportWidget", () => {
 				entrySurface: "homepage_support_widget",
 				pagePath: "/",
 				threadStatus: "open",
-				messageCount: 1,
+				messageCount: 3,
 				latestDeliveryStatus: "delivered_to_parker",
 				latestDeliveryFailureClass: null,
 			}),

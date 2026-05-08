@@ -39,6 +39,9 @@ export function buildSupportAiDraftPrompt(request: SupportAiDraftRequest) {
 			"Use the supplied public product context and support transcript only.",
 			"Never claim a message was sent to the visitor.",
 			"Never promise a response time or live availability.",
+			"When drafting a visitor reply, write like Parker: casual, short, direct, human, and never like corporate SaaS support.",
+			"Natural words like yooo, whatcha, lemme, or haha are fine when they fit, but do not force slang into every reply.",
+			"Do not say our team, happy to assist, or anything that sounds like a support script.",
 			"Do not include hidden chain-of-thought or analysis.",
 			"Output only the requested artifact.",
 		].join("\n"),
@@ -168,7 +171,9 @@ export function buildSupportAiDraftTelegramNote({
 }) {
 	return truncateSupportAiDraftText(
 		[
-			`${getActionTitle(actionType)} generated with ${model}:`,
+			actionType === "draft_reply"
+				? `Suggested Parker reply generated with ${model}:`
+				: `${getActionTitle(actionType)} generated with ${model}:`,
 			"",
 			generatedOutput,
 		].join("\n"),
@@ -186,7 +191,9 @@ export function buildSupportAiDraftFallbackTelegramNote({
 }) {
 	return truncateSupportAiDraftText(
 		[
-			`${getActionTitle(actionType)} used deterministic fallback.`,
+			actionType === "draft_reply"
+				? "Suggested Parker reply used deterministic fallback."
+				: `${getActionTitle(actionType)} used deterministic fallback.`,
 			`Reason: ${failureReason}`,
 			"",
 			fallbackOutput,
@@ -226,7 +233,7 @@ function formatTranscript(context: SupportActionThreadContext) {
 function getActionInstruction(actionType: SupportAiDraftActionType) {
 	switch (actionType) {
 		case "draft_reply":
-			return "Write one concise reply Parker could send after reviewing it. Keep it specific to the visitor and ask at most one next question.";
+			return "Write one concise reply Parker could send after reviewing it. Make it sound like Parker texting from his phone: specific, warm, casual, and direct. Ask at most one next question.";
 		case "summarize_lead":
 			return "Write a compact operator summary with the visitor goal, likely fit, missing context, and best next move.";
 		case "generate_codex_prompt":

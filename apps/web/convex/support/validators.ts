@@ -46,6 +46,7 @@ export const supportOperatorNoteDeliveryStatusValues = [
 	"delivered",
 	"delivery_failed",
 ] as const;
+export const supportDraftDecisionStatusValues = ["sent", "discarded"] as const;
 export const supportTelegramTopicCleanupStatusValues = [
 	"not_required",
 	"pending",
@@ -91,6 +92,8 @@ export const supportDeliveryFailureClassValidator = v.union(
 	v.literal("unknown"),
 );
 export const supportOperatorActionTypeValidator = v.union(
+	v.literal("ask_how_found"),
+	v.literal("ask_what_building"),
 	v.literal("close_thread"),
 	v.literal("ask_for_email"),
 	v.literal("ask_for_context"),
@@ -128,6 +131,10 @@ export const supportOperatorNoteDeliveryStatusValidator = v.union(
 	v.literal("pending"),
 	v.literal("delivered"),
 	v.literal("delivery_failed"),
+);
+export const supportDraftDecisionStatusValidator = v.union(
+	v.literal("sent"),
+	v.literal("discarded"),
 );
 export const supportTelegramTopicCleanupStatusValidator = v.union(
 	v.literal("not_required"),
@@ -177,6 +184,13 @@ export const supportOperatorActionResultValidator = v.object({
 		v.literal("scheduling_failed"),
 	),
 	aiDraftSchedulingFailureReason: v.union(v.string(), v.null()),
+});
+
+export const supportDraftDecisionResultValidator = v.object({
+	ok: v.boolean(),
+	ignored: v.boolean(),
+	reason: v.union(v.string(), v.null()),
+	callbackAnswerText: v.string(),
 });
 
 export const supportOperationsSnapshotValidator = v.object({

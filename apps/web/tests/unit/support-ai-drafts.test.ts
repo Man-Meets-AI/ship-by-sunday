@@ -52,6 +52,8 @@ describe("support AI drafts", () => {
 		const prompt = buildSupportAiDraftPrompt(draftRequest);
 
 		expect(prompt.instructions).toContain("operator-only support artifacts");
+		expect(prompt.instructions).toContain("write like Parker");
+		expect(prompt.instructions).toContain("never like corporate SaaS support");
 		expect(prompt.input).toContain("Ship by Sunday helps customers");
 		expect(prompt.input).toContain("Action: draft_reply");
 		expect(prompt.input).toContain("Support id: SBS-0506-1234");
@@ -59,6 +61,7 @@ describe("support AI drafts", () => {
 			"Visitor: Can this help me ship a React app by Friday?",
 		);
 		expect(prompt.input).toContain("Deterministic fallback draft:");
+		expect(prompt.input).toContain("sound like Parker texting from his phone");
 	});
 
 	it("extracts text from current Responses API output shapes", () => {
@@ -158,5 +161,16 @@ describe("support AI drafts", () => {
 
 		expect(note).toHaveLength(3_700);
 		expect(note).toContain("AI Codex prompt generated");
+	});
+
+	it("labels draft replies as Parker suggestions before they are sent", () => {
+		const note = buildSupportAiDraftTelegramNote({
+			actionType: "draft_reply",
+			generatedOutput: "Yooo - what are you trying to make?",
+			model: "gpt-support-snapshot",
+		});
+
+		expect(note).toContain("Suggested Parker reply generated");
+		expect(note).toContain("Yooo - what are you trying to make?");
 	});
 });

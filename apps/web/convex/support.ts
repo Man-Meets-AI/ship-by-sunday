@@ -20,9 +20,12 @@ import {
 	resolveSupportAiDraftModel,
 	type SupportAiDraftRequest,
 } from "./support/aiDrafts";
+import { buildTelegramDraftDecisionKeyboard } from "./support/operatorActions";
 import {
 	applyOperatorActionFromTelegramHandler,
 	type ApplySupportOperatorActionResult,
+	applySupportDraftDecisionFromTelegramHandler,
+	type ApplySupportDraftDecisionResult,
 	completeOperatorActionAiDraftHandler,
 	createSupportDeliveryFailure,
 	createVisitorMessageForDeliveryHandler,
@@ -57,6 +60,7 @@ import {
 import {
 	supportOperationsSnapshotValidator,
 	supportOperatorActionResultValidator,
+	supportDraftDecisionResultValidator,
 	supportAiDraftActionTypeValidator,
 	supportDeliveryFailureClassValidator,
 	supportGeneratedOutputSourceValidator,
@@ -300,6 +304,8 @@ export const applyOperatorActionFromTelegram = internalMutation({
 		operatorTelegramUserId: v.number(),
 		supportId: v.string(),
 		actionType: v.union(
+			v.literal("ask_how_found"),
+			v.literal("ask_what_building"),
 			v.literal("close_thread"),
 			v.literal("ask_for_email"),
 			v.literal("ask_for_context"),
@@ -314,6 +320,20 @@ export const applyOperatorActionFromTelegram = internalMutation({
 	},
 	returns: supportOperatorActionResultValidator,
 	handler: applyOperatorActionFromTelegramHandler,
+});
+
+export const applySupportDraftDecisionFromTelegram = internalMutation({
+	args: {
+		updateId: v.number(),
+		callbackQueryId: v.string(),
+		chatId: v.string(),
+		messageThreadId: v.number(),
+		operatorTelegramUserId: v.number(),
+		operatorActionId: v.id("supportOperatorActions"),
+		decision: v.union(v.literal("send"), v.literal("discard")),
+	},
+	returns: supportDraftDecisionResultValidator,
+	handler: applySupportDraftDecisionFromTelegramHandler,
 });
 
 export const getOperatorActionAiDraftContext = internalQuery({
@@ -430,6 +450,10 @@ export async function generateSupportOperatorAiDraftHandler(
 	const noteDelivery = await sendTelegramOperatorNote({
 		messageThreadId: args.messageThreadId,
 		text: operatorNoteText,
+		replyMarkup:
+			draftContext.actionType === "draft_reply"
+				? buildTelegramDraftDecisionKeyboard(draftContext.operatorActionId)
+				: undefined,
 	});
 	await ctx.runMutation(internal.support.markOperatorActionNoteDelivery, {
 		operatorActionId: args.operatorActionId,
@@ -585,6 +609,23 @@ export const processTelegramSupportWebhookUpdate = internalAction({
 			return result;
 		}
 
+		if (update.kind === "draft_decision") {
+			const { kind: _kind, ...draftDecision } = update;
+			const result: ApplySupportDraftDecisionResult = await ctx.runMutation(
+				internal.support.applySupportDraftDecisionFromTelegram,
+				draftDecision,
+			);
+			await answerTelegramCallback(
+				update.callbackQueryId,
+				result.callbackAnswerText,
+			);
+			return {
+				ok: result.ok,
+				ignored: result.ignored,
+				reason: result.reason,
+			};
+		}
+
 		const { kind: _kind, ...operatorAction } = update;
 		const actionResult: ApplySupportOperatorActionResult =
 			await ctx.runMutation(
@@ -603,6 +644,10 @@ export const processTelegramSupportWebhookUpdate = internalAction({
 		) {
 			const noteDelivery = await sendTelegramOperatorNote({
 				messageThreadId: update.messageThreadId,
+				replyMarkup:
+					update.actionType === "draft_reply"
+						? buildTelegramDraftDecisionKeyboard(actionResult.operatorActionId)
+						: undefined,
 				text: buildSupportAiDraftFallbackTelegramNote({
 					actionType: update.actionType,
 					fallbackOutput: actionResult.operatorNoteText,
@@ -702,9 +747,11 @@ async function answerTelegramCallback(
 
 async function sendTelegramOperatorNote({
 	messageThreadId,
+	replyMarkup,
 	text,
 }: {
 	messageThreadId: number;
+	replyMarkup?: unknown;
 	text: string;
 }): Promise<{
 	status: "delivered" | "delivery_failed";
@@ -714,6 +761,7 @@ async function sendTelegramOperatorNote({
 	try {
 		const result = await sendTelegramSupportMessage({
 			messageThreadId,
+			replyMarkup,
 			text,
 		});
 		return {

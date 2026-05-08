@@ -36,6 +36,10 @@
   Impact: Low; the replacement was narrow and only changed intended import paths, but it violated the repo editing constraint.
   Corrective action: Use `apply_patch` for manual file edits, including mechanical import updates, unless running a formatter or generated-code command.
 
+- Mistake: While verifying hosted Convex support env during the Telegram operator UX smoke, I ran a Convex env listing command instead of the presence-only probe.
+  Impact: Secret values were printed to local tool output, though they were not added to source files or final user-facing notes.
+  Corrective action: Use only per-key presence checks that suppress values for provider env verification, and treat the previously exposed Telegram bot token as needing rotation before production confidence.
+
 ## 2026-05-06 Codex Command Hygiene
 
 - Mistake: I used a chained shell read command while inspecting Telegram support files, despite the repo instruction to avoid separator-chained shell commands.

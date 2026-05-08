@@ -16,6 +16,7 @@ import {
 	isSupportAiDraftActionType,
 	type SupportActionThreadContext,
 	type SupportAiDraftActionType,
+	type SupportDraftDecision,
 	type SupportOperatorActionType,
 } from "./operatorActions";
 import type { SupportDeliveryFailureClass } from "./types";
@@ -33,6 +34,10 @@ const SUPPORT_RETENTION_THREAD_BATCH_SIZE = 20;
 const SUPPORT_TRANSCRIPT_PURGE_WRITE_LIMIT = 100;
 const SUPPORT_RATE_BUCKET_RETENTION_MS = 48 * 60 * 60 * 1_000;
 const SUPPORT_OPERATIONS_SNAPSHOT_LIMIT = 20;
+const SUPPORT_FIRST_MESSAGE_ACKNOWLEDGEMENTS = [
+	"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+	"Parker usually catches these pretty quickly when he's near his phone.",
+] as const;
 
 type SupportThreadId = GenericId<"supportThreads">;
 type SupportMessageId = GenericId<"supportMessages">;
@@ -96,6 +101,13 @@ export type ApplySupportOperatorActionResult = {
 	operatorActionId: SupportOperatorActionId | null;
 	aiDraftSchedulingStatus: "not_required" | "scheduled" | "scheduling_failed";
 	aiDraftSchedulingFailureReason: string | null;
+};
+
+export type ApplySupportDraftDecisionResult = {
+	ok: boolean;
+	ignored: boolean;
+	reason: string | null;
+	callbackAnswerText: string;
 };
 
 export type SupportOperatorAiDraftContext = {
@@ -245,12 +257,13 @@ export async function createVisitorMessageForDeliveryHandler(
 		pagePath: normalizePagePath(args.pagePath),
 		now,
 	});
-	const thread = await getOrCreateSupportThreadForVisitorMessage(ctx, {
-		visitorId: visitor._id,
-		entrySurface: normalizeEntrySurface(args.entrySurface),
-		pagePath: normalizePagePath(args.pagePath),
-		now,
-	});
+	const { thread, isNewThread } =
+		await getOrCreateSupportThreadForVisitorMessage(ctx, {
+			visitorId: visitor._id,
+			entrySurface: normalizeEntrySurface(args.entrySurface),
+			pagePath: normalizePagePath(args.pagePath),
+			now,
+		});
 
 	assertThreadCanAcceptVisitorMessage(thread, now);
 	await assertGlobalHourlyLimit(ctx, now);
@@ -271,10 +284,17 @@ export async function createVisitorMessageForDeliveryHandler(
 		telegramOperatorUserId: undefined,
 		bodyPurgedAt: undefined,
 	});
+	const lastMessageAt = isNewThread
+		? await insertFirstMessageAcknowledgements(ctx, {
+				threadId: thread._id,
+				visitorId: visitor._id,
+				now,
+			})
+		: now;
 
 	await ctx.db.patch(thread._id, {
-		updatedAt: now,
-		lastMessageAt: now,
+		updatedAt: lastMessageAt,
+		lastMessageAt,
 		lastVisitorMessageAt: now,
 		pendingVisitorMessageCount: thread.pendingVisitorMessageCount + 1,
 	});
@@ -688,6 +708,138 @@ export async function applyOperatorActionFromTelegramHandler(
 		operatorActionId,
 		aiDraftSchedulingStatus: schedulingResult.status,
 		aiDraftSchedulingFailureReason: schedulingResult.failureReason,
+	};
+}
+
+export async function applySupportDraftDecisionFromTelegramHandler(
+	ctx: MutationCtx,
+	args: {
+		updateId: number;
+		callbackQueryId: string;
+		chatId: string;
+		messageThreadId: number;
+		operatorTelegramUserId: number;
+		operatorActionId: SupportOperatorActionId;
+		decision: SupportDraftDecision;
+	},
+): Promise<ApplySupportDraftDecisionResult> {
+	const existingCallbackAction = await ctx.db
+		.query("supportOperatorActions")
+		.withIndex("by_telegram_callback_query_id", (query) =>
+			query.eq("telegramCallbackQueryId", args.callbackQueryId),
+		)
+		.unique();
+	if (existingCallbackAction) {
+		return createIgnoredDraftDecisionResult(
+			"duplicate_action",
+			"Action was already handled.",
+		);
+	}
+
+	const action = await ctx.db.get(args.operatorActionId);
+	if (
+		!action ||
+		action.status !== "completed" ||
+		action.actionType !== "draft_reply"
+	) {
+		return createIgnoredDraftDecisionResult(
+			"draft_unavailable",
+			"Draft is unavailable.",
+		);
+	}
+
+	const thread = await ctx.db.get(action.threadId);
+	if (
+		!thread ||
+		thread.telegramChatId !== args.chatId ||
+		thread.telegramMessageThreadId !== args.messageThreadId
+	) {
+		return createIgnoredDraftDecisionResult(
+			"unmapped_topic",
+			"Support thread was not found.",
+		);
+	}
+	if (thread.status !== "open" || thread.purgedAt) {
+		return createIgnoredDraftDecisionResult(
+			"thread_closed",
+			"Thread is closed.",
+		);
+	}
+	if (
+		action.customerVisibleMessageId ||
+		action.draftDecisionStatus === "sent"
+	) {
+		return createIgnoredDraftDecisionResult(
+			"draft_already_sent",
+			"Draft was already sent.",
+		);
+	}
+	if (action.draftDecisionStatus === "discarded") {
+		return createIgnoredDraftDecisionResult(
+			"draft_discarded",
+			"Draft was already discarded.",
+		);
+	}
+
+	const now = Date.now();
+	if (args.decision === "discard") {
+		await ctx.db.patch(action._id, {
+			draftDecisionStatus: "discarded",
+			draftDecisionAt: now,
+			draftDecisionTelegramUpdateId: args.updateId,
+		});
+		return {
+			ok: true,
+			ignored: false,
+			reason: null,
+			callbackAnswerText: "Draft discarded.",
+		};
+	}
+
+	if (
+		!action.generatedOutput ||
+		action.generatedOutputPurgedAt ||
+		action.aiDraftGenerationStatus === "scheduled"
+	) {
+		return createIgnoredDraftDecisionResult(
+			"draft_unavailable",
+			"Draft is unavailable.",
+		);
+	}
+
+	const customerVisibleMessageId = await ctx.db.insert("supportMessages", {
+		threadId: thread._id,
+		visitorId: thread.visitorId,
+		source: "operator",
+		body: normalizeSupportMessageText(action.generatedOutput),
+		createdAt: now,
+		deliveryStatus: "not_required",
+		deliveryAttemptCount: 0,
+		lastDeliveryAttemptAt: undefined,
+		lastDeliveryError: undefined,
+		deliveryFailureClass: undefined,
+		telegramMessageId: undefined,
+		telegramUpdateId: args.updateId,
+		telegramOperatorUserId: args.operatorTelegramUserId,
+		bodyPurgedAt: undefined,
+	});
+	await ctx.db.patch(thread._id, {
+		updatedAt: now,
+		lastMessageAt: now,
+		pendingVisitorMessageCount: 0,
+	});
+	await ctx.db.patch(action._id, {
+		customerVisibleMessageId,
+		draftDecisionStatus: "sent",
+		draftDecisionAt: now,
+		draftDecisionTelegramUpdateId: args.updateId,
+	});
+
+	return {
+		ok: true,
+		ignored: false,
+		reason: null,
+		callbackAnswerText: "Sent draft.",
 	};
 }
 
@@ -1109,10 +1261,11 @@ export async function deliverSupportVisitorMessage({
 			messageThreadId,
 			text: [
 				`${supportId}`,
-				`Entry: ${entryLabel}`,
+				"Status: Needs reply",
+				`From: ${entryLabel}`,
 				`Page: ${normalizedPagePath}`,
 				"Visitor: anonymous or signed in on site",
-				"Reply normally in this topic, or use buttons for audited support actions.",
+				"Reply in this topic to message the visitor.",
 			].join("\n"),
 			replyMarkup: buildTelegramSupportActionKeyboard(supportId),
 		});
@@ -1568,7 +1721,7 @@ async function getOrCreateSupportThreadForVisitorMessage(
 		args.visitorId,
 	);
 	if (existing) {
-		return existing;
+		return { thread: existing, isNewThread: false };
 	}
 
 	const threadId = await ctx.db.insert("supportThreads", {
@@ -1596,7 +1749,43 @@ async function getOrCreateSupportThreadForVisitorMessage(
 		throw new Error("Unable to create support thread.");
 	}
 
-	return thread;
+	return { thread, isNewThread: true };
+}
+
+async function insertFirstMessageAcknowledgements(
+	ctx: MutationCtx,
+	args: {
+		threadId: SupportThreadId;
+		visitorId: GenericId<"supportVisitors">;
+		now: number;
+	},
+) {
+	let lastMessageAt = args.now;
+	for (const [
+		index,
+		body,
+	] of SUPPORT_FIRST_MESSAGE_ACKNOWLEDGEMENTS.entries()) {
+		const createdAt = args.now + index + 1;
+		await ctx.db.insert("supportMessages", {
+			threadId: args.threadId,
+			visitorId: args.visitorId,
+			source: "system",
+			body,
+			createdAt,
+			deliveryStatus: "not_required",
+			deliveryAttemptCount: 0,
+			lastDeliveryAttemptAt: undefined,
+			lastDeliveryError: undefined,
+			deliveryFailureClass: undefined,
+			telegramMessageId: undefined,
+			telegramUpdateId: undefined,
+			telegramOperatorUserId: undefined,
+			bodyPurgedAt: undefined,
+		});
+		lastMessageAt = createdAt;
+	}
+
+	return lastMessageAt;
 }
 
 function assertThreadCanAcceptVisitorMessage(
@@ -1752,6 +1941,18 @@ function createIgnoredOperatorActionResult(
 		operatorActionId: null,
 		aiDraftSchedulingStatus: "not_required",
 		aiDraftSchedulingFailureReason: null,
+	};
+}
+
+function createIgnoredDraftDecisionResult(
+	reason: string,
+	callbackAnswerText: string,
+): ApplySupportDraftDecisionResult {
+	return {
+		ok: true,
+		ignored: true,
+		reason,
+		callbackAnswerText,
 	};
 }
 

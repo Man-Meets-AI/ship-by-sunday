@@ -100,6 +100,37 @@ describe("telegram support updates", () => {
 		});
 	});
 
+	it("parses draft decision callbacks", () => {
+		expect(
+			parseTelegramSupportUpdate(
+				{
+					update_id: 103,
+					callback_query: {
+						id: "callback_send_draft",
+						from: { id: 42 },
+						data: "draft:kg2a1a1a1a1a1a1a1a1a1a1a1a6ab123:send",
+						message: {
+							message_id: 202,
+							message_thread_id: 302,
+							chat: { id: "-100123" },
+						},
+					},
+				},
+				[42],
+				"-100123",
+			),
+		).toEqual({
+			kind: "draft_decision",
+			updateId: 103,
+			callbackQueryId: "callback_send_draft",
+			chatId: "-100123",
+			messageThreadId: 302,
+			operatorTelegramUserId: 42,
+			operatorActionId: "kg2a1a1a1a1a1a1a1a1a1a1a1a6ab123",
+			decision: "send",
+		});
+	});
+
 	it("ignores unsupported or unauthorized updates without forcing webhook retries", () => {
 		expect(
 			parseTelegramSupportUpdate(
@@ -407,6 +438,79 @@ describe("telegram support updates", () => {
 				body: JSON.stringify({
 					callback_query_id: "callback_draft",
 					text: "Generating AI draft.",
+				}),
+			}),
+		);
+	});
+
+	it("applies draft decisions and answers the Telegram callback", async () => {
+		process.env.TELEGRAM_SUPPORT_BOT_TOKEN = "support-token";
+		process.env.TELEGRAM_SUPPORT_CHAT_ID = "-100123";
+		process.env.TELEGRAM_SUPPORT_OPERATOR_USER_IDS = "42";
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(JSON.stringify({ ok: true, result: true }), {
+				status: 200,
+			}),
+		);
+		const runMutation = vi.fn().mockResolvedValue({
+			ok: true,
+			ignored: false,
+			reason: null,
+			callbackAnswerText: "Sent draft.",
+		});
+		const { processTelegramSupportWebhookUpdate } =
+			await import("@/convex/support");
+		const action = processTelegramSupportWebhookUpdate as unknown as {
+			_handler: (
+				ctx: { runMutation: ReturnType<typeof vi.fn> },
+				args: { payload: unknown },
+			) => Promise<unknown>;
+		};
+
+		await expect(
+			action._handler(
+				{ runMutation },
+				{
+					payload: {
+						update_id: 109,
+						callback_query: {
+							id: "callback_send_draft",
+							from: { id: 42 },
+							data: "draft:kg2a1a1a1a1a1a1a1a1a1a1a1a6ab123:send",
+							message: {
+								message_id: 209,
+								message_thread_id: 309,
+								chat: { id: "-100123" },
+							},
+						},
+					},
+				},
+			),
+		).resolves.toEqual({
+			ok: true,
+			ignored: false,
+			reason: null,
+		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.not.objectContaining({ kind: expect.any(String) }),
+		);
+		expect(runMutation.mock.calls[0]?.[1]).toMatchObject({
+			updateId: 109,
+			callbackQueryId: "callback_send_draft",
+			chatId: "-100123",
+			messageThreadId: 309,
+			operatorTelegramUserId: 42,
+			operatorActionId: "kg2a1a1a1a1a1a1a1a1a1a1a1a6ab123",
+			decision: "send",
+		});
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.telegram.org/botsupport-token/answerCallbackQuery",
+			expect.objectContaining({
+				method: "POST",
+				body: JSON.stringify({
+					callback_query_id: "callback_send_draft",
+					text: "Sent draft.",
 				}),
 			}),
 		);

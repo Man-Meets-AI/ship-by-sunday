@@ -21,7 +21,7 @@ The browser never receives a support bearer token. The widget talks to `/api/sup
 6. Find the support group chat id and store it as `TELEGRAM_SUPPORT_CHAT_ID` in Convex. Supergroup ids usually look like `-100...`.
 7. Find each allowed operator's Telegram user id and store a comma-separated list as `TELEGRAM_SUPPORT_OPERATOR_USER_IDS` in Convex.
 
-The 2026-05-07 hosted dev smoke reused the existing Worker forum bot and forum group instead of creating a new support-only bot. That bot had no webhook configured before support setup, was already an admin in a forum supergroup, and had `can_manage_topics` plus `can_delete_messages`. Reusing an existing bot is only safe when nothing else depends on long polling for that bot, because Telegram allows either a webhook or `getUpdates` polling, not both.
+The 2026-05-08 hosted dev smoke uses `@sbsprodbot` in the `SBS Website` forum group. The bot must be an administrator with `can_manage_topics` and `can_delete_messages`. Reusing any existing bot is only safe when nothing else depends on long polling for that bot, because Telegram allows either a webhook or `getUpdates` polling, not both. Rotate any bot token that was pasted into chat or a terminal transcript before treating the setup as production-safe.
 
 ## Configure Convex env
 
@@ -87,37 +87,54 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_SUPPORT_BOT_TOKEN/setWebhook
 
 Keep `allowed_updates` narrow. This bridge only accepts `message` replies and `callback_query` actions from the support topic inline keyboard.
 
+## Visitor acknowledgement
+
+On the first visitor message in a support thread, the website stores the visitor message and then shows two system acknowledgement messages:
+
+```text
+Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.
+
+Parker usually catches these pretty quickly when he's near his phone.
+```
+
+These are `system` messages in Convex. They appear in the website widget only and are not sent to Telegram as visitor messages. They intentionally do not claim Parker is online and do not promise a response time.
+
 ## Operator action buttons
 
 Every support topic starts with a bot-authored header and an inline keyboard. Normal Telegram replies from allowlisted operators still become website-visible replies.
 
-These buttons also send website-visible operator messages after an allowlisted operator taps them:
+New support topics show this default keyboard:
 
-- `Ask email`: asks for the best email if the visitor gets disconnected
-- `Ask context`: asks for product, stack, and blocker context
-- `Pricing`: sends the visitor to the homepage pricing section
-- `Checkout`: sends the visitor to the homepage pricing section to start checkout
+```text
+Yoooo | Whatcha
+Draft Parker
+Close
+```
+
+These buttons send website-visible operator messages after an allowlisted operator taps them:
+
+- `Yoooo`: sends `Yooo - how'd you find my site?`
+- `Whatcha`: sends `Whatcha trying to make?`
+
+`Draft Parker` is operator-only and AI-backed when `OPENAI_API_KEY` is configured. It posts a private Parker-style draft in the Telegram topic only. The generated Telegram note includes `Send draft` and `Discard` buttons. `Send draft` writes the generated draft to the visitor transcript as one normal operator message. `Discard` prevents that generated draft from being sent later. Duplicate `Send draft` or `Discard` callbacks do not create duplicate visitor-visible messages.
+
+`Close` closes the website thread and starts the closed-transcript retention window.
+
+Older in-flight Telegram keyboards may still include legacy buttons. The webhook continues to validate those callback payloads safely, but new topic headers do not show them by default.
 
 These buttons are operator-only and AI-backed when `OPENAI_API_KEY` is configured:
 
-- `Draft reply`: posts a private AI draft in the Telegram topic only
 - `Summary`: posts a private AI lead summary in the Telegram topic only
 - `Codex prompt`: posts a private paste-ready Codex prompt in the Telegram topic only
 - `Linear draft`: posts a private paste-ready Linear issue draft in the Telegram topic only
 
-This operator-only button does not use AI:
-
-- `Hot lead`: marks the Convex support thread as a hot lead and posts a Telegram note
-
-`Close thread` closes the website thread and starts the closed-transcript retention window.
-
-The AI and Linear buttons are draft-only. They do not create a Linear issue and do not send generated text to the visitor. Each button creates a `supportOperatorActions` audit record with the operator id, callback query id, source message when available, AI generation status, generated output when applicable, generated output source, model, generation failure reason, operator-note delivery status, Telegram note message id or delivery failure reason, and customer-visible message id when one is created.
+Legacy AI and Linear buttons are draft-only unless the explicit `Send draft` decision is present for a `Draft Parker` reply. They do not create a Linear issue and do not send generated text to the visitor automatically. Each button creates a `supportOperatorActions` audit record with the operator id, callback query id, source message when available, AI generation status, generated output when applicable, generated output source, model, generation failure reason, operator-note delivery status, Telegram note message id or delivery failure reason, customer-visible message id when one is created, and draft-send or discard decision when applicable.
 
 When Parker taps an AI-backed button, the callback mutation stores a deterministic private fallback and schedules OpenAI Responses API generation in the same Convex transaction, then the webhook answers Telegram with `answerCallbackQuery`. The Responses request sets `store: false`. If generation succeeds, Convex patches the same audit record with `generatedOutputSource: "openai_responses"` and posts the generated text as a private Telegram topic note. If `OPENAI_API_KEY` is missing or OpenAI fails, Convex keeps `generatedOutputSource: "deterministic"`, records `generationFailureReason`, and posts the deterministic fallback note instead. If Telegram cannot receive that private note, Convex records `operatorNoteDeliveryStatus: "delivery_failed"` and leaves the AI generation result intact.
 
-AI output is never inserted into `supportMessages`, never shown in the homepage widget transcript automatically, and must not be sent to PostHog. Parker can still send a normal Telegram reply manually after reading or editing a draft; that manual reply is what becomes visitor-visible.
+AI output is not inserted into `supportMessages` or shown in the homepage widget transcript until Parker explicitly taps `Send draft` or sends a normal Telegram reply manually. Generated output must not be sent to PostHog.
 
-Telegram inline keyboard callback data is limited to 1-64 bytes, so the app uses compact `support:<support-id>:<action>` callback data. The webhook answers callback queries with `answerCallbackQuery` so Telegram clients do not leave a spinner running.
+Telegram inline keyboard callback data is limited to 1-64 bytes, so the app uses compact `support:<support-id>:<action>` callback data for topic actions and `draft:<operator-action-id>:<decision>` for draft decisions. The webhook answers callback queries with `answerCallbackQuery` so Telegram clients do not leave a spinner running.
 
 ## Verify setup
 
@@ -136,9 +153,9 @@ Check that:
 
 Then open the homepage, open the Message Parker launcher, and send a test message. A new Telegram topic named with the `SBS-...` support id and safe entry label should appear, such as `homepage` or `workspace`. Reply in that topic from an operator user listed in `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`; the reply should appear in the widget on the next refresh or poll. Signed-in buyers also get an `Ask Parker` launcher inside protected workspace routes; messages from that launcher use the same support thread bridge with `entrySurface: "workspace_support_widget"` and do not send workspace source, findings, logs, local paths, or payment details automatically.
 
-Click `Ask email` or `Pricing` in Telegram. The widget should show a new operator message after refresh. Click `Draft reply` or `Summary`; Telegram should first acknowledge the button tap, then receive an operator-only AI note. The widget should not receive a new message from the AI action. Click `Close thread`; the widget should show the closed state after refresh.
+Click `Yoooo` in Telegram. The widget should show `Yooo - how'd you find my site?` after refresh. Click `Whatcha`; the widget should show `Whatcha trying to make?` after refresh. Click `Draft Parker`; Telegram should first acknowledge the button tap, then receive an operator-only AI note with `Send draft` and `Discard`. The widget should not receive a new message from the AI action until `Send draft` is tapped. Click `Close`; the widget should show the closed state after refresh.
 
-To verify the AI provider path, set `OPENAI_API_KEY`, tap `Draft reply`, and inspect the `supportOperatorActions` record for that callback. It should keep the same action row, set `aiDraftGenerationStatus` to `completed`, set `generatedOutputSource` to `openai_responses`, set `generatedOutputModel` to the active support draft model, record `operatorNoteDeliveryStatus`, and leave `supportMessages` unchanged. Unset `OPENAI_API_KEY` and tap a new AI button to prove the fallback path: Telegram should receive the deterministic fallback note and the action row should contain `generationFailureReason`.
+To verify the AI provider path, set `OPENAI_API_KEY`, tap `Draft Parker`, and inspect the `supportOperatorActions` record for that callback. It should keep the same action row, set `aiDraftGenerationStatus` to `completed`, set `generatedOutputSource` to `openai_responses`, set `generatedOutputModel` to the active support draft model, record `operatorNoteDeliveryStatus`, and leave `supportMessages` unchanged until `Send draft` is tapped. Tap `Send draft` and verify exactly one operator support message is created. Tap `Send draft` again and verify no duplicate message is created. Unset `OPENAI_API_KEY` only in a non-production deployment and tap a new AI button to prove the fallback path: Telegram should receive the deterministic fallback note and the action row should contain `generationFailureReason`.
 
 ## Operations runbook
 

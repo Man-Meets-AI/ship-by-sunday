@@ -1,6 +1,8 @@
 import type { GenericId } from "convex/values";
 
 export const supportOperatorActionTypeValues = [
+	"ask_how_found",
+	"ask_what_building",
 	"close_thread",
 	"ask_for_email",
 	"ask_for_context",
@@ -25,6 +27,10 @@ export const supportAiDraftActionTypeValues = [
 
 export type SupportAiDraftActionType =
 	(typeof supportAiDraftActionTypeValues)[number];
+
+export const supportDraftDecisionValues = ["send", "discard"] as const;
+
+export type SupportDraftDecision = (typeof supportDraftDecisionValues)[number];
 
 export type SupportOperatorActionDefinition = {
 	readonly actionType: SupportOperatorActionType;
@@ -62,6 +68,18 @@ const CALLBACK_DATA_BYTE_LIMIT = 64;
 
 const supportOperatorActionDefinitions = [
 	{
+		actionType: "ask_how_found",
+		callbackSlug: "yoooo",
+		buttonLabel: "Yoooo",
+		visibility: "customer_visible",
+	},
+	{
+		actionType: "ask_what_building",
+		callbackSlug: "whatcha",
+		buttonLabel: "Whatcha",
+		visibility: "customer_visible",
+	},
+	{
 		actionType: "ask_for_email",
 		callbackSlug: "email",
 		buttonLabel: "Ask email",
@@ -88,7 +106,7 @@ const supportOperatorActionDefinitions = [
 	{
 		actionType: "draft_reply",
 		callbackSlug: "draft",
-		buttonLabel: "Draft reply",
+		buttonLabel: "Draft Parker",
 		visibility: "operator_only",
 	},
 	{
@@ -118,7 +136,7 @@ const supportOperatorActionDefinitions = [
 	{
 		actionType: "close_thread",
 		callbackSlug: "close",
-		buttonLabel: "Close thread",
+		buttonLabel: "Close",
 		visibility: "lifecycle",
 	},
 ] as const satisfies readonly SupportOperatorActionDefinition[];
@@ -179,29 +197,73 @@ export function parseSupportActionCallbackData(callbackData: string) {
 	};
 }
 
+export function buildSupportDraftDecisionCallbackData(
+	operatorActionId: GenericId<"supportOperatorActions">,
+	decision: SupportDraftDecision,
+) {
+	const callbackData = `draft:${operatorActionId}:${decision}`;
+	if (
+		new TextEncoder().encode(callbackData).byteLength > CALLBACK_DATA_BYTE_LIMIT
+	) {
+		throw new Error(
+			"Support draft decision callback data exceeds Telegram's limit.",
+		);
+	}
+
+	return callbackData;
+}
+
+export function parseSupportDraftDecisionCallbackData(callbackData: string) {
+	const match = callbackData.match(/^draft:([a-z0-9]+):(send|discard)$/);
+	if (!match) {
+		return null;
+	}
+
+	const [, operatorActionId, decision] = match;
+	if (!operatorActionId || !isSupportDraftDecision(decision)) {
+		return null;
+	}
+
+	return {
+		operatorActionId: operatorActionId as GenericId<"supportOperatorActions">,
+		decision,
+	};
+}
+
+export function buildTelegramDraftDecisionKeyboard(
+	operatorActionId: GenericId<"supportOperatorActions">,
+) {
+	return {
+		inline_keyboard: [
+			[
+				{
+					text: "Send draft",
+					callback_data: buildSupportDraftDecisionCallbackData(
+						operatorActionId,
+						"send",
+					),
+				},
+				{
+					text: "Discard",
+					callback_data: buildSupportDraftDecisionCallbackData(
+						operatorActionId,
+						"discard",
+					),
+				},
+			],
+		],
+	};
+}
+
 export function buildTelegramSupportActionKeyboard(supportId: string) {
 	return {
 		inline_keyboard: [
 			[
-				buildButton("ask_for_email", supportId),
-				buildButton("ask_for_context", supportId),
+				buildButton("ask_how_found", supportId),
+				buildButton("ask_what_building", supportId),
 			],
-			[
-				buildButton("send_pricing_link", supportId),
-				buildButton("send_checkout_link", supportId),
-			],
-			[
-				buildButton("draft_reply", supportId),
-				buildButton("summarize_lead", supportId),
-			],
-			[
-				buildButton("generate_codex_prompt", supportId),
-				buildButton("create_linear_draft", supportId),
-			],
-			[
-				buildButton("mark_hot_lead", supportId),
-				buildButton("close_thread", supportId),
-			],
+			[buildButton("draft_reply", supportId)],
+			[buildButton("close_thread", supportId)],
 		],
 	};
 }
@@ -211,6 +273,16 @@ export function buildSupportOperatorActionEffect(
 	context: SupportActionThreadContext,
 ): SupportOperatorActionEffect {
 	switch (actionType) {
+		case "ask_how_found":
+			return buildCustomerVisibleEffect(
+				"Sent Yoooo.",
+				"Yooo - how'd you find my site?",
+			);
+		case "ask_what_building":
+			return buildCustomerVisibleEffect(
+				"Sent Whatcha.",
+				"Whatcha trying to make?",
+			);
 		case "ask_for_email":
 			return buildCustomerVisibleEffect(
 				"Sent email ask.",
@@ -275,6 +347,12 @@ function buildButton(actionType: SupportOperatorActionType, supportId: string) {
 			definition.actionType,
 		),
 	};
+}
+
+function isSupportDraftDecision(
+	value: string | undefined,
+): value is SupportDraftDecision {
+	return value === "send" || value === "discard";
 }
 
 function buildCustomerVisibleEffect(
