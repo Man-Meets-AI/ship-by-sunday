@@ -6,6 +6,8 @@ describe("cli", () => {
 
 		await expect(runCli(["--help"])).resolves.toBe(0);
 
+		expect(logSpy.mock.calls.join("\n")).toContain("shipbysunday install");
+		expect(logSpy.mock.calls.join("\n")).toContain("shipbysunday i");
 		expect(logSpy.mock.calls.join("\n")).toContain("setup pair <token>");
 		expect(logSpy.mock.calls.join("\n")).toContain("daemon start");
 		expect(logSpy.mock.calls.join("\n")).toContain(

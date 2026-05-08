@@ -2,7 +2,7 @@
 title: 'Planning Brief 1: Install Worker Foundations Planning Runtime'
 program_id: sbs-worker-foundations-installer
 brief_version: 1
-status: current
+status: superseded
 summary: Implement the first Worker Foundations installer slice for a visible repo-local planning-runtime profile.
 read_when:
   - Authoring or implementing the first Worker Foundations installer child ExecPlan.

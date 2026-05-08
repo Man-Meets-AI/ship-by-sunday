@@ -28,16 +28,19 @@ export async function runBoundedProcess({
 	command,
 	args,
 	cwd,
+	env = process.env,
 	timeoutMs = getReadinessProbeTimeoutMs(),
 }: {
 	command: string;
 	args: string[];
 	cwd?: string;
+	env?: NodeJS.ProcessEnv;
 	timeoutMs?: number;
 }): Promise<BoundedProcessResult> {
 	try {
 		const { stdout, stderr } = await execFileAsync(command, args, {
 			cwd,
+			env,
 			timeout: timeoutMs,
 			windowsHide: true,
 			maxBuffer: 1024 * 1024,

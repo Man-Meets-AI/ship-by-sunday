@@ -1,5 +1,13 @@
 # Learnings
 
+## 2026-05-08 Worker Foundations Arena Dry Run
+
+- Fact: Arena CRM currently has legacy Worker-style planning scripts that forward through `scripts/run-runtime.sh`, so the productized installer must recognize those exact commands as managed migration candidates rather than owner-authored script conflicts.
+  Verified by: A read-only `shipbysunday install --repo <arena-crm-checkout> --dry-run --json --no-kickoff` smoke from the local-runner implementation; after legacy script recognition, the remaining blocker was missing local license activation.
+
+- Fact: Worker-installed `scripts/run-worker.sh` must not depend on external shell utilities when it is proving a managed Bun path with a stripped PATH.
+  Verified by: The no-global-Bun installer fixture failed when the script used `dirname`, then passed after the script switched to shell parameter expansion and prepended `~/.worker/toolchains/bun/bin` to PATH for nested Bun package scripts.
+
 ## 2026-05-07 Passwordless Checkout Account Handoff
 
 - Fact: A Stripe Checkout payment cannot safely create an authenticated browser session by itself.

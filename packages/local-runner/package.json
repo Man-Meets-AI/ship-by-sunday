@@ -4,7 +4,8 @@
 	"private": false,
 	"type": "module",
 	"bin": {
-		"ship-by-sunday": "./dist/cli.js"
+		"ship-by-sunday": "./dist/cli.js",
+		"shipbysunday": "./dist/cli.js"
 	},
 	"files": [
 		"dist/cli.js"

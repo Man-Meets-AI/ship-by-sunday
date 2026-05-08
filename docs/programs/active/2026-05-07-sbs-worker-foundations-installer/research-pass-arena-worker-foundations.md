@@ -32,20 +32,22 @@ The existing runner's wrapper-first model is too small for this product outcome.
 
 ## Product Implication
 
-The product should become a Worker Foundations installer. A user-facing command such as `ship-by-sunday worker install --profile planning-runtime --repo <path>` should inspect the target repo, plan visible files, apply a safe subset, and run proof. The installer should leave behind:
+The product should become a Worker Foundations installer. The 2026-05-08 product-shape decision supersedes the initial profile/runtime names below: the customer command is `shipbysunday install`, the installed source root is `apps/worker`, the forwarding script is `scripts/run-worker.sh`, and local proof/state lives under `.worker/`. The core research finding remains that the target repo needs visible local source, not hidden package wrappers.
 
-- `apps/runtime/**`
-- `scripts/run-runtime.sh`
+The installer should leave behind:
+
+- `apps/worker/**`
+- `scripts/run-worker.sh`
 - Program and ExecPlan docs, prompts, validators, and indexes
-- root scripts for `programs:lint`, `plans:lint`, `markdown:lint`, `docs:validate`, `program:write-child-plan`, and `execplan:*`
-- `.runtime/` ignored in `.gitignore`
+- root scripts for `programs:lint`, `plans:lint`, `markdown:lint`, `docs:validate`, `program:write-child-plan`, bounded ExecPlan commands, and `worker:test`
+- `.worker/` protected as ignored local state
 - a dogfood Program packet and first child ExecPlan when the target repo does not already have an active Program loop
-- sync-safe install proof under `.sbs/worker-install/**`
+- sync-safe install proof under `.worker/**` plus a tracked `docs/worker/install-report.md`
 
 ## Watchpoints
 
-Do not copy Worker-specific state. Worker has local runtime state, dashboard/control surfaces, provider integrations, role docs, topology, notes, goals, projects, Telegram/Discord surfaces, and app-specific process commands that are not part of a portable planning-runtime foundation.
+Do not copy Worker-specific state. Worker has local runtime state, dashboard/control surfaces, provider integrations, role docs, topology, notes, goals, projects, Telegram/Discord surfaces, and app-specific process commands that are not part of portable Worker Foundations.
 
 Do not preserve Arena's temporary harness assumptions. The harness code was useful only as evidence of the starting gap. The product should replace parallel validation surfaces with the canonical Worker/SBS command surface.
 
-Do not skip dogfooding. The install has not proven the planning-runtime substrate until the target repo can run the Program loop and create or validate a Program-linked child ExecPlan with immutable planning-brief provenance.
+Do not skip dogfooding. The install has not proven the Worker Foundations substrate until the target repo can run the Program loop and create a Program-linked child ExecPlan with immutable planning-brief provenance through the installed command surface.

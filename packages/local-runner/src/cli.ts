@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { runDaemonCommand } from "./commands/daemon";
 import { runDocsOperatingSystemCommand } from "./commands/docs-operating-system";
 import { runDoctorPassCommand } from "./commands/doctor-pass";
+import { runInstallCommand } from "./commands/install";
 import { runOneShotCommand } from "./commands/one-shot";
 import { runSetupCheckCommand } from "./commands/setup-check";
 import { runSetupPairCommand } from "./commands/setup-pair";
@@ -13,6 +14,8 @@ const HELP_TEXT = `
 Ship by Sunday local runner
 
 Usage:
+  shipbysunday install [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
+  shipbysunday i [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
   ship-by-sunday setup pair <token> [--repo <path>] [--api-url <url>] [--repair] [--json]
   ship-by-sunday setup check [--repo <path>] [--json]
   ship-by-sunday setup check --codex-config-preview
@@ -44,6 +47,9 @@ export async function runCli(argv = process.argv.slice(2)) {
 			return 0;
 		}
 
+		if (command === "install" || command === "i") {
+			return await runInstallCommand([subcommand, ...rest].filter(Boolean));
+		}
 		if (command === "setup" && subcommand === "pair") {
 			return await runSetupPairCommand(rest);
 		}
