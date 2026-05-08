@@ -30,6 +30,7 @@ export function WorkspaceSupportWidget({
 			content={workspaceSupportWidgetContent}
 			entrySurface="workspace_support_widget"
 			fallbackHref={fallbackHref}
+			launcherMotion="standard"
 		/>
 	);
 }

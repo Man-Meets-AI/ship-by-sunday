@@ -1,5 +1,10 @@
 # Learnings
 
+## 2026-05-08 Vitest Runner
+
+- Fact: Tests that import `vi.hoisted` must run through the repo Vitest scripts, not `bun test`, because Bun's test runner does not provide `vi.hoisted`.
+  Verified by: `bun test apps/web/tests/integration-ui/home-page-support-widget.test.tsx apps/web/tests/integration-ui/workspace-support-widget.test.tsx` failed before test execution with `vi.hoisted is not a function`, while `bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-support-widget.test.tsx tests/integration-ui/workspace-support-widget.test.tsx` passed.
+
 ## 2026-05-08 Worker Foundations Arena Dry Run
 
 - Fact: Arena CRM currently has legacy Worker-style planning scripts that forward through `scripts/run-runtime.sh`, so the productized installer must recognize those exact commands as managed migration candidates rather than owner-authored script conflicts.

@@ -13,16 +13,20 @@ import {
 	useSupportChat,
 } from "./use-support-chat";
 
+type SupportWidgetLauncherMotion = "standard" | "squishy";
+
 export function SupportWidget({
 	analyticsSurface,
 	content,
 	entrySurface,
 	fallbackHref,
+	launcherMotion,
 }: {
 	readonly analyticsSurface: SupportWidgetAnalyticsSurface;
 	readonly content: SupportWidgetContent;
 	readonly entrySurface: SupportWidgetEntrySurface;
 	readonly fallbackHref: string;
+	readonly launcherMotion: SupportWidgetLauncherMotion;
 }) {
 	const supportChat = useSupportChat({
 		analyticsSurface,
@@ -59,9 +63,21 @@ export function SupportWidget({
 				<button
 					type="button"
 					onClick={supportChat.openChat}
-					className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#111418] px-4 py-3 text-sm font-semibold text-white shadow-2xl shadow-black/25 transition hover:-translate-y-0.5 hover:bg-[#1a1f25] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#D8FF76]"
+					className={cn(
+						"pointer-events-auto group inline-flex origin-bottom-right items-center gap-2 rounded-full border border-white/15 bg-[#111418] px-4 py-3 text-sm font-semibold text-white shadow-2xl shadow-black/25 outline-none transition-[transform,background-color,box-shadow] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-[#D8FF76] motion-reduce:transition-none",
+						launcherMotion === "squishy"
+							? "hover:-translate-y-1 hover:scale-[1.03] hover:bg-[#1a1f25] hover:shadow-black/35 active:translate-y-0.5 active:scale-x-[1.06] active:scale-y-[0.94]"
+							: "hover:-translate-y-0.5 hover:bg-[#1a1f25] active:translate-y-px",
+					)}
 				>
-					<MessageCircle className="size-4" aria-hidden="true" />
+					<MessageCircle
+						className={cn(
+							"size-4",
+							launcherMotion === "squishy" &&
+								"transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 group-active:scale-95 motion-reduce:transition-none",
+						)}
+						aria-hidden="true"
+					/>
 					<span>{content.launcherLabel}</span>
 				</button>
 			)}

@@ -12,6 +12,7 @@ export function HomePageSupportWidget({
 			content={supportWidget.content}
 			entrySurface="homepage_support_widget"
 			fallbackHref={supportWidget.fallbackHref}
+			launcherMotion="squishy"
 		/>
 	);
 }
