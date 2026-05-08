@@ -1,16 +1,16 @@
 ---
 title: Install Worker Foundations
-status: active
+status: complete
 created_at: 2026-05-07
-completed_at: null
+completed_at: 2026-05-08
 summary: Add the first native Worker Foundations installer path that installs visible repo-local Worker source into a target repo and proves it by dogfooding the Program loop.
-post_build_recap: null
+post_build_recap: The local runner now exposes `shipbysunday install` and `shipbysunday i`, installs visible Worker Foundations source into target repos, dogfoods the Program-to-child-ExecPlan loop, records sync-safe proof, supports proof-gated local commits, and can run Worker proof through a managed Bun toolchain imported from safe local sources.
 program_id: sbs-worker-foundations-installer
 planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
-  - Implementing `shipbysunday install`.
+  - Reviewing the first completed Worker Foundations installer slice.
   - Changing local-runner install bundles, Worker Foundations templates, or Arena smoke proof.
-  - Reviewing how repo-local Worker installation differs from the wrapper-only docs operating-system runner.
+  - Planning follow-up license activation, native distribution, or bundled Bun provisioning work.
 ---
 
 # Install Worker Foundations
@@ -39,6 +39,7 @@ The visible user outcome is simple: from a target repo, a user or agent can run 
 - [x] 2026-05-08: Ran final local-runner tests, build, package smoke, lint, typecheck, format check, Program lint, ExecPlan lint, markdown metadata lint, and diff check.
 - [x] 2026-05-08: Added Worker-managed Bun toolchain preparation for existing managed Bun, compatible PATH Bun, explicit `SHIPBYSUNDAY_WORKER_BUN`, and current Bun runtime import; added a no-global-Bun fixture proving install and dogfood can run through `~/.worker/toolchains/bun/bin/bun`.
 - [x] 2026-05-08: Re-ran full local-runner validation, package smoke, Program lint, ExecPlan lint, markdown lint, diff check, and Arena dry-run smoke after the toolchain work.
+- [x] 2026-05-08: Moved this ExecPlan to `docs/exec-plans/completed/` after the implementation landed in `927c152a` and the remaining work was narrowed to follow-up product hardening slices.
 
 ## Surprises & Discoveries
 
@@ -164,7 +165,7 @@ Date: 2026-05-08
 
 ## Outcomes & Retrospective
 
-This plan is active. The first implementation makes Worker Foundations installation a runnable product path rather than only a research conclusion. It shipped the local-runner command surface, first visible Worker source templates, sync-safe plan/result artifacts, dogfood Program and child ExecPlan proof, proof-gated commit support, managed Bun import from safe local sources, and Arena read-only dry-run smoke. The intentionally deferred gaps are native executable packaging, browser/device license activation, bundled or downloaded Bun provisioning, full interactive checklist polish, CI patching, and non-JS repo support.
+This plan is complete. The first implementation makes Worker Foundations installation a runnable product path rather than only a research conclusion. It shipped the local-runner command surface, first visible Worker source templates, sync-safe plan/result artifacts, dogfood Program and child ExecPlan proof, proof-gated commit support, managed Bun import from safe local sources, and Arena read-only dry-run smoke. The intentionally deferred gaps are native executable packaging, browser/device license activation, bundled or downloaded Bun provisioning, full interactive checklist polish, CI patching, and non-JS repo support; those belong in later Program slices rather than this completed ExecPlan.
 
 ## Context and Orientation
 

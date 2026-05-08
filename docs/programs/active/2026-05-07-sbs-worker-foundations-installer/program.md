@@ -46,12 +46,13 @@ This first slice is still not the final customer distribution path. Browser/devi
 
 - [x] 2026-05-07: Converted the Arena discovery into an active Program packet so the product direction is durable in the repo.
 - [x] 2026-05-07: Chose the first product boundary: a Worker Foundations installer that installs visible repo-local source instead of only hidden package-owned wrappers.
-- [x] 2026-05-07: Created the first child ExecPlan, now revised at `docs/exec-plans/active/2026-05-07-install-worker-foundations.md`.
+- [x] 2026-05-07: Created the first child ExecPlan, later completed at `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`.
 - [x] 2026-05-08: Interviewed the install design and locked the product-facing shape: native `shipbysunday install`, no user-visible install profile picker, required grouped install checklist, clean branch, proof-gated auto-commit, `apps/worker`, `scripts/run-worker.sh`, `.worker/`, Bun-first Worker package with private Worker-managed Bun provisioning, managed agent instructions, Worker-managed Codex permission profiles for kickoff safety, and a real dogfood Program plus child ExecPlan.
 - [x] 2026-05-08: Implemented the first local-runner installer slice with sync-safe dry-run JSON, license and clean-worktree gates, Worker-managed Codex profile setup, `apps/worker` templates, root script patching, `.worker/` protection, dogfood child-plan proof, validation proof, report writing, local commit support, and optional foreground Codex kickoff.
 - [x] 2026-05-08: Added fixture coverage for sparse target repos, unknown package-script conflicts, legacy `scripts/run-runtime.sh` script migration, and dogfood proof with `--no-commit --no-kickoff`.
 - [x] 2026-05-08: Smoke-tested read-only dry-run against Arena CRM. It stayed sync-safe and read-only, recognized legacy `scripts/run-runtime.sh` commands as managed updates, and blocked only on missing local license activation.
 - [x] 2026-05-08: Added Worker-managed Bun toolchain import for existing managed Bun, compatible PATH Bun, explicit `SHIPBYSUNDAY_WORKER_BUN`, and current Bun runtime; fixture proof covers install and dogfood with no `bun` on PATH.
+- [x] 2026-05-08: Completed the first installer child ExecPlan and moved it to `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`.
 - [ ] Harden native distribution, license activation, and package-manager fallback after the local installer path is proven.
 
 ## Decision Log
@@ -198,15 +199,13 @@ Date: 2026-05-07
 
 ## Slice Ledger
 
-The first active child ExecPlan is `docs/exec-plans/active/2026-05-07-install-worker-foundations.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The first child ExecPlan is complete at `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
 Expected later slices are Worker template extraction and hardening, Arena golden smoke automation, update/idempotence handling for already-installed repos, native distribution and licensing hardening, and optional CI wiring. Worker-specific state, provider setup, app-stack process management, dashboards, Telegram/Discord/control-panel surfaces, and full Worker operating state remain outside this first Program until a later brief explicitly admits them.
 
 ## Next Slice
 
-The active child ExecPlan is `docs/exec-plans/active/2026-05-07-install-worker-foundations.md`.
-
-The remaining outcome for the next slice is a real installer command that can inspect a clean target repo, verify license state, prepare Worker-managed Codex and Bun safety/toolchain prerequisites, show the grouped checklist, create or reuse `shipbysunday/install`, install visible repo-local Worker source, patch root commands and managed instructions, protect `.worker/`, dogfood the installed Program loop, run proof, write `docs/worker/install-report.md`, and create a local commit when proof passes.
+No child ExecPlan is currently active for this Program. The next recommended slice is browser/device license activation for `shipbysunday install`, because Arena and fixture proof now show the installer path works but real customer installs still block on missing local license state. That slice should keep the completed installer boundary intact, avoid provider or CI scope creep, and preserve sync-safe JSON/proof behavior.
 
 ## Risks and Watchpoints
 
