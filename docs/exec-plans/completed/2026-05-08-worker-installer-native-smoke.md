@@ -1,12 +1,12 @@
 ---
 title: Prove Worker Installer Native Smoke
-status: active
+status: complete
 created_at: 2026-05-08
-completed_at: null
+completed_at: 2026-05-08
 summary: Add a native distributable smoke path for shipbysunday install and prove it against disposable repos beyond runner-test.
-post_build_recap: null
+post_build_recap: Package smoke now compiles a standalone shipbysunday CLI, runs a native actual install into a disposable repo, and dry-runs a second pnpm-shaped disposable repo with isolated Worker license state.
 program_id: sbs-worker-foundations-installer
-planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
   - Changing native or distributable packaging for the local-runner CLI.
   - Verifying Worker Foundations installer release readiness.
@@ -28,13 +28,13 @@ After this slice, the Program should have evidence that the distributable CLI ca
 ## Progress
 
 - [x] 2026-05-08: Created this Program-linked child ExecPlan after completing the Worker-managed Bun provisioning fallback slice.
-- [ ] Add native build or native smoke command support for the local-runner CLI.
-- [ ] Smoke `shipbysunday install` through that distributable artifact against disposable repos.
-- [ ] Decide whether Program-level acceptance is true and either complete the Program or document the remaining blocker.
+- [x] 2026-05-08: Added native compiled CLI smoke support inside `packages/local-runner/tests/package-smoke.ts`.
+- [x] 2026-05-08: Smoked `shipbysunday install` through the native artifact against one disposable actual-install repo and one pnpm-shaped dry-run repo.
+- [x] 2026-05-08: Confirmed Program-level acceptance is true after native smoke, runner-test smoke, package smoke, and completed child slices.
 
 ## Surprises & Discoveries
 
-None yet.
+The local Bun toolchain can compile the local-runner CLI with `bun build --compile`, so native proof did not require new dependencies or a release pipeline.
 
 ## Decision Log
 
@@ -48,7 +48,11 @@ Date: 2026-05-08
 
 ## Outcomes & Retrospective
 
-This plan is active. Fill this section with native smoke evidence, additional repo smoke evidence, and the final Program closeout decision before moving the plan to `docs/exec-plans/completed/`.
+This plan is complete. `package:smoke` now builds a standalone native `shipbysunday` executable in a temporary directory, runs `shipbysunday install --yes --json --no-kickoff` through that artifact against a disposable committed repo, verifies the install report exists, and verifies the repo worktree is clean after the proof-gated install commit.
+
+The same native artifact also runs `shipbysunday install --dry-run --json --no-kickoff` against a second disposable repo with `packageManager: pnpm@9.12.0`, proving a non-default package-manager shape without requiring pnpm to be installed or mutating the repo. Arena CRM was not touched.
+
+This closes the final Program acceptance gap, so the Program can move to completed after Program docs and indexes are updated.
 
 ## Context and Orientation
 
@@ -107,7 +111,7 @@ Run validation:
     bun run --cwd packages/local-runner package:smoke
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Validation and Acceptance
@@ -125,11 +129,13 @@ Run full package validation:
     bun run --cwd packages/local-runner build
     bun run --cwd packages/local-runner package:smoke
 
+Completion result: full tests passed with 24 files passed and 2 skipped; lint found 0 warnings and 0 errors; typecheck passed; format:check passed; build produced `dist/cli.js`; package smoke passed, including native actual install and pnpm-shaped dry-run.
+
 Run docs validation:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Idempotence and Recovery

@@ -6,7 +6,7 @@ completed_at: 2026-05-08
 summary: Make normal shipbysunday install show a grouped all-required checklist before confirmation while preserving JSON and noninteractive contracts.
 post_build_recap: Normal interactive installs now render a grouped all-required checklist before confirmation, cancellation exits before repo mutation, and JSON/--yes modes remain prompt-free. Focused and full local-runner validation, package smoke, and runner-test dry-run passed.
 program_id: sbs-worker-foundations-installer
-planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
   - Changing the human confirmation surface for shipbysunday install.
   - Verifying grouped checklist behavior for Worker Foundations installer phases.
@@ -112,7 +112,7 @@ Complete the plan only after docs validation passes:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Validation and Acceptance
@@ -147,7 +147,7 @@ Run Program and docs validation:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-interactive-checklist.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 Read-only runner-test smoke:

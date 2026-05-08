@@ -1,11 +1,11 @@
 ---
 program_id: sbs-worker-foundations-installer
 title: Shipbysunday Worker Foundations Installer
-status: active
+status: complete
 created_at: 2026-05-07
-completed_at: null
+completed_at: 2026-05-08
 summary: Productize the Worker/Arena proof into a native installer that gives another repo visible, repo-local Program, ExecPlan, prompt, validator, and Worker source.
-post_build_recap: null
+post_build_recap: Shipped the Worker Foundations installer with source-visible repo install, browser/device license activation, grouped interactive checklist, Worker-managed Bun provisioning fallback, proof-gated report/commit, native compiled CLI smoke, and disposable repo proof.
 read_when:
   - Planning or implementing the Shipbysunday Worker Foundations installer.
   - Changing local-runner docs operating-system install bundles, Program/ExecPlan tooling, or repo-local Worker installation.
@@ -26,7 +26,7 @@ This initiative is moving correctly when a target repo can receive the default W
 
 ## Program Inputs
 
-The durable packet artifacts for this Program live in `docs/programs/active/2026-05-07-sbs-worker-foundations-installer/`.
+The durable packet artifacts for this Program live in `docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/`.
 
 The research input is `research-pass-arena-worker-foundations.md`. The normalized product direction is `normalized-pass-worker-foundations-installer.md`. The accepted initiative decision is `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. The current immutable implementation brief is `planning-brief-2.md`, and `current-planning-brief.txt` points at that brief. `planning-brief-1.md` records the earlier profile/runtime wording and is superseded by the product-shape decisions captured on 2026-05-08.
 
@@ -56,8 +56,8 @@ This first product path is still not the final customer distribution path. Nativ
 - [x] 2026-05-08: Completed browser/device license activation and package smoke coverage in `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`; fresh `~/Developer/runner-test` smoke proved empty-repo blocking, minimal-package dry-run readiness, proof-gated install, and commit `45f8d85` on `shipbysunday/install`.
 - [x] 2026-05-08: Completed grouped interactive checklist polish in `docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md`; normal interactive installs now preview all required phases before continue/cancel while JSON and `--yes` remain prompt-free.
 - [x] 2026-05-08: Completed Worker-managed Bun download fallback in `docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md`; no-local-Bun fixture coverage installs through `origin: download` and invalid downloads fail before repo mutation.
-- [ ] 2026-05-08: Started native/distributable smoke at `docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md`.
-- [ ] Harden native distribution, package-manager fallback, and broader real-project smoke after the local installer path is proven.
+- [x] 2026-05-08: Completed native/distributable smoke in `docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md`; package smoke now compiles a standalone CLI, runs a native actual install in a disposable repo, and dry-runs a pnpm-shaped disposable repo.
+- [x] 2026-05-08: Verified Program-level acceptance and prepared this Program for completed archive.
 
 ## Decision Log
 
@@ -203,21 +203,21 @@ Date: 2026-05-07
 
 ## Slice Ledger
 
-The first child ExecPlan is complete at `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The first child ExecPlan is complete at `docs/exec-plans/completed/2026-05-07-install-worker-foundations.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
-The second child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The second child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-license-activation.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
-The third child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The third child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-interactive-checklist.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
-The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The fourth child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-bun-provisioning.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
-The fifth child ExecPlan is active at `docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
+The fifth child ExecPlan is complete at `docs/exec-plans/completed/2026-05-08-worker-installer-native-smoke.md`. It carries `program_id: sbs-worker-foundations-installer` and `planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md`.
 
 Expected later slices are Worker template extraction and hardening, Arena golden smoke automation, update/idempotence handling for already-installed repos, native distribution and licensing hardening, and optional CI wiring. Worker-specific state, provider setup, app-stack process management, dashboards, Telegram/Discord/control-panel surfaces, and full Worker operating state remain outside this first Program until a later brief explicitly admits them.
 
 ## Next Slice
 
-The active child ExecPlan is `docs/exec-plans/active/2026-05-08-worker-installer-native-smoke.md`. Its required outcome is that a built distributable `shipbysunday` artifact can prove the installer command shape against disposable repos and at least one additional non-Arena project without relying on source-only `bun packages/local-runner/src/cli.ts` execution.
+No required next slice remains. All child ExecPlans are complete and all Program acceptance bullets are satisfied.
 
 ## Risks and Watchpoints
 
@@ -231,11 +231,15 @@ Do not call install proof complete because files were copied. Proof requires can
 
 Do not make Arena-only assumptions canonical. Arena is the first golden target because it exposed the gap, not because every repo should inherit Arena's folder names or temporary harness decisions.
 
-Do not claim bundled or downloaded Bun provisioning is complete yet. The current implementation can import a safe local Bun into `~/.worker/toolchains/`, but the native executable still needs a durable bundled or downloaded toolchain path for machines that have no usable local Bun source.
+Do not broaden this completed Program into unrelated Worker runtime state, provider setup, or app-stack process management. Those belong in later Programs if needed.
 
 ## Outcomes & Retrospective
 
-This Program is active. The first implementation now installs the seed Worker operating system into another repository and leaves behind local source, commands, proof, and a durable handoff prompt that another agent can use without chat history. Browser/device license activation, grouped interactive checklist polish, and Worker-managed Bun download fallback are complete for the local-runner installer path. The remaining Program work is hardening the customer distribution surface: native executable packaging and broader real-repo smoke.
+This Program is complete. It converted the Arena Worker-foundations proof into a repeatable `shipbysunday install` path that installs visible repo-local Worker source, Program/ExecPlan/prompt contracts, root command scripts, proof, and a durable install report into another repository.
+
+The shipped installer supports sync-safe dry-run JSON, noninteractive `--yes`/`--json` modes, browser/device license activation stored outside the repo, grouped all-required interactive confirmation, clean-worktree and conflict gates, Worker-managed Codex safety profiles with rollback behavior, private Worker-managed Bun provisioning from local, explicit, current-runtime, or download sources, dogfood child-plan proof, proof-gated local commit, and foreground Codex kickoff for the normal path.
+
+Validation covered focused fixture tests, full local-runner tests, package smoke, native compiled CLI smoke, `runner-test` empty/minimal/install proof, and Program/ExecPlan/markdown contract linting. Arena CRM was not touched after the user redirected smoke to disposable repos.
 
 ## Validation and Acceptance
 
@@ -260,6 +264,8 @@ Program-level acceptance requires the installer to support at least one native i
 - foreground Codex auto-kickoff through the Worker-managed project-write profile after proof and commit
 - Arena CRM smoke evidence or an equivalent checked fixture that reproduces the harness-to-Worker-foundations migration
 
+All acceptance bullets are satisfied by the completed child slices and validation evidence recorded below.
+
 ## Artifacts and Notes
 
 Arena CRM's useful reference commits were `2fd0211ccf26c8e987a1979cbbac0e14e2d3d07f`, `143de7e6a5b10bae370922c8599bf4adc9eb69a6`, and `8ad93149d3f2fffdf2d25ee5b783062a9da39208` on the `sbs/worker-foundations` branch. They are research inputs, not files to copy blindly. They used the older `apps/runtime` and `scripts/run-runtime.sh` names; the productized install should use `apps/worker` and `scripts/run-worker.sh`.
@@ -279,6 +285,8 @@ Read-only Arena CRM smoke command:
 The Arena dry-run produced a sync-safe blocked result without mutating the repo. After legacy script recognition, the remaining blocker was missing local license activation.
 
 The fresh `~/Developer/runner-test` smoke proved the current local-runner path without using Arena CRM: an empty Git repo blocked on missing root `package.json`; after adding and committing a minimal package file, dry-run returned `ready`; the real install with an isolated Worker home returned `installed`, passed all proof commands, and committed `45f8d85` on `shipbysunday/install`.
+
+The native package smoke compiles a standalone `shipbysunday` executable with `bun build --compile`, runs an actual `shipbysunday install --yes --json --no-kickoff` into a disposable repo, verifies the tracked install report and clean worktree, then dry-runs a second pnpm-shaped disposable repo through the same native artifact.
 
 The first local-runner implementation is in `packages/local-runner/src/commands/install.ts` and `packages/local-runner/src/workflows/worker-foundations-install/`. Its installed Worker source is intentionally minimal but visible and dogfoodable. Treat it as the seed substrate to harden, not as the final full Worker product.
 

@@ -6,7 +6,7 @@ completed_at: 2026-05-08
 summary: Add the first native Worker Foundations installer path that installs visible repo-local Worker source into a target repo and proves it by dogfooding the Program loop.
 post_build_recap: The local runner now exposes `shipbysunday install` and `shipbysunday i`, installs visible Worker Foundations source into target repos, dogfoods the Program-to-child-ExecPlan loop, records sync-safe proof, supports proof-gated local commits, and can run Worker proof through a managed Bun toolchain imported from safe local sources.
 program_id: sbs-worker-foundations-installer
-planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
   - Reviewing the first completed Worker Foundations installer slice.
   - Changing local-runner install bundles, Worker Foundations templates, or Arena smoke proof.
@@ -239,8 +239,8 @@ Work from the repository root:
 
 Read the planning and implementation context:
 
-    sed -n '1,220p' docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
-    sed -n '1,220p' docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
+    sed -n '1,220p' docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
+    sed -n '1,220p' docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
     sed -n '1,220p' docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/program.md
     sed -n '1,220p' packages/local-runner/src/cli.ts
     sed -n '1,260p' packages/local-runner/src/commands/docs-operating-system.ts
@@ -265,7 +265,7 @@ Before closeout, run build, package, and docs validation:
     bun run --cwd packages/local-runner package:smoke
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-07-install-worker-foundations.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-07-install-worker-foundations.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-07-install-worker-foundations.md
     git diff --check
 
 ## Validation and Acceptance
@@ -303,7 +303,7 @@ Run planning docs validation:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-07-install-worker-foundations.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-07-install-worker-foundations.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-07-install-worker-foundations.md
     git diff --check
 
 ## Idempotence and Recovery
@@ -318,7 +318,7 @@ The dogfood Program and child ExecPlan creation path should be create-only unles
 
 Reference Program packet:
 
-    docs/programs/active/2026-05-07-sbs-worker-foundations-installer/
+    docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/
 
 Arena research commits:
 

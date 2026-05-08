@@ -6,7 +6,7 @@ completed_at: 2026-05-08
 summary: Make shipbysunday install activate a missing Worker license through a browser/device flow before mutating the target repo.
 post_build_recap: Browser/device license activation now validates and persists v1 machine licenses under the Worker home, interactive missing-license installs can activate before repo mutation, noninteractive modes block honestly, packed package smoke covers `shipbysunday install`, and a fresh runner-test repository installed successfully with proof-gated commit.
 program_id: sbs-worker-foundations-installer
-planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
   - Resuming browser/device license activation for the Worker Foundations installer.
   - Changing Worker machine license storage, activation polling, package smoke, or install preflight behavior.
@@ -151,7 +151,7 @@ Run Program and docs validation:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-07-sbs-worker-foundations-installer docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md
     git diff --check
 
 Smoke a fresh disposable repo if installer behavior changes:
@@ -211,7 +211,7 @@ Completion validation on 2026-05-08:
     bun run programs:lint
     Program docs, packets, and prompts: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-license-activation.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     Both paths ok.
 
     git diff --check

@@ -6,7 +6,7 @@ completed_at: 2026-05-08
 summary: Let shipbysunday install prepare a Worker-managed Bun runtime when no usable local Bun source exists.
 post_build_recap: The installer now supports a download-origin Worker-managed Bun fallback, validates the prepared executable before repo writes, keeps download URLs and absolute paths out of JSON/report output, and has focused success/failure coverage for no-local-Bun paths.
 program_id: sbs-worker-foundations-installer
-planning_brief: docs/programs/active/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/planning-brief-2.md
 read_when:
   - Changing Worker-managed Bun toolchain provisioning.
   - Testing shipbysunday install on machines without a global Bun runtime.
@@ -118,7 +118,7 @@ Before completing this plan, run:
     bun run --cwd packages/local-runner package:smoke
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 ## Validation and Acceptance
@@ -148,7 +148,7 @@ Run Program and docs validation:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md docs/programs/active/2026-05-07-sbs-worker-foundations-installer/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-08-worker-installer-bun-provisioning.md docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/program.md
     git diff --check
 
 Read-only runner-test smoke:

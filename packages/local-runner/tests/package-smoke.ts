@@ -106,6 +106,12 @@ try {
 	const installCommandRepositoryRoot =
 		await createWorkerInstallSmokeRepository();
 	const installCommandWorkerHome = await createWorkerInstallWorkerHome();
+	const nativeInstallRepositoryRoot = await createWorkerInstallSmokeRepository(
+		"sbs-native-install-smoke-repo-",
+	);
+	const nativePackageManagerRepositoryRoot =
+		await createPackageManagerSmokeRepository();
+	const nativeInstallWorkerHome = await createWorkerInstallWorkerHome();
 
 	await runSmokePairCommand({
 		commandName: "bunx",
@@ -154,6 +160,11 @@ try {
 		repositoryRoot: installCommandRepositoryRoot,
 		workerHome: installCommandWorkerHome,
 	});
+	await runNativeWorkerInstallCommandSmoke({
+		installRepositoryRoot: nativeInstallRepositoryRoot,
+		packageManagerRepositoryRoot: nativePackageManagerRepositoryRoot,
+		workerHome: nativeInstallWorkerHome,
+	});
 	if (!existsSync(path.join(runnerHome, "credentials.json"))) {
 		throw new Error("package smoke did not write runner credentials");
 	}
@@ -175,10 +186,10 @@ async function createSmokeRepository(prefix: string) {
 	return repositoryRoot;
 }
 
-async function createWorkerInstallSmokeRepository() {
-	const repositoryRoot = await createSmokeRepository(
-		"sbs-install-command-smoke-repo-",
-	);
+async function createWorkerInstallSmokeRepository(
+	prefix = "sbs-install-command-smoke-repo-",
+) {
+	const repositoryRoot = await createSmokeRepository(prefix);
 	await runRequiredProcess("git", ["add", "package.json"], {
 		cwd: repositoryRoot,
 		label: "install smoke git add",
@@ -186,6 +197,34 @@ async function createWorkerInstallSmokeRepository() {
 	await runRequiredProcess("git", ["commit", "-m", "smoke fixture"], {
 		cwd: repositoryRoot,
 		label: "install smoke git commit",
+	});
+	return repositoryRoot;
+}
+
+async function createPackageManagerSmokeRepository() {
+	const repositoryRoot = await mkdtemp(
+		path.join(os.tmpdir(), "sbs-native-pnpm-smoke-repo-"),
+	);
+	await initializeGitRepository(repositoryRoot);
+	await writeFile(
+		path.join(repositoryRoot, "package.json"),
+		`${JSON.stringify(
+			{
+				name: "native-pnpm-smoke",
+				packageManager: "pnpm@9.12.0",
+				private: true,
+			},
+			null,
+			"\t",
+		)}\n`,
+	);
+	await runRequiredProcess("git", ["add", "package.json"], {
+		cwd: repositoryRoot,
+		label: "native package-manager smoke git add",
+	});
+	await runRequiredProcess("git", ["commit", "-m", "smoke fixture"], {
+		cwd: repositoryRoot,
+		label: "native package-manager smoke git commit",
 	});
 	return repositoryRoot;
 }
@@ -366,6 +405,119 @@ async function runPackedWorkerInstallCommandSmoke({
 	}
 	if (existsSync(path.join(repositoryRoot, "apps", "worker"))) {
 		throw new Error("packed package install dry-run wrote apps/worker");
+	}
+}
+
+async function runNativeWorkerInstallCommandSmoke({
+	installRepositoryRoot,
+	packageManagerRepositoryRoot,
+	workerHome,
+}: {
+	installRepositoryRoot: string;
+	packageManagerRepositoryRoot: string;
+	workerHome: string;
+}) {
+	const nativeCliPath = path.join(
+		await mkdtemp(path.join(os.tmpdir(), "sbs-native-cli-")),
+		"shipbysunday",
+	);
+	await runRequiredProcess(
+		"bun",
+		[
+			"build",
+			"./src/cli.ts",
+			"--target=bun",
+			"--compile",
+			"--outfile",
+			nativeCliPath,
+		],
+		{ cwd: packageRoot, label: "native cli build" },
+	);
+
+	const nativeInstallResult = await runProcess(
+		nativeCliPath,
+		[
+			"install",
+			"--repo",
+			installRepositoryRoot,
+			"--yes",
+			"--json",
+			"--no-kickoff",
+		],
+		{
+			env: {
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			},
+		},
+	);
+	if (nativeInstallResult.exitCode !== 0) {
+		throw new Error(
+			`native install smoke failed with ${nativeInstallResult.exitCode}\nSTDOUT:\n${nativeInstallResult.stdout}\nSTDERR:\n${nativeInstallResult.stderr}`,
+		);
+	}
+	const nativeInstall = JSON.parse(nativeInstallResult.stdout) as {
+		outcome?: string;
+		workflowId?: string;
+	};
+	if (
+		nativeInstall.outcome !== "installed" ||
+		nativeInstall.workflowId !== "worker-foundations-install"
+	) {
+		throw new Error(
+			`native install smoke returned an unexpected result\nSTDOUT:\n${nativeInstallResult.stdout}\nSTDERR:\n${nativeInstallResult.stderr}`,
+		);
+	}
+	if (
+		!existsSync(
+			path.join(installRepositoryRoot, "docs", "worker", "install-report.md"),
+		)
+	) {
+		throw new Error("native install smoke did not write install report");
+	}
+	const installStatus = await runProcess("git", ["status", "--short"], {
+		cwd: installRepositoryRoot,
+	});
+	if (installStatus.exitCode !== 0 || installStatus.stdout.trim() !== "") {
+		throw new Error(
+			`native install smoke left dirty worktree\nSTDOUT:\n${installStatus.stdout}\nSTDERR:\n${installStatus.stderr}`,
+		);
+	}
+
+	const nativeDryRunResult = await runProcess(
+		nativeCliPath,
+		[
+			"install",
+			"--repo",
+			packageManagerRepositoryRoot,
+			"--dry-run",
+			"--json",
+			"--no-kickoff",
+		],
+		{
+			env: {
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+			},
+		},
+	);
+	if (nativeDryRunResult.exitCode !== 0) {
+		throw new Error(
+			`native package-manager dry-run smoke failed with ${nativeDryRunResult.exitCode}\nSTDOUT:\n${nativeDryRunResult.stdout}\nSTDERR:\n${nativeDryRunResult.stderr}`,
+		);
+	}
+	const nativeDryRun = JSON.parse(nativeDryRunResult.stdout) as {
+		outcome?: string;
+		plan?: { packageManager?: string };
+	};
+	if (
+		nativeDryRun.outcome !== "ready" ||
+		nativeDryRun.plan?.packageManager !== "pnpm"
+	) {
+		throw new Error(
+			`native package-manager dry-run smoke returned an unexpected result\nSTDOUT:\n${nativeDryRunResult.stdout}\nSTDERR:\n${nativeDryRunResult.stderr}`,
+		);
+	}
+	if (existsSync(path.join(packageManagerRepositoryRoot, "apps", "worker"))) {
+		throw new Error("native package-manager dry-run wrote apps/worker");
 	}
 }
 
