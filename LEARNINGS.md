@@ -18,6 +18,11 @@
 - Fact: Worker-installed `scripts/run-worker.sh` must not depend on external shell utilities when it is proving a managed Bun path with a stripped PATH.
   Verified by: The no-global-Bun installer fixture failed when the script used `dirname`, then passed after the script switched to shell parameter expansion and prepended `~/.worker/toolchains/bun/bin` to PATH for nested Bun package scripts.
 
+## 2026-05-09 Root Typecheck Side Effects
+
+- Fact: In this checkout, root `bun typecheck` runs the Next.js production build path and can execute `runAfterProductionCompile`, including PostHog source-map release creation and upload when PostHog credentials are present in the environment.
+  Verified by: Running `bun typecheck` on 2026-05-09, which completed successfully after creating `ship-by-sunday-web@38814d7a87699696bc9b2be4c878fe9a6b68437c` in PostHog and uploading source-map symbol sets.
+
 ## 2026-05-07 Passwordless Checkout Account Handoff
 
 - Fact: A Stripe Checkout payment cannot safely create an authenticated browser session by itself.

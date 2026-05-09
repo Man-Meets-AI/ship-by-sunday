@@ -71,3 +71,13 @@
 - Mistake: Existing billing proof proved hosted Checkout, webhook fulfillment, product-access grants, and post-checkout handoff, but did not exercise the homepage Express Checkout Link handoff that failed.
   Impact: Release proof missed the browser-specific failure shape where `onBeforeCheckout` changed parent state during Link confirmation and retriggered custom session creation.
   Corrective action: Add regression coverage for confirmation-time parent rerenders and ensure payment proof covers the exact CTA/browser path that customers use.
+
+## 2026-05-09 Worker Compatibility Smoke Review
+
+- Mistake: I initially tightened the fake-Codex kickoff assertion against the raw temp repository path instead of its real path.
+  Impact: The focused smoke failed on macOS because `/var/...` temp paths resolve through `/private/var/...` during the spawned Codex process.
+  Corrective action: Normalize expected spawned-process paths with `realpath` before asserting cwd or command arguments.
+
+- Mistake: I ran root `bun typecheck` without first checking whether the command has networked build hooks in this environment.
+  Impact: The command passed, but it created a PostHog release and uploaded source maps because the local environment had PostHog credentials available.
+  Corrective action: Prefer focused package validation for scoped Worker work, and check root build hooks before broad validation commands that may talk to external services.
