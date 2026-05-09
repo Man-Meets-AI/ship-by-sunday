@@ -42,16 +42,10 @@ type WorkerInstallJsonOutput = {
 	workflowId?: string;
 };
 
-type InstallExpectation =
-	| {
-			expectedPackageManager: PackageManager;
-			type: "installs";
-	  }
-	| {
-			blockerId: string;
-			reasonIncludes: string;
-			type: "blocks";
-	  };
+type InstallExpectation = {
+	expectedPackageManager: PackageManager;
+	type: "installs";
+};
 
 type CompatibilityScenario = {
 	assertTargetIdentity?: (
@@ -82,13 +76,56 @@ const scenarios: CompatibilityScenario[] = [
 	{
 		name: "blank-slate",
 		description:
-			"Empty git repository with no package.json. This is tracked as a current product gap until blank repos default to Bun.",
-		expectation: {
-			blockerId: "root-package-json",
-			reasonIncludes: "requires a root package.json",
-			type: "blocks",
+			"Empty git repository with no package.json. The installer should create Bun defaults and a ready Worker surface.",
+		expectation: { expectedPackageManager: "bun", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(
+				packageJson.name,
+				"shipbysunday-worker-project",
+				`${label} generated name`,
+			);
+			assertEqual(
+				packageJson.packageManager,
+				"bun@1.3.5",
+				`${label} generated packageManager`,
+			);
+			assertEqual(packageJson.private, true, `${label} generated private`);
 		},
 		setup: async () => undefined,
+	},
+	{
+		name: "minimal-unclaimed-package",
+		description:
+			"Minimal existing package.json with no package-manager field or lockfile. The installer should default it to Bun.",
+		expectation: { expectedPackageManager: "bun", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(
+				packageJson.name,
+				"minimal-unclaimed-package",
+				`${label} name`,
+			);
+			assertEqual(
+				packageJson.packageManager,
+				"bun@1.3.5",
+				`${label} default packageManager`,
+			);
+			assertEqual(
+				readPackageScript(packageJson, "dev"),
+				"node server.js",
+				`${label} dev script`,
+			);
+		},
+		setup: async (repositoryRoot) => {
+			await writeJson(path.join(repositoryRoot, "package.json"), {
+				name: "minimal-unclaimed-package",
+				private: true,
+				scripts: {
+					dev: "node server.js",
+				},
+			});
+		},
 	},
 	{
 		name: "minimal-bun-package",
@@ -384,31 +421,6 @@ async function runCompatibilityScenario(
 	);
 
 	const expectation = scenario.expectation;
-	if (expectation.type === "blocks") {
-		assertEqual(
-			dryRun.exitCode,
-			2,
-			`${scenario.name} blocked dry-run exit code`,
-		);
-		assertEqual(
-			dryRun.output.outcome,
-			"blocked",
-			`${scenario.name} dry-run outcome`,
-		);
-		const blockers = dryRun.output.plan?.blockers ?? [];
-		const blocker = blockers.find(
-			(candidate) => candidate.blockerId === expectation.blockerId,
-		);
-		if (!blocker?.reason?.includes(expectation.reasonIncludes)) {
-			throw new Error(`${scenario.name} did not report expected blocker`);
-		}
-		assertMissing(
-			path.join(repositoryRoot, "apps", "worker"),
-			`${scenario.name} blocked dry-run must not write apps/worker`,
-		);
-		console.log(`${scenario.name}: expected blocker ok`);
-		return;
-	}
 
 	assertEqual(dryRun.exitCode, 0, `${scenario.name} dry-run exit code`);
 	assertEqual(
@@ -639,10 +651,25 @@ async function assertInstalledRepository({
 		path.join(repositoryRoot, "docs", "worker", "install-report.md"),
 		`${label} install report`,
 	);
+	assertExists(path.join(repositoryRoot, "README.md"), `${label} README`);
+	assertExists(path.join(repositoryRoot, "AGENTS.md"), `${label} AGENTS`);
 	assertExists(
 		path.join(repositoryRoot, "scripts", "run-worker.sh"),
 		`${label} run-worker executable`,
 	);
+
+	const help = await runProcess("./scripts/run-worker.sh", ["--help"], {
+		cwd: repositoryRoot,
+		env,
+	});
+	assertEqual(help.exitCode, 0, `${label} direct Worker help exit code`);
+	assertTextIncludes(help.stdout, "Shipbysunday Worker", `${label} help title`);
+	assertTextIncludes(
+		help.stdout,
+		"Usage: ./scripts/run-worker.sh <command> [args]",
+		`${label} help usage`,
+	);
+	assertTextIncludes(help.stdout, "docs:validate", `${label} help command`);
 
 	await runRequiredProcess("./scripts/run-worker.sh", ["docs:validate"], {
 		cwd: repositoryRoot,
@@ -672,6 +699,41 @@ async function assertInstalledRepository({
 		packageJson.scripts?.["worker:test"],
 		"./scripts/run-worker.sh test",
 		`${label} root Worker test script`,
+	);
+
+	const readme = await readFile(path.join(repositoryRoot, "README.md"), "utf8");
+	assertTextIncludes(readme, "# Shipbysunday Worker", `${label} README title`);
+	assertTextIncludes(
+		readme,
+		`${expectedPackageManager} run docs:validate`,
+		`${label} README docs command`,
+	);
+	assertTextIncludes(
+		readme,
+		`${expectedPackageManager} run worker:test`,
+		`${label} README test command`,
+	);
+	assertTextIncludes(
+		readme,
+		"./scripts/run-worker.sh --help",
+		`${label} README help command`,
+	);
+
+	const agents = await readFile(path.join(repositoryRoot, "AGENTS.md"), "utf8");
+	assertTextIncludes(
+		agents,
+		"Read `README.md`, `docs/worker/install-report.md`, the active Program, and the active ExecPlan",
+		`${label} AGENTS handoff instruction`,
+	);
+	assertTextIncludes(
+		agents,
+		`${expectedPackageManager} run docs:validate`,
+		`${label} AGENTS docs command`,
+	);
+	assertTextIncludes(
+		agents,
+		"./scripts/run-worker.sh <command>",
+		`${label} AGENTS direct command`,
 	);
 
 	const report = await readFile(
@@ -883,6 +945,12 @@ function assertJsonEqual(actual: unknown, expected: unknown, label: string) {
 		throw new Error(
 			`${label}: expected ${expectedJson ?? "undefined"}, got ${actualJson ?? "undefined"}`,
 		);
+	}
+}
+
+function assertTextIncludes(text: string, expectedText: string, label: string) {
+	if (!text.includes(expectedText)) {
+		throw new Error(`${label}: missing ${expectedText}`);
 	}
 }
 

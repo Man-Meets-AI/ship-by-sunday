@@ -26,22 +26,21 @@ The initiative is moving correctly when automated fixtures prove blank and exist
 
 ## Program Inputs
 
-The initial inputs are this Program packet, `planning-brief-1.md`, the completed compatibility harness slice in `docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md`, the current Worker installer implementation in `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts`, and the package smoke runner in `packages/local-runner/tests/package-smoke.ts`.
+The initial inputs are this Program packet, `planning-brief-1.md`, `planning-brief-2.md`, the completed compatibility harness slice in `docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md`, the completed recipient ergonomics slice in `docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md`, the current Worker installer implementation in `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts`, and the package smoke runner in `packages/local-runner/tests/package-smoke.ts`.
 
 Arena CRM remains a reference input for what a useful repo-local runtime looks like, but the productized Worker install should use `apps/worker`, `scripts/run-worker.sh`, `.worker/`, and generated Worker docs instead of copying Arena-specific runtime names.
 
 ## Current State
 
-Worker Foundations install currently has strong unit coverage and a package smoke path, but the smoke coverage is not yet organized around repo-shape compatibility. The installer preserves explicit package-manager choices for Bun, npm, pnpm, and yarn detection, but blank repos still block on missing `package.json`, generated target repos do not yet include a root README, and the direct Worker executable help path is not yet a polished recipient entrypoint.
+Worker Foundations install now has a source-level compatibility smoke organized around repo-shape compatibility. The default smoke covers blank-slate install success, unclaimed package roots that default to Bun, explicit Bun, npm, and pnpm identities that remain preserved, fresh-clone command execution, generated root README and AGENTS handoff text, Worker-specific `./scripts/run-worker.sh --help`, and fake-Codex kickoff proof.
 
-The first fixture harness slice adds a durable place to exercise realistic install scenarios. The Program remains active because the full target matrix, generated README/AGENTS ergonomics, conflict/upgrade coverage, polyglot fixtures, and release-gate integration are not complete.
+The Program remains active because conflict and upgrade coverage, polyglot fixtures, an Arena-shaped fixture, and release-gate integration are not complete.
 
 ## Progress
 
 - [x] 2026-05-09: Defined the compatibility Program around all practical repo shapes, ready-to-rip kickoff behavior, and both fast CI plus release smoke proof.
 - [x] 2026-05-09: Completed the first fixture harness slice with Bun, npm, pnpm, current blank-slate blocker, dry-run no-mutation proof, preserved target identity checks, exact proof-report assertions, fresh clone proof, and fake-Codex kickoff contract proof.
-- [ ] Land blank-slate install support so unclaimed repos default to Bun instead of blocking.
-- [ ] Generate recipient-grade root README and stronger AGENTS instructions from the installer.
+- [x] 2026-05-09: Completed the recipient ergonomics slice with blank-slate install support, unclaimed package Bun defaults, generated README/AGENTS handoff, direct Worker help, six-scenario compatibility smoke, and fake-Codex kickoff proof.
 - [ ] Expand the matrix to polyglot, conflict, upgrade, and Arena-shaped fixtures.
 - [ ] Decide which compatibility smoke commands are required in CI and which remain release-only.
 
@@ -66,12 +65,13 @@ Date: 2026-05-09
 ## Slice Ledger
 
 - `docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md` completed the first slice: create the fixture harness, cover the first installing scenarios, record current blank-slate behavior, prove fresh clone command execution, and prove fake-Codex kickoff.
+- `docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md` completed the second slice from `planning-brief-2.md`: make blank and unclaimed repositories default to Bun, generate recipient README and AGENTS handoff, make direct Worker help useful, and prove the recipient surface through installed and fresh-clone compatibility smoke.
 
-Future slices should cover package-manager policy and blank repo defaults, generated recipient docs, conflict and upgrade fixtures, polyglot and Arena-shaped fixtures, and release-gate integration.
+Future slices should cover conflict and upgrade fixtures, polyglot and Arena-shaped fixtures, and release-gate integration.
 
 ## Next Slice
 
-The next recommended slice is package-manager policy and generated recipient ergonomics. It should make blank and unclaimed repositories default to Bun, generate a root README and stronger AGENTS instructions, make `./scripts/run-worker.sh --help` a Worker-specific help entrypoint, and then flip the `blank-slate` compatibility scenario from expected blocker to install success.
+The next recommended slice is conflict, upgrade, polyglot, and Arena-shaped fixture coverage. It should add representative fixtures for existing owner README and AGENTS content, incomplete managed markers, rerunning over an already installed Worker surface, a polyglot monorepo with non-JavaScript project areas, and an Arena-shaped repo that proves the installer drops in the standalone Worker system without assuming a single Next.js app.
 
 ## Risks and Watchpoints
 
@@ -95,6 +95,7 @@ Program validation should include `bun run --cwd packages/local-runner worker:co
 
 - Compatibility harness: `packages/local-runner/tests/worker-install-compatibility-smoke.ts`
 - Harness command: `bun run --cwd packages/local-runner worker:compatibility-smoke`
+- Latest harness proof: `worker install compatibility smoke passed (6 scenarios)` with blank-slate, minimal-unclaimed-package, minimal-bun-package, next-npm-single-app, next-pnpm-monorepo, bun-different-version, and fake-Codex kickoff all passing.
 - Package smoke command: `bun run --cwd packages/local-runner package:smoke`
 - Installer implementation: `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts`
 

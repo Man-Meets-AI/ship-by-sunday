@@ -27,6 +27,7 @@ Inside that folder:
 
 Active Program folders:
 
+- `docs/programs/active/2026-05-09-shipping-evidence-hardening/` - test infrastructure, CI gates, staging, production preflight, release evidence, billing/Convex proof, and generated customer repo validation.
 - `docs/programs/active/2026-05-09-worker-install-compatibility-matrix/` - Worker Foundations install compatibility across practical repo shapes, package managers, fresh-clone proof, and kickoff smoke.
 - `docs/programs/active/2026-05-06-telegram-support-bot/` - first-party landing-page support chat, Convex support thread state, dedicated Telegram operator bot, and structured support actions.
 - `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.

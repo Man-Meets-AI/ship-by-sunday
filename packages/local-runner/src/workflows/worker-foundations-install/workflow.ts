@@ -209,6 +209,7 @@ type RootPackageManager = "bun" | "npm" | "pnpm" | "yarn";
 type ManagedFileTemplate = {
 	content: string;
 	executable?: boolean;
+	managedSection?: boolean;
 	preserveIfExists?: boolean;
 	targetRef: string;
 };
@@ -486,7 +487,10 @@ export async function runWorkerFoundationsInstall({
 			codexConfigBackupPath = codexConfigPatch.backupPath;
 		}
 
-		const applyResult = await applyWorkerFoundations(context);
+		const applyResult = await applyWorkerFoundations(
+			context,
+			inspection.packageManager,
+		);
 		const childPlanExistedBeforeDogfood = existsSync(
 			path.join(context.repositoryRoot, STARTER_CHILD_PLAN_REF),
 		);
@@ -701,13 +705,7 @@ async function inspectTargetRepository(
 	const packageJsonExists = existsSync(packageJsonRef);
 	let packageJsonText = "";
 	let packageJson: JsonObject = {};
-	if (!packageJsonExists) {
-		blockers.push({
-			blockerId: "root-package-json",
-			targetRef: "package.json",
-			reason: "Worker Foundations v1 requires a root package.json.",
-		});
-	} else {
+	if (packageJsonExists) {
 		packageJsonText = await readFile(packageJsonRef, "utf8");
 		const parsedPackageJson = parseJsonObject(packageJsonText);
 		if (!parsedPackageJson) {
@@ -720,6 +718,10 @@ async function inspectTargetRepository(
 			packageJson = parsedPackageJson;
 		}
 	}
+	const packageManager = detectRootPackageManager({
+		packageJson,
+		repositoryRoot: context.repositoryRoot,
+	});
 
 	const gitClean = await isGitWorktreeClean(context.repositoryRoot);
 	if (!gitClean) {
@@ -785,13 +787,10 @@ async function inspectTargetRepository(
 			codexProfileStatus = "ready";
 		}
 	}
-	blockers.push(...(await findManagedFileBlockers(context)));
+	blockers.push(...(await findManagedFileBlockers(context, packageManager)));
 
 	return {
-		packageManager: detectRootPackageManager({
-			packageJson,
-			repositoryRoot: context.repositoryRoot,
-		}),
+		packageManager,
 		packageJsonText,
 		packageJson,
 		packageJsonExists,
@@ -1421,7 +1420,7 @@ function buildInstallPlan(inspection: TargetRepoInspection): WorkerInstallPlan {
 			}),
 		);
 	}
-	for (const targetRef of requiredManagedFileRefs()) {
+	for (const targetRef of requiredManagedFileRefs(inspection.packageManager)) {
 		operations.push({
 			operationId: `file:${targetRef}`,
 			surface: "file",
@@ -1540,8 +1539,9 @@ function buildPackageScriptOperation({
 			operationId: `package-script:${scriptName}`,
 			surface: "package-script",
 			targetRef: `package.json#scripts.${scriptName}`,
-			status: "blocked",
-			reason: "Root package.json is required.",
+			status: "add",
+			reason:
+				"Root package.json will be created with Bun defaults and this Worker command script.",
 		};
 	}
 	const scripts = packageJson.scripts;
@@ -1946,10 +1946,11 @@ function isPathInsideDirectory(candidatePath: string, directoryPath: string) {
 
 async function applyWorkerFoundations(
 	context: WorkerInstallContext,
+	packageManager: RootPackageManager,
 ): Promise<ApplyResult> {
 	const applyResult: ApplyResult = { createdRefs: [], changedRefs: [] };
-	await writePackageJsonScripts(context, applyResult);
-	await writeManagedFileSet(context, applyResult);
+	await writePackageJsonScripts(context, applyResult, packageManager);
+	await writeManagedFileSet(context, applyResult, packageManager);
 	await appendGitInfoExclude(context);
 	return applyResult;
 }
@@ -1957,12 +1958,24 @@ async function applyWorkerFoundations(
 async function writePackageJsonScripts(
 	context: WorkerInstallContext,
 	applyResult: ApplyResult,
+	packageManager: RootPackageManager,
 ) {
 	const packageJsonPath = path.join(context.repositoryRoot, "package.json");
-	const packageJsonText = await readFile(packageJsonPath, "utf8");
-	const packageJson = parseJsonObject(packageJsonText);
-	if (!packageJson) {
+	const packageJsonExists = existsSync(packageJsonPath);
+	const packageJsonText = packageJsonExists
+		? await readFile(packageJsonPath, "utf8")
+		: "";
+	const packageJson = packageJsonExists
+		? parseJsonObject(packageJsonText)
+		: defaultRootPackageJson();
+	if (!packageJson || !isJsonObject(packageJson)) {
 		throw new Error("Root package.json must parse before apply.");
+	}
+	if (
+		packageManager === "bun" &&
+		typeof packageJson.packageManager !== "string"
+	) {
+		packageJson.packageManager = `bun@${WORKER_MANAGED_BUN_VERSION}`;
 	}
 	const scripts = ensureJsonObjectProperty(packageJson, "scripts");
 	for (const scriptName of WORKER_FOUNDATIONS_ROOT_SCRIPTS) {
@@ -1992,15 +2005,20 @@ async function writePackageJsonScripts(
 		packageJsonPath,
 		`${JSON.stringify(packageJson, null, detectJsonIndent(packageJsonText))}\n`,
 	);
-	applyResult.changedRefs.push("package.json");
+	if (packageJsonExists) {
+		applyResult.changedRefs.push("package.json");
+	} else {
+		applyResult.createdRefs.push("package.json");
+	}
 }
 
 async function writeManagedFileSet(
 	context: WorkerInstallContext,
 	applyResult: ApplyResult,
+	packageManager: RootPackageManager,
 ) {
-	for (const file of buildManagedFiles()) {
-		if (file.targetRef.endsWith("AGENTS.md")) {
+	for (const file of buildManagedFiles(packageManager)) {
+		if (file.managedSection) {
 			await writeManagedSectionFile({
 				context,
 				applyResult,
@@ -2024,19 +2042,22 @@ async function writeManagedFileSet(
 	);
 }
 
-async function findManagedFileBlockers(context: WorkerInstallContext) {
+async function findManagedFileBlockers(
+	context: WorkerInstallContext,
+	packageManager: RootPackageManager,
+) {
 	const blockers: WorkerInstallBlocker[] = [];
-	for (const file of buildManagedFiles()) {
+	for (const file of buildManagedFiles(packageManager)) {
 		const absolutePath = path.join(context.repositoryRoot, file.targetRef);
 		if (!existsSync(absolutePath)) {
 			continue;
 		}
-		if (file.targetRef.endsWith("AGENTS.md")) {
+		if (file.managedSection) {
 			if (hasIncompleteManagedBlock(await readFile(absolutePath, "utf8"))) {
 				blockers.push({
 					blockerId: `file-conflict:${file.targetRef}`,
 					targetRef: file.targetRef,
-					reason: "Existing AGENTS.md has incomplete Worker managed markers.",
+					reason: `Existing ${file.targetRef} has incomplete Worker managed markers.`,
 				});
 			}
 			continue;
@@ -2782,7 +2803,9 @@ function countOperationsByStatus(operations: WorkerInstallOperation[]) {
 	return counts;
 }
 
-function buildManagedFiles(): ManagedFileTemplate[] {
+function buildManagedFiles(
+	packageManager: RootPackageManager,
+): ManagedFileTemplate[] {
 	return [
 		{
 			targetRef: "scripts/run-worker.sh",
@@ -2803,7 +2826,16 @@ function buildManagedFiles(): ManagedFileTemplate[] {
 			targetRef: "apps/worker/tests/smoke.test.ts",
 			content: workerSmokeTestSource(),
 		},
-		{ targetRef: "AGENTS.md", content: rootAgentsMd() },
+		{
+			targetRef: "README.md",
+			content: rootReadmeMd(packageManager),
+			managedSection: true,
+		},
+		{
+			targetRef: "AGENTS.md",
+			content: rootAgentsMd(packageManager),
+			managedSection: true,
+		},
 		{ targetRef: "docs/programs/AGENTS.md", content: programsAgentsMd() },
 		{ targetRef: "docs/exec-plans/AGENTS.md", content: execPlansAgentsMd() },
 		{ targetRef: "docs/prompts/AGENTS.md", content: promptsAgentsMd() },
@@ -2882,13 +2914,20 @@ function buildManagedFiles(): ManagedFileTemplate[] {
 	];
 }
 
-function requiredManagedFileRefs(): string[] {
-	return buildManagedFiles().map((file) => file.targetRef);
+function requiredManagedFileRefs(packageManager: RootPackageManager): string[] {
+	return buildManagedFiles(packageManager).map((file) => file.targetRef);
 }
 
 function expectedScriptCommand(scriptName: WorkerFoundationsRootScript) {
 	const workerScript = scriptName === "worker:test" ? "test" : scriptName;
 	return `./scripts/run-worker.sh ${workerScript}`;
+}
+
+function packageRunCommand(
+	packageManager: RootPackageManager,
+	scriptName: WorkerFoundationsRootScript,
+) {
+	return `${packageManager} run ${scriptName}`;
 }
 
 function recognizeWorkerScriptCommand(
@@ -2931,10 +2970,19 @@ function runWorkerShellScript() {
 		"else",
 		'  BUN_BIN="${BUN:-bun}"',
 		"fi",
+		'if ! command -v "$BUN_BIN" >/dev/null 2>&1; then',
+		'  echo "Shipbysunday Worker requires Bun. Re-run shipbysunday install to prepare the Worker-managed Bun toolchain, or install Bun and try again." >&2',
+		"  exit 127",
+		"fi",
 		'case "$BUN_BIN" in',
 		'  */*) PATH="${BUN_BIN%/*}:$PATH"; export PATH ;;',
 		"esac",
 		'cd "$REPO_ROOT/apps/worker"',
+		'case "${1:-}" in',
+		'  ""|--help|-h)',
+		'    exec "$BUN_BIN" src/worker-cli.ts --help',
+		"    ;;",
+		"esac",
 		'exec "$BUN_BIN" run "$@"',
 		"",
 	].join("\n");
@@ -2992,7 +3040,7 @@ const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
 
 if (!command || command === "--help" || command === "-h") {
-	console.log("Usage: bun src/worker-cli.ts <programs:lint|plans:lint|markdown:lint|docs:validate|program:write-child-plan|execplan:validate>");
+	console.log(renderWorkerHelp());
 	process.exit(0);
 }
 
@@ -3014,6 +3062,26 @@ if (command === "programs:lint") {
 	console.log(command + " is installed. Use Program-linked ExecPlans as the source of truth.");
 } else {
 	throw new Error("Unknown Worker command: " + command);
+}
+
+function renderWorkerHelp() {
+	return [
+		"Shipbysunday Worker",
+		"",
+		"Usage: ./scripts/run-worker.sh <command> [args]",
+		"",
+		"Commands:",
+		"  programs:lint              Validate Worker Program packets.",
+		"  plans:lint                 Validate Worker ExecPlans.",
+		"  markdown:lint              Validate Worker markdown metadata.",
+		"  docs:validate              Run markdown, Program, and ExecPlan validation.",
+		"  program:write-child-plan   Create a Program-linked child ExecPlan.",
+		"  execplan:validate          Validate one ExecPlan with --plan <path>.",
+		"  worker:test                Run the installed Worker tests through the root package script.",
+		"  test                       Run the installed Worker tests directly.",
+		"",
+		"Start with README.md and docs/worker/install-report.md.",
+	].join("\n");
 }
 
 async function lintPrograms(): Promise<LintReport[]> {
@@ -3331,17 +3399,66 @@ function workerSmokeTestSource() {
 	].join("\n");
 }
 
-function rootAgentsMd() {
+function rootReadmeMd(packageManager: RootPackageManager) {
+	const docsValidateCommand = packageRunCommand(
+		packageManager,
+		"docs:validate",
+	);
+	const workerTestCommand = packageRunCommand(packageManager, "worker:test");
+	const programsLintCommand = packageRunCommand(
+		packageManager,
+		"programs:lint",
+	);
+	const plansLintCommand = packageRunCommand(packageManager, "plans:lint");
+	return [
+		"# Shipbysunday Worker",
+		"",
+		ROOT_AGENT_START,
+		"## Shipbysunday Worker",
+		"",
+		"This repository has the Shipbysunday Worker Foundations operating system installed.",
+		"",
+		"### Quick Start",
+		"",
+		`- Validate Worker docs and plans: \`${docsValidateCommand}\``,
+		`- Run Worker tests: \`${workerTestCommand}\``,
+		"- Show direct Worker commands: `./scripts/run-worker.sh --help`",
+		"- Direct fallback for any Worker command: `./scripts/run-worker.sh <command>`",
+		"",
+		"### Command Surface",
+		"",
+		`- Programs: \`${programsLintCommand}\``,
+		`- ExecPlans: \`${plansLintCommand}\``,
+		`- Full Worker validation: \`${docsValidateCommand}\``,
+		`- Worker tests: \`${workerTestCommand}\``,
+		"",
+		"### Handoff",
+		"",
+		"- Install report: `docs/worker/install-report.md`",
+		"- Active Programs: `docs/programs/active/`",
+		"- Active ExecPlans: `docs/exec-plans/active/`",
+		"- Local Worker proof and run state live under `.worker/` and should stay out of commits.",
+		ROOT_AGENT_END,
+		"",
+	].join("\n");
+}
+
+function rootAgentsMd(packageManager: RootPackageManager) {
 	return [
 		"# AGENTS.md",
 		"",
 		ROOT_AGENT_START,
 		"## Shipbysunday Worker",
 		"- Stay inside this repository unless the user explicitly names another path.",
+		"- Read `README.md`, `docs/worker/install-report.md`, the active Program, and the active ExecPlan before continuing Worker work.",
 		"- Use `docs/worker/install-report.md` as the current Worker install handoff.",
+		`- Prefer repo-native Worker commands such as \`${packageRunCommand(packageManager, "docs:validate")}\` and \`${packageRunCommand(packageManager, "worker:test")}\`.`,
+		"- Use `./scripts/run-worker.sh <command>` as the direct fallback when package-manager context is unclear.",
+		"- Run `./scripts/run-worker.sh --help` to inspect the installed Worker command surface.",
 		"- Use Program packets in `docs/programs/active/` for multi-slice initiatives.",
 		"- Use ExecPlans in `docs/exec-plans/active/` for concrete implementation work.",
 		"- Keep `.worker/` local and out of commits.",
+		"- Do not store secrets, raw logs, Codex transcripts, or local absolute paths in checked-in Worker proof.",
 		ROOT_AGENT_END,
 		"",
 	].join("\n");
@@ -3652,6 +3769,15 @@ function parseJsonObject(text: string): JsonObject | null {
 	}
 }
 
+function defaultRootPackageJson(): JsonObject {
+	return {
+		name: "shipbysunday-worker-project",
+		private: true,
+		packageManager: `bun@${WORKER_MANAGED_BUN_VERSION}`,
+		scripts: {},
+	};
+}
+
 function ensureJsonObjectProperty(object: JsonObject, key: string) {
 	const value = object[key];
 	if (isJsonObject(value)) {
@@ -3690,7 +3816,8 @@ function detectRootPackageManager({
 	if (existsSync(path.join(repositoryRoot, "bun.lock"))) return "bun";
 	if (existsSync(path.join(repositoryRoot, "pnpm-lock.yaml"))) return "pnpm";
 	if (existsSync(path.join(repositoryRoot, "yarn.lock"))) return "yarn";
-	return "npm";
+	if (existsSync(path.join(repositoryRoot, "package-lock.json"))) return "npm";
+	return "bun";
 }
 
 async function isGitWorktreeClean(repositoryRoot: string) {
@@ -3856,7 +3983,7 @@ function extractManagedBlock(content: string) {
 	const startIndex = normalized.indexOf(ROOT_AGENT_START);
 	const endIndex = normalized.indexOf(ROOT_AGENT_END);
 	if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-		throw new Error("Worker AGENTS template is missing managed markers.");
+		throw new Error("Worker managed template is missing managed markers.");
 	}
 	return normalized.slice(startIndex, endIndex + ROOT_AGENT_END.length);
 }
@@ -3882,9 +4009,7 @@ function replaceOrAppendManagedBlock({
 		return `${normalized.trimEnd()}\n\n${managedBlock}\n`;
 	}
 	if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
-		throw new Error(
-			"Existing AGENTS.md has incomplete Worker managed markers.",
-		);
+		throw new Error("Existing file has incomplete Worker managed markers.");
 	}
 	return `${normalized.slice(0, startIndex).trimEnd()}\n\n${managedBlock}\n\n${normalized.slice(endIndex + ROOT_AGENT_END.length).trimStart()}`;
 }
