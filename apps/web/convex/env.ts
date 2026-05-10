@@ -5,7 +5,7 @@ function normalizeEnvValue(value: string | undefined) {
 		return value;
 	}
 
-	const normalized = value.trim();
+	const normalized = value.trim().replace(/\\n+$/g, "").replace(/\n+$/g, "");
 	return normalized.length > 0 ? normalized : undefined;
 }
 
@@ -19,7 +19,7 @@ const convexEnvShape = {
 	OPENAI_API_KEY: z.string().min(1).optional(),
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
-	CHECKOUT_FULFILLMENT_RETRY_SECRET: z.string().min(1).optional(),
+	CHECKOUT_FULFILLMENT_RETRY_SECRET: z.string().min(32).optional(),
 	TELEGRAM_BOT_TOKEN: z.string().min(1).optional(),
 	TELEGRAM_CHAT_ID: z.string().min(1).optional(),
 	TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN: z.string().min(1).optional(),
@@ -34,7 +34,16 @@ const convexEnvShape = {
 type ConvexEnvKey = keyof typeof convexEnvShape;
 
 function readConvexEnv<K extends ConvexEnvKey>(key: K) {
-	return convexEnvShape[key].parse(normalizeEnvValue(process.env[key]));
+	try {
+		return convexEnvShape[key].parse(normalizeEnvValue(process.env[key]));
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			const message = error.issues[0]?.message ?? "Invalid value";
+			throw new Error(`Invalid Convex environment variable ${key}: ${message}`);
+		}
+
+		throw error;
+	}
 }
 
 export function readOptionalConvexEnv<K extends ConvexEnvKey>(key: K) {
