@@ -124,6 +124,107 @@ describe("product access server helpers", () => {
 		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
 	});
 
+	it("ignores a signed-out pending checkout cookie when Stripe cannot find the session", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_missing_signed_out",
+		);
+		getCheckoutSessionForRecoveryMock.mockResolvedValue(null);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("ignores a signed-out pending checkout cookie for a different product", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_wrong_product_signed_out",
+		);
+		isStripeCheckoutSessionForCourseMock.mockReturnValue(false);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps a signed-out pending unpaid checkout on the payment-pending recovery path", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_unpaid_signed_out",
+		);
+		getCheckoutSessionForRecoveryMock.mockResolvedValue({
+			payment_status: "unpaid",
+		});
+		isStripeCheckoutSessionPaidMock.mockReturnValue(false);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+			pendingCheckoutRecovery: {
+				kind: "payment_pending",
+				sessionId: "cs_unpaid_signed_out",
+				paymentStatus: "unpaid",
+				checkoutEmail: "buyer@example.com",
+			},
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("ignores a signed-out paid checkout cookie when Stripe has no checkout email", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_missing_email_signed_out",
+		);
+		getStripeCheckoutSessionEmailMock.mockReturnValue(null);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
 	it("keeps signed-in users with a missing Convex token on the recovery surface", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -266,6 +367,40 @@ describe("product access server helpers", () => {
 		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
 		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
 		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
+	});
+
+	it("keeps paid checkout recovery details when verified-email claim needs sign-in", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
+			kind: "sign_in_required",
+			sessionId: "cs_email_pending_123",
+			checkoutEmail: "buyer@example.com",
+		});
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+			pendingCheckoutRecovery: {
+				kind: "sign_in_required",
+				sessionId: "cs_email_pending_123",
+				checkoutEmail: "buyer@example.com",
+			},
+		});
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
 	it("keeps paid checkout recovery details when the fallback checkout claim finds the wrong account", async () => {

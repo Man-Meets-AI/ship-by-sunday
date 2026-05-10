@@ -6,6 +6,7 @@ function createCheckoutClaimsCtx({
 	productAccessGrant = null,
 	identity = {
 		subject: "user_123",
+		tokenIdentifier: "https://clerk.example.com|user_123",
 		email: "buyer@example.com",
 		emailVerified: true,
 	},
@@ -284,6 +285,7 @@ describe("convex/checkoutClaims", () => {
 			},
 			identity: {
 				subject: "user_123",
+				tokenIdentifier: "https://clerk.example.com|user_123",
 				email: "other@example.com",
 				emailVerified: true,
 			},

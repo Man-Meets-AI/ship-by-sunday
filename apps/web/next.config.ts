@@ -41,7 +41,10 @@ const nextConfig: NextConfig = {
 };
 
 const nextConfigWithMdx = withMDX(nextConfig);
+const isPostHogSourceMapUploadDisabled =
+	process.env.DISABLE_POSTHOG_SOURCE_MAP_UPLOAD === "1";
 const shouldUploadPostHogSourceMaps =
+	!isPostHogSourceMapUploadDisabled &&
 	process.env.NODE_ENV === "production" &&
 	Boolean(process.env.POSTHOG_API_KEY?.trim()) &&
 	Boolean(process.env.POSTHOG_PROJECT_ID?.trim());

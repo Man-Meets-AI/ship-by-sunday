@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const retrieveSessionMock = vi.fn();
 const stripeConstructorArgs: Array<Array<unknown>> = [];
+const checkoutFulfillmentRetrySecret = "checkout_retry_secret_123456789012345";
 
 class StripeMock {
 	checkout = {
@@ -22,6 +23,7 @@ vi.mock("stripe", () => ({
 function createActionCtx({
 	identity = {
 		subject: "user_123",
+		tokenIdentifier: "https://clerk.example.com|user_123",
 		email: "buyer@example.com",
 		emailVerified: true,
 	},
@@ -50,7 +52,7 @@ describe("convex/checkoutClaimsActions", () => {
 			CLERK_SECRET_KEY: "sk_clerk_test_123",
 			STRIPE_SECRET_KEY: "sk_test_123",
 			STRIPE_WEBHOOK_SECRET: "whsec_test_123",
-			CHECKOUT_FULFILLMENT_RETRY_SECRET: "checkout_retry_secret_123",
+			CHECKOUT_FULFILLMENT_RETRY_SECRET: checkoutFulfillmentRetrySecret,
 		};
 		retrieveSessionMock.mockReset();
 		stripeConstructorArgs.length = 0;
@@ -198,6 +200,7 @@ describe("convex/checkoutClaimsActions", () => {
 			createActionCtx({
 				identity: {
 					subject: "user_456",
+					tokenIdentifier: "https://clerk.example.com|user_456",
 					email: "other@example.com",
 					emailVerified: true,
 				},
@@ -234,6 +237,7 @@ describe("convex/checkoutClaimsActions", () => {
 			createActionCtx({
 				identity: {
 					subject: "user_456",
+					tokenIdentifier: "https://clerk.example.com|user_456",
 					email: "other@example.com",
 					emailVerified: true,
 				},
@@ -492,7 +496,7 @@ describe("convex/checkoutClaimsActions", () => {
 		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
 			createActionCtx({ runMutation }) as never,
 			{
-				fulfillmentToken: "checkout_retry_secret_123",
+				fulfillmentToken: checkoutFulfillmentRetrySecret,
 				sessionId: "cs_guest_create_race",
 			},
 		);
@@ -565,7 +569,7 @@ describe("convex/checkoutClaimsActions", () => {
 		const result = await fulfillCheckoutSessionFromSuccessPage._handler(
 			createActionCtx({ runMutation }) as never,
 			{
-				fulfillmentToken: "checkout_retry_secret_123",
+				fulfillmentToken: checkoutFulfillmentRetrySecret,
 				sessionId: "cs_missing_course",
 			},
 		);

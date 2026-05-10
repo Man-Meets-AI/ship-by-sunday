@@ -59,6 +59,10 @@ vi.mock("@/app/(workspace)/_components/app-shell/app-shell-user-menu", () => ({
 	),
 }));
 
+vi.mock("@/app/_components/support-mode/support-mode-bar", () => ({
+	SupportModeBar: () => null,
+}));
+
 vi.mock("@/components/ui/navigation-menu", () => ({
 	NavigationMenu: ({ children }: { children: React.ReactNode }) => (
 		<nav data-slot="navigation-menu">{children}</nav>

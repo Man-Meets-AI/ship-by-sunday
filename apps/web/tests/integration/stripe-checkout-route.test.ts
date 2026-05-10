@@ -36,6 +36,13 @@ vi.mock("@/platform/next/app-url", () => ({
 	getAppBaseUrl: getAppBaseUrlMock,
 }));
 
+function createAuthState(userId: string | null) {
+	return {
+		userId,
+		getToken: vi.fn().mockResolvedValue(null),
+	};
+}
+
 function createRequest(body?: unknown) {
 	return new Request("https://example.com/api/stripe/checkout", {
 		method: "POST",
@@ -83,7 +90,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("creates a guest checkout session when the viewer is signed out", async () => {
-		authMock.mockResolvedValue({ userId: null });
+		authMock.mockResolvedValue(createAuthState(null));
 		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
 		getStripeLineItemMock.mockReturnValue({
 			price_data: {
@@ -153,7 +160,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("creates a checkout session with account metadata and ignores request intent", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({
 			primaryEmailAddress: {
 				emailAddress: "buyer@example.com",
@@ -235,7 +242,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("returns a server error when Stripe does not return a checkout URL", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue(null);
 		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
 		getStripeLineItemMock.mockReturnValue({
@@ -275,7 +282,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("returns a server error when the managed Stripe price fails validation", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({
 			primaryEmailAddress: {
 				emailAddress: "buyer@example.com",
@@ -315,7 +322,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("creates an express checkout session with a client secret", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({
 			primaryEmailAddress: {
 				emailAddress: "buyer@example.com",

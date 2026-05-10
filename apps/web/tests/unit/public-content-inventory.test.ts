@@ -21,7 +21,7 @@ describe("public content inventory", () => {
 		const entries = await getDocsContentEntries();
 		const docsPaths = entries.map((entry) => entry.pathname);
 
-		expect(entries).toHaveLength(32);
+		expect(entries).toHaveLength(33);
 		expect(docsPaths).toContain("/docs");
 		expect(docsPaths).toContain("/docs/local-setup");
 		expect(docsPaths).toContain("/docs/troubleshooting/access");
