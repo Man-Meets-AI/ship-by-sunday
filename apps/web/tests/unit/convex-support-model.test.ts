@@ -43,6 +43,39 @@ describe("convex support model", () => {
 		);
 	});
 
+	it("validates screenshot attachment metadata at the boundary", async () => {
+		const { normalizeSupportAttachmentMetadata } =
+			await import("@/convex/support/model");
+
+		expect(
+			normalizeSupportAttachmentMetadata({
+				storageId: "storage_123" as never,
+				fileName: " checkout stall.png ",
+				contentType: "image/png",
+				size: 1234,
+			}),
+		).toMatchObject({
+			kind: "screenshot",
+			fileName: "checkout stall.png",
+			contentType: "image/png",
+			size: 1234,
+		});
+		expect(() =>
+			normalizeSupportAttachmentMetadata({
+				fileName: "trace.txt",
+				contentType: "text/plain",
+				size: 1234,
+			}),
+		).toThrow("Support screenshot must be a PNG, JPG, or WebP image.");
+		expect(() =>
+			normalizeSupportAttachmentMetadata({
+				fileName: "huge.png",
+				contentType: "image/png",
+				size: 11 * 1024 * 1024,
+			}),
+		).toThrow("Support screenshot must be 10 MB or smaller.");
+	});
+
 	it("adds first-thread website acknowledgements after the visitor message", async () => {
 		const { createVisitorMessageForDeliveryHandler } =
 			await import("@/convex/support/model");

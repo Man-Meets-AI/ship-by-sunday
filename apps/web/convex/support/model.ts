@@ -8,7 +8,15 @@ import {
 	classifySupportDeliveryError,
 	createTelegramSupportTopic,
 	sendTelegramSupportMessage,
+	sendTelegramSupportPhoto,
 } from "./telegram";
+import {
+	formatSupportAttachmentSize,
+	isSupportScreenshotContentType,
+	normalizeSupportScreenshotFileName,
+	SUPPORT_SCREENSHOT_MAX_BYTES,
+	type SupportScreenshotContentType,
+} from "../../lib/support/support-attachment-policy";
 import { normalizeSupportAiDraftFailureReason } from "./aiDrafts";
 import {
 	buildSupportOperatorActionEffect,
@@ -42,6 +50,19 @@ const SUPPORT_FIRST_MESSAGE_ACKNOWLEDGEMENTS = [
 type SupportThreadId = GenericId<"supportThreads">;
 type SupportMessageId = GenericId<"supportMessages">;
 type SupportOperatorActionId = GenericId<"supportOperatorActions">;
+type SupportStorageId = GenericId<"_storage">;
+
+export type SupportMessageAttachment = {
+	kind: "screenshot";
+	storageId: SupportStorageId;
+	fileName: string;
+	contentType: SupportScreenshotContentType;
+	size: number;
+};
+
+type SupportMessageAttachmentDelivery = SupportMessageAttachment & {
+	url: string;
+};
 
 export type SupportThreadState = {
 	status: "empty" | "open" | "closed" | "disabled";
@@ -50,6 +71,13 @@ export type SupportThreadState = {
 		id: string;
 		source: "visitor" | "operator" | "system";
 		body: string | null;
+		attachment: {
+			kind: "screenshot";
+			fileName: string;
+			contentType: string;
+			size: number;
+			url: string | null;
+		} | null;
 		createdAt: number;
 		deliveryStatus:
 			| "not_required"
@@ -73,6 +101,7 @@ export type CreateVisitorMessageResult =
 			threadId: SupportThreadId;
 			supportId: string;
 			messageText: string;
+			attachment: SupportMessageAttachment | null;
 			entrySurface: string;
 			pagePath: string;
 			telegramMessageThreadId: number | null;
@@ -85,6 +114,7 @@ export type FailedMessageForRecovery = {
 	threadId: SupportThreadId;
 	supportId: string;
 	messageText: string;
+	attachment: SupportMessageAttachment | null;
 	deliveryAttemptCount: number;
 	entrySurface: string;
 	pagePath: string;
@@ -199,6 +229,48 @@ export function normalizeSupportMessageText(messageText: string) {
 	return normalized;
 }
 
+export function normalizeSupportAttachmentMetadata(input: {
+	fileName: string;
+	contentType: string;
+	size: number;
+	storageId?: SupportStorageId;
+}): SupportMessageAttachment | Omit<SupportMessageAttachment, "storageId"> {
+	const contentType = input.contentType.trim().toLowerCase();
+	if (!isSupportScreenshotContentType(contentType)) {
+		throw new Error("Support screenshot must be a PNG, JPG, or WebP image.");
+	}
+
+	if (
+		!Number.isSafeInteger(input.size) ||
+		input.size <= 0 ||
+		input.size > SUPPORT_SCREENSHOT_MAX_BYTES
+	) {
+		throw new Error("Support screenshot must be 10 MB or smaller.");
+	}
+
+	return {
+		kind: "screenshot",
+		...(input.storageId ? { storageId: input.storageId } : {}),
+		fileName: normalizeSupportScreenshotFileName(input.fileName),
+		contentType,
+		size: input.size,
+	};
+}
+
+export async function validateSupportAttachmentUploadRequest(args: {
+	sessionToken: string;
+	fileName: string;
+	contentType: string;
+	size: number;
+}) {
+	if (isSupportChatDisabled()) {
+		throw new Error("Support is using Telegram directly right now.");
+	}
+
+	await createSupportSessionTokenHash(args.sessionToken);
+	normalizeSupportAttachmentMetadata(args);
+}
+
 export async function getThreadBySessionHandler(
 	ctx: QueryCtx,
 	args: {
@@ -237,6 +309,7 @@ export async function createVisitorMessageForDeliveryHandler(
 		pagePath: string;
 		entrySurface: string;
 		clerkUserId?: string | null;
+		attachment?: SupportMessageAttachment | null;
 	},
 ): Promise<CreateVisitorMessageResult> {
 	if (isSupportChatDisabled()) {
@@ -273,6 +346,12 @@ export async function createVisitorMessageForDeliveryHandler(
 		visitorId: visitor._id,
 		source: "visitor",
 		body: messageText,
+		attachmentKind: args.attachment?.kind,
+		attachmentStorageId: args.attachment?.storageId,
+		attachmentFileName: args.attachment?.fileName,
+		attachmentContentType: args.attachment?.contentType,
+		attachmentSize: args.attachment?.size,
+		attachmentPurgedAt: undefined,
 		createdAt: now,
 		deliveryStatus: "sending",
 		deliveryAttemptCount: 1,
@@ -307,6 +386,7 @@ export async function createVisitorMessageForDeliveryHandler(
 		threadId: thread._id,
 		supportId: thread.supportId,
 		messageText,
+		attachment: args.attachment ?? null,
 		entrySurface: thread.entrySurface,
 		pagePath: thread.pagePath,
 		telegramMessageThreadId: updatedThread.telegramMessageThreadId ?? null,
@@ -1046,6 +1126,7 @@ export async function getFailedVisitorMessageForRecoveryHandler(
 		threadId: thread._id,
 		supportId: thread.supportId,
 		messageText: message.body,
+		attachment: getSupportMessageAttachmentForDelivery(message),
 		deliveryAttemptCount: message.deliveryAttemptCount,
 		entrySurface: thread.entrySurface,
 		pagePath: thread.pagePath,
@@ -1216,6 +1297,7 @@ export async function deliverSupportVisitorMessage({
 	threadId,
 	supportId,
 	messageText,
+	attachment,
 	entrySurface,
 	pagePath,
 	telegramMessageThreadId,
@@ -1226,6 +1308,7 @@ export async function deliverSupportVisitorMessage({
 	threadId: SupportThreadId;
 	supportId: string;
 	messageText: string;
+	attachment: SupportMessageAttachmentDelivery | null;
 	entrySurface: string;
 	pagePath: string;
 	telegramMessageThreadId: number | null;
@@ -1275,9 +1358,22 @@ export async function deliverSupportVisitorMessage({
 		});
 	}
 
-	return await sendTelegramSupportMessage({
+	if (!attachment) {
+		return await sendTelegramSupportMessage({
+			messageThreadId,
+			text: messageText,
+		});
+	}
+
+	await sendTelegramSupportMessage({
 		messageThreadId,
 		text: messageText,
+	});
+
+	return await sendTelegramSupportPhoto({
+		messageThreadId,
+		photoUrl: attachment.url,
+		caption: formatSupportScreenshotCaption(attachment),
 	});
 }
 
@@ -1404,6 +1500,7 @@ async function purgeSupportMessageBodies(
 	now: number,
 ) {
 	let purgedCount = 0;
+	let writeCount = 0;
 	let limitReached = false;
 	const messages = ctx.db
 		.query("supportMessages")
@@ -1413,15 +1510,45 @@ async function purgeSupportMessageBodies(
 		.order("asc");
 
 	for await (const message of messages) {
-		if (!message.body) {
+		const shouldPurgeBody = Boolean(message.body);
+		const shouldPurgeAttachment = Boolean(
+			message.attachmentStorageId && !message.attachmentPurgedAt,
+		);
+		if (!shouldPurgeBody && !shouldPurgeAttachment) {
 			continue;
 		}
+
+		if (message.attachmentStorageId && !message.attachmentPurgedAt) {
+			await ctx.storage.delete(message.attachmentStorageId);
+		}
+
 		await ctx.db.patch(message._id, {
-			body: undefined,
-			bodyPurgedAt: now,
+			body: shouldPurgeBody ? undefined : message.body,
+			bodyPurgedAt: shouldPurgeBody ? now : message.bodyPurgedAt,
+			attachmentStorageId: shouldPurgeAttachment
+				? undefined
+				: message.attachmentStorageId,
+			attachmentFileName: shouldPurgeAttachment
+				? undefined
+				: message.attachmentFileName,
+			attachmentContentType: shouldPurgeAttachment
+				? undefined
+				: message.attachmentContentType,
+			attachmentSize: shouldPurgeAttachment
+				? undefined
+				: message.attachmentSize,
+			attachmentKind: shouldPurgeAttachment
+				? undefined
+				: message.attachmentKind,
+			attachmentPurgedAt: shouldPurgeAttachment
+				? now
+				: message.attachmentPurgedAt,
 		});
-		purgedCount += 1;
-		if (purgedCount >= SUPPORT_TRANSCRIPT_PURGE_WRITE_LIMIT) {
+		if (shouldPurgeBody) {
+			purgedCount += 1;
+		}
+		writeCount += 1;
+		if (writeCount >= SUPPORT_TRANSCRIPT_PURGE_WRITE_LIMIT) {
 			limitReached = true;
 			break;
 		}
@@ -1587,21 +1714,80 @@ async function buildSupportThreadState(
 		.order("desc")
 		.take(50);
 	const chronologicalMessages = [...messages].reverse();
+	const messagesWithAttachments = await Promise.all(
+		chronologicalMessages.map(async (message) => ({
+			message,
+			attachment: await buildPublicSupportMessageAttachment(ctx, message),
+		})),
+	);
 
 	return {
 		status: thread.status,
 		supportId: thread.supportId,
 		fallbackHref: SUPPORT_FALLBACK_HREF,
 		error: null,
-		messages: chronologicalMessages.map((message) => ({
+		messages: messagesWithAttachments.map(({ message, attachment }) => ({
 			id: message._id,
 			source: message.source,
 			body: message.body ?? null,
+			attachment,
 			createdAt: message.createdAt,
 			deliveryStatus: message.deliveryStatus,
 			deliveryFailureClass: message.deliveryFailureClass ?? null,
 		})),
 	};
+}
+
+async function buildPublicSupportMessageAttachment(
+	ctx: QueryCtx | MutationCtx,
+	message: Doc<"supportMessages">,
+): Promise<SupportThreadState["messages"][number]["attachment"]> {
+	if (
+		message.attachmentKind !== "screenshot" ||
+		!message.attachmentStorageId ||
+		message.attachmentPurgedAt
+	) {
+		return null;
+	}
+
+	const url = await ctx.storage.getUrl(message.attachmentStorageId);
+	return {
+		kind: "screenshot",
+		fileName: message.attachmentFileName ?? "screenshot.png",
+		contentType: message.attachmentContentType ?? "image/png",
+		size: message.attachmentSize ?? 0,
+		url,
+	};
+}
+
+function getSupportMessageAttachmentForDelivery(
+	message: Doc<"supportMessages">,
+): SupportMessageAttachment | null {
+	if (
+		message.attachmentKind !== "screenshot" ||
+		!message.attachmentStorageId ||
+		!message.attachmentFileName ||
+		!message.attachmentContentType ||
+		!message.attachmentSize ||
+		message.attachmentPurgedAt ||
+		!isSupportScreenshotContentType(message.attachmentContentType)
+	) {
+		return null;
+	}
+
+	return {
+		kind: "screenshot",
+		storageId: message.attachmentStorageId,
+		fileName: message.attachmentFileName,
+		contentType: message.attachmentContentType,
+		size: message.attachmentSize,
+	};
+}
+
+function formatSupportScreenshotCaption(
+	attachment: SupportMessageAttachmentDelivery,
+) {
+	return `Screenshot: ${attachment.fileName} (${formatSupportAttachmentSize(attachment.size)})`;
 }
 
 async function findSupportVisitorBySessionTokenHash(

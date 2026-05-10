@@ -15,6 +15,7 @@ import {
 } from "./observability/validators";
 import {
 	supportAiDraftGenerationStatusValidator,
+	supportAttachmentKindValidator,
 	supportDeliveryFailureClassValidator,
 	supportDeliveryStatusValidator,
 	supportGeneratedOutputSourceValidator,
@@ -429,6 +430,12 @@ export default defineSchema({
 		visitorId: v.id("supportVisitors"),
 		source: supportMessageSourceValidator,
 		body: v.optional(v.string()),
+		attachmentKind: v.optional(supportAttachmentKindValidator),
+		attachmentStorageId: v.optional(v.id("_storage")),
+		attachmentFileName: v.optional(v.string()),
+		attachmentContentType: v.optional(v.string()),
+		attachmentSize: v.optional(v.number()),
+		attachmentPurgedAt: v.optional(v.number()),
 		createdAt: v.number(),
 		deliveryStatus: supportDeliveryStatusValidator,
 		deliveryAttemptCount: v.number(),

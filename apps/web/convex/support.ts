@@ -8,6 +8,7 @@ import {
 	internalAction,
 	internalMutation,
 	internalQuery,
+	mutation,
 	query,
 } from "./_generated/server";
 import { readOptionalConvexEnv, requireConvexEnv } from "./env";
@@ -44,8 +45,11 @@ import {
 	markVisitorMessageFailedHandler,
 	recordOperatorReplyHandler,
 	runSupportRetentionDatabaseMaintenanceHandler,
+	normalizeSupportAttachmentMetadata,
+	validateSupportAttachmentUploadRequest,
 	type CreateVisitorMessageResult,
 	type FailedMessageForRecovery,
+	type SupportMessageAttachment,
 	type SupportRetentionMaintenanceResult,
 	type SupportOperatorAiDraftContext,
 	type SupportThreadState,
@@ -85,6 +89,16 @@ const createVisitorMessageResultValidator = v.union(
 		threadId: v.id("supportThreads"),
 		supportId: v.string(),
 		messageText: v.string(),
+		attachment: v.union(
+			v.object({
+				kind: v.literal("screenshot"),
+				storageId: v.id("_storage"),
+				fileName: v.string(),
+				contentType: v.string(),
+				size: v.number(),
+			}),
+			v.null(),
+		),
 		entrySurface: v.string(),
 		pagePath: v.string(),
 		telegramMessageThreadId: v.union(v.number(), v.null()),
@@ -99,6 +113,16 @@ const failedVisitorMessageForRecoveryValidator = v.union(
 		threadId: v.id("supportThreads"),
 		supportId: v.string(),
 		messageText: v.string(),
+		attachment: v.union(
+			v.object({
+				kind: v.literal("screenshot"),
+				storageId: v.id("_storage"),
+				fileName: v.string(),
+				contentType: v.string(),
+				size: v.number(),
+			}),
+			v.null(),
+		),
 		deliveryAttemptCount: v.number(),
 		entrySurface: v.string(),
 		pagePath: v.string(),
@@ -157,6 +181,18 @@ const publicVisitorMessageArgs = {
 	messageText: v.string(),
 	pagePath: v.string(),
 	entrySurface: v.string(),
+	attachment: v.optional(
+		v.union(
+			v.object({
+				kind: v.literal("screenshot"),
+				storageId: v.id("_storage"),
+				fileName: v.string(),
+				contentType: v.string(),
+				size: v.number(),
+			}),
+			v.null(),
+		),
+	),
 };
 
 const internalVisitorMessageArgs = {
@@ -172,15 +208,33 @@ export const getThreadBySession = query({
 	handler: getThreadBySessionHandler,
 });
 
+export const generateVisitorAttachmentUploadUrl = mutation({
+	args: {
+		sessionToken: v.string(),
+		fileName: v.string(),
+		contentType: v.string(),
+		size: v.number(),
+	},
+	returns: v.string(),
+	handler: async (ctx, args) => {
+		await validateSupportAttachmentUploadRequest(args);
+		return await ctx.storage.generateUploadUrl();
+	},
+});
+
 export const sendVisitorMessage = action({
 	args: publicVisitorMessageArgs,
 	returns: supportThreadStateValidator,
 	handler: async (ctx, args): Promise<SupportThreadState> => {
 		const identity = await ctx.auth.getUserIdentity();
+		const attachment = args.attachment
+			? await loadSupportMessageAttachment(ctx, args.attachment)
+			: null;
 		const result: CreateVisitorMessageResult = await ctx.runMutation(
 			internal.support.createVisitorMessageForDelivery,
 			{
 				...args,
+				attachment,
 				clerkUserId: identity?.subject ?? null,
 			},
 		);
@@ -195,6 +249,12 @@ export const sendVisitorMessage = action({
 				threadId: result.threadId,
 				supportId: result.supportId,
 				messageText: result.messageText,
+				attachment: result.attachment
+					? {
+							...result.attachment,
+							url: await getSupportAttachmentUrl(ctx, result.attachment),
+						}
+					: null,
 				entrySurface: result.entrySurface,
 				pagePath: result.pagePath,
 				telegramMessageThreadId: result.telegramMessageThreadId,
@@ -699,6 +759,12 @@ export async function retryFailedSupportVisitorMessage(
 			threadId: failedMessage.threadId,
 			supportId: failedMessage.supportId,
 			messageText: failedMessage.messageText,
+			attachment: failedMessage.attachment
+				? {
+						...failedMessage.attachment,
+						url: await getSupportAttachmentUrl(ctx, failedMessage.attachment),
+					}
+				: null,
 			entrySurface: failedMessage.entrySurface,
 			pagePath: failedMessage.pagePath,
 			telegramMessageThreadId: failedMessage.telegramMessageThreadId,
@@ -729,6 +795,46 @@ export async function retryFailedSupportVisitorMessage(
 		telegramMessageThreadId: telegramResult.messageThreadId,
 		telegramMessageId: telegramResult.messageId,
 	})) as SupportThreadState;
+}
+
+async function loadSupportMessageAttachment(
+	ctx: ActionCtx,
+	input: {
+		kind: "screenshot";
+		storageId: Id<"_storage">;
+		fileName: string;
+		contentType: string;
+		size: number;
+	},
+): Promise<SupportMessageAttachment> {
+	const blob = await ctx.storage.get(input.storageId);
+	if (!blob) {
+		throw new Error("Support screenshot upload was not found.");
+	}
+
+	const normalized = normalizeSupportAttachmentMetadata({
+		storageId: input.storageId,
+		fileName: input.fileName,
+		contentType: blob.type || input.contentType,
+		size: blob.size,
+	});
+
+	return {
+		...normalized,
+		storageId: input.storageId,
+	};
+}
+
+async function getSupportAttachmentUrl(
+	ctx: ActionCtx,
+	attachment: SupportMessageAttachment,
+) {
+	const attachmentUrl = await ctx.storage.getUrl(attachment.storageId);
+	if (!attachmentUrl) {
+		throw new Error("Support screenshot upload was not found.");
+	}
+
+	return attachmentUrl;
 }
 
 async function answerTelegramCallback(

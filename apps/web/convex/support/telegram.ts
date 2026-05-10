@@ -309,6 +309,34 @@ export async function sendTelegramSupportMessage({
 	};
 }
 
+export async function sendTelegramSupportPhoto({
+	messageThreadId,
+	photoUrl,
+	caption,
+}: {
+	messageThreadId: number;
+	photoUrl: string;
+	caption: string;
+}) {
+	const result = await postTelegramSupportMethod("sendPhoto", {
+		chat_id: requireConvexEnv("TELEGRAM_SUPPORT_CHAT_ID"),
+		message_thread_id: messageThreadId,
+		photo: photoUrl,
+		caption,
+	});
+
+	if (!result.ok || !result.messageId) {
+		throw new Error(
+			result.ok ? "Telegram did not return a message id." : result.error,
+		);
+	}
+
+	return {
+		messageId: result.messageId,
+		messageThreadId: result.messageThreadId ?? messageThreadId,
+	};
+}
+
 export async function answerTelegramSupportCallbackQuery(
 	callbackQueryId: string,
 	text: string,

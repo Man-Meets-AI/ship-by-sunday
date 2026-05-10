@@ -4,6 +4,7 @@ import {
 	classifySupportDeliveryError,
 	parseTelegramSupportOperatorIds,
 	parseTelegramSupportUpdate,
+	sendTelegramSupportPhoto,
 } from "@/convex/support/telegram";
 
 describe("telegram support updates", () => {
@@ -780,5 +781,42 @@ describe("telegram support updates", () => {
 		expect(
 			classifySupportDeliveryError(new Error("Forbidden: not enough rights")),
 		).toBe("topic_permission_failed");
+	});
+
+	it("sends screenshot attachments to the support topic as Telegram photos", async () => {
+		process.env.TELEGRAM_SUPPORT_BOT_TOKEN = "support-token";
+		process.env.TELEGRAM_SUPPORT_CHAT_ID = "-100123";
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+			new Response(
+				JSON.stringify({
+					ok: true,
+					result: { message_id: 555, message_thread_id: 300 },
+				}),
+				{ status: 200 },
+			),
+		);
+
+		await expect(
+			sendTelegramSupportPhoto({
+				messageThreadId: 300,
+				photoUrl: "https://storage.example/screenshot.png",
+				caption: "Screenshot: checkout.png (12 KB)",
+			}),
+		).resolves.toEqual({
+			messageId: 555,
+			messageThreadId: 300,
+		});
+		expect(fetchMock).toHaveBeenCalledWith(
+			"https://api.telegram.org/botsupport-token/sendPhoto",
+			expect.objectContaining({
+				method: "POST",
+				body: JSON.stringify({
+					chat_id: "-100123",
+					message_thread_id: 300,
+					photo: "https://storage.example/screenshot.png",
+					caption: "Screenshot: checkout.png (12 KB)",
+				}),
+			}),
+		);
 	});
 });

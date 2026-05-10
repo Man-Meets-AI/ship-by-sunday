@@ -45,17 +45,22 @@ export function SupportWidget({
 		>
 			{supportChat.isOpen ? (
 				<SupportWidgetPanel
+					attachmentErrorMessage={supportChat.attachmentErrorMessage}
+					attachmentFile={supportChat.attachmentFile}
+					bugReportDraft={supportChat.bugReportDraft}
 					canSend={supportChat.canSend}
+					chatMode={supportChat.chatMode}
 					content={content}
 					draftMessage={supportChat.draftMessage}
 					errorMessage={supportChat.errorMessage}
 					fallbackHref={fallbackHref}
-					isBusy={supportChat.isBusy}
 					onClose={supportChat.closeChat}
 					onDraftMessageChange={supportChat.setDraftMessage}
 					onFallbackClick={supportChat.recordFallbackClick}
-					onRefresh={supportChat.refreshThread}
 					onSend={supportChat.sendMessage}
+					onSetAttachmentFile={supportChat.setAttachmentFile}
+					onSetBugReportDraft={supportChat.setBugReportDraft}
+					onSetChatMode={supportChat.setChatMode}
 					status={supportChat.status}
 					threadState={supportChat.threadState}
 				/>

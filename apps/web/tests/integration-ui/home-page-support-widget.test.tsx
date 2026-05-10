@@ -22,6 +22,13 @@ const supportWidget = {
 		starterMessage:
 			"Send a note here. Parker replies from Telegram and the thread stays on this page.",
 		messagePlaceholder: "Type your question...",
+		bugReportLabel: "Bug",
+		bugSummaryPlaceholder: "What broke?",
+		bugStepsPlaceholder: "What were you trying to do?",
+		bugExpectedPlaceholder: "What did you expect instead?",
+		bugImpactLabel: "Bug impact",
+		attachScreenshotLabel: "Attach screenshot",
+		removeAttachmentLabel: "Remove screenshot",
 		sendLabel: "Send",
 		closeLabel: "Close support chat",
 		fallbackLabel: "Open Telegram",
@@ -45,6 +52,7 @@ function createThreadState(messageText = "Can this help my SaaS?") {
 				id: "message_1",
 				source: "visitor",
 				body: messageText,
+				attachment: null,
 				createdAt: 1,
 				deliveryStatus: "delivered_to_parker",
 				deliveryFailureClass: null,
@@ -53,6 +61,7 @@ function createThreadState(messageText = "Can this help my SaaS?") {
 				id: "message_2",
 				source: "system",
 				body: "Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+				attachment: null,
 				createdAt: 2,
 				deliveryStatus: "not_required",
 				deliveryFailureClass: null,
@@ -61,6 +70,7 @@ function createThreadState(messageText = "Can this help my SaaS?") {
 				id: "message_3",
 				source: "system",
 				body: "Parker usually catches these pretty quickly when he's near his phone.",
+				attachment: null,
 				createdAt: 3,
 				deliveryStatus: "not_required",
 				deliveryFailureClass: null,
@@ -151,6 +161,7 @@ describe("HomePageSupportWidget", () => {
 				messageText: "Can this help my SaaS?",
 				pagePath: "/",
 				entrySurface: "homepage_support_widget",
+				attachment: null,
 			}),
 		});
 		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({
@@ -168,5 +179,137 @@ describe("HomePageSupportWidget", () => {
 		expect(
 			JSON.stringify(capturePostHogProductEventMock.mock.calls),
 		).not.toContain("Can this help my SaaS?");
+	});
+
+	it("uploads a screenshot and sends a structured bug report", async () => {
+		const bugReportState = {
+			...createThreadState("Bug report\nImpact: Blocking me"),
+			messages: [
+				{
+					id: "message_1",
+					source: "visitor",
+					body: "Bug report\nImpact: Blocking me\nWhat happened: Checkout stalled",
+					attachment: {
+						kind: "screenshot",
+						fileName: "checkout-stall.png",
+						contentType: "image/png",
+						size: 1234,
+						url: "https://storage.example/checkout-stall.png",
+					},
+					createdAt: 1,
+					deliveryStatus: "delivered_to_parker",
+					deliveryFailureClass: null,
+				},
+			],
+		};
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						status: "empty",
+						supportId: null,
+						messages: [],
+						fallbackHref: "https://t.me/parkerrex",
+						error: null,
+					}),
+					{ status: 200 },
+				),
+			)
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({ uploadUrl: "https://storage.example/upload" }),
+					{ status: 200 },
+				),
+			)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify({ storageId: "storage_123" }), {
+					status: 200,
+				}),
+			)
+			.mockResolvedValueOnce(
+				new Response(JSON.stringify(bugReportState), { status: 200 }),
+			);
+
+		const user = userEvent.setup();
+		const { container } = render(
+			<HomePageSupportWidget supportWidget={supportWidget} />,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Message Parker" }));
+		await screen.findByText(
+			"Send a note here. Parker replies from Telegram and the thread stays on this page.",
+		);
+		await user.click(screen.getByRole("button", { name: "Bug" }));
+		await user.type(
+			screen.getByPlaceholderText("What broke?"),
+			"Checkout stalled",
+		);
+		await user.type(
+			screen.getByPlaceholderText("What were you trying to do?"),
+			"Pay from the homepage",
+		);
+		const fileInput =
+			container.querySelector<HTMLInputElement>('input[type="file"]');
+		expect(fileInput).toBeTruthy();
+		await user.upload(
+			fileInput as HTMLInputElement,
+			new File(["fake image"], "checkout-stall.png", { type: "image/png" }),
+		);
+		await user.click(screen.getByRole("button", { name: "Send" }));
+
+		await waitFor(() =>
+			expect(screen.getByText("Delivered to Parker")).toBeTruthy(),
+		);
+		expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/support/attachments", {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				fileName: "checkout-stall.png",
+				contentType: "image/png",
+				size: 10,
+			}),
+		});
+		expect(fetchMock).toHaveBeenNthCalledWith(
+			3,
+			"https://storage.example/upload",
+			expect.objectContaining({
+				method: "POST",
+				headers: {
+					"Content-Type": "image/png",
+				},
+			}),
+		);
+		expect(fetchMock).toHaveBeenNthCalledWith(
+			4,
+			"/api/support/messages",
+			expect.objectContaining({
+				method: "POST",
+				body: expect.stringContaining("Bug report"),
+			}),
+		);
+		const messageRequestInit = fetchMock.mock.calls[3]?.[1] as
+			| RequestInit
+			| undefined;
+		if (!messageRequestInit || typeof messageRequestInit.body !== "string") {
+			throw new Error("Expected support message request body.");
+		}
+		const finalRequest = JSON.parse(messageRequestInit.body) as {
+			messageText: string;
+			attachment: { storageId: string; fileName: string };
+		};
+		expect(finalRequest.messageText).toContain(
+			"What happened: Checkout stalled",
+		);
+		expect(finalRequest.messageText).toContain(
+			"What I was doing: Pay from the homepage",
+		);
+		expect(finalRequest.attachment).toMatchObject({
+			storageId: "storage_123",
+			fileName: "checkout-stall.png",
+		});
 	});
 });

@@ -612,6 +612,13 @@ export const homePageContent = {
 		starterMessage:
 			"Send a note here. Parker replies from Telegram and the thread stays on this page.",
 		messagePlaceholder: "Type your question...",
+		bugReportLabel: "Bug",
+		bugSummaryPlaceholder: "What broke?",
+		bugStepsPlaceholder: "What were you trying to do?",
+		bugExpectedPlaceholder: "What did you expect instead?",
+		bugImpactLabel: "Bug impact",
+		attachScreenshotLabel: "Attach screenshot",
+		removeAttachmentLabel: "Remove screenshot",
 		sendLabel: "Send",
 		closeLabel: "Close support chat",
 		fallbackLabel: "Open Telegram",

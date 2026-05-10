@@ -8,6 +8,13 @@ const workspaceSupportWidgetContent = {
 	starterMessage:
 		"Send a note from this workspace. Parker replies from Telegram and the thread stays here.",
 	messagePlaceholder: "Type a workspace question...",
+	bugReportLabel: "Bug",
+	bugSummaryPlaceholder: "What broke?",
+	bugStepsPlaceholder: "What were you trying to do?",
+	bugExpectedPlaceholder: "What did you expect instead?",
+	bugImpactLabel: "Bug impact",
+	attachScreenshotLabel: "Attach screenshot",
+	removeAttachmentLabel: "Remove screenshot",
 	sendLabel: "Send",
 	closeLabel: "Close support chat",
 	fallbackLabel: "Open Telegram",

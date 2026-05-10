@@ -22,6 +22,7 @@ function createThreadState(messageText = "Can you review my workspace setup?") {
 				id: "message_1",
 				source: "visitor",
 				body: messageText,
+				attachment: null,
 				createdAt: 1,
 				deliveryStatus: "delivered_to_parker",
 				deliveryFailureClass: null,
@@ -30,6 +31,7 @@ function createThreadState(messageText = "Can you review my workspace setup?") {
 				id: "message_2",
 				source: "system",
 				body: "Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+				attachment: null,
 				createdAt: 2,
 				deliveryStatus: "not_required",
 				deliveryFailureClass: null,
@@ -38,6 +40,7 @@ function createThreadState(messageText = "Can you review my workspace setup?") {
 				id: "message_3",
 				source: "system",
 				body: "Parker usually catches these pretty quickly when he's near his phone.",
+				attachment: null,
 				createdAt: 3,
 				deliveryStatus: "not_required",
 				deliveryFailureClass: null,
@@ -131,6 +134,7 @@ describe("WorkspaceSupportWidget", () => {
 				messageText: "Can you review my workspace setup?",
 				pagePath: "/workspace/setup",
 				entrySurface: "workspace_support_widget",
+				attachment: null,
 			}),
 		});
 		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({

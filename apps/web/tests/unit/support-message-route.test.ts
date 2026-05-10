@@ -1,11 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { getConvexServerSessionMock, fetchActionMock, fetchQueryMock } =
-	vi.hoisted(() => ({
-		getConvexServerSessionMock: vi.fn(),
-		fetchActionMock: vi.fn(),
-		fetchQueryMock: vi.fn(),
-	}));
+const {
+	getConvexServerSessionMock,
+	fetchActionMock,
+	fetchMutationMock,
+	fetchQueryMock,
+} = vi.hoisted(() => ({
+	getConvexServerSessionMock: vi.fn(),
+	fetchActionMock: vi.fn(),
+	fetchMutationMock: vi.fn(),
+	fetchQueryMock: vi.fn(),
+}));
 
 vi.mock("server-only", () => ({}));
 
@@ -15,6 +20,7 @@ vi.mock("@/platform/auth/convex-auth", () => ({
 
 vi.mock("convex/nextjs", () => ({
 	fetchAction: fetchActionMock,
+	fetchMutation: fetchMutationMock,
 	fetchQuery: fetchQueryMock,
 }));
 
@@ -32,9 +38,11 @@ describe("support message route", () => {
 	beforeEach(() => {
 		getConvexServerSessionMock.mockReset();
 		fetchActionMock.mockReset();
+		fetchMutationMock.mockReset();
 		fetchQueryMock.mockReset();
 		fetchQueryMock.mockResolvedValue(createThreadState());
 		fetchActionMock.mockResolvedValue(createThreadState());
+		fetchMutationMock.mockResolvedValue("https://storage.example/upload");
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "convex-auth-token",
@@ -89,6 +97,7 @@ describe("support message route", () => {
 				messageText: "Can this help my SaaS?",
 				pagePath: "/",
 				entrySurface: "homepage_support_widget",
+				attachment: null,
 			},
 			{ token: "convex-auth-token" },
 		);
@@ -120,6 +129,7 @@ describe("support message route", () => {
 			messageText: "Can this help my SaaS?",
 			pagePath: "/",
 			entrySurface: "homepage_support_widget",
+			attachment: null,
 		});
 	});
 
@@ -150,6 +160,7 @@ describe("support message route", () => {
 					id: "message_1",
 					source: "visitor",
 					body: "Question",
+					attachment: null,
 					createdAt: 1,
 					deliveryStatus: "delivered_to_parker",
 					deliveryFailureClass: null,
@@ -208,5 +219,37 @@ describe("support message route", () => {
 		expect(response.status).toBe(400);
 		expect(fetchActionMock).not.toHaveBeenCalled();
 		expect(response.headers.get("set-cookie")).toContain("HttpOnly");
+	});
+
+	it("prepares screenshot uploads through the server-held support session", async () => {
+		const { POST } = await import("@/app/api/support/attachments/route");
+		const existingToken = "c".repeat(64);
+
+		const response = await POST(
+			new Request("https://example.test/api/support/attachments", {
+				method: "POST",
+				headers: {
+					cookie: `__Host-sbs_support_session=${existingToken}`,
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					fileName: "checkout-stall.png",
+					contentType: "image/png",
+					size: 1234,
+				}),
+			}),
+		);
+
+		await expect(response.json()).resolves.toEqual({
+			uploadUrl: "https://storage.example/upload",
+		});
+		expect(response.status).toBe(200);
+		expect(response.headers.get("set-cookie")).toBeNull();
+		expect(fetchMutationMock).toHaveBeenCalledWith(expect.anything(), {
+			sessionToken: existingToken,
+			fileName: "checkout-stall.png",
+			contentType: "image/png",
+			size: 1234,
+		});
 	});
 });

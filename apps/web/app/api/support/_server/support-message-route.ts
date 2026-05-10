@@ -1,9 +1,15 @@
 import "server-only";
 
-import { fetchAction, fetchQuery } from "convex/nextjs";
+import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import type { JsonValue } from "@/lib/json-value";
+import {
+	isSupportScreenshotContentType,
+	normalizeSupportScreenshotFileName,
+	SUPPORT_SCREENSHOT_MAX_BYTES,
+} from "@/lib/support/support-attachment-policy";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import {
 	appendSupportSessionCookie,
@@ -15,6 +21,13 @@ type SupportMessageRequestBody = {
 	readonly messageText?: JsonValue;
 	readonly pagePath?: JsonValue;
 	readonly entrySurface?: JsonValue;
+	readonly attachment?: JsonValue;
+};
+
+type SupportAttachmentUploadRequestBody = {
+	readonly fileName?: JsonValue;
+	readonly contentType?: JsonValue;
+	readonly size?: JsonValue;
 };
 
 const SUPPORT_MESSAGE_MAX_LENGTH = 2_000;
@@ -64,6 +77,7 @@ export async function sendSupportMessageFromRequest(request: Request) {
 			messageText,
 			pagePath: normalizePagePath(body?.pagePath),
 			entrySurface: normalizeEntrySurface(body?.entrySurface),
+			attachment: normalizeSupportAttachment(body?.attachment),
 		};
 		const convexAuthToken = await getOptionalConvexAuthToken();
 		const threadState = convexAuthToken
@@ -83,9 +97,58 @@ export async function sendSupportMessageFromRequest(request: Request) {
 	}
 }
 
+export async function prepareSupportAttachmentUploadFromRequest(
+	request: Request,
+) {
+	const supportSessionCookie = getSupportSessionCookie(request);
+	const body = await readSupportAttachmentUploadRequestBody(request);
+	const attachment = normalizeSupportAttachmentUploadRequest(body);
+	if (!attachment) {
+		return jsonWithSupportCookie(
+			{ error: "Upload a PNG, JPG, or WebP screenshot up to 10 MB." },
+			{ status: 400 },
+			supportSessionCookie,
+		);
+	}
+
+	try {
+		const uploadUrl = await fetchMutation(
+			api.support.generateVisitorAttachmentUploadUrl,
+			{
+				sessionToken: supportSessionCookie.sessionToken,
+				...attachment,
+			},
+		);
+
+		return jsonWithSupportCookie(
+			{ uploadUrl },
+			undefined,
+			supportSessionCookie,
+		);
+	} catch (error) {
+		return jsonWithSupportCookie(
+			{
+				error: getSupportMessageError(
+					error instanceof Error ? error : String(error),
+				),
+			},
+			{ status: getSupportErrorStatus(error instanceof Error ? error : "") },
+			supportSessionCookie,
+		);
+	}
+}
+
 async function readSupportMessageRequestBody(request: Request) {
 	try {
 		return (await request.json()) as SupportMessageRequestBody;
+	} catch {
+		return null;
+	}
+}
+
+async function readSupportAttachmentUploadRequestBody(request: Request) {
+	try {
+		return (await request.json()) as SupportAttachmentUploadRequestBody;
 	} catch {
 		return null;
 	}
@@ -121,6 +184,71 @@ function normalizeEntrySurface(value: JsonValue | undefined) {
 	return typeof value === "string" && value.trim()
 		? value.trim().slice(0, 80)
 		: "homepage_support_widget";
+}
+
+function normalizeSupportAttachment(value: JsonValue | undefined) {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		return null;
+	}
+
+	const attachment = value as Record<string, JsonValue | undefined>;
+	const storageId = attachment.storageId;
+	const fileName = attachment.fileName;
+	const contentType = attachment.contentType;
+	const size = attachment.size;
+	const kind = attachment.kind;
+	if (
+		kind !== "screenshot" ||
+		typeof storageId !== "string" ||
+		typeof fileName !== "string" ||
+		typeof contentType !== "string" ||
+		typeof size !== "number" ||
+		!isSupportScreenshotContentType(contentType) ||
+		!supportAttachmentSizeIsValid(size)
+	) {
+		return null;
+	}
+
+	return {
+		kind: "screenshot" as const,
+		storageId: storageId as Id<"_storage">,
+		fileName: normalizeSupportScreenshotFileName(fileName),
+		contentType,
+		size,
+	};
+}
+
+function normalizeSupportAttachmentUploadRequest(
+	body: SupportAttachmentUploadRequestBody | null,
+) {
+	if (!body) {
+		return null;
+	}
+
+	const { fileName, contentType, size } = body;
+	if (
+		typeof fileName !== "string" ||
+		typeof contentType !== "string" ||
+		typeof size !== "number" ||
+		!isSupportScreenshotContentType(contentType) ||
+		!supportAttachmentSizeIsValid(size)
+	) {
+		return null;
+	}
+
+	return {
+		fileName: normalizeSupportScreenshotFileName(fileName),
+		contentType,
+		size,
+	};
+}
+
+function supportAttachmentSizeIsValid(size: number) {
+	return (
+		Number.isSafeInteger(size) &&
+		size > 0 &&
+		size <= SUPPORT_SCREENSHOT_MAX_BYTES
+	);
 }
 
 async function getOptionalConvexAuthToken() {

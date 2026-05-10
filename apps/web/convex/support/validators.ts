@@ -9,6 +9,7 @@ export const supportMessageSourceValues = [
 	"operator",
 	"system",
 ] as const;
+export const supportAttachmentKindValues = ["screenshot"] as const;
 export const supportDeliveryStatusValues = [
 	"not_required",
 	"sending",
@@ -75,6 +76,7 @@ export const supportMessageSourceValidator = v.union(
 	v.literal("operator"),
 	v.literal("system"),
 );
+export const supportAttachmentKindValidator = v.union(v.literal("screenshot"));
 export const supportDeliveryStatusValidator = v.union(
 	v.literal("not_required"),
 	v.literal("sending"),
@@ -147,6 +149,16 @@ export const supportPublicMessageValidator = v.object({
 	id: v.string(),
 	source: supportMessageSourceValidator,
 	body: v.union(v.string(), v.null()),
+	attachment: v.union(
+		v.object({
+			kind: supportAttachmentKindValidator,
+			fileName: v.string(),
+			contentType: v.string(),
+			size: v.number(),
+			url: v.union(v.string(), v.null()),
+		}),
+		v.null(),
+	),
 	createdAt: v.number(),
 	deliveryStatus: supportDeliveryStatusValidator,
 	deliveryFailureClass: v.union(supportDeliveryFailureClassValidator, v.null()),

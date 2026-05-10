@@ -99,6 +99,16 @@ Parker usually catches these pretty quickly when he's near his phone.
 
 These are `system` messages in Convex. They appear in the website widget only and are not sent to Telegram as visitor messages. They intentionally do not claim Parker is online and do not promise a response time.
 
+## Screenshots and bug reports
+
+The support widget accepts one explicit customer-selected screenshot per message. Supported screenshot formats are PNG, JPG, and WebP up to 10 MB. The browser asks `/api/support/attachments` for a Convex storage upload URL using the existing HttpOnly support session cookie, uploads the file directly to Convex storage, and then sends the resulting storage id through `/api/support/messages`. The browser never receives a support bearer token or Telegram bot token.
+
+When a message includes a screenshot, Convex validates the stored blob metadata again before the visitor message is created. Telegram receives the text message in the customer topic and then receives the screenshot through `sendPhoto` with a short caption. The website transcript shows the screenshot inside the same visitor bubble when Convex can return a signed storage URL.
+
+The widget also has a `Bug` mode. That mode sends a structured visitor message with impact, page path, viewport, browser user agent, what happened, what the customer was doing, and what they expected instead. The app does not automatically attach workspace source, logs, local paths, payment details, or transcript DOM. Customers must explicitly type the bug report and explicitly choose any screenshot.
+
+Screenshot storage follows the same closed-thread retention path as support transcripts. When closed transcripts are purged, message bodies are removed and attached screenshot files are deleted from Convex storage before Telegram topic cleanup is attempted.
+
 ## Operator action buttons
 
 Every support topic starts with a bot-authored header and an inline keyboard. Normal Telegram replies from allowlisted operators still become website-visible replies.
@@ -154,6 +164,8 @@ Check that:
 Then open the homepage, open the Message Parker launcher, and send a test message. A new Telegram topic named with the `SBS-...` support id and safe entry label should appear, such as `homepage` or `workspace`. Reply in that topic from an operator user listed in `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`; the reply should appear in the widget on the next refresh or poll. Signed-in buyers also get an `Ask Parker` launcher inside protected workspace routes; messages from that launcher use the same support thread bridge with `entrySurface: "workspace_support_widget"` and do not send workspace source, findings, logs, local paths, or payment details automatically.
 
 Click `Yoooo` in Telegram. The widget should show `Yooo - how'd you find my site?` after refresh. Click `Whatcha`; the widget should show `Whatcha trying to make?` after refresh. Click `Draft Parker`; Telegram should first acknowledge the button tap, then receive an operator-only AI note with `Send draft` and `Discard`. The widget should not receive a new message from the AI action until `Send draft` is tapped. Click `Close`; the widget should show the closed state after refresh.
+
+To verify screenshot and bug-report handling, open the widget, switch to `Bug`, fill the bug fields, attach a small PNG screenshot, and send. The website should render the visitor bubble immediately with a sending state, then show the uploaded screenshot after the Convex response returns. The Telegram topic should receive the structured bug text and a separate photo message. The structured text should include page, viewport, and browser context only; it should not contain source code, logs, local filesystem paths, payment details, or workspace transcript DOM.
 
 To verify the AI provider path, set `OPENAI_API_KEY`, tap `Draft Parker`, and inspect the `supportOperatorActions` record for that callback. It should keep the same action row, set `aiDraftGenerationStatus` to `completed`, set `generatedOutputSource` to `openai_responses`, set `generatedOutputModel` to the active support draft model, record `operatorNoteDeliveryStatus`, and leave `supportMessages` unchanged until `Send draft` is tapped. Tap `Send draft` and verify exactly one operator support message is created. Tap `Send draft` again and verify no duplicate message is created. Unset `OPENAI_API_KEY` only in a non-production deployment and tap a new AI button to prove the fallback path: Telegram should receive the deterministic fallback note and the action row should contain `generationFailureReason`.
 
