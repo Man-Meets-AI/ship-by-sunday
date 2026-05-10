@@ -1,12 +1,12 @@
 "use client";
 
 import {
+	ArrowUp,
 	Bug,
 	ExternalLink,
 	Image as ImageIcon,
 	Loader2,
 	Paperclip,
-	SendHorizontal,
 	Trash2,
 	X,
 } from "lucide-react";
@@ -95,23 +95,36 @@ export function SupportWidgetPanel({
 	return (
 		<section
 			aria-label={content.panelTitle}
-			className="pointer-events-auto flex max-h-[calc(100dvh-1.5rem)] min-h-[30rem] w-full flex-col overflow-hidden rounded-[14px] border border-white/12 bg-[#101316]/96 text-white shadow-2xl shadow-black/35 backdrop-blur-xl sm:w-[26rem]"
+			className="pointer-events-auto flex max-h-[calc(100dvh-1rem)] min-h-[32rem] w-full flex-col overflow-hidden rounded-[22px] border border-white/[0.1] bg-[#1b1b1b]/98 text-white shadow-2xl shadow-black/35 backdrop-blur-xl sm:w-[27rem]"
 		>
-			<header className="flex items-start justify-between gap-4 border-b border-white/10 px-4 py-3">
+			<header className="flex items-center justify-between gap-4 border-b border-white/[0.08] px-4 py-3">
 				<div className="min-w-0">
 					<div className="flex items-center gap-2">
-						<span className="size-2 rounded-full bg-[#D8FF76]" aria-hidden />
-						<p className="text-sm font-semibold">{content.panelTitle}</p>
+						<span
+							className="size-2 rounded-full bg-[#D8FF76] shadow-[0_0_0_3px_rgba(216,255,118,0.08)]"
+							aria-hidden
+						/>
+						<p className="truncate text-sm font-medium">{content.panelTitle}</p>
 					</div>
-					<p className="mt-1 text-xs leading-5 text-white/62">
+					<p className="mt-0.5 truncate text-xs leading-5 text-white/52">
 						{content.panelSubtitle}
 					</p>
 				</div>
 				<div className="flex shrink-0 items-center gap-1">
+					<a
+						href={threadState.fallbackHref || fallbackHref}
+						target="_blank"
+						rel="noreferrer"
+						onClick={onFallbackClick}
+						aria-label={content.fallbackLabel}
+						className="grid size-8 place-items-center rounded-lg text-white/54 transition hover:bg-white/[0.08] hover:text-white"
+					>
+						<ExternalLink className="size-4" aria-hidden="true" />
+					</a>
 					<button
 						type="button"
 						aria-label={content.closeLabel}
-						className="grid size-8 place-items-center rounded-lg text-white/62 transition hover:bg-white/10 hover:text-white"
+						className="grid size-8 place-items-center rounded-lg text-white/54 transition hover:bg-white/[0.08] hover:text-white"
 						onClick={onClose}
 					>
 						<X className="size-4" aria-hidden="true" />
@@ -120,17 +133,15 @@ export function SupportWidgetPanel({
 			</header>
 
 			<div
-				className="ph-no-capture ph-sensitive flex-1 overflow-y-auto px-4 py-4"
+				className="ph-no-capture ph-sensitive flex-1 overflow-y-auto px-4 py-5"
 				data-ph-no-capture
 				role="log"
 				aria-live="polite"
 			>
 				{messages.length === 0 ? (
-					<div className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-3 text-sm leading-6 text-white/72">
-						{content.starterMessage}
-					</div>
+					<AssistantIntroMessage content={content} />
 				) : (
-					<div className="space-y-3">
+					<div className="space-y-5">
 						{messages.map((message) => (
 							<SupportMessageBubble
 								key={message.id}
@@ -143,56 +154,34 @@ export function SupportWidgetPanel({
 				<div ref={transcriptEndRef} />
 			</div>
 
-			<div className="border-t border-white/10 px-4 py-3">
+			<div className="border-t border-white/[0.08] bg-[#1b1b1b] px-3 py-3">
 				{threadState.status === "closed" ? (
-					<p className="mb-3 text-xs text-white/65">{content.closedLabel}</p>
+					<p className="mb-3 px-1 text-xs text-white/60">
+						{content.closedLabel}
+					</p>
 				) : null}
 				{errorMessage || attachmentErrorMessage ? (
-					<p className="mb-3 text-xs leading-5 text-[#ffb4a8]">
+					<p className="mb-3 px-1 text-xs leading-5 text-[#ffb4a8]">
 						{errorMessage ?? attachmentErrorMessage}
 					</p>
 				) : null}
 				<form
-					className="space-y-3"
+					className="rounded-[20px] border border-white/[0.09] bg-[#2a2a2a] p-2 shadow-[0_1px_0_rgba(255,255,255,0.04)_inset]"
 					onSubmit={(event) => {
 						event.preventDefault();
 						onSend();
 					}}
 				>
-					<div className="flex items-center justify-between gap-2">
-						<div className="flex rounded-lg border border-white/10 bg-white/[0.04] p-1">
-							<ModeButton
-								isActive={chatMode === "message"}
-								label="Chat"
-								onClick={() => onSetChatMode("message")}
-							/>
-							<ModeButton
-								icon={<Bug className="size-3.5" aria-hidden />}
-								isActive={chatMode === "bug_report"}
-								label={content.bugReportLabel}
-								onClick={() => onSetChatMode("bug_report")}
-							/>
-						</div>
-						<input
-							ref={fileInputRef}
-							type="file"
-							accept="image/png,image/jpeg,image/webp"
-							className="hidden"
-							onChange={(event) => {
-								onSetAttachmentFile(event.currentTarget.files?.[0] ?? null);
-								event.currentTarget.value = "";
-							}}
-						/>
-						<button
-							type="button"
-							className="inline-flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/70 transition hover:bg-white/10 hover:text-white"
-							aria-label={content.attachScreenshotLabel}
-							onClick={() => fileInputRef.current?.click()}
-							disabled={threadState.status === "closed"}
-						>
-							<Paperclip className="size-4" aria-hidden />
-						</button>
-					</div>
+					<input
+						ref={fileInputRef}
+						type="file"
+						accept="image/png,image/jpeg,image/webp"
+						className="hidden"
+						onChange={(event) => {
+							onSetAttachmentFile(event.currentTarget.files?.[0] ?? null);
+							event.currentTarget.value = "";
+						}}
+					/>
 
 					{chatMode === "bug_report" ? (
 						<BugReportFields
@@ -202,9 +191,11 @@ export function SupportWidgetPanel({
 						/>
 					) : (
 						<MessageTextarea
+							canSend={canSend}
 							content={content}
 							draftMessage={draftMessage}
 							onDraftMessageChange={onDraftMessageChange}
+							onSend={onSend}
 							threadState={threadState}
 						/>
 					)}
@@ -217,38 +208,65 @@ export function SupportWidgetPanel({
 						/>
 					) : null}
 
-					<div className="flex items-center gap-2">
+					<div className="mt-2 flex items-center gap-2">
+						<div className="flex min-w-0 flex-1 items-center gap-1">
+							<ModeButton
+								isActive={chatMode === "message"}
+								label="Chat"
+								onClick={() => onSetChatMode("message")}
+							/>
+							<ModeButton
+								icon={<Bug className="size-3.5" aria-hidden />}
+								isActive={chatMode === "bug_report"}
+								label={content.bugReportLabel}
+								onClick={() => onSetChatMode("bug_report")}
+							/>
+							<button
+								type="button"
+								className="ml-1 inline-flex size-8 items-center justify-center rounded-full text-white/58 transition hover:bg-white/[0.08] hover:text-white disabled:cursor-not-allowed disabled:text-white/24"
+								aria-label={content.attachScreenshotLabel}
+								onClick={() => fileInputRef.current?.click()}
+								disabled={threadState.status === "closed"}
+							>
+								<Paperclip className="size-4" aria-hidden />
+							</button>
+						</div>
 						<button
 							type="submit"
 							aria-label={content.sendLabel}
 							disabled={!canSend}
-							className="grid size-10 shrink-0 place-items-center rounded-full bg-[#D8FF76] text-[#151912] transition hover:bg-[#ecffb2] disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35"
+							className="grid size-8 shrink-0 place-items-center rounded-full bg-white text-[#151912] transition hover:bg-white/90 disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35"
 						>
 							{status === "sending" ? (
 								<Loader2 className="size-4 animate-spin" aria-hidden="true" />
 							) : (
-								<SendHorizontal className="size-4" aria-hidden="true" />
+								<ArrowUp className="size-4" aria-hidden="true" />
 							)}
 						</button>
-						<p className="min-w-0 flex-1 text-[11px] text-white/45">
-							{status === "sending"
-								? content.sendingLabel
-								: getStatusLabel(threadState)}
-						</p>
-						<a
-							href={threadState.fallbackHref || fallbackHref}
-							target="_blank"
-							rel="noreferrer"
-							onClick={onFallbackClick}
-							className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-white/70 transition hover:text-white"
-						>
-							{content.fallbackLabel}
-							<ExternalLink className="size-3.5" aria-hidden="true" />
-						</a>
 					</div>
 				</form>
 			</div>
 		</section>
+	);
+}
+
+function AssistantIntroMessage({
+	content,
+}: {
+	readonly content: SupportWidgetContent;
+}) {
+	return (
+		<div className="flex items-start gap-3">
+			<div
+				className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-semibold text-[#1b1b1b]"
+				aria-hidden
+			>
+				P
+			</div>
+			<p className="max-w-[20rem] pt-0.5 text-sm leading-6 text-white/76">
+				{content.starterMessage}
+			</p>
+		</div>
 	);
 }
 
@@ -269,10 +287,10 @@ function ModeButton({
 			aria-pressed={isActive}
 			onClick={onClick}
 			className={cn(
-				"inline-flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition",
+				"inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition",
 				isActive
-					? "bg-white text-[#101316]"
-					: "text-white/62 hover:bg-white/10 hover:text-white",
+					? "bg-white/[0.12] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.1)]"
+					: "text-white/54 hover:bg-white/[0.08] hover:text-white",
 			)}
 		>
 			{icon}
@@ -282,14 +300,18 @@ function ModeButton({
 }
 
 function MessageTextarea({
+	canSend,
 	content,
 	draftMessage,
 	onDraftMessageChange,
+	onSend,
 	threadState,
 }: {
+	readonly canSend: boolean;
 	readonly content: SupportWidgetContent;
 	readonly draftMessage: string;
 	readonly onDraftMessageChange: (value: string) => void;
+	readonly onSend: () => void;
 	readonly threadState: SupportThreadState;
 }) {
 	return (
@@ -301,13 +323,21 @@ function MessageTextarea({
 				id="support-widget-message"
 				value={draftMessage}
 				onChange={(event) => onDraftMessageChange(event.target.value)}
+				onKeyDown={(event) => {
+					if (event.key !== "Enter" || event.shiftKey || !canSend) {
+						return;
+					}
+
+					event.preventDefault();
+					onSend();
+				}}
 				placeholder={content.messagePlaceholder}
 				rows={2}
 				maxLength={2000}
 				disabled={
 					threadState.status === "closed" || threadState.status === "disabled"
 				}
-				className="ph-mask ph-sensitive min-h-11 w-full resize-none rounded-lg border border-white/10 bg-white/[0.07] px-3 py-2 text-sm leading-5 text-white outline-none transition placeholder:text-white/38 focus:border-[#D8FF76]/70"
+				className="ph-mask ph-sensitive min-h-16 w-full resize-none border-0 bg-transparent px-2 py-1 text-sm leading-6 text-white outline-none placeholder:text-white/34"
 				data-ph-mask
 			/>
 		</div>
@@ -359,7 +389,7 @@ function BugReportFields({
 						impact: event.target.value as SupportBugImpact,
 					})
 				}
-				className="h-9 w-full rounded-lg border border-white/10 bg-[#191d21] px-3 text-xs text-white outline-none transition focus:border-[#D8FF76]/70"
+				className="h-9 w-full rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 text-xs text-white outline-none transition focus:border-white/30"
 			>
 				<option value="blocked">Blocking me</option>
 				<option value="not_blocked">Not blocked</option>
@@ -388,7 +418,7 @@ function BugTextarea({
 			placeholder={placeholder}
 			rows={2}
 			maxLength={700}
-			className="ph-mask ph-sensitive min-h-10 w-full resize-none rounded-lg border border-white/10 bg-white/[0.07] px-3 py-2 text-sm leading-5 text-white outline-none transition placeholder:text-white/38 focus:border-[#D8FF76]/70"
+			className="ph-mask ph-sensitive min-h-11 w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-sm leading-5 text-white outline-none transition placeholder:text-white/34 focus:border-white/30"
 			data-ph-mask
 		/>
 	);
@@ -404,7 +434,7 @@ function AttachmentChip({
 	readonly onRemove: () => void;
 }) {
 	return (
-		<div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/70">
+		<div className="mt-2 flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.05] px-3 py-2 text-xs text-white/70">
 			<ImageIcon className="size-4 shrink-0 text-white/55" aria-hidden />
 			<span className="min-w-0 flex-1 truncate">
 				{file.name} - {formatSupportAttachmentSize(file.size)}
@@ -413,7 +443,7 @@ function AttachmentChip({
 				type="button"
 				aria-label={content.removeAttachmentLabel}
 				onClick={onRemove}
-				className="grid size-7 shrink-0 place-items-center rounded-md text-white/55 transition hover:bg-white/10 hover:text-white"
+				className="grid size-7 shrink-0 place-items-center rounded-full text-white/55 transition hover:bg-white/[0.08] hover:text-white"
 			>
 				<Trash2 className="size-3.5" aria-hidden />
 			</button>
@@ -430,7 +460,7 @@ function SupportMessageBubble({
 }) {
 	if (message.source === "system") {
 		return (
-			<div className="px-5 text-center text-xs leading-5 text-white/45">
+			<div className="px-7 text-center text-xs leading-5 text-white/38">
 				{message.body}
 			</div>
 		);
@@ -439,12 +469,20 @@ function SupportMessageBubble({
 	const isVisitor = message.source === "visitor";
 	return (
 		<div className={cn("flex", isVisitor ? "justify-end" : "justify-start")}>
+			{isVisitor ? null : (
+				<div
+					className="mr-3 grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-semibold text-[#1b1b1b]"
+					aria-hidden
+				>
+					P
+				</div>
+			)}
 			<div
 				className={cn(
-					"max-w-[84%] overflow-hidden rounded-[12px] px-3 py-2 text-sm leading-6",
+					"max-w-[84%] overflow-hidden text-sm leading-6",
 					isVisitor
-						? "bg-[#D8FF76] text-[#151912]"
-						: "border border-white/10 bg-white/[0.06] text-white",
+						? "rounded-[18px] bg-[#303030] px-3.5 py-2.5 text-white"
+						: "pt-0.5 text-white/82",
 				)}
 			>
 				{message.body ? (
@@ -457,8 +495,8 @@ function SupportMessageBubble({
 						className={cn(
 							"mt-2 overflow-hidden rounded-lg border",
 							isVisitor
-								? "border-[#151912]/12 bg-[#151912]/5"
-								: "border-white/10 bg-black/10",
+								? "border-white/[0.08] bg-black/10"
+								: "border-white/[0.08] bg-white/[0.04]",
 						)}
 					>
 						{message.attachment.url ? (
@@ -478,7 +516,7 @@ function SupportMessageBubble({
 					</div>
 				) : null}
 				{isVisitor ? (
-					<p className="mt-1 text-[11px] leading-4 text-[#151912]/60">
+					<p className="mt-1 text-right text-[11px] leading-4 text-white/38">
 						{getDeliveryLabel(message.deliveryStatus, content)}
 					</p>
 				) : null}
@@ -530,14 +568,4 @@ function getDeliveryLabel(
 		case "not_required":
 			return "";
 	}
-}
-
-function getStatusLabel(threadState: SupportThreadState) {
-	if (threadState.supportId) {
-		return threadState.supportId;
-	}
-	if (threadState.status === "disabled") {
-		return "Support fallback available";
-	}
-	return "Replies stay in this thread";
 }

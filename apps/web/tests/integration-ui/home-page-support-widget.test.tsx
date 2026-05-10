@@ -127,9 +127,9 @@ describe("HomePageSupportWidget", () => {
 		expect(textarea.getAttribute("data-ph-mask")).toBe("true");
 		expect(textarea.classList.contains("ph-mask")).toBe(true);
 		expect(textarea.classList.contains("ph-sensitive")).toBe(true);
+		expect(screen.queryByText("Replies stay in this thread")).toBeNull();
 
-		await user.type(textarea, "Can this help my SaaS?");
-		await user.click(screen.getByRole("button", { name: "Send" }));
+		await user.type(textarea, "Can this help my SaaS?{Enter}");
 
 		await waitFor(() =>
 			expect(screen.getByText("Delivered to Parker")).toBeTruthy(),
