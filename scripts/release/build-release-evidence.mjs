@@ -16,7 +16,13 @@ function parseArgs(argv) {
 			continue;
 		}
 
-		const [key, value = "true"] = argument.slice(2).split("=");
+		const separatorIndex = argument.indexOf("=");
+		const key =
+			separatorIndex === -1
+				? argument.slice(2)
+				: argument.slice(2, separatorIndex);
+		const value =
+			separatorIndex === -1 ? "true" : argument.slice(separatorIndex + 1);
 		options[key] = value;
 	}
 
@@ -25,6 +31,24 @@ function parseArgs(argv) {
 
 function readShaOption(options, key, fallback) {
 	return options[key]?.trim() || fallback?.trim() || "unavailable";
+}
+
+function readNullableOption(options, key) {
+	const value = options[key]?.trim();
+	return value && value !== "null" ? value : null;
+}
+
+function proofStateFromOptions(options, key, { dryRun, fallbackNotes }) {
+	const proof = proofStateFromStatus(
+		options[`${key}-status`] || (dryRun ? "unavailable" : undefined),
+		options[`${key}-notes`] || fallbackNotes,
+	);
+
+	return {
+		...proof,
+		runId: readNullableOption(options, `${key}-run-id`) ?? proof.runId,
+		url: readNullableOption(options, `${key}-url`) ?? proof.url,
+	};
 }
 
 export async function runCli({
@@ -59,26 +83,26 @@ export async function runCli({
 					: null,
 			},
 		],
-		vercel: proofStateFromStatus(
-			options["vercel-status"] || (dryRun ? "unavailable" : undefined),
-			options["vercel-notes"] || "Vercel production proof was not supplied.",
-		),
-		convex: proofStateFromStatus(
-			options["convex-status"] || (dryRun ? "unavailable" : undefined),
-			options["convex-notes"] || "Convex production proof was not supplied.",
-		),
-		billing: proofStateFromStatus(
-			options["billing-status"] || (dryRun ? "unavailable" : undefined),
-			options["billing-notes"] || "Billing proof was not supplied.",
-		),
-		auth: proofStateFromStatus(
-			options["auth-status"] || (dryRun ? "unavailable" : undefined),
-			options["auth-notes"] || "Auth proof was not supplied.",
-		),
-		entitlement: proofStateFromStatus(
-			options["entitlement-status"] || (dryRun ? "unavailable" : undefined),
-			options["entitlement-notes"] || "Entitlement proof was not supplied.",
-		),
+		vercel: proofStateFromOptions(options, "vercel", {
+			dryRun,
+			fallbackNotes: "Vercel production proof was not supplied.",
+		}),
+		convex: proofStateFromOptions(options, "convex", {
+			dryRun,
+			fallbackNotes: "Convex production proof was not supplied.",
+		}),
+		billing: proofStateFromOptions(options, "billing", {
+			dryRun,
+			fallbackNotes: "Billing proof was not supplied.",
+		}),
+		auth: proofStateFromOptions(options, "auth", {
+			dryRun,
+			fallbackNotes: "Auth proof was not supplied.",
+		}),
+		entitlement: proofStateFromOptions(options, "entitlement", {
+			dryRun,
+			fallbackNotes: "Entitlement proof was not supplied.",
+		}),
 	});
 
 	assertReleaseEvidence(evidence, { publish: false });

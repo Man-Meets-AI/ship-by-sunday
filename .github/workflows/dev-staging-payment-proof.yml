@@ -79,6 +79,14 @@ jobs:
           writeFileSync(envPath, `${filtered.join("\n")}\n`);
           NODE
 
+      - name: Verify dev Stripe environment and webhook endpoint
+        run: |
+          cd apps/web
+          bun --env-file=.env.local scripts/verify-managed-stripe-env.ts \
+            --expected-mode=test \
+            --app-base-url=https://dev.man-meets-ai.com \
+            --require-webhook-endpoint
+
       - name: Run dev Stripe card payment proof
         run: |
           bun run --cwd apps/web stripe:hosted:verify:dev-card -- \

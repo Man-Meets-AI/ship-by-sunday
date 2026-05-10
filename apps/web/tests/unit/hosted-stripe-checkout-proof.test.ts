@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
+	assertHostedProofCheckoutSessionSafe,
 	buildHostedProofAccessDebugArgs,
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
 	EXPRESS_CHECKOUT_ROUTE_PATH,
+	isHostedProofCheckoutSessionFulfilled,
 	HOMEPAGE_CHECKOUT_PROOF_PATH,
 	isExpressCheckoutRouteUrl,
+	isLiveStripeSecretKey,
+	shouldAllowHostedProofCardEntry,
 } from "../../scripts/lib/hosted-stripe-checkout-proof.mjs";
 
 describe("hosted Stripe checkout proof helpers", () => {
@@ -95,6 +99,56 @@ describe("hosted Stripe checkout proof helpers", () => {
 				"https://www.man-meets-ai.com/api/stripe/checkout",
 				"https://www.man-meets-ai.com",
 			),
+		).toBe(false);
+	});
+
+	it("keeps live production proof on the zero-cost no-card path", () => {
+		expect(isLiveStripeSecretKey("sk_live_123")).toBe(true);
+		expect(isLiveStripeSecretKey("rk_live_123")).toBe(true);
+		expect(isLiveStripeSecretKey("sk_test_123")).toBe(false);
+		expect(isLiveStripeSecretKey("rk_test_123")).toBe(false);
+		expect(shouldAllowHostedProofCardEntry(true)).toBe(false);
+		expect(shouldAllowHostedProofCardEntry(false)).toBe(true);
+		expect(() =>
+			assertHostedProofCheckoutSessionSafe({
+				checkoutSession: {
+					amount_total: 100,
+					id: "cs_live_non_zero",
+				},
+				isLiveStripeMode: true,
+			}),
+		).toThrow(
+			"Live hosted billing proof requires a zero-cost Checkout Session before navigation. Session cs_live_non_zero amount_total=100.",
+		);
+		expect(() =>
+			assertHostedProofCheckoutSessionSafe({
+				checkoutSession: {
+					amount_total: 0,
+					id: "cs_live_zero",
+				},
+				isLiveStripeMode: true,
+			}),
+		).not.toThrow();
+		expect(
+			isHostedProofCheckoutSessionFulfilled({
+				amount_total: 0,
+				payment_status: "paid",
+				status: "complete",
+			}),
+		).toBe(true);
+		expect(
+			isHostedProofCheckoutSessionFulfilled({
+				amount_total: 0,
+				payment_status: "no_payment_required",
+				status: "complete",
+			}),
+		).toBe(true);
+		expect(
+			isHostedProofCheckoutSessionFulfilled({
+				amount_total: 0,
+				payment_status: "unpaid",
+				status: "complete",
+			}),
 		).toBe(false);
 	});
 });

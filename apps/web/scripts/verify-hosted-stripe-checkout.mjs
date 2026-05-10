@@ -8,13 +8,17 @@ import { chromium } from "@playwright/test";
 import Stripe from "stripe";
 
 import {
+	assertHostedProofCheckoutSessionSafe,
 	buildHostedProofAccessDebugArgs,
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
 	DEFAULT_PROOF_COURSE_SLUG,
 	HOMEPAGE_CHECKOUT_PROOF_PATH,
+	isHostedProofCheckoutSessionFulfilled,
 	isExpressCheckoutRouteUrl,
+	isLiveStripeSecretKey,
+	shouldAllowHostedProofCardEntry,
 } from "./lib/hosted-stripe-checkout-proof.mjs";
 import { buildResetProductAccessCommand } from "./lib/convex-product-access-grant.mjs";
 import { withConvexDeploymentEnv } from "./lib/convex-deployment-env.mjs";
@@ -184,7 +188,7 @@ function getHostedCheckoutSubmitButton(page) {
 	);
 }
 
-async function fillHostedSandboxCardDetails(page) {
+async function fillHostedSandboxCardDetails(page, { allowCardEntry }) {
 	const cardNumberInput = page.getByRole("textbox", { name: /card number/i });
 	await cardNumberInput
 		.waitFor({ state: "visible", timeout: 5_000 })
@@ -192,6 +196,12 @@ async function fillHostedSandboxCardDetails(page) {
 
 	if (!(await cardNumberInput.isVisible().catch(() => false))) {
 		return;
+	}
+
+	if (!allowCardEntry) {
+		throw new Error(
+			"Live hosted billing proof refused to enter card details. Production proof must use the restricted zero-cost Checkout Session.",
+		);
 	}
 
 	await cardNumberInput.fill("4242 4242 4242 4242");
@@ -254,13 +264,15 @@ async function satisfyStripeLinkVerification(page) {
 		.catch(() => null);
 }
 
-async function submitHostedCheckout(page) {
+async function submitHostedCheckout(page, { allowCardEntry }) {
 	await page.waitForURL(/checkout\.stripe\.com/, {
 		timeout: 30_000,
 	});
 	await satisfyStripeLinkVerification(page);
-	await selectHostedCardPaymentMethod(page);
-	await fillHostedSandboxCardDetails(page);
+	if (allowCardEntry) {
+		await selectHostedCardPaymentMethod(page);
+	}
+	await fillHostedSandboxCardDetails(page, { allowCardEntry });
 
 	const submitButton = getHostedCheckoutSubmitButton(page);
 	await submitButton.waitFor({ state: "visible", timeout: 20_000 });
@@ -557,6 +569,9 @@ if (!stripeSecretKey) {
 	throw new Error("Missing STRIPE_SECRET_KEY in environment.");
 }
 
+const isLiveStripeMode = isLiveStripeSecretKey(stripeSecretKey);
+const allowCardEntry = shouldAllowHostedProofCardEntry(isLiveStripeMode);
+
 if (!stripePriceId) {
 	throw new Error("Missing STRIPE_PRICE_ID in environment.");
 }
@@ -603,6 +618,10 @@ try {
 			priceId: stripePriceId,
 		}),
 	);
+	assertHostedProofCheckoutSessionSafe({
+		checkoutSession,
+		isLiveStripeMode,
+	});
 	if (!checkoutSession.url) {
 		throw new Error("Stripe did not return a hosted checkout URL.");
 	}
@@ -622,7 +641,7 @@ try {
 		waitUntil: "load",
 	});
 	console.log("Opened hosted Stripe Checkout");
-	await submitHostedCheckout(page);
+	await submitHostedCheckout(page, { allowCardEntry });
 	console.log("Submitted hosted Stripe Checkout");
 	await waitForHostedCheckoutReturn(page);
 
@@ -643,9 +662,7 @@ try {
 	console.log(`Checkout session: ${checkoutSession.id}`);
 	printCheck(
 		"Stripe session complete",
-		finalSession.status === "complete" &&
-			finalSession.payment_status === "paid" &&
-			finalSession.amount_total === 0,
+		isHostedProofCheckoutSessionFulfilled(finalSession),
 		`status=${finalSession.status}, payment_status=${finalSession.payment_status}, amount_total=${finalSession.amount_total}`,
 	);
 	printCheck(
@@ -732,9 +749,7 @@ try {
 	);
 
 	if (
-		finalSession.status !== "complete" ||
-		finalSession.payment_status !== "paid" ||
-		finalSession.amount_total !== 0 ||
+		!isHostedProofCheckoutSessionFulfilled(finalSession) ||
 		!appCheckoutSession.ok ||
 		!appCheckoutSession.sessionId ||
 		!appCheckoutSession.url ||

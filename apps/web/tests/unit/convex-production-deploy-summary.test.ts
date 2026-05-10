@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { validateConvexProductionDeploySummary } from "../../../../scripts/release/lib/convex-production-deploy-summary.mjs";
+import {
+	buildConvexProductionDeployProofState,
+	validateConvexProductionDeploySummary,
+} from "../../../../scripts/release/lib/convex-production-deploy-summary.mjs";
 import { runCli as verifyConvexProductionDeploySummaryCli } from "../../../../scripts/release/verify-convex-production-deploy-summary.mjs";
 
 const validSummary = {
@@ -81,5 +84,46 @@ describe("Convex production deploy summary verification", () => {
 		expect(stderr).toContain(
 			"Convex production deploy mode was dry-run, expected deploy.",
 		);
+	});
+
+	it("derives a failed proof state when required Convex deploy was skipped", () => {
+		expect(
+			buildConvexProductionDeployProofState(
+				{
+					...validSummary,
+					deployMode: "skip",
+					proof: {
+						convex: "skip",
+					},
+				},
+				"main-sha",
+				{ required: true },
+			),
+		).toMatchObject({
+			ok: true,
+			proof: {
+				runId: "123",
+				status: "failed",
+				url: validSummary.runUrl,
+			},
+		});
+	});
+
+	it("derives not_required when production proof says Convex was not sensitive", () => {
+		expect(
+			buildConvexProductionDeployProofState(null, "main-sha", {
+				required: false,
+			}),
+		).toEqual({
+			ok: true,
+			issues: [],
+			proof: {
+				notes:
+					"Production proof classified the release as not Convex-sensitive.",
+				runId: null,
+				status: "not_required",
+				url: null,
+			},
+		});
 	});
 });

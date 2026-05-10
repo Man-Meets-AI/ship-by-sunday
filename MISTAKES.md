@@ -81,3 +81,7 @@
 - Mistake: I ran root `bun typecheck` without first checking whether the command has networked build hooks in this environment.
   Impact: The command passed, but it created a PostHog release and uploaded source maps because the local environment had PostHog credentials available.
   Corrective action: Prefer focused package validation for scoped Worker work, and check root build hooks before broad validation commands that may talk to external services.
+
+- Mistake: I repeated the guarded-typecheck miss during the production preflight hardening fix by polling an already-started `bun run --cwd apps/web typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The command passed, but it created a PostHog release and uploaded source maps from the local environment.
+  Corrective action: Restart release-sensitive app validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` before accepting the result, and keep the guard in the command line for every local typecheck/build run.

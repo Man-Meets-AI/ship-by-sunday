@@ -181,7 +181,8 @@ jobs:
       - name: Wait for matching Vercel production deployment
         run: |
           node scripts/release/wait-for-vercel-production-deployment.mjs \
-            --commit_sha="$RELEASE_COMMIT_SHA"
+            --commit_sha="$RELEASE_COMMIT_SHA" \
+            --alias_domain=www.man-meets-ai.com
 
       - name: Wait for public release
         run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
@@ -289,7 +290,8 @@ jobs:
       - name: Wait for matching Vercel production deployment
         run: |
           node scripts/release/wait-for-vercel-production-deployment.mjs \
-            --commit_sha="$RELEASE_COMMIT_SHA"
+            --commit_sha="$RELEASE_COMMIT_SHA" \
+            --alias_domain=www.man-meets-ai.com
 
       - name: Wait for public release
         run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
@@ -338,7 +340,8 @@ jobs:
           cd apps/web
           bun --env-file=.env.production scripts/verify-managed-stripe-env.ts \
             --expected-mode=live \
-            --app-base-url=https://www.man-meets-ai.com
+            --app-base-url=https://www.man-meets-ai.com \
+            --require-webhook-endpoint
 
       - name: Run production billing integration proof
         run: bun run release:proof -- --proof=billing_integration

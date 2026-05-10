@@ -40,7 +40,7 @@ The first CI baseline slice has been landed. `static` now runs app and package l
 
 The Convex and billing runtime hardening slice has been landed. `productAccessGrants.clerkUserId` is now characterized as the current Clerk-id contract, Convex retry-secret validation matches Next.js, unpaid signed-in Checkout completion is accepted without access fulfillment, and Stripe webhook processing uses a schema-backed `stripeWebhookEvents` ledger for terminal duplicates and retryable failures. Production proof now consumes Convex-sensitive release scope and waits for the same-commit Convex production deploy when Convex code changes.
 
-The remaining gaps are production preflight, release evidence truthfulness, and generated customer repo proof. The next slice should make live environment, Vercel alias, Convex deploy mode, Stripe live object, webhook endpoint, and observability checks explicit and fail-closed without moving hosted provider checks into every PR.
+The remaining gap is generated customer repo proof. Release evidence now consumes same-commit proof summary artifacts from push or manual production proof runs instead of loose check-run conclusions.
 
 ## Progress
 
@@ -51,7 +51,10 @@ The remaining gaps are production preflight, release evidence truthfulness, and 
 - [x] 2026-05-09: Created `planning-brief-2.md` and child ExecPlan `docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md` for the Convex and billing runtime slice.
 - [x] 2026-05-09: Completed Milestone 1 of the active Convex/billing runtime slice: retry-secret validation, identity characterization, and pending Checkout webhook handling.
 - [x] 2026-05-09: Completed the Convex/runtime and billing webhook hardening slice: schema-backed Stripe webhook event ledger, retryable failure records, duplicate-event tests, hosted Convex dry-run, and Convex-sensitive production proof wiring.
-- [ ] Add production preflight and release evidence hardening slices.
+- [x] 2026-05-10: Created `planning-brief-3.md` and child ExecPlan `docs/exec-plans/active/2026-05-10-production-preflight-hardening.md` for the production preflight slice.
+- [x] 2026-05-10: Completed the production preflight hardening slice: production Vercel alias enforcement, Stripe webhook endpoint preflight, dev staging webhook preflight, release billing doctor webhook checks, and live no-card billing proof safety.
+- [x] 2026-05-10: Created `planning-brief-4.md` and child ExecPlan `docs/exec-plans/active/2026-05-10-release-evidence-truthfulness.md` for release evidence truthfulness.
+- [x] 2026-05-10: Completed the release evidence truthfulness slice: tag evidence now downloads same-commit production and Convex proof summaries, derives proof states from validated artifacts, and preserves proof run metadata.
 - [ ] Add generated customer repo command-contract proof.
 
 ## Decision Log
@@ -90,16 +93,16 @@ Completed child ExecPlan:
 
 - `docs/exec-plans/completed/2026-05-09-shipping-evidence-ci-baseline.md`: landed the cheap CI and workspace source-gate baseline.
 - `docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md`: hardened Convex retry-secret validation, current Clerk-id entitlement characterization, signed-in webhook pending-payment handling, Stripe webhook event idempotency, and Convex-sensitive production proof wiring.
+- `docs/exec-plans/completed/2026-05-10-production-preflight-hardening.md`: hardened Vercel production alias binding, Stripe webhook endpoint checks, dev staging webhook preflight, release billing doctor webhook checks, and live no-card hosted billing proof safety.
+- `docs/exec-plans/completed/2026-05-10-release-evidence-truthfulness.md`: made tag release evidence consume same-commit production and Convex proof summary artifacts rather than check-run conclusions.
 
 Recommended child slices:
 
-- Staging and production preflight: make environment, Vercel alias, Convex deploy mode, Stripe live object, webhook endpoint, and observability checks explicit and fail-closed.
-- Release evidence truthfulness: make tag evidence consume proof summaries/artifacts rather than only check-run conclusions.
 - Generated customer repo proof: materialize a generated repo and run the advertised command contract in a clean-room fixture.
 
 ## Next Slice
 
-No child ExecPlan is currently active for this Program. The next recommended slice is staging and production preflight: make environment, Vercel alias, Convex deploy mode, Stripe live object, webhook endpoint, and observability checks explicit and fail-closed. That slice should stay broke-startup-friendly by keeping source proof cheap on PRs and putting provider-backed checks in release, staging, manual, or conditional paths.
+No child ExecPlan is currently active for this Program. The next recommended slice is generated customer repo proof: materialize a generated repo and run the advertised command contract in a clean-room fixture.
 
 ## Risks and Watchpoints
 

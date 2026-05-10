@@ -31,6 +31,7 @@ STRIPE_PRICE_ID=
 STRIPE_WEBHOOK_SECRET=
 CHECKOUT_FULFILLMENT_RETRY_SECRET=
 APP_BASE_URL=
+NEXT_PUBLIC_CONVEX_SITE_URL=
 CLERK_SECRET_KEY=
 ```
 
@@ -74,6 +75,10 @@ It also expects `.env.local` to contain the `CONVEX_DEPLOYMENT` value that `bun 
 In this repo, that same `bun run dev:convex` sync also needs to leave `NEXT_PUBLIC_CONVEX_SITE_URL` in `.env.local`, because Stripe forwards into the Convex HTTP-actions origin instead of the `.convex.cloud` client origin.
 
 If the listener writes a fresh secret while the app is already running, restart the app before testing checkout.
+
+Subscribe the Stripe webhook endpoint to `checkout.session.completed` and `checkout.session.async_payment_succeeded`. The endpoint URL must be exactly `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`; do not add a trailing slash. Use webhook endpoint API version `2023-08-16` or later, or leave the endpoint on an account default that is at least that new, so no-cost Checkout events render correctly. The Convex webhook accepts an unpaid `checkout.session.completed` event without granting access, then waits for the later async success event before fulfilling delayed-payment checkouts.
+
+Before production billing proof, `bun run release:billing:doctor -- --env=production` verifies that the configured Stripe mode, product, price, promotion code, app checkout route, and Stripe Dashboard webhook endpoint all match this contract. Stripe only returns a webhook endpoint signing secret when the endpoint is created, so the doctor verifies that `STRIPE_WEBHOOK_SECRET` is present and shaped like a Stripe signing secret; it cannot compare the saved secret back to Stripe.
 
 ## Use test mode first
 
@@ -124,8 +129,8 @@ bun run stripe:dev:verify
 The happy path is:
 
 1. checkout completes in Stripe
-2. Stripe forwards `checkout.session.completed`
-3. the webhook grants product access
+2. Stripe forwards a paid `checkout.session.completed`, or `checkout.session.async_payment_succeeded` for a delayed payment method
+3. the webhook grants product access only after Stripe reports the Checkout Session as paid or no-payment-required
 4. signed-out buyers sign in through Clerk email code with the Stripe checkout email locked
 5. `/checkout/success` stops waiting or redirects immediately
 6. the buyer reaches `/workspace/choose` and then chooses `/codebase`, `/workspace/setup`, or `/tutorials`

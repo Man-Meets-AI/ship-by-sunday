@@ -5,7 +5,32 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = path.resolve(import.meta.dirname, "../../../../");
 
-describe("production release proof workflow", () => {
+describe("release proof workflows", () => {
+	it("waits for the production alias on the matching Vercel deployment", () => {
+		const workflow = readFileSync(
+			path.join(repoRoot, ".github/workflows/production-release-proof.yml"),
+			"utf8",
+		);
+
+		const aliasWaitCount =
+			workflow.match(/--alias_domain=www\.man-meets-ai\.com/g)?.length ?? 0;
+
+		expect(aliasWaitCount).toBe(2);
+	});
+
+	it("runs Stripe webhook endpoint preflight before production billing proof", () => {
+		const workflow = readFileSync(
+			path.join(repoRoot, ".github/workflows/production-release-proof.yml"),
+			"utf8",
+		);
+
+		expect(workflow).toContain(
+			"Verify production Stripe environment and checkout route",
+		);
+		expect(workflow).toContain("--require-webhook-endpoint");
+		expect(workflow).toContain("--expected-mode=live");
+	});
+
 	it("requires Convex-sensitive proof to verify an actual deploy summary", () => {
 		const workflow = readFileSync(
 			path.join(repoRoot, ".github/workflows/production-release-proof.yml"),
@@ -20,5 +45,21 @@ describe("production release proof workflow", () => {
 			'--summary="$convex_summary_dir/convex-production-deploy-summary.json"',
 		);
 		expect(workflow).toContain('--commit="$RELEASE_COMMIT_SHA"');
+	});
+
+	it("runs Stripe webhook endpoint preflight before dev staging card proof", () => {
+		const workflow = readFileSync(
+			path.join(repoRoot, ".github/workflows/dev-staging-payment-proof.yml"),
+			"utf8",
+		);
+
+		expect(workflow).toContain(
+			"Verify dev Stripe environment and webhook endpoint",
+		);
+		expect(workflow.indexOf("--require-webhook-endpoint")).toBeGreaterThan(-1);
+		expect(
+			workflow.indexOf("Run dev Stripe card payment proof"),
+		).toBeGreaterThan(workflow.indexOf("--require-webhook-endpoint"));
+		expect(workflow).toContain("--expected-mode=test");
 	});
 });

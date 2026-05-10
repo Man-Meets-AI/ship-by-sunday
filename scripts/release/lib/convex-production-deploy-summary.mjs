@@ -1,4 +1,4 @@
-export function validateConvexProductionDeploySummary(
+export function validateConvexProductionDeploySummaryShape(
 	summary,
 	expectedCommitSha,
 ) {
@@ -25,6 +25,26 @@ export function validateConvexProductionDeploySummary(
 		);
 	}
 
+	return {
+		ok: issues.length === 0,
+		issues,
+	};
+}
+
+export function validateConvexProductionDeploySummary(
+	summary,
+	expectedCommitSha,
+) {
+	const shape = validateConvexProductionDeploySummaryShape(
+		summary,
+		expectedCommitSha,
+	);
+	if (!shape.ok) {
+		return shape;
+	}
+
+	const issues = [...shape.issues];
+
 	if (summary.deployMode !== "deploy") {
 		issues.push(
 			`Convex production deploy mode was ${summary.deployMode ?? "<missing>"}, expected deploy.`,
@@ -44,5 +64,57 @@ export function validateConvexProductionDeploySummary(
 	return {
 		ok: issues.length === 0,
 		issues,
+	};
+}
+
+function runMetadataFromSummary(summary) {
+	return {
+		runId: typeof summary?.runId === "string" ? summary.runId : null,
+		url: typeof summary?.runUrl === "string" ? summary.runUrl : null,
+	};
+}
+
+export function buildConvexProductionDeployProofState(
+	summary,
+	expectedCommitSha,
+	{ required } = { required: true },
+) {
+	if (!required) {
+		return {
+			ok: true,
+			issues: [],
+			proof: {
+				notes: "Production proof classified the release as not Convex-sensitive.",
+				runId: null,
+				status: "not_required",
+				url: null,
+			},
+		};
+	}
+
+	const shape = validateConvexProductionDeploySummaryShape(
+		summary,
+		expectedCommitSha,
+	);
+	if (!shape.ok) {
+		return shape;
+	}
+
+	const validation = validateConvexProductionDeploySummary(
+		summary,
+		expectedCommitSha,
+	);
+	const runMetadata = runMetadataFromSummary(summary);
+
+	return {
+		ok: true,
+		issues: validation.issues,
+		proof: {
+			...runMetadata,
+			status: validation.ok ? "passed" : "failed",
+			notes: validation.ok
+				? "Derived from same-commit Convex Production Deploy summary with deployMode=deploy."
+				: validation.issues.join(" "),
+		},
 	};
 }
