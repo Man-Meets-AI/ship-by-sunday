@@ -1,11 +1,11 @@
 ---
 program_id: shipping-evidence-hardening
 title: Shipping Evidence Hardening
-status: active
+status: complete
 created_at: 2026-05-09
-completed_at: null
+completed_at: 2026-05-10
 summary: Harden the test, CI, staging, production preflight, and generated-repo evidence surfaces so releases are judged by risk-matched proof instead of ambient green checks.
-post_build_recap: null
+post_build_recap: Shipping evidence now has fast source gates for shipped workspaces, hardened Convex and billing runtime proof, explicit staging and production preflight boundaries, artifact-derived tag release evidence, and clean-room generated repo command-contract proof.
 read_when:
   - Deciding which proof must exist before shipping billing, auth, Convex, or generated-codebase changes.
   - Splitting test infrastructure hardening into bounded ExecPlans.
@@ -26,7 +26,7 @@ The initiative is moving correctly when CI covers every shipped workspace, Conve
 
 ## Program Inputs
 
-The initial inputs are this Program packet, `research-pass-test-infrastructure-hardening.md`, `normalized-pass-shipping-evidence-hardening.md`, `converged-decision-packet.md`, `dependency-graph.md`, `plan-split-recommendation.md`, `cross-repo-review.md`, `planning-brief-1.md`, and `planning-brief-2.md`.
+The initial inputs are this Program packet, `research-pass-test-infrastructure-hardening.md`, `normalized-pass-shipping-evidence-hardening.md`, `converged-decision-packet.md`, `dependency-graph.md`, `plan-split-recommendation.md`, `cross-repo-review.md`, `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, and `planning-brief-5.md`.
 
 The codebase inputs are `apps/web/vitest.config.ts`, `apps/web/playwright.config.ts`, `.github/workflows/ci.yml`, `.github/workflows/production-release-proof.yml`, `.github/workflows/dev-staging-payment-proof.yml`, `.github/workflows/convex-production-deploy.yml`, `.github/workflows/release.yml`, `scripts/release/`, `apps/web/convex/`, `apps/web/platform/billing/`, `packages/codebase-compiler/`, and the generated customer repo renderers under `packages/codebase-compiler/src/repo-generation/`.
 
@@ -40,7 +40,7 @@ The first CI baseline slice has been landed. `static` now runs app and package l
 
 The Convex and billing runtime hardening slice has been landed. `productAccessGrants.clerkUserId` is now characterized as the current Clerk-id contract, Convex retry-secret validation matches Next.js, unpaid signed-in Checkout completion is accepted without access fulfillment, and Stripe webhook processing uses a schema-backed `stripeWebhookEvents` ledger for terminal duplicates and retryable failures. Production proof now consumes Convex-sensitive release scope and waits for the same-commit Convex production deploy when Convex code changes.
 
-The remaining gap is generated customer repo proof. Release evidence now consumes same-commit proof summary artifacts from push or manual production proof runs instead of loose check-run conclusions.
+The generated customer repo proof slice has been landed. Release evidence consumes same-commit proof summary artifacts from push or manual production proof runs instead of loose check-run conclusions, and generated customer repos now have clean-room command-contract proof for their no-provider baseline commands.
 
 ## Progress
 
@@ -51,11 +51,13 @@ The remaining gap is generated customer repo proof. Release evidence now consume
 - [x] 2026-05-09: Created `planning-brief-2.md` and child ExecPlan `docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md` for the Convex and billing runtime slice.
 - [x] 2026-05-09: Completed Milestone 1 of the active Convex/billing runtime slice: retry-secret validation, identity characterization, and pending Checkout webhook handling.
 - [x] 2026-05-09: Completed the Convex/runtime and billing webhook hardening slice: schema-backed Stripe webhook event ledger, retryable failure records, duplicate-event tests, hosted Convex dry-run, and Convex-sensitive production proof wiring.
-- [x] 2026-05-10: Created `planning-brief-3.md` and child ExecPlan `docs/exec-plans/active/2026-05-10-production-preflight-hardening.md` for the production preflight slice.
+- [x] 2026-05-10: Created `planning-brief-3.md` and child ExecPlan `docs/exec-plans/completed/2026-05-10-production-preflight-hardening.md` for the production preflight slice.
 - [x] 2026-05-10: Completed the production preflight hardening slice: production Vercel alias enforcement, Stripe webhook endpoint preflight, dev staging webhook preflight, release billing doctor webhook checks, and live no-card billing proof safety.
-- [x] 2026-05-10: Created `planning-brief-4.md` and child ExecPlan `docs/exec-plans/active/2026-05-10-release-evidence-truthfulness.md` for release evidence truthfulness.
+- [x] 2026-05-10: Created `planning-brief-4.md` and child ExecPlan `docs/exec-plans/completed/2026-05-10-release-evidence-truthfulness.md` for release evidence truthfulness.
 - [x] 2026-05-10: Completed the release evidence truthfulness slice: tag evidence now downloads same-commit production and Convex proof summaries, derives proof states from validated artifacts, and preserves proof run metadata.
-- [ ] Add generated customer repo command-contract proof.
+- [x] 2026-05-10: Created `planning-brief-5.md` and child ExecPlan `docs/exec-plans/completed/2026-05-10-generated-repo-command-contract-proof.md` for generated customer repo command-contract proof.
+- [x] 2026-05-10: Completed the generated customer repo command-contract proof slice: generated snapshots now include required workspace packages, render a customer-safe lockfile, expose `codebase:contract`, align generated docs and CI examples around `bun ci` plus no-provider checks, and run clean-room frozen workspace plus no-provider command proof.
+- [x] 2026-05-10: Completed this Program and moved it to `docs/programs/completed/2026-05-09-shipping-evidence-hardening/`.
 
 ## Decision Log
 
@@ -95,14 +97,11 @@ Completed child ExecPlan:
 - `docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md`: hardened Convex retry-secret validation, current Clerk-id entitlement characterization, signed-in webhook pending-payment handling, Stripe webhook event idempotency, and Convex-sensitive production proof wiring.
 - `docs/exec-plans/completed/2026-05-10-production-preflight-hardening.md`: hardened Vercel production alias binding, Stripe webhook endpoint checks, dev staging webhook preflight, release billing doctor webhook checks, and live no-card hosted billing proof safety.
 - `docs/exec-plans/completed/2026-05-10-release-evidence-truthfulness.md`: made tag release evidence consume same-commit production and Convex proof summary artifacts rather than check-run conclusions.
-
-Recommended child slices:
-
-- Generated customer repo proof: materialize a generated repo and run the advertised command contract in a clean-room fixture.
+- `docs/exec-plans/completed/2026-05-10-generated-repo-command-contract-proof.md`: materialized a generated repo and ran the advertised no-provider command contract in a clean-room fixture.
 
 ## Next Slice
 
-No child ExecPlan is currently active for this Program. The next recommended slice is generated customer repo proof: materialize a generated repo and run the advertised command contract in a clean-room fixture.
+No required next slice remains inside this Program.
 
 ## Risks and Watchpoints
 
@@ -120,7 +119,11 @@ Do not ship generated customer repo commands that the generated snapshot cannot 
 
 ## Outcomes & Retrospective
 
-This Program is active. Record the final source-gate shape, the staging policy, the production preflight contract, the release evidence schema behavior, the generated customer repo proof surface, and any intentionally deferred high-cost checks before moving the Program to completed.
+This Program is complete. The final source gate is the documented `static` and `integration` split: `static` covers app and package lint, app format, package typechecks, app unit and contract tests, package tests, root script tests, critical coverage, package smoke, worker compatibility smoke, and app build; `integration` covers the app integration suite. Dev payment staging remains a Stripe test-mode rehearsal lane, not release authority. Production preflight verifies the live Vercel alias, Stripe webhook endpoint shape, billing doctor checks, release personas, and live no-card checkout safety without pretending test-mode success proves production.
+
+Tag release evidence now derives hosted proof from same-commit `production-release-proof-summary` and `convex-production-deploy-summary` artifacts instead of check-run names. Generated customer repo proof now materializes a customer snapshot, verifies frozen lockfile resolution, and runs `programs:lint`, `plans:lint`, `codebase:contract`, and `agentic:check` from the generated repo root.
+
+The intentionally deferred high-cost checks remain hosted browser, Stripe, Clerk, Convex, and full lifecycle proof on every PR. Those checks stay conditional, post-merge, nightly, manual, or release-bound based on risk.
 
 ## Validation and Acceptance
 

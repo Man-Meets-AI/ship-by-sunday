@@ -6,7 +6,7 @@ completed_at: 2026-05-10
 summary: Make protected tag release evidence consume production proof summary artifacts instead of loose check-run conclusions.
 post_build_recap: Tag release evidence now downloads same-commit production proof summaries from push or manual proof runs, derives hosted proof from validated artifacts, preserves proof run ids, URLs, and notes, and refuses to treat active, skipped, or failed required billing or Convex work as passed.
 program_id: shipping-evidence-hardening
-planning_brief: docs/programs/active/2026-05-09-shipping-evidence-hardening/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-09-shipping-evidence-hardening/planning-brief-4.md
 read_when:
   - Resuming release evidence truthfulness work.
   - Changing tag release evidence collection, proof summary validators, or release workflow publication gates.
@@ -110,13 +110,13 @@ Observed focused validation:
 
 Observed docs and Program validation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-10-release-evidence-truthfulness.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-10-release-evidence-truthfulness.md
     # passed before this plan was moved to completed
 
     bun run programs:lint
     # passed
 
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-10-release-evidence-truthfulness.md docs/programs/active/2026-05-09-shipping-evidence-hardening .github/workflows/README.md docs/release-workflow.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-10-release-evidence-truthfulness.md docs/programs/completed/2026-05-09-shipping-evidence-hardening .github/workflows/README.md docs/release-workflow.md
     # passed before this plan was moved to completed
 
 Observed broader gates:

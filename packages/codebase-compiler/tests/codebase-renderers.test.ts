@@ -138,7 +138,10 @@ describe("codebase renderers", () => {
 		expect(buildReadiness?.content).toContain("docs/build/docs/review.md");
 		expect(buildReadiness?.content).toContain("## Validation Manifest");
 		expect(buildReadiness?.content).toContain(
-			"| Run compiler tests | runnable | `test:compiler` | `bun run test:compiler` |",
+			"| Run Codebase contract check | runnable | `codebase:contract` | `bun run codebase:contract` |",
+		);
+		expect(buildReadiness?.content).toContain(
+			"| Run generated operating pack check | runnable | `agentic:check` | `bun run agentic:check` |",
 		);
 		expect(buildReadiness?.content).toContain("## Customer Input Work");
 		expect(buildReadiness?.content).toContain("Confidence state:");
@@ -219,14 +222,14 @@ describe("codebase renderers", () => {
 			"Build M1 for Ship by Sunday OS: Bootstrap the compiler and canonical schema.",
 		);
 		expect(buildPrompt).toContain(
-			"- Existing checks to start from: Run compiler tests; Run app build; Run codebase-flow integration tests",
+			"- Existing checks to start from: Run Codebase contract check; Run generated operating pack check",
 		);
-		expect(buildPrompt).toContain("bun run test:compiler");
-		expect(buildPrompt).toContain("bun run build");
+		expect(buildPrompt).toContain("bun run codebase:contract");
+		expect(buildPrompt).toContain("bun run agentic:check");
 		expect(buildPlans).toContain(
 			"| M1 - Bootstrap the compiler and canonical schema. | A buyer can move through the funnel and download a Codebase zip.",
 		);
-		expect(buildPlans).toContain("bun run test:integration");
+		expect(buildPlans).not.toContain("bun run test:integration");
 		expect(buildImplement).toContain("## Source Of Truth");
 		expect(buildImplement).toContain("## Preflight Checklist");
 		expect(buildImplement).toContain("## Typed Validation Manifest");
@@ -247,16 +250,16 @@ describe("codebase renderers", () => {
 		expect(validationRows).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					"Source validation step": "Run compiler tests",
+					"Source validation step": "Run Codebase contract check",
 					Type: "runnable",
-					"Package script": "`test:compiler`",
-					"Proof path": "`bun run test:compiler`",
+					"Package script": "`codebase:contract`",
+					"Proof path": "`bun run codebase:contract`",
 				}),
 				expect.objectContaining({
-					"Source validation step": "Run app build",
+					"Source validation step": "Run generated operating pack check",
 					Type: "runnable",
-					"Package script": "`build`",
-					"Proof path": "`bun run build`",
+					"Package script": "`agentic:check`",
+					"Proof path": "`bun run agentic:check`",
 				}),
 			]),
 		);

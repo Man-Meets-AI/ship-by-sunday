@@ -79,9 +79,8 @@ const DEFAULT_ACCEPTANCE_CRITERIA = [
 	"Repo zip contains generated docs under docs/",
 ];
 const DEFAULT_VALIDATION_PLAN = [
-	"Run compiler tests",
-	"Run app build",
-	"Run codebase-flow integration tests",
+	"Run Codebase contract check",
+	"Run generated operating pack check",
 ];
 const DEFAULT_DEMO_FLOW =
 	"Complete the funnel, review the Codebase materials, then download the Codebase zip with docs/ at the root.";

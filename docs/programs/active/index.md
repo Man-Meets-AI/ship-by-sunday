@@ -28,7 +28,6 @@ Inside that folder:
 Active Program folders:
 
 - `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/` - standalone React package extraction for the Telegram chat support widget, optional Convex realtime adapter, host-owned auth/session integration, and package setup docs.
-- `docs/programs/active/2026-05-09-shipping-evidence-hardening/` - test infrastructure, CI gates, staging, production preflight, release evidence, billing/Convex proof, and generated customer repo validation.
 - `docs/programs/active/2026-05-06-telegram-support-bot/` - first-party landing-page support chat, Convex support thread state, dedicated Telegram operator bot, and structured support actions.
 - `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
 - `docs/programs/active/2026-05-05-worker-generate-tutorials-ia/` - Generate Codebase, Tutorials, and Worker IA migration with capability-based access, canonical routes, navigation, copy, and runtime compatibility.

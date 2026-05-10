@@ -6,7 +6,7 @@ completed_at: 2026-05-10
 summary: Harden hosted production preflight around Vercel alias binding, Stripe webhook endpoint configuration, and live no-card billing proof safety.
 post_build_recap: Production proof now requires the same-commit Vercel deployment to own the `www.man-meets-ai.com` alias, staging and production billing proof run Stripe webhook endpoint preflight, the release billing doctor includes webhook endpoint verification, and live hosted billing proof refuses non-zero-cost sessions or card entry.
 program_id: shipping-evidence-hardening
-planning_brief: docs/programs/active/2026-05-09-shipping-evidence-hardening/planning-brief-3.md
+planning_brief: docs/programs/completed/2026-05-09-shipping-evidence-hardening/planning-brief-3.md
 read_when:
   - Resuming production preflight hardening.
   - Changing release proof, hosted billing proof, Vercel deployment waits, or Stripe webhook endpoint checks.
@@ -119,7 +119,7 @@ Observed docs and Program validation:
     bun run programs:lint
     # passed
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-10-production-preflight-hardening.md docs/programs/active/2026-05-09-shipping-evidence-hardening .github/workflows/README.md docs/release-workflow.md apps/web/content/docs/stripe-checkout-webhook.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-10-production-preflight-hardening.md docs/programs/completed/2026-05-09-shipping-evidence-hardening .github/workflows/README.md docs/release-workflow.md apps/web/content/docs/stripe-checkout-webhook.mdx
     # passed before this plan was moved to completed
 
 Observed broader completion gates:
@@ -145,7 +145,7 @@ Run these before marking the plan complete:
 
     bun run --cwd apps/web test:unit -- tests/unit/stripe-line-item.test.ts tests/unit/release-billing-doctor.test.ts tests/unit/production-release-proof-workflow.test.ts tests/unit/hosted-stripe-checkout-proof.test.ts
     ruby -e 'require "yaml"; YAML.load_file(ARGV[0]); YAML.load_file(ARGV[1]); puts "ok"' .github/workflows/production-release-proof.yml .github/workflows/dev-staging-payment-proof.yml
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-10-production-preflight-hardening.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-10-production-preflight-hardening.md
     bun run programs:lint
 
 ## Idempotence and Recovery

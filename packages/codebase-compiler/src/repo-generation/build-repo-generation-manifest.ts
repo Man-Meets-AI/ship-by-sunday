@@ -4,6 +4,8 @@ import {
 	customerSafeAppFilePaths,
 	customerSafeCodebaseCompilerDirectoryPaths,
 	customerSafeCodebaseCompilerFilePaths,
+	customerSafeCodebasePresentationDirectoryPaths,
+	customerSafeCodebasePresentationFilePaths,
 	customerSafeRepoExcludedPathSegments,
 	customerSafeRepoRootFilePaths,
 } from "./repo-download-source-contract";
@@ -30,11 +32,13 @@ export function buildRepoGenerationManifest(
 		includedDirectories: [
 			...customerSafeAppDirectoryPaths,
 			...customerSafeCodebaseCompilerDirectoryPaths,
+			...customerSafeCodebasePresentationDirectoryPaths,
 		],
 		includedFiles: [
 			...customerSafeRepoRootFilePaths,
 			...customerSafeAppFilePaths,
 			...customerSafeCodebaseCompilerFilePaths,
+			...customerSafeCodebasePresentationFilePaths,
 		],
 		repoName: slugify(projectDefinition.facts.product_name),
 	};

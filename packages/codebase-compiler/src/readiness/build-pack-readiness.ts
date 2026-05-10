@@ -142,6 +142,18 @@ const placeholderFactConfigs = [
 
 const validationScriptRules = [
 	{
+		scriptName: "codebase:contract",
+		patterns: [/\bcodebase contract\b/i, /\bgenerated repo contract\b/i],
+	},
+	{
+		scriptName: "agentic:check",
+		patterns: [
+			/\bagentic check\b/i,
+			/\bgenerated operating pack\b/i,
+			/\bprogram(?:s)? and execplan(?:s)?\b/i,
+		],
+	},
+	{
 		scriptName: "test:compiler",
 		patterns: [/\bcompiler\b/i, /\bcodebase compiler\b/i],
 	},

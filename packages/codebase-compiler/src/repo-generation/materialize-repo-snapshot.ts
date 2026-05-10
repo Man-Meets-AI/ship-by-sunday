@@ -10,6 +10,7 @@ import {
 } from "./build-repo-generation-manifest";
 import { renderGeneratedDesignSystemFiles } from "./render-generated-design-system-files";
 import { renderGeneralizedStarterFiles } from "./render-generalized-starter-files";
+import { renderStarterBunLock } from "./render-starter-bun-lock";
 import { isExcludedSnapshotPath } from "./repo-download-source-contract";
 import { renderTemplateOverrides } from "./render-template-overrides";
 
@@ -59,6 +60,17 @@ async function collectDirectoryFiles(
 	return files.flat();
 }
 
+function renderIncludedRepoFile(file: RepoSnapshotFile): RepoSnapshotFile {
+	if (file.path !== "bun.lock") {
+		return file;
+	}
+
+	return {
+		...file,
+		content: renderStarterBunLock(file.content.toString()),
+	};
+}
+
 export async function materializeRepoSnapshot(
 	projectDefinition: CanonicalProjectDefinition,
 ): Promise<RepoSnapshotFile[]> {
@@ -88,7 +100,9 @@ export async function materializeRepoSnapshot(
 	const overrideMap = new Map(overrides.map((file) => [file.path, file]));
 
 	return [
-		...includedFiles.filter((file) => !overrideMap.has(file.path)),
+		...includedFiles
+			.map(renderIncludedRepoFile)
+			.filter((file) => !overrideMap.has(file.path)),
 		...includedDirectories.flat().filter((file) => !overrideMap.has(file.path)),
 		...overrides,
 		...(codebaseFiles as RenderedCodebaseFile[]),

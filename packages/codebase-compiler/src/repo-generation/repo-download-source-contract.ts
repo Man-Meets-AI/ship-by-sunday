@@ -59,6 +59,14 @@ export const customerSafeCodebaseCompilerDirectoryPaths = [
 	"packages/codebase-compiler/src",
 ] as const;
 
+export const customerSafeCodebasePresentationFilePaths = [
+	"packages/codebase-presentation/package.json",
+] as const;
+
+export const customerSafeCodebasePresentationDirectoryPaths = [
+	"packages/codebase-presentation/src",
+] as const;
+
 export const codebaseCompilerTemplateSourceTracePaths = [
 	"../../docs/openai/**/*",
 	"../../docs/prompts/execplan*.md",
@@ -152,6 +160,10 @@ export function buildRepoDownloadTraceIncludes() {
 		...customerSafeRepoRootFilePaths.map(toRepoTraceFilePath),
 		...customerSafeCodebaseCompilerFilePaths.map(toRepoTraceFilePath),
 		...customerSafeCodebaseCompilerDirectoryPaths.map(toRepoTraceDirectoryGlob),
+		...customerSafeCodebasePresentationFilePaths.map(toRepoTraceFilePath),
+		...customerSafeCodebasePresentationDirectoryPaths.map(
+			toRepoTraceDirectoryGlob,
+		),
 		...codebaseCompilerTemplateSourceTracePaths,
 	] as const;
 }

@@ -6,7 +6,7 @@ completed_at: 2026-05-09
 summary: Harden the Convex and Stripe runtime evidence around checkout fulfillment, entitlement identity, retry-secret validation, and webhook idempotency.
 post_build_recap: Convex and billing fulfillment now reject weak retry secrets, characterize the Clerk-id entitlement contract, avoid unpaid Checkout fulfillment, track accepted Stripe webhook events in a schema-backed ledger, and require same-commit Convex production deploy evidence for Convex-sensitive production proof.
 program_id: shipping-evidence-hardening
-planning_brief: docs/programs/active/2026-05-09-shipping-evidence-hardening/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-09-shipping-evidence-hardening/planning-brief-2.md
 read_when:
   - Resuming the Convex and billing runtime hardening slice.
   - Changing Stripe webhook fulfillment, checkout success recovery, or Convex product access grants.
@@ -194,7 +194,7 @@ Plan and Program proof:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md docs/programs/active/2026-05-09-shipping-evidence-hardening .github/workflows/README.md docs/release-workflow.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md docs/programs/completed/2026-05-09-shipping-evidence-hardening .github/workflows/README.md docs/release-workflow.md
 
 Completion gates for runtime code:
 
@@ -248,4 +248,4 @@ Completed validation artifacts:
 
 ## Interfaces and Dependencies
 
-This plan depends on Convex functions and validators, Stripe Checkout Session webhook event shape, Clerk user ids, Next.js server env validation, Vitest unit tests, GitHub Actions release proof workflows, hosted Convex dev or production deployments for provider-backed validation, and the Program packet at `docs/programs/active/2026-05-09-shipping-evidence-hardening/program.md`.
+This plan depends on Convex functions and validators, Stripe Checkout Session webhook event shape, Clerk user ids, Next.js server env validation, Vitest unit tests, GitHub Actions release proof workflows, hosted Convex dev or production deployments for provider-backed validation, and the Program packet at `docs/programs/completed/2026-05-09-shipping-evidence-hardening/program.md`.

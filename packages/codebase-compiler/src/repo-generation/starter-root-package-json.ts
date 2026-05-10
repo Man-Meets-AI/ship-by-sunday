@@ -4,6 +4,7 @@ import { buildRepoGenerationManifest } from "./build-repo-generation-manifest";
 export const STARTER_ROOT_PACKAGE_SCRIPTS = {
 	bootstrap: "bash ./bootstrap.sh",
 	"codex:skills:install": "bash ./scripts/install-codex-skills.sh",
+	"codebase:contract": "bun scripts/agentic/check-codebase-contract.mjs",
 	"programs:lint": "bun scripts/agentic/check-programs.mjs",
 	"plans:lint": "bun scripts/agentic/check-exec-plans.mjs",
 	"agentic:check": "bun run programs:lint && bun run plans:lint",
@@ -24,7 +25,7 @@ export const STARTER_ROOT_PACKAGE_SCRIPTS = {
 	"test:contracts": "bun run --cwd apps/web test:contracts",
 	"test:integration": "bun run --cwd apps/web test:integration",
 	"test:e2e:sandbox": "bun run --cwd apps/web test:e2e:sandbox",
-	"test:compiler": "bun run --cwd packages/codebase-compiler test",
+	"test:compiler": "bun run codebase:contract",
 	check: "bun run --cwd apps/web check",
 } as const;
 

@@ -18,6 +18,7 @@ The Program must satisfy [PROGRAMS.md](../PROGRAMS.md), use `status: complete`, 
 
 Completed Program folders:
 
+- `docs/programs/completed/2026-05-09-shipping-evidence-hardening/`: completed shipping evidence hardening Program that added risk-matched source gates, Convex and billing runtime proof, explicit staging and production preflight contracts, artifact-derived tag release evidence, and clean-room generated repo command-contract proof.
 - `docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/`: completed Worker Foundations install compatibility Program that proves blank, unclaimed, lockfile-owned, explicit Bun/npm/pnpm/Yarn, polyglot, Arena-shaped, fresh-clone, and fake-Codex kickoff behavior through source and CI gates, with package smoke covering the shipped local-runner artifact path.
 - `docs/programs/completed/2026-05-07-sbs-worker-foundations-installer/`: completed Worker Foundations installer Program that added `shipbysunday install`, visible repo-local Worker source, browser/device license activation, grouped confirmation, Worker-managed Bun provisioning fallback, native compiled CLI smoke, and disposable repo proof.
 - `docs/programs/completed/2026-05-06-worker-grade-docs-operating-system-adoption/`: completed local-runner docs operating-system adoption that added dry-run install planning, bounded package-script and wrapper patching, shared validator commands, lockfile refresh proof, package artifact proof, quality refresh, and native command proof.

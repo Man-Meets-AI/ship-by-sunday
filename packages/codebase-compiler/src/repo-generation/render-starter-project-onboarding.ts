@@ -127,6 +127,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		internalPhase: "core",
 		customerAction: [
 			"Run `bun run agentic:check` from the repo root.",
+			"Run `bun run codebase:contract` from the repo root.",
 			"Open `docs/programs/active/` to see the generated Program packet.",
 			"Open `docs/exec-plans/active/` to see the first active ExecPlan.",
 			"Use the Program for multi-slice product truth and the ExecPlan for the next bounded implementation slice.",
@@ -344,6 +345,7 @@ function renderSharedIntro(productName: string) {
 		"- restart Codex if the new skills do not appear",
 		"- `$starter-linear-workflow` if you use Linear to run the build",
 		"- `bun run agentic:check` to verify the generated Program and ExecPlan pack",
+		"- `bun run codebase:contract` to verify the generated Codebase snapshot contract",
 		"- `$starter-core-setup`",
 		"- `$starter-auth-setup`",
 		"- `$starter-billing-setup`",
