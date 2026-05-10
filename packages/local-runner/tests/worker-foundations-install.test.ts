@@ -266,6 +266,190 @@ describe("Worker Foundations install command", () => {
 		expect(status.stdout.trim()).toBe("");
 	});
 
+	it("does not write packageManager identity for Bun lockfile-owned roots", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			files: {
+				"bun.lock": "# existing owner lockfile\n",
+			},
+			packageJson: {
+				name: "bun-lockfile-owned",
+				private: true,
+				scripts: {
+					dev: "bun --version",
+				},
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			plan: { packageManager: string };
+		};
+		expect(result.plan.packageManager).toBe("bun");
+		const packageJson = JSON.parse(
+			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
+		) as { packageManager?: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBeUndefined();
+		expect(packageJson.scripts.dev).toBe("bun --version");
+		expect(await readFile(path.join(repositoryRoot, "bun.lock"), "utf8")).toBe(
+			"# existing owner lockfile\n",
+		);
+	});
+
+	it("does not write packageManager identity for legacy Bun lockfile-owned roots", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			files: {
+				"bun.lockb": "legacy bun binary lock placeholder\n",
+			},
+			packageJson: {
+				name: "legacy-bun-lockfile-owned",
+				private: true,
+				scripts: {
+					dev: "bun --version",
+				},
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			plan: { packageManager: string };
+		};
+		expect(result.plan.packageManager).toBe("bun");
+		const packageJson = JSON.parse(
+			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
+		) as { packageManager?: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBeUndefined();
+		expect(packageJson.scripts.dev).toBe("bun --version");
+		expect(await readFile(path.join(repositoryRoot, "bun.lockb"), "utf8")).toBe(
+			"legacy bun binary lock placeholder\n",
+		);
+	});
+
+	it("does not write packageManager identity for npm shrinkwrap-owned roots", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			files: {
+				"npm-shrinkwrap.json": `${JSON.stringify(
+					{
+						lockfileVersion: 3,
+						name: "npm-shrinkwrap-owned",
+						packages: { "": { name: "npm-shrinkwrap-owned" } },
+					},
+					null,
+					"\t",
+				)}\n`,
+			},
+			packageJson: {
+				name: "npm-shrinkwrap-owned",
+				private: true,
+				scripts: {
+					dev: "node server.js",
+				},
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			plan: { packageManager: string };
+		};
+		expect(result.plan.packageManager).toBe("npm");
+		const packageJson = JSON.parse(
+			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
+		) as { packageManager?: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBeUndefined();
+		expect(packageJson.scripts.dev).toBe("node server.js");
+	});
+
+	it("blocks missing non-Bun package-manager commands before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			packageJson: {
+				name: "missing-pnpm-command",
+				packageManager: "pnpm@9.12.0",
+				private: true,
+				scripts: {},
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const pathWithoutPackageManagers = await createTemporaryDirectory(
+			"worker-no-package-managers-",
+		);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					PATH: pathWithoutPackageManagers,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "package-manager-command",
+					reason: expect.stringContaining("pnpm"),
+				}),
+			]),
+		);
+		expect(output).not.toContain(repositoryRoot);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
 	it("reruns a committed install without failing on the existing starter child plan", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
@@ -296,6 +480,16 @@ describe("Worker Foundations install command", () => {
 			cwd: repositoryRoot,
 		});
 		expect(status.stdout.trim()).toBe("");
+		const readme = await readFile(
+			path.join(repositoryRoot, "README.md"),
+			"utf8",
+		);
+		expect(countWorkerManagedStarts(readme)).toBe(1);
+		const agents = await readFile(
+			path.join(repositoryRoot, "AGENTS.md"),
+			"utf8",
+		);
+		expect(countWorkerManagedStarts(agents)).toBe(1);
 	});
 
 	it("provisions a Worker-managed Bun toolchain when Bun is not on PATH", async () => {
@@ -353,6 +547,45 @@ describe("Worker Foundations install command", () => {
 		expect(result.proof).toEqual(
 			expect.arrayContaining([
 				{ command: "bun run docs:validate", status: "passed" },
+			]),
+		);
+	});
+
+	it("lets BUN override a stale Worker-managed Bun in the direct launcher", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const staleManagedBun = path.join(workerHome, "toolchains/bun/bin/bun");
+		await mkdir(path.dirname(staleManagedBun), { recursive: true });
+		await writeFile(staleManagedBun, "#!/bin/sh\necho 1.2.3\n");
+		await chmod(staleManagedBun, 0o755);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{
+					...process.env,
+					BUN: findExecutableOnPath("bun"),
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(0);
+
+		const result = JSON.parse(logSpy.mock.calls.join("\n")) as {
+			outcome: string;
+			proof: Array<{ command: string; status: string }>;
+		};
+		expect(result.outcome).toBe("installed");
+		expect(result.proof).toEqual(
+			expect.arrayContaining([
+				{ command: "bun run worker:test", status: "passed" },
 			]),
 		);
 	});
@@ -901,6 +1134,177 @@ describe("Worker Foundations install command", () => {
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
+	it("blocks duplicate managed README markers during preflight", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const duplicateManagedBlock = [
+			"# Existing README",
+			"",
+			"<!-- shipbysunday-worker:start -->",
+			"## Shipbysunday Worker",
+			"<!-- shipbysunday-worker:end -->",
+			"",
+			"Owner content",
+			"",
+			"<!-- shipbysunday-worker:start -->",
+			"## Shipbysunday Worker",
+			"<!-- shipbysunday-worker:end -->",
+			"",
+		].join("\n");
+		await writeFixtureFile(repositoryRoot, "README.md", duplicateManagedBlock);
+		await commitFixtureFiles(repositoryRoot, ["README.md"]);
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("duplicate Worker managed markers");
+		expect(await readFile(path.join(repositoryRoot, "README.md"), "utf8")).toBe(
+			duplicateManagedBlock,
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+	});
+
+	it("blocks owner-authored apps/worker files before mutation", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			files: {
+				"apps/worker/README.md": "# Owner Worker Area\n",
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("Existing apps/worker file");
+		expect(output).not.toContain("# Owner Worker Area");
+		expect(
+			await readFile(
+				path.join(repositoryRoot, "apps/worker/README.md"),
+				"utf8",
+			),
+		).toBe("# Owner Worker Area\n");
+		expect(
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+		).toBe(false);
+	});
+
+	it("blocks owner-authored apps/worker file before mutation", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			files: {
+				"apps/worker": "owner worker file\n",
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("apps/worker");
+		expect(output).not.toContain(repositoryRoot);
+		expect(
+			await readFile(path.join(repositoryRoot, "apps/worker"), "utf8"),
+		).toBe("owner worker file\n");
+		expect(
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+		).toBe(false);
+	});
+
+	it("blocks lone legacy placeholder lockfile before mutation", async () => {
+		const repositoryRoot = await createFixtureRepository({
+			files: {
+				"apps/worker/bun.lock": "# Worker package lockfile placeholder.\n",
+			},
+		});
+		const workerHome = await createWorkerHome();
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		expect(output).toContain("apps/worker/bun.lock");
+		expect(existsSync(path.join(repositoryRoot, "apps/worker/bun.lock"))).toBe(
+			true,
+		);
+		expect(
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+		).toBe(false);
+	});
+
+	it("removes the legacy Worker placeholder lockfile during recognized reruns", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const env = { ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome };
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				env,
+			),
+		).resolves.toBe(0);
+		await writeFixtureFile(
+			repositoryRoot,
+			"apps/worker/bun.lock",
+			"# Worker package lockfile placeholder.\n",
+		);
+		await commitFixtureFiles(repositoryRoot, ["apps/worker/bun.lock"]);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				env,
+			),
+		).resolves.toBe(0);
+
+		expect(existsSync(path.join(repositoryRoot, "apps/worker/bun.lock"))).toBe(
+			false,
+		);
+		const status = await execFileAsync("git", ["status", "--porcelain"], {
+			cwd: repositoryRoot,
+		});
+		expect(status.stdout.trim()).toBe("");
+		await expect(
+			execFileAsync("git", ["cat-file", "-e", "HEAD:apps/worker/bun.lock"], {
+				cwd: repositoryRoot,
+			}),
+		).rejects.toThrow();
+	});
+
 	it("starts foreground Codex kickoff after proof and commit", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
@@ -996,26 +1400,32 @@ describe("Worker Foundations install command", () => {
 });
 
 async function createFixtureRepository({
+	files = {},
+	packageJson,
 	scripts = {},
 }: {
+	files?: Record<string, string>;
+	packageJson?: Record<string, unknown>;
 	scripts?: Record<string, string>;
 } = {}) {
 	const repositoryRoot = await createTemporaryDirectory("worker-install-repo-");
 	await initializeGitRepository(repositoryRoot);
+	const rootPackageJson =
+		packageJson ??
+		({
+			name: "worker-install-fixture",
+			private: true,
+			packageManager: "bun@1.3.5",
+			scripts,
+		} as Record<string, unknown>);
 	await writeFile(
 		path.join(repositoryRoot, "package.json"),
-		`${JSON.stringify(
-			{
-				name: "worker-install-fixture",
-				private: true,
-				packageManager: "bun@1.3.5",
-				scripts,
-			},
-			null,
-			"\t",
-		)}\n`,
+		`${JSON.stringify(rootPackageJson, null, "\t")}\n`,
 	);
-	await execFileAsync("git", ["add", "package.json"], { cwd: repositoryRoot });
+	for (const [ref, contents] of Object.entries(files)) {
+		await writeFixtureFile(repositoryRoot, ref, contents);
+	}
+	await execFileAsync("git", ["add", "."], { cwd: repositoryRoot });
 	await execFileAsync("git", ["commit", "-m", "test fixture"], {
 		cwd: repositoryRoot,
 	});
@@ -1362,6 +1772,10 @@ const CRC32_TABLE = Array.from({ length: 256 }, (_value, index) => {
 	}
 	return crc >>> 0;
 });
+
+function countWorkerManagedStarts(content: string) {
+	return content.match(/<!-- shipbysunday-worker:start -->/gu)?.length ?? 0;
+}
 
 function findExecutableOnPath(executableName: string) {
 	for (const directory of (process.env.PATH ?? "").split(path.delimiter)) {

@@ -95,19 +95,19 @@ Rationale: `shipbysunday install` should show a one-time code and open or print 
 Date: 2026-05-08
 
 Decision: Keep Worker dependencies inside `apps/worker`.
-Rationale: Root `package.json` should only receive command forwarding scripts. The installed Worker package should carry its own `package.json`, `bun.lock`, runtime tests, and dependencies so the customer app dependency graph is not polluted.
+Rationale: Root `package.json` should only receive command forwarding scripts. The installed Worker package should carry its own `package.json`, runtime tests, and future dependency metadata so the customer app dependency graph is not polluted. A later compatibility slice removed the no-dependency placeholder `apps/worker/bun.lock`; a real Worker lockfile should only be committed when Worker dependencies require one.
 Date: 2026-05-08
 
 Decision: Make the installed Worker package Bun-first for v1.
-Rationale: Worker and Arena proved the Bun path. The target repo may use any root package manager, but `apps/worker` should be one deterministic Bun package installed with its committed lockfile.
+Rationale: Worker and Arena proved the Bun path. The target repo may use any root package manager, but `apps/worker` should stay a deterministic Bun package. The installed package now omits a placeholder lockfile until it has dependencies to lock.
 Date: 2026-05-08
 
 Decision: Provision Bun as a private Worker-managed toolchain when needed.
 Rationale: Customers should not have to install Bun globally or switch their app package manager just because Worker Foundations is Bun-first internally. The native installer should prefer an existing compatible `bun` on `PATH`, but if Bun is missing or unsuitable it should provision a pinned Worker-managed Bun runtime under `~/.worker/toolchains/` and make `scripts/run-worker.sh` discover it through `SHIPBYSUNDAY_WORKER_HOME` or the default `~/.worker/` layout. Root package scripts should remain runnable through the target repo's package manager and then forward into the Worker-managed Bun runtime. Toolchain setup must not leak absolute paths into tracked reports or manifests.
 Date: 2026-05-08
 
-Decision: Require a root `package.json` for v1.
-Rationale: The first install path depends on root package scripts as the agent-facing command surface. Non-JS repos should block with a clear message until a native non-package-script surface exists.
+Decision: Start with a root `package.json` requirement, then supersede it with Bun defaults for blank repos.
+Rationale: The first install path depended on root package scripts as the agent-facing command surface. The Worker install compatibility matrix later made blank Git repositories installable by creating a private Bun root manifest, while still preserving explicit or lockfile-owned package-manager identities.
 Date: 2026-05-08
 
 Decision: Dogfood during installation through the installed command surface.
@@ -285,7 +285,7 @@ Read-only Arena CRM smoke command:
 
 The Arena dry-run produced a sync-safe blocked result without mutating the repo. After legacy script recognition, the remaining blocker was missing local license activation.
 
-The fresh `~/Developer/runner-test` smoke proved the current local-runner path without using Arena CRM: an empty Git repo blocked on missing root `package.json`; after adding and committing a minimal package file, dry-run returned `ready`; the real install with an isolated Worker home returned `installed`, passed all proof commands, and committed `45f8d85` on `shipbysunday/install`.
+The fresh `~/Developer/runner-test` smoke proved the original local-runner path without using Arena CRM: at the time, an empty Git repo blocked on missing root `package.json`; after adding and committing a minimal package file, dry-run returned `ready`; the real install with an isolated Worker home returned `installed`, passed all proof commands, and committed `45f8d85` on `shipbysunday/install`. The later Worker install compatibility matrix superseded that blank-repo blocker by creating a private Bun root manifest automatically.
 
 Focused fixture proof covers both blocked and successful foreground Codex kickoff. Package smoke now runs a packed-tarball `shipbysunday install --yes --json --no-kickoff` into a disposable repo, verifies the tracked install report, and asserts a clean worktree. The native package smoke compiles a standalone `shipbysunday` executable with `bun build --compile`, runs an actual `shipbysunday install --yes --json --no-kickoff` into a disposable repo, verifies the tracked install report and clean worktree, then dry-runs a second pnpm-shaped disposable repo through the same native artifact.
 

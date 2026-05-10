@@ -4,11 +4,14 @@ import { existsSync } from "node:fs";
 import {
 	chmod,
 	copyFile,
+	lstat,
 	mkdir,
 	mkdtemp,
 	readFile,
+	readdir,
 	realpath,
 	rm,
+	unlink,
 	writeFile,
 } from "node:fs/promises";
 import os from "node:os";
@@ -225,7 +228,6 @@ const STARTER_CHILD_PLAN_REF =
 const WORKER_MANIFEST_MANAGED_REFS = [
 	"scripts/run-worker.sh",
 	"apps/worker/package.json",
-	"apps/worker/bun.lock",
 	"apps/worker/worker-manifest.json",
 	"apps/worker/src/worker-cli.ts",
 	"apps/worker/tests/smoke.test.ts",
@@ -246,9 +248,10 @@ const WORKER_MANAGED_BUN_SHA256_BY_ASSET: Record<string, string> = {
 		"ed01000f85bd97785228ad2845dc92a1860b8054856826d7317690ac8f8ee74b",
 	"bun-linux-x64.zip":
 		"7051d86a924aefea3e0b96213b5fd8f79c0793f9cae6534233e627e5c3db4669",
-	"bun-windows-x64.zip":
-		"922cffdd5143cd118c6ccec6a61dfcf5d69e0068b048ea00f0a0615016530082",
 };
+const LEGACY_WORKER_BUN_LOCK_REF = "apps/worker/bun.lock";
+const LEGACY_WORKER_BUN_LOCK_CONTENT =
+	"# Worker package lockfile placeholder.\n";
 
 export async function runWorkerFoundationsInstall({
 	options,
@@ -722,6 +725,13 @@ async function inspectTargetRepository(
 		packageJson,
 		repositoryRoot: context.repositoryRoot,
 	});
+	if (process.platform === "win32") {
+		blockers.push({
+			blockerId: "unsupported-platform",
+			reason:
+				"Worker Foundations install currently supports macOS and Linux targets only.",
+		});
+	}
 
 	const gitClean = await isGitWorktreeClean(context.repositoryRoot);
 	if (!gitClean) {
@@ -748,6 +758,16 @@ async function inspectTargetRepository(
 			blockerId: "worker-bun-toolchain",
 			reason:
 				"Worker-managed Bun toolchain cannot be prepared on this machine.",
+		});
+	}
+	const packageManagerCommandStatus = await inspectPackageManagerCommand({
+		context,
+		packageManager,
+	});
+	if (packageManagerCommandStatus === "blocked") {
+		blockers.push({
+			blockerId: "package-manager-command",
+			reason: `Detected ${packageManager} package-manager identity, but the ${packageManager} command is not available for Worker proof commands.`,
 		});
 	}
 
@@ -1254,6 +1274,26 @@ async function inspectWorkerBunToolchain(
 	};
 }
 
+async function inspectPackageManagerCommand({
+	context,
+	packageManager,
+}: {
+	context: WorkerInstallContext;
+	packageManager: RootPackageManager;
+}) {
+	if (packageManager === "bun") {
+		return "ready" as const;
+	}
+	const result = await runBoundedProcess({
+		command: packageManager,
+		args: ["--version"],
+		cwd: context.repositoryRoot,
+		env: buildWorkerProcessEnv(context),
+		timeoutMs: 5_000,
+	});
+	return result.succeeded ? ("ready" as const) : ("blocked" as const);
+}
+
 type ProvisionableBunCandidate = {
 	origin: "current-runtime" | "download" | "explicit-env";
 } & (
@@ -1399,10 +1439,6 @@ function resolveBunReleaseAssetName() {
 	if (process.platform === "linux") {
 		if (process.arch === "arm64") return "bun-linux-aarch64.zip";
 		if (process.arch === "x64") return "bun-linux-x64.zip";
-		return null;
-	}
-	if (process.platform === "win32") {
-		if (process.arch === "x64") return "bun-windows-x64.zip";
 		return null;
 	}
 	return null;
@@ -1951,6 +1987,7 @@ async function applyWorkerFoundations(
 	const applyResult: ApplyResult = { createdRefs: [], changedRefs: [] };
 	await writePackageJsonScripts(context, applyResult, packageManager);
 	await writeManagedFileSet(context, applyResult, packageManager);
+	await removeLegacyWorkerBunLock(context, applyResult, packageManager);
 	await appendGitInfoExclude(context);
 	return applyResult;
 }
@@ -1973,7 +2010,8 @@ async function writePackageJsonScripts(
 	}
 	if (
 		packageManager === "bun" &&
-		typeof packageJson.packageManager !== "string"
+		typeof packageJson.packageManager !== "string" &&
+		!hasRootPackageManagerLockfile(context.repositoryRoot)
 	) {
 		packageJson.packageManager = `bun@${WORKER_MANAGED_BUN_VERSION}`;
 	}
@@ -2042,6 +2080,33 @@ async function writeManagedFileSet(
 	);
 }
 
+async function removeLegacyWorkerBunLock(
+	context: WorkerInstallContext,
+	applyResult: ApplyResult,
+	packageManager: RootPackageManager,
+) {
+	const absolutePath = path.join(
+		context.repositoryRoot,
+		LEGACY_WORKER_BUN_LOCK_REF,
+	);
+	if (!existsSync(absolutePath)) {
+		return;
+	}
+	const currentContent = normalizeManagedContent(
+		await readFile(absolutePath, "utf8"),
+	);
+	if (
+		currentContent !== normalizeManagedContent(LEGACY_WORKER_BUN_LOCK_CONTENT)
+	) {
+		return;
+	}
+	if (!(await hasRecognizedWorkerAppManagedContent(context, packageManager))) {
+		return;
+	}
+	await unlink(absolutePath);
+	applyResult.changedRefs.push(LEGACY_WORKER_BUN_LOCK_REF);
+}
+
 async function findManagedFileBlockers(
 	context: WorkerInstallContext,
 	packageManager: RootPackageManager,
@@ -2053,11 +2118,14 @@ async function findManagedFileBlockers(
 			continue;
 		}
 		if (file.managedSection) {
-			if (hasIncompleteManagedBlock(await readFile(absolutePath, "utf8"))) {
+			const markerStatus = inspectManagedBlockMarkers(
+				await readFile(absolutePath, "utf8"),
+			);
+			if (markerStatus === "incomplete" || markerStatus === "duplicate") {
 				blockers.push({
 					blockerId: `file-conflict:${file.targetRef}`,
 					targetRef: file.targetRef,
-					reason: `Existing ${file.targetRef} has incomplete Worker managed markers.`,
+					reason: `Existing ${file.targetRef} has ${markerStatus} Worker managed markers.`,
 				});
 			}
 			continue;
@@ -2077,6 +2145,7 @@ async function findManagedFileBlockers(
 			});
 		}
 	}
+	blockers.push(...(await findWorkerAppFileBlockers(context, packageManager)));
 	const childPlanPath = path.join(
 		context.repositoryRoot,
 		STARTER_CHILD_PLAN_REF,
@@ -2093,6 +2162,131 @@ async function findManagedFileBlockers(
 		}
 	}
 	return blockers;
+}
+
+async function findWorkerAppFileBlockers(
+	context: WorkerInstallContext,
+	packageManager: RootPackageManager,
+) {
+	const blockers: WorkerInstallBlocker[] = [];
+	const workerAppRoot = path.join(context.repositoryRoot, "apps/worker");
+	if (!existsSync(workerAppRoot)) {
+		return blockers;
+	}
+	if (!(await lstat(workerAppRoot)).isDirectory()) {
+		blockers.push({
+			blockerId: "file-conflict:apps/worker",
+			targetRef: "apps/worker",
+			reason: "Existing apps/worker path is not a Worker-managed directory.",
+		});
+		return blockers;
+	}
+	const managedWorkerRefs = new Set(
+		buildManagedFiles(packageManager)
+			.filter((file) => file.targetRef.startsWith("apps/worker/"))
+			.map((file) => file.targetRef),
+	);
+	for (const targetRef of await collectExistingFileRefs({
+		absoluteRoot: workerAppRoot,
+		repositoryRoot: context.repositoryRoot,
+	})) {
+		if (managedWorkerRefs.has(targetRef)) {
+			continue;
+		}
+		if (
+			(await isLegacyWorkerManagedFile(context, targetRef)) &&
+			(await hasRecognizedWorkerAppManagedContent(context, packageManager))
+		) {
+			continue;
+		}
+		blockers.push({
+			blockerId: `file-conflict:${targetRef}`,
+			targetRef,
+			reason: "Existing apps/worker file is not recognized as Worker-managed.",
+		});
+	}
+	return blockers;
+}
+
+async function collectExistingFileRefs({
+	absoluteRoot,
+	repositoryRoot,
+}: {
+	absoluteRoot: string;
+	repositoryRoot: string;
+}) {
+	const refs: string[] = [];
+	await collectExistingFileRefsInto({
+		absolutePath: absoluteRoot,
+		repositoryRoot,
+		refs,
+	});
+	return refs.sort();
+}
+
+async function collectExistingFileRefsInto({
+	absolutePath,
+	repositoryRoot,
+	refs,
+}: {
+	absolutePath: string;
+	repositoryRoot: string;
+	refs: string[];
+}) {
+	for (const entry of await readdir(absolutePath, { withFileTypes: true })) {
+		const childPath = path.join(absolutePath, entry.name);
+		if (entry.isDirectory()) {
+			await collectExistingFileRefsInto({
+				absolutePath: childPath,
+				repositoryRoot,
+				refs,
+			});
+			continue;
+		}
+		if (entry.isFile() || entry.isSymbolicLink()) {
+			refs.push(
+				path.relative(repositoryRoot, childPath).split(path.sep).join("/"),
+			);
+		}
+	}
+}
+
+async function isLegacyWorkerManagedFile(
+	context: WorkerInstallContext,
+	targetRef: string,
+) {
+	if (targetRef !== LEGACY_WORKER_BUN_LOCK_REF) {
+		return false;
+	}
+	const absolutePath = path.join(context.repositoryRoot, targetRef);
+	return (
+		normalizeManagedContent(await readFile(absolutePath, "utf8")) ===
+		normalizeManagedContent(LEGACY_WORKER_BUN_LOCK_CONTENT)
+	);
+}
+
+async function hasRecognizedWorkerAppManagedContent(
+	context: WorkerInstallContext,
+	packageManager: RootPackageManager,
+) {
+	let recognizedManagedFileCount = 0;
+	for (const file of buildManagedFiles(packageManager)) {
+		if (!file.targetRef.startsWith("apps/worker/")) {
+			continue;
+		}
+		const absolutePath = path.join(context.repositoryRoot, file.targetRef);
+		if (!existsSync(absolutePath)) {
+			continue;
+		}
+		const currentContent = normalizeManagedContent(
+			await readFile(absolutePath, "utf8"),
+		);
+		if (currentContent !== normalizeManagedContent(file.content)) {
+			return false;
+		}
+		recognizedManagedFileCount += 1;
+	}
+	return recognizedManagedFileCount > 0;
 }
 
 async function writeManagedSectionFile({
@@ -2496,17 +2690,25 @@ async function commitInstallChanges({
 	context: WorkerInstallContext;
 	touchedRefs: string[];
 }) {
-	const existingRefs = uniqueRefs(touchedRefs).filter(
-		(ref) =>
-			isTrackedInstallRef(ref) &&
-			existsSync(path.join(context.repositoryRoot, ref)),
-	);
-	if (existingRefs.length === 0) {
+	const stageableRefs: string[] = [];
+	for (const ref of uniqueRefs(touchedRefs)) {
+		if (!isTrackedInstallRef(ref)) {
+			continue;
+		}
+		if (
+			existsSync(path.join(context.repositoryRoot, ref)) ||
+			(await isGitTrackedRef(context.repositoryRoot, ref))
+		) {
+			stageableRefs.push(ref);
+		}
+	}
+	if (stageableRefs.length === 0) {
 		return null;
 	}
 	const addResult = await runGit(context.repositoryRoot, [
 		"add",
-		...existingRefs,
+		"--",
+		...stageableRefs,
 	]);
 	if (!addResult.succeeded) {
 		throw new Error("Could not stage Worker Foundations install files.");
@@ -2814,10 +3016,6 @@ function buildManagedFiles(
 		},
 		{ targetRef: "apps/worker/package.json", content: workerPackageJson() },
 		{
-			targetRef: "apps/worker/bun.lock",
-			content: "# Worker package lockfile placeholder.\n",
-		},
-		{
 			targetRef: "apps/worker/worker-manifest.json",
 			content: workerManifestJson(),
 		},
@@ -2965,10 +3163,12 @@ function runWorkerShellScript() {
 		"fi",
 		'REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"',
 		'WORKER_HOME="${SHIPBYSUNDAY_WORKER_HOME:-$HOME/.worker}"',
-		'if [ -x "$WORKER_HOME/toolchains/bun/bin/bun" ]; then',
+		'if [ -n "${BUN:-}" ]; then',
+		'  BUN_BIN="$BUN"',
+		'elif [ -x "$WORKER_HOME/toolchains/bun/bin/bun" ] && [ "$("$WORKER_HOME/toolchains/bun/bin/bun" --version 2>/dev/null || true)" = "1.3.5" ]; then',
 		'  BUN_BIN="$WORKER_HOME/toolchains/bun/bin/bun"',
 		"else",
-		'  BUN_BIN="${BUN:-bun}"',
+		'  BUN_BIN="bun"',
 		"fi",
 		'if ! command -v "$BUN_BIN" >/dev/null 2>&1; then',
 		'  echo "Shipbysunday Worker requires Bun. Re-run shipbysunday install to prepare the Worker-managed Bun toolchain, or install Bun and try again." >&2',
@@ -2983,6 +3183,10 @@ function runWorkerShellScript() {
 		'    exec "$BUN_BIN" src/worker-cli.ts --help',
 		"    ;;",
 		"esac",
+		'if [ "${1:-}" = "worker:test" ]; then',
+		"  shift",
+		'  set -- test "$@"',
+		"fi",
 		'exec "$BUN_BIN" run "$@"',
 		"",
 	].join("\n");
@@ -3006,6 +3210,7 @@ function workerPackageJson() {
 				"execplan:grill": "bun src/worker-cli.ts execplan:grill",
 				"execplan:build": "bun src/worker-cli.ts execplan:build",
 				"execplan:validate": "bun src/worker-cli.ts execplan:validate",
+				"worker:test": "bun test tests",
 				test: "bun test tests",
 			},
 		},
@@ -3270,7 +3475,7 @@ function renderChildPlan(input: { title: string; summary: string; programId: str
 		"",
 		"### Test Commands",
 		"",
-		"- npm run docs:validate",
+		"- ./scripts/run-worker.sh docs:validate",
 		"",
 		"## Idempotence and Recovery",
 		"",
@@ -3814,10 +4019,24 @@ function detectRootPackageManager({
 		if (packageManager.startsWith("npm@")) return "npm";
 	}
 	if (existsSync(path.join(repositoryRoot, "bun.lock"))) return "bun";
+	if (existsSync(path.join(repositoryRoot, "bun.lockb"))) return "bun";
 	if (existsSync(path.join(repositoryRoot, "pnpm-lock.yaml"))) return "pnpm";
 	if (existsSync(path.join(repositoryRoot, "yarn.lock"))) return "yarn";
+	if (existsSync(path.join(repositoryRoot, "npm-shrinkwrap.json")))
+		return "npm";
 	if (existsSync(path.join(repositoryRoot, "package-lock.json"))) return "npm";
 	return "bun";
+}
+
+function hasRootPackageManagerLockfile(repositoryRoot: string) {
+	return (
+		existsSync(path.join(repositoryRoot, "bun.lock")) ||
+		existsSync(path.join(repositoryRoot, "bun.lockb")) ||
+		existsSync(path.join(repositoryRoot, "pnpm-lock.yaml")) ||
+		existsSync(path.join(repositoryRoot, "yarn.lock")) ||
+		existsSync(path.join(repositoryRoot, "npm-shrinkwrap.json")) ||
+		existsSync(path.join(repositoryRoot, "package-lock.json"))
+	);
 }
 
 async function isGitWorktreeClean(repositoryRoot: string) {
@@ -3841,6 +4060,12 @@ async function gitBranchExists(repositoryRoot: string) {
 			"--verify",
 			`refs/heads/${WORKER_FOUNDATIONS_INSTALL_BRANCH}`,
 		])
+	).succeeded;
+}
+
+async function isGitTrackedRef(repositoryRoot: string, ref: string) {
+	return (
+		await runGit(repositoryRoot, ["ls-files", "--error-unmatch", "--", ref])
 	).succeeded;
 }
 
@@ -3988,11 +4213,36 @@ function extractManagedBlock(content: string) {
 	return normalized.slice(startIndex, endIndex + ROOT_AGENT_END.length);
 }
 
-function hasIncompleteManagedBlock(content: string) {
+function inspectManagedBlockMarkers(content: string) {
 	const normalized = normalizeManagedContent(content);
-	const startIndex = normalized.indexOf(ROOT_AGENT_START);
-	const endIndex = normalized.indexOf(ROOT_AGENT_END);
-	return (startIndex === -1) !== (endIndex === -1) || endIndex < startIndex;
+	const startIndexes = markerIndexes(normalized, ROOT_AGENT_START);
+	const endIndexes = markerIndexes(normalized, ROOT_AGENT_END);
+	if (startIndexes.length === 0 && endIndexes.length === 0) {
+		return "none" as const;
+	}
+	if (startIndexes.length === 0 || endIndexes.length === 0) {
+		return "incomplete" as const;
+	}
+	if (startIndexes.length !== 1 || endIndexes.length !== 1) {
+		return "duplicate" as const;
+	}
+	return endIndexes[0] < startIndexes[0]
+		? ("incomplete" as const)
+		: ("single" as const);
+}
+
+function markerIndexes(content: string, marker: string) {
+	const indexes: number[] = [];
+	let searchIndex = 0;
+	while (searchIndex < content.length) {
+		const index = content.indexOf(marker, searchIndex);
+		if (index === -1) {
+			break;
+		}
+		indexes.push(index);
+		searchIndex = index + marker.length;
+	}
+	return indexes;
 }
 
 function replaceOrAppendManagedBlock({
@@ -4003,12 +4253,16 @@ function replaceOrAppendManagedBlock({
 	managedBlock: string;
 }) {
 	const normalized = normalizeManagedContent(currentContent);
+	const markerStatus = inspectManagedBlockMarkers(normalized);
+	if (markerStatus === "duplicate") {
+		throw new Error("Existing file has duplicate Worker managed markers.");
+	}
 	const startIndex = normalized.indexOf(ROOT_AGENT_START);
 	const endIndex = normalized.indexOf(ROOT_AGENT_END);
 	if (startIndex === -1 && endIndex === -1) {
 		return `${normalized.trimEnd()}\n\n${managedBlock}\n`;
 	}
-	if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+	if (markerStatus === "incomplete") {
 		throw new Error("Existing file has incomplete Worker managed markers.");
 	}
 	return `${normalized.slice(0, startIndex).trimEnd()}\n\n${managedBlock}\n\n${normalized.slice(endIndex + ROOT_AGENT_END.length).trimStart()}`;

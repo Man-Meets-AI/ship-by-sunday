@@ -6,7 +6,7 @@ completed_at: 2026-05-09
 summary: Make Worker install produce Bun-default blank repos plus recipient-grade README, AGENTS, and direct help output.
 post_build_recap: Worker install now creates Bun-default blank repositories, defaults unclaimed package roots to Bun, writes managed README and AGENTS handoff sections, exposes Worker-specific run-worker help, and proves those surfaces through compatibility smoke.
 program_id: worker-install-compatibility-matrix
-planning_brief: docs/programs/active/2026-05-09-worker-install-compatibility-matrix/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/planning-brief-2.md
 read_when:
   - Implementing blank-slate Worker install support.
   - Updating generated Worker README or AGENTS output.
@@ -119,7 +119,7 @@ Run Program and plan validation:
 
     bun run programs:lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md
     git diff --check
 
 ## Validation and Acceptance
@@ -145,7 +145,7 @@ Run Program and plan validation:
 
     bun run programs:lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md
     git diff --check
 
 ## Idempotence and Recovery
@@ -154,7 +154,7 @@ The installer must remain safe to rerun. Existing managed README and AGENTS sect
 
 ## Artifacts and Notes
 
-The main code artifacts are `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts` and `packages/local-runner/tests/worker-install-compatibility-smoke.ts`. The Program artifacts are `docs/programs/active/2026-05-09-worker-install-compatibility-matrix/planning-brief-2.md` and `docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md`.
+The main code artifacts are `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts` and `packages/local-runner/tests/worker-install-compatibility-smoke.ts`. The Program artifacts are `docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/planning-brief-2.md` and `docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md`.
 
 ## Interfaces and Dependencies
 

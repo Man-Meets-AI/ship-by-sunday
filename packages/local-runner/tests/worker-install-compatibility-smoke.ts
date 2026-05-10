@@ -18,7 +18,7 @@ import {
 	initializeGitRepository,
 } from "./test-utils";
 
-type PackageManager = "bun" | "npm" | "pnpm";
+type PackageManager = "bun" | "npm" | "pnpm" | "yarn";
 
 type WorkerInstallBlocker = {
 	blockerId?: string;
@@ -123,6 +123,103 @@ const scenarios: CompatibilityScenario[] = [
 				private: true,
 				scripts: {
 					dev: "node server.js",
+				},
+			});
+		},
+	},
+	{
+		name: "bun-lockfile-owned-package",
+		description:
+			"Package with a Bun lockfile but no packageManager field. The installer should use Bun without writing a new package-manager identity.",
+		expectation: { expectedPackageManager: "bun", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(
+				packageJson.name,
+				"bun-lockfile-owned-package",
+				`${label} name`,
+			);
+			assertEqual(
+				packageJson.packageManager,
+				undefined,
+				`${label} packageManager`,
+			);
+			assertEqual(
+				readPackageScript(packageJson, "dev"),
+				"bun --version",
+				`${label} dev script`,
+			);
+			assertEqual(
+				await readFile(path.join(repositoryRoot, "bun.lock"), "utf8"),
+				"# existing Bun lockfile\n",
+				`${label} bun lockfile`,
+			);
+		},
+		setup: async (repositoryRoot) => {
+			await writeJson(path.join(repositoryRoot, "package.json"), {
+				name: "bun-lockfile-owned-package",
+				private: true,
+				scripts: {
+					dev: "bun --version",
+				},
+			});
+			await writeFile(
+				path.join(repositoryRoot, "bun.lock"),
+				"# existing Bun lockfile\n",
+			);
+		},
+	},
+	{
+		name: "npm-lockfile-owned-package",
+		description:
+			"Package with an npm lockfile but no packageManager field. The installer should use npm without adding packageManager.",
+		expectation: { expectedPackageManager: "npm", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(
+				packageJson.name,
+				"npm-lockfile-owned-package",
+				`${label} name`,
+			);
+			assertEqual(
+				packageJson.packageManager,
+				undefined,
+				`${label} packageManager`,
+			);
+			assertEqual(
+				readPackageScript(packageJson, "dev"),
+				"node server.js",
+				`${label} dev script`,
+			);
+			const packageLock = JSON.parse(
+				await readFile(path.join(repositoryRoot, "package-lock.json"), "utf8"),
+			) as { lockfileVersion?: number; name?: string };
+			assertEqual(
+				packageLock.lockfileVersion,
+				3,
+				`${label} package-lock version`,
+			);
+			assertEqual(
+				packageLock.name,
+				"npm-lockfile-owned-package",
+				`${label} package-lock name`,
+			);
+		},
+		setup: async (repositoryRoot) => {
+			await writeJson(path.join(repositoryRoot, "package.json"), {
+				name: "npm-lockfile-owned-package",
+				private: true,
+				scripts: {
+					dev: "node server.js",
+				},
+			});
+			await writeJson(path.join(repositoryRoot, "package-lock.json"), {
+				lockfileVersion: 3,
+				name: "npm-lockfile-owned-package",
+				packages: {
+					"": {
+						name: "npm-lockfile-owned-package",
+					},
 				},
 			});
 		},
@@ -324,6 +421,77 @@ const scenarios: CompatibilityScenario[] = [
 		},
 	},
 	{
+		name: "next-yarn-monorepo",
+		description:
+			"Monorepo with a single Next.js-style web app and Yarn workspace metadata.",
+		expectation: { expectedPackageManager: "yarn", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(packageJson.name, "next-yarn-monorepo", `${label} name`);
+			assertEqual(
+				packageJson.packageManager,
+				"yarn@1.22.22",
+				`${label} packageManager`,
+			);
+			assertJsonEqual(
+				packageJson.workspaces,
+				["apps/*", "packages/*"],
+				`${label} workspaces`,
+			);
+			assertEqual(
+				readPackageScript(packageJson, "build"),
+				"yarn workspace @fixture/web build",
+				`${label} build script`,
+			);
+			assertEqual(
+				readPackageScript(packageJson, "dev"),
+				"yarn workspace @fixture/web dev",
+				`${label} dev script`,
+			);
+			const webPackageJson = await readJsonObject(
+				path.join(repositoryRoot, "apps", "web", "package.json"),
+			);
+			assertEqual(webPackageJson.name, "@fixture/web", `${label} web name`);
+			assertEqual(
+				readPackageScript(webPackageJson, "build"),
+				"next build",
+				`${label} web build script`,
+			);
+			assertEqual(
+				readPackageScript(webPackageJson, "dev"),
+				"next dev",
+				`${label} web dev script`,
+			);
+		},
+		setup: async (repositoryRoot) => {
+			await writeJson(path.join(repositoryRoot, "package.json"), {
+				name: "next-yarn-monorepo",
+				packageManager: "yarn@1.22.22",
+				private: true,
+				scripts: {
+					build: "yarn workspace @fixture/web build",
+					dev: "yarn workspace @fixture/web dev",
+				},
+				workspaces: ["apps/*", "packages/*"],
+			});
+			await writeFile(
+				path.join(repositoryRoot, "yarn.lock"),
+				"# yarn lockfile v1\n",
+			);
+			await writeJson(
+				path.join(repositoryRoot, "apps", "web", "package.json"),
+				{
+					name: "@fixture/web",
+					private: true,
+					scripts: {
+						build: "next build",
+						dev: "next dev",
+					},
+				},
+			);
+		},
+	},
+	{
 		name: "bun-different-version",
 		description:
 			"Bun repo whose root packageManager version is different from the Worker-managed Bun target.",
@@ -351,6 +519,123 @@ const scenarios: CompatibilityScenario[] = [
 					build: "bun --version",
 				},
 			});
+		},
+	},
+	{
+		name: "polyglot-standalone",
+		description:
+			"Polyglot repository with app and service directories outside apps/worker. Worker files should install standalone without touching those areas.",
+		expectation: { expectedPackageManager: "bun", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(packageJson.name, "polyglot-standalone", `${label} name`);
+			assertEqual(
+				packageJson.packageManager,
+				"bun@1.3.5",
+				`${label} packageManager`,
+			);
+			assertEqual(
+				await readFile(path.join(repositoryRoot, "backend", "main.py"), "utf8"),
+				"print('owner service')\n",
+				`${label} Python service`,
+			);
+			assertEqual(
+				await readFile(path.join(repositoryRoot, "go.mod"), "utf8"),
+				"module example.com/polyglot\n",
+				`${label} Go module`,
+			);
+			const webPackageJson = await readJsonObject(
+				path.join(repositoryRoot, "apps", "web", "package.json"),
+			);
+			assertEqual(webPackageJson.name, "@fixture/web", `${label} web name`);
+		},
+		setup: async (repositoryRoot) => {
+			await writeJson(path.join(repositoryRoot, "package.json"), {
+				name: "polyglot-standalone",
+				private: true,
+				scripts: {
+					dev: "node server.js",
+				},
+			});
+			await mkdir(path.join(repositoryRoot, "backend"), { recursive: true });
+			await writeFile(
+				path.join(repositoryRoot, "backend", "main.py"),
+				"print('owner service')\n",
+			);
+			await writeFile(
+				path.join(repositoryRoot, "go.mod"),
+				"module example.com/polyglot\n",
+			);
+			await writeJson(
+				path.join(repositoryRoot, "apps", "web", "package.json"),
+				{
+					name: "@fixture/web",
+					private: true,
+					scripts: {
+						dev: "next dev",
+					},
+				},
+			);
+		},
+	},
+	{
+		name: "arena-shaped-runtime",
+		description:
+			"Arena-shaped repository with an existing runtime launcher and app folders. Legacy Worker root scripts should upgrade without deleting unrelated owner files.",
+		expectation: { expectedPackageManager: "bun", type: "installs" },
+		assertTargetIdentity: async (repositoryRoot, label) => {
+			const packageJson = await readPackageJson(repositoryRoot);
+			assertEqual(packageJson.name, "arena-shaped-runtime", `${label} name`);
+			assertEqual(
+				readPackageScript(packageJson, "docs:validate"),
+				"./scripts/run-worker.sh docs:validate",
+				`${label} upgraded docs script`,
+			);
+			assertEqual(
+				await readFile(
+					path.join(repositoryRoot, "scripts", "run-runtime.sh"),
+					"utf8",
+				),
+				'#!/bin/sh\necho owner runtime "$@"\n',
+				`${label} owner runtime launcher`,
+			);
+			const arenaPackageJson = await readJsonObject(
+				path.join(repositoryRoot, "apps", "arena", "package.json"),
+			);
+			assertEqual(
+				arenaPackageJson.name,
+				"@fixture/arena",
+				`${label} arena package`,
+			);
+		},
+		setup: async (repositoryRoot) => {
+			await writeJson(path.join(repositoryRoot, "package.json"), {
+				name: "arena-shaped-runtime",
+				packageManager: "bun@1.3.5",
+				private: true,
+				scripts: {
+					"docs:validate": "./scripts/run-runtime.sh docs:validate",
+				},
+			});
+			await mkdir(path.join(repositoryRoot, "scripts"), { recursive: true });
+			await writeFile(
+				path.join(repositoryRoot, "scripts", "run-runtime.sh"),
+				'#!/bin/sh\necho owner runtime "$@"\n',
+			);
+			await chmod(
+				path.join(repositoryRoot, "scripts", "run-runtime.sh"),
+				0o755,
+			);
+			await writeJson(
+				path.join(repositoryRoot, "apps", "arena", "package.json"),
+				{
+					name: "@fixture/arena",
+					private: true,
+					scripts: {
+						dev: "bun --version",
+					},
+				},
+			);
 		},
 	},
 ];
@@ -561,6 +846,12 @@ async function createPackageManagerBinDirectory() {
 		["#!/bin/sh", 'exec corepack pnpm "$@"', ""].join("\n"),
 	);
 	await chmod(pnpmPath, 0o755);
+	const yarnPath = path.join(binDirectory, "yarn");
+	await writeFile(
+		yarnPath,
+		["#!/bin/sh", 'exec corepack yarn "$@"', ""].join("\n"),
+	);
+	await chmod(yarnPath, 0o755);
 	return binDirectory;
 }
 
@@ -676,6 +967,11 @@ async function assertInstalledRepository({
 		env,
 		label: `${label} direct Worker docs validation`,
 	});
+	await runRequiredProcess("./scripts/run-worker.sh", ["worker:test"], {
+		cwd: repositoryRoot,
+		env,
+		label: `${label} direct Worker test alias`,
+	});
 	await runRequiredProcess(expectedPackageManager, ["run", "docs:validate"], {
 		cwd: repositoryRoot,
 		env,
@@ -703,6 +999,11 @@ async function assertInstalledRepository({
 
 	const readme = await readFile(path.join(repositoryRoot, "README.md"), "utf8");
 	assertTextIncludes(readme, "# Shipbysunday Worker", `${label} README title`);
+	assertEqual(
+		countWorkerManagedStarts(readme),
+		1,
+		`${label} README managed block count`,
+	);
 	assertTextIncludes(
 		readme,
 		`${expectedPackageManager} run docs:validate`,
@@ -720,6 +1021,11 @@ async function assertInstalledRepository({
 	);
 
 	const agents = await readFile(path.join(repositoryRoot, "AGENTS.md"), "utf8");
+	assertEqual(
+		countWorkerManagedStarts(agents),
+		1,
+		`${label} AGENTS managed block count`,
+	);
 	assertTextIncludes(
 		agents,
 		"Read `README.md`, `docs/worker/install-report.md`, the active Program, and the active ExecPlan",
@@ -741,6 +1047,10 @@ async function assertInstalledRepository({
 		"utf8",
 	);
 	assertInstallReportProofCommandsPassed(report, expectedPackageManager, label);
+	assertMissing(
+		path.join(repositoryRoot, "apps", "worker", "bun.lock"),
+		`${label} Worker placeholder lockfile`,
+	);
 
 	await assertCleanWorktree(repositoryRoot, label);
 }
@@ -952,6 +1262,10 @@ function assertTextIncludes(text: string, expectedText: string, label: string) {
 	if (!text.includes(expectedText)) {
 		throw new Error(`${label}: missing ${expectedText}`);
 	}
+}
+
+function countWorkerManagedStarts(content: string) {
+	return content.match(/<!-- shipbysunday-worker:start -->/gu)?.length ?? 0;
 }
 
 async function runRequiredProcess(

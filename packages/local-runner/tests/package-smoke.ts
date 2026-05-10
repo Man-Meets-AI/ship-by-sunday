@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
@@ -24,6 +24,7 @@ if (!existsSync(builtCliPath)) {
 const runnerHome = await mkdtemp(path.join(os.tmpdir(), "sbs-smoke-home-"));
 const codexHome = await createCodexHome();
 const { binDirectory } = await createFakeRunnerBin();
+const packageManagerBinDirectory = await createPackageManagerBinDirectory();
 const packagePackDirectory = await mkdtemp(
 	path.join(os.tmpdir(), "sbs-smoke-pack-"),
 );
@@ -550,6 +551,7 @@ async function runNativeWorkerInstallCommandSmoke({
 		],
 		{
 			env: {
+				PATH: packageManagerSmokePath(),
 				SHIPBYSUNDAY_WORKER_HOME: workerHome,
 			},
 		},
@@ -607,6 +609,40 @@ async function assertPackedTarballContents(packageTarballPath: string) {
 			);
 		}
 	}
+}
+
+async function createPackageManagerBinDirectory() {
+	const binDirectory = await mkdtemp(
+		path.join(os.tmpdir(), "sbs-smoke-package-managers-"),
+	);
+	await writePnpmVersionShim(binDirectory);
+	return binDirectory;
+}
+
+async function writePnpmVersionShim(binDirectory: string) {
+	const pnpmPath = path.join(binDirectory, "pnpm");
+	await writeFile(
+		pnpmPath,
+		[
+			"#!/bin/sh",
+			'if [ "${1:-}" = "--version" ]; then',
+			"  echo 9.12.0",
+			"  exit 0",
+			"fi",
+			'echo "fake pnpm only supports --version" >&2',
+			"exit 1",
+			"",
+		].join("\n"),
+	);
+	await chmod(pnpmPath, 0o755);
+}
+
+function packageManagerSmokePath() {
+	return [
+		packageManagerBinDirectory,
+		binDirectory,
+		process.env.PATH ?? "",
+	].join(path.delimiter);
 }
 
 async function runProcess(

@@ -1,15 +1,15 @@
 ---
-program_id: worker-install-compatibility-matrix
 title: Worker Install Compatibility Matrix
-status: active
+program_id: worker-install-compatibility-matrix
+status: complete
 created_at: 2026-05-09
-completed_at: null
+completed_at: 2026-05-09
 summary: Prove that Worker Foundations install drops a standalone ready-to-run Worker system into practical repo shapes without assuming one app stack or package manager.
-post_build_recap: null
+post_build_recap: Worker install compatibility is now proven by an 11-scenario source smoke in root check:source and CI, package smoke covers packed/native shipped-artifact paths, generated README/AGENTS and launcher behavior are asserted, fake Codex kickoff is proven, and release proof intentionally stays focused on hosted product behavior.
 read_when:
-  - Extending Worker Foundations install compatibility coverage.
+  - Reviewing completed Worker Foundations install compatibility coverage.
   - Checking whether a repo shape is officially supported by the installer.
-  - Deciding which Worker install smoke tests belong in CI or release proof.
+  - Checking why Worker install smoke belongs in source and package gates instead of hosted release proof.
 ---
 
 # Worker Install Compatibility Matrix
@@ -32,17 +32,17 @@ Arena CRM remains a reference input for what a useful repo-local runtime looks l
 
 ## Current State
 
-Worker Foundations install now has a source-level compatibility smoke organized around repo-shape compatibility. The default smoke covers blank-slate install success, unclaimed package roots that default to Bun, explicit Bun, npm, and pnpm identities that remain preserved, fresh-clone command execution, generated root README and AGENTS handoff text, Worker-specific `./scripts/run-worker.sh --help`, and fake-Codex kickoff proof.
+Worker Foundations install now has a source-level compatibility smoke organized around repo-shape compatibility. The default smoke covers blank-slate install success, unclaimed package roots that default to Bun, lockfile-owned Bun and npm roots that keep their missing `packageManager` identity, explicit Bun, npm, pnpm, and Yarn identities that remain preserved, fresh-clone command execution, generated root README and AGENTS handoff text, Worker-specific `./scripts/run-worker.sh --help`, direct and root-package-manager `worker:test`, polyglot standalone installation, Arena-shaped legacy runtime upgrade, and fake-Codex kickoff proof.
 
-The Program remains active because conflict and upgrade coverage, polyglot fixtures, an Arena-shaped fixture, and release-gate integration are not complete.
+The Program is complete. The full 11-scenario source compatibility smoke runs through `bun run test:worker-compatibility-smoke`, root `check:source`, and the required CI `static` job. The shipped-artifact path is covered by `bun run test:package-smoke`, which builds the local-runner CLI and exercises packed and native command paths, including package-manager identity dry-run coverage. Hosted production release proof intentionally does not run Worker install compatibility because this contract mutates local recipient repositories rather than hosted web production behavior.
 
 ## Progress
 
 - [x] 2026-05-09: Defined the compatibility Program around all practical repo shapes, ready-to-rip kickoff behavior, and both fast CI plus release smoke proof.
 - [x] 2026-05-09: Completed the first fixture harness slice with Bun, npm, pnpm, current blank-slate blocker, dry-run no-mutation proof, preserved target identity checks, exact proof-report assertions, fresh clone proof, and fake-Codex kickoff contract proof.
 - [x] 2026-05-09: Completed the recipient ergonomics slice with blank-slate install support, unclaimed package Bun defaults, generated README/AGENTS handoff, direct Worker help, six-scenario compatibility smoke, and fake-Codex kickoff proof.
-- [ ] Expand the matrix to polyglot, conflict, upgrade, and Arena-shaped fixtures.
-- [ ] Decide which compatibility smoke commands are required in CI and which remain release-only.
+- [x] 2026-05-09: Completed the conflict and upgrade matrix slice with lockfile-owned npm/Bun identity preservation, Yarn smoke coverage, README/AGENTS duplicate-marker blockers, owner `apps/worker` blockers, missing non-Bun package-manager preflight, direct `worker:test`, legacy placeholder lockfile cleanup, polyglot standalone proof, and Arena-shaped legacy runtime upgrade proof.
+- [x] 2026-05-09: Completed release-gate placement. The full Worker compatibility smoke is a source and CI static gate; package smoke is the shipped-artifact gate; hosted release proof stays focused on production web behavior.
 
 ## Decision Log
 
@@ -62,16 +62,22 @@ Decision: Use both fast fixture coverage and slower shipped-artifact smoke.
 Rationale: Source-level integration catches regressions quickly, while packed/native smoke proves the artifact a customer actually runs.
 Date: 2026-05-09
 
+Decision: Keep Worker install compatibility out of hosted release proof.
+Rationale: Worker install compatibility is a local repository mutation and generated-artifact contract. Root source checks, CI static validation, and local-runner package smoke prove that contract more directly than hosted production proof.
+Date: 2026-05-09
+
 ## Slice Ledger
 
 - `docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md` completed the first slice: create the fixture harness, cover the first installing scenarios, record current blank-slate behavior, prove fresh clone command execution, and prove fake-Codex kickoff.
 - `docs/exec-plans/completed/2026-05-09-worker-install-recipient-ergonomics.md` completed the second slice from `planning-brief-2.md`: make blank and unclaimed repositories default to Bun, generate recipient README and AGENTS handoff, make direct Worker help useful, and prove the recipient surface through installed and fresh-clone compatibility smoke.
+- `docs/exec-plans/completed/2026-05-09-worker-install-conflict-upgrade-matrix.md` completed the third slice from `planning-brief-3.md`: harden lockfile identity, marker conflict handling, owner file blockers, non-Bun package-manager preflight, launcher behavior, legacy placeholder lock cleanup, Yarn, polyglot, and Arena-shaped compatibility proof.
+- `docs/exec-plans/completed/2026-05-09-worker-install-release-gates.md` completed the final slice from `planning-brief-4.md`: make the source, CI, package-smoke, and hosted-release-proof placement explicit and close the Program.
 
-Future slices should cover conflict and upgrade fixtures, polyglot and Arena-shaped fixtures, and release-gate integration.
+No required slices remain inside this Program.
 
 ## Next Slice
 
-The next recommended slice is conflict, upgrade, polyglot, and Arena-shaped fixture coverage. It should add representative fixtures for existing owner README and AGENTS content, incomplete managed markers, rerunning over an already installed Worker surface, a polyglot monorepo with non-JavaScript project areas, and an Arena-shaped repo that proves the installer drops in the standalone Worker system without assuming a single Next.js app.
+No required next slice remains inside this Program. Future Worker install compatibility work should open a new Program or a focused ExecPlan if the supported repository matrix changes.
 
 ## Risks and Watchpoints
 
@@ -83,11 +89,13 @@ Do not let generated docs claim more support than the automated fixtures prove. 
 
 ## Outcomes & Retrospective
 
-This Program is active. Record the final compatibility matrix, the CI and release smoke split, and any intentionally deferred repo shapes before moving the Program to completed.
+This Program delivered the Worker install compatibility matrix. The installer now supports blank repositories, unclaimed package roots, explicit Bun/npm/pnpm/Yarn roots, lockfile-owned npm/Bun roots, polyglot repositories, Arena-shaped legacy runtime upgrades, fresh clones, direct Worker command usage, and fake-Codex kickoff proof. It blocks unsafe managed marker states, owner-authored package scripts, owner-authored Worker paths, missing non-Bun package-manager commands, and unsupported Windows installs before mutation.
+
+The gate split is now explicit. `bun run test:worker-compatibility-smoke` is the canonical full matrix proof and runs under root `check:source` plus the CI `static` job. `bun run test:package-smoke` is the shipped-artifact proof and covers packed and native local-runner command paths. Hosted production release proof remains focused on hosted application behavior because Worker install compatibility is a local generated-repository contract.
 
 ## Validation and Acceptance
 
-The Program is complete only when `packages/local-runner` contains a reusable compatibility harness, the default smoke covers the primary repo-shape matrix, shipped package/native smoke proves the customer artifact path, generated README and AGENTS output are recipient-grade, kickoff is proven with fake Codex, JSON mode remains sync-safe, and the target matrix has an explicit policy for every practical repo shape.
+This Program is complete because `packages/local-runner` contains a reusable compatibility harness, the default smoke covers the primary repo-shape matrix, shipped package/native smoke proves the customer artifact path, generated README and AGENTS output are recipient-grade, kickoff is proven with fake Codex, JSON mode remains sync-safe, and the target matrix has an explicit policy for every practical repo shape.
 
 Program validation should include `bun run --cwd packages/local-runner worker:compatibility-smoke`, `bun run --cwd packages/local-runner package:smoke`, local runner unit tests, lint, typecheck, format check, and Program/ExecPlan markdown validation.
 
@@ -95,10 +103,12 @@ Program validation should include `bun run --cwd packages/local-runner worker:co
 
 - Compatibility harness: `packages/local-runner/tests/worker-install-compatibility-smoke.ts`
 - Harness command: `bun run --cwd packages/local-runner worker:compatibility-smoke`
-- Latest harness proof: `worker install compatibility smoke passed (6 scenarios)` with blank-slate, minimal-unclaimed-package, minimal-bun-package, next-npm-single-app, next-pnpm-monorepo, bun-different-version, and fake-Codex kickoff all passing.
+- Latest harness proof: `worker install compatibility smoke passed (11 scenarios)` with blank-slate, minimal-unclaimed-package, bun-lockfile-owned-package, npm-lockfile-owned-package, minimal-bun-package, next-npm-single-app, next-pnpm-monorepo, next-yarn-monorepo, bun-different-version, polyglot-standalone, arena-shaped-runtime, and fake-Codex kickoff all passing.
 - Package smoke command: `bun run --cwd packages/local-runner package:smoke`
+- Root source gate: `bun run check:source` includes `bun run test:package-smoke` and `bun run test:worker-compatibility-smoke`.
+- CI gate: `.github/workflows/ci.yml` runs package smoke and Worker compatibility smoke as separate steps in the `static` job.
 - Installer implementation: `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts`
 
 ## Interfaces and Dependencies
 
-This Program depends on the Worker Foundations install workflow, the local runner CLI command surface, Git-backed temporary fixture repositories, Bun, npm, Corepack-backed pnpm, fake Codex binaries for kickoff proof, Program/ExecPlan lint contracts, and package smoke for the distributed artifact path.
+This Program depends on the Worker Foundations install workflow, the local runner CLI command surface, Git-backed temporary fixture repositories, Bun, npm, Corepack-backed pnpm and Yarn, fake Codex binaries for kickoff proof, Program/ExecPlan lint contracts, and package smoke for the distributed artifact path.

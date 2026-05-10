@@ -6,7 +6,7 @@ completed_at: 2026-05-09
 summary: Add the first reusable compatibility smoke harness for Worker Foundations install across practical repo shapes.
 post_build_recap: Added a source-level Worker install compatibility smoke harness with Bun, npm, pnpm, Bun different-version, current blank-slate blocker, dry-run mutation snapshots, preserved target identity checks, exact proof-report assertions, fresh-clone proof, fake-Codex kickoff contract proof, and Program-owned planning context.
 program_id: worker-install-compatibility-matrix
-planning_brief: docs/programs/active/2026-05-09-worker-install-compatibility-matrix/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/planning-brief-1.md
 read_when:
   - Resuming Worker install compatibility harness work.
   - Validating the first Worker install compatibility slice.
@@ -75,7 +75,7 @@ First, create `packages/local-runner/tests/worker-install-compatibility-smoke.ts
 
 Second, wire the script into `packages/local-runner/package.json` as `worker:compatibility-smoke` so maintainers can run it without remembering a file path.
 
-Third, create the Program packet under `docs/programs/active/2026-05-09-worker-install-compatibility-matrix/` and link this ExecPlan to `planning-brief-1.md`.
+Third, create the Program packet under `docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/` and link this ExecPlan to `planning-brief-1.md`.
 
 Fourth, run the focused validation commands. If the harness fails, inspect the failing temporary repository output, repair the harness or product behavior if it is inside this slice, and rerun validation.
 
@@ -121,7 +121,7 @@ Validate the local runner package and docs touched by this slice:
     bun run --cwd packages/local-runner package:smoke
     bun run programs:lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md
 
 ## Validation and Acceptance
 
@@ -146,7 +146,7 @@ Run Program and ExecPlan validation:
 
     bun run programs:lint
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md
-    bun run markdown:lint -- --paths docs/programs/active/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md
+    bun run markdown:lint -- --paths docs/programs/completed/2026-05-09-worker-install-compatibility-matrix docs/exec-plans/completed/2026-05-09-worker-install-fixture-harness.md
 
 ## Idempotence and Recovery
 
@@ -158,7 +158,7 @@ If Corepack cannot run pnpm in the local environment, the pnpm scenario should f
 
 The primary artifact is `packages/local-runner/tests/worker-install-compatibility-smoke.ts`. The package entrypoint is `packages/local-runner/package.json#scripts.worker:compatibility-smoke`.
 
-The Program packet for the larger compatibility initiative lives at `docs/programs/active/2026-05-09-worker-install-compatibility-matrix/`.
+The Program packet for the larger compatibility initiative lives at `docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/`.
 
 ## Interfaces and Dependencies
 
