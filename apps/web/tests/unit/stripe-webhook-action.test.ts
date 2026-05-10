@@ -17,6 +17,47 @@ vi.mock("stripe", () => ({
 	default: StripeMock,
 }));
 
+type StripeWebhookLedgerBeginResult =
+	| {
+			decision: "process";
+			attemptCount: number;
+	  }
+	| {
+			decision: "skip";
+			status: string;
+			resultKind: string | null;
+	  };
+
+function createWebhookRunMutationMock({
+	beginResult = { decision: "process", attemptCount: 1 },
+	grantResult = { granted: "inserted" },
+	grantError,
+}: {
+	beginResult?: StripeWebhookLedgerBeginResult;
+	grantResult?: { granted: "inserted" | "patched" };
+	grantError?: Error;
+} = {}) {
+	return vi.fn(async (_ref: unknown, args: Record<string, unknown>) => {
+		if ("status" in args && "resultKind" in args) {
+			return { recorded: "patched" };
+		}
+
+		if ("stripeEventId" in args) {
+			return beginResult;
+		}
+
+		if ("clerkUserId" in args) {
+			if (grantError) {
+				throw grantError;
+			}
+
+			return grantResult;
+		}
+
+		throw new Error(`Unexpected mutation args: ${JSON.stringify(args)}`);
+	});
+}
+
 describe("convex/stripeWebhook", () => {
 	const originalEnv = { ...process.env };
 
@@ -101,7 +142,7 @@ describe("convex/stripeWebhook", () => {
 				},
 			},
 		});
-		const runMutation = vi.fn();
+		const runMutation = createWebhookRunMutationMock();
 		const runAction = vi.fn().mockResolvedValue({
 			kind: "fulfilled",
 			sessionId: "cs_test_123",
@@ -136,7 +177,20 @@ describe("convex/stripeWebhook", () => {
 			stripeEventId: "evt_pending_claim",
 			stripeEventType: "checkout.session.completed",
 		});
-		expect(runMutation).not.toHaveBeenCalled();
+		expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+			stripeEventId: "evt_pending_claim",
+			eventType: "checkout.session.completed",
+			stripeObjectId: "cs_test_123",
+			courseSlug: "ship-by-sunday",
+		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_pending_claim",
+				status: "processed",
+				resultKind: "granted",
+			}),
+		);
 	});
 
 	it("ignores checkout sessions missing course metadata", async () => {
@@ -187,10 +241,11 @@ describe("convex/stripeWebhook", () => {
 					metadata: {
 						courseSlug: "ship-by-sunday",
 					},
+					payment_status: "paid",
 				},
 			},
 		});
-		const runMutation = vi.fn();
+		const runMutation = createWebhookRunMutationMock();
 		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
 
 		const result = await processStripeWebhook._handler(
@@ -207,7 +262,160 @@ describe("convex/stripeWebhook", () => {
 			eventType: "checkout.session.completed",
 			sessionId: "cs_test_123",
 		});
-		expect(runMutation).not.toHaveBeenCalled();
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_missing_email",
+				status: "failed",
+				resultKind: "missing_checkout_email",
+			}),
+		);
+	});
+
+	it("accepts unpaid signed-in checkout completion without granting access", async () => {
+		constructEventMock.mockReturnValue({
+			id: "evt_pending_payment",
+			type: "checkout.session.completed",
+			data: {
+				object: {
+					id: "cs_test_pending",
+					client_reference_id: "user_123",
+					metadata: {
+						clerkUserId: "user_123",
+						courseSlug: "ship-by-sunday",
+					},
+					customer_details: {
+						email: "buyer@example.com",
+					},
+					payment_status: "unpaid",
+				},
+			},
+		});
+		const runMutation = createWebhookRunMutationMock();
+		const runAction = vi.fn();
+		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
+
+		const result = await processStripeWebhook._handler(
+			{ runMutation, runAction } as never,
+			{
+				body: "raw-webhook-body",
+				signature: "t=1,v1=signature",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "payment_pending",
+			eventId: "evt_pending_payment",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_test_pending",
+			paymentStatus: "unpaid",
+		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_pending_payment",
+				status: "payment_pending",
+				resultKind: "payment_pending",
+			}),
+		);
+		expect(runAction).not.toHaveBeenCalled();
+	});
+
+	it("does not grant setup-mode Checkout Sessions that require no payment", async () => {
+		constructEventMock.mockReturnValue({
+			id: "evt_setup_mode",
+			type: "checkout.session.completed",
+			data: {
+				object: {
+					id: "cs_test_setup",
+					client_reference_id: "user_123",
+					mode: "setup",
+					metadata: {
+						clerkUserId: "user_123",
+						courseSlug: "ship-by-sunday",
+					},
+					payment_status: "no_payment_required",
+				},
+			},
+		});
+		const runMutation = createWebhookRunMutationMock();
+		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
+
+		const result = await processStripeWebhook._handler(
+			{ runMutation } as never,
+			{
+				body: "raw-webhook-body",
+				signature: "t=1,v1=signature",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "payment_pending",
+			eventId: "evt_setup_mode",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_test_setup",
+			paymentStatus: "no_payment_required",
+		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_setup_mode",
+				status: "payment_pending",
+				resultKind: "payment_pending",
+			}),
+		);
+	});
+
+	it("skips a terminal duplicate Stripe event without repeating fulfillment", async () => {
+		constructEventMock.mockReturnValue({
+			id: "evt_duplicate",
+			type: "checkout.session.completed",
+			data: {
+				object: {
+					id: "cs_test_duplicate",
+					client_reference_id: "user_123",
+					metadata: {
+						clerkUserId: "user_123",
+						courseSlug: "ship-by-sunday",
+					},
+					payment_status: "paid",
+				},
+			},
+		});
+		const runMutation = createWebhookRunMutationMock({
+			beginResult: {
+				decision: "skip",
+				status: "processed",
+				resultKind: "granted",
+			},
+		});
+		const runAction = vi.fn();
+		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
+
+		const result = await processStripeWebhook._handler(
+			{ runMutation, runAction } as never,
+			{
+				body: "raw-webhook-body",
+				signature: "t=1,v1=signature",
+			},
+		);
+
+		expect(result).toEqual({
+			kind: "duplicate",
+			eventId: "evt_duplicate",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_test_duplicate",
+			status: "processed",
+			resultKind: "granted",
+		});
+		expect(runAction).not.toHaveBeenCalled();
+		expect(runMutation).toHaveBeenCalledTimes(1);
+		expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+			stripeEventId: "evt_duplicate",
+			eventType: "checkout.session.completed",
+			stripeObjectId: "cs_test_duplicate",
+			courseSlug: "ship-by-sunday",
+		});
 	});
 
 	it.each([
@@ -230,10 +438,11 @@ describe("convex/stripeWebhook", () => {
 					},
 					customer: "cus_123",
 					payment_intent: "pi_123",
+					payment_status: "paid",
 				},
 			},
 		});
-		const runMutation = vi.fn().mockResolvedValue({ granted: "inserted" });
+		const runMutation = createWebhookRunMutationMock();
 		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
 
 		const result = await processStripeWebhook._handler(
@@ -263,6 +472,14 @@ describe("convex/stripeWebhook", () => {
 				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_grant",
+				status: "processed",
+				resultKind: "granted",
+			}),
+		);
 		expect(stripeConstructorArgs).toEqual([
 			[
 				"sk_test_123",
@@ -285,12 +502,13 @@ describe("convex/stripeWebhook", () => {
 						clerkUserId: "user_123",
 						courseSlug: "ship-by-sunday",
 					},
+					payment_status: "paid",
 				},
 			},
 		});
-		const runMutation = vi
-			.fn()
-			.mockRejectedValue(new Error("convex unavailable"));
+		const runMutation = createWebhookRunMutationMock({
+			grantError: new Error("convex unavailable"),
+		});
 		const { processStripeWebhook } = await import("@/convex/stripeWebhook");
 
 		const result = await processStripeWebhook._handler(
@@ -311,5 +529,14 @@ describe("convex/stripeWebhook", () => {
 			stripePaymentIntentId: null,
 			message: "convex unavailable",
 		});
+		expect(runMutation).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_failure",
+				status: "failed",
+				resultKind: "grant_failed",
+				errorMessage: "convex unavailable",
+			}),
+		);
 	});
 });

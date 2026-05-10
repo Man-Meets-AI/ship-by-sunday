@@ -26,7 +26,7 @@ The initiative is moving correctly when CI covers every shipped workspace, Conve
 
 ## Program Inputs
 
-The initial inputs are this Program packet, `research-pass-test-infrastructure-hardening.md`, `normalized-pass-shipping-evidence-hardening.md`, `converged-decision-packet.md`, `dependency-graph.md`, `plan-split-recommendation.md`, `cross-repo-review.md`, and `planning-brief-1.md`.
+The initial inputs are this Program packet, `research-pass-test-infrastructure-hardening.md`, `normalized-pass-shipping-evidence-hardening.md`, `converged-decision-packet.md`, `dependency-graph.md`, `plan-split-recommendation.md`, `cross-repo-review.md`, `planning-brief-1.md`, and `planning-brief-2.md`.
 
 The codebase inputs are `apps/web/vitest.config.ts`, `apps/web/playwright.config.ts`, `.github/workflows/ci.yml`, `.github/workflows/production-release-proof.yml`, `.github/workflows/dev-staging-payment-proof.yml`, `.github/workflows/convex-production-deploy.yml`, `.github/workflows/release.yml`, `scripts/release/`, `apps/web/convex/`, `apps/web/platform/billing/`, `packages/codebase-compiler/`, and the generated customer repo renderers under `packages/codebase-compiler/src/repo-generation/`.
 
@@ -36,14 +36,21 @@ The operator contract inputs are `AGENTS.md`, `apps/web/AGENTS.md`, `docs/releas
 
 The repo already has useful test infrastructure. `apps/web` has Vitest unit, contract, integration, and integration-ui projects plus Playwright sandbox e2e. CI runs documented `static` and `integration` jobs. The release system has dev payment staging, production release proof, Convex production deploy, and tag release evidence.
 
-The current gap is evidence alignment. CI is mostly app-centered and does not run package workspace tests, package typechecks, package smoke scripts, root script tests, or the critical coverage gate. Convex-sensitive changes are detected but not used by production proof. Billing tests cover important checkout and webhook branches, but the runtime proof is mocked more than hosted Convex, and production preflight is conditional and coarse. Generated customer repos can advertise validation commands that the generated snapshot cannot actually run.
+The first CI baseline slice has been landed. `static` now runs app and package lint, the app format check, package typechecks, app unit tests, app contract tests, package tests, root script tests, critical coverage, package smoke, worker compatibility smoke, and the app build. `integration` remains the app integration suite.
+
+The Convex and billing runtime hardening slice has been landed. `productAccessGrants.clerkUserId` is now characterized as the current Clerk-id contract, Convex retry-secret validation matches Next.js, unpaid signed-in Checkout completion is accepted without access fulfillment, and Stripe webhook processing uses a schema-backed `stripeWebhookEvents` ledger for terminal duplicates and retryable failures. Production proof now consumes Convex-sensitive release scope and waits for the same-commit Convex production deploy when Convex code changes.
+
+The remaining gaps are production preflight, release evidence truthfulness, and generated customer repo proof. The next slice should make live environment, Vercel alias, Convex deploy mode, Stripe live object, webhook endpoint, and observability checks explicit and fail-closed without moving hosted provider checks into every PR.
 
 ## Progress
 
 - [x] 2026-05-09: Completed the initial multi-agent research pass across test harness, CI/release gates, billing/auth/entitlement paths, staging/preflight infrastructure, and generated customer repo output.
 - [x] 2026-05-09: Created this Program packet to preserve the research and split the work into bounded implementation slices.
-- [ ] Land the first CI baseline slice so the required merge gate covers all shipped workspaces and the critical app coverage gate.
-- [ ] Add Convex/runtime and billing webhook hardening slices.
+- [x] 2026-05-09: Created the first child ExecPlan for the CI and workspace baseline slice, now completed at `docs/exec-plans/completed/2026-05-09-shipping-evidence-ci-baseline.md`.
+- [x] 2026-05-09: Landed the first CI baseline slice so the required merge gate covers all shipped workspaces and the critical app coverage gate.
+- [x] 2026-05-09: Created `planning-brief-2.md` and child ExecPlan `docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md` for the Convex and billing runtime slice.
+- [x] 2026-05-09: Completed Milestone 1 of the active Convex/billing runtime slice: retry-secret validation, identity characterization, and pending Checkout webhook handling.
+- [x] 2026-05-09: Completed the Convex/runtime and billing webhook hardening slice: schema-backed Stripe webhook event ledger, retryable failure records, duplicate-event tests, hosted Convex dry-run, and Convex-sensitive production proof wiring.
 - [ ] Add production preflight and release evidence hardening slices.
 - [ ] Add generated customer repo command-contract proof.
 
@@ -79,19 +86,20 @@ Date: 2026-05-09
 
 ## Slice Ledger
 
-No child ExecPlan exists yet.
+Completed child ExecPlan:
+
+- `docs/exec-plans/completed/2026-05-09-shipping-evidence-ci-baseline.md`: landed the cheap CI and workspace source-gate baseline.
+- `docs/exec-plans/completed/2026-05-09-convex-billing-runtime-hardening.md`: hardened Convex retry-secret validation, current Clerk-id entitlement characterization, signed-in webhook pending-payment handling, Stripe webhook event idempotency, and Convex-sensitive production proof wiring.
 
 Recommended child slices:
 
-- CI and workspace baseline: aggregate package tests, package typechecks, package smoke scripts, root script tests, and `test:coverage:critical` into the intended required gate without making hosted proof part of every PR.
-- Convex and billing runtime harness: add real Convex runtime coverage where appropriate, close entitlement identity and retry-secret validation gaps, and harden Stripe webhook idempotency and duplicate/out-of-order evidence.
 - Staging and production preflight: make environment, Vercel alias, Convex deploy mode, Stripe live object, webhook endpoint, and observability checks explicit and fail-closed.
 - Release evidence truthfulness: make tag evidence consume proof summaries/artifacts rather than only check-run conclusions.
 - Generated customer repo proof: materialize a generated repo and run the advertised command contract in a clean-room fixture.
 
 ## Next Slice
 
-The next recommended slice is the CI and workspace baseline. It should make the required source gate represent the whole repo by adding or wiring aggregate scripts for package tests, package typechecks, package smoke commands where they are cheap enough, root script tests, and the existing critical app coverage gate. It should verify the live required-check enforcement shape before changing check names, preserve `static` and `integration` unless there is a deliberate docs-backed reason to change them, and avoid hosted staging or production proof. The desired outcome is a fast, deterministic merge gate whose omissions are intentional and documented.
+No child ExecPlan is currently active for this Program. The next recommended slice is staging and production preflight: make environment, Vercel alias, Convex deploy mode, Stripe live object, webhook endpoint, and observability checks explicit and fail-closed. That slice should stay broke-startup-friendly by keeping source proof cheap on PRs and putting provider-backed checks in release, staging, manual, or conditional paths.
 
 ## Risks and Watchpoints
 

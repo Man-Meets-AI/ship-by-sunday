@@ -16,8 +16,8 @@ Production is healthy only when GitHub, Vercel, and Convex agree on the same `ma
 
 The current workflow strategy is summarized beside the workflow files in `.github/workflows/README.md`.
 
-- `CI` is the fast source proof surface from `.github/workflows/ci.yml`. It runs on pull requests into `main`, pushes to `main`, schedule, and manual dispatch. The durable merge-gate jobs are `static` and `integration`.
-- `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles.
+- `CI` is the fast source proof surface from `.github/workflows/ci.yml`. It runs on pull requests into `main`, pushes to `main`, schedule, and manual dispatch. The durable merge-gate jobs are `static` and `integration`. `static` covers app and package lint, the app format check, package typechecks, app unit and contract tests, package tests, root script tests, critical coverage, package smoke, worker compatibility smoke, and the app build with PostHog source-map upload disabled. `integration` covers the app integration suite.
+- `Production Release Proof` is the hosted production post-deploy proof surface from `.github/workflows/production-release-proof.yml`. It runs on `main` pushes and manual dispatches after the production web deployment settles. When the release scope is Convex-sensitive, it also waits for a successful same-commit `Convex Production Deploy` summary that proves `deployMode: deploy` and fails closed if automatic Convex production deploys are paused.
 - `Convex Production Deploy` is the production backend deploy surface from `.github/workflows/convex-production-deploy.yml`. It runs on `main` pushes and manual dispatches and is controlled by the `CONVEX_PRODUCTION_DEPLOY_ENABLED` variable for automatic deploys.
 - `Tag Release` is the protected `v*` tag workflow from `.github/workflows/release.yml`. It validates `release.json`, collects release evidence for the tag target, builds the GitHub Release body from the matching `CHANGELOG.md` section, and publishes the GitHub Release only after evidence is available.
 
@@ -95,8 +95,8 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 
 6. Merge only after required GitHub checks pass.
 7. Confirm Vercel creates the production web deploy from the merged `main` commit.
-8. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` commit, or records an intentional skip when automatic deploys are paused.
-9. Let `Production Release Proof` wait for the exact Vercel production deployment for the merged commit, then run hosted verification against `https://www.man-meets-ai.com`.
+8. Confirm GitHub Actions runs `Convex Production Deploy` for the same `main` commit. A non-Convex release may intentionally record a skip when automatic deploys are paused, but a Convex-sensitive release must deploy Convex production before production proof can pass.
+9. Let `Production Release Proof` wait for the exact Vercel production deployment for the merged commit and, when Convex-sensitive, the same-commit Convex production deploy, then run hosted verification against `https://www.man-meets-ai.com`.
 10. When the release touched checkout, homepage checkout CTAs, Stripe, entitlement, webhook, or access-handoff behavior, make sure `Production Release Proof` also runs hosted `billing_integration`.
 11. Update `release.json` and `CHANGELOG.md` for the next version when the verified `main` commit is ready to publish.
 12. Create the protected `vMAJOR.MINOR.PATCH` tag at the verified `main` commit.

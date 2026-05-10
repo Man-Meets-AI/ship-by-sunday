@@ -44,6 +44,7 @@ import type * as observability from "../observability.js";
 import type * as observability_model from "../observability/model.js";
 import type * as observability_validators from "../observability/validators.js";
 import type * as stripeWebhook from "../stripeWebhook.js";
+import type * as stripeWebhookEvents from "../stripeWebhookEvents.js";
 import type * as support from "../support.js";
 import type * as support_aiDrafts from "../support/aiDrafts.js";
 import type * as support_model from "../support/model.js";
@@ -103,6 +104,7 @@ declare const fullApi: ApiFromModules<{
   "observability/model": typeof observability_model;
   "observability/validators": typeof observability_validators;
   stripeWebhook: typeof stripeWebhook;
+  stripeWebhookEvents: typeof stripeWebhookEvents;
   support: typeof support;
   "support/aiDrafts": typeof support_aiDrafts;
   "support/model": typeof support_model;

@@ -6,13 +6,15 @@ The workflows in this directory follow the Codex-style lifecycle: pull requests 
 
 - `ci.yml` is the pre-merge source proof path for pull requests into `main`.
 - The durable merge-gate jobs are `static` and `integration`.
-- `static` runs lint, format check, unit tests, contract tests, and the app build.
+- `static` runs app and package lint, the app format check, package typechecks, app unit tests, app contract tests, package tests, root script tests, critical coverage, package smoke checks, worker compatibility smoke, and the app build.
 - `integration` runs the integration test suite.
+- `static` disables PostHog source-map upload during its app build so pull request proof remains source-level and non-provider-backed.
+- Keep `static` and `integration` as the required context names unless branch protection or ruleset enforcement is verified and this workflow documentation is updated in the same change. Private-repo branch protection and ruleset APIs can return a plan-gated `403`, which is inconclusive rather than proof that enforcement is absent.
 
 ## Post-Merge On `main`
 
 - `ci.yml` also runs on pushes to `main` so the merged source tree is rechecked.
-- `production-release-proof.yml` runs hosted production proof after pushes to `main` and on manual dispatch. It waits for the matching Vercel production deployment, runs `default_ship`, and runs `billing_integration` when the release scope requires it.
+- `production-release-proof.yml` runs hosted production proof after pushes to `main` and on manual dispatch. It waits for the matching Vercel production deployment, waits for the same-commit Convex production deploy summary to prove an actual deploy when the release scope is Convex-sensitive, runs `default_ship`, and runs `billing_integration` when the release scope requires it.
 - `convex-production-deploy.yml` owns Convex production deployment from `main`. Automatic deploys remain controlled by `CONVEX_PRODUCTION_DEPLOY_ENABLED`.
 
 ## Dev Payment Staging

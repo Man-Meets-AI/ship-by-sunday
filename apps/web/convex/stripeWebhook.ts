@@ -7,6 +7,7 @@ import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
 import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
 import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
+import type { ActionCtx } from "./_generated/server";
 import { requireConvexEnv } from "./env";
 import { productAccessGrantResultValidator } from "./access/validators";
 
@@ -34,6 +35,23 @@ const stripeWebhookMissingCheckoutEmailResultValidator = v.object({
 	eventId: v.string(),
 	eventType: v.string(),
 	sessionId: v.string(),
+});
+
+const stripeWebhookPaymentPendingResultValidator = v.object({
+	kind: v.literal("payment_pending"),
+	eventId: v.string(),
+	eventType: v.string(),
+	sessionId: v.string(),
+	paymentStatus: v.string(),
+});
+
+const stripeWebhookDuplicateResultValidator = v.object({
+	kind: v.literal("duplicate"),
+	eventId: v.string(),
+	eventType: v.string(),
+	sessionId: v.string(),
+	status: v.string(),
+	resultKind: v.union(v.string(), v.null()),
 });
 
 const stripeWebhookInvalidSignatureResultValidator = v.object({
@@ -83,6 +101,21 @@ type StripeWebhookActionResult =
 			sessionId: string;
 	  }
 	| {
+			kind: "payment_pending";
+			eventId: string;
+			eventType: string;
+			sessionId: string;
+			paymentStatus: string;
+	  }
+	| {
+			kind: "duplicate";
+			eventId: string;
+			eventType: string;
+			sessionId: string;
+			status: string;
+			resultKind: string | null;
+	  }
+	| {
 			kind: "invalid_signature";
 			message: string;
 	  }
@@ -123,6 +156,48 @@ function getStripeCheckoutEmail(session: Stripe.Checkout.Session) {
 		: null;
 }
 
+function isFulfillableCheckoutSession(session: Stripe.Checkout.Session) {
+	if (session.payment_status === "paid") {
+		return true;
+	}
+
+	if (session.payment_status === "no_payment_required") {
+		return session.mode === "payment";
+	}
+
+	return false;
+}
+
+function stripeWebhookEventLedgerArgs({
+	event,
+	session,
+}: {
+	event: Stripe.Event;
+	session: Stripe.Checkout.Session;
+}) {
+	return {
+		stripeEventId: event.id,
+		eventType: event.type,
+		stripeObjectId: session.id,
+		courseSlug: session.metadata?.courseSlug,
+	};
+}
+
+async function recordStripeWebhookEventResult(
+	ctx: Pick<ActionCtx, "runMutation">,
+	args: ReturnType<typeof stripeWebhookEventLedgerArgs> & {
+		status: "processed" | "failed" | "ignored" | "payment_pending";
+		attemptCount: number;
+		resultKind: string;
+		errorMessage?: string;
+	},
+) {
+	await ctx.runMutation(
+		internal.stripeWebhookEvents.recordStripeWebhookEventResult,
+		args,
+	);
+}
+
 export const processStripeWebhook = internalAction({
 	args: {
 		body: v.string(),
@@ -132,6 +207,8 @@ export const processStripeWebhook = internalAction({
 		stripeWebhookIgnoredResultValidator,
 		stripeWebhookGrantedResultValidator,
 		stripeWebhookMissingCheckoutEmailResultValidator,
+		stripeWebhookPaymentPendingResultValidator,
+		stripeWebhookDuplicateResultValidator,
 		stripeWebhookInvalidSignatureResultValidator,
 		stripeWebhookGrantFailedResultValidator,
 		stripeWebhookFulfillmentFailedResultValidator,
@@ -170,12 +247,54 @@ export const processStripeWebhook = internalAction({
 			};
 		}
 
+		const ledgerArgs = stripeWebhookEventLedgerArgs({ event, session });
+		const ledgerDecision = await ctx.runMutation(
+			internal.stripeWebhookEvents.beginStripeWebhookEventProcessing,
+			ledgerArgs,
+		);
+		if (ledgerDecision.decision === "skip") {
+			return {
+				kind: "duplicate" as const,
+				eventId: event.id,
+				eventType: event.type,
+				sessionId: session.id,
+				status: ledgerDecision.status,
+				resultKind: ledgerDecision.resultKind,
+			};
+		}
+		const ledgerAttemptCount = ledgerDecision.attemptCount;
+
+		if (!isFulfillableCheckoutSession(session)) {
+			await recordStripeWebhookEventResult(ctx, {
+				...ledgerArgs,
+				status: "payment_pending",
+				attemptCount: ledgerAttemptCount,
+				resultKind: "payment_pending",
+			});
+
+			return {
+				kind: "payment_pending" as const,
+				eventId: event.id,
+				eventType: event.type,
+				sessionId: session.id,
+				paymentStatus: session.payment_status ?? "unknown",
+			};
+		}
+
 		const clerkUserId =
 			session.metadata?.clerkUserId ?? session.client_reference_id ?? undefined;
 
 		if (!clerkUserId) {
 			const checkoutEmail = getStripeCheckoutEmail(session);
 			if (!checkoutEmail) {
+				await recordStripeWebhookEventResult(ctx, {
+					...ledgerArgs,
+					status: "failed",
+					attemptCount: ledgerAttemptCount,
+					resultKind: "missing_checkout_email",
+					errorMessage: "Paid guest checkout session had no buyer email.",
+				});
+
 				return {
 					kind: "missing_checkout_email" as const,
 					eventId: event.id,
@@ -194,6 +313,13 @@ export const processStripeWebhook = internalAction({
 			);
 
 			if (fulfillmentResult.kind === "fulfilled") {
+				await recordStripeWebhookEventResult(ctx, {
+					...ledgerArgs,
+					status: "processed",
+					attemptCount: ledgerAttemptCount,
+					resultKind: "granted",
+				});
+
 				return {
 					kind: "granted" as const,
 					eventId: event.id,
@@ -204,6 +330,14 @@ export const processStripeWebhook = internalAction({
 			}
 
 			if (fulfillmentResult.kind === "missing_checkout_email") {
+				await recordStripeWebhookEventResult(ctx, {
+					...ledgerArgs,
+					status: "failed",
+					attemptCount: ledgerAttemptCount,
+					resultKind: "missing_checkout_email",
+					errorMessage: "Paid guest checkout fulfillment found no buyer email.",
+				});
+
 				return {
 					kind: "missing_checkout_email" as const,
 					eventId: event.id,
@@ -211,6 +345,14 @@ export const processStripeWebhook = internalAction({
 					sessionId: session.id,
 				};
 			}
+
+			await recordStripeWebhookEventResult(ctx, {
+				...ledgerArgs,
+				status: "failed",
+				attemptCount: ledgerAttemptCount,
+				resultKind: "fulfillment_failed",
+				errorMessage: `Paid checkout fulfillment returned ${fulfillmentResult.kind}.`,
+			});
 
 			return {
 				kind: "fulfillment_failed" as const,
@@ -239,6 +381,18 @@ export const processStripeWebhook = internalAction({
 				},
 			)) as StripeWebhookGrantResult;
 		} catch (error) {
+			const message =
+				error instanceof Error
+					? error.message
+					: "Unable to persist the Stripe webhook grant.";
+			await recordStripeWebhookEventResult(ctx, {
+				...ledgerArgs,
+				status: "failed",
+				attemptCount: ledgerAttemptCount,
+				resultKind: "grant_failed",
+				errorMessage: message,
+			});
+
 			return {
 				kind: "grant_failed" as const,
 				eventId: event.id,
@@ -251,12 +405,16 @@ export const processStripeWebhook = internalAction({
 					typeof session.payment_intent === "string"
 						? session.payment_intent
 						: null,
-				message:
-					error instanceof Error
-						? error.message
-						: "Unable to persist the Stripe webhook grant.",
+				message,
 			};
 		}
+
+		await recordStripeWebhookEventResult(ctx, {
+			...ledgerArgs,
+			status: "processed",
+			attemptCount: ledgerAttemptCount,
+			resultKind: "granted",
+		});
 
 		return {
 			kind: "granted" as const,

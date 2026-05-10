@@ -81,6 +81,9 @@ describe("release scope classifier", () => {
 		expect(
 			isBillingSensitivePath("scripts/release/prepare-release-personas.mjs"),
 		).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/convex/stripeWebhookEvents.ts"),
+		).toBe(true);
 	});
 
 	it("marks convex files as convex sensitive", () => {

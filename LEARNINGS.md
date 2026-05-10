@@ -23,6 +23,12 @@
 - Fact: In this checkout, root `bun typecheck` runs the Next.js production build path and can execute `runAfterProductionCompile`, including PostHog source-map release creation and upload when PostHog credentials are present in the environment.
   Verified by: Running `bun typecheck` on 2026-05-09, which completed successfully after creating `ship-by-sunday-web@38814d7a87699696bc9b2be4c878fe9a6b68437c` in PostHog and uploading source-map symbol sets.
 
+- Fact: This local environment does not have `pnpm` available on PATH, so source-gate smokes that model pnpm-owned repositories need their own shim when they are testing dry-run detection rather than real pnpm execution.
+  Verified by: `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run check:source` initially failed in `packages/local-runner/tests/package-smoke.ts` with the installer blocking the native pnpm dry-run fixture, then passed after the smoke supplied a fake `pnpm --version` binary for that fixture.
+
+- Fact: This checkout's Convex CLI is authenticated enough to run `bunx convex deploy --dry-run -y` against the production deployment from `apps/web`; the production deployment URL is redacted from this repo note.
+  Verified by: The Convex billing runtime hardening slice dry-run completed schema validation and reported that it would have deployed functions to the redacted production deployment without deleting indexes.
+
 ## 2026-05-07 Passwordless Checkout Account Handoff
 
 - Fact: A Stripe Checkout payment cannot safely create an authenticated browser session by itself.

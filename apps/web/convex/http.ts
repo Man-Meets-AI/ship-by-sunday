@@ -87,6 +87,55 @@ function buildConvexStripeWebhookResultIncident(
 	});
 }
 
+type StripeWebhookAcceptedResult =
+	| {
+			kind: "payment_pending";
+			paymentStatus: string;
+	  }
+	| {
+			kind: "duplicate";
+			status: string;
+			resultKind: string | null;
+	  }
+	| {
+			kind: "ignored";
+	  }
+	| {
+			kind: "granted";
+			grantResult: {
+				granted: "inserted" | "patched";
+			};
+	  };
+
+export function buildStripeWebhookAcceptedResponseBody(
+	result: StripeWebhookAcceptedResult,
+) {
+	switch (result.kind) {
+		case "payment_pending":
+			return {
+				received: true,
+				paymentPending: true,
+				paymentStatus: result.paymentStatus,
+			};
+		case "duplicate":
+			return {
+				received: true,
+				duplicate: true,
+				status: result.status,
+				resultKind: result.resultKind,
+			};
+		case "ignored":
+			return { ignored: true };
+		case "granted":
+			return {
+				received: true,
+				grantResult: result.grantResult,
+			};
+		default:
+			return result satisfies never;
+	}
+}
+
 http.route({
 	path: "/stripe/webhook",
 	method: "POST",
@@ -167,13 +216,11 @@ http.route({
 						{ error: "Unable to fulfill paid checkout." },
 						{ status: 500 },
 					);
+				case "payment_pending":
+				case "duplicate":
 				case "ignored":
-					return jsonResponse({ ignored: true });
 				case "granted":
-					return jsonResponse({
-						received: true,
-						grantResult: result.grantResult,
-					});
+					return jsonResponse(buildStripeWebhookAcceptedResponseBody(result));
 				default:
 					return jsonResponse(
 						{ error: "Unhandled Stripe webhook result." },

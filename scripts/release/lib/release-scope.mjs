@@ -5,6 +5,7 @@ const exactBillingSensitivePaths = new Set([
 	"apps/web/convex/checkoutClaims.ts",
 	"apps/web/convex/checkoutClaimsActions.ts",
 	"apps/web/convex/stripeWebhook.ts",
+	"apps/web/convex/stripeWebhookEvents.ts",
 	"apps/web/config/product.ts",
 	"apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-codebase-branch.tsx",
 	"apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx",

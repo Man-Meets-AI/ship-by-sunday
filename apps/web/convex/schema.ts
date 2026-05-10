@@ -115,6 +115,31 @@ export default defineSchema({
 			"status",
 			"updatedAt",
 		]),
+	stripeWebhookEvents: defineTable({
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		stripeObjectId: v.optional(v.string()),
+		courseSlug: v.optional(v.string()),
+		status: v.union(
+			v.literal("processing"),
+			v.literal("processed"),
+			v.literal("failed"),
+			v.literal("ignored"),
+			v.literal("payment_pending"),
+		),
+		resultKind: v.optional(v.string()),
+		errorMessage: v.optional(v.string()),
+		attemptCount: v.number(),
+		firstSeenAt: v.number(),
+		updatedAt: v.number(),
+		completedAt: v.optional(v.number()),
+	})
+		.index("by_stripe_event_id", ["stripeEventId"])
+		.index("by_stripe_object_id_and_event_type", [
+			"stripeObjectId",
+			"eventType",
+		])
+		.index("by_status_and_updated_at", ["status", "updatedAt"]),
 	// Deprecated: retained temporarily for historical private starter repository
 	// invite records. No live app or operator path writes this table.
 	starterRepoAccess: defineTable({
