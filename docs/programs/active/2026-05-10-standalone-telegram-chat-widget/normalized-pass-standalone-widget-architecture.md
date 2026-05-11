@@ -35,6 +35,10 @@ React layer:
 
 The panel and primitive modules should remain internal or testing-only in v1 unless a concrete host need proves they should be exported. The default developer path should be mounting one widget with a client adapter and content configuration.
 
+The first scaffold may include only a skeletal root `TelegramChatWidget` export for package API stability. Real launcher, panel, conversation, prompt input, attachments, and branded primitive implementation belongs to the UI extraction slice.
+
+Do not create empty AI Elements primitive placeholders in the scaffold. The package should add real branded primitive source only when the UI extraction slice implements and tests it.
+
 Placement should be owned by the all-in-one widget by default. The package should start with fixed bottom-right placement and a small placement enum for bottom-left or inline contexts, not an arbitrary host positioning bag.
 
 Content should be merged inside the package from strong defaults plus partial host overrides. Host wrappers should customize identity and surface-specific language without re-declaring every label and state string.
@@ -68,6 +72,7 @@ Analytics boundary:
 - host-provided event sink
 - no package dependency on PostHog or another analytics SDK
 - no transcript bodies, attachment content, emails, tokens, Telegram ids, or generated output in event payloads
+- package-owned privacy DOM hooks on transcript, rendered message, attachment, and input surfaces by default
 
 ## Host Responsibilities
 

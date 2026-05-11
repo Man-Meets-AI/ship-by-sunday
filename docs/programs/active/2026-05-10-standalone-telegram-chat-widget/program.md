@@ -68,6 +68,10 @@ This Program depends on the active Telegram Support Bot Program for the current 
 - [x] 2026-05-10: Locked `./convex` as a reserved subpath in the scaffold slice, with no live Convex adapter implementation until the realtime slice.
 - [x] 2026-05-11: Locked a working configurable fetch adapter into the scaffold slice, without switching `apps/web` to consume it yet.
 - [x] 2026-05-11: Locked fetch adapter defaults to current support routes, with endpoint overrides.
+- [x] 2026-05-11: Locked package-owned privacy and masking DOM hooks on transcript, input, and attachment surfaces by default.
+- [x] 2026-05-11: Locked a minimal skeletal `TelegramChatWidget` export in the scaffold slice, with real UI deferred.
+- [x] 2026-05-11: Locked no AI Elements primitive placeholder files in the scaffold; real adapted primitives arrive in the UI extraction slice.
+- [x] 2026-05-11: Locked package README for package API docs and app docs for provider/runtime setup.
 - [ ] Create the first child ExecPlan from `planning-brief-1.md`.
 - [ ] Land the package contract and scaffold.
 - [ ] Migrate the Ship by Sunday support widget to consume the package without behavior regression.
@@ -200,6 +204,22 @@ Decision: Default the fetch adapter to the current support route endpoints.
 Rationale: v1 is internal monorepo-only, so the zero-config fetch adapter should work against the current Ship by Sunday support routes: `/api/support/messages` and `/api/support/attachments`. Endpoint overrides should still be supported for tests and future hosts.
 Date: 2026-05-11
 
+Decision: Apply privacy and masking DOM hooks by default.
+Rationale: Support transcripts, bug reports, screenshots, and text inputs can contain sensitive customer data. The package should apply stable privacy hooks such as `ph-no-capture`, `ph-sensitive`, `data-ph-no-capture`, and `data-ph-mask` to transcript, input, and attachment surfaces by default so hosts cannot forget the privacy contract.
+Date: 2026-05-11
+
+Decision: Include only a minimal skeletal `TelegramChatWidget` React export in the scaffold slice.
+Rationale: The root React API should exist early for type stability, but the first scaffold should not build or migrate real UI. A tiny placeholder component or shell is enough to prove exports and package wiring while avoiding temporary UI that could be mistaken for the production widget.
+Date: 2026-05-11
+
+Decision: Do not create AI Elements primitive placeholder files in the scaffold slice.
+Rationale: Empty primitive files would look like implemented UI and create churn. The scaffold should reserve the architecture in docs and types only. Real package-owned, heavily branded AI Elements-inspired Conversation, Prompt Input, and Attachments primitives should be added when the UI extraction slice actually implements and tests them.
+Date: 2026-05-11
+
+Decision: Split package API docs from provider/runtime setup docs.
+Rationale: `packages/telegram-chat-widget/README.md` should document package usage, imports, CSS, adapters, content overrides, privacy hooks, and test commands. App docs should continue owning Telegram bot setup, Convex env, webhook setup, production verification, and operator workflow because those are host/runtime responsibilities.
+Date: 2026-05-11
+
 ## Slice Ledger
 
 No child ExecPlan exists yet. Child ExecPlans should carry `program_id: standalone-telegram-chat-widget` and `planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-<N>.md` in their frontmatter.
@@ -230,6 +250,12 @@ The first slice should keep dependencies narrow: peer `react` and `react-dom`, o
 The first slice should reserve the `./convex` subpath only as a stable future boundary. It may export future-facing adapter types or a deliberate placeholder, but it must not implement live Convex `useQuery` or mutation behavior until the Convex Realtime Adapter child slice.
 
 The first slice should include `createFetchTelegramChatClient` or equivalent under the `./fetch` subpath. It should default to `/api/support/messages` and `/api/support/attachments`, while accepting message endpoint, attachment endpoint, and optional `fetchImpl` overrides for tests and future hosts. `apps/web` should not consume this adapter until the later UI extraction slice.
+
+The package DOM contract should include privacy hooks by default. The scaffold should define the classes or constants the UI extraction must use for transcript, input, and attachment surfaces so package-level tests can assert the privacy contract later.
+
+The first slice may export a minimal skeletal `TelegramChatWidget` from the root package for API stability. It should not copy the existing app panel, build the real launcher, adapt AI Elements primitives, or create empty primitive placeholder files. Real UI work belongs in the following UI extraction slice.
+
+The first slice should include a package README that documents only the package API and local package commands. It should not duplicate Telegram BotFather, Convex env, webhook, or production operator setup from app docs.
 
 The package should be internal monorepo-only in v1. The first slice should not add npm publishing workflows, public release automation, or external compatibility guarantees.
 

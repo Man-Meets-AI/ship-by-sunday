@@ -140,6 +140,22 @@ Decision: Give the fetch adapter current route defaults with overrides.
 
 Rationale: `createFetchTelegramChatClient()` should be useful immediately inside this monorepo by targeting `/api/support/messages` and `/api/support/attachments`. Tests and future hosts can override those endpoints without changing the package contract.
 
+Decision: Apply transcript and input privacy DOM hooks by default.
+
+Rationale: Privacy should be a package guarantee, not host diligence. The widget should automatically render stable PostHog-compatible masking and no-capture hooks on transcript, input, and attachment surfaces while still allowing hosts to add provider configuration.
+
+Decision: Scaffold only a minimal `TelegramChatWidget` React export.
+
+Rationale: The public root export should exist for API stability, but the scaffold slice should not include real UI. This keeps the first slice focused on contracts and prevents a temporary component from becoming accidental product surface.
+
+Decision: Do not add empty AI Elements primitive placeholders in the scaffold.
+
+Rationale: Placeholder files make the package look more implemented than it is. The adapted primitives should land with real branded code and tests in the UI extraction slice.
+
+Decision: Put package API docs in the package README and provider/runtime setup in app docs.
+
+Rationale: Package consumers need usage docs next to the package. Telegram, Convex env, webhook, production verification, and operator workflow setup belong to the host app/runtime documentation so provider setup does not drift across package docs.
+
 ## Non-Decisions
 
 This packet does not decide when or whether to publish the package outside the monorepo after v1. It does not decide to replace the current anonymous HttpOnly support session with a browser-visible token in the first slice. It does not decide to extract Convex backend functions into the package. It does not change production Telegram setup ownership.
