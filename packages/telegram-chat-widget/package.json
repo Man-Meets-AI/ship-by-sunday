@@ -1,0 +1,33 @@
+{
+	"name": "@shipbysunday/telegram-chat-widget",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./fetch": "./src/adapters/fetch/index.ts",
+		"./convex": "./src/adapters/convex/index.ts",
+		"./testing": "./src/testing/index.ts",
+		"./styles.css": "./src/styles/telegram-chat-widget.css"
+	},
+	"scripts": {
+		"lint": "oxlint -c ../../.oxlintrc.json --deny-warnings src tests vitest.config.ts",
+		"format": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore .",
+		"format:check": "oxfmt -c ../../.oxfmtrc.json --ignore-path ../../.gitignore --check .",
+		"typecheck": "tsc --noEmit -p tsconfig.json",
+		"test": "vitest run --config vitest.config.ts"
+	},
+	"peerDependencies": {
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "25.5.0",
+		"@types/react": "19.2.14",
+		"@types/react-dom": "19.2.3",
+		"oxfmt": "^0.46.0",
+		"oxlint": "^1.56.0",
+		"typescript": "5.9.3",
+		"vitest": "^4.1.0"
+	}
+}

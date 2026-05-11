@@ -1,0 +1,25 @@
+.sbs-telegram-chat-widget {
+	--sbs-chat-background: var(--background, #fffaf3);
+	--sbs-chat-foreground: var(--foreground, #1b1712);
+	--sbs-chat-muted: var(--muted, #f4efe7);
+	--sbs-chat-muted-foreground: var(--muted-foreground, #71685f);
+	--sbs-chat-border: var(--border, #ded5c8);
+	--sbs-chat-primary: var(--primary, #14110f);
+	--sbs-chat-primary-foreground: var(--primary-foreground, #fffaf3);
+	--sbs-chat-danger: var(--destructive, #b42318);
+	--sbs-chat-radius: var(--radius, 8px);
+	--sbs-chat-shadow: 0 18px 48px rgb(27 23 18 / 18%);
+
+	color: var(--sbs-chat-foreground);
+	font: inherit;
+}
+
+.sbs-telegram-chat-widget[data-placement="bottom-right"] {
+	inset-block-end: 16px;
+	inset-inline-end: 16px;
+}
+
+.sbs-telegram-chat-widget[data-placement="bottom-left"] {
+	inset-block-end: 16px;
+	inset-inline-start: 16px;
+}

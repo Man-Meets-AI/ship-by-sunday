@@ -36,6 +36,8 @@ The current support system is implemented in the web app and Convex runtime. `ap
 
 Recent support work landed the custom Telegram bridge, authenticated workspace entry, screenshot and bug-report UX, a ChatGPT-like visual polish pass, removal of the redundant `Replies stay in this thread` copy, and Enter-to-send behavior. The latest focused UI polish is committed as `31742e66 feat: polish support widget chat UI`.
 
+As of 2026-05-11, `packages/telegram-chat-widget` exists as the first internal package scaffold. It owns the initial public contracts, screenshot policy, bug-report rendering, metadata-only analytics helpers, privacy constants, CSS token shell, a tested fetch adapter, a reserved non-live Convex subpath, and package README docs. `apps/web` does not consume the package yet, so the current app-local widget remains the customer-facing implementation.
+
 The existing implementation still polls through the app support route for visitor transcript updates. Convex already supports realtime subscriptions through React hooks, and `apps/web/platform/convex/convex-client-provider.tsx` already wraps the web app with `ConvexProviderWithClerk`. The package extraction should use this existing host capability rather than introduce a manual WebSocket or a package-specific server.
 
 This Program depends on the active Telegram Support Bot Program for the current backend behavior and provider setup truth. It should not re-litigate the customer-support bot architecture. Its job is to package and harden the widget boundary.
@@ -72,8 +74,8 @@ This Program depends on the active Telegram Support Bot Program for the current 
 - [x] 2026-05-11: Locked a minimal skeletal `TelegramChatWidget` export in the scaffold slice, with real UI deferred.
 - [x] 2026-05-11: Locked no AI Elements primitive placeholder files in the scaffold; real adapted primitives arrive in the UI extraction slice.
 - [x] 2026-05-11: Locked package README for package API docs and app docs for provider/runtime setup.
-- [x] 2026-05-11: Created child ExecPlan `docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md` from `planning-brief-1.md`.
-- [ ] Land the package contract and scaffold.
+- [x] 2026-05-11: Created child ExecPlan `docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md` from `planning-brief-1.md`.
+- [x] 2026-05-11: Landed the package contract and scaffold in `packages/telegram-chat-widget` with focused package tests and root package script wiring.
 - [ ] Migrate the Ship by Sunday support widget to consume the package without behavior regression.
 - [ ] Add the Convex realtime adapter and remove visitor-side polling where the host provides Convex.
 - [ ] Document standalone setup, auth/session tradeoffs, attachment limits, and verification.
@@ -224,13 +226,12 @@ Date: 2026-05-11
 
 Child ExecPlans should carry `program_id: standalone-telegram-chat-widget` and `planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-<N>.md` in their frontmatter.
 
-Active child ExecPlans:
+Completed child ExecPlans:
 
-- `docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md`: active first slice for `Package Contract And Scaffold`.
+- `docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md`: completed first slice for `Package Contract And Scaffold`.
 
 Planned slices:
 
-- Package Contract And Scaffold: define the public API, exports, styling contract, peer dependencies, test harness, and first empty package.
 - UI Extraction With Fetch Transport: move the current polished widget UI and hook orchestration into the package while preserving the existing Next route bridge.
 - Ship By Sunday Consumer Migration: replace app-local support widget internals with package imports while keeping homepage and workspace placement in `apps/web`.
 - Convex Realtime Adapter: add optional direct Convex subscriptions and mutations so host apps can stream updates without polling.
@@ -239,29 +240,11 @@ Planned slices:
 
 ## Next Slice
 
-The active child ExecPlan is `docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md`. Its remaining outcome is the package contract and scaffold: create `packages/telegram-chat-widget`, define the package contracts, add the configurable fetch adapter, reserve the Convex subpath, add package README docs, add focused tests, and wire the package into root package validation without moving the current `apps/web` widget UI.
+No child ExecPlan is active right now. The next recommended child ExecPlan is `UI Extraction With Fetch Transport`.
 
-That slice should establish the package directory, public exports, types, styling strategy, test config, and host integration contract without moving runtime behavior yet. It must keep the package free of Next.js dependencies, avoid Convex Component APIs, keep Convex under an optional adapter subpath export, and update workspace/package validation so later implementation slices can build on a stable package shell. It should also create or reserve package-local primitive modules for selected AI Elements-inspired Conversation, Prompt Input, and Attachments primitives so later UI extraction does not create host-local component imports. Package CSS should follow shadcn's CSS-variable token model and map widget-specific variables to host tokens with branded fallbacks. Do not add a widget-specific theme provider in v1. Transport should be modeled as one typed client adapter object, with fetch and Convex implementations behind subpath exports. Analytics should be modeled as a host-provided typed event sink and must stay metadata-only. The primary React export should be an all-in-one `TelegramChatWidget` that owns launcher, panel, open state, and default fixed placement. Placement should be a narrow enum with bottom-right as the default, not a free-form positioning config bag. Content should have Parker/Ship by Sunday-branded package defaults with partial host overrides, not a required exhaustive copy object. Actual upload support should be screenshot/image-only in v1, with one screenshot per message. Bug reporting should remain an inline composer mode and should produce structured metadata plus a rendered body.
+That slice should move the current polished launcher, panel, composer, message rendering, screenshot chip, bug-report mode, Enter-to-send behavior, open/close state, optimistic send behavior, loading and error states, and privacy hooks from `apps/web/app/_components/support/` into `packages/telegram-chat-widget`. It should use the package's existing typed client adapter and the `createFetchTelegramChatClient` subpath so `apps/web` can keep today's `/api/support/messages` and `/api/support/attachments` bridge, HttpOnly support-session cookie, and polling behavior while the UI moves. It should bring the selected AI Elements-inspired primitives into the package only when they are real, branded, and tested as part of the UI implementation. It should not add live Convex realtime, direct browser-visible conversation tokens, backend schema changes, provider setup changes, arbitrary file uploads, or a public package release.
 
-The first slice should not migrate the current widget UI out of `apps/web`. UI extraction starts only after this package contract exists and validates.
-
-The first slice should include focused package tests for contract helpers and types. Typecheck alone is not enough for the scaffold because the package's defaults, merge behavior, attachment policy, and bug-report payload rendering are real behavior that future slices will depend on.
-
-The first slice should add the new package to the root package validation scripts so `bun run lint:packages`, `bun run typecheck:packages`, and `bun run test:packages` include `packages/telegram-chat-widget` immediately.
-
-The first slice should keep dependencies narrow: peer `react` and `react-dom`, optional normal dependency on `lucide-react` if icon components are used, optional normal dependency on `clsx` only if class composition needs it, and no `tailwind-merge`, Next.js, Clerk, PostHog, or app-local dependencies.
-
-The first slice should reserve the `./convex` subpath only as a stable future boundary. It may export future-facing adapter types or a deliberate placeholder, but it must not implement live Convex `useQuery` or mutation behavior until the Convex Realtime Adapter child slice.
-
-The first slice should include `createFetchTelegramChatClient` or equivalent under the `./fetch` subpath. It should default to `/api/support/messages` and `/api/support/attachments`, while accepting message endpoint, attachment endpoint, and optional `fetchImpl` overrides for tests and future hosts. `apps/web` should not consume this adapter until the later UI extraction slice.
-
-The package DOM contract should include privacy hooks by default. The scaffold should define the classes or constants the UI extraction must use for transcript, input, and attachment surfaces so package-level tests can assert the privacy contract later.
-
-The first slice may export a minimal skeletal `TelegramChatWidget` from the root package for API stability. It should not copy the existing app panel, build the real launcher, adapt AI Elements primitives, or create empty primitive placeholder files. Real UI work belongs in the following UI extraction slice.
-
-The first slice should include a package README that documents only the package API and local package commands. It should not duplicate Telegram BotFather, Convex env, webhook, or production operator setup from app docs.
-
-The package should be internal monorepo-only in v1. The first slice should not add npm publishing workflows, public release automation, or external compatibility guarantees.
+The proof for that next slice should include package-local React/UI tests for the extracted state behavior, app integration tests proving homepage and workspace support widget behavior still works, and desktop plus mobile browser proof because it changes the customer-visible chat surface.
 
 ## Risks and Watchpoints
 
@@ -307,6 +290,10 @@ Research anchors:
 
 Current code anchors:
 
+- Package root: `packages/telegram-chat-widget`
+- Package fetch adapter: `packages/telegram-chat-widget/src/adapters/fetch/fetch-telegram-chat-client.ts`
+- Package public exports: `packages/telegram-chat-widget/src/index.ts`
+- Completed package scaffold ExecPlan: `docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md`
 - Widget UI: `apps/web/app/_components/support/support-widget-panel.tsx`
 - Widget orchestration: `apps/web/app/_components/support/use-support-chat.ts`
 - Support API client: `apps/web/app/_components/support/support-api-client.ts`

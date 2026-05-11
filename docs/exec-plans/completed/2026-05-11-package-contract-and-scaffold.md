@@ -1,10 +1,10 @@
 ---
 title: Package Contract And Scaffold
-status: active
+status: complete
 created_at: 2026-05-11
-completed_at: null
+completed_at: 2026-05-11
 summary: Create the internal telegram chat widget package shell, contracts, fetch adapter, package docs, and validation gates without moving app UI yet.
-post_build_recap: null
+post_build_recap: Added the internal telegram chat widget package scaffold with typed contracts, screenshot and bug-report helpers, metadata-only events, CSS token shell, reserved Convex subpath, tested fetch adapter, README, lockfile entry, and root package validation wiring.
 program_id: standalone-telegram-chat-widget
 planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-1.md
 read_when:
@@ -26,18 +26,18 @@ Ship by Sunday already has a polished Telegram-backed support widget in the web 
 ## Progress
 
 - [x] 2026-05-11: Created this child ExecPlan from `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-1.md`.
-- [ ] Create the package manifest, TypeScript config, Vitest config, README, and source/test directories.
-- [ ] Define core public types, content defaults, privacy hook constants, attachment policy, bug-report payload helpers, analytics event helpers, and client adapter interface.
-- [ ] Add a working configurable fetch adapter that defaults to the current support routes.
-- [ ] Add a reserved `./convex` subpath without live Convex realtime behavior.
-- [ ] Add a minimal skeletal `TelegramChatWidget` root export without real launcher or panel UI.
-- [ ] Add focused package contract tests.
-- [ ] Wire the package into root `lint:packages`, `typecheck:packages`, and `test:packages`.
-- [ ] Run validation, repair failures, update this plan and the owning Program, and commit the finished scaffold.
+- [x] 2026-05-11: Created the package manifest, TypeScript config, Vitest config, README, and source/test directories.
+- [x] 2026-05-11: Defined core public types, content defaults, privacy hook constants, attachment policy, bug-report payload helpers, analytics event helpers, and client adapter interface.
+- [x] 2026-05-11: Added a working configurable fetch adapter that defaults to the current support routes.
+- [x] 2026-05-11: Added a reserved `./convex` subpath without live Convex realtime behavior.
+- [x] 2026-05-11: Added a minimal skeletal `TelegramChatWidget` root export without real launcher or panel UI.
+- [x] 2026-05-11: Added focused package contract tests.
+- [x] 2026-05-11: Wired the package into root `lint:packages`, `typecheck:packages`, and `test:packages`.
+- [x] 2026-05-11: Ran validation, repaired package formatting, updated this plan and the owning Program, and prepared the finished scaffold for commit.
 
 ## Surprises & Discoveries
 
-None yet.
+`bun run test:packages` is blocked before reaching `packages/telegram-chat-widget` by unrelated dirty work in `packages/codebase-compiler/tests/generated-repo-command-contract.test.ts`. That local diff changes the clean-room generated repo proof from `bun install --lockfile-only --frozen-lockfile` to `bun ci`, and the generated repo lockfile then reports `error: lockfile had changes, but lockfile is frozen`. This slice still proves the new package directly with package-local tests, and the root `test:packages` script now includes `packages/telegram-chat-widget`.
 
 ## Decision Log
 
@@ -59,7 +59,7 @@ Date: 2026-05-11
 
 ## Outcomes & Retrospective
 
-This plan is active. The expected outcome is a working internal package scaffold that has no production UI impact yet but gives later slices a clear, tested package contract to build on.
+This plan is complete. `packages/telegram-chat-widget` now exists as internal package `@shipbysunday/telegram-chat-widget` with root, `./fetch`, `./convex`, `./testing`, and `./styles.css` exports. The package owns the first public contracts for threads, messages, placements, content overrides, screenshot validation, bug-report rendering, metadata-only events, privacy hooks, and the shared client adapter. The fetch adapter matches today's `/api/support/messages` and `/api/support/attachments` route shape and is tested with injected fetch functions. The current `apps/web` support widget is still the production UI, so this slice has no browser-visible behavior change. The remaining gap is the unrelated generated-repo command-contract failure described in `Surprises & Discoveries`.
 
 ## Context and Orientation
 
@@ -167,8 +167,8 @@ If these commands fail because of the new package, fix the package. If they fail
 
 Validate docs and plan state:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md docs/programs/active/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md docs/programs/active/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
     git diff --check
 
 Run `bun run programs:lint` if the unrelated Program tree is in a valid state. If it is blocked by unrelated dirty files, record that exact blocker and the targeted Program metadata result. The standalone widget Program should remain valid.
@@ -194,8 +194,8 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run lint:packages
     bun run typecheck:packages
     bun run test:packages
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md docs/programs/active/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md docs/programs/active/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
     git diff --check
 
 Run this command too when the unrelated Program tree is valid:
@@ -228,7 +228,29 @@ The current screenshot policy is:
     10 MB max
     one optional screenshot attachment per message
 
-Record final validation snippets here before completion.
+Final validation evidence:
+
+    bun run --cwd packages/telegram-chat-widget lint
+    Found 0 warnings and 0 errors.
+
+    bun run --cwd packages/telegram-chat-widget format:check
+    All matched files use the correct format.
+
+    bun run --cwd packages/telegram-chat-widget typecheck
+    tsc --noEmit -p tsconfig.json
+
+    bun run --cwd packages/telegram-chat-widget test
+    Test Files  3 passed (3)
+    Tests       14 passed (14)
+
+    bun run lint:packages
+    Found 0 warnings and 0 errors.
+
+    bun run typecheck:packages
+    tsc --noEmit -p tsconfig.json
+
+    bun run test:packages
+    Failed in packages/codebase-compiler before reaching packages/telegram-chat-widget because the unrelated dirty generated-repo command-contract test now runs bun ci and the generated repo lockfile would change under frozen lockfile rules.
 
 ## Interfaces and Dependencies
 
