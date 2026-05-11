@@ -2,6 +2,7 @@ import {
 	shouldPollTelegramChatThread,
 	telegramChatRealtimeSuppressesFetchRefresh,
 } from "../src/react/telegram-chat-widget";
+import { adaptConvexTelegramChatThreadState } from "../src/adapters/convex";
 import { createTelegramChatTestThreadState } from "../src/testing";
 import { describe, expect, it } from "vitest";
 
@@ -45,5 +46,19 @@ describe("telegram chat realtime state", () => {
 				realtime: undefined,
 			}),
 		).toBe(false);
+	});
+
+	it("resumes fetch fallback when Convex reports an expired realtime capability", () => {
+		const realtime = adaptConvexTelegramChatThreadState(
+			createTelegramChatTestThreadState({
+				status: "disabled",
+				supportId: null,
+				messages: [],
+				error: "Support realtime session expired. Refresh support.",
+			}),
+		);
+
+		expect(realtime).toEqual({ status: "unavailable" });
+		expect(telegramChatRealtimeSuppressesFetchRefresh(realtime)).toBe(false);
 	});
 });

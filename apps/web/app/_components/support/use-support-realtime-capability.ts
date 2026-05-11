@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { JsonObject, JsonValue } from "@/lib/json-value";
 
-type SupportRealtimeCapabilityState =
+export type SupportRealtimeCapabilityState =
 	| {
 			readonly status: "loading";
 			readonly capabilityToken: null;
@@ -20,16 +20,50 @@ type SupportRealtimeCapabilityState =
 	  };
 
 const supportSessionEndpoint = "/api/support/session";
+const supportRealtimeCapabilityRefreshLeewayMs = 5 * 60 * 1_000;
+const unavailableSupportRealtimeCapability = {
+	status: "unavailable",
+	capabilityToken: null,
+} satisfies SupportRealtimeCapabilityState;
 
-export function useSupportRealtimeCapability(): SupportRealtimeCapabilityState {
+export function useSupportRealtimeCapability(): {
+	readonly capabilityState: SupportRealtimeCapabilityState;
+	readonly requestCapability: () => void;
+} {
 	const [capabilityState, setCapabilityState] =
-		useState<SupportRealtimeCapabilityState>({
+		useState<SupportRealtimeCapabilityState>(
+			unavailableSupportRealtimeCapability,
+		);
+	const capabilityStateRef = useRef(capabilityState);
+	const currentRequestIdRef = useRef(0);
+
+	useEffect(() => {
+		capabilityStateRef.current = capabilityState;
+	}, [capabilityState]);
+
+	useEffect(
+		() => () => {
+			currentRequestIdRef.current += 1;
+		},
+		[],
+	);
+
+	const requestCapability = useCallback(() => {
+		const currentCapabilityState = capabilityStateRef.current;
+		if (
+			currentCapabilityState.status === "ready" &&
+			currentCapabilityState.expiresAt >
+				Date.now() + supportRealtimeCapabilityRefreshLeewayMs
+		) {
+			return;
+		}
+
+		const requestId = currentRequestIdRef.current + 1;
+		currentRequestIdRef.current = requestId;
+		setCapabilityState({
 			status: "loading",
 			capabilityToken: null,
 		});
-
-	useEffect(() => {
-		let isCurrentRequest = true;
 
 		async function loadCapability() {
 			try {
@@ -42,32 +76,25 @@ export function useSupportRealtimeCapability(): SupportRealtimeCapabilityState {
 				});
 				const body = (await response.json().catch(() => null)) as JsonValue;
 				const capability = readSupportRealtimeCapability(body);
-				if (!isCurrentRequest) {
+				if (currentRequestIdRef.current !== requestId) {
 					return;
 				}
 				setCapabilityState(
 					response.ok && capability
 						? capability
-						: { status: "unavailable", capabilityToken: null },
+						: unavailableSupportRealtimeCapability,
 				);
 			} catch {
-				if (isCurrentRequest) {
-					setCapabilityState({
-						status: "unavailable",
-						capabilityToken: null,
-					});
+				if (currentRequestIdRef.current === requestId) {
+					setCapabilityState(unavailableSupportRealtimeCapability);
 				}
 			}
 		}
 
 		void loadCapability();
-
-		return () => {
-			isCurrentRequest = false;
-		};
 	}, []);
 
-	return capabilityState;
+	return { capabilityState, requestCapability };
 }
 
 export function readSupportRealtimeCapability(

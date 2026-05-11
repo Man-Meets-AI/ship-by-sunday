@@ -4,6 +4,11 @@ import Stripe from "stripe";
 import { v } from "convex/values";
 
 import { apiConfig } from "../config/product";
+import { normalizeIncidentEvent } from "../lib/observability/incident";
+import {
+	buildStripeWebhookResultIncidentEvent,
+	getStripeModeLabelFromSecretKey,
+} from "../lib/observability/stripe-webhook-incident";
 import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
 import {
 	isPaidAppCheckoutMetadata,
@@ -16,6 +21,10 @@ import { internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
 import { requireConvexEnv } from "./env";
 import { productAccessGrantResultValidator } from "./access/validators";
+import {
+	getStripeWebhookFulfillmentRetryDelayMs,
+	STRIPE_WEBHOOK_FULFILLMENT_MAX_ATTEMPTS,
+} from "./stripeWebhookEvents";
 
 const supportedStripeEventTypes = new Set([
 	"checkout.session.async_payment_succeeded",
@@ -172,11 +181,88 @@ type StripeWebhookQueuedFulfillmentResult = Extract<
 			| "fulfillment_failed";
 	}
 >;
+type StripeWebhookRetryableFailureResult = Extract<
+	StripeWebhookQueuedFulfillmentResult,
+	{ kind: "grant_failed" | "fulfillment_failed" | "missing_checkout_email" }
+>;
 
 function getWebhookStripe() {
 	return new Stripe(requireConvexEnv("STRIPE_SECRET_KEY"), {
 		apiVersion: apiConfig.stripeApiVersion,
 	});
+}
+
+function isRetryableStripeWebhookFailure(
+	result: StripeWebhookQueuedFulfillmentResult,
+): result is StripeWebhookRetryableFailureResult {
+	return (
+		result.kind === "grant_failed" ||
+		result.kind === "fulfillment_failed" ||
+		result.kind === "missing_checkout_email"
+	);
+}
+
+async function recordFinalStripeWebhookFailureIncident(
+	ctx: Pick<ActionCtx, "runAction" | "runMutation">,
+	result: StripeWebhookRetryableFailureResult,
+) {
+	try {
+		const incident = normalizeIncidentEvent(
+			buildStripeWebhookResultIncidentEvent({
+				result,
+				stripeMode: getStripeModeLabelFromSecretKey(
+					requireConvexEnv("STRIPE_SECRET_KEY"),
+				),
+			}),
+		);
+		const writeResult = await ctx.runMutation(
+			internal.observability.recordIncident,
+			incident,
+		);
+		if (writeResult.shouldNotify) {
+			await ctx.runAction(internal.observability.deliverIncidentNotification, {
+				incidentId: writeResult.incidentId,
+			});
+		}
+	} catch (error) {
+		console.error(
+			"stripe webhook final failure incident recording failed",
+			error,
+		);
+	}
+}
+
+async function scheduleStripeWebhookFulfillmentRetry(
+	ctx: Pick<ActionCtx, "runAction" | "runMutation" | "scheduler">,
+	{
+		attemptCount,
+		eventType,
+		result,
+		sessionId,
+		stripeEventId,
+	}: {
+		stripeEventId: string;
+		eventType: string;
+		sessionId: string;
+		attemptCount: number;
+		result: StripeWebhookRetryableFailureResult;
+	},
+) {
+	if (attemptCount >= STRIPE_WEBHOOK_FULFILLMENT_MAX_ATTEMPTS) {
+		await recordFinalStripeWebhookFailureIncident(ctx, result);
+		return;
+	}
+
+	await ctx.scheduler.runAfter(
+		getStripeWebhookFulfillmentRetryDelayMs(attemptCount),
+		internal.stripeWebhookEvents.retryFailedStripeWebhookEventFulfillment,
+		{
+			stripeEventId,
+			eventType,
+			sessionId,
+			failedAttemptCount: attemptCount,
+		},
+	);
 }
 
 function getStripeCheckoutEmail(session: Stripe.Checkout.Session) {
@@ -228,34 +314,13 @@ async function recordStripeWebhookEventResult(
 	);
 }
 
-async function recordPurchaseIntentFulfillment(
-	ctx: Pick<ActionCtx, "runMutation">,
-	{
-		clerkUserId,
-		session,
-	}: {
-		clerkUserId: string;
-		session: Stripe.Checkout.Session;
-	},
-) {
+function getCheckoutPurchaseIntentId(session: Stripe.Checkout.Session) {
 	const checkoutMetadata = readCheckoutPurchaseMetadata(session.metadata);
 	if (!checkoutMetadata) {
-		return;
+		return undefined;
 	}
 
-	try {
-		await ctx.runMutation(
-			internal.checkoutClaims.recordCheckoutPurchaseIntentFulfillment,
-			{
-				purchaseIntentId:
-					checkoutMetadata.purchaseIntentId as Id<"checkoutPurchaseIntents">,
-				stripeCheckoutSessionId: session.id,
-				clerkUserId,
-			},
-		);
-	} catch (error) {
-		console.warn("unable to mark checkout purchase intent fulfilled", error);
-	}
+	return checkoutMetadata.purchaseIntentId as Id<"checkoutPurchaseIntents">;
 }
 
 async function fulfillStripeCheckoutSessionEvent({
@@ -310,10 +375,6 @@ async function fulfillStripeCheckoutSessionEvent({
 		);
 
 		if (fulfillmentResult.kind === "fulfilled") {
-			await recordPurchaseIntentFulfillment(ctx, {
-				clerkUserId: fulfillmentResult.clerkUserId,
-				session,
-			});
 			await recordStripeWebhookEventResult(ctx, {
 				...ledgerArgs,
 				status: "processed",
@@ -368,9 +429,10 @@ async function fulfillStripeCheckoutSessionEvent({
 	let grantResult: StripeWebhookGrantResult;
 	try {
 		grantResult = (await ctx.runMutation(
-			internal.access.grantProductAccessFromStripe,
+			internal.checkoutClaims.grantProductAccessForCheckoutSession,
 			{
 				clerkUserId,
+				source: "stripe_webhook",
 				stripeCustomerId:
 					typeof session.customer === "string" ? session.customer : undefined,
 				stripeCheckoutSessionId: session.id,
@@ -378,6 +440,7 @@ async function fulfillStripeCheckoutSessionEvent({
 					typeof session.payment_intent === "string"
 						? session.payment_intent
 						: undefined,
+				checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
 				...readCheckoutIntentFromMetadata(session.metadata),
 			},
 		)) as StripeWebhookGrantResult;
@@ -415,10 +478,6 @@ async function fulfillStripeCheckoutSessionEvent({
 		status: "processed",
 		attemptCount: ledgerAttemptCount,
 		resultKind: "granted",
-	});
-	await recordPurchaseIntentFulfillment(ctx, {
-		clerkUserId,
-		session,
 	});
 
 	return {
@@ -547,6 +606,16 @@ export const fulfillQueuedStripeWebhookEvent = internalAction({
 		stripeWebhookFulfillmentFailedResultValidator,
 	),
 	handler: async (ctx, args): Promise<StripeWebhookQueuedFulfillmentResult> => {
+		await ctx.runMutation(
+			internal.stripeWebhookEvents.markStripeWebhookEventFulfillmentProcessing,
+			{
+				stripeEventId: args.stripeEventId,
+				eventType: args.eventType,
+				stripeObjectId: args.sessionId,
+				attemptCount: args.attemptCount,
+			},
+		);
+
 		let session: Stripe.Checkout.Session;
 		try {
 			session = await getWebhookStripe().checkout.sessions.retrieve(
@@ -568,7 +637,7 @@ export const fulfillQueuedStripeWebhookEvent = internalAction({
 				errorMessage: message,
 			});
 
-			return {
+			const result = {
 				kind: "fulfillment_failed" as const,
 				eventId: args.stripeEventId,
 				eventType: args.eventType,
@@ -576,6 +645,14 @@ export const fulfillQueuedStripeWebhookEvent = internalAction({
 				checkoutEmail: null,
 				message,
 			};
+			await scheduleStripeWebhookFulfillmentRetry(ctx, {
+				stripeEventId: args.stripeEventId,
+				eventType: args.eventType,
+				sessionId: args.sessionId,
+				attemptCount: args.attemptCount,
+				result,
+			});
+			return result;
 		}
 
 		const ledgerArgs = stripeWebhookEventLedgerArgs({
@@ -604,13 +681,23 @@ export const fulfillQueuedStripeWebhookEvent = internalAction({
 		}
 
 		try {
-			return await fulfillStripeCheckoutSessionEvent({
+			const result = await fulfillStripeCheckoutSessionEvent({
 				ctx,
 				eventId: args.stripeEventId,
 				eventType: args.eventType,
 				ledgerAttemptCount: args.attemptCount,
 				session,
 			});
+			if (isRetryableStripeWebhookFailure(result)) {
+				await scheduleStripeWebhookFulfillmentRetry(ctx, {
+					stripeEventId: args.stripeEventId,
+					eventType: args.eventType,
+					sessionId: session.id,
+					attemptCount: args.attemptCount,
+					result,
+				});
+			}
+			return result;
 		} catch (error) {
 			const message =
 				error instanceof Error
@@ -624,7 +711,7 @@ export const fulfillQueuedStripeWebhookEvent = internalAction({
 				errorMessage: message,
 			});
 
-			return {
+			const result = {
 				kind: "fulfillment_failed" as const,
 				eventId: args.stripeEventId,
 				eventType: args.eventType,
@@ -632,6 +719,14 @@ export const fulfillQueuedStripeWebhookEvent = internalAction({
 				checkoutEmail: getStripeCheckoutEmail(session),
 				message,
 			};
+			await scheduleStripeWebhookFulfillmentRetry(ctx, {
+				stripeEventId: args.stripeEventId,
+				eventType: args.eventType,
+				sessionId: session.id,
+				attemptCount: args.attemptCount,
+				result,
+			});
+			return result;
 		}
 	},
 });

@@ -120,6 +120,24 @@ describe("support message route", () => {
 		expect(response.headers.get("set-cookie")).toContain("HttpOnly");
 	});
 
+	it("returns realtime unavailable when the support session has no thread", async () => {
+		fetchMutationMock.mockResolvedValueOnce(null);
+		const { GET } = await import("@/app/api/support/session/route");
+
+		const response = await GET(
+			new Request("https://example.test/api/support/session"),
+		);
+
+		await expect(response.json()).resolves.toEqual({
+			ok: true,
+			realtime: {
+				kind: "unavailable",
+			},
+		});
+		expect(response.status).toBe(200);
+		expect(response.headers.get("set-cookie")).toContain("HttpOnly");
+	});
+
 	it("sends messages with the existing cookie token and no browser-held bearer", async () => {
 		const { POST } = await import("@/app/api/support/messages/route");
 		const existingToken = "b".repeat(64);

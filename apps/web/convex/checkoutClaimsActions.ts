@@ -8,8 +8,10 @@ import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/che
 import {
 	isPaidAppCheckoutMetadata,
 	readCheckoutMetadataClerkUserId,
+	readCheckoutPurchaseMetadata,
 } from "../platform/billing/checkout/checkout-metadata";
 import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
 import { action, internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
 import { productAccessGrantResultValidator } from "./access/validators";
@@ -537,6 +539,12 @@ function getSessionLegacyFulfillmentFields(session: Stripe.Checkout.Session) {
 		: { fulfillmentTrack: checkoutIntent.fulfillmentTrack };
 }
 
+function getCheckoutPurchaseIntentId(session: Stripe.Checkout.Session) {
+	return readCheckoutPurchaseMetadata(session.metadata)?.purchaseIntentId as
+		| Id<"checkoutPurchaseIntents">
+		| undefined;
+}
+
 async function fulfillPaidCheckoutSessionByEmail({
 	ctx,
 	session,
@@ -585,6 +593,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 			paymentStatus: session.payment_status,
 			stripeCustomerId,
 			stripePaymentIntentId,
+			checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
 			...checkoutFulfillment,
 			stripeEventId,
 			stripeEventType,
@@ -873,18 +882,24 @@ export const claimCheckoutSessionForViewer = action({
 			}
 
 			const grantResult: { granted: "inserted" | "patched" } =
-				await ctx.runMutation(internal.access.grantProductAccess, {
-					clerkUserId: identity.subject,
-					source: "stripe_checkout",
-					stripeCustomerId:
-						typeof session.customer === "string" ? session.customer : undefined,
-					stripeCheckoutSessionId: session.id,
-					stripePaymentIntentId:
-						typeof session.payment_intent === "string"
-							? session.payment_intent
-							: undefined,
-					...getSessionLegacyFulfillmentFields(session),
-				});
+				await ctx.runMutation(
+					internal.checkoutClaims.grantProductAccessForCheckoutSession,
+					{
+						clerkUserId: identity.subject,
+						source: "stripe_checkout",
+						stripeCustomerId:
+							typeof session.customer === "string"
+								? session.customer
+								: undefined,
+						stripeCheckoutSessionId: session.id,
+						stripePaymentIntentId:
+							typeof session.payment_intent === "string"
+								? session.payment_intent
+								: undefined,
+						checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
+						...getSessionLegacyFulfillmentFields(session),
+					},
+				);
 
 			return {
 				kind: "validated" as const,
@@ -914,6 +929,7 @@ export const claimCheckoutSessionForViewer = action({
 					typeof session.payment_intent === "string"
 						? session.payment_intent
 						: undefined,
+				checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
 				...getSessionLegacyFulfillmentFields(session),
 				stripeEventId: `claim:${session.id}`,
 				stripeEventType: "checkout.success.claim",

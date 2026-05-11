@@ -37,6 +37,19 @@ export function useConvexTelegramChatRealtime({
 		return { status: "loading" };
 	}
 
+	return adaptConvexTelegramChatThreadState(threadState);
+}
+
+export function adaptConvexTelegramChatThreadState(
+	threadState: TelegramChatThreadState,
+): TelegramChatRealtimeState {
+	if (
+		threadState.status === "disabled" &&
+		threadState.error?.toLowerCase().includes("realtime session expired")
+	) {
+		return { status: "unavailable" };
+	}
+
 	return {
 		status: "ready",
 		threadState,

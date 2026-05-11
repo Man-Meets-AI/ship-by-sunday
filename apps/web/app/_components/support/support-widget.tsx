@@ -36,7 +36,8 @@ export function SupportWidget({
 	readonly launcherMotion: SupportWidgetLauncherMotion;
 }) {
 	const supportChatClient = useMemo(() => createFetchTelegramChatClient(), []);
-	const realtimeCapability = useSupportRealtimeCapability();
+	const { capabilityState: realtimeCapability, requestCapability } =
+		useSupportRealtimeCapability();
 	const convexRealtimeState = useConvexTelegramChatRealtime({
 		capabilityToken: realtimeCapability.capabilityToken,
 		enabled: realtimeCapability.status === "ready",
@@ -46,12 +47,22 @@ export function SupportWidget({
 		realtimeCapability.status === "loading"
 			? { status: "loading" }
 			: convexRealtimeState;
-	const recordSupportEvent = useCallback((event: TelegramChatEvent) => {
-		capturePostHogProductEvent({
-			event: event.name,
-			properties: event.properties,
-		});
-	}, []);
+	const recordSupportEvent = useCallback(
+		(event: TelegramChatEvent) => {
+			if (
+				event.name === "support_widget_opened" ||
+				event.name === "support_widget_message_sent"
+			) {
+				requestCapability();
+			}
+
+			capturePostHogProductEvent({
+				event: event.name,
+				properties: event.properties,
+			});
+		},
+		[requestCapability],
+	);
 
 	return (
 		<TelegramChatWidget

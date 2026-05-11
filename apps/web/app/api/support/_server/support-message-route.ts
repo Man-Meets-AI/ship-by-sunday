@@ -285,6 +285,10 @@ async function issueSupportConversationCapability(
 				sessionToken: supportSessionCookie.sessionToken,
 			},
 		);
+		if (!capability) {
+			return { kind: "unavailable" };
+		}
+
 		return {
 			kind: "convex",
 			capabilityToken: capability.capabilityToken,

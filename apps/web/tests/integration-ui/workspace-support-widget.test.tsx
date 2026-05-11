@@ -57,7 +57,7 @@ describe("WorkspaceSupportWidget", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		capturePostHogProductEventMock.mockReset();
-		window.history.pushState({}, "", "/workspace/setup");
+		window.history.pushState({}, "", "/workers/setup");
 	});
 
 	it("opens workspace support without exposing transcript DOM and sends workspace-scoped metadata", async () => {
@@ -91,11 +91,12 @@ describe("WorkspaceSupportWidget", () => {
 		const user = userEvent.setup();
 		render(<WorkspaceSupportWidget fallbackHref="https://t.me/parkerrex" />);
 
+		expect(fetchMock).not.toHaveBeenCalled();
 		await user.click(screen.getByRole("button", { name: "Ask Parker" }));
 
 		expect(
 			await screen.findByText(
-				"Send a note from this workspace. Parker replies from Telegram and the thread stays here.",
+				"Send a note from the app. Parker replies from Telegram and the thread stays here.",
 			),
 		).toBeTruthy();
 		expect(screen.getByRole("log").getAttribute("data-ph-no-capture")).toBe(
@@ -107,9 +108,7 @@ describe("WorkspaceSupportWidget", () => {
 		expect(screen.getByRole("log").classList.contains("ph-sensitive")).toBe(
 			true,
 		);
-		const textarea = screen.getByPlaceholderText(
-			"Type a workspace question...",
-		);
+		const textarea = screen.getByPlaceholderText("Type an app question...");
 		expect(textarea.getAttribute("data-ph-mask")).toBe("true");
 		expect(textarea.classList.contains("ph-mask")).toBe(true);
 		expect(textarea.classList.contains("ph-sensitive")).toBe(true);
@@ -152,7 +151,7 @@ describe("WorkspaceSupportWidget", () => {
 			},
 			body: JSON.stringify({
 				messageText: "Can you review my workspace setup?",
-				pagePath: "/workspace/setup",
+				pagePath: "/workers/setup",
 				entrySurface: "workspace_support_widget",
 				attachment: null,
 			}),
@@ -162,7 +161,7 @@ describe("WorkspaceSupportWidget", () => {
 			properties: expect.objectContaining({
 				surface: "workspace",
 				entrySurface: "workspace_support_widget",
-				pagePath: "/workspace/setup",
+				pagePath: "/workers/setup",
 				threadStatus: "open",
 				messageCount: 3,
 				latestDeliveryStatus: "delivered_to_parker",

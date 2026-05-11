@@ -503,11 +503,12 @@ describe("convex/stripeWebhook", () => {
 		const runMutation = createWebhookRunMutationMock({
 			grantError: new Error("convex unavailable"),
 		});
+		const runAfter = vi.fn();
 		const { fulfillQueuedStripeWebhookEvent } =
 			await import("@/convex/stripeWebhook");
 
 		const result = await fulfillQueuedStripeWebhookEvent._handler(
-			{ runMutation } as never,
+			{ runMutation, scheduler: { runAfter } } as never,
 			{
 				stripeEventId: "evt_failure",
 				eventType: "checkout.session.completed",
@@ -533,6 +534,16 @@ describe("convex/stripeWebhook", () => {
 				status: "failed",
 				resultKind: "grant_failed",
 				errorMessage: "convex unavailable",
+			}),
+		);
+		expect(runAfter).toHaveBeenCalledWith(
+			30_000,
+			expect.anything(),
+			expect.objectContaining({
+				stripeEventId: "evt_failure",
+				eventType: "checkout.session.completed",
+				sessionId: "cs_test_123",
+				failedAttemptCount: 1,
 			}),
 		);
 	});

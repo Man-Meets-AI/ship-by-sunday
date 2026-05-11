@@ -93,95 +93,91 @@ function runCleanRoomCommand(repoRoot: string, args: readonly string[]) {
 }
 
 describe("generated repo command contract", () => {
-	it(
-		"materializes a clean generated repo and runs the no-provider command contract",
-		async () => {
-			const tempRoot = await mkdtemp(
-				path.join(tmpdir(), "sbs-generated-command-contract-"),
+	it("materializes a clean generated repo and runs the no-provider command contract", async () => {
+		const tempRoot = await mkdtemp(
+			path.join(tmpdir(), "sbs-generated-command-contract-"),
+		);
+		const generatedRepoRoot = path.join(tempRoot, "ship-by-sunday-os");
+
+		try {
+			await writeGeneratedRepoSnapshot(generatedRepoRoot);
+
+			runCleanRoomCommand(generatedRepoRoot, ["ci"]);
+			runCleanRoomCommand(generatedRepoRoot, ["run", "programs:lint"]);
+			runCleanRoomCommand(generatedRepoRoot, ["run", "plans:lint"]);
+			runCleanRoomCommand(generatedRepoRoot, ["run", "codebase:contract"]);
+			runCleanRoomCommand(generatedRepoRoot, ["run", "agentic:check"]);
+
+			const testedRunCommands = new Set([
+				"bun ci",
+				"bun run programs:lint",
+				"bun run plans:lint",
+				"bun run codebase:contract",
+				"bun run agentic:check",
+			]);
+			const packageJson = JSON.parse(
+				await readFile(path.join(generatedRepoRoot, "package.json"), "utf8"),
+			) as {
+				scripts?: Record<string, string>;
+			};
+			const readiness = await readFile(
+				path.join(generatedRepoRoot, "docs/build/docs/readiness.md"),
+				"utf8",
 			);
-			const generatedRepoRoot = path.join(tempRoot, "ship-by-sunday-os");
+			const validationRows = parseMarkdownTable(
+				readiness,
+				"Source validation step",
+			);
+			const basicCiWorkflow = await readFile(
+				path.join(
+					generatedRepoRoot,
+					".github/workflows/examples/basic-ci.example.yml",
+				),
+				"utf8",
+			);
+			const runnableRows = validationRows.filter(
+				(row) => row.Type === "runnable",
+			);
+			const workflowRunCommands = extractWorkflowRunCommands(basicCiWorkflow);
 
-			try {
-				await writeGeneratedRepoSnapshot(generatedRepoRoot);
+			expect(runnableRows).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						"Source validation step": "Run Codebase contract check",
+						"Package script": "`codebase:contract`",
+						"Proof path": "`bun run codebase:contract`",
+					}),
+					expect.objectContaining({
+						"Source validation step": "Run generated operating pack check",
+						"Package script": "`agentic:check`",
+						"Proof path": "`bun run agentic:check`",
+					}),
+				]),
+			);
+			expect(workflowRunCommands).toEqual([
+				"bun ci",
+				"bun run codebase:contract",
+				"bun run agentic:check",
+			]);
 
-				runCleanRoomCommand(generatedRepoRoot, ["ci"]);
-				runCleanRoomCommand(generatedRepoRoot, ["run", "programs:lint"]);
-				runCleanRoomCommand(generatedRepoRoot, ["run", "plans:lint"]);
-				runCleanRoomCommand(generatedRepoRoot, ["run", "codebase:contract"]);
-				runCleanRoomCommand(generatedRepoRoot, ["run", "agentic:check"]);
+			for (const row of runnableRows) {
+				const scriptName = stripInlineCode(row["Package script"] ?? "");
+				const proofPath = stripInlineCode(row["Proof path"] ?? "");
 
-				const testedRunCommands = new Set([
-					"bun ci",
-					"bun run programs:lint",
-					"bun run plans:lint",
-					"bun run codebase:contract",
-					"bun run agentic:check",
-				]);
-				const packageJson = JSON.parse(
-					await readFile(path.join(generatedRepoRoot, "package.json"), "utf8"),
-				) as {
-					scripts?: Record<string, string>;
-				};
-				const readiness = await readFile(
-					path.join(generatedRepoRoot, "docs/build/docs/readiness.md"),
-					"utf8",
-				);
-				const validationRows = parseMarkdownTable(
-					readiness,
-					"Source validation step",
-				);
-				const basicCiWorkflow = await readFile(
-					path.join(
-						generatedRepoRoot,
-						".github/workflows/examples/basic-ci.example.yml",
-					),
-					"utf8",
-				);
-				const runnableRows = validationRows.filter(
-					(row) => row.Type === "runnable",
-				);
-				const workflowRunCommands = extractWorkflowRunCommands(basicCiWorkflow);
-
-				expect(runnableRows).toEqual(
-					expect.arrayContaining([
-						expect.objectContaining({
-							"Source validation step": "Run Codebase contract check",
-							"Package script": "`codebase:contract`",
-							"Proof path": "`bun run codebase:contract`",
-						}),
-						expect.objectContaining({
-							"Source validation step": "Run generated operating pack check",
-							"Package script": "`agentic:check`",
-							"Proof path": "`bun run agentic:check`",
-						}),
-					]),
-				);
-				expect(workflowRunCommands).toEqual([
-					"bun ci",
-					"bun run codebase:contract",
-					"bun run agentic:check",
-				]);
-
-				for (const row of runnableRows) {
-					const scriptName = stripInlineCode(row["Package script"] ?? "");
-					const proofPath = stripInlineCode(row["Proof path"] ?? "");
-
-					expect(packageJson.scripts?.[scriptName]).toBeDefined();
-					expect(testedRunCommands.has(proofPath)).toBe(true);
-				}
-
-				for (const command of workflowRunCommands) {
-					if (!command.startsWith("bun run ")) {
-						expect(command).toBe("bun ci");
-						continue;
-					}
-
-					expect(testedRunCommands.has(command)).toBe(true);
-				}
-			} finally {
-				await rm(tempRoot, { force: true, recursive: true });
+				expect(packageJson.scripts?.[scriptName]).toBeDefined();
+				expect(testedRunCommands.has(proofPath)).toBe(true);
 			}
-		},
-		60_000,
-	);
+
+			for (const command of workflowRunCommands) {
+				if (!command.startsWith("bun run ")) {
+					expect(command).toBe("bun ci");
+					continue;
+				}
+
+				expect(testedRunCommands.has(command)).toBe(true);
+			}
+		} finally {
+			await rm(tempRoot, { force: true, recursive: true });
+		}
+	}, 60_000);
 });

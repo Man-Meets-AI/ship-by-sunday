@@ -14,10 +14,10 @@ const getStripePublishableKeyMock = vi.fn();
 const getStripeModeLabelMock = vi.fn();
 const getStripeDashboardUrlMock = vi.fn();
 const getStripeProductDashboardUrlMock = vi.fn();
-const fetchMutationMock = vi.fn();
+const fetchActionMock = vi.fn();
 
 vi.mock("convex/nextjs", () => ({
-	fetchMutation: fetchMutationMock,
+	fetchAction: fetchActionMock,
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({
@@ -89,8 +89,8 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeModeLabelMock.mockReset();
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
-		fetchMutationMock.mockReset();
-		fetchMutationMock.mockImplementation(
+		fetchActionMock.mockReset();
+		fetchActionMock.mockImplementation(
 			async (_ref: unknown, args: Record<string, unknown>) => {
 				if ("checkoutSurface" in args) {
 					return { purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId };
@@ -103,6 +103,8 @@ describe("POST /api/stripe/checkout", () => {
 				);
 			},
 		);
+		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET =
+			"checkout_server_secret_123456789012345";
 		getStripeModeLabelMock.mockReturnValue("test");
 		getStripeDashboardUrlMock.mockImplementation((path?: string) =>
 			path

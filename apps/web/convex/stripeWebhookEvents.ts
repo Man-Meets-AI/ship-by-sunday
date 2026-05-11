@@ -20,8 +20,15 @@ const completedStripeWebhookEventStatuses = new Set([
 ]);
 const duplicateBlockingStripeWebhookEventStatuses = new Set([
 	...completedStripeWebhookEventStatuses,
+	"processing",
 	"queued",
 ]);
+export const STRIPE_WEBHOOK_FULFILLMENT_MAX_ATTEMPTS = 3;
+export const STRIPE_WEBHOOK_FULFILLMENT_STALE_MS = 5 * 60 * 1000;
+
+export function getStripeWebhookFulfillmentRetryDelayMs(attemptCount: number) {
+	return attemptCount <= 1 ? 30 * 1000 : 5 * 60 * 1000;
+}
 
 function isCompletedStripeWebhookEventStatus(status: string) {
 	return completedStripeWebhookEventStatuses.has(status);
@@ -125,6 +132,42 @@ function assertStripeWebhookEventMatchesExisting(
 	) {
 		throw new ConvexError("Stripe event id already belongs to another object");
 	}
+}
+
+async function scheduleStripeWebhookFulfillmentAttempt(
+	ctx: Pick<MutationCtx, "scheduler">,
+	{
+		stripeEventId,
+		eventType,
+		sessionId,
+		attemptCount,
+	}: {
+		stripeEventId: string;
+		eventType: string;
+		sessionId: string;
+		attemptCount: number;
+	},
+) {
+	await ctx.scheduler.runAfter(
+		0,
+		internal.stripeWebhook.fulfillQueuedStripeWebhookEvent,
+		{
+			stripeEventId,
+			eventType,
+			sessionId,
+			attemptCount,
+		},
+	);
+	await ctx.scheduler.runAfter(
+		STRIPE_WEBHOOK_FULFILLMENT_STALE_MS,
+		internal.stripeWebhookEvents.retryStaleStripeWebhookEventFulfillment,
+		{
+			stripeEventId,
+			eventType,
+			sessionId,
+			attemptCount,
+		},
+	);
 }
 
 export const beginStripeWebhookEventProcessing = internalMutation({
@@ -256,18 +299,187 @@ export const queueStripeWebhookEventFulfillment = internalMutation({
 			});
 		}
 
-		await ctx.scheduler.runAfter(
-			0,
-			internal.stripeWebhook.fulfillQueuedStripeWebhookEvent,
-			{
-				stripeEventId: args.stripeEventId,
-				eventType: args.eventType,
-				sessionId: args.stripeObjectId,
-				attemptCount: args.attemptCount,
-			},
-		);
+		await scheduleStripeWebhookFulfillmentAttempt(ctx, {
+			stripeEventId: args.stripeEventId,
+			eventType: args.eventType,
+			sessionId: args.stripeObjectId,
+			attemptCount: args.attemptCount,
+		});
 
 		return { queued: "scheduled" as const };
+	},
+});
+
+export const markStripeWebhookEventFulfillmentProcessing = internalMutation({
+	args: {
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		stripeObjectId: v.string(),
+		attemptCount: v.number(),
+	},
+	returns: v.object({
+		marked: v.union(
+			v.literal("processing"),
+			v.literal("missing_event"),
+			v.literal("skipped_stale"),
+		),
+	}),
+	handler: async (ctx, args) => {
+		const existingEvent = await getStripeWebhookEventByStripeEventId(
+			ctx,
+			args.stripeEventId,
+		);
+		if (!existingEvent) {
+			return { marked: "missing_event" as const };
+		}
+
+		assertStripeWebhookEventMatchesExisting(existingEvent, args);
+		if (
+			isCompletedStripeWebhookEventStatus(existingEvent.status) ||
+			existingEvent.status === "failed" ||
+			existingEvent.attemptCount !== args.attemptCount
+		) {
+			return { marked: "skipped_stale" as const };
+		}
+
+		await ctx.db.patch(existingEvent._id, {
+			status: "processing",
+			resultKind: "processing",
+			errorMessage: undefined,
+			updatedAt: Date.now(),
+			completedAt: undefined,
+		});
+
+		return { marked: "processing" as const };
+	},
+});
+
+export const retryFailedStripeWebhookEventFulfillment = internalMutation({
+	args: {
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		sessionId: v.string(),
+		failedAttemptCount: v.number(),
+	},
+	returns: v.object({
+		retried: v.union(
+			v.literal("scheduled"),
+			v.literal("skipped_stale"),
+			v.literal("max_attempts_reached"),
+		),
+	}),
+	handler: async (ctx, args) => {
+		const existingEvent = await getStripeWebhookEventByStripeEventId(
+			ctx,
+			args.stripeEventId,
+		);
+		if (!existingEvent) {
+			return { retried: "skipped_stale" as const };
+		}
+
+		assertStripeWebhookEventMatchesExisting(existingEvent, {
+			eventType: args.eventType,
+			stripeObjectId: args.sessionId,
+		});
+		if (
+			existingEvent.status !== "failed" ||
+			existingEvent.attemptCount !== args.failedAttemptCount
+		) {
+			return { retried: "skipped_stale" as const };
+		}
+		if (existingEvent.attemptCount >= STRIPE_WEBHOOK_FULFILLMENT_MAX_ATTEMPTS) {
+			return { retried: "max_attempts_reached" as const };
+		}
+
+		const nextAttemptCount = existingEvent.attemptCount + 1;
+		await ctx.db.patch(existingEvent._id, {
+			status: "queued",
+			resultKind: "queued",
+			errorMessage: undefined,
+			attemptCount: nextAttemptCount,
+			updatedAt: Date.now(),
+			completedAt: undefined,
+		});
+		await scheduleStripeWebhookFulfillmentAttempt(ctx, {
+			stripeEventId: args.stripeEventId,
+			eventType: args.eventType,
+			sessionId: args.sessionId,
+			attemptCount: nextAttemptCount,
+		});
+
+		return { retried: "scheduled" as const };
+	},
+});
+
+export const retryStaleStripeWebhookEventFulfillment = internalMutation({
+	args: {
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		sessionId: v.string(),
+		attemptCount: v.number(),
+	},
+	returns: v.object({
+		retried: v.union(
+			v.literal("scheduled"),
+			v.literal("skipped_stale"),
+			v.literal("skipped_recent"),
+			v.literal("max_attempts_reached"),
+		),
+	}),
+	handler: async (ctx, args) => {
+		const existingEvent = await getStripeWebhookEventByStripeEventId(
+			ctx,
+			args.stripeEventId,
+		);
+		if (!existingEvent) {
+			return { retried: "skipped_stale" as const };
+		}
+
+		assertStripeWebhookEventMatchesExisting(existingEvent, {
+			eventType: args.eventType,
+			stripeObjectId: args.sessionId,
+		});
+		if (
+			(existingEvent.status !== "queued" &&
+				existingEvent.status !== "processing") ||
+			existingEvent.attemptCount !== args.attemptCount
+		) {
+			return { retried: "skipped_stale" as const };
+		}
+		if (
+			Date.now() - existingEvent.updatedAt <
+			STRIPE_WEBHOOK_FULFILLMENT_STALE_MS
+		) {
+			return { retried: "skipped_recent" as const };
+		}
+		if (existingEvent.attemptCount >= STRIPE_WEBHOOK_FULFILLMENT_MAX_ATTEMPTS) {
+			await ctx.db.patch(existingEvent._id, {
+				status: "failed",
+				resultKind: "fulfillment_stale",
+				errorMessage: "Queued Stripe webhook fulfillment did not complete.",
+				updatedAt: Date.now(),
+				completedAt: Date.now(),
+			});
+			return { retried: "max_attempts_reached" as const };
+		}
+
+		const nextAttemptCount = existingEvent.attemptCount + 1;
+		await ctx.db.patch(existingEvent._id, {
+			status: "queued",
+			resultKind: "queued",
+			errorMessage: undefined,
+			attemptCount: nextAttemptCount,
+			updatedAt: Date.now(),
+			completedAt: undefined,
+		});
+		await scheduleStripeWebhookFulfillmentAttempt(ctx, {
+			stripeEventId: args.stripeEventId,
+			eventType: args.eventType,
+			sessionId: args.sessionId,
+			attemptCount: nextAttemptCount,
+		});
+
+		return { retried: "scheduled" as const };
 	},
 });
 

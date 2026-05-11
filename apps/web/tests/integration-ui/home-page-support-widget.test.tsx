@@ -131,6 +131,7 @@ describe("HomePageSupportWidget", () => {
 		const user = userEvent.setup();
 		render(<HomePageSupportWidget supportWidget={supportWidget} />);
 
+		expect(fetchMock).not.toHaveBeenCalled();
 		await user.click(screen.getByRole("button", { name: "Message Parker" }));
 
 		expect(

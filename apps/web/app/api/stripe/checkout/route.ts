@@ -1,5 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { fetchMutation } from "convex/nextjs";
+import { fetchAction } from "convex/nextjs";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { api } from "@/convex/_generated/api";
@@ -18,6 +18,7 @@ import {
 } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
+import { requireServerEnv } from "@/platform/env/server";
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
@@ -47,9 +48,13 @@ export async function POST(request: Request) {
 		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;
 		const checkoutEmail = user?.primaryEmailAddress?.emailAddress ?? null;
-		const purchaseIntent = await fetchMutation(
+		const checkoutServerToken = requireServerEnv(
+			"CHECKOUT_FULFILLMENT_RETRY_SECRET",
+		);
+		const purchaseIntent = await fetchAction(
 			api.checkoutClaims.createCheckoutPurchaseIntent,
 			{
+				checkoutServerToken,
 				checkoutSurface: "hosted_checkout",
 				...(userId ? { clerkUserId: userId } : {}),
 				...(checkoutEmail ? { checkoutEmail } : {}),
@@ -84,9 +89,10 @@ export async function POST(request: Request) {
 				requestId,
 			);
 		}
-		await fetchMutation(
+		await fetchAction(
 			api.checkoutClaims.attachStripeCheckoutSessionToPurchaseIntent,
 			{
+				checkoutServerToken,
 				purchaseIntentId: purchaseIntent.purchaseIntentId,
 				stripeCheckoutSessionId: session.id,
 			},

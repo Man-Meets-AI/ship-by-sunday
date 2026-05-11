@@ -4,10 +4,10 @@ import type { SupportWidgetContent } from "@/app/_components/support/support-wid
 const workspaceSupportWidgetContent = {
 	launcherLabel: "Ask Parker",
 	panelTitle: "Ask Parker",
-	panelSubtitle: "Ask about setup, review, or your workspace.",
+	panelSubtitle: "Ask about setup, review, or the app.",
 	starterMessage:
-		"Send a note from this workspace. Parker replies from Telegram and the thread stays here.",
-	messagePlaceholder: "Type a workspace question...",
+		"Send a note from the app. Parker replies from Telegram and the thread stays here.",
+	messagePlaceholder: "Type an app question...",
 	bugReportLabel: "Bug",
 	bugSummaryPlaceholder: "What broke?",
 	bugStepsPlaceholder: "What were you trying to do?",

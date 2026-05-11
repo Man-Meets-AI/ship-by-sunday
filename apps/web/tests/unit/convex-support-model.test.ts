@@ -60,11 +60,10 @@ describe("convex support model", () => {
 		}> = [];
 		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
 		const fakeCtx = createConversationCapabilityIssueContext({
-			activeCapabilities: [{ _id: "capability_old" }],
 			inserted,
 			patches,
-			thread: null,
-			visitor: null,
+			thread: { _id: "thread_1", visitorId: "visitor_1" },
+			visitor: { _id: "visitor_1" },
 		}) as unknown as Parameters<
 			typeof issueVisitorConversationCapabilityHandler
 		>[0];
@@ -74,6 +73,9 @@ describe("convex support model", () => {
 			{ sessionToken: "a".repeat(64) },
 		);
 
+		if (!capability) {
+			throw new Error("Expected a support conversation capability.");
+		}
 		expect(capability.capabilityToken).toHaveLength(64);
 		expect(capability.expiresAt).toBeGreaterThan(Date.now());
 		expect(inserted).toEqual([
@@ -88,12 +90,33 @@ describe("convex support model", () => {
 		]);
 		expect(JSON.stringify(inserted)).not.toContain(capability.capabilityToken);
 		expect(JSON.stringify(inserted)).not.toContain("a".repeat(64));
-		expect(patches).toEqual([
-			{
-				id: "capability_old",
-				patch: expect.objectContaining({ status: "revoked" }),
-			},
-		]);
+		expect(patches).toEqual([]);
+	});
+
+	it("does not issue conversation capabilities for unknown support sessions", async () => {
+		const { issueVisitorConversationCapabilityHandler } =
+			await import("@/convex/support/model");
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+		}> = [];
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = createConversationCapabilityIssueContext({
+			inserted,
+			patches,
+			thread: null,
+			visitor: null,
+		}) as unknown as Parameters<
+			typeof issueVisitorConversationCapabilityHandler
+		>[0];
+
+		await expect(
+			issueVisitorConversationCapabilityHandler(fakeCtx, {
+				sessionToken: "a".repeat(64),
+			}),
+		).resolves.toBeNull();
+		expect(inserted).toEqual([]);
+		expect(patches).toEqual([]);
 	});
 
 	it("reads the realtime thread through a valid conversation capability", async () => {
@@ -1121,6 +1144,7 @@ describe("convex support model", () => {
 				},
 			],
 			rateLimitBuckets: [{ _id: "bucket_old" }],
+			expiredActiveCapabilities: [{ _id: "capability_expired" }],
 			patches,
 			deletedIds,
 		}) as unknown as Parameters<
@@ -1184,7 +1208,7 @@ describe("convex support model", () => {
 				}),
 			]),
 		);
-		expect(deletedIds).toEqual(["bucket_old"]);
+		expect(deletedIds).toEqual(["bucket_old", "capability_expired"]);
 	});
 
 	it("retries failed Telegram topic cleanups after transcript purge", async () => {
@@ -1642,13 +1666,11 @@ function createSequencedQueryContext(
 }
 
 function createConversationCapabilityIssueContext({
-	activeCapabilities,
 	inserted,
 	patches,
 	thread,
 	visitor,
 }: {
-	activeCapabilities: Array<Record<string, unknown>>;
 	inserted: Array<{ table: string; document: Record<string, unknown> }>;
 	patches: Array<{ id: string; patch: Record<string, unknown> }>;
 	thread: Record<string, unknown> | null;
@@ -1665,9 +1687,6 @@ function createConversationCapabilityIssueContext({
 						return thread
 							? { unique: async () => thread }
 							: { unique: async () => null };
-					}
-					if (table === "supportConversationCapabilities") {
-						return { take: async () => activeCapabilities };
 					}
 					throw new Error(`Unexpected table ${table}`);
 				},
@@ -1739,6 +1758,8 @@ function createRetentionMaintenanceContext({
 	messages,
 	operatorActions,
 	rateLimitBuckets,
+	expiredActiveCapabilities = [],
+	expiredRevokedCapabilities = [],
 	pendingTopicCleanups = [],
 	failedTopicCleanups = [],
 	patches,
@@ -1749,6 +1770,8 @@ function createRetentionMaintenanceContext({
 	messages: Array<Record<string, unknown>>;
 	operatorActions: Array<Record<string, unknown>>;
 	rateLimitBuckets: Array<Record<string, unknown>>;
+	expiredActiveCapabilities?: Array<Record<string, unknown>>;
+	expiredRevokedCapabilities?: Array<Record<string, unknown>>;
 	pendingTopicCleanups?: Array<Record<string, unknown>>;
 	failedTopicCleanups?: Array<Record<string, unknown>>;
 	patches: Array<{ id: string; patch: Record<string, unknown> }>;
@@ -1769,7 +1792,12 @@ function createRetentionMaintenanceContext({
 				withIndex: (
 					indexName: string,
 					buildQuery?: (query: {
-						eq: (fieldName: string, value: string) => unknown;
+						eq: (
+							fieldName: string,
+							value: string,
+						) => {
+							lte: (fieldName: string, value: number) => unknown;
+						};
 					}) => unknown,
 				) => {
 					if (
@@ -1792,7 +1820,7 @@ function createRetentionMaintenanceContext({
 						buildQuery?.({
 							eq: (_fieldName: string, value: string) => {
 								cleanupStatus = value;
-								return {};
+								return { lte: () => ({}) };
 							},
 						});
 						return {
@@ -1814,6 +1842,24 @@ function createRetentionMaintenanceContext({
 					}
 					if (table === "supportRateLimitBuckets") {
 						return { take: async () => rateLimitBuckets };
+					}
+					if (
+						table === "supportConversationCapabilities" &&
+						indexName === "by_status_and_expires_at"
+					) {
+						let capabilityStatus = "active";
+						buildQuery?.({
+							eq: (_fieldName: string, value: string) => {
+								capabilityStatus = value;
+								return { lte: () => ({}) };
+							},
+						});
+						return {
+							take: async () =>
+								capabilityStatus === "revoked"
+									? expiredRevokedCapabilities
+									: expiredActiveCapabilities,
+						};
 					}
 					throw new Error(`Unexpected query: ${table}.${indexName}`);
 				},

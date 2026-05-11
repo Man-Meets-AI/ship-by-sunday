@@ -120,6 +120,7 @@ export default defineSchema({
 		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),

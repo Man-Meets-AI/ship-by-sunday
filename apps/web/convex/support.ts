@@ -150,10 +150,13 @@ const supportRetentionMaintenanceResultValidator = v.object({
 	telegramTopicCleanups: v.array(supportTelegramTopicCleanupValidator),
 });
 
-const supportConversationCapabilityValidator = v.object({
-	capabilityToken: v.string(),
-	expiresAt: v.number(),
-});
+const supportConversationCapabilityValidator = v.union(
+	v.object({
+		capabilityToken: v.string(),
+		expiresAt: v.number(),
+	}),
+	v.null(),
+);
 
 const supportActionMessageContextValidator = v.object({
 	id: v.id("supportMessages"),
@@ -221,7 +224,7 @@ export const issueVisitorConversationCapability = mutation({
 		sessionToken: v.string(),
 	},
 	returns: supportConversationCapabilityValidator,
-	handler: async (ctx, args): Promise<SupportConversationCapability> =>
+	handler: async (ctx, args): Promise<SupportConversationCapability | null> =>
 		await issueVisitorConversationCapabilityHandler(ctx, args),
 });
 

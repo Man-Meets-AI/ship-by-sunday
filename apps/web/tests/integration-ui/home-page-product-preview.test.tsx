@@ -45,6 +45,10 @@ vi.mock("@/app/checkout/_components/express-checkout-button", () => ({
 	},
 }));
 
+vi.mock("@/app/_components/home-page/support/home-page-support-widget", () => ({
+	HomePageSupportWidget: () => <div data-testid="home-page-support-widget" />,
+}));
+
 import { homePageContent } from "@/app/_content/home-page";
 import HomePage from "@/app/_components/home-page/home-page";
 import { CodebaseDemoSectionBlock } from "@/app/_components/home-page/sections/codebase-demo/codebase-demo-section";

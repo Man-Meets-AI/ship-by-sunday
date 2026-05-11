@@ -6,7 +6,13 @@ type StripeWebhookEventRecord = {
 	eventType: string;
 	stripeObjectId?: string;
 	courseSlug?: string;
-	status: "processing" | "processed" | "failed" | "ignored" | "payment_pending";
+	status:
+		| "processing"
+		| "queued"
+		| "processed"
+		| "failed"
+		| "ignored"
+		| "payment_pending";
 	resultKind?: string;
 	errorMessage?: string;
 	attemptCount: number;
@@ -24,6 +30,7 @@ function createStripeWebhookEventsCtx({
 	const tables = {
 		stripeWebhookEvents: [...stripeWebhookEvents],
 	};
+	const runAfter = vi.fn();
 	const insert = vi.fn(
 		async (
 			tableName: "stripeWebhookEvents",
@@ -96,9 +103,13 @@ function createStripeWebhookEventsCtx({
 				insert,
 				patch,
 			},
+			scheduler: {
+				runAfter,
+			},
 		},
 		insert,
 		patch,
+		runAfter,
 		tables,
 	};
 }
@@ -434,5 +445,115 @@ describe("convex/stripeWebhookEvents", () => {
 				completedAt: 3_000,
 			}),
 		);
+	});
+
+	it("schedules a retry for a failed queued fulfillment attempt", async () => {
+		const { ctx, patch, runAfter } = createStripeWebhookEventsCtx({
+			stripeWebhookEvents: [
+				{
+					_id: "stripe_webhook_event_failed",
+					stripeEventId: "evt_retry",
+					eventType: "checkout.session.completed",
+					stripeObjectId: "cs_retry",
+					courseSlug: "ship-by-sunday",
+					status: "failed",
+					resultKind: "grant_failed",
+					errorMessage: "convex unavailable",
+					attemptCount: 1,
+					firstSeenAt: 1_000,
+					updatedAt: 1_000,
+					completedAt: 1_000,
+				},
+			],
+		});
+		vi.spyOn(Date, "now").mockReturnValue(2_000);
+
+		await expect(
+			moduleUnderTest.retryFailedStripeWebhookEventFulfillment._handler(
+				ctx as never,
+				{
+					stripeEventId: "evt_retry",
+					eventType: "checkout.session.completed",
+					sessionId: "cs_retry",
+					failedAttemptCount: 1,
+				},
+			),
+		).resolves.toEqual({
+			retried: "scheduled",
+		});
+
+		expect(patch).toHaveBeenCalledWith(
+			"stripe_webhook_event_failed",
+			expect.objectContaining({
+				status: "queued",
+				resultKind: "queued",
+				errorMessage: undefined,
+				attemptCount: 2,
+				updatedAt: 2_000,
+				completedAt: undefined,
+			}),
+		);
+		expect(runAfter).toHaveBeenCalledTimes(2);
+		expect(runAfter.mock.calls[0]?.[0]).toBe(0);
+		expect(runAfter.mock.calls[0]?.[2]).toMatchObject({
+			stripeEventId: "evt_retry",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_retry",
+			attemptCount: 2,
+		});
+	});
+
+	it("reschedules a stale queued fulfillment attempt", async () => {
+		const { ctx, patch, runAfter } = createStripeWebhookEventsCtx({
+			stripeWebhookEvents: [
+				{
+					_id: "stripe_webhook_event_queued",
+					stripeEventId: "evt_stale",
+					eventType: "checkout.session.completed",
+					stripeObjectId: "cs_stale",
+					courseSlug: "ship-by-sunday",
+					status: "queued",
+					resultKind: "queued",
+					attemptCount: 1,
+					firstSeenAt: 1_000,
+					updatedAt: 1_000,
+				},
+			],
+		});
+		vi.spyOn(Date, "now").mockReturnValue(
+			1_000 + moduleUnderTest.STRIPE_WEBHOOK_FULFILLMENT_STALE_MS + 1,
+		);
+
+		await expect(
+			moduleUnderTest.retryStaleStripeWebhookEventFulfillment._handler(
+				ctx as never,
+				{
+					stripeEventId: "evt_stale",
+					eventType: "checkout.session.completed",
+					sessionId: "cs_stale",
+					attemptCount: 1,
+				},
+			),
+		).resolves.toEqual({
+			retried: "scheduled",
+		});
+
+		expect(patch).toHaveBeenCalledWith(
+			"stripe_webhook_event_queued",
+			expect.objectContaining({
+				status: "queued",
+				resultKind: "queued",
+				errorMessage: undefined,
+				attemptCount: 2,
+				completedAt: undefined,
+			}),
+		);
+		expect(runAfter).toHaveBeenCalledTimes(2);
+		expect(runAfter.mock.calls[0]?.[2]).toMatchObject({
+			stripeEventId: "evt_stale",
+			eventType: "checkout.session.completed",
+			sessionId: "cs_stale",
+			attemptCount: 2,
+		});
 	});
 });

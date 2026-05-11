@@ -339,7 +339,7 @@ export async function issueVisitorConversationCapabilityHandler(
 	args: {
 		sessionToken: string;
 	},
-): Promise<SupportConversationCapability> {
+): Promise<SupportConversationCapability | null> {
 	const now = Date.now();
 	const sessionTokenHash = await createSupportSessionTokenHash(
 		args.sessionToken,
@@ -351,18 +351,16 @@ export async function issueVisitorConversationCapabilityHandler(
 	const thread = visitor
 		? await findCurrentSupportThreadByVisitorId(ctx, visitor._id)
 		: null;
-
-	await revokeActiveSupportConversationCapabilitiesForSession(ctx, {
-		sessionTokenHash,
-		now,
-	});
+	if (!visitor || !thread) {
+		return null;
+	}
 
 	const capabilityToken = createSupportConversationCapabilityToken();
 	await ctx.db.insert("supportConversationCapabilities", {
 		capabilityTokenHash:
 			await createSupportConversationCapabilityTokenHash(capabilityToken),
 		sessionTokenHash,
-		threadId: thread?._id,
+		threadId: thread._id,
 		status: "active",
 		createdAt: now,
 		expiresAt: now + SUPPORT_CONVERSATION_CAPABILITY_TTL_MS,
@@ -1267,6 +1265,7 @@ export async function runSupportRetentionDatabaseMaintenanceHandler(
 	const purgeResult = await purgeExpiredSupportTranscripts(ctx, now);
 	const deletedRateLimitBucketCount =
 		await deleteExpiredSupportRateLimitBuckets(ctx, now);
+	await deleteExpiredSupportConversationCapabilities(ctx, now);
 	const pendingCleanups = await listRetryableTelegramTopicCleanups(ctx);
 
 	return {
@@ -1727,6 +1726,33 @@ async function deleteExpiredSupportRateLimitBuckets(
 	return buckets.length;
 }
 
+async function deleteExpiredSupportConversationCapabilities(
+	ctx: MutationCtx,
+	now: number,
+) {
+	const expiredCapabilities = await Promise.all([
+		listExpiredSupportConversationCapabilities(ctx, "active", now),
+		listExpiredSupportConversationCapabilities(ctx, "revoked", now),
+	]);
+
+	for (const capability of expiredCapabilities.flat()) {
+		await ctx.db.delete(capability._id);
+	}
+}
+
+async function listExpiredSupportConversationCapabilities(
+	ctx: MutationCtx,
+	status: "active" | "revoked",
+	now: number,
+) {
+	return await ctx.db
+		.query("supportConversationCapabilities")
+		.withIndex("by_status_and_expires_at", (query) =>
+			query.eq("status", status).lte("expiresAt", now),
+		)
+		.take(SUPPORT_TRANSCRIPT_PURGE_WRITE_LIMIT);
+}
+
 async function listRetryableTelegramTopicCleanups(ctx: MutationCtx) {
 	const [pendingCleanups, failedCleanups] = await Promise.all([
 		listTelegramTopicCleanupsByStatus(ctx, "pending"),
@@ -1975,31 +2001,6 @@ async function findLatestUnpurgedClosedSupportThreadByVisitorId(
 				!thread.purgedAt && (!thread.purgeAfter || thread.purgeAfter > now),
 		) ?? null
 	);
-}
-
-async function revokeActiveSupportConversationCapabilitiesForSession(
-	ctx: MutationCtx,
-	args: {
-		sessionTokenHash: string;
-		now: number;
-	},
-) {
-	const activeCapabilities = await ctx.db
-		.query("supportConversationCapabilities")
-		.withIndex("by_session_token_hash_and_status", (query) =>
-			query
-				.eq("sessionTokenHash", args.sessionTokenHash)
-				.eq("status", "active"),
-		)
-		.take(20);
-
-	for (const capability of activeCapabilities) {
-		await ctx.db.patch(capability._id, {
-			status: "revoked",
-			revokedAt: args.now,
-			lastIssuedAt: args.now,
-		});
-	}
 }
 
 async function getOrCreateSupportVisitor(
