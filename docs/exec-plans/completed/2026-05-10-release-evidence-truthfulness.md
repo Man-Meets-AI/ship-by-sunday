@@ -22,7 +22,7 @@ This ExecPlan must be maintained in accordance with `docs/exec-plans/PLANS.md`.
 
 A protected release tag should attest the actual hosted proof for the tagged `main` commit. The current tag workflow can summarize check-run conclusions by job name, which is too weak for release evidence: a Convex job can succeed while skipping deploy, and a billing job can be skipped for valid or invalid reasons unless the production proof summary says whether billing was required.
 
-After this slice, `.github/workflows/release.yml` downloads same-commit proof summary artifacts, validates their schema and commit identity, derives proof states from those artifacts, and passes run ids, URLs, statuses, and notes into `release-evidence.v1`. The production proof summary may come from the latest same-commit push run or manual proof run after that run completes, so a manual `force_billing` proof can be release authority without letting an older push summary hide it. A skipped Convex production deploy cannot become `passed`, and skipped billing can become `not_required` only when the selected production proof summary says the release was not billing-sensitive.
+After this slice, `.github/workflows/release.yml` downloads same-commit proof summary artifacts, validates their schema and commit identity, derives proof states from those artifacts, and passes run ids, URLs, statuses, and notes into `release-evidence.v1`. The production proof summary may come from the latest same-commit successful push run or manual proof run after that run completes, so a manual `force_billing` proof can be release authority without letting an older push summary hide it. A skipped or failed Convex production deploy cannot become `passed`, and skipped billing can become `not_required` only when the selected production proof summary says the release was not billing-sensitive.
 
 ## Progress
 
@@ -50,7 +50,7 @@ Date: 2026-05-10
 
 ## Outcomes & Retrospective
 
-This plan is complete. `.github/workflows/release.yml` now calls `scripts/release/collect-hosted-proof-summaries.mjs` instead of mapping commit check-run names. The collector downloads the latest same-commit `production-release-proof-summary` from either push or manual production proof runs after that run completes, derives Vercel, auth, entitlement, billing, and release-scope proof from the selected summary, and downloads `convex-production-deploy-summary` only when production proof says the release was Convex-sensitive. `release-evidence.v1` now preserves artifact-derived run ids, URLs, and notes for each hosted proof field.
+This plan is complete. `.github/workflows/release.yml` now calls `scripts/release/collect-hosted-proof-summaries.mjs` instead of mapping commit check-run names. The collector downloads the latest same-commit successful `production-release-proof-summary` from either push or manual production proof runs after that run completes, derives Vercel, auth, entitlement, billing, and release-scope proof from the selected summary, and downloads `convex-production-deploy-summary` only when production proof says the release was Convex-sensitive. `release-evidence.v1` now preserves artifact-derived run ids, URLs, and notes for each hosted proof field.
 
 The next Program slice remains generated customer repo proof.
 

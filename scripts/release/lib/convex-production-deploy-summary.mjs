@@ -51,6 +51,12 @@ export function validateConvexProductionDeploySummary(
 		);
 	}
 
+	if (summary.deployMode === "deploy" && summary.deployOutcome !== "success") {
+		issues.push(
+			`Convex production deploy step outcome was ${summary.deployOutcome ?? "<missing>"}, expected success.`,
+		);
+	}
+
 	const convexProof =
 		typeof summary.proof === "object" && summary.proof !== null
 			? summary.proof.convex
@@ -107,7 +113,7 @@ export function buildConvexProductionDeployProofState(
 	const runMetadata = runMetadataFromSummary(summary);
 
 	return {
-		ok: true,
+		ok: validation.ok,
 		issues: validation.issues,
 		proof: {
 			...runMetadata,

@@ -65,6 +65,7 @@ export function findLatestCompletedRun({
 	commitSha,
 	events = ["push"],
 	repo,
+	requiredConclusion = "success",
 	runGhImpl = runGh,
 	workflow,
 }) {
@@ -91,6 +92,15 @@ export function findLatestCompletedRun({
 	if (run.status !== "completed") {
 		throw new Error(
 			`${workflow} run ${run.databaseId} for commit ${commitSha} is ${run.status}, expected completed.`,
+		);
+	}
+
+	if (
+		typeof requiredConclusion === "string" &&
+		run.conclusion !== requiredConclusion
+	) {
+		throw new Error(
+			`${workflow} run ${run.databaseId} for commit ${commitSha} concluded ${run.conclusion ?? "<missing>"}, expected ${requiredConclusion}.`,
 		);
 	}
 

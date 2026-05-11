@@ -49,6 +49,7 @@ describe("tag release workflow", () => {
 						? [
 								{
 									databaseId: 100,
+									conclusion: "success",
 									headSha: "main-sha",
 									status: "completed",
 								},
@@ -56,6 +57,7 @@ describe("tag release workflow", () => {
 						: [
 								{
 									databaseId: 200,
+									conclusion: "success",
 									headSha: "main-sha",
 									status: "completed",
 								},
@@ -86,6 +88,7 @@ describe("tag release workflow", () => {
 							? [
 									{
 										databaseId: 200,
+										conclusion: "success",
 										headSha: "main-sha",
 										status: "completed",
 									},
@@ -93,6 +96,7 @@ describe("tag release workflow", () => {
 							: [
 									{
 										databaseId: 300,
+										conclusion: null,
 										headSha: "main-sha",
 										status: "in_progress",
 									},
@@ -103,6 +107,28 @@ describe("tag release workflow", () => {
 			}),
 		).toThrow(
 			"production-release-proof.yml run 300 for commit main-sha is in_progress, expected completed.",
+		);
+	});
+
+	it("fails closed instead of using a failed latest same-commit proof run", () => {
+		expect(() =>
+			findLatestCompletedRun({
+				commitSha: "main-sha",
+				events: ["push"],
+				repo: "Man-Meets-AI/ship-by-sunday",
+				runGhImpl: () =>
+					JSON.stringify([
+						{
+							databaseId: 400,
+							conclusion: "failure",
+							headSha: "main-sha",
+							status: "completed",
+						},
+					]),
+				workflow: "convex-production-deploy.yml",
+			}),
+		).toThrow(
+			"convex-production-deploy.yml run 400 for commit main-sha concluded failure, expected success.",
 		);
 	});
 });

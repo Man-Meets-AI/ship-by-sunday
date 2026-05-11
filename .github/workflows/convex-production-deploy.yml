@@ -75,11 +75,13 @@ jobs:
           exit 1
 
       - name: Run Convex production dry-run
+        id: dry_run_convex
         if: steps.deploy_mode.outputs.label == 'dry-run'
         working-directory: apps/web
         run: bunx convex deploy --dry-run -y
 
       - name: Deploy Convex production
+        id: deploy_convex
         if: steps.deploy_mode.outputs.label == 'deploy'
         working-directory: apps/web
         run: bunx convex deploy -y
@@ -87,12 +89,24 @@ jobs:
       - name: Write Convex production deploy summary
         if: always()
         env:
+          DEPLOY_OUTCOME: ${{ steps.deploy_convex.outcome }}
+          DRY_RUN_OUTCOME: ${{ steps.dry_run_convex.outcome }}
           DEPLOY_MODE: ${{ steps.deploy_mode.outputs.label }}
         run: |
           node - <<'NODE'
           const fs = require("node:fs");
 
+          function getConvexProofStatus({ deployMode, deployOutcome }) {
+            if (deployMode !== "deploy") {
+              return deployMode;
+            }
+
+            return deployOutcome === "success" ? "passed" : "failed";
+          }
+
           const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+          const deployMode = process.env.DEPLOY_MODE;
+          const deployOutcome = process.env.DEPLOY_OUTCOME || null;
           const summary = {
             schemaVersion: "release-proof-summary.v1",
             workflowName: "Convex Production Deploy",
@@ -100,9 +114,11 @@ jobs:
             runAttempt: process.env.GITHUB_RUN_ATTEMPT,
             runUrl,
             commitSha: process.env.GITHUB_SHA,
-            deployMode: process.env.DEPLOY_MODE,
+            deployMode,
+            deployOutcome,
+            dryRunOutcome: process.env.DRY_RUN_OUTCOME || null,
             proof: {
-              convex: process.env.DEPLOY_MODE === "deploy" ? "passed" : process.env.DEPLOY_MODE,
+              convex: getConvexProofStatus({ deployMode, deployOutcome }),
             },
             generatedAt: new Date().toISOString(),
           };

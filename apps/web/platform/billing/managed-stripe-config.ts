@@ -205,7 +205,9 @@ function assertStripeWebhookEndpointApiVersionSupportsNoCostCheckout(
 	endpoint: Pick<Stripe.WebhookEndpoint, "api_version" | "id">,
 ) {
 	if (endpoint.api_version === null) {
-		return;
+		throw new Error(
+			`Stripe webhook endpoint ${endpoint.id} does not pin an API version. Pin the endpoint to ${minimumNoCostCheckoutWebhookApiDate} or later so no-cost Checkout webhook payloads are proven compatible.`,
+		);
 	}
 
 	const endpointApiDate = getStripeApiVersionDate(endpoint.api_version);

@@ -25,7 +25,7 @@ describe("getStripeLineItem", () => {
 		overrides: Partial<Stripe.WebhookEndpoint> = {},
 	): Stripe.WebhookEndpoint {
 		return {
-			api_version: null,
+			api_version: "2026-02-25.clover",
 			application: null,
 			created: 1_700_000_000,
 			description: null,
@@ -582,6 +582,27 @@ describe("getStripeLineItem", () => {
 			}),
 		).rejects.toThrow(
 			"Stripe webhook endpoint we_old_api_version uses API version 2022-11-15, expected 2023-08-16 or later for no-cost Checkout orders.",
+		);
+	});
+
+	it("rejects an unpinned webhook endpoint API version for no-cost checkout proof", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				api_version: null,
+				id: "we_account_default_api_version",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint we_account_default_api_version does not pin an API version. Pin the endpoint to 2023-08-16 or later so no-cost Checkout webhook payloads are proven compatible.",
 		);
 	});
 

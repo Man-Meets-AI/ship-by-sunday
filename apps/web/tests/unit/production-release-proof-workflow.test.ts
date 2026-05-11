@@ -47,6 +47,23 @@ describe("release proof workflows", () => {
 		expect(workflow).toContain('--commit="$RELEASE_COMMIT_SHA"');
 	});
 
+	it("requires manual proof runs to provide an explicit release-scope base", () => {
+		const workflow = readFileSync(
+			path.join(repoRoot, ".github/workflows/production-release-proof.yml"),
+			"utf8",
+		);
+
+		expect(workflow).toContain("base_sha:");
+		expect(workflow).toContain("MANUAL_BASE_SHA: ${{ inputs.base_sha }}");
+		expect(workflow).toContain(
+			"Manual production release proof requires inputs.base_sha",
+		);
+		expect(workflow).toContain(
+			'git merge-base --is-ancestor "$base_sha" "$head_sha"',
+		);
+		expect(workflow).not.toContain('git rev-parse "${head_sha}^"');
+	});
+
 	it("runs Stripe webhook endpoint preflight before dev staging card proof", () => {
 		const workflow = readFileSync(
 			path.join(repoRoot, ".github/workflows/dev-staging-payment-proof.yml"),

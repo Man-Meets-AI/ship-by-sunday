@@ -74,7 +74,7 @@ This plan does not make provider-backed checks run on every PR. It does not rewr
 
 ## Plan of Work
 
-First, extend `managed-stripe-config.ts` with a webhook endpoint preflight helper. It should require `STRIPE_WEBHOOK_SECRET`, derive the expected endpoint from `NEXT_PUBLIC_CONVEX_SITE_URL` unless an explicit URL is passed, call `stripe.webhookEndpoints.list()`, require an enabled endpoint at the exact expected URL, require mode parity with `--expected-mode`, reject explicit webhook API versions older than `2023-08-16`, accept either the required events or `*`, and fail if an enabled app-origin `/api/stripe/webhook` endpoint exists.
+First, extend `managed-stripe-config.ts` with a webhook endpoint preflight helper. It should require `STRIPE_WEBHOOK_SECRET`, derive the expected endpoint from `NEXT_PUBLIC_CONVEX_SITE_URL` unless an explicit URL is passed, call `stripe.webhookEndpoints.list()`, require an enabled endpoint at the exact expected URL, require mode parity with `--expected-mode`, reject unpinned webhook API versions and explicit webhook API versions older than `2023-08-16`, accept either the required events or `*`, and fail if an enabled app-origin `/api/stripe/webhook` endpoint exists.
 
 Second, wire the helper through `verify-managed-stripe-env.ts` behind `--require-webhook-endpoint` and optional `--expected-webhook-url`. Include the result in the verifier's JSON output. Update the release billing doctor command to pass the new flag for preview and production.
 
@@ -135,7 +135,7 @@ Observed broader completion gates:
 
 ## Validation and Acceptance
 
-This plan is accepted because production billing proof fails before browser proof if the Vercel alias is not bound to the same deployment, if Stripe lacks an enabled exact Convex webhook endpoint, if required checkout events are missing, if Stripe mode is wrong, if an explicit webhook endpoint API version is too old for no-cost Checkout orders, or if a stale app-origin webhook endpoint is still enabled. Dev staging runs the same webhook endpoint verifier in test mode before card proof.
+This plan is accepted because production billing proof fails before browser proof if the Vercel alias is not bound to the same deployment, if Stripe lacks an enabled exact Convex webhook endpoint, if required checkout events are missing, if Stripe mode is wrong, if the webhook endpoint API version is unpinned or too old for no-cost Checkout orders, or if a stale app-origin webhook endpoint is still enabled. Dev staging runs the same webhook endpoint verifier in test mode before card proof.
 
 Live proof safety is accepted because the production hosted billing script refuses to proceed unless its direct proof Checkout Session is zero-cost and refuses to enter card details in live mode.
 

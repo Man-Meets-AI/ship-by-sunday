@@ -14,6 +14,7 @@ const validSummary = {
 	runUrl: "https://github.com/Man-Meets-AI/ship-by-sunday/actions/runs/123",
 	commitSha: "main-sha",
 	deployMode: "deploy",
+	deployOutcome: "success",
 	proof: {
 		convex: "passed",
 	},
@@ -47,6 +48,27 @@ describe("Convex production deploy summary verification", () => {
 			issues: expect.arrayContaining([
 				"Convex production deploy mode was skip, expected deploy.",
 				"Convex production proof was skip, expected passed.",
+			]),
+		});
+	});
+
+	it("rejects a deploy summary when the deploy step failed", () => {
+		expect(
+			validateConvexProductionDeploySummary(
+				{
+					...validSummary,
+					deployOutcome: "failure",
+					proof: {
+						convex: "failed",
+					},
+				},
+				"main-sha",
+			),
+		).toMatchObject({
+			ok: false,
+			issues: expect.arrayContaining([
+				"Convex production deploy step outcome was failure, expected success.",
+				"Convex production proof was failed, expected passed.",
 			]),
 		});
 	});
@@ -100,7 +122,10 @@ describe("Convex production deploy summary verification", () => {
 				{ required: true },
 			),
 		).toMatchObject({
-			ok: true,
+			ok: false,
+			issues: expect.arrayContaining([
+				"Convex production deploy mode was skip, expected deploy.",
+			]),
 			proof: {
 				runId: "123",
 				status: "failed",

@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      base_sha:
+        description: Base commit SHA for manual release-scope detection
+        required: true
+        type: string
       force_billing:
         description: Force the billing integration gate for a manual rerun
         required: false
@@ -42,13 +46,37 @@ jobs:
 
       - name: Resolve release scope refs
         id: refs
+        env:
+          MANUAL_BASE_SHA: ${{ inputs.base_sha }}
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ github.ref }}" != "refs/heads/main" ]]; then
+              echo "Manual production release proof must run from refs/heads/main." >&2
+              exit 1
+            fi
+
             head_sha="$(git rev-parse HEAD)"
-            if git rev-parse "${head_sha}^" >/dev/null 2>&1; then
-              base_sha="$(git rev-parse "${head_sha}^")"
-            else
-              base_sha="$head_sha"
+            base_sha="$(printf '%s' "$MANUAL_BASE_SHA" | tr -d '[:space:]')"
+
+            if [[ -z "$base_sha" ]]; then
+              echo "Manual production release proof requires inputs.base_sha so billing and Convex release-scope detection covers the intended commit range." >&2
+              exit 1
+            fi
+
+            if ! git cat-file -e "${base_sha}^{commit}" 2>/dev/null; then
+              echo "Manual production release proof base_sha is not a commit in this checkout: $base_sha" >&2
+              exit 1
+            fi
+
+            base_sha="$(git rev-parse "$base_sha")"
+            if [[ "$base_sha" == "$head_sha" ]]; then
+              echo "Manual production release proof base_sha must be an ancestor before HEAD, not HEAD itself." >&2
+              exit 1
+            fi
+
+            if ! git merge-base --is-ancestor "$base_sha" "$head_sha"; then
+              echo "Manual production release proof base_sha must be an ancestor of HEAD." >&2
+              exit 1
             fi
           else
             base_sha="${{ github.event.before }}"

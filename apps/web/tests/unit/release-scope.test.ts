@@ -34,6 +34,14 @@ describe("release scope classifier", () => {
 				"apps/web/platform/billing/checkout/checkout-session.ts",
 			),
 		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/platform/billing/managed-stripe-config.ts",
+			),
+		).toBe(true);
+		expect(isBillingSensitivePath("apps/web/platform/env/server.ts")).toBe(
+			true,
+		);
 		expect(isBillingSensitivePath("apps/web/config/product.ts")).toBe(true);
 		expect(
 			isBillingSensitivePath(
@@ -80,6 +88,9 @@ describe("release scope classifier", () => {
 		).toBe(true);
 		expect(
 			isBillingSensitivePath("scripts/release/prepare-release-personas.mjs"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/scripts/lib/release-billing-doctor.mjs"),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath("apps/web/convex/stripeWebhookEvents.ts"),

@@ -121,7 +121,7 @@ Do not ship generated customer repo commands that the generated snapshot cannot 
 
 This Program is complete. The final source gate is the documented `static` and `integration` split: `static` covers app and package lint, app format, package typechecks, app unit and contract tests, package tests, root script tests, critical coverage, package smoke, worker compatibility smoke, and app build; `integration` covers the app integration suite. Dev payment staging remains a Stripe test-mode rehearsal lane, not release authority. Production preflight verifies the live Vercel alias, Stripe webhook endpoint shape, billing doctor checks, release personas, and live no-card checkout safety without pretending test-mode success proves production.
 
-Tag release evidence now derives hosted proof from same-commit `production-release-proof-summary` and `convex-production-deploy-summary` artifacts instead of check-run names. Generated customer repo proof now materializes a customer snapshot, verifies frozen lockfile resolution, and runs `programs:lint`, `plans:lint`, `codebase:contract`, and `agentic:check` from the generated repo root.
+Tag release evidence now derives hosted proof from same-commit successful `production-release-proof-summary` and `convex-production-deploy-summary` artifacts instead of check-run names. Generated customer repo proof now materializes a customer snapshot, runs the generated `bun ci` install command, and runs `programs:lint`, `plans:lint`, `codebase:contract`, and `agentic:check` from the generated repo root.
 
 The intentionally deferred high-cost checks remain hosted browser, Stripe, Clerk, Convex, and full lifecycle proof on every PR. Those checks stay conditional, post-merge, nightly, manual, or release-bound based on risk.
 
