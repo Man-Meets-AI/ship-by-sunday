@@ -105,3 +105,7 @@
 - Mistake: I ran `bun run --cwd apps/web typecheck` once without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
   Impact: The command passed, but it created a local PostHog release and uploaded source maps from the credentialed environment.
   Corrective action: Keep `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` on every local app build/typecheck unless source-map upload behavior is the thing under test.
+
+- Mistake: I used `bunx convex env list --prod` while checking production runtime configuration.
+  Impact: The command printed production environment variable values into the local tool transcript instead of returning a presence-only view.
+  Corrective action: Use provider commands that prove presence or update a single named variable without printing values; treat any secret-inspection command as unsafe unless its output is known to redact values.
