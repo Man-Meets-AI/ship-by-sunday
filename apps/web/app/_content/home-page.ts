@@ -196,11 +196,11 @@ const productPreviewSection = {
 		options: [
 			{
 				id: "codebase",
-				label: "I have a codebase already",
+				label: "I want an AI worker",
 			},
 			{
 				id: "idea",
-				label: "I have an idea for a product",
+				label: "I want an AI starter template",
 			},
 		],
 	},
@@ -295,7 +295,7 @@ const productPreviewSection = {
 		pricePlaceholder: codebaseFieldPlaceholder("pricing") ?? "",
 	},
 	cta: {
-		label: "Generate my codebase",
+		label: "Start my AI starter template",
 		lockedNote:
 			"We'll save your draft, take you to Stripe, and bring you back to the workspace prefilled with these answers.",
 	},
@@ -604,6 +604,33 @@ export const homePageContent = {
 			description:
 				"A 30-video workflow course included free for faster build reps after the sprint.",
 		},
+	},
+	supportWidget: {
+		launcherLabel: "Message Parker",
+		panelTitle: "Message Parker",
+		panelSubtitle: "Ask about fit, scope, or what to do next.",
+		starterMessage:
+			"Send a note here. Parker replies from Telegram and the thread stays on this page.",
+		messagePlaceholder: "Type your question...",
+		bugReportLabel: "Bug",
+		bugSummaryPlaceholder: "What broke?",
+		bugStepsPlaceholder: "What were you trying to do?",
+		bugExpectedPlaceholder: "What did you expect instead?",
+		bugImpactLabel: "Bug impact",
+		attachScreenshotLabel: "Attach screenshot",
+		removeAttachmentLabel: "Remove screenshot",
+		sendLabel: "Send",
+		closeLabel: "Close support chat",
+		fallbackLabel: "Open Telegram",
+		directTelegramLabel: "Use Telegram directly",
+		loadingLabel: "Loading conversation",
+		sendingLabel: "Sending",
+		deliveredLabel: "Delivered to Parker",
+		failedLabel: "Parker may not have seen this.",
+		closedLabel: "This thread is closed.",
+		screenshotRejectedTypeMessage: "Upload a PNG, JPG, or WebP screenshot.",
+		screenshotRejectedSizeMessage: "Screenshots must be 10 MB or smaller.",
+		genericErrorMessage: "Unable to reach support.",
 	},
 	footerWordmark: productName,
 } as const;

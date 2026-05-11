@@ -24,6 +24,10 @@ import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type ApprovedWorkflowRunCommand = {
 	workflowRunId: string;
@@ -143,6 +147,7 @@ export function WorkspaceFindingDetailPage({
 				workflowVersion: approval.workflowVersion,
 				branchName: approval.branchName,
 				profileName: approval.profileName,
+				installProfile: approval.installProfile,
 				writeLeaseDurationMinutes: approval.writeLeaseDurationMinutes,
 				dirtyStatePolicy: approval.dirtyStatePolicy,
 				expectedOutputs: approval.expectedOutputs,
@@ -153,6 +158,9 @@ export function WorkspaceFindingDetailPage({
 				stopConditions: approval.stopConditions,
 				rollbackNotes: approval.rollbackNotes,
 			});
+			if (isSupportModeBlockedMutationResult(workflowRun)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setApprovedWorkflowRunCommand({
 				workflowRunId: workflowRun._id,
 				branchName: workflowRun.branchName ?? approval.branchName,
@@ -160,7 +168,11 @@ export function WorkspaceFindingDetailPage({
 			});
 			setActionState("approved");
 		} catch (error) {
-			setActionError(getWorkflowRequestErrorMessage(error));
+			setActionError(
+				getWorkflowRequestErrorMessage(
+					error instanceof Error ? error : String(error),
+				),
+			);
 			setActionState("error");
 		}
 	}
@@ -397,7 +409,7 @@ function FindingUnavailable() {
 				Finding unavailable
 			</h1>
 			<p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-				This finding is not in the approved workspace ledger.
+				This finding is not in the approved Worker findings ledger.
 			</p>
 			<Button asChild className="mt-4" size="sm">
 				<Link href={routeConfig.workspaceFindings}>Back to findings</Link>
@@ -413,7 +425,7 @@ function getUnavailableWorkflowMessage(detail: WorkspaceFindingDetailModel) {
 	return unavailableWorkflowMessages[detail.status];
 }
 
-function getWorkflowRequestErrorMessage(error: unknown) {
+function getWorkflowRequestErrorMessage(error: Error | string) {
 	const message = error instanceof Error ? error.message : String(error);
 	if (message.includes("Blocked findings cannot start workflows")) {
 		return unavailableWorkflowMessages.blocked;

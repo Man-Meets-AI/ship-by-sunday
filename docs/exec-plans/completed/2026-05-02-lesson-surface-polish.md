@@ -1,10 +1,10 @@
 ---
 title: Lesson Surface Polish
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Polish the bonus lesson surface at `/lesson/[lessonKey]` and the shared lesson shell primitives (Watch, Split, Focus) so the view feels like a course product worth dwelling in across light and dark at desktop and mobile, without changing the lesson manifest, bonus mission state, view tracker, unlock logic, bonus library presentation, or any AppShell file.
-post_build_recap: null
+post_build_recap: The lesson surface polish pass shipped watch-shell rhythm, video chrome, coach and objective panel motion, copy-prompt feedback, secondary content polish, lesson-map reveal behavior, footer hierarchy, route-state polish, and validation.
 read_when:
   - Resuming the lesson-surface polish pass mid-flight.
   - Reviewing the polish-pass diff against the locked behavior contract.

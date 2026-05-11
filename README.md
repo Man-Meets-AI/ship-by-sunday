@@ -16,11 +16,11 @@ Use it before changing any user-facing UI. It documents the shared neutral app t
 - `release.json`: the manifest-backed release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
 - `docs/`: the canonical contributor and agent-facing docs spine, plus ExecPlans, prompts, references, and generated analyses.
 
-The protected journey is codebase-first:
+The protected paid-app journey is codebase-first:
 
-`/codebase -> /review`
+`/home -> /generate-codebase -> /generate-codebase/review`
 
-The `/review` contract exposes one download artifact, the `Ship by Sunday Codebase`, not separate design, marketing, or build downloads.
+The `/generate-codebase/review` contract exposes one download artifact, the `Ship by Sunday Codebase`, not separate design, marketing, or build downloads.
 
 ## Quick start
 

@@ -14,6 +14,13 @@ vi.mock(
 	}),
 );
 
+vi.mock(
+	"@/app/(workspace)/_components/workspace-support/workspace-support-widget",
+	() => ({
+		WorkspaceSupportWidget: () => <div>Support widget</div>,
+	}),
+);
+
 describe("protected app layout", () => {
 	beforeEach(() => {
 		getServerProductAccessMock.mockReset();

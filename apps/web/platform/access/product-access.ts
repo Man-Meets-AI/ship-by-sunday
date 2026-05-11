@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { FunctionReturnType } from "convex/server";
 import { fetchQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 
@@ -18,18 +17,13 @@ import {
 import type { PaidCheckoutRecovery, ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 
-type ResumeDestination = FunctionReturnType<
-	typeof api.codebase.getCodebaseResumeDestination
->;
 type ExistingCodebaseResumeDestination = {
 	destination: string;
 	kind: "existing_codebase_setup" | "fulfillment_choice";
 	codebaseStageId: null;
 	postReviewTargets: null;
 };
-type ServerResumeDestination =
-	| ResumeDestination
-	| ExistingCodebaseResumeDestination;
+type ServerResumeDestination = ExistingCodebaseResumeDestination;
 
 async function refreshViewerProductAccess(token: string) {
 	return (await fetchQuery(
@@ -95,6 +89,7 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 			clerkUserId: null,
 			hasAccess: false,
 			status: "signed_out",
+			capabilities: [],
 			...(pendingCheckoutRecovery ? { pendingCheckoutRecovery } : {}),
 		};
 	}
@@ -104,6 +99,7 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 			clerkUserId: session.userId,
 			hasAccess: false,
 			status: "token_missing",
+			capabilities: [],
 		};
 	}
 
@@ -151,34 +147,12 @@ export async function getServerResumeDestination(): Promise<ServerResumeDestinat
 		return null;
 	}
 
-	if (access.fulfillmentTrack === "existing_codebase_doctor") {
-		return {
-			destination: routeConfig.workspaceSetup,
-			kind: "existing_codebase_setup",
-			codebaseStageId: null,
-			postReviewTargets: null,
-		};
-	}
-
-	if (!access.fulfillmentTrack || access.fulfillmentTrack === "unspecified") {
-		return {
-			destination: routeConfig.workspaceChoice,
-			kind: "fulfillment_choice",
-			codebaseStageId: null,
-			postReviewTargets: null,
-		};
-	}
-
-	const session = await getConvexServerSession();
-	if (!session.token) {
-		return null;
-	}
-
-	return (await fetchQuery(
-		api.codebase.getCodebaseResumeDestination,
-		{},
-		{ token: session.token },
-	)) as ResumeDestination;
+	return {
+		destination: routeConfig.appHome,
+		kind: "fulfillment_choice",
+		codebaseStageId: null,
+		postReviewTargets: null,
+	};
 }
 
 export async function redirectGrantedHomeVisitor({

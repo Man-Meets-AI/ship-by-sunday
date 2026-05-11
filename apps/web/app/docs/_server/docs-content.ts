@@ -9,14 +9,14 @@ import {
 } from "@/app/_content/public-content-inventory";
 
 type DocsMdxModule = {
-	default: ComponentType<Record<string, unknown>>;
+	default: ComponentType<object>;
 };
 
 type DocsMdxModuleLoader = () => Promise<DocsMdxModule>;
 
 export type DocsContentPageModel = {
 	entry: DocsContentEntry;
-	Content: ComponentType<Record<string, unknown>>;
+	Content: ComponentType<object>;
 };
 
 const docsMdxModuleLoaders: Record<string, DocsMdxModuleLoader> = {
@@ -69,6 +69,8 @@ const docsMdxModuleLoaders: Record<string, DocsMdxModuleLoader> = {
 		import("@/content/docs/ship-live.mdx") as Promise<DocsMdxModule>,
 	"stripe-checkout-webhook": () =>
 		import("@/content/docs/stripe-checkout-webhook.mdx") as Promise<DocsMdxModule>,
+	"telegram-support-bot": () =>
+		import("@/content/docs/telegram-support-bot.mdx") as Promise<DocsMdxModule>,
 	"test-the-buyer-journey": () =>
 		import("@/content/docs/test-the-buyer-journey.mdx") as Promise<DocsMdxModule>,
 	"the-build-loop": () =>

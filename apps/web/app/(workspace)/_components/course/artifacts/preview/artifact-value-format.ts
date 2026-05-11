@@ -9,6 +9,7 @@ import {
 	isReferenceGalleryValue,
 } from "@/lib/course/lesson/model/reference-gallery";
 import { isChecklistItemArray } from "@/lib/course/lesson/model/registry";
+import type { PersistedFieldValue } from "@/lib/course/lesson/model/registry";
 import { formatTablePreview } from "@/lib/course/lesson/model/table";
 
 import {
@@ -16,7 +17,7 @@ import {
 	getUploadMetadataList,
 } from "./artifact-value-codecs";
 
-export function formatArtifactValue(value: unknown) {
+export function formatArtifactValue(value: PersistedFieldValue | undefined) {
 	const upload = getUploadMetadata(value);
 	if (upload) {
 		return upload.fileName ?? "Uploaded file";
@@ -63,7 +64,9 @@ export function formatArtifactValue(value: unknown) {
 		: String(value);
 }
 
-export function getUploadPreviewItems(value: unknown): UploadFieldValue[] {
+export function getUploadPreviewItems(
+	value: PersistedFieldValue | undefined,
+): UploadFieldValue[] {
 	const upload = getUploadMetadata(value);
 	if (upload && (upload.previewUrl ?? upload.url)) {
 		return [upload];
@@ -74,12 +77,12 @@ export function getUploadPreviewItems(value: unknown): UploadFieldValue[] {
 	);
 }
 
-export function hasUploadGalleryValue(value: unknown) {
+export function hasUploadGalleryValue(value: PersistedFieldValue | undefined) {
 	return getUploadMetadataList(value).length > 0;
 }
 
 export function getReferenceGalleryPreviewItems(
-	value: unknown,
+	value: PersistedFieldValue | undefined,
 ): ReferenceGalleryItem[] {
 	return getReferenceGalleryItems(value).filter((item) =>
 		Boolean(getReferenceGalleryItemImageUrl(item)),

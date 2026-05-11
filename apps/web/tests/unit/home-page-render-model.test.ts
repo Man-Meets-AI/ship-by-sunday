@@ -15,7 +15,7 @@ describe("home page render model", () => {
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
 		expect(renderModel.productPreview.isEnabled).toBe(true);
 		expect(renderModel.productPreview.section.cta.label).toBe(
-			"Generate my codebase",
+			"Start my AI starter template",
 		);
 		expect(renderModel.productPreview.section.leverageHero.headline).toBe(
 			"Install leverage",
@@ -27,7 +27,7 @@ describe("home page render model", () => {
 		expect(renderModel.hero.primaryCtaTarget).toEqual({
 			kind: "checkout",
 		});
-		expect(renderModel.execLoop.isEnabled).toBe(true);
+		expect(renderModel.execLoop.isEnabled).toBe(false);
 		expect(
 			renderModel.execLoop.section.steps.map((step) => step.label),
 		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);
@@ -80,6 +80,13 @@ describe("home page render model", () => {
 		expect(renderModel.pricing.primaryCtaTarget).toEqual({
 			kind: "checkout",
 		});
+		expect(renderModel.supportWidget).toMatchObject({
+			isEnabled: true,
+			fallbackHref: "https://t.me/parkerrex",
+			content: {
+				launcherLabel: "Message Parker",
+			},
+		});
 	});
 
 	it("derives non-default section toggles and link CTA targets", () => {
@@ -93,6 +100,10 @@ describe("home page render model", () => {
 				socialProof: false,
 				programs: false,
 				plansMd: false,
+			},
+			supportWidget: {
+				enabled: false,
+				fallbackHref: "https://t.me/example",
 			},
 			heroPrimaryCta: {
 				kind: "link",
@@ -118,6 +129,10 @@ describe("home page render model", () => {
 		expect(renderModel.pricing.primaryCtaTarget).toEqual({
 			kind: "link",
 			href: routeConfig.signIn,
+		});
+		expect(renderModel.supportWidget).toMatchObject({
+			isEnabled: false,
+			fallbackHref: "https://t.me/example",
 		});
 	});
 });

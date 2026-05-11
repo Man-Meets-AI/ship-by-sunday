@@ -1,0 +1,611 @@
+.sbs-telegram-chat-widget {
+	--sbs-chat-background: var(--background, #fffaf3);
+	--sbs-chat-foreground: var(--foreground, #1b1712);
+	--sbs-chat-muted: var(--muted, #f4efe7);
+	--sbs-chat-muted-foreground: var(--muted-foreground, #71685f);
+	--sbs-chat-border: var(--border, #ded5c8);
+	--sbs-chat-primary: var(--primary, #14110f);
+	--sbs-chat-primary-foreground: var(--primary-foreground, #fffaf3);
+	--sbs-chat-danger: var(--destructive, #b42318);
+	--sbs-chat-radius: var(--radius, 8px);
+	--sbs-chat-shadow: 0 18px 48px rgb(27 23 18 / 18%);
+
+	color: var(--sbs-chat-foreground);
+	font: inherit;
+}
+
+.sbs-telegram-chat-widget,
+.sbs-telegram-chat-widget * {
+	box-sizing: border-box;
+}
+
+.sbs-telegram-chat-widget {
+	position: fixed;
+	z-index: 50;
+	pointer-events: none;
+}
+
+.sbs-telegram-chat-widget[data-placement="bottom-right"] {
+	inset-block-end: 16px;
+	inset-inline-end: 16px;
+}
+
+.sbs-telegram-chat-widget[data-placement="bottom-left"] {
+	inset-block-end: 16px;
+	inset-inline-start: 16px;
+}
+
+.sbs-telegram-chat-widget--open {
+	inset-inline: 12px;
+	inset-block-end: 12px;
+}
+
+.sbs-telegram-chat-widget--closed {
+	width: max-content;
+}
+
+.sbs-telegram-chat-launcher {
+	pointer-events: auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	border: 1px solid rgb(255 255 255 / 15%);
+	border-radius: 999px;
+	background: #111418;
+	box-shadow: 0 18px 48px rgb(0 0 0 / 25%);
+	color: #ffffff;
+	font: inherit;
+	font-size: 14px;
+	font-weight: 650;
+	line-height: 1;
+	padding: 12px 16px;
+	outline: none;
+	transform-origin: bottom right;
+	transition:
+		transform 180ms ease,
+		background-color 180ms ease,
+		box-shadow 180ms ease;
+}
+
+.sbs-telegram-chat-launcher:hover {
+	background: #1a1f25;
+	transform: translateY(-2px);
+}
+
+.sbs-telegram-chat-launcher:active {
+	transform: translateY(1px);
+}
+
+.sbs-telegram-chat-launcher:focus-visible {
+	box-shadow:
+		0 18px 48px rgb(0 0 0 / 25%),
+		0 0 0 2px #d8ff76;
+}
+
+.sbs-telegram-chat-launcher--squishy:hover {
+	box-shadow: 0 20px 52px rgb(0 0 0 / 35%);
+	transform: translateY(-4px) scale(1.03);
+}
+
+.sbs-telegram-chat-launcher--squishy:active {
+	transform: translateY(2px) scaleX(1.06) scaleY(0.94);
+}
+
+.sbs-telegram-chat-launcher--squishy:hover .sbs-telegram-chat-icon {
+	transform: rotate(-6deg) scale(1.1);
+}
+
+.sbs-telegram-chat-panel {
+	pointer-events: auto;
+	display: flex;
+	width: 100%;
+	max-height: calc(100dvh - 16px);
+	min-height: 32rem;
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid rgb(255 255 255 / 10%);
+	border-radius: 22px;
+	background: rgb(27 27 27 / 98%);
+	box-shadow: 0 22px 64px rgb(0 0 0 / 35%);
+	color: #ffffff;
+	backdrop-filter: blur(18px);
+}
+
+.sbs-telegram-chat-panel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	border-bottom: 1px solid rgb(255 255 255 / 8%);
+	padding: 12px 16px;
+}
+
+.sbs-telegram-chat-panel-title-block {
+	min-width: 0;
+}
+
+.sbs-telegram-chat-panel-title-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.sbs-telegram-chat-online-dot {
+	width: 8px;
+	height: 8px;
+	flex: 0 0 auto;
+	border-radius: 999px;
+	background: #d8ff76;
+	box-shadow: 0 0 0 3px rgb(216 255 118 / 8%);
+}
+
+.sbs-telegram-chat-panel-title {
+	overflow: hidden;
+	margin: 0;
+	font-size: 14px;
+	font-weight: 650;
+	line-height: 20px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sbs-telegram-chat-panel-subtitle {
+	overflow: hidden;
+	margin: 2px 0 0;
+	color: rgb(255 255 255 / 52%);
+	font-size: 12px;
+	line-height: 20px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sbs-telegram-chat-panel-actions {
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	gap: 4px;
+}
+
+.sbs-telegram-chat-icon-button,
+.sbs-telegram-chat-attach-button,
+.sbs-telegram-chat-remove-attachment,
+.sbs-telegram-chat-send-button,
+.sbs-telegram-chat-mode-button {
+	appearance: none;
+	border: 0;
+	font: inherit;
+}
+
+.sbs-telegram-chat-icon-button {
+	display: grid;
+	width: 32px;
+	height: 32px;
+	place-items: center;
+	border-radius: 8px;
+	background: transparent;
+	color: rgb(255 255 255 / 54%);
+	text-decoration: none;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.sbs-telegram-chat-icon-button:hover {
+	background: rgb(255 255 255 / 8%);
+	color: #ffffff;
+}
+
+.sbs-telegram-chat-transcript {
+	flex: 1;
+	overflow-y: auto;
+	padding: 20px 16px;
+}
+
+.sbs-telegram-chat-message-list {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.sbs-telegram-chat-assistant-intro {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.sbs-telegram-chat-avatar {
+	display: grid;
+	width: 28px;
+	height: 28px;
+	flex: 0 0 auto;
+	place-items: center;
+	border-radius: 999px;
+	background: #ffffff;
+	color: #1b1b1b;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.sbs-telegram-chat-assistant-copy {
+	max-width: 20rem;
+	margin: 0;
+	padding-top: 2px;
+	color: rgb(255 255 255 / 76%);
+	font-size: 14px;
+	line-height: 24px;
+}
+
+.sbs-telegram-chat-composer-shell {
+	border-top: 1px solid rgb(255 255 255 / 8%);
+	background: #1b1b1b;
+	padding: 12px;
+}
+
+.sbs-telegram-chat-closed-message,
+.sbs-telegram-chat-error-message {
+	margin: 0 4px 12px;
+	font-size: 12px;
+	line-height: 20px;
+}
+
+.sbs-telegram-chat-closed-message {
+	color: rgb(255 255 255 / 60%);
+}
+
+.sbs-telegram-chat-error-message {
+	color: #ffb4a8;
+}
+
+.sbs-telegram-chat-composer {
+	border: 1px solid rgb(255 255 255 / 9%);
+	border-radius: 20px;
+	background: #2a2a2a;
+	box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+	padding: 8px;
+}
+
+.sbs-telegram-chat-file-input {
+	display: none;
+}
+
+.sbs-telegram-chat-message-textarea,
+.sbs-telegram-chat-bug-textarea {
+	width: 100%;
+	resize: none;
+	border: 0;
+	background: transparent;
+	color: #ffffff;
+	font: inherit;
+	font-size: 14px;
+	line-height: 24px;
+	outline: none;
+}
+
+.sbs-telegram-chat-message-textarea {
+	min-height: 64px;
+	padding: 4px 8px;
+}
+
+.sbs-telegram-chat-message-textarea::placeholder,
+.sbs-telegram-chat-bug-textarea::placeholder {
+	color: rgb(255 255 255 / 34%);
+}
+
+.sbs-telegram-chat-bug-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.sbs-telegram-chat-bug-textarea,
+.sbs-telegram-chat-bug-impact {
+	border: 1px solid rgb(255 255 255 / 8%);
+	border-radius: 12px;
+	background: rgb(255 255 255 / 5%);
+	transition: border-color 160ms ease;
+}
+
+.sbs-telegram-chat-bug-textarea {
+	min-height: 44px;
+	padding: 8px 12px;
+	line-height: 20px;
+}
+
+.sbs-telegram-chat-bug-textarea:focus,
+.sbs-telegram-chat-bug-impact:focus {
+	border-color: rgb(255 255 255 / 30%);
+}
+
+.sbs-telegram-chat-bug-impact {
+	width: 100%;
+	height: 36px;
+	padding: 0 12px;
+	color: #ffffff;
+	font: inherit;
+	font-size: 12px;
+	outline: none;
+}
+
+.sbs-telegram-chat-bug-impact option {
+	color: #1b1b1b;
+}
+
+.sbs-telegram-chat-attachment-chip {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+	border: 1px solid rgb(255 255 255 / 8%);
+	border-radius: 12px;
+	background: rgb(255 255 255 / 5%);
+	color: rgb(255 255 255 / 70%);
+	font-size: 12px;
+	line-height: 16px;
+	padding: 8px 12px;
+}
+
+.sbs-telegram-chat-attachment-name {
+	min-width: 0;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sbs-telegram-chat-remove-attachment,
+.sbs-telegram-chat-attach-button {
+	display: grid;
+	flex: 0 0 auto;
+	place-items: center;
+	border-radius: 999px;
+	background: transparent;
+	color: rgb(255 255 255 / 55%);
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.sbs-telegram-chat-remove-attachment {
+	width: 28px;
+	height: 28px;
+}
+
+.sbs-telegram-chat-attach-button {
+	width: 32px;
+	height: 32px;
+}
+
+.sbs-telegram-chat-remove-attachment:hover,
+.sbs-telegram-chat-attach-button:hover {
+	background: rgb(255 255 255 / 8%);
+	color: #ffffff;
+}
+
+.sbs-telegram-chat-attach-button:disabled {
+	cursor: not-allowed;
+	color: rgb(255 255 255 / 24%);
+}
+
+.sbs-telegram-chat-composer-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.sbs-telegram-chat-composer-tools {
+	display: flex;
+	min-width: 0;
+	flex: 1;
+	align-items: center;
+	gap: 4px;
+}
+
+.sbs-telegram-chat-mode-button {
+	display: inline-flex;
+	height: 32px;
+	align-items: center;
+	gap: 6px;
+	border-radius: 999px;
+	background: transparent;
+	color: rgb(255 255 255 / 54%);
+	font-size: 12px;
+	font-weight: 650;
+	padding: 0 12px;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease,
+		box-shadow 160ms ease;
+}
+
+.sbs-telegram-chat-mode-button:hover {
+	background: rgb(255 255 255 / 8%);
+	color: #ffffff;
+}
+
+.sbs-telegram-chat-mode-button--active {
+	background: rgb(255 255 255 / 12%);
+	box-shadow: 0 0 0 1px rgb(255 255 255 / 10%);
+	color: #ffffff;
+}
+
+.sbs-telegram-chat-send-button {
+	display: grid;
+	width: 32px;
+	height: 32px;
+	flex: 0 0 auto;
+	place-items: center;
+	border-radius: 999px;
+	background: #ffffff;
+	color: #151912;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.sbs-telegram-chat-send-button:hover:not(:disabled) {
+	background: rgb(255 255 255 / 90%);
+}
+
+.sbs-telegram-chat-send-button:disabled {
+	cursor: not-allowed;
+	background: rgb(255 255 255 / 12%);
+	color: rgb(255 255 255 / 35%);
+}
+
+.sbs-telegram-chat-message-row {
+	display: flex;
+	justify-content: flex-start;
+}
+
+.sbs-telegram-chat-message-row--visitor {
+	justify-content: flex-end;
+}
+
+.sbs-telegram-chat-message-bubble {
+	max-width: 84%;
+	overflow: hidden;
+	font-size: 14px;
+	line-height: 24px;
+}
+
+.sbs-telegram-chat-message-bubble--visitor {
+	border-radius: 18px;
+	background: #303030;
+	color: #ffffff;
+	padding: 10px 14px;
+}
+
+.sbs-telegram-chat-message-bubble--operator {
+	padding-top: 2px;
+	color: rgb(255 255 255 / 82%);
+}
+
+.sbs-telegram-chat-message-body {
+	margin: 0;
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+}
+
+.sbs-telegram-chat-system-message {
+	padding: 0 28px;
+	color: rgb(255 255 255 / 38%);
+	font-size: 12px;
+	line-height: 20px;
+	text-align: center;
+}
+
+.sbs-telegram-chat-message-attachment {
+	overflow: hidden;
+	margin-top: 8px;
+	border: 1px solid rgb(255 255 255 / 8%);
+	border-radius: 8px;
+	background: rgb(255 255 255 / 4%);
+}
+
+.sbs-telegram-chat-message-bubble--visitor
+	.sbs-telegram-chat-message-attachment {
+	background: rgb(0 0 0 / 10%);
+}
+
+.sbs-telegram-chat-message-attachment-image {
+	display: block;
+	width: 100%;
+	max-height: 160px;
+	object-fit: cover;
+}
+
+.sbs-telegram-chat-message-attachment-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 10px;
+	font-size: 11px;
+	line-height: 16px;
+	opacity: 0.7;
+}
+
+.sbs-telegram-chat-delivery-label {
+	margin: 4px 0 0;
+	color: rgb(255 255 255 / 38%);
+	font-size: 11px;
+	line-height: 16px;
+	text-align: right;
+}
+
+.sbs-telegram-chat-icon {
+	width: 16px;
+	height: 16px;
+	flex: 0 0 auto;
+	transition: transform 180ms ease;
+}
+
+.sbs-telegram-chat-small-icon {
+	width: 14px;
+	height: 14px;
+	flex: 0 0 auto;
+}
+
+.sbs-telegram-chat-spin {
+	animation: sbs-telegram-chat-spin 900ms linear infinite;
+}
+
+.sbs-telegram-chat-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	clip-path: inset(50%);
+}
+
+@keyframes sbs-telegram-chat-spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (min-width: 640px) {
+	.sbs-telegram-chat-widget--open[data-placement="bottom-right"] {
+		inset-block-end: 24px;
+		inset-inline: auto 24px;
+	}
+
+	.sbs-telegram-chat-widget--open[data-placement="bottom-left"] {
+		inset-block-end: 24px;
+		inset-inline: 24px auto;
+	}
+
+	.sbs-telegram-chat-widget--closed[data-placement="bottom-right"] {
+		inset-block-end: 24px;
+		inset-inline-end: 24px;
+	}
+
+	.sbs-telegram-chat-widget--closed[data-placement="bottom-left"] {
+		inset-block-end: 24px;
+		inset-inline-start: 24px;
+	}
+
+	.sbs-telegram-chat-panel {
+		width: 27rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sbs-telegram-chat-launcher,
+	.sbs-telegram-chat-icon,
+	.sbs-telegram-chat-icon-button,
+	.sbs-telegram-chat-mode-button,
+	.sbs-telegram-chat-send-button,
+	.sbs-telegram-chat-attach-button,
+	.sbs-telegram-chat-remove-attachment {
+		transition: none;
+	}
+}

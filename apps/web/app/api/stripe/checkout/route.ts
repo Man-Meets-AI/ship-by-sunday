@@ -1,6 +1,8 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { fetchAction } from "convex/nextjs";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { api } from "@/convex/_generated/api";
 import { buildStripeCheckoutSessionCreateParams } from "@/platform/billing/checkout/checkout-session-params";
 import { captureServerError } from "@/platform/observability/capture-server-error";
 import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
@@ -15,6 +17,8 @@ import {
 	getStripe,
 } from "@/platform/billing/stripe";
 import { getAppBaseUrl } from "@/platform/next/app-url";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
+import { requireServerEnv } from "@/platform/env/server";
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
@@ -27,14 +31,41 @@ export async function POST(request: Request) {
 	});
 
 	try {
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "stripe.checkout.createSession",
+				blockReason: "billing_action_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Checkout is unavailable during support mode.", requestId },
+				{ status: 403 },
+				requestId,
+			);
+		}
+
 		const stripe = getStripe();
 		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;
+		const checkoutEmail = user?.primaryEmailAddress?.emailAddress ?? null;
+		const checkoutServerToken = requireServerEnv(
+			"CHECKOUT_FULFILLMENT_RETRY_SECRET",
+		);
+		const purchaseIntent = await fetchAction(
+			api.checkoutClaims.createCheckoutPurchaseIntent,
+			{
+				checkoutServerToken,
+				checkoutSurface: "hosted_checkout",
+				...(userId ? { clerkUserId: userId } : {}),
+				...(checkoutEmail ? { checkoutEmail } : {}),
+			},
+		);
 		const session = await stripe.checkout.sessions.create(
 			buildStripeCheckoutSessionCreateParams({
 				appBaseUrl,
 				clerkUserId: userId,
-				customerEmail: user?.primaryEmailAddress?.emailAddress ?? null,
+				customerEmail: checkoutEmail,
+				purchaseIntentId: purchaseIntent.purchaseIntentId,
 			}),
 		);
 
@@ -58,6 +89,14 @@ export async function POST(request: Request) {
 				requestId,
 			);
 		}
+		await fetchAction(
+			api.checkoutClaims.attachStripeCheckoutSessionToPurchaseIntent,
+			{
+				checkoutServerToken,
+				purchaseIntentId: purchaseIntent.purchaseIntentId,
+				stripeCheckoutSessionId: session.id,
+			},
+		);
 
 		const response = jsonWithRequestId(
 			{ url: session.url, sessionId: session.id },
@@ -74,7 +113,7 @@ export async function POST(request: Request) {
 		return response;
 	} catch (error) {
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.stripeCheckout,
 			source: "stripe",

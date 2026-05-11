@@ -1,10 +1,10 @@
 ---
 title: Checkout Success Polish
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Polish the post-checkout success view at /checkout/success so the first 5-15 seconds after Stripe feel like a deliberate delivery handoff in light and dark mode, by tuning typography, motion, microinteractions, CTA hierarchy, and mobile reflow without changing polling cadence, redirect timing, cookie recovery, the view-model contract, Stripe behavior, or metadata.robots.
-post_build_recap: null
+post_build_recap: The checkout success polish pass shipped the status-frame cleanup, typography rhythm, progress-step motion, redirect affordance, CTA hierarchy, mobile reflow, dark-mode audit, focused tests, and limited browser proof recorded in the retrospective.
 read_when:
   - Resuming the checkout-success polish pass mid-flight.
   - Reviewing the polish-pass diff against the locked behavior contract.

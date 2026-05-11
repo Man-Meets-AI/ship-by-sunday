@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "@xyflow/react/dist/style.css";
+import "@shipbysunday/telegram-chat-widget/styles.css";
 import { ThemeProvider } from "next-themes";
 
 import { projectFontVariables } from "@/app/fonts";

@@ -93,7 +93,7 @@ describe("workspace mission route", () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
 			if (query === "getCodebaseResumeDestination") {
 				return {
-					destination: "/review",
+					destination: "/generate-codebase/review",
 					kind: "review",
 					codebaseStageId: "review",
 					postReviewTargets: null,
@@ -109,7 +109,7 @@ describe("workspace mission route", () => {
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
 		expect(markup).toContain("Lesson Map opens after Review.");
-		expect(markup).toContain('href="/review"');
+		expect(markup).toContain('href="/generate-codebase/review"');
 	});
 
 	it("keeps the restored route reachable after unlock without redirecting to start", async () => {
@@ -120,10 +120,10 @@ describe("workspace mission route", () => {
 					kind: "post_review",
 					codebaseStageId: null,
 					postReviewTargets: {
-						reviewDestination: "/review",
+						reviewDestination: "/generate-codebase/review",
 						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
 						launchLessonsDestination: "/lesson/product-review",
-						lessonMapDestination: "/review?showLessonMap=1",
+						lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 						latestLessonDestination: "/lesson/iterate-the-product-with-ai",
 					},
 				};
@@ -136,8 +136,10 @@ describe("workspace mission route", () => {
 			await import("@/app/(workspace)/mission/page");
 
 		await expect(MissionRoutePage()).rejects.toThrowError(
-			"NEXT_REDIRECT:/review?showLessonMap=1",
+			"NEXT_REDIRECT:/generate-codebase/review?showLessonMap=1",
 		);
-		expect(redirectMock).toHaveBeenCalledWith("/review?showLessonMap=1");
+		expect(redirectMock).toHaveBeenCalledWith(
+			"/generate-codebase/review?showLessonMap=1",
+		);
 	});
 });

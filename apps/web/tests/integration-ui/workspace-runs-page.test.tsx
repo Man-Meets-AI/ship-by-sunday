@@ -155,6 +155,6 @@ describe("WorkspaceRunsPage", () => {
 			screen
 				.getByRole("link", { name: "Open Doctor Pass" })
 				.getAttribute("href"),
-		).toBe("/workspace/doctor-pass");
+		).toBe("/workers/doctor-pass");
 	});
 });

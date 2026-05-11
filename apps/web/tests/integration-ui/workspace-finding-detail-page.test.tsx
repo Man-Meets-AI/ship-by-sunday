@@ -186,7 +186,7 @@ describe("WorkspaceFindingDetailPage", () => {
 			([title]) => title === "Local evidence ref copied.",
 		)?.[1];
 		toastOptions?.action?.onClick();
-		expect(routerPushMock).toHaveBeenCalledWith("/workspace/runs");
+		expect(routerPushMock).toHaveBeenCalledWith("/workers/runs");
 
 		await user.click(
 			screen.getByRole("button", { name: /Create branch and run workflow/i }),
@@ -468,7 +468,7 @@ describe("WorkspaceFindingDetailPage", () => {
 			screen
 				.getByRole("link", { name: "Back to findings" })
 				.getAttribute("href"),
-		).toBe("/workspace/findings");
+		).toBe("/workers/findings");
 	});
 
 	it("renders broken-app triage as read-only diagnostics before patching", async () => {

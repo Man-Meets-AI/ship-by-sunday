@@ -149,9 +149,9 @@ export function renderGeneralizedStarterFiles(
 				"    steps:",
 				"      - uses: actions/checkout@v4",
 				"      - uses: oven-sh/setup-bun@v2",
-				"      - run: bun install",
-				"      - run: bun run lint",
-				"      - run: bun run build",
+				"      - run: bun ci",
+				"      - run: bun run codebase:contract",
+				"      - run: bun run agentic:check",
 			].join("\n"),
 		},
 		{

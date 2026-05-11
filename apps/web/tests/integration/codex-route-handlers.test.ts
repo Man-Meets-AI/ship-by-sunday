@@ -4,11 +4,13 @@ vi.mock("server-only", () => ({}));
 
 const {
 	requireProductAccessApiSessionMock,
+	recordBlockedSupportModeActionForRequestMock,
 	upsertViewerCodexConnectionMock,
 	recordCodexRunMock,
 	withCodexAppServerClientMock,
 } = vi.hoisted(() => ({
 	requireProductAccessApiSessionMock: vi.fn(),
+	recordBlockedSupportModeActionForRequestMock: vi.fn(),
 	upsertViewerCodexConnectionMock: vi.fn(),
 	recordCodexRunMock: vi.fn(),
 	withCodexAppServerClientMock: vi.fn(),
@@ -38,6 +40,11 @@ vi.mock("@/platform/codex/app-server-service", async () => {
 	};
 });
 
+vi.mock("@/platform/admin-impersonation/route-policy", () => ({
+	recordBlockedSupportModeActionForRequest:
+		recordBlockedSupportModeActionForRequestMock,
+}));
+
 import { GET as getCodexLoginPoll } from "@/app/api/codex/account/login/poll/route";
 import { POST as postCodexLoginStart } from "@/app/api/codex/account/login/start/route";
 import { POST as postCodexLogout } from "@/app/api/codex/account/logout/route";
@@ -52,6 +59,9 @@ function createRequest(url: string, init?: RequestInit) {
 describe("codex route handlers", () => {
 	beforeEach(() => {
 		requireProductAccessApiSessionMock.mockReset();
+		recordBlockedSupportModeActionForRequestMock
+			.mockReset()
+			.mockResolvedValue(false);
 		upsertViewerCodexConnectionMock.mockReset();
 		recordCodexRunMock.mockReset();
 		withCodexAppServerClientMock.mockReset();
@@ -132,6 +142,33 @@ describe("codex route handlers", () => {
 		);
 	});
 
+	it("blocks Codex account reads during support mode before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const response = await getCodexAccountRead(
+			createRequest("https://example.test/api/codex/account/read"),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Codex account reads are unavailable during support mode.",
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "codex.account.read",
+				blockReason: "external_side_effect_blocked",
+			},
+		);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
+	});
+
 	it("starts Codex login and marks the viewer connection as connecting", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -170,6 +207,35 @@ describe("codex route handlers", () => {
 				rateLimits: null,
 			}),
 		);
+	});
+
+	it("blocks Codex login starts during support mode before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const response = await postCodexLoginStart(
+			createRequest("https://example.test/api/codex/account/login/start", {
+				method: "POST",
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Codex account login is unavailable during support mode.",
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "codex.account.login.start",
+				blockReason: "external_side_effect_blocked",
+			},
+		);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
 	});
 
 	it("returns a mapped auth response when Codex access is missing", async () => {
@@ -240,6 +306,35 @@ describe("codex route handlers", () => {
 		expect(withCodexAppServerClientMock).toHaveBeenCalledTimes(1);
 	});
 
+	it("blocks Codex login polling during support mode before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const response = await getCodexLoginPoll(
+			createRequest(
+				"https://example.test/api/codex/account/login/poll?loginId=login_123",
+			),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Codex login polling is unavailable during support mode.",
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "codex.account.login.poll",
+				blockReason: "external_side_effect_blocked",
+			},
+		);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
+	});
+
 	it("returns a mapped auth response when polling without access", async () => {
 		requireProductAccessApiSessionMock.mockRejectedValue(
 			new Error("FORBIDDEN"),
@@ -286,6 +381,35 @@ describe("codex route handlers", () => {
 				rateLimits: null,
 			}),
 		);
+	});
+
+	it("blocks Codex logout during support mode before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const response = await postCodexLogout(
+			createRequest("https://example.test/api/codex/account/logout", {
+				method: "POST",
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Codex account logout is unavailable during support mode.",
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "codex.account.logout",
+				blockReason: "external_side_effect_blocked",
+			},
+		);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
 	});
 
 	it("returns a mapped auth response when logout access is missing", async () => {
@@ -341,6 +465,68 @@ describe("codex route handlers", () => {
 				rateLimits: null,
 			}),
 		);
+	});
+
+	it("returns a disconnected rate-limit state when no Codex account is attached", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: null,
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		const response = await getCodexRateLimits(
+			createRequest("https://example.test/api/codex/account/rate-limits"),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
+			connected: false,
+			rateLimits: null,
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "disconnected",
+				account: null,
+				rateLimits: null,
+			}),
+		);
+	});
+
+	it("blocks Codex rate-limit reads during support mode before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const response = await getCodexRateLimits(
+			createRequest("https://example.test/api/codex/account/rate-limits"),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Codex rate-limit reads are unavailable during support mode.",
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "codex.account.rateLimits",
+				blockReason: "external_side_effect_blocked",
+			},
+		);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
 	});
 
 	it("returns live rate limits for managed Codex accounts", async () => {
@@ -441,6 +627,42 @@ describe("codex route handlers", () => {
 		);
 
 		expect(response.status).toBe(400);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(recordCodexRunMock).not.toHaveBeenCalled();
+	});
+
+	it("blocks Codex generation during support mode before parsing the request body", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "competitor_research",
+					prompt: "Research the offer",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(403);
+		expect(body).toEqual({
+			error: "Codex generation is unavailable during support mode.",
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "codex.generate",
+				blockReason: "external_side_effect_blocked",
+			},
+		);
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 		expect(recordCodexRunMock).not.toHaveBeenCalled();
 	});
@@ -690,6 +912,39 @@ describe("codex route handlers", () => {
 		});
 	});
 
+	it("returns a disconnected poll state when no pending login id exists", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			readAccount: vi.fn().mockResolvedValue({
+				account: null,
+			}),
+		});
+
+		const response = await getCodexLoginPoll(
+			createRequest("https://example.test/api/codex/account/login/poll"),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
+			connected: false,
+			status: "disconnected",
+			account: null,
+			rateLimits: null,
+		});
+		expect(upsertViewerCodexConnectionMock).toHaveBeenCalledWith(
+			{ userId: "user_123", token: "token_123" },
+			expect.objectContaining({
+				status: "disconnected",
+				account: null,
+				rateLimits: null,
+			}),
+		);
+	});
+
 	it("returns a request-tagged 500 when reading the account fails unexpectedly", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -705,6 +960,28 @@ describe("codex route handlers", () => {
 		const body = (await response.json()) as Record<string, unknown>;
 
 		expect(response.status).toBe(500);
+		expect(body.requestId).toBeTruthy();
+	});
+
+	it("returns a mapped unavailable response when polling uses a disabled app-server runtime", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		withCodexAppServerClientMock.mockRejectedValue(
+			new Error("CODEX_APP_SERVER_DISABLED"),
+		);
+
+		const response = await getCodexLoginPoll(
+			createRequest("https://example.test/api/codex/account/login/poll"),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(503);
+		expect(body).toMatchObject({
+			error:
+				"Codex app-server is disabled in this deployment. Enable it only on a runtime that can spawn the Codex binary and persist per-user state.",
+		});
 		expect(body.requestId).toBeTruthy();
 	});
 
@@ -833,6 +1110,28 @@ describe("codex route handlers", () => {
 		const body = (await response.json()) as Record<string, unknown>;
 
 		expect(response.status).toBe(500);
+		expect(body.requestId).toBeTruthy();
+	});
+
+	it("returns a mapped unavailable response when rate-limit reads use a disabled app-server runtime", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		withCodexAppServerClientMock.mockRejectedValue(
+			new Error("CODEX_APP_SERVER_DISABLED"),
+		);
+
+		const response = await getCodexRateLimits(
+			createRequest("https://example.test/api/codex/account/rate-limits"),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(503);
+		expect(body).toMatchObject({
+			error:
+				"Codex app-server is disabled in this deployment. Enable it only on a runtime that can spawn the Codex binary and persist per-user state.",
+		});
 		expect(body.requestId).toBeTruthy();
 	});
 

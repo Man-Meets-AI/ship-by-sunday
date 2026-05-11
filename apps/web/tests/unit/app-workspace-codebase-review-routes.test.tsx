@@ -5,9 +5,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const fetchAuthenticatedQueryMock = vi.fn();
 const fetchAuthenticatedMutationMock = vi.fn();
 const getServerProductAccessMock = vi.fn();
+const currentUserMock = vi.fn();
 const redirectMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
+
+vi.mock("@clerk/nextjs/server", () => ({
+	currentUser: currentUserMock,
+}));
 
 vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedMutation: fetchAuthenticatedMutationMock,
@@ -33,9 +38,12 @@ vi.mock("@/app/(workspace)/_components/codebase-flow/codebase-page", () => ({
 	CodebasePage: () => <div>Codebase workspace</div>,
 }));
 
-vi.mock("@/app/(workspace)/review/_components/codebase-review-page", () => ({
-	CodebaseReviewPage: () => <div>Review workspace</div>,
-}));
+vi.mock(
+	"@/app/(workspace)/generate-codebase/review/_components/codebase-review-page",
+	() => ({
+		CodebaseReviewPage: () => <div>Review workspace</div>,
+	}),
+);
 
 vi.mock(
 	"@/app/(workspace)/_components/existing-codebase-setup/existing-codebase-setup-page",
@@ -44,9 +52,12 @@ vi.mock(
 	}),
 );
 
-vi.mock("@/app/(workspace)/_components/workspace-fulfillment-choice", () => ({
-	WorkspaceFulfillmentChoice: () => <div>Workspace fulfillment choice</div>,
-}));
+vi.mock(
+	"@/app/(workspace)/_components/paid-app-home/paid-app-home-page",
+	() => ({
+		PaidAppHomePage: () => <div>Paid app home</div>,
+	}),
+);
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -68,6 +79,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		fetchAuthenticatedMutationMock.mockReset();
 		fetchAuthenticatedQueryMock.mockReset();
 		getServerProductAccessMock.mockReset();
+		currentUserMock.mockReset();
 		redirectMock.mockReset();
 		redirectMock.mockImplementation((destination: string) => {
 			throw new Error(`redirect:${destination}`);
@@ -76,6 +88,7 @@ describe("workspace codebase, review, and setup routes", () => {
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
 			fulfillmentTrack: "generated_codebase",
 		});
 		vi.resetModules();
@@ -89,7 +102,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(workspace)/codebase/page");
+			await import("@/app/(workspace)/generate-codebase/page");
 
 		const markup = renderToStaticMarkup(await CodebaseRoutePage());
 
@@ -105,7 +118,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: ReviewRoutePage } =
-			await import("@/app/(workspace)/review/page");
+			await import("@/app/(workspace)/generate-codebase/review/page");
 
 		const markup = renderToStaticMarkup(
 			await ReviewRoutePage({
@@ -125,7 +138,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: SetupRoutePage } =
-			await import("@/app/(workspace)/workspace/setup/page");
+			await import("@/app/(workspace)/workers/setup/page");
 
 		const markup = renderToStaticMarkup(await SetupRoutePage());
 
@@ -145,7 +158,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(workspace)/codebase/page");
+			await import("@/app/(workspace)/generate-codebase/page");
 
 		const markup = renderToStaticMarkup(await CodebaseRoutePage());
 
@@ -169,7 +182,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: ReviewRoutePage } =
-			await import("@/app/(workspace)/review/page");
+			await import("@/app/(workspace)/generate-codebase/review/page");
 
 		const markup = renderToStaticMarkup(
 			await ReviewRoutePage({
@@ -190,6 +203,7 @@ describe("workspace codebase, review, and setup routes", () => {
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
 			fulfillmentTrack: "existing_codebase_doctor",
 		});
 		fetchAuthenticatedMutationMock.mockResolvedValue({
@@ -203,7 +217,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: SetupRoutePage } =
-			await import("@/app/(workspace)/workspace/setup/page");
+			await import("@/app/(workspace)/workers/setup/page");
 
 		const markup = renderToStaticMarkup(await SetupRoutePage());
 
@@ -217,106 +231,78 @@ describe("workspace codebase, review, and setup routes", () => {
 		);
 	});
 
-	it("renders workspace choice only for unresolved paid access", async () => {
+	it("renders paid app home for granted access", async () => {
 		getServerProductAccessMock.mockResolvedValue({
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
 			fulfillmentTrack: "unspecified",
 		});
 
-		const { default: ChoiceRoutePage } =
-			await import("@/app/(workspace)/workspace/choose/page");
+		const { default: HomeRoutePage } =
+			await import("@/app/(workspace)/home/page");
 
-		const markup = renderToStaticMarkup(await ChoiceRoutePage());
+		const markup = renderToStaticMarkup(
+			await HomeRoutePage({
+				searchParams: Promise.resolve({}),
+			}),
+		);
 
-		expect(markup).toContain("Workspace fulfillment choice");
+		expect(markup).toContain("Paid app home");
 	});
 
-	it("renders workspace choice access recovery without paid access", async () => {
+	it("renders paid app home access recovery without paid access", async () => {
 		getServerProductAccessMock.mockResolvedValue({
 			clerkUserId: "user_123",
 			hasAccess: false,
 			status: "no_access",
+			capabilities: [],
 		});
 
-		const { default: ChoiceRoutePage } =
-			await import("@/app/(workspace)/workspace/choose/page");
+		const { default: HomeRoutePage } =
+			await import("@/app/(workspace)/home/page");
 
-		const markup = renderToStaticMarkup(await ChoiceRoutePage());
+		const markup = renderToStaticMarkup(
+			await HomeRoutePage({
+				searchParams: Promise.resolve({}),
+			}),
+		);
 
 		expect(markup).toContain("Access recovery");
 	});
 
-	it("redirects generated-codebase viewers away from workspace choice", async () => {
-		const { default: ChoiceRoutePage } =
-			await import("@/app/(workspace)/workspace/choose/page");
-
-		await expect(ChoiceRoutePage()).rejects.toThrow("redirect:/codebase");
-		expect(redirectMock).toHaveBeenCalledWith("/codebase");
-	});
-
-	it("redirects existing-codebase viewers away from workspace choice", async () => {
+	it("redirects viewers without worker capability away from worker setup", async () => {
 		getServerProductAccessMock.mockResolvedValue({
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
-			fulfillmentTrack: "existing_codebase_doctor",
+			capabilities: ["generate_codebase", "tutorials"],
+			fulfillmentTrack: "generated_codebase",
 		});
 
-		const { default: ChoiceRoutePage } =
-			await import("@/app/(workspace)/workspace/choose/page");
-
-		await expect(ChoiceRoutePage()).rejects.toThrow(
-			"redirect:/workspace/setup",
-		);
-		expect(redirectMock).toHaveBeenCalledWith("/workspace/setup");
-	});
-
-	it("redirects generated-codebase viewers away from existing-codebase setup", async () => {
 		const { default: SetupRoutePage } =
-			await import("@/app/(workspace)/workspace/setup/page");
+			await import("@/app/(workspace)/workers/setup/page");
 
-		await expect(SetupRoutePage()).rejects.toThrow("redirect:/codebase");
+		await expect(SetupRoutePage()).rejects.toThrow("redirect:/home");
 		expect(fetchAuthenticatedMutationMock).not.toHaveBeenCalled();
-		expect(redirectMock).toHaveBeenCalledWith("/codebase");
+		expect(redirectMock).toHaveBeenCalledWith("/home");
 	});
 
-	it("redirects existing-codebase viewers away from generated-codebase codebase", async () => {
+	it("redirects viewers without generate-codebase capability away from generate-codebase", async () => {
 		getServerProductAccessMock.mockResolvedValue({
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["tutorials", "worker"],
 			fulfillmentTrack: "existing_codebase_doctor",
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(workspace)/codebase/page");
+			await import("@/app/(workspace)/generate-codebase/page");
 
-		await expect(CodebaseRoutePage()).rejects.toThrow(
-			"redirect:/workspace/setup",
-		);
+		await expect(CodebaseRoutePage()).rejects.toThrow("redirect:/home");
 		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
-		expect(redirectMock).toHaveBeenCalledWith("/workspace/setup");
-	});
-
-	it("redirects unresolved viewers away from generated-codebase review", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: true,
-			status: "granted",
-			fulfillmentTrack: "unspecified",
-		});
-
-		const { default: ReviewRoutePage } =
-			await import("@/app/(workspace)/review/page");
-
-		await expect(
-			ReviewRoutePage({
-				searchParams: Promise.resolve({}),
-			}),
-		).rejects.toThrow("redirect:/workspace/choose");
-		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
-		expect(redirectMock).toHaveBeenCalledWith("/workspace/choose");
+		expect(redirectMock).toHaveBeenCalledWith("/home");
 	});
 });

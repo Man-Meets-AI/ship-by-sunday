@@ -656,7 +656,7 @@ export function buildWorkspacePrivacyModel({
 
 	return {
 		projectId: project?._id ?? null,
-		projectLabel: project?.displayName ?? "Existing codebase workspace",
+		projectLabel: project?.displayName ?? "Existing codebase Worker",
 		repositoryLabel: formatRepositoryLabel(repository),
 		runnerId: runner?._id ?? null,
 		runnerIdentityLabel:

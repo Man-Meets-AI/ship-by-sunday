@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
 import {
 	createUnifiedDiffPreview,
-	hasTomlTable,
+	type ParsedCodexConfigToml,
 	parseCodexConfigToml,
 	replaceManagedTomlBlock,
 } from "./codex-config-toml";
@@ -15,6 +15,20 @@ export const SBS_CODEX_BLOCK_START =
 	"# >>> Ship by Sunday managed Codex profiles >>>";
 export const SBS_CODEX_BLOCK_END =
 	"# <<< Ship by Sunday managed Codex profiles <<<";
+export const SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START =
+	"# >>> Shipbysunday Worker-managed Codex profiles >>>";
+export const SHIPBYSUNDAY_WORKER_CODEX_BLOCK_END =
+	"# <<< Shipbysunday Worker-managed Codex profiles <<<";
+export const SHIPBYSUNDAY_WORKER_READONLY_PROFILE =
+	"shipbysunday-worker-readonly";
+export const SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE =
+	"shipbysunday-worker-project-write";
+export const SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS =
+	"shipbysunday-worker-readonly";
+export const SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS =
+	"shipbysunday-worker-project-write";
+const SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES =
+	'["*KEY*", "*SECRET*", "*TOKEN*", "OPENAI_*", "ANTHROPIC_*", "GITHUB_TOKEN", "GH_TOKEN"]';
 
 export type CodexConfigInspection = {
 	configPath: string;
@@ -26,12 +40,34 @@ export type CodexConfigInspection = {
 	hasExplicitUntrustedProject: boolean;
 };
 
+export type ShipbysundayWorkerCodexConfigInspection = {
+	configPath: string;
+	exists: boolean;
+	hasReadonlyProfile: boolean;
+	hasProjectWriteProfile: boolean;
+	hasReadonlyPermissions: boolean;
+	hasProjectWritePermissions: boolean;
+	hasExplicitUntrustedProject: boolean;
+};
+
 export type CodexConfigPatchPreview = {
 	configPath: string;
 	before: string;
 	after: string;
 	diff: string;
 	changed: boolean;
+};
+
+type ManagedCodexProfileSetInspection = {
+	hasReadonlyProfile: boolean;
+	hasWriteProfile: boolean;
+	hasReadonlyPermissions: boolean;
+	hasWritePermissions: boolean;
+	hasExplicitUntrustedProject: boolean;
+};
+
+type CodexConfigPatchResult = CodexConfigPatchPreview & {
+	backupPath: string | null;
 };
 
 export function resolveCodexHome(env: NodeJS.ProcessEnv = process.env) {
@@ -65,57 +101,66 @@ export async function inspectCodexConfig({
 	}
 
 	const contents = await readFile(configPath, "utf8");
-	const normalizedRepositoryRoot = repositoryRoot
-		? repositoryRoot.replace(/\\/g, "\\\\")
-		: null;
+	const inspection = inspectManagedCodexProfileSet({
+		contents,
+		repositoryRoot,
+		readonlyProfileName: "sbs-doctor-readonly",
+		writeProfileName: "sbs-workspace-write",
+		readonlyPermissionsName: "sbs-readonly",
+		writePermissionsName: "sbs-workspace-write",
+		requireShellEnvironmentPolicy: false,
+	});
 
 	return {
 		configPath,
 		exists: true,
-		hasReadonlyProfile:
-			hasTomlTable(contents, "profiles.sbs-doctor-readonly") &&
-			hasTomlAssignment(contents, "profiles.sbs-doctor-readonly", {
-				key: "sandbox_mode",
-				value: '"read-only"',
-			}) &&
-			hasTomlAssignment(contents, "profiles.sbs-doctor-readonly", {
-				key: "default_permissions",
-				value: '"sbs-readonly"',
-			}),
-		hasWorkspaceWriteProfile:
-			hasTomlTable(contents, "profiles.sbs-workspace-write") &&
-			hasTomlAssignment(contents, "profiles.sbs-workspace-write", {
-				key: "sandbox_mode",
-				value: '"workspace-write"',
-			}) &&
-			hasTomlAssignment(contents, "profiles.sbs-workspace-write", {
-				key: "default_permissions",
-				value: '"sbs-workspace-write"',
-			}),
-		hasReadonlyPermissions:
-			hasTomlTable(
-				contents,
-				'permissions.sbs-readonly.filesystem.":project_roots"',
-			) &&
-			hasTomlTable(contents, "permissions.sbs-readonly.network") &&
-			hasTomlAssignment(contents, "permissions.sbs-readonly.network", {
-				key: "enabled",
-				value: "false",
-			}),
-		hasWorkspaceWritePermissions:
-			hasTomlTable(
-				contents,
-				'permissions.sbs-workspace-write.filesystem.":project_roots"',
-			) &&
-			hasTomlTable(contents, "permissions.sbs-workspace-write.network") &&
-			hasTomlAssignment(contents, "permissions.sbs-workspace-write.network", {
-				key: "enabled",
-				value: "false",
-			}),
-		hasExplicitUntrustedProject: normalizedRepositoryRoot
-			? contents.includes(`[projects."${normalizedRepositoryRoot}"]`) &&
-				contents.includes('trust_level = "untrusted"')
-			: contents.includes('trust_level = "untrusted"'),
+		hasReadonlyProfile: inspection.hasReadonlyProfile,
+		hasWorkspaceWriteProfile: inspection.hasWriteProfile,
+		hasReadonlyPermissions: inspection.hasReadonlyPermissions,
+		hasWorkspaceWritePermissions: inspection.hasWritePermissions,
+		hasExplicitUntrustedProject: inspection.hasExplicitUntrustedProject,
+	};
+}
+
+export async function inspectShipbysundayWorkerCodexConfig({
+	env = process.env,
+	repositoryRoot,
+}: {
+	env?: NodeJS.ProcessEnv;
+	repositoryRoot?: string;
+} = {}): Promise<ShipbysundayWorkerCodexConfigInspection> {
+	const configPath = resolveCodexConfigPath(env);
+	if (!existsSync(configPath)) {
+		return {
+			configPath,
+			exists: false,
+			hasReadonlyProfile: false,
+			hasProjectWriteProfile: false,
+			hasReadonlyPermissions: false,
+			hasProjectWritePermissions: false,
+			hasExplicitUntrustedProject: false,
+		};
+	}
+
+	const contents = await readFile(configPath, "utf8");
+	const inspection = inspectManagedCodexProfileSet({
+		contents,
+		repositoryRoot,
+		readonlyProfileName: SHIPBYSUNDAY_WORKER_READONLY_PROFILE,
+		writeProfileName: SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE,
+		readonlyPermissionsName: SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS,
+		writePermissionsName: SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS,
+		requireShellEnvironmentPolicy: true,
+	});
+
+	return {
+		configPath,
+		exists: true,
+		hasReadonlyProfile: inspection.hasReadonlyProfile,
+		hasProjectWriteProfile: inspection.hasWriteProfile,
+		hasReadonlyPermissions: inspection.hasReadonlyPermissions,
+		hasProjectWritePermissions: inspection.hasWritePermissions,
+		hasExplicitUntrustedProject: inspection.hasExplicitUntrustedProject,
 	};
 }
 
@@ -155,6 +200,204 @@ export function renderSbsCodexConfigBlock() {
 	].join("\n");
 }
 
+export function renderShipbysundayWorkerCodexConfigBlock() {
+	return [
+		SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START,
+		`[profiles.${SHIPBYSUNDAY_WORKER_READONLY_PROFILE}]`,
+		'approval_policy = "never"',
+		'sandbox_mode = "read-only"',
+		`default_permissions = "${SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS}"`,
+		'web_search = "disabled"',
+		'model_reasoning_effort = "medium"',
+		"",
+		`[profiles.${SHIPBYSUNDAY_WORKER_READONLY_PROFILE}.shell_environment_policy]`,
+		'inherit = "core"',
+		`exclude = ${SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES}`,
+		"",
+		`[profiles.${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE}]`,
+		'approval_policy = "on-request"',
+		'sandbox_mode = "workspace-write"',
+		`default_permissions = "${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS}"`,
+		'web_search = "disabled"',
+		'model_reasoning_effort = "medium"',
+		"",
+		`[profiles.${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PROFILE}.shell_environment_policy]`,
+		'inherit = "core"',
+		`exclude = ${SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES}`,
+		"",
+		`[permissions.${SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS}.filesystem.":project_roots"]`,
+		'"." = "read"',
+		'".env*" = "none"',
+		'"**/.env*" = "none"',
+		"",
+		`[permissions.${SHIPBYSUNDAY_WORKER_READONLY_PERMISSIONS}.network]`,
+		"enabled = false",
+		"",
+		`[permissions.${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS}.filesystem.":project_roots"]`,
+		'"." = "write"',
+		'".env*" = "none"',
+		'"**/.env*" = "none"',
+		"",
+		`[permissions.${SHIPBYSUNDAY_WORKER_PROJECT_WRITE_PERMISSIONS}.network]`,
+		"enabled = false",
+		SHIPBYSUNDAY_WORKER_CODEX_BLOCK_END,
+	].join("\n");
+}
+
+function inspectManagedCodexProfileSet({
+	contents,
+	repositoryRoot,
+	readonlyProfileName,
+	writeProfileName,
+	readonlyPermissionsName,
+	writePermissionsName,
+	requireShellEnvironmentPolicy,
+}: {
+	contents: string;
+	repositoryRoot?: string;
+	readonlyProfileName: string;
+	writeProfileName: string;
+	readonlyPermissionsName: string;
+	writePermissionsName: string;
+	requireShellEnvironmentPolicy: boolean;
+}): ManagedCodexProfileSetInspection {
+	const parsedConfig = parseCodexConfigToml(contents);
+	return {
+		hasReadonlyProfile: hasManagedCodexProfile({
+			contents,
+			parsedConfig,
+			profileName: readonlyProfileName,
+			sandboxMode: '"read-only"',
+			permissionsName: readonlyPermissionsName,
+			requireShellEnvironmentPolicy,
+		}),
+		hasWriteProfile: hasManagedCodexProfile({
+			contents,
+			parsedConfig,
+			profileName: writeProfileName,
+			sandboxMode: '"workspace-write"',
+			permissionsName: writePermissionsName,
+			requireShellEnvironmentPolicy,
+		}),
+		hasReadonlyPermissions: hasManagedCodexPermissions({
+			contents,
+			parsedConfig,
+			permissionsName: readonlyPermissionsName,
+		}),
+		hasWritePermissions: hasManagedCodexPermissions({
+			contents,
+			parsedConfig,
+			permissionsName: writePermissionsName,
+		}),
+		hasExplicitUntrustedProject: hasExplicitUntrustedCodexProject({
+			contents,
+			parsedConfig,
+			repositoryRoot,
+		}),
+	};
+}
+
+function hasManagedCodexProfile({
+	contents,
+	parsedConfig,
+	profileName,
+	sandboxMode,
+	permissionsName,
+	requireShellEnvironmentPolicy,
+}: {
+	contents: string;
+	parsedConfig: ParsedCodexConfigToml;
+	profileName: string;
+	sandboxMode: string;
+	permissionsName: string;
+	requireShellEnvironmentPolicy: boolean;
+}) {
+	const profileTableName = `profiles.${profileName}`;
+	const environmentPolicyTableName = `${profileTableName}.shell_environment_policy`;
+	return (
+		hasParsedTomlTable(parsedConfig, profileTableName) &&
+		hasTomlAssignment(contents, profileTableName, {
+			key: "sandbox_mode",
+			value: sandboxMode,
+		}) &&
+		hasTomlAssignment(contents, profileTableName, {
+			key: "default_permissions",
+			value: `"${permissionsName}"`,
+		}) &&
+		(!requireShellEnvironmentPolicy ||
+			(hasParsedTomlTable(parsedConfig, environmentPolicyTableName) &&
+				hasTomlAssignment(contents, environmentPolicyTableName, {
+					key: "inherit",
+					value: '"core"',
+				}) &&
+				hasTomlAssignment(contents, environmentPolicyTableName, {
+					key: "exclude",
+					value: SHIPBYSUNDAY_WORKER_SHELL_ENV_EXCLUDES,
+				})))
+	);
+}
+
+function hasManagedCodexPermissions({
+	contents,
+	parsedConfig,
+	permissionsName,
+}: {
+	contents: string;
+	parsedConfig: ParsedCodexConfigToml;
+	permissionsName: string;
+}) {
+	const projectRootPermissionsTableName = `permissions.${permissionsName}.filesystem.":project_roots"`;
+	const networkPermissionsTableName = `permissions.${permissionsName}.network`;
+	return (
+		hasParsedTomlTable(parsedConfig, projectRootPermissionsTableName) &&
+		hasParsedTomlTable(parsedConfig, networkPermissionsTableName) &&
+		hasTomlAssignment(contents, networkPermissionsTableName, {
+			key: "enabled",
+			value: "false",
+		})
+	);
+}
+
+function hasExplicitUntrustedCodexProject({
+	contents,
+	parsedConfig,
+	repositoryRoot,
+}: {
+	contents: string;
+	parsedConfig: ParsedCodexConfigToml;
+	repositoryRoot?: string;
+}) {
+	if (repositoryRoot) {
+		const projectTableName = `projects."${escapeTomlQuotedKeySegment(
+			repositoryRoot,
+		)}"`;
+		return (
+			hasParsedTomlTable(parsedConfig, projectTableName) &&
+			hasTomlAssignment(contents, projectTableName, {
+				key: "trust_level",
+				value: '"untrusted"',
+			})
+		);
+	}
+
+	return [...parsedConfig.tableNames].some((tableName) => {
+		return (
+			tableName.startsWith("projects.") &&
+			hasTomlAssignment(contents, tableName, {
+				key: "trust_level",
+				value: '"untrusted"',
+			})
+		);
+	});
+}
+
+function hasParsedTomlTable(
+	parsedConfig: ParsedCodexConfigToml,
+	tableName: string,
+) {
+	return parsedConfig.tableNames.has(tableName);
+}
+
 function hasTomlAssignment(
 	contents: string,
 	tableName: string,
@@ -172,8 +415,9 @@ function hasTomlAssignment(
 
 function readTomlTableLines(contents: string, tableName: string) {
 	const lines = contents.split(/\r?\n/);
-	const tableHeader = `[${tableName}]`;
-	const startIndex = lines.findIndex((line) => line.trim() === tableHeader);
+	const startIndex = lines.findIndex((line) =>
+		isTomlTableHeaderFor(line, tableName),
+	);
 	if (startIndex === -1) {
 		return [];
 	}
@@ -188,20 +432,68 @@ function readTomlTableLines(contents: string, tableName: string) {
 	return tableLines;
 }
 
+function isTomlTableHeaderFor(line: string, tableName: string) {
+	const trimmedLine = line.trim();
+	const tableHeader = `[${tableName}]`;
+	return (
+		trimmedLine === tableHeader || trimmedLine.startsWith(`${tableHeader} #`)
+	);
+}
+
+function escapeTomlQuotedKeySegment(value: string) {
+	return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export async function previewSbsCodexConfigPatch({
 	env = process.env,
 }: {
 	env?: NodeJS.ProcessEnv;
 } = {}): Promise<CodexConfigPatchPreview> {
+	return await previewManagedCodexConfigPatch({
+		env,
+		startMarker: SBS_CODEX_BLOCK_START,
+		endMarker: SBS_CODEX_BLOCK_END,
+		replacementBlock: renderSbsCodexConfigBlock(),
+		toLabel: "config.toml.sbs-preview",
+	});
+}
+
+export async function previewShipbysundayWorkerCodexConfigPatch({
+	env = process.env,
+}: {
+	env?: NodeJS.ProcessEnv;
+} = {}): Promise<CodexConfigPatchPreview> {
+	return await previewManagedCodexConfigPatch({
+		env,
+		startMarker: SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START,
+		endMarker: SHIPBYSUNDAY_WORKER_CODEX_BLOCK_END,
+		replacementBlock: renderShipbysundayWorkerCodexConfigBlock(),
+		toLabel: "config.toml.shipbysunday-worker-preview",
+	});
+}
+
+async function previewManagedCodexConfigPatch({
+	env,
+	startMarker,
+	endMarker,
+	replacementBlock,
+	toLabel,
+}: {
+	env: NodeJS.ProcessEnv;
+	startMarker: string;
+	endMarker: string;
+	replacementBlock: string;
+	toLabel: string;
+}): Promise<CodexConfigPatchPreview> {
 	const configPath = resolveCodexConfigPath(env);
 	const before = existsSync(configPath)
 		? await readFile(configPath, "utf8")
 		: "";
 	const after = replaceManagedTomlBlock({
 		contents: before,
-		startMarker: SBS_CODEX_BLOCK_START,
-		endMarker: SBS_CODEX_BLOCK_END,
-		replacementBlock: renderSbsCodexConfigBlock(),
+		startMarker,
+		endMarker,
+		replacementBlock,
 	});
 
 	return {
@@ -210,7 +502,7 @@ export async function previewSbsCodexConfigPatch({
 		after,
 		diff: createUnifiedDiffPreview({
 			fromLabel: "config.toml",
-			toLabel: "config.toml.sbs-preview",
+			toLabel,
 			before,
 			after,
 		}),
@@ -224,14 +516,42 @@ export async function applySbsCodexConfigPatch({
 	env?: NodeJS.ProcessEnv;
 } = {}) {
 	const preview = await previewSbsCodexConfigPatch({ env });
+	return await applyCodexConfigPatchPreview({
+		preview,
+		backupFileLabel: "sbs",
+	});
+}
+
+export async function applyShipbysundayWorkerCodexConfigPatch({
+	env = process.env,
+}: {
+	env?: NodeJS.ProcessEnv;
+} = {}) {
+	const preview = await previewShipbysundayWorkerCodexConfigPatch({ env });
+	return await applyCodexConfigPatchPreview({
+		preview,
+		backupFileLabel: "shipbysunday-worker",
+	});
+}
+
+async function applyCodexConfigPatchPreview({
+	preview,
+	backupFileLabel,
+}: {
+	preview: CodexConfigPatchPreview;
+	backupFileLabel: string;
+}): Promise<CodexConfigPatchResult> {
 	if (!preview.changed) {
 		return { ...preview, backupPath: null };
 	}
 
 	await mkdir(path.dirname(preview.configPath), { recursive: true });
-	const backupPath = `${preview.configPath}.sbs-backup-${Date.now()}`;
-	if (existsSync(preview.configPath)) {
+	const configExists = existsSync(preview.configPath);
+	const backupPath = `${preview.configPath}.${backupFileLabel}-backup-${Date.now()}${configExists ? "" : "-missing"}`;
+	if (configExists) {
 		await copyFile(preview.configPath, backupPath);
+	} else {
+		await writeFile(backupPath, "");
 	}
 	await writeFile(preview.configPath, preview.after);
 	return { ...preview, backupPath };
@@ -244,6 +564,36 @@ export async function rollbackSbsCodexConfigPatch({
 	backupPath: string;
 	env?: NodeJS.ProcessEnv;
 }) {
+	return await rollbackCodexConfigPatch({
+		backupPath,
+		env,
+		rollbackBackupFileLabel: "sbs",
+	});
+}
+
+export async function rollbackShipbysundayWorkerCodexConfigPatch({
+	backupPath,
+	env = process.env,
+}: {
+	backupPath: string;
+	env?: NodeJS.ProcessEnv;
+}) {
+	return await rollbackCodexConfigPatch({
+		backupPath,
+		env,
+		rollbackBackupFileLabel: "shipbysunday-worker",
+	});
+}
+
+async function rollbackCodexConfigPatch({
+	backupPath,
+	env,
+	rollbackBackupFileLabel,
+}: {
+	backupPath: string;
+	env: NodeJS.ProcessEnv;
+	rollbackBackupFileLabel: string;
+}) {
 	const configPath = resolveCodexConfigPath(env);
 	if (!existsSync(backupPath)) {
 		throw new Error(`Codex config backup does not exist: ${backupPath}`);
@@ -252,11 +602,15 @@ export async function rollbackSbsCodexConfigPatch({
 	const backupContents = await readFile(backupPath, "utf8");
 	parseCodexConfigToml(backupContents);
 	await mkdir(path.dirname(configPath), { recursive: true });
-	const rollbackBackupPath = `${configPath}.sbs-before-rollback-${Date.now()}`;
+	const rollbackBackupPath = `${configPath}.${rollbackBackupFileLabel}-before-rollback-${Date.now()}`;
 	if (existsSync(configPath)) {
 		await copyFile(configPath, rollbackBackupPath);
 	}
-	await writeFile(configPath, backupContents);
+	if (backupPath.endsWith("-missing")) {
+		await rm(configPath, { force: true });
+	} else {
+		await writeFile(configPath, backupContents);
+	}
 	return {
 		configPath,
 		backupPath,

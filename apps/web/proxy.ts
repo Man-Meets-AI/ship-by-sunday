@@ -12,8 +12,9 @@ const clerkAuthorizedParties = getClerkAuthorizedParties();
 const canonicalWorkspaceRoutes = [
 	routeConfig.codebase,
 	routeConfig.review,
+	routeConfig.appHome,
+	routeConfig.workers,
 	routeConfig.settings,
-	routeConfig.workspaceChoice,
 	routeConfig.workspaceSetup,
 	routeConfig.workspaceDoctorPass,
 	routeConfig.workspaceFindings,
@@ -36,6 +37,7 @@ const compatibilityWorkspaceRoutes = [
 const isProtectedRoute = createRouteMatcher([
 	...canonicalWorkspaceRoutes.map((route) => `${route}(.*)`),
 	...compatibilityWorkspaceRoutes.map((route) => `${route}(.*)`),
+	`${routeConfig.adminImpersonation}(.*)`,
 	"/lesson(.*)",
 ]);
 
@@ -50,7 +52,7 @@ export default disableClerkMiddleware
 				} catch (error) {
 					await captureServerError({
 						source: "clerk",
-						error,
+						error: error instanceof Error ? error : String(error),
 						pathname: request.nextUrl.pathname,
 						requestId: request.headers.get("x-request-id"),
 						code: "clerk_proxy_failed",

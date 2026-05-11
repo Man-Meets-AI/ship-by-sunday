@@ -17,7 +17,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 
 ## Product Contract
 
-- Required protected handoff: `/codebase -> /review`.
+- Required protected handoff: `/home -> /generate-codebase -> /generate-codebase/review`, with Worker under `/workers/*` and Tutorials under `/tutorials`.
 - `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are compatibility redirects, not the current product journey.
 - Optional post-download library: Execute / Ship.
 - Do not preserve old CEO / Design / Build / Ship framing if it conflicts with codebase-first logic.

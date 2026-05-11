@@ -5,10 +5,11 @@ import type {
 import {
 	isChecklistItemArray,
 	isUploadFieldValue,
+	type PersistedFieldValue,
 } from "@/lib/course/lesson/model/registry";
 
 export function normalizeChecklistValue(
-	value: unknown,
+	value: PersistedFieldValue | undefined,
 	options: string[],
 ): ChecklistItemValue[] {
 	if (isChecklistItemArray(value)) {
@@ -35,11 +36,15 @@ export function normalizeChecklistValue(
 	}));
 }
 
-export function getUploadMetadata(value: unknown): UploadFieldValue | null {
+export function getUploadMetadata(
+	value: PersistedFieldValue | undefined,
+): UploadFieldValue | null {
 	return isUploadFieldValue(value) ? value : null;
 }
 
-export function getUploadMetadataList(value: unknown): UploadFieldValue[] {
+export function getUploadMetadataList(
+	value: PersistedFieldValue | undefined,
+): UploadFieldValue[] {
 	if (!Array.isArray(value)) {
 		return [];
 	}

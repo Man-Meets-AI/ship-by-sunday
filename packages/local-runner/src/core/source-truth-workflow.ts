@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonValue } from "./json-value";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
@@ -617,7 +618,7 @@ async function writeSourceTruthAgentsBlock({
 async function writeJsonArtifact(
 	repositoryRoot: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	const artifactPath = path.join(repositoryRoot, repoRelativePath);
 	await mkdir(path.dirname(artifactPath), { recursive: true });

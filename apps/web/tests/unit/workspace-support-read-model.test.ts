@@ -233,7 +233,7 @@ describe("workspace support read model", () => {
 			id: "source-truth-agent-readiness",
 			statusLabel: "recommended",
 			actionLabel: "Review finding",
-			relatedFindingHref: "/workspace/findings/finding-source-truth-readiness",
+			relatedFindingHref: "/workers/findings/finding-source-truth-readiness",
 			workflowRunStatusLabel: "Workflow Proof Completed",
 		});
 		expect(

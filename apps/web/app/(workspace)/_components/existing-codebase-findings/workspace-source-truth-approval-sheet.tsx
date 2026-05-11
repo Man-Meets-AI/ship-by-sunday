@@ -307,7 +307,7 @@ function buildWorkflowCommand({
 		approvedWorkflowRunCommand.branchName,
 		"--profile",
 		approvedWorkflowRunCommand.profileName,
-		approval.confirmationFlag,
+		...approval.confirmationFlags,
 	]
 		.map(shellQuote)
 		.join(" ");
@@ -328,6 +328,9 @@ function getPrimaryActionLabel(
 	}
 	if (workflowKind === "observability_debuggability") {
 		return "Run observability audit";
+	}
+	if (workflowKind === "docs_operating_system_adoption") {
+		return "Run docs tooling dry run";
 	}
 	return "Create branch and run workflow";
 }

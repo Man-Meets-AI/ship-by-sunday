@@ -14,6 +14,11 @@ const getStripePublishableKeyMock = vi.fn();
 const getStripeModeLabelMock = vi.fn();
 const getStripeDashboardUrlMock = vi.fn();
 const getStripeProductDashboardUrlMock = vi.fn();
+const fetchActionMock = vi.fn();
+
+vi.mock("convex/nextjs", () => ({
+	fetchAction: fetchActionMock,
+}));
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
@@ -35,6 +40,26 @@ vi.mock("@/platform/billing/stripe", () => ({
 vi.mock("@/platform/next/app-url", () => ({
 	getAppBaseUrl: getAppBaseUrlMock,
 }));
+
+const hostedCheckoutMetadata = {
+	metadataSchema: "mma_checkout_v1",
+	app: "man_meets_ai",
+	accessProduct: "paid_app_access",
+	purchaseIntentId: "purchase_intent_123",
+	checkoutSurface: "hosted_checkout",
+} as const;
+
+const expressCheckoutMetadata = {
+	...hostedCheckoutMetadata,
+	checkoutSurface: "express_checkout",
+} as const;
+
+function createAuthState(userId: string | null) {
+	return {
+		userId,
+		getToken: vi.fn().mockResolvedValue(null),
+	};
+}
 
 function createRequest(body?: unknown) {
 	return new Request("https://example.com/api/stripe/checkout", {
@@ -64,6 +89,22 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeModeLabelMock.mockReset();
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
+		fetchActionMock.mockReset();
+		fetchActionMock.mockImplementation(
+			async (_ref: unknown, args: Record<string, unknown>) => {
+				if ("checkoutSurface" in args) {
+					return { purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId };
+				}
+				if ("purchaseIntentId" in args && "stripeCheckoutSessionId" in args) {
+					return { attached: "attached" };
+				}
+				throw new Error(
+					`Unexpected fetchMutation args: ${JSON.stringify(args)}`,
+				);
+			},
+		);
+		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET =
+			"checkout_server_secret_123456789012345";
 		getStripeModeLabelMock.mockReturnValue("test");
 		getStripeDashboardUrlMock.mockImplementation((path?: string) =>
 			path
@@ -83,7 +124,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("creates a guest checkout session when the viewer is signed out", async () => {
-		authMock.mockResolvedValue({ userId: null });
+		authMock.mockResolvedValue(createAuthState(null));
 		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
 		getStripeLineItemMock.mockReturnValue({
 			price_data: {
@@ -123,9 +164,7 @@ describe("POST /api/stripe/checkout", () => {
 			expect.objectContaining({
 				client_reference_id: undefined,
 				customer_email: undefined,
-				metadata: {
-					courseSlug: "ship-by-sunday",
-				},
+				metadata: hostedCheckoutMetadata,
 				line_items: [
 					{
 						price_data: {
@@ -138,9 +177,7 @@ describe("POST /api/stripe/checkout", () => {
 				],
 				discounts: [{ promotion_code: "promo_50_off" }],
 				payment_intent_data: {
-					metadata: {
-						courseSlug: "ship-by-sunday",
-					},
+					metadata: hostedCheckoutMetadata,
 				},
 			}),
 		);
@@ -153,7 +190,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("creates a checkout session with account metadata and ignores request intent", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({
 			primaryEmailAddress: {
 				emailAddress: "buyer@example.com",
@@ -212,14 +249,14 @@ describe("POST /api/stripe/checkout", () => {
 					},
 				],
 				metadata: {
+					...hostedCheckoutMetadata,
 					clerkUserId: "user_123",
-					courseSlug: "ship-by-sunday",
 				},
 				mode: "payment",
 				payment_intent_data: {
 					metadata: {
+						...hostedCheckoutMetadata,
 						clerkUserId: "user_123",
-						courseSlug: "ship-by-sunday",
 					},
 				},
 				success_url:
@@ -235,7 +272,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("returns a server error when Stripe does not return a checkout URL", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue(null);
 		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
 		getStripeLineItemMock.mockReturnValue({
@@ -275,7 +312,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("returns a server error when the managed Stripe price fails validation", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({
 			primaryEmailAddress: {
 				emailAddress: "buyer@example.com",
@@ -315,7 +352,7 @@ describe("POST /api/stripe/checkout", () => {
 	});
 
 	it("creates an express checkout session with a client secret", async () => {
-		authMock.mockResolvedValue({ userId: "user_123" });
+		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({
 			primaryEmailAddress: {
 				emailAddress: "buyer@example.com",
@@ -367,13 +404,13 @@ describe("POST /api/stripe/checkout", () => {
 				discounts: [{ promotion_code: "promo_50_off" }],
 				mode: "payment",
 				metadata: expect.objectContaining({
+					...expressCheckoutMetadata,
 					clerkUserId: "user_123",
-					courseSlug: "ship-by-sunday",
 				}),
 				payment_intent_data: {
 					metadata: expect.objectContaining({
+						...expressCheckoutMetadata,
 						clerkUserId: "user_123",
-						courseSlug: "ship-by-sunday",
 					}),
 				},
 				return_url:

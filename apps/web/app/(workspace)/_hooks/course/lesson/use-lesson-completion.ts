@@ -20,12 +20,22 @@ import type {
 } from "@/lib/course/lesson/model/registry";
 import { getLessonHref } from "@/lib/course/lesson/routing/lesson-routes";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type CompletionErrorData = {
 	code: "INCOMPLETE_LESSON";
 	message: string;
 	issues?: CompletionIssue[];
 };
+type CompletionMutationError =
+	| {
+			data?: Partial<CompletionErrorData> | null;
+	  }
+	| null
+	| undefined;
 
 type CompletionPhase = "idle" | "submitting" | "celebrating";
 
@@ -36,12 +46,14 @@ type CompletionPayload = {
 	nextLessonLabel: string | null;
 };
 
-function getCompletionErrorData(error: unknown): CompletionErrorData | null {
+function getCompletionErrorData(
+	error: CompletionMutationError,
+): CompletionErrorData | null {
 	if (!error || typeof error !== "object" || !("data" in error)) {
 		return null;
 	}
 
-	const data = (error as { data?: unknown }).data;
+	const data = error.data;
 	if (!data || typeof data !== "object") {
 		return null;
 	}
@@ -332,7 +344,12 @@ export function useLessonCompletion({
 
 			setCompletionPhase("submitting");
 			void completeLesson({ lessonKey, fieldValues }).then(
-				(result: { nextLessonKey: string | null }) => {
+				(result) => {
+					if (isSupportModeBlockedMutationResult(result)) {
+						setCompletionPhase("idle");
+						setServerCompletionMessage(getSupportModeBlockedMutationMessage());
+						return;
+					}
 					const nextLesson = result.nextLessonKey
 						? getLessonByKey(result.nextLessonKey)
 						: null;
@@ -355,7 +372,7 @@ export function useLessonCompletion({
 						navigateToNextStep(result.nextLessonKey);
 					}, getCompletionNavigationDelayMs());
 				},
-				(error: unknown) => {
+				(error) => {
 					setCompletionPhase("idle");
 					const completionError = getCompletionErrorData(error);
 					if (completionError) {

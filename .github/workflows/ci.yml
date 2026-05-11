@@ -52,13 +52,33 @@ jobs:
       - name: Check formatting
         run: bun run format:check
 
+      - name: Typecheck packages
+        run: bun run typecheck:packages
+
       - name: Run unit tests
         run: bun run test:unit
 
       - name: Run contract tests
         run: bun run test:contracts
 
+      - name: Run package tests
+        run: bun run test:packages
+
+      - name: Run root script tests
+        run: bun run test:scripts
+
+      - name: Run critical coverage tests
+        run: bun run test:coverage:critical
+
+      - name: Run package smoke test
+        run: bun run test:package-smoke
+
+      - name: Run worker compatibility smoke
+        run: bun run test:worker-compatibility-smoke
+
       - name: Build application
+        env:
+          DISABLE_POSTHOG_SOURCE_MAP_UPLOAD: "1"
         run: bun run build
 
   integration:

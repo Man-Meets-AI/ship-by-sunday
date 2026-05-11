@@ -127,9 +127,8 @@ const completeProjectFacts: CanonicalProjectFacts = {
 		"Repo zip contains generated docs under docs/",
 	],
 	validation_plan: [
-		"Run compiler tests",
-		"Run app build",
-		"Run codebase-flow integration tests",
+		"Run Codebase contract check",
+		"Run generated operating pack check",
 	],
 	demo_flow:
 		"Complete the funnel, review the Codebase materials, then download the Codebase zip with docs/ at the root.",

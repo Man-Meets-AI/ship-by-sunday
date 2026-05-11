@@ -2,7 +2,9 @@
 import { pathToFileURL } from "node:url";
 
 import { runDaemonCommand } from "./commands/daemon";
+import { runDocsOperatingSystemCommand } from "./commands/docs-operating-system";
 import { runDoctorPassCommand } from "./commands/doctor-pass";
+import { runInstallCommand } from "./commands/install";
 import { runOneShotCommand } from "./commands/one-shot";
 import { runSetupCheckCommand } from "./commands/setup-check";
 import { runSetupPairCommand } from "./commands/setup-pair";
@@ -12,23 +14,29 @@ const HELP_TEXT = `
 Ship by Sunday local runner
 
 Usage:
+  shipbysunday install [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
+  shipbysunday i [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
   ship-by-sunday setup pair <token> [--repo <path>] [--api-url <url>] [--repair] [--json]
   ship-by-sunday setup check [--repo <path>] [--json]
   ship-by-sunday setup check --codex-config-preview
   ship-by-sunday setup check --apply-codex-config
   ship-by-sunday setup check --rollback-codex-config <backup>
-  ship-by-sunday daemon start [--repo <path>] [--once] [--work --confirm-local-writes --confirm-observability-audit --confirm-adoption-audit --confirm-docs-spine-adoption --confirm-docs-spine-apply]
+  ship-by-sunday daemon start [--repo <path>] [--once] [--work --confirm-local-writes --confirm-observability-audit --confirm-adoption-audit --confirm-docs-spine-adoption --confirm-docs-spine-apply --confirm-docs-operating-system-scan --confirm-docs-operating-system-tooling-plan --confirm-docs-operating-system-tooling-apply --confirm-docs-operating-system-lockfile-refresh]
   ship-by-sunday daemon status [--repo <path>] [--json]
   ship-by-sunday daemon stop [--repo <path>]
   ship-by-sunday one-shot [--repo <path>] [--json]
   ship-by-sunday doctor-pass run [--repo <path>] [--json] [--local-only]
   ship-by-sunday doctor-pass upload --run-id <id> [--repo <path>] [--json]
+  ship-by-sunday docs-operating-system <programs-lint|exec-plans-lint|markdown-lint|docs-validate|docs-refresh-quality|native-command-proof|write-child-plan> [--repo <path>]
   ship-by-sunday workflow source-truth-readiness run --workflow-run-id <id> --confirm-local-writes [--repo <path>] [--json]
   ship-by-sunday workflow observability-debuggability run --workflow-run-id <id> --confirm-observability-audit [--repo <path>] [--json]
   ship-by-sunday workflow broken-app-triage run --workflow-run-id <id> --confirm-read-only-reproduction [--repo <path>] [--json]
   ship-by-sunday workflow mature-repo-adoption run --workflow-run-id <id> --confirm-adoption-audit [--repo <path>] [--json]
   ship-by-sunday workflow docs-spine-adoption run --workflow-run-id <id> --confirm-docs-spine-adoption [--repo <path>] [--json]
   ship-by-sunday workflow docs-spine-apply-and-proof run --workflow-run-id <id> --confirm-docs-spine-apply [--repo <path>] [--json]
+  ship-by-sunday workflow docs-operating-system-adoption run --workflow-run-id <id> --confirm-docs-operating-system-scan --confirm-docs-operating-system-tooling-plan [--repo <path>] [--json]
+  ship-by-sunday workflow docs-operating-system-package-script-patching run --workflow-run-id <id> --confirm-docs-operating-system-tooling-apply [--repo <path>] [--json]
+  ship-by-sunday workflow docs-operating-system-lockfile-refresh run --workflow-run-id <id> --confirm-docs-operating-system-lockfile-refresh [--repo <path>] [--json]
 `;
 
 export async function runCli(argv = process.argv.slice(2)) {
@@ -39,6 +47,9 @@ export async function runCli(argv = process.argv.slice(2)) {
 			return 0;
 		}
 
+		if (command === "install" || command === "i") {
+			return await runInstallCommand([subcommand, ...rest].filter(Boolean));
+		}
 		if (command === "setup" && subcommand === "pair") {
 			return await runSetupPairCommand(rest);
 		}
@@ -53,6 +64,11 @@ export async function runCli(argv = process.argv.slice(2)) {
 		}
 		if (command === "doctor-pass") {
 			return await runDoctorPassCommand([subcommand, ...rest].filter(Boolean));
+		}
+		if (command === "docs-operating-system") {
+			return await runDocsOperatingSystemCommand(
+				[subcommand, ...rest].filter(Boolean),
+			);
 		}
 		if (command === "workflow") {
 			return await runWorkflowCommand([subcommand, ...rest].filter(Boolean));

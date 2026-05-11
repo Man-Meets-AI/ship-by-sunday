@@ -6,35 +6,36 @@ import { ConvexError } from "convex/values";
 
 import { apiConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 import { BONUS_LESSON_VIEW_ERROR_CODES } from "@/lib/execute-ship/bonus-lesson-view-contract";
 import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import type { JsonObject, JsonValue } from "@/lib/json-value";
 
 type BonusLessonViewedRequestBody = {
 	lessonKey: string;
 };
 
-function getConvexErrorMessage(error: unknown) {
+function getConvexErrorMessage(error: Error) {
 	if (error instanceof ConvexError) {
 		return String(error.data);
 	}
 
-	if (error instanceof Error) {
-		return error.message;
-	}
-
-	return null;
+	return error.message;
 }
 
-function normalizeLessonKey(value: unknown) {
+function normalizeLessonKey(value: JsonValue | undefined) {
 	return typeof value === "string" ? value.trim() : null;
 }
 
 async function readBonusLessonViewedRequestBody(request: Request) {
 	try {
-		return (await request.json()) as Record<string, unknown>;
+		return (await request.json()) as JsonObject;
 	} catch {
 		return null;
 	}
@@ -91,10 +92,22 @@ export async function markBonusLessonViewedFromRequest(request: Request) {
 			{ lessonKey } satisfies BonusLessonViewedRequestBody,
 			{ token },
 		);
+		if (isSupportModeBlockedMutationResult(result)) {
+			return jsonWithRequestId(
+				{
+					error: getSupportModeBlockedMutationMessage(),
+					code: BONUS_LESSON_VIEW_ERROR_CODES.forbidden,
+					requestId,
+				},
+				{ status: 403 },
+				requestId,
+			);
+		}
 
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {
-		const message = getConvexErrorMessage(error);
+		const message =
+			error instanceof Error ? getConvexErrorMessage(error) : null;
 		if (message?.includes("Execute / Ship is still locked")) {
 			return jsonWithRequestId(
 				{

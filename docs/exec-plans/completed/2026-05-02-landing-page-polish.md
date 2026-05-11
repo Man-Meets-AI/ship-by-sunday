@@ -1,10 +1,10 @@
 ---
 title: Landing Page Polish
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Bring the Codebase demo's caliber of craft polish to every other public landing-page section by tuning motion, microinteractions, typography rhythm, dark-mode parity, accessibility, and mobile reflow without changing the homepage shell, copy, render-model gating, structured data, or the locked surfaces from commit d1cad98.
-post_build_recap: null
+post_build_recap: The landing-page polish pass shipped section-by-section motion, rhythm, accessibility, pricing, FAQ, promo, and footer refinements, plus validation and consolidated browser proof for the marketing homepage.
 read_when:
   - Resuming the landing-page polish pass mid-flight.
   - Reviewing the polish-pass diff against the locked behavior contract.

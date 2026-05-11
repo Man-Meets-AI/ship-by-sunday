@@ -14,8 +14,8 @@ const TERMINAL_VIEW_TRACKER_ERROR_CODES = new Set<string>([
 ]);
 
 type BonusLessonViewTrackerResponse = {
-	code?: unknown;
-	error?: unknown;
+	code?: string;
+	error?: string;
 };
 
 function getTerminalResponseCode(responseBody: BonusLessonViewTrackerResponse) {

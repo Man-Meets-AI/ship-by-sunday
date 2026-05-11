@@ -1,5 +1,7 @@
 import { getCodebaseStageDefinition } from "@shipbysunday/codebase-compiler";
 
+import { routeConfig } from "@/config/product";
+
 export const CODEBASE_OVERVIEW_ID = "overview" as const;
 
 export const codebasePageSectionIds = [
@@ -54,9 +56,9 @@ export function isCodebasePageSectionId(
 }
 
 export function getCodebasePageSectionHref(sectionId: CodebasePageSectionId) {
-	return `${codebaseStage.route}#${sectionId}`;
+	return `${routeConfig.codebase}#${sectionId}`;
 }
 
 export function getCodebasePageOverviewHref() {
-	return `${codebaseStage.route}#${CODEBASE_OVERVIEW_ID}`;
+	return `${routeConfig.codebase}#${CODEBASE_OVERVIEW_ID}`;
 }

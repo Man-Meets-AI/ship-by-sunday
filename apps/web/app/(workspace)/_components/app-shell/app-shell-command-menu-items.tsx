@@ -3,8 +3,9 @@
 import { useClerk } from "@clerk/nextjs";
 import { CommandGroup, CommandItem, CommandSeparator } from "cmdk";
 import {
+	Bot,
 	Compass,
-	Flag,
+	Code2,
 	House,
 	ListVideo,
 	LogOut,
@@ -38,9 +39,10 @@ type AppShellCommandMenuItemsProps = {
 };
 
 const workspaceLinkIcons = {
-	[routeConfig.codebase]: House,
-	[routeConfig.review]: Flag,
+	[routeConfig.appHome]: House,
+	[routeConfig.codebase]: Code2,
 	[routeConfig.tutorials]: ListVideo,
+	[routeConfig.workers]: Bot,
 	[routeConfig.settings]: Settings,
 } as const;
 
@@ -187,14 +189,14 @@ export function AppShellCommandMenuItems({
 					))}
 				</CommandGroup>
 			) : null}
-			<CommandGroup heading="Workspace">
+			<CommandGroup heading="App">
 				{workspaceLinks.map((link) => {
 					const Icon =
 						workspaceLinkIcons[link.href as keyof typeof workspaceLinkIcons];
 					return (
 						<CommandItem
 							key={`workspace:${link.href}`}
-							value={`Workspace ${link.label}`}
+							value={`App ${link.label}`}
 							onSelect={() => navigateTo(link.href)}
 						>
 							<Icon className="size-4 shrink-0 text-muted-foreground" />

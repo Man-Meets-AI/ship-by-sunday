@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const clerkUserId = "user_product_access_123";
+const convexTokenIdentifier =
+	"https://clerk.example.com|user_product_access_123";
+const allProductCapabilities = ["generate_codebase", "tutorials", "worker"];
 
 function createProductAccessGrant(
 	status: "granted" | "pending" | "revoked" | "refunded",
@@ -74,12 +77,16 @@ describe("convex/access/model", () => {
 			clerkUserId: null,
 			hasAccess: false,
 			status: "signed_out",
+			capabilities: [],
 		});
 	});
 
 	it("marks a signed-in viewer without product access as needing access", async () => {
 		const ctx = createAccessCtx();
-		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
 
 		await expect(
 			moduleUnderTest.viewerProductAccessHandler(ctx as never),
@@ -87,6 +94,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: false,
 			status: "no_access",
+			capabilities: [],
 		});
 	});
 
@@ -94,7 +102,10 @@ describe("convex/access/model", () => {
 		const ctx = createAccessCtx({
 			productAccessGrant: createProductAccessGrant("granted"),
 		});
-		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
 
 		await expect(
 			moduleUnderTest.viewerProductAccessHandler(ctx as never),
@@ -102,6 +113,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
+			capabilities: allProductCapabilities,
 			buyerStartingPoint: "unspecified",
 			checkoutCtaId: "unspecified",
 			fulfillmentTrack: "unspecified",
@@ -116,7 +128,10 @@ describe("convex/access/model", () => {
 				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		});
-		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
 
 		await expect(
 			moduleUnderTest.viewerProductAccessHandler(ctx as never),
@@ -124,6 +139,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
+			capabilities: allProductCapabilities,
 			buyerStartingPoint: "existing_codebase",
 			checkoutCtaId: "codebase_demo_existing",
 			fulfillmentTrack: "existing_codebase_doctor",
@@ -277,7 +293,10 @@ describe("convex/access/model", () => {
 			}),
 			patch,
 		});
-		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
 		vi.spyOn(Date, "now").mockReturnValue(450);
 
 		await expect(
@@ -309,7 +328,10 @@ describe("convex/access/model", () => {
 			}),
 			patch,
 		});
-		ctx.auth.getUserIdentity.mockResolvedValue({ subject: clerkUserId });
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
 
 		await expect(
 			moduleUnderTest.resolveViewerFulfillmentTrackHandler(ctx as never, {

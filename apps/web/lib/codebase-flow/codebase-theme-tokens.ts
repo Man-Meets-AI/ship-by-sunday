@@ -17,7 +17,7 @@ export function getGoogleFontsUrl(font: string): string | null {
 }
 
 export function buildPreviewCssVars(config: PresetConfig): CSSProperties {
-	return buildPresetPreviewCssVars(config) as unknown as CSSProperties;
+	return buildPresetPreviewCssVars(config) as CSSProperties;
 }
 
 export const STYLE_META: Record<string, PresetStyleMeta> = {

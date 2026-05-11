@@ -80,6 +80,7 @@
 		"@remotion/player": "^4.0.455",
 		"@shipbysunday/codebase-compiler": "workspace:*",
 		"@shipbysunday/codebase-presentation": "workspace:*",
+		"@shipbysunday/telegram-chat-widget": "workspace:*",
 		"@stripe/react-stripe-js": "^6.3.0",
 		"@stripe/stripe-js": "^9.4.0",
 		"@tabler/icons-react": "^3.40.0",

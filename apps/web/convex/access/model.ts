@@ -8,6 +8,11 @@ import {
 	type FulfillmentTrack,
 } from "../../platform/billing/checkout/checkout-intent";
 import {
+	productSurfaceCapabilities,
+	resolveProductSurfaceCapabilities,
+	type ProductSurfaceCapability,
+} from "../../platform/access/product-surface-capabilities";
+import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
@@ -21,6 +26,7 @@ import type {
 } from "./types";
 import {
 	productAccessDebugReturnValidator,
+	productAccessCapabilityValidator,
 	productAccessGrantResultValidator,
 	productAccessResetResultValidator,
 	productAccessReturnValidator,
@@ -36,6 +42,7 @@ type ProductAccessGrantUpsertInput = {
 	stripeCustomerId?: string;
 	stripeCheckoutSessionId?: string;
 	stripePaymentIntentId?: string;
+	capabilities?: ProductSurfaceCapability[];
 	buyerStartingPoint?: BuyerStartingPoint;
 	checkoutCtaId?: CheckoutCtaId;
 	fulfillmentTrack?: FulfillmentTrack;
@@ -77,6 +84,19 @@ function getStoredCheckoutIntentFields(
 	return normalizeCheckoutIntent(intent);
 }
 
+function getStoredProductSurfaceCapabilities(
+	accessGrant: {
+		status?: string;
+		capabilities?: string[];
+	} | null,
+): ProductSurfaceCapability[] {
+	if (!accessGrant || accessGrant.status !== "granted") {
+		return [];
+	}
+
+	return resolveProductSurfaceCapabilities(accessGrant.capabilities);
+}
+
 export async function getProductAccessGrantByClerkUserId(
 	ctx: AccessReadCtx,
 	clerkUserId: string,
@@ -107,9 +127,8 @@ export async function requireExistingCodebaseProductAccess(ctx: AccessReadCtx) {
 		ctx,
 		clerkUserId,
 	);
-	const checkoutIntent = getStoredCheckoutIntentFields(accessGrant);
 
-	if (checkoutIntent.fulfillmentTrack !== "existing_codebase_doctor") {
+	if (!getStoredProductSurfaceCapabilities(accessGrant).includes("worker")) {
 		throw new ConvexError("Existing codebase access required");
 	}
 
@@ -124,9 +143,12 @@ export async function requireGeneratedCodebaseProductAccess(
 		ctx,
 		clerkUserId,
 	);
-	const checkoutIntent = getStoredCheckoutIntentFields(accessGrant);
 
-	if (checkoutIntent.fulfillmentTrack !== "generated_codebase") {
+	if (
+		!getStoredProductSurfaceCapabilities(accessGrant).includes(
+			"generate_codebase",
+		)
+	) {
 		throw new ConvexError("Generated codebase access required");
 	}
 
@@ -164,6 +186,8 @@ export async function upsertProductAccessGrant(
 	const grantToPatch = existingStripeGrant ?? existingGrant;
 	if (grantToPatch) {
 		const checkoutIntent = getResolvedCheckoutIntentFields(grantToPatch, input);
+		const capabilities = input.capabilities ??
+			grantToPatch.capabilities ?? [...productSurfaceCapabilities];
 		await ctx.db.patch(grantToPatch._id, {
 			status: "granted",
 			source: getNextProductAccessGrantSource({
@@ -173,6 +197,7 @@ export async function upsertProductAccessGrant(
 			stripeCustomerId: input.stripeCustomerId,
 			stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 			stripePaymentIntentId: input.stripePaymentIntentId,
+			capabilities,
 			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			updatedAt: now,
 			revokedAt: undefined,
@@ -189,6 +214,7 @@ export async function upsertProductAccessGrant(
 		stripeCustomerId: input.stripeCustomerId,
 		stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 		stripePaymentIntentId: input.stripePaymentIntentId,
+		capabilities: input.capabilities ?? [...productSurfaceCapabilities],
 		fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 		grantedAt: now,
 		updatedAt: now,
@@ -204,6 +230,7 @@ export async function viewerProductAccessHandler(ctx: AccessQueryCtx) {
 			clerkUserId: null,
 			hasAccess: false,
 			status: "signed_out" as const,
+			capabilities: [],
 		};
 	}
 
@@ -216,6 +243,7 @@ export async function viewerProductAccessHandler(ctx: AccessQueryCtx) {
 		clerkUserId: identity.subject,
 		hasAccess: accessGrant?.status === "granted",
 		status: accessGrant?.status ?? ("no_access" as const),
+		capabilities: getStoredProductSurfaceCapabilities(accessGrant),
 		...(accessGrant ? getStoredCheckoutIntentFields(accessGrant) : undefined),
 	};
 }
@@ -226,6 +254,7 @@ export const grantProductAccessArgs = {
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
+	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -240,6 +269,7 @@ export async function grantProductAccessHandler(
 		stripeCustomerId?: string;
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
+		capabilities?: ProductSurfaceCapability[];
 		buyerStartingPoint?: BuyerStartingPoint;
 		checkoutCtaId?: CheckoutCtaId;
 		fulfillmentTrack?: FulfillmentTrack;
@@ -256,6 +286,7 @@ export const grantProductAccessFromStripeArgs = {
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
+	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -270,6 +301,7 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCustomerId?: string;
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
+		capabilities?: ProductSurfaceCapability[];
 		buyerStartingPoint?: BuyerStartingPoint;
 		checkoutCtaId?: CheckoutCtaId;
 		fulfillmentTrack?: FulfillmentTrack;
@@ -281,6 +313,7 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCustomerId: args.stripeCustomerId,
 		stripeCheckoutSessionId: args.stripeCheckoutSessionId,
 		stripePaymentIntentId: args.stripePaymentIntentId,
+		capabilities: args.capabilities,
 		buyerStartingPoint: args.buyerStartingPoint,
 		checkoutCtaId: args.checkoutCtaId,
 		fulfillmentTrack: args.fulfillmentTrack,

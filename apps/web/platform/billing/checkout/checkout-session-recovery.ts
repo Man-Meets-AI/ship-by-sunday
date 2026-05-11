@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 
 import { api } from "@/convex/_generated/api";
 import { PENDING_CHECKOUT_SESSION_COOKIE_NAME } from "@/platform/billing/checkout/pending-checkout-session-cookie";
-import { COURSE_SLUG } from "@/lib/course/lesson/model/registry";
+import { isPaidAppCheckoutMetadata } from "@/platform/billing/checkout/checkout-metadata";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import { getStripe } from "@/platform/billing/stripe";
 import { requireServerEnv } from "@/platform/env/server";
@@ -40,7 +40,7 @@ export type CheckoutSessionClaimResult =
 	| {
 			kind: "validated";
 			sessionId: string;
-			claimResult: unknown;
+			claimResult: object | null;
 	  };
 
 export type CheckoutSessionFulfillmentResult =
@@ -108,7 +108,7 @@ export type CheckoutEmailClaimResult =
 	| {
 			kind: "validated";
 			sessionId: string;
-			claimResult: unknown;
+			claimResult: object | null;
 	  };
 
 export function getStripeCheckoutSessionEmail(
@@ -132,7 +132,7 @@ export function isStripeCheckoutSessionPaid(
 export function isStripeCheckoutSessionForCourse(
 	session: Stripe.Checkout.Session,
 ): boolean {
-	return session.metadata?.courseSlug === COURSE_SLUG;
+	return isPaidAppCheckoutMetadata(session.metadata);
 }
 
 export async function getCheckoutSessionForRecovery(

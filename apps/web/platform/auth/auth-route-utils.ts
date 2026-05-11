@@ -94,7 +94,7 @@ export function isCheckoutWelcomeRedirectPath(rawPath?: string | null) {
 	}
 
 	return (
-		redirectUrl.pathname === routeConfig.workspaceChoice &&
+		redirectUrl.pathname === routeConfig.appHome &&
 		redirectUrl.searchParams.get("welcome") === "checkout"
 	);
 }

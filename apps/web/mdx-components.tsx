@@ -9,7 +9,7 @@ import Link from "next/link";
 
 import { createPublicContentHeadingId } from "@/app/_content/public-content-heading-ids";
 
-type MdxComponentMap = Record<string, ComponentType<Record<string, unknown>>>;
+type MdxComponentMap = Record<string, ComponentType<object>>;
 
 function getTextFromNode(node: ReactNode): string {
 	if (typeof node === "string" || typeof node === "number") {

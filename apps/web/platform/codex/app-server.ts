@@ -7,6 +7,11 @@ import { homedir } from "node:os";
 import path from "node:path";
 
 import { apiConfig, limitConfig, productConfig } from "@/config/product";
+import type {
+	JsonObject,
+	JsonValue,
+	MutableJsonObject,
+} from "@/lib/json-value";
 import {
 	CODEX_APP_SERVER_DISABLED_ERROR,
 	CodexAppServerRuntimeError,
@@ -33,31 +38,31 @@ type JsonRpcRequest = {
 	jsonrpc: "2.0";
 	id: JsonRpcId;
 	method: string;
-	params?: unknown;
+	params?: JsonValue;
 };
 
 type JsonRpcResponse = {
 	jsonrpc: "2.0";
 	id: JsonRpcId;
-	result?: unknown;
+	result?: JsonValue;
 	error?: {
 		code: number;
 		message: string;
-		data?: unknown;
+		data?: JsonValue;
 	};
 };
 
 type JsonRpcNotification = {
 	jsonrpc: "2.0";
 	method: string;
-	params?: unknown;
+	params?: JsonValue;
 };
 
 type RpcMessage = JsonRpcResponse | JsonRpcNotification;
 
 type PendingRequest = {
-	resolve: (value: unknown) => void;
-	reject: (reason?: unknown) => void;
+	resolve: (value: JsonValue | undefined) => void;
+	reject: (reason?: Error) => void;
 	timeout: NodeJS.Timeout;
 };
 
@@ -107,7 +112,7 @@ type ThreadReadResponse = {
 	};
 };
 
-function toErrorMessage(error: unknown) {
+function toErrorMessage(error: Error | string | null | undefined) {
 	if (error instanceof Error) {
 		return error.message;
 	}
@@ -206,7 +211,9 @@ export class CodexAppServerClient {
 				"Unable to spawn the Codex app-server.",
 				{
 					binary: codexBinary,
-					originalMessage: toErrorMessage(error),
+					originalMessage: toErrorMessage(
+						error instanceof Error ? error : String(error),
+					),
 				},
 			);
 			this.reportRuntimeIncident(runtimeError);
@@ -245,7 +252,9 @@ export class CodexAppServerClient {
 				"codex_app_server_process_error",
 				"Codex app-server process emitted an error event.",
 				{
-					originalMessage: toErrorMessage(error),
+					originalMessage: toErrorMessage(
+						error instanceof Error ? error : String(error),
+					),
 				},
 			);
 			this.reportRuntimeIncident(runtimeError);
@@ -351,9 +360,9 @@ export class CodexAppServerClient {
 		}
 	}
 
-	private async request<T = unknown>(
+	private async request<T = JsonValue>(
 		method: string,
-		params?: unknown,
+		params?: JsonValue,
 	): Promise<T> {
 		if (!this.child || this.closed) {
 			throw new Error("Codex app-server is not running.");
@@ -417,7 +426,9 @@ export class CodexAppServerClient {
 					`Failed to write request to the Codex app-server (${method}).`,
 					{
 						method,
-						originalMessage: toErrorMessage(error),
+						originalMessage: toErrorMessage(
+							error instanceof Error ? error : String(error),
+						),
 					},
 				);
 				this.reportRuntimeIncident(runtimeError);
@@ -481,7 +492,7 @@ export class CodexAppServerClient {
 		model?: string | null;
 		turnTimeoutMs?: number;
 	}) {
-		const threadParams: Record<string, unknown> = {
+		const threadParams: MutableJsonObject = {
 			experimentalRawEvents: false,
 			persistExtendedHistory: false,
 		};
@@ -633,7 +644,7 @@ export class CodexAppServerClient {
 	private createRuntimeError(
 		incidentCode: CodexRuntimeIncidentCode,
 		message: string,
-		incidentDetails: Record<string, unknown> | null = null,
+		incidentDetails: JsonObject | null = null,
 	) {
 		return new CodexAppServerRuntimeError(
 			incidentCode,
@@ -680,7 +691,9 @@ export async function withCodexAppServerClient<T>(
 			throw error;
 		}
 
-		throw new Error(toErrorMessage(error));
+		throw new Error(
+			toErrorMessage(error instanceof Error ? error : String(error)),
+		);
 	} finally {
 		await client.close();
 	}

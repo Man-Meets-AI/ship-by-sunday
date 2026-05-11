@@ -115,7 +115,7 @@ export async function POST(
 	} catch (error) {
 		await captureServerError({
 			source: "convex",
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.observabilityIncidentStatus,
 			code: "incident_status_update_failed",

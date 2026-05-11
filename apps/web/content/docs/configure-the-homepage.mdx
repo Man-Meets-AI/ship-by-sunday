@@ -138,7 +138,7 @@ Safe rules:
 
 - if you need a normal link CTA, use `kind: "link"` with `href`
 - if you need checkout, use `kind: "checkout"` with no path-routing payload
-- do not add `checkoutIntent`, `buyerStartingPoint`, or CTA-specific checkout metadata to new public CTAs; the buyer chooses the workspace path after payment on `/workspace/choose`
+- do not add `checkoutIntent`, `buyerStartingPoint`, or CTA-specific checkout metadata to new public CTAs; checkout writes the app-owned purchase intent and lands the buyer on `/home`
 - do not import `CheckoutButton` straight into hero or pricing again
 - homepage checkout CTAs use hosted Stripe Checkout; keep Link enabled through Stripe's hosted payment method surface instead of precreating custom Express Checkout Sessions on page load
 - if you add a new CTA target kind, update the target union, the render model, the CTA renderer, and the tests together
@@ -190,19 +190,19 @@ Edit:
 
 The first-screen `productPreview` section opens with the dark leverage hero from
 the Figma landing-page selection and a two-option starting-point selector. The
-default `I have an idea for a product` branch continues into the interactive
-Codebase demo that mirrors the real `/codebase` workspace. The `I have a
-codebase already` branch shows the Figma-sourced codebase audit path. Both
-starting points then continue through the same homepage story: hero, exec-loop,
+default `I want an AI starter template` branch continues into the interactive
+Codebase demo that mirrors the real `/generate-codebase` workspace. The `I want
+an AI worker` branch shows the Figma-sourced codebase audit path. Both
+starting points then continue through the same homepage story: hero,
 starter-system, optional durability, social proof, Programs, FAQ, PLANS.md,
 pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
-"Generate my codebase" persists the latest demo draft to `localStorage` (key
-`sbs:home-codebase-draft:v1`) before starting Stripe checkout. After payment,
-the buyer lands on `/workspace/choose`; if they choose Generate a codebase, a
+"Start my AI starter template" persists the latest demo draft to `localStorage`
+(key `sbs:home-codebase-draft:v1`) before starting Stripe checkout. After
+payment, the buyer lands on `/home`; if they choose Generate Codebase, a
 workspace-mounted seeder hydrates that draft into Convex on the first
-authenticated `/codebase` load when the buyer has no saved facts.
+authenticated `/generate-codebase` load when the buyer has no saved facts.
 
 Hard rules when editing this section:
 
@@ -311,8 +311,8 @@ The product-preview CTA is now a real checkout action. Browser proof must
 include a desktop and mobile viewport at `/?marketing=1` (so
 `redirectGrantedHomeVisitor` does not bounce an entitled local account).
 Verify the demo draft is written to `localStorage` immediately before the
-Stripe redirect, survives the round trip through `/workspace/choose`, and
-prefills `/codebase` on the first authenticated generated-codebase load when
+Stripe redirect, survives the round trip through `/home`, and
+prefills `/generate-codebase` on the first authenticated generated-codebase load when
 the buyer has no saved facts.
 
 ## What a future AI agent should preserve

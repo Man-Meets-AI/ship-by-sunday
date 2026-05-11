@@ -96,7 +96,7 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-import { CodebaseReviewPage } from "@/app/(workspace)/review/_components/codebase-review-page";
+import { CodebaseReviewPage } from "@/app/(workspace)/generate-codebase/review/_components/codebase-review-page";
 
 describe("CodebaseReviewPage", () => {
 	beforeEach(() => {
@@ -227,7 +227,7 @@ describe("CodebaseReviewPage", () => {
 		).toBe("#review-handoff");
 		expect(
 			screen.getByRole("link", { name: "Lesson Map" }).getAttribute("href"),
-		).toBe("/review?showLessonMap=1#review-lesson-map");
+		).toBe("/generate-codebase/review?showLessonMap=1#review-lesson-map");
 		expect(
 			screen.getByRole("link", { name: "Build Lessons" }).getAttribute("href"),
 		).toBe("/lesson/iterate-the-product-with-ai");
@@ -253,7 +253,7 @@ describe("CodebaseReviewPage", () => {
 			render(
 				<CodebaseReviewPage initialWorkspaceState={lockedWorkspaceState} />,
 			),
-		).toThrowError("NEXT_REDIRECT:/codebase");
-		expect(redirectMock).toHaveBeenCalledWith("/codebase");
+		).toThrowError("NEXT_REDIRECT:/generate-codebase");
+		expect(redirectMock).toHaveBeenCalledWith("/generate-codebase");
 	});
 });

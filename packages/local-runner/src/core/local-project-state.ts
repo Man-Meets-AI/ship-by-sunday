@@ -10,6 +10,8 @@ import {
 import os from "node:os";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "./json-value";
+
 export const LOCAL_STATE_DIRECTORY_NAME = ".sbs";
 
 export type LocalProjectState = {
@@ -113,11 +115,11 @@ export async function readLocalProjectState(repositoryRoot: string) {
 		return null;
 	}
 
-	const parsed = JSON.parse(await readFile(statePath, "utf8")) as unknown;
+	const parsed = JSON.parse(await readFile(statePath, "utf8")) as JsonValue;
 	if (
 		!parsed ||
 		typeof parsed !== "object" ||
-		(parsed as { schemaVersion?: unknown }).schemaVersion !== 1
+		(parsed as JsonObject).schemaVersion !== 1
 	) {
 		throw new Error("Local .sbs/config.json has an unsupported schema.");
 	}
@@ -160,11 +162,13 @@ export async function readLocalCodexThreadState(repositoryRoot: string) {
 		return null;
 	}
 
-	const parsed = JSON.parse(await readFile(threadStatePath, "utf8")) as unknown;
+	const parsed = JSON.parse(
+		await readFile(threadStatePath, "utf8"),
+	) as JsonValue;
 	if (
 		!parsed ||
 		typeof parsed !== "object" ||
-		(parsed as { schemaVersion?: unknown }).schemaVersion !== 1
+		(parsed as JsonObject).schemaVersion !== 1
 	) {
 		throw new Error(
 			"Local .sbs/runs/codex-thread.json has an unsupported schema.",

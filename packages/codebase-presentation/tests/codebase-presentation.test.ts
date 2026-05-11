@@ -22,7 +22,7 @@ describe("codebase presentation", () => {
 			"Enter the public-facing product name.",
 		);
 		expect(codebaseFieldHelperText("theme_preset")).toContain(
-			"Adjust the starter theme",
+			"Adjust the Codebase theme",
 		);
 		expect(codebaseFieldInputKind("product_name")).toBe("input");
 		expect(codebaseFieldInputKind("pricing")).toBe("number");

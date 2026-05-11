@@ -27,34 +27,46 @@ type RenderableError = {
 	message?: string;
 };
 
+type ClerkMutationError = RenderableError | null | undefined;
+
+type ClerkFutureMutationResult =
+	| {
+			error?: ClerkMutationError;
+	  }
+	| null
+	| undefined
+	| void;
+
+type ClerkSignInErrors = ReturnType<typeof useSignIn>["errors"];
+
 type SignInCompletionCandidate = {
 	createdSessionId?: string | null;
-	error?: unknown;
+	error?: ClerkMutationError;
 	finalize?: (args: {
 		navigate: (params: {
 			decorateUrl: (url: string) => string;
 			session?: { currentTask?: { key: string } | null } | null;
 		}) => Promise<void>;
-	}) => Promise<unknown>;
+	}) => Promise<ClerkFutureMutationResult>;
 	status?: string | null;
 	supportedFirstFactors?: ClerkSignInWithFirstFactors["supportedFirstFactors"];
 };
 
-type ClerkFutureMutationResult = {
-	error?: unknown;
-};
-
 function getRenderableErrors(
-	errors: Array<unknown> | null,
+	errors: ClerkSignInErrors["global"] | ClerkSignInErrors["raw"] | null,
 ): RenderableError[] | null {
 	if (!errors?.length) {
 		return null;
 	}
 
-	return errors.filter(
-		(error): error is RenderableError =>
-			typeof error === "object" && error !== null,
-	);
+	const renderableErrors: RenderableError[] = [];
+	for (const error of errors) {
+		if (typeof error === "object" && error !== null) {
+			renderableErrors.push(error);
+		}
+	}
+
+	return renderableErrors;
 }
 
 async function navigateWithRouter(
@@ -244,9 +256,9 @@ export function useSignInFlow({
 			return;
 		}
 
-		const finalizeResponse = (await finalize({
+		const finalizeResponse = await finalize({
 			navigate: navigateAfterAuth,
-		})) as ClerkFutureMutationResult;
+		});
 		if (finalizeResponse?.error) {
 			reportUnsupportedState(completionStatus);
 		}

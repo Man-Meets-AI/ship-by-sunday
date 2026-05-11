@@ -453,7 +453,7 @@ describe("ExistingCodebaseSetupPage", () => {
 			([title]) => title === "Doctor pass started",
 		)?.[1];
 		toastOptions?.action?.onClick();
-		expect(routerPushMock).toHaveBeenCalledWith("/workspace/doctor-pass");
+		expect(routerPushMock).toHaveBeenCalledWith("/workers/doctor-pass");
 	});
 
 	it("saves the default open destination through the workspace contract", async () => {
@@ -494,11 +494,11 @@ describe("ExistingCodebaseSetupPage", () => {
 		);
 		expect(reportClientErrorMock).toHaveBeenCalledWith({
 			error: saveError,
-			pathname: "/workspace/setup",
+			pathname: "/workers/setup",
 			code: "workspace_setup_open_destination_save_failed",
 			severity: "medium",
 			details: {
-				action: "Workspace setup open destination save failed",
+				action: "Worker setup open destination save failed",
 				defaultOpenDestination: "vscode",
 			},
 		});

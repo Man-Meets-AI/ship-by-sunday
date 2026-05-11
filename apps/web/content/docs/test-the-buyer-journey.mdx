@@ -12,8 +12,8 @@ Do not stop at component checks. Test the full buyer journey:
 3. `/checkout/success`
 4. passwordless Clerk email-code sign-in when payment happened before app auth
 5. product-access claim and grant
-6. `/workspace/choose`
-7. the chosen workspace path
+6. `/home`
+7. the chosen product surface
 
 ## The four realities
 
@@ -36,12 +36,12 @@ Every pass should cover these states:
 - signed-out users can start checkout directly from the primary CTA
 - users without access land on protected routes and see inline recovery
 - checkout returns to `/checkout/success`
-- `/checkout/success` sends signed-out paid buyers to `/sign-in?redirect_url=/workspace/choose?welcome=checkout`
+- `/checkout/success` sends signed-out paid buyers to `/sign-in?redirect_url=/home?welcome=checkout`
 - sign-in does not offer Google, password-first account creation, or a second purchase
 - the webhook grants access
-- the app recovers automatically into `/workspace/choose`
+- the app recovers automatically into `/home`
 - the first protected page does not throw a client-side `Unauthorized` error during hydration
-- the next codebase-first stage loads after access appears
+- the next product surface loads after access appears
 
 ## What success looks like
 

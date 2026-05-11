@@ -1,3 +1,4 @@
+import type { JsonObject } from "../json-value";
 import type { RunnerCredential } from "../local-runner-home";
 import type { DoctorFinding } from "./types";
 
@@ -85,7 +86,7 @@ async function readRunnerResponse<T>(
 	action: string,
 ): Promise<T> {
 	const text = await response.text();
-	const parsed = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+	const parsed = text ? (JSON.parse(text) as JsonObject) : {};
 	if (!response.ok) {
 		const message =
 			typeof parsed.error === "string" ? parsed.error : `Unable to ${action}.`;

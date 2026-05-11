@@ -7,6 +7,53 @@ vi.mock("server-only", () => ({}));
 
 describe("getStripeLineItem", () => {
 	const originalEnv = { ...process.env };
+	const expectedConvexWebhookUrl = "https://convex-site.example/stripe/webhook";
+	const staleAppOriginWebhookUrl = "https://www.example.com/api/stripe/webhook";
+
+	function setWebhookPreflightEnv({
+		secretKey = "sk_live_123",
+	}: {
+		secretKey?: string;
+	} = {}) {
+		process.env.APP_BASE_URL = "https://www.example.com";
+		process.env.NEXT_PUBLIC_CONVEX_SITE_URL = "https://convex-site.example";
+		process.env.STRIPE_SECRET_KEY = secretKey;
+		process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_123";
+	}
+
+	function buildWebhookEndpoint(
+		overrides: Partial<Stripe.WebhookEndpoint> = {},
+	): Stripe.WebhookEndpoint {
+		return {
+			api_version: "2026-02-25.clover",
+			application: null,
+			created: 1_700_000_000,
+			description: null,
+			enabled_events: [
+				"checkout.session.completed",
+				"checkout.session.async_payment_succeeded",
+			],
+			id: "we_ready",
+			livemode: true,
+			metadata: {},
+			object: "webhook_endpoint",
+			status: "enabled",
+			url: expectedConvexWebhookUrl,
+			...overrides,
+		};
+	}
+
+	function buildStripeWithWebhookEndpoints(
+		endpoints: Stripe.WebhookEndpoint[],
+	) {
+		return {
+			webhookEndpoints: {
+				list: vi.fn().mockReturnValue({
+					autoPagingToArray: vi.fn().mockResolvedValue(endpoints),
+				}),
+			},
+		} as unknown as Stripe;
+	}
 
 	beforeEach(() => {
 		process.env = {
@@ -53,9 +100,6 @@ describe("getStripeLineItem", () => {
 				product_data: {
 					name: productConfig.name,
 					description: productConfig.promise,
-					metadata: {
-						courseSlug: productConfig.courseSlug,
-					},
 				},
 				unit_amount: productConfig.priceUsdCents,
 			},
@@ -369,6 +413,212 @@ describe("getStripeLineItem", () => {
 		);
 	});
 
+	it("accepts an enabled Stripe webhook endpoint at the Convex HTTP-actions URL", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				id: "we_live_ready",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).resolves.toMatchObject({
+			endpointId: "we_live_ready",
+			expectedUrl: expectedConvexWebhookUrl,
+			livemode: true,
+			status: "enabled",
+			url: expectedConvexWebhookUrl,
+		});
+	});
+
+	it("rejects wildcard Stripe webhook event subscriptions", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				enabled_events: ["*"],
+				id: "we_wildcard_events",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint https://convex-site.example/stripe/webhook uses wildcard event subscriptions. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded.",
+		);
+	});
+
+	it("rejects a still-enabled app-origin Stripe webhook endpoint", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint(),
+			buildWebhookEndpoint({
+				id: "we_stale_app_origin",
+				url: staleAppOriginWebhookUrl,
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe has enabled app-origin webhook endpoint(s) at https://www.example.com/api/stripe/webhook.",
+		);
+	});
+
+	it("rejects a trailing-slash Stripe webhook endpoint at the Convex URL", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				url: `${expectedConvexWebhookUrl}/`,
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Missing enabled Stripe webhook endpoint at https://convex-site.example/stripe/webhook.",
+		);
+	});
+
+	it("rejects a disabled Stripe webhook endpoint at the Convex URL", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				status: "disabled",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint https://convex-site.example/stripe/webhook exists but is disabled.",
+		);
+	});
+
+	it("rejects a Stripe webhook endpoint missing async checkout success events", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				enabled_events: ["checkout.session.completed"],
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint https://convex-site.example/stripe/webhook is missing required event subscription(s): checkout.session.async_payment_succeeded.",
+		);
+	});
+
+	it("rejects a Stripe webhook endpoint in the wrong mode", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				livemode: false,
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint https://convex-site.example/stripe/webhook is in test mode, expected live.",
+		);
+	});
+
+	it("rejects an explicit old webhook endpoint API version for no-cost checkout proof", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				api_version: "2022-11-15",
+				id: "we_old_api_version",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint we_old_api_version uses API version 2022-11-15, expected 2023-08-16 or later for no-cost Checkout orders.",
+		);
+	});
+
+	it("rejects an unpinned webhook endpoint API version for no-cost checkout proof", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				api_version: null,
+				id: "we_account_default_api_version",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint we_account_default_api_version does not pin an API version. Pin the endpoint to 2023-08-16 or later so no-cost Checkout webhook payloads are proven compatible.",
+		);
+	});
+
+	it("requires a Stripe webhook signing secret for webhook endpoint preflight", async () => {
+		setWebhookPreflightEnv();
+		delete process.env.STRIPE_WEBHOOK_SECRET;
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([buildWebhookEndpoint()]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Missing required environment variable: STRIPE_WEBHOOK_SECRET",
+		);
+	});
+
 	it("normalizes newline-polluted stripe keys before mode detection", async () => {
 		process.env.STRIPE_SECRET_KEY = "sk_test_123\\n";
 
@@ -377,5 +627,27 @@ describe("getStripeLineItem", () => {
 
 		expect(getNormalizedStripeSecretKey()).toBe("sk_test_123");
 		expect(getStripeModeLabel()).toBe("test");
+	});
+
+	it("detects restricted Stripe key modes", async () => {
+		process.env.STRIPE_SECRET_KEY = "rk_test_123";
+
+		let stripeModule = await import("@/platform/billing/stripe");
+		expect(stripeModule.getStripeModeLabel()).toBe("test");
+
+		vi.resetModules();
+		process.env.STRIPE_SECRET_KEY = "rk_live_123";
+		stripeModule = await import("@/platform/billing/stripe");
+		expect(stripeModule.getStripeModeLabel()).toBe("live");
+	});
+
+	it("rejects unknown Stripe secret key prefixes for mode detection", async () => {
+		process.env.STRIPE_SECRET_KEY = "stripe_123";
+
+		const { getStripeModeLabel } = await import("@/platform/billing/stripe");
+
+		expect(() => getStripeModeLabel()).toThrow(
+			"STRIPE_SECRET_KEY must start with sk_test_, rk_test_, sk_live_, or rk_live_.",
+		);
 	});
 });

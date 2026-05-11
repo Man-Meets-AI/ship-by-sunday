@@ -1,10 +1,10 @@
 ---
 title: Resolve Paid Checkout Account Mismatches
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Make paid-but-unclaimed checkout a first-class user state with clear account recovery instead of a generic no-access dead end.
-post_build_recap: null
+post_build_recap: The checkout account-resolution pass made paid pending checkout states explicit in checkout success and access-required UX, preserved guest checkout policy, added tests, and recorded targeted validation.
 read_when:
   - Changing signed-out checkout behavior.
   - Improving checkout success or access-required UX.

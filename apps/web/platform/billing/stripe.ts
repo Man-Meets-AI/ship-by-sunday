@@ -6,6 +6,7 @@ import {
 	assertManagedStripeEnvReadyForRelease as assertManagedStripeConfigReadyForRelease,
 	assertManagedStripePriceMatchesProductConfig as assertManagedStripeConfigPriceMatchesProductConfig,
 	assertManagedStripePromotionCodeMatchesProductConfig as assertManagedStripeConfigPromotionCodeMatchesProductConfig,
+	assertManagedStripeWebhookEndpointReadyForRelease as assertManagedStripeConfigWebhookEndpointReadyForRelease,
 	assertStripeModeMatchesExpected as assertStripeConfigModeMatchesExpected,
 	getManagedStripeConfigFromEnv,
 	getNormalizedStripeSecretKey as getNormalizedStripeConfigSecretKey,
@@ -13,6 +14,7 @@ import {
 	getStripeLineItem as getStripeConfigLineItem,
 	getStripeModeLabel as getStripeConfigModeLabel,
 	type ManagedStripeConfig,
+	type ManagedStripeWebhookEndpointPreflightResult,
 	type StripeModeLabel,
 } from "@/platform/billing/managed-stripe-config";
 import { requireServerEnv, serverEnv } from "@/platform/env/server";
@@ -20,6 +22,7 @@ import { requireServerEnv, serverEnv } from "@/platform/env/server";
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
 export { normalizeStripeSecretKey } from "@/platform/billing/managed-stripe-config";
 export type { StripeModeLabel };
+export type { ManagedStripeWebhookEndpointPreflightResult };
 
 let stripeClient: Stripe | null = null;
 
@@ -68,6 +71,21 @@ export async function assertManagedStripePromotionCodeMatchesProductConfig(
 	await assertManagedStripeConfigPromotionCodeMatchesProductConfig(
 		stripe,
 		getManagedStripeConfig(),
+	);
+}
+
+export async function assertManagedStripeWebhookEndpointReadyForRelease(
+	stripe: Stripe,
+	options: {
+		expectedMode?: StripeModeLabel;
+		expectedWebhookUrl?: string;
+		requiredEvents?: readonly string[];
+	} = {},
+) {
+	return await assertManagedStripeConfigWebhookEndpointReadyForRelease(
+		stripe,
+		getManagedStripeConfig(),
+		options,
 	);
 }
 

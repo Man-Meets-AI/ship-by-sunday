@@ -31,5 +31,6 @@ export function buildReleaseBillingDoctorCommand(config) {
 		"scripts/verify-managed-stripe-env.ts",
 		`--expected-mode=${config.expectedMode}`,
 		`--app-base-url=${config.appBaseUrl}`,
+		"--require-webhook-endpoint",
 	];
 }

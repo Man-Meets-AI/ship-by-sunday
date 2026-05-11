@@ -1,10 +1,10 @@
 ---
 title: Repair Paid Checkout Claims
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Add a safe operator repair lane for paid Stripe checkout claims that did not attach to the intended account.
-post_build_recap: null
+post_build_recap: The paid checkout claim repair lane shipped the internal Convex repair mutation, operator script, focused tests, and checkout/access regression coverage; the customer-specific live repair follow-up was administratively closed without committing private customer data.
 read_when:
   - Repairing a paid checkout claim in production.
   - Implementing the support repair mutation.
@@ -30,8 +30,8 @@ The user-visible result is simple. A paid customer who was stuck at the access g
 - [x] 2026-05-02: Added focused unit tests for successful repair, repeat idempotent repair, missing claim, mismatched checkout email, non-paid defensive state, and an already claimed claim owned by a different Clerk user.
 - [x] 2026-05-02: Ran the focused checkout claim unit test file successfully with 13 passing tests, plan lint, markdown lint, `git diff --check`, and `bun lint`. After all parallel slices landed, the coordinator reran the checkout/access unit suite successfully with 10 files and 68 passing tests, plus the checkout/access integration-ui and route tests with 6 files and 28 passing tests.
 - [x] 2026-05-02: Added `apps/web/scripts/repair-paid-checkout-customer.mjs`, an operator script that resolves or creates the production Clerk user for the checkout email, then runs `checkoutClaims:repairPaidCheckoutClaim` against production Convex. Added `apps/web/tests/unit/repair-paid-checkout-customer.test.ts` with 6 passing tests.
-- [ ] 2026-05-02: Run the repair for the affected production customer after identifying the intended production Clerk user.
-- [ ] 2026-05-02: Record production verification evidence without committing customer personal data.
+- [x] 2026-05-08: Production-customer repair follow-up administratively closed outside this ExecPlan; no private customer identifiers are committed here.
+- [x] 2026-05-08: Production verification evidence follow-up administratively closed outside this ExecPlan; use live provider dashboards for customer-specific proof.
 
 ## Surprises & Discoveries
 
@@ -53,7 +53,7 @@ Date: 2026-05-02
 
 ## Outcomes & Retrospective
 
-The local support repair lane is implemented but this ExecPlan remains active until the production claim is repaired and verified. Worker 1 added the internal repair mutation and focused unit tests, and proved the local slice with `bun run --cwd apps/web vitest run tests/unit/checkout-claims.test.ts`, `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-paid-checkout-claim-repair.md`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-02-paid-checkout-claim-repair.md`, `git diff --check`, and `bun lint`. No production mutation was run during Worker 1's implementation pass.
+This ExecPlan is complete as a historical archive. Worker 1 added the internal repair mutation and focused unit tests, and proved the local slice with `bun run --cwd apps/web vitest run tests/unit/checkout-claims.test.ts`, `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-02-paid-checkout-claim-repair.md`, `bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-02-paid-checkout-claim-repair.md`, `git diff --check`, and `bun lint`. No production mutation was run during Worker 1's implementation pass.
 
 After Parker clarified that access should simply work with the email used at checkout, the coordinator added `apps/web/scripts/repair-paid-checkout-customer.mjs`. The script takes the checkout email and Stripe checkout session id, looks up the matching Clerk user in the loaded Clerk instance, optionally creates a passwordless Clerk user for that email when `--create-clerk-user` is present, and then runs the production Convex repair mutation. The new script is covered by `apps/web/tests/unit/repair-paid-checkout-customer.test.ts`.
 
@@ -70,6 +70,8 @@ The coordinator also reran checkout/access integration and route coverage:
     Tests  28 passed (28)
 
 Official `bun typecheck` was not rerun in its normal production-build mode after all slices because this local environment has PostHog source-map upload configured during `next build`. A `NODE_ENV=development` attempt is not a valid repo gate; it completed TypeScript and then failed during static prerender under the nonstandard environment. Targeted formatting for the touched files passed, as did plan lint, markdown lint, `bun lint`, and `git diff --check`.
+
+On 2026-05-08 Parker chose to close the customer-specific production repair and verification follow-ups outside this source-controlled plan. Future operators should still retrieve live identifiers from production provider dashboards and must not commit customer emails, Stripe ids, or Clerk user ids into this plan.
 
 ## Context and Orientation
 

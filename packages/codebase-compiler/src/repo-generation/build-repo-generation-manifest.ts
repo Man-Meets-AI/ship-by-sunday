@@ -4,8 +4,12 @@ import {
 	customerSafeAppFilePaths,
 	customerSafeCodebaseCompilerDirectoryPaths,
 	customerSafeCodebaseCompilerFilePaths,
+	customerSafeCodebasePresentationDirectoryPaths,
+	customerSafeCodebasePresentationFilePaths,
 	customerSafeRepoExcludedPathSegments,
 	customerSafeRepoRootFilePaths,
+	customerSafeTelegramChatWidgetDirectoryPaths,
+	customerSafeTelegramChatWidgetFilePaths,
 } from "./repo-download-source-contract";
 
 export type RepoGenerationManifest = {
@@ -30,11 +34,15 @@ export function buildRepoGenerationManifest(
 		includedDirectories: [
 			...customerSafeAppDirectoryPaths,
 			...customerSafeCodebaseCompilerDirectoryPaths,
+			...customerSafeCodebasePresentationDirectoryPaths,
+			...customerSafeTelegramChatWidgetDirectoryPaths,
 		],
 		includedFiles: [
 			...customerSafeRepoRootFilePaths,
 			...customerSafeAppFilePaths,
 			...customerSafeCodebaseCompilerFilePaths,
+			...customerSafeCodebasePresentationFilePaths,
+			...customerSafeTelegramChatWidgetFilePaths,
 		],
 		repoName: slugify(projectDefinition.facts.product_name),
 	};

@@ -7,19 +7,48 @@ import {
 	type CheckoutCtaId,
 	type FulfillmentTrack,
 } from "../platform/billing/checkout/checkout-intent";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { action, internalMutation, internalQuery } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { upsertProductAccessGrant } from "./access/model";
+import { productAccessGrantResultValidator } from "./access/validators";
 import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 } from "./checkoutIntentValidators";
+import { requireConvexEnv } from "./env";
 
 const pendingCheckoutClaimStatusValidator = v.union(
 	v.literal("pending"),
 	v.literal("claimed"),
 );
+
+const checkoutSurfaceValidator = v.union(
+	v.literal("hosted_checkout"),
+	v.literal("express_checkout"),
+);
+
+const checkoutPurchaseIntentCreateResultValidator = v.object({
+	purchaseIntentId: v.id("checkoutPurchaseIntents"),
+});
+
+const checkoutPurchaseIntentAttachResultValidator = v.object({
+	attached: v.union(v.literal("attached"), v.literal("already_attached")),
+});
+
+const checkoutPurchaseIntentFulfillmentResultValidator = v.object({
+	fulfilled: v.union(v.literal("fulfilled"), v.literal("missing_intent")),
+});
+
+type CheckoutPurchaseIntentCreateResult = {
+	purchaseIntentId: Id<"checkoutPurchaseIntents">;
+};
+
+type CheckoutPurchaseIntentAttachResult = {
+	attached: "attached" | "already_attached";
+};
 
 const pendingCheckoutClaimReturnValidator = v.union(
 	v.object({
@@ -32,6 +61,7 @@ const pendingCheckoutClaimReturnValidator = v.union(
 		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -111,6 +141,226 @@ const paidCheckoutClaimRepairResultValidator = v.union(
 export function normalizeCheckoutEmail(email: string) {
 	return email.trim().toLowerCase();
 }
+
+function assertCheckoutServerToken(checkoutServerToken: string) {
+	if (
+		checkoutServerToken !==
+		requireConvexEnv("CHECKOUT_FULFILLMENT_RETRY_SECRET")
+	) {
+		throw new ConvexError("Unauthorized checkout purchase intent write");
+	}
+}
+
+export const createCheckoutPurchaseIntent = action({
+	args: {
+		checkoutServerToken: v.string(),
+		clerkUserId: v.optional(v.string()),
+		checkoutEmail: v.optional(v.string()),
+		checkoutSurface: checkoutSurfaceValidator,
+	},
+	returns: checkoutPurchaseIntentCreateResultValidator,
+	handler: async (ctx, args): Promise<CheckoutPurchaseIntentCreateResult> => {
+		assertCheckoutServerToken(args.checkoutServerToken);
+		return await ctx.runMutation(
+			internal.checkoutClaims.createCheckoutPurchaseIntentRecord,
+			{
+				clerkUserId: args.clerkUserId,
+				checkoutEmail: args.checkoutEmail,
+				checkoutSurface: args.checkoutSurface,
+			},
+		);
+	},
+});
+
+export const createCheckoutPurchaseIntentRecord = internalMutation({
+	args: {
+		clerkUserId: v.optional(v.string()),
+		checkoutEmail: v.optional(v.string()),
+		checkoutSurface: checkoutSurfaceValidator,
+	},
+	returns: checkoutPurchaseIntentCreateResultValidator,
+	handler: async (ctx, args) => {
+		const now = Date.now();
+		const checkoutEmail = args.checkoutEmail?.trim();
+		const purchaseIntentId = await ctx.db.insert("checkoutPurchaseIntents", {
+			clerkUserId: args.clerkUserId,
+			checkoutEmail: checkoutEmail || undefined,
+			checkoutEmailNormalized: checkoutEmail
+				? normalizeCheckoutEmail(checkoutEmail)
+				: undefined,
+			checkoutSurface: args.checkoutSurface,
+			status: "created",
+			createdAt: now,
+			updatedAt: now,
+		});
+
+		return { purchaseIntentId };
+	},
+});
+
+export const attachStripeCheckoutSessionToPurchaseIntent = action({
+	args: {
+		checkoutServerToken: v.string(),
+		purchaseIntentId: v.id("checkoutPurchaseIntents"),
+		stripeCheckoutSessionId: v.string(),
+	},
+	returns: checkoutPurchaseIntentAttachResultValidator,
+	handler: async (ctx, args): Promise<CheckoutPurchaseIntentAttachResult> => {
+		assertCheckoutServerToken(args.checkoutServerToken);
+		return await ctx.runMutation(
+			internal.checkoutClaims.attachStripeCheckoutSessionToPurchaseIntentRecord,
+			{
+				purchaseIntentId: args.purchaseIntentId,
+				stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+			},
+		);
+	},
+});
+
+export const attachStripeCheckoutSessionToPurchaseIntentRecord =
+	internalMutation({
+		args: {
+			purchaseIntentId: v.id("checkoutPurchaseIntents"),
+			stripeCheckoutSessionId: v.string(),
+		},
+		returns: checkoutPurchaseIntentAttachResultValidator,
+		handler: async (ctx, args) => {
+			const purchaseIntent = await ctx.db.get(args.purchaseIntentId);
+			if (!purchaseIntent) {
+				throw new ConvexError("Checkout purchase intent not found");
+			}
+			if (
+				purchaseIntent.stripeCheckoutSessionId === args.stripeCheckoutSessionId
+			) {
+				return { attached: "already_attached" as const };
+			}
+			if (purchaseIntent.stripeCheckoutSessionId) {
+				throw new ConvexError(
+					"Checkout purchase intent already has a Stripe session",
+				);
+			}
+
+			await ctx.db.patch(args.purchaseIntentId, {
+				stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+				status: "stripe_session_attached",
+				updatedAt: Date.now(),
+			});
+
+			return { attached: "attached" as const };
+		},
+	});
+
+async function recordCheckoutPurchaseIntentFulfillmentInTransaction(
+	ctx: MutationCtx,
+	{
+		checkoutPurchaseIntentId,
+		stripeCheckoutSessionId,
+		clerkUserId,
+	}: {
+		checkoutPurchaseIntentId: Id<"checkoutPurchaseIntents"> | undefined;
+		stripeCheckoutSessionId: string;
+		clerkUserId?: string;
+	},
+) {
+	if (!checkoutPurchaseIntentId) {
+		return null;
+	}
+
+	const purchaseIntent = await ctx.db.get(checkoutPurchaseIntentId);
+	if (!purchaseIntent) {
+		return { fulfilled: "missing_intent" as const };
+	}
+
+	if (
+		purchaseIntent.stripeCheckoutSessionId &&
+		purchaseIntent.stripeCheckoutSessionId !== stripeCheckoutSessionId
+	) {
+		throw new ConvexError(
+			"Checkout purchase intent belongs to a different Stripe session",
+		);
+	}
+
+	const now = Date.now();
+	await ctx.db.patch(checkoutPurchaseIntentId, {
+		clerkUserId: clerkUserId ?? purchaseIntent.clerkUserId,
+		stripeCheckoutSessionId,
+		status: "fulfilled",
+		fulfilledAt: now,
+		updatedAt: now,
+	});
+
+	return { fulfilled: "fulfilled" as const };
+}
+
+function assertPurchaseIntentFulfilled(
+	result: Awaited<
+		ReturnType<typeof recordCheckoutPurchaseIntentFulfillmentInTransaction>
+	>,
+) {
+	if (result?.fulfilled === "missing_intent") {
+		throw new ConvexError("Checkout purchase intent not found");
+	}
+}
+
+export const grantProductAccessForCheckoutSession = internalMutation({
+	args: {
+		clerkUserId: v.string(),
+		source: v.union(v.literal("stripe_checkout"), v.literal("stripe_webhook")),
+		stripeCustomerId: v.optional(v.string()),
+		stripeCheckoutSessionId: v.string(),
+		stripePaymentIntentId: v.optional(v.string()),
+		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+		checkoutCtaId: v.optional(checkoutCtaIdValidator),
+		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
+	},
+	returns: productAccessGrantResultValidator,
+	handler: async (ctx, args) => {
+		const grantResult = await upsertProductAccessGrant(ctx, {
+			clerkUserId: args.clerkUserId,
+			source: args.source,
+			stripeCustomerId: args.stripeCustomerId,
+			stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+			stripePaymentIntentId: args.stripePaymentIntentId,
+			buyerStartingPoint: args.buyerStartingPoint,
+			checkoutCtaId: args.checkoutCtaId,
+			fulfillmentTrack: args.fulfillmentTrack,
+		});
+		assertPurchaseIntentFulfilled(
+			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
+				checkoutPurchaseIntentId: args.checkoutPurchaseIntentId,
+				stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+				clerkUserId: args.clerkUserId,
+			}),
+		);
+
+		return grantResult;
+	},
+});
+
+export const recordCheckoutPurchaseIntentFulfillment = internalMutation({
+	args: {
+		purchaseIntentId: v.id("checkoutPurchaseIntents"),
+		stripeCheckoutSessionId: v.string(),
+		clerkUserId: v.optional(v.string()),
+	},
+	returns: checkoutPurchaseIntentFulfillmentResultValidator,
+	handler: async (ctx, args) => {
+		const result = await recordCheckoutPurchaseIntentFulfillmentInTransaction(
+			ctx,
+			{
+				checkoutPurchaseIntentId: args.purchaseIntentId,
+				stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+				clerkUserId: args.clerkUserId,
+			},
+		);
+		if (result?.fulfilled === "missing_intent") {
+			return result;
+		}
+
+		return { fulfilled: "fulfilled" as const };
+	},
+});
 
 function requireNonEmptySupportInput(value: string, fieldName: string) {
 	const trimmedValue = value.trim();
@@ -215,6 +465,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 		paymentStatus: v.union(v.literal("paid"), v.literal("no_payment_required")),
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -241,6 +492,9 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 				paymentStatus: args.paymentStatus,
 				stripeCustomerId: args.stripeCustomerId,
 				stripePaymentIntentId: args.stripePaymentIntentId,
+				checkoutPurchaseIntentId:
+					args.checkoutPurchaseIntentId ??
+					existingClaim.checkoutPurchaseIntentId,
 				fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 				stripeEventId: args.stripeEventId,
 				stripeEventType: args.stripeEventType,
@@ -260,6 +514,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 			paymentStatus: args.paymentStatus,
 			stripeCustomerId: args.stripeCustomerId,
 			stripePaymentIntentId: args.stripePaymentIntentId,
+			checkoutPurchaseIntentId: args.checkoutPurchaseIntentId,
 			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			stripeEventId: args.stripeEventId,
 			stripeEventType: args.stripeEventType,
@@ -323,6 +578,13 @@ export const claimPendingCheckoutClaim = internalMutation({
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
 			...getPendingCheckoutClaimIntentFields(existingClaim),
 		});
+		assertPurchaseIntentFulfilled(
+			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
+				checkoutPurchaseIntentId: existingClaim.checkoutPurchaseIntentId,
+				stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
+				clerkUserId: viewerIdentity.clerkUserId,
+			}),
+		);
 
 		if (existingClaim.status === "claimed") {
 			await ctx.db.patch(existingClaim._id, {
@@ -418,6 +680,13 @@ export const repairPaidCheckoutClaim = internalMutation({
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
 			...getPendingCheckoutClaimIntentFields(existingClaim),
 		});
+		assertPurchaseIntentFulfilled(
+			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
+				checkoutPurchaseIntentId: existingClaim.checkoutPurchaseIntentId,
+				stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
+				clerkUserId,
+			}),
+		);
 
 		if (existingClaim.status === "claimed") {
 			await ctx.db.patch(existingClaim._id, {

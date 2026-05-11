@@ -16,6 +16,7 @@ const serverEnvSchema = z.object({
 	CHECKOUT_SUCCESS_FIXTURES: z.string().min(1).optional(),
 	ENABLE_OBSERVABILITY_TEST_TRIGGER: z.string().min(1).optional(),
 	GOOGLE_SITE_VERIFICATION: z.string().min(1).optional(),
+	NEXT_PUBLIC_CONVEX_SITE_URL: z.string().url().optional(),
 	CLERK_AUTHORIZED_PARTIES: z.string().min(1).optional(),
 	CLERK_SECRET_KEY: z.string().min(1).optional(),
 	CLERK_FRONTEND_API_URL: z.string().min(1).optional(),
@@ -37,6 +38,7 @@ const serverEnvSchema = z.object({
 	CODEX_APP_SERVER_HOME_ROOT: z.string().min(1).optional(),
 	CODEX_APP_SERVER_MODEL: z.string().min(1).optional(),
 	CODEX_APP_SERVER_TIMEOUT_MS: z.string().min(1).optional(),
+	ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET: z.string().min(32).optional(),
 });
 
 export function loadServerEnv() {
@@ -50,6 +52,9 @@ export function loadServerEnv() {
 		),
 		GOOGLE_SITE_VERIFICATION: normalizeEnvValue(
 			process.env.GOOGLE_SITE_VERIFICATION,
+		),
+		NEXT_PUBLIC_CONVEX_SITE_URL: normalizeEnvValue(
+			process.env.NEXT_PUBLIC_CONVEX_SITE_URL,
 		),
 		CLERK_AUTHORIZED_PARTIES: normalizeEnvValue(
 			process.env.CLERK_AUTHORIZED_PARTIES,
@@ -97,6 +102,9 @@ export function loadServerEnv() {
 		),
 		CODEX_APP_SERVER_TIMEOUT_MS: normalizeEnvValue(
 			process.env.CODEX_APP_SERVER_TIMEOUT_MS,
+		),
+		ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET: normalizeEnvValue(
+			process.env.ADMIN_IMPERSONATION_ROUTE_AUDIT_SECRET,
 		),
 	});
 }

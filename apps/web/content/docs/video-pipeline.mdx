@@ -144,6 +144,15 @@ apps/web/output/video-pipeline/run-<timestamp>.links.md
 
 Use the Markdown manifest when you need a durable pasteable source of Bunny embed links later.
 
+Tutorial thumbnails are served through the first-party
+`/api/video/thumbnails/[videoId]` route. Bunny Stream thumbnails are referer
+gated, so the route validates the video ID against the generated lesson media
+map and fetches the Bunny CDN image with the matching player URL as referer.
+If the Bunny Stream pull-zone hostname changes, update
+`apiConfig.bunnyStreamCdnBaseUrl` in `apps/web/config/product.ts` and verify a
+known `/api/video/thumbnails/[videoId]` response returns `200` with an image
+content type.
+
 ## Environment
 
 Required env values live in `apps/web/.env.local`.

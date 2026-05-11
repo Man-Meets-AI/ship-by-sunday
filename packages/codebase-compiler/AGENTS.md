@@ -25,6 +25,7 @@ The compiler produces one customer-safe Codebase snapshot that includes:
 - repo-root `docs/index.md`
 - repo-root `docs/facts/project-definition.json`
 - repo-root `docs/facts/design-system.json`
+- customer-safe `packages/codebase-compiler`, `packages/codebase-presentation`, and `packages/telegram-chat-widget` workspace source required by the generated app
 - starter overrides for `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts`
 - starter override for `apps/web/config/generated-design-system.ts`
 - design, marketing, build, and prompt materials inside that one repo output

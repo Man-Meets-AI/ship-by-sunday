@@ -33,6 +33,7 @@ export async function createFakeRunnerBin({
 		[
 			"#!/bin/sh",
 			'if [ "$1" = "--version" ]; then echo "codex 1.0.0"; exit 0; fi',
+			'if [ "$1" = "login" ] && [ "$2" = "status" ]; then echo "Logged in"; exit 0; fi',
 			'if [ "$1" = "exec" ] && [ "$2" = "--help" ]; then echo "exec help"; exit 0; fi',
 			'if [ "$CODEX_ARGS_FILE" != "" ]; then printf "%s\\n" "$@" > "$CODEX_ARGS_FILE"; fi',
 			'if [ "$1" = "exec" ]; then',

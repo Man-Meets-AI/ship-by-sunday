@@ -18,28 +18,30 @@ export const brandColorConfig = {
 
 export const routeConfig = {
 	home: "/",
-	codebase: "/codebase",
-	review: "/review",
+	appHome: "/home",
+	codebase: "/generate-codebase",
+	review: "/generate-codebase/review",
 	execute: "/execute",
 	tutorials: "/tutorials",
+	workers: "/workers",
 	docs: "/docs",
 	blog: "/blog",
 	mission: "/mission",
 	artifacts: "/artifacts",
 	settings: "/settings",
+	adminImpersonation: "/admin/impersonation",
 	signIn: "/sign-in",
 	signUp: "/sign-up",
 	checkoutSuccess: "/checkout/success",
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
-	workspaceChoice: "/workspace/choose",
-	workspaceSetup: "/workspace/setup",
-	workspaceDoctorPass: "/workspace/doctor-pass",
-	workspaceFindings: "/workspace/findings",
-	workspaceLoops: "/workspace/loops",
-	workspaceRuns: "/workspace/runs",
-	workspacePrivacy: "/workspace/privacy",
+	workspaceSetup: "/workers/setup",
+	workspaceDoctorPass: "/workers/doctor-pass",
+	workspaceFindings: "/workers/findings",
+	workspaceLoops: "/workers/loops",
+	workspaceRuns: "/workers/runs",
+	workspacePrivacy: "/workers/privacy",
 	pricingHash: "#pricing",
 } as const;
 
@@ -70,6 +72,10 @@ export type HomePageCtaTarget =
 
 export type StarterHomePageConfig = {
 	readonly sections: Readonly<Record<HomePageSectionName, boolean>>;
+	readonly supportWidget: {
+		readonly enabled: boolean;
+		readonly fallbackHref: string;
+	};
 	readonly heroPrimaryCta: HomePageCtaTarget;
 	readonly pricingPrimaryCta: HomePageCtaTarget;
 };
@@ -83,7 +89,7 @@ export const starterHomePageConfig = {
 	sections: {
 		productPreview: true,
 		hero: true,
-		execLoop: true,
+		execLoop: false,
 		starterSystem: true,
 		durability: false,
 		socialProof: true,
@@ -92,6 +98,10 @@ export const starterHomePageConfig = {
 		plansMd: true,
 		pricing: true,
 		footer: true,
+	},
+	supportWidget: {
+		enabled: true,
+		fallbackHref: "https://t.me/parkerrex",
 	},
 	heroPrimaryCta: {
 		kind: "checkout",
@@ -146,15 +156,15 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Generate my codebase",
+		primaryCtaLabel: "Start my AI build",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {
-		homeLabel: "Workspace",
-		homeNoun: "workspace",
-		homeSubtitle: "Your product, one step at a time",
-		openHomeActionLabel: "Open workspace",
-		firstStepLabel: "workspace step",
+		homeLabel: "Home",
+		homeNoun: "home",
+		homeSubtitle: "Choose your next path",
+		openHomeActionLabel: "Open home",
+		firstStepLabel: "home path",
 		artifactsLabel: "Artifacts",
 		settingsLabel: "Settings",
 	},
@@ -271,6 +281,7 @@ export const apiConfig = {
 	stripeApiVersion: "2026-02-25.clover",
 	convexAuthTokenTemplate: "convex",
 	bunnyEmbedBaseUrl: "https://player.mediadelivery.net/embed",
+	bunnyStreamCdnBaseUrl: "https://vz-fd54da20-4b1.b-cdn.net",
 	codexAppServerClientVersion: "0.1.0",
 } as const;
 
@@ -371,7 +382,7 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	fallbackRedirectUrl: routeConfig.workspaceChoice,
+	fallbackRedirectUrl: routeConfig.appHome,
 } as const;
 
 export function getSignInRedirectHref(redirectPath: string) {

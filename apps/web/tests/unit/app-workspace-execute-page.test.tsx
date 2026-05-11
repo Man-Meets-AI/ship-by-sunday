@@ -88,7 +88,7 @@ describe("workspace execute route", () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
 			if (query === "getCodebaseResumeDestination") {
 				return {
-					destination: "/review",
+					destination: "/generate-codebase/review",
 					kind: "review",
 					codebaseStageId: "review",
 					postReviewTargets: null,
@@ -102,9 +102,9 @@ describe("workspace execute route", () => {
 			await import("@/app/(workspace)/execute/page");
 
 		await expect(ExecuteRoutePage()).rejects.toThrowError(
-			"NEXT_REDIRECT:/review",
+			"NEXT_REDIRECT:/generate-codebase/review",
 		);
-		expect(redirectMock).toHaveBeenCalledWith("/review");
+		expect(redirectMock).toHaveBeenCalledWith("/generate-codebase/review");
 	});
 
 	it("redirects unlocked visitors into the canonical build lessons target", async () => {
@@ -115,12 +115,12 @@ describe("workspace execute route", () => {
 					kind: "post_review",
 					codebaseStageId: null,
 					postReviewTargets: {
-						reviewDestination: "/review",
+						reviewDestination: "/generate-codebase/review",
 						buildLessonsDestination: getLessonHref(
 							"iterate-the-product-with-ai",
 						),
 						launchLessonsDestination: getLessonHref("product-review"),
-						lessonMapDestination: "/review?showLessonMap=1",
+						lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 						latestLessonDestination: getLessonHref(
 							"iterate-the-product-with-ai",
 						),

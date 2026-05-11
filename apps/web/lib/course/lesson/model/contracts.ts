@@ -203,6 +203,7 @@ export type LessonVideoContent = {
 	videoId?: string;
 	title?: string;
 	posterUrl?: string;
+	thumbnailFileName?: string;
 	durationLabel?: string;
 };
 

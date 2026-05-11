@@ -109,4 +109,49 @@ describe("release evidence", () => {
 		expect(evidence.gitTag).toBe("v0.4.0");
 		expect(evidence.blockers).toEqual([]);
 	});
+
+	it("preserves artifact-derived proof metadata from CLI options", async () => {
+		const evidence = await buildReleaseEvidenceCli({
+			args: [
+				"--manifest=../../release.json",
+				"--tag=v0.4.0",
+				"--tag-target-sha=main-sha",
+				"--main-sha=main-sha",
+				"--vercel-status=passed",
+				"--vercel-run-id=456",
+				"--vercel-url=https://github.com/Man-Meets-AI/ship-by-sunday/actions/runs/456",
+				"--vercel-notes=Derived from production summary.",
+				"--convex-status=not_required",
+				"--convex-notes=Not Convex-sensitive.",
+				"--billing-status=not_required",
+				"--billing-notes=Not billing-sensitive.",
+				"--auth-status=passed",
+				"--auth-run-id=456",
+				"--auth-url=https://github.com/Man-Meets-AI/ship-by-sunday/actions/runs/456",
+				"--entitlement-status=passed",
+				"--entitlement-run-id=456",
+				"--entitlement-url=https://github.com/Man-Meets-AI/ship-by-sunday/actions/runs/456",
+				"--dry-run",
+			],
+			env: {
+				GITHUB_REF_NAME: "main",
+			},
+			writeFileImpl: async () => undefined,
+			writeStdout: () => undefined,
+		});
+
+		expect(evidence.vercel).toMatchObject({
+			notes: "Derived from production summary.",
+			runId: "456",
+			status: "passed",
+			url: "https://github.com/Man-Meets-AI/ship-by-sunday/actions/runs/456",
+		});
+		expect(evidence.convex).toMatchObject({
+			notes: "Not Convex-sensitive.",
+			runId: null,
+			status: "not_required",
+			url: null,
+		});
+		expect(evidence.blockers).toEqual([]);
+	});
 });

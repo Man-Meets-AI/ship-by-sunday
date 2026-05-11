@@ -14,12 +14,8 @@ describe("sign-in route utils", () => {
 	});
 
 	it("falls back for invalid redirect paths", () => {
-		expect(getSafeRedirectPath("https://example.com/settings")).toBe(
-			"/workspace/choose",
-		);
-		expect(getSafeRedirectPath("//example.com/settings")).toBe(
-			"/workspace/choose",
-		);
+		expect(getSafeRedirectPath("https://example.com/settings")).toBe("/home");
+		expect(getSafeRedirectPath("//example.com/settings")).toBe("/home");
 	});
 
 	it("builds task routes that preserve the redirect target", () => {
@@ -29,26 +25,24 @@ describe("sign-in route utils", () => {
 	});
 
 	it("builds cookie-clearing checkout recovery routes with a safe redirect", () => {
-		expect(buildClearPendingCheckoutSessionHref("/codebase")).toBe(
-			"/checkout/clear-pending?redirect_url=%2Fcodebase",
+		expect(buildClearPendingCheckoutSessionHref("/generate-codebase")).toBe(
+			"/checkout/clear-pending?redirect_url=%2Fgenerate-codebase",
 		);
 		expect(
 			buildClearPendingCheckoutSessionHref("https://example.com/owned"),
-		).toBe("/checkout/clear-pending?redirect_url=%2Fworkspace%2Fchoose");
+		).toBe("/checkout/clear-pending?redirect_url=%2Fhome");
 	});
 
-	it("detects the immediate post-checkout workspace welcome redirect", () => {
-		expect(
-			isCheckoutWelcomeRedirectPath("/workspace/choose?welcome=checkout"),
-		).toBe(true);
-		expect(
-			isCheckoutWelcomeRedirectPath("/workspace/choose?welcome=returning"),
-		).toBe(false);
+	it("detects the immediate post-checkout home welcome redirect", () => {
+		expect(isCheckoutWelcomeRedirectPath("/home?welcome=checkout")).toBe(true);
+		expect(isCheckoutWelcomeRedirectPath("/home?welcome=returning")).toBe(
+			false,
+		);
 		expect(isCheckoutWelcomeRedirectPath(null)).toBe(false);
-		expect(
-			isCheckoutWelcomeRedirectPath("https://example.com/workspace/choose"),
-		).toBe(false);
-		expect(isCheckoutWelcomeRedirectPath("/workspace/choose")).toBe(false);
+		expect(isCheckoutWelcomeRedirectPath("https://example.com/home")).toBe(
+			false,
+		);
+		expect(isCheckoutWelcomeRedirectPath("/home")).toBe(false);
 		expect(isCheckoutWelcomeRedirectPath("/checkout/success")).toBe(false);
 	});
 
@@ -59,7 +53,7 @@ describe("sign-in route utils", () => {
 	it("uses the sanitized redirect target for task completion", () => {
 		expect(getTaskRedirectUrlComplete("/settings")).toBe("/settings");
 		expect(getTaskRedirectUrlComplete("https://example.com/settings")).toBe(
-			"/workspace/choose",
+			"/home",
 		);
 	});
 });

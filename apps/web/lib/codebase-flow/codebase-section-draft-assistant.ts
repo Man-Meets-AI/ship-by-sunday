@@ -6,6 +6,7 @@ import {
 	type CanonicalProjectFactsDraft,
 } from "@shipbysunday/codebase-compiler";
 import { codebaseFieldLabel } from "@/lib/codebase-flow/codebase-field-helpers";
+import type { JsonObject, JsonValue } from "@/lib/json-value";
 
 export const codebaseDraftableSectionIds = [
 	"foundation",
@@ -188,15 +189,15 @@ function stripJsonCodeFence(output: string) {
 		.trim();
 }
 
-function parseJsonObject(output: string): Record<string, unknown> {
+function parseJsonObject(output: string): JsonObject {
 	const strippedOutput = stripJsonCodeFence(output);
 	const objectMatch = strippedOutput.match(/\{[\s\S]*\}/);
 	const jsonText = objectMatch?.[0] ?? strippedOutput;
 
 	try {
-		const parsed = JSON.parse(jsonText) as unknown;
+		const parsed = JSON.parse(jsonText) as JsonValue;
 		if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-			return parsed as Record<string, unknown>;
+			return parsed as JsonObject;
 		}
 	} catch {
 		// Fall through to the domain error below.
@@ -205,7 +206,7 @@ function parseJsonObject(output: string): Record<string, unknown> {
 	throw new Error("Codex returned a response that was not a JSON object.");
 }
 
-function normalizeArrayFieldValue(value: unknown) {
+function normalizeArrayFieldValue(value: JsonValue | undefined) {
 	const items = Array.isArray(value)
 		? value
 		: typeof value === "string"
@@ -237,7 +238,7 @@ function normalizePricingModelValue(value: string) {
 	return null;
 }
 
-function normalizeNumericFieldValue(value: unknown) {
+function normalizeNumericFieldValue(value: JsonValue | undefined) {
 	const rawValue = String(value);
 	const match = rawValue.match(/\d+(?:\.\d+)?/);
 	if (!match) {
@@ -254,7 +255,7 @@ function normalizeNumericFieldValue(value: unknown) {
 
 function normalizeSectionDraftValue(
 	fieldKey: CanonicalProjectFactKey,
-	value: unknown,
+	value: JsonValue | undefined,
 ) {
 	if (value === null || value === undefined) {
 		return null;

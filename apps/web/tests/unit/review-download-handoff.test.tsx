@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/config/product", () => ({
 	routeConfig: {
-		review: "/review?showLessonMap=1",
+		review: "/generate-codebase/review?showLessonMap=1",
 	},
 }));
 
@@ -13,17 +13,17 @@ import {
 	getReviewAutoDownloadHref,
 	isReviewAutoDownloadEnabled,
 } from "@/lib/codebase-flow/review-download-handoff";
-import { useReviewDownloadHandoff } from "@/app/(workspace)/review/_hooks/use-review-download-handoff";
+import { useReviewDownloadHandoff } from "@/app/(workspace)/generate-codebase/review/_hooks/use-review-download-handoff";
 
 describe("review download handoff", () => {
 	afterEach(() => {
 		vi.restoreAllMocks();
-		window.history.replaceState({}, "", "/review");
+		window.history.replaceState({}, "", "/generate-codebase/review");
 	});
 
 	it("builds the review download href and only enables the exact query value", () => {
 		expect(getReviewAutoDownloadHref()).toBe(
-			"/review?showLessonMap=1&download=1",
+			"/generate-codebase/review?showLessonMap=1&download=1",
 		);
 		expect(isReviewAutoDownloadEnabled("1")).toBe(true);
 		expect(isReviewAutoDownloadEnabled("0")).toBe(false);
@@ -48,7 +48,7 @@ describe("review download handoff", () => {
 		window.history.replaceState(
 			{},
 			"",
-			"/review?download=1&showLessonMap=1#handoff",
+			"/generate-codebase/review?download=1&showLessonMap=1#handoff",
 		);
 		const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click");
 
@@ -71,7 +71,7 @@ describe("review download handoff", () => {
 		expect(result.current.downloadHref).toBe("/api/download/repo");
 		expect(
 			window.location.pathname + window.location.search + window.location.hash,
-		).toBe("/review?showLessonMap=1#handoff");
+		).toBe("/generate-codebase/review?showLessonMap=1#handoff");
 
 		await act(async () => {
 			rerender({

@@ -33,6 +33,10 @@ import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 
 type WorkspaceSyncPreviewState = FunctionReturnType<
 	typeof api.workspace.getWorkspaceSyncPreviewState
@@ -87,6 +91,9 @@ export function WorkspaceDoctorPassPage({
 				doctorPassRunId: doctorPassRun._id,
 				previewDigest: doctorPassRun.syncPreviewDigest,
 			});
+			if (isSupportModeBlockedMutationResult(nextRun)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setLastMutationState({
 				doctorPassRun: nextRun,
 			});
@@ -103,10 +110,10 @@ export function WorkspaceDoctorPassPage({
 			setApprovalState("errored");
 			showWorkspaceActionErrorToast({
 				id: workspaceDoctorPassToastIds.approvePreviewError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to approve sync preview.",
 				report: {
-					title: "Workspace doctor pass sync preview approval failed",
+					title: "Worker doctor pass sync preview approval failed",
 					code: "workspace_doctor_pass_sync_preview_approval_failed",
 					pathname: routeConfig.workspaceDoctorPass,
 					details: {
@@ -575,7 +582,7 @@ function buildDoctorPassSteps(doctorPassRun: DoctorPassRun): DoctorPassStep[] {
 					: "pending",
 		},
 		{
-			label: "View findings in workspace",
+			label: "View findings in Worker",
 			status: hasUpload ? "current" : "pending",
 		},
 	];
@@ -596,7 +603,7 @@ function getDoctorPassPresentation(doctorPassRun: DoctorPassRun) {
 		return {
 			title: "Findings uploaded",
 			subtitle:
-				"Approved structured findings are now available in the workspace.",
+				"Approved structured findings are now available in Worker findings.",
 			statusLabel: "Findings uploaded.",
 			approvalCopy:
 				"Upload is complete. Open the synced findings or run history.",

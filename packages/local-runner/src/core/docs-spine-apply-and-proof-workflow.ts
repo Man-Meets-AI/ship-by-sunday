@@ -1,6 +1,7 @@
 import { lstat, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "./json-value";
 import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
@@ -31,6 +32,7 @@ import {
 	summarizeFailedQualityRules,
 } from "../workflows/docs-spine-adoption/quality-eval";
 import { DOCS_SPINE_ADOPTION_WORKFLOW_ID } from "../workflows/docs-spine-adoption/manifest";
+import { buildDocsSpineScannerBundle } from "../workflows/docs-spine-adoption/scanner";
 import type { DocsSpineRepoFacts } from "../workflows/docs-spine-adoption/schemas";
 
 export type DocsSpineApplyWorkflowResult = {
@@ -181,6 +183,7 @@ export async function runDocsSpineApplyWorkflow({
 			fetchRunnerEvent,
 		});
 	}
+	const preApplyDirtyFileRefs = await listGitDirtyFileRefs(repositoryRoot);
 
 	await ensureSafeApplyArtifactDirectory(
 		repositoryRoot,
@@ -310,12 +313,16 @@ export async function runDocsSpineApplyWorkflow({
 		const approvedApplyTargetRefs = applyReadyFiles.map(
 			(file) => file.targetRef,
 		);
-		const unexpectedDirtyFiles = await listUnexpectedDirtyFiles(
+		const preApplyUserDirtyFileRefs = preApplyDirtyFileRefs.filter(
+			(fileRef) => !fileRef.startsWith(".sbs/"),
+		);
+		const unsafePreApplyDirtyFiles = await listUnsafePreApplyDirtyFiles(
 			repositoryRoot,
+			preApplyDirtyFileRefs,
 			approvedApplyTargetRefs,
 			workflowRunId,
 		);
-		if (unexpectedDirtyFiles.length > 0) {
+		if (unsafePreApplyDirtyFiles.length > 0) {
 			await writeApplySummary({
 				repositoryRoot,
 				workflowRunId,
@@ -324,8 +331,8 @@ export async function runDocsSpineApplyWorkflow({
 				status: "blocked",
 				appliedFileRefs: [],
 				blockedReasons: [
-					"Worktree has unexpected dirty files before docs spine apply starts.",
-					...unexpectedDirtyFiles,
+					"Worktree has dirty docs-spine targets or unsafe runner artifacts before apply starts.",
+					...unsafePreApplyDirtyFiles,
 				],
 				sourceArtifactRefs: applyReadyFiles.map(
 					(file) => file.sourceArtifactRef,
@@ -343,7 +350,7 @@ export async function runDocsSpineApplyWorkflow({
 				localRunDirectory,
 				blockedStage: "dirty-state",
 				blockedReason:
-					"Worktree has unexpected dirty files before docs spine apply starts.",
+					"Worktree has dirty docs-spine targets or unsafe runner artifacts before apply starts.",
 				createdArtifacts: [
 					...initialCreatedArtifacts,
 					qualityReportRef,
@@ -425,12 +432,126 @@ export async function runDocsSpineApplyWorkflow({
 			};
 		}
 
+		const appliedFileRefs = plannedApplyFiles.map((file) => file.targetRef);
+		const createdArtifacts = [
+			...initialCreatedArtifacts,
+			qualityReportRef,
+			applySummaryRef,
+			proofRef,
+			syncPreviewRef,
+		];
+
 		for (const plannedApplyFile of plannedApplyFiles) {
 			await writeMarkdownFile(
 				repositoryRoot,
 				plannedApplyFile.targetRef,
 				plannedApplyFile.markdown,
 			);
+		}
+		const postApplyScannerBundle = await buildDocsSpineScannerBundle({
+			repositoryRoot,
+			now,
+		});
+		qualityReport = buildDocsSpineApplyQualityReport({
+			files: await readAppliedMarkdownFiles(repositoryRoot, plannedApplyFiles),
+			repoFacts: postApplyScannerBundle.repoFacts,
+			now,
+		});
+		await writeJsonArtifact(
+			repositoryRoot,
+			workflowRunId,
+			qualityReportRef,
+			qualityReport,
+		);
+		const postApplyQualityBlockers = summarizeFailedQualityRules(qualityReport);
+		if (postApplyQualityBlockers.length > 0) {
+			await writeApplySummary({
+				repositoryRoot,
+				workflowRunId,
+				applySummaryRef,
+				now,
+				status: "blocked",
+				appliedFileRefs,
+				blockedReasons: postApplyQualityBlockers,
+				sourceArtifactRefs: applyReadyFiles.map(
+					(file) => file.sourceArtifactRef,
+				),
+			});
+			const blockedReason = postApplyQualityBlockers[0];
+			await writeJsonArtifact(repositoryRoot, workflowRunId, proofRef, {
+				schemaVersion: "docs-spine-apply-proof.v1",
+				workflowId: DOCS_SPINE_APPLY_WORKFLOW_ID,
+				workflowVersion: DOCS_SPINE_APPLY_WORKFLOW_VERSION,
+				workflowRunId,
+				branchName,
+				profileName,
+				applySummaryRef,
+				qualityReportRef,
+				qualityReportStatus: qualityReport.status,
+				qualityScore: qualityReport.score,
+				touchedFiles: appliedFileRefs,
+				appliedFileRefs,
+				createdArtifacts,
+				proofCommandsRun: [],
+				proofCommandResults: [],
+				blockedProof: [
+					{
+						stage: "post-apply-quality",
+						reason: blockedReason,
+						nextApprovalRequired: true,
+					},
+				],
+				rollbackInstructions: DOCS_SPINE_APPLY_ROLLBACK_NOTES,
+				nextRecommendedWorkflow: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+				createdAt: now,
+			});
+			await writeJsonArtifact(repositoryRoot, workflowRunId, syncPreviewRef, {
+				schemaVersion: "docs-spine-apply-sync-preview.v1",
+				workflowId: DOCS_SPINE_APPLY_WORKFLOW_ID,
+				workflowVersion: DOCS_SPINE_APPLY_WORKFLOW_VERSION,
+				branchName,
+				profileName,
+				touchedFileRefs: appliedFileRefs,
+				createdArtifactRefs: createdArtifacts,
+				proofCommandResults: [],
+				qualityReportRef,
+				qualityReportStatus: qualityReport.status,
+				qualityScore: qualityReport.score,
+				blockedReason,
+				nextRecommendedWorkflowId: DOCS_SPINE_ADOPTION_WORKFLOW_ID,
+			});
+			const blockedEventResult = await sendRunnerEventDirect({
+				credential,
+				fetchRunnerEvent,
+				event: createRunnerEvent({
+					projectId: state.projectId,
+					runnerId: state.runnerId,
+					workflowRunId,
+					payload: {
+						eventType: "workflow.blocked",
+						workflowId: DOCS_SPINE_APPLY_WORKFLOW_ID,
+						writeLeaseId,
+						blockedStage: "post-apply-quality",
+						blockedReason,
+					},
+				}),
+			});
+			return {
+				workflowRunId,
+				workflowId: DOCS_SPINE_APPLY_WORKFLOW_ID,
+				status: "blocked",
+				branchName,
+				profileName,
+				proofStatus: "blocked",
+				localRunDirectoryRef,
+				touchedFiles: appliedFileRefs,
+				createdArtifacts,
+				blockedReason,
+				deliveredEvents:
+					startEventResult.delivered + blockedEventResult.delivered,
+				remainingEvents:
+					startEventResult.remaining + blockedEventResult.remaining,
+			};
 		}
 
 		await writeApplySummary({
@@ -444,20 +565,13 @@ export async function runDocsSpineApplyWorkflow({
 			sourceArtifactRefs: applyReadyFiles.map((file) => file.sourceArtifactRef),
 		});
 
-		const appliedFileRefs = plannedApplyFiles.map((file) => file.targetRef);
-		const createdArtifacts = [
-			...initialCreatedArtifacts,
-			qualityReportRef,
-			applySummaryRef,
-			proofRef,
-			syncPreviewRef,
-		];
 		const { proofCommandResults, unexpectedTouchedFiles, blockedProof } =
 			await runProofCommands(
 				repositoryRoot,
 				appliedFileRefs,
 				workflowRunId,
-				repoFacts,
+				postApplyScannerBundle.repoFacts,
+				preApplyDirtyFileRefs,
 			);
 		const touchedFileRefs = [
 			...appliedFileRefs,
@@ -485,6 +599,7 @@ export async function runDocsSpineApplyWorkflow({
 			qualityReportRef,
 			qualityReportStatus: qualityReport.status,
 			qualityScore: qualityReport.score,
+			preexistingDirtyFileRefs: preApplyUserDirtyFileRefs,
 			touchedFiles: touchedFileRefs,
 			appliedFileRefs,
 			createdArtifacts,
@@ -513,6 +628,7 @@ export async function runDocsSpineApplyWorkflow({
 			qualityReportRef,
 			qualityReportStatus: qualityReport.status,
 			qualityScore: qualityReport.score,
+			preexistingDirtyFileCount: preApplyUserDirtyFileRefs.length,
 			blockedProofCount: blockedProof.length,
 			proofSummary,
 			nextRecommendedWorkflowId: DOCS_SPINE_APPLY_NEXT_RECOMMENDED_WORKFLOW_ID,
@@ -606,7 +722,7 @@ async function readApplyReadyFiles(
 			path.join(repositoryRoot, sourceArtifactRef),
 			"utf8",
 		);
-		const parsedDraft = JSON.parse(rawDraft) as unknown;
+		const parsedDraft = JSON.parse(rawDraft) as JsonValue;
 		applyReadyFiles.push(
 			...extractApplyReadyFiles(parsedDraft, sourceArtifactRef),
 		);
@@ -615,21 +731,18 @@ async function readApplyReadyFiles(
 }
 
 export function extractApplyReadyFiles(
-	draft: unknown,
+	draft: JsonValue,
 	sourceArtifactRef: string,
 ): DocsSpineApplyReadyFile[] {
 	if (!draft || typeof draft !== "object" || Array.isArray(draft)) {
 		return [];
 	}
-	const proposedFiles = (draft as Record<string, unknown>).proposedFiles;
+	const draftRecord = draft as JsonObject;
+	const proposedFiles = draftRecord.proposedFiles;
 	const draftStatus =
-		typeof (draft as Record<string, unknown>).status === "string"
-			? String((draft as Record<string, unknown>).status)
-			: null;
-	const draftBlockedReasons = Array.isArray(
-		(draft as Record<string, unknown>).blockedReasons,
-	)
-		? ((draft as Record<string, unknown>).blockedReasons as unknown[]).filter(
+		typeof draftRecord.status === "string" ? String(draftRecord.status) : null;
+	const draftBlockedReasons = Array.isArray(draftRecord.blockedReasons)
+		? draftRecord.blockedReasons.filter(
 				(reason): reason is string => typeof reason === "string",
 			)
 		: [];
@@ -645,7 +758,7 @@ export function extractApplyReadyFiles(
 			) {
 				return null;
 			}
-			const record = proposedFile as Record<string, unknown>;
+			const record = proposedFile as JsonObject;
 			if (
 				typeof record.targetRef !== "string" ||
 				typeof record.markdown !== "string"
@@ -761,6 +874,24 @@ async function buildPlannedApplyMarkdownFiles(
 	return plannedFiles;
 }
 
+async function readAppliedMarkdownFiles(
+	repositoryRoot: string,
+	plannedApplyFiles: DocsSpineMarkdownFile[],
+): Promise<DocsSpineMarkdownFile[]> {
+	const appliedFiles: DocsSpineMarkdownFile[] = [];
+	for (const plannedApplyFile of plannedApplyFiles) {
+		appliedFiles.push({
+			targetRef: plannedApplyFile.targetRef,
+			markdown: await readFile(
+				path.join(repositoryRoot, plannedApplyFile.targetRef),
+				"utf8",
+			),
+			sourceArtifactRef: plannedApplyFile.sourceArtifactRef,
+		});
+	}
+	return appliedFiles;
+}
+
 function isReplaceablePriorDocsSpineOutput(
 	targetRef: string,
 	existingMarkdown: string,
@@ -769,14 +900,42 @@ function isReplaceablePriorDocsSpineOutput(
 		"docs/index.md",
 		"docs/exec-plans/PLANS.md",
 		"docs/exec-plans/active/docs-spine-adoption-first-slice.md",
+		"docs/exec-plans/index.md",
+		"docs/exec-plans/AGENTS.md",
+		"docs/exec-plans/active/index.md",
+		"docs/exec-plans/completed/index.md",
+		"docs/programs/README.md",
+		"docs/programs/AGENTS.md",
 		"docs/programs/PROGRAMS.md",
 		"docs/programs/active/docs-spine-adoption/program.md",
+		"docs/programs/active/index.md",
+		"docs/programs/completed/index.md",
 		"docs/prompts/README.md",
+		"docs/prompts/AGENTS.md",
+		"docs/prompts/program-create.md",
 		"docs/QUALITY_SCORE.md",
 		"docs/validation.md",
 		"docs/proof.md",
 	]);
-	if (!replaceableTargetRefs.has(targetRef)) {
+	const isDatedDocsSpineAdoptionTarget =
+		/^docs\/exec-plans\/active\/\d{4}-\d{2}-\d{2}-docs-spine-adoption-first-slice\.md$/.test(
+			targetRef,
+		) ||
+		/^docs\/programs\/active\/\d{4}-\d{2}-\d{2}-docs-spine-adoption\/(?:program|planning-brief-1|track-1-docs-spine-surfaces|normalized-track-1|research-pass-docs-spine-surfaces|normalized-pass-docs-spine-adoption|converged-decision-packet|dependency-graph|plan-split-recommendation|cross-repo-review)\.md$/.test(
+			targetRef,
+		) ||
+		/^docs\/programs\/active\/\d{4}-\d{2}-\d{2}-docs-spine-adoption\/current-planning-brief\.txt$/.test(
+			targetRef,
+		);
+	const isGeneratedPromptTarget =
+		/^docs\/prompts\/(?:program-(?:orchestrator|initialize|funnel|research-passes|normalize-pass|converged-decision-packet|dependency-graph|plan-split-recommendation|cross-repo-review|planning-brief|doc-synthesis|loop|docs-sync|planning-refresh|completion-review)|exec-plan-(?:writer|grill|execute|validate))\.md$/.test(
+			targetRef,
+		);
+	if (
+		!replaceableTargetRefs.has(targetRef) &&
+		!isDatedDocsSpineAdoptionTarget &&
+		!isGeneratedPromptTarget
+	) {
 		return false;
 	}
 	return (
@@ -787,6 +946,25 @@ function isReplaceablePriorDocsSpineOutput(
 			existingMarkdown,
 		) ||
 		/Repo convention refs detected by the docs-spine scanner|Detected prompt refs: `none`|Use the repo-native commands below when proving docs-spine adoption work|Record local proof for docs-spine adoption here/.test(
+			existingMarkdown,
+		) ||
+		/This Program is a living initiative document for adopting the docs spine|Install the first docs-spine slice for this repository|This is a living execution plan for the first human-reviewed follow-up|Planning Brief 1: Docs Spine Adoption/.test(
+			existingMarkdown,
+		) ||
+		/Program Funnel|Subtree guidance for Program docs|Subtree guidance for active and completed ExecPlans|Subtree guidance for reusable Program and ExecPlan prompt contracts|Active ExecPlans|Completed ExecPlans|canonical ExecPlan surface|Program Orchestrator|Program Initialize|Program Research Passes|Program Planning Refresh|ExecPlan Writer|ExecPlan Execute|Quality gate before returning/.test(
+			existingMarkdown,
+		) ||
+		/# Research Pass: Docs Spine Surfaces|# Normalized Pass: Docs Spine Adoption|# Converged Decision Packet|# Dependency Graph|# Plan Split Recommendation|# Cross-Repo Review/.test(
+			existingMarkdown,
+		) ||
+		/`docs\/` is the first-hop documentation spine|Prompt assets live here when a repeatable workflow needs a stable instruction packet|<!-- sbs-docs-spine:start docs-prompts-README\.md -->/.test(
+			existingMarkdown,
+		) ||
+		/summary: Index of active Program packets in this repository|summary: Index of completed Program packets in this repository|summary: Agent prompt for creating or updating durable Program packets/.test(
+			existingMarkdown,
+		) ||
+		/^planning-brief-1\.md\s*$/.test(existingMarkdown) ||
+		/Existing docs refs:[\s\S]*(?:apps|packages)\/[^`\s]+\/(?:src|test|tests|__tests__|assets|public|static)\//.test(
 			existingMarkdown,
 		)
 	);
@@ -848,6 +1026,7 @@ async function runProofCommands(
 	appliedFileRefs: string[],
 	workflowRunId: string,
 	repoFacts?: DocsSpineRepoFacts,
+	preApplyDirtyFileRefs: string[] = [],
 ) {
 	const commands = [
 		["git", ["status", "--short"]],
@@ -868,6 +1047,7 @@ async function runProofCommands(
 		repositoryRoot,
 		appliedFileRefs,
 		workflowRunId,
+		preApplyDirtyFileRefs,
 	);
 	for (const [command, args] of commands) {
 		const result = await runBoundedProcess({
@@ -934,7 +1114,29 @@ async function listUnexpectedDirtyFiles(
 	repositoryRoot: string,
 	appliedFileRefs: string[],
 	workflowRunId: string,
+	preApplyDirtyFileRefs: string[] = [],
 ) {
+	const preApplyDirtySet = new Set(preApplyDirtyFileRefs);
+	const dirtyFileRefs = await listGitDirtyFileRefs(repositoryRoot);
+	const unexpectedDirtyFileRefs: string[] = [];
+	for (const dirtyFileRef of dirtyFileRefs) {
+		if (preApplyDirtySet.has(dirtyFileRef)) {
+			continue;
+		}
+		const allowed = await isAllowedApplyDirtyRef(
+			repositoryRoot,
+			dirtyFileRef,
+			appliedFileRefs,
+			workflowRunId,
+		);
+		if (!allowed) {
+			unexpectedDirtyFileRefs.push(dirtyFileRef);
+		}
+	}
+	return unexpectedDirtyFileRefs.sort();
+}
+
+async function listGitDirtyFileRefs(repositoryRoot: string) {
 	const result = await runGit(repositoryRoot, [
 		"status",
 		"--porcelain",
@@ -953,19 +1155,62 @@ async function listUnexpectedDirtyFiles(
 			...(await expandGitStatusPathForProof(repositoryRoot, statusFileRef)),
 		);
 	}
-	const unexpectedDirtyFileRefs: string[] = [];
+	return Array.from(new Set(dirtyFileRefs)).sort();
+}
+
+async function listUnsafePreApplyDirtyFiles(
+	repositoryRoot: string,
+	dirtyFileRefs: string[],
+	appliedFileRefs: string[],
+	workflowRunId: string,
+) {
+	const unsafeDirtyFileRefs: string[] = [];
 	for (const dirtyFileRef of dirtyFileRefs) {
+		if (dirtyFileRef === "<unable to inspect git status>") {
+			unsafeDirtyFileRefs.push(dirtyFileRef);
+			continue;
+		}
+		const dirtyApplyTargetRef = getMatchingApplyTargetRef(
+			dirtyFileRef,
+			appliedFileRefs,
+		);
+		if (dirtyApplyTargetRef) {
+			const existingMarkdown = await readExistingMarkdownFile(
+				repositoryRoot,
+				dirtyApplyTargetRef,
+			);
+			if (
+				existingMarkdown !== null &&
+				isReplaceablePriorDocsSpineOutput(dirtyApplyTargetRef, existingMarkdown)
+			) {
+				continue;
+			}
+			unsafeDirtyFileRefs.push(dirtyFileRef);
+			continue;
+		}
 		const allowed = await isAllowedApplyDirtyRef(
 			repositoryRoot,
 			dirtyFileRef,
 			appliedFileRefs,
 			workflowRunId,
 		);
-		if (!allowed) {
-			unexpectedDirtyFileRefs.push(dirtyFileRef);
+		if (allowed) {
+			continue;
+		}
+		if (dirtyFileRef.startsWith(".sbs/")) {
+			unsafeDirtyFileRefs.push(dirtyFileRef);
 		}
 	}
-	return unexpectedDirtyFileRefs.sort();
+	return unsafeDirtyFileRefs.sort();
+}
+
+function getMatchingApplyTargetRef(fileRef: string, appliedFileRefs: string[]) {
+	return appliedFileRefs.find(
+		(appliedFileRef) =>
+			fileRef === appliedFileRef ||
+			fileRef.startsWith(`${appliedFileRef}/`) ||
+			appliedFileRef.startsWith(`${fileRef}/`),
+	);
 }
 
 function parseGitStatusPathsForProof(statusLine: string) {
@@ -1058,7 +1303,7 @@ async function isPriorDocsSpineAdoptionRunRef(
 	}
 	try {
 		const workflowPacket = JSON.parse(rawWorkflowPacket) as {
-			workflowId?: unknown;
+			workflowId?: string;
 		};
 		return workflowPacket.workflowId === DOCS_SPINE_ADOPTION_WORKFLOW_ID;
 	} catch {
@@ -1320,7 +1565,7 @@ async function writeJsonArtifact(
 	repositoryRoot: string,
 	workflowRunId: string,
 	repoRelativePath: string,
-	value: unknown,
+	value: JsonValue,
 ) {
 	await writeTextArtifact(
 		repositoryRoot,
@@ -1382,10 +1627,19 @@ function getApprovedApplyTargetError(repoRelativePath: string) {
 	if (!isWithinApprovedApplyRoot(repoRelativePath)) {
 		return "target is outside approved docs-spine apply roots";
 	}
-	if (!repoRelativePath.endsWith(".md")) {
-		return "target must be an approved Markdown file";
+	if (
+		!repoRelativePath.endsWith(".md") &&
+		!isApprovedCurrentPlanningBriefPointerRef(repoRelativePath)
+	) {
+		return "target must be an approved Markdown file or current planning brief pointer";
 	}
 	return null;
+}
+
+function isApprovedCurrentPlanningBriefPointerRef(repoRelativePath: string) {
+	return /^docs\/programs\/(?:active|completed)\/\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*\/current-planning-brief\.txt$/.test(
+		repoRelativePath,
+	);
 }
 
 function isWithinApprovedApplyRoot(repoRelativePath: string) {
@@ -1637,7 +1891,10 @@ function assertSafeWorkflowRunId(workflowRunId: string) {
 }
 
 function assertSafeBranchName(branchName: string) {
-	if (!/^sbs\/docs-spine-apply-\d{8}-\d{4}$/.test(branchName)) {
+	if (
+		branchName !== "sbs/docs-spine-apply" &&
+		!/^sbs\/docs-spine-apply-\d{8}-\d{4}$/.test(branchName)
+	) {
 		throw new Error("Approved branch name is not a docs spine apply branch.");
 	}
 }

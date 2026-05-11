@@ -15,6 +15,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,18 @@ export async function GET(request: Request) {
 
 	try {
 		const session = await requireProductAccessApiSession();
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.account.read",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex account reads are unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 
 		const result = await withCodexAppServerClient(
 			{
@@ -54,7 +67,7 @@ export async function GET(request: Request) {
 		return jsonWithRequestId(result, undefined, requestId);
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(
-			error,
+			error instanceof Error ? error : String(error),
 			{
 				unauthorized: "Sign in before managing Codex connection.",
 				forbidden:
@@ -68,12 +81,12 @@ export async function GET(request: Request) {
 		}
 
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.codexAccountRead,
 			source: "codex",
 			defaultMessage: "Unable to read Codex account state.",
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !(error instanceof Error && isCodexAppServerRuntimeError(error)),
 		});
 	}
 }

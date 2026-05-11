@@ -27,9 +27,9 @@ describe("workspace data model", () => {
 		).rejects.toThrow("Access required");
 	});
 
-	it("rejects generated-codebase grants from existing-codebase workspace state", async () => {
+	it("rejects grants without Worker capability from existing-codebase workspace state", async () => {
 		const { ctx } = createWorkspaceTestCtx({
-			fulfillmentTrack: "generated_codebase",
+			capabilities: ["generate_codebase"],
 		});
 
 		await expect(
@@ -146,7 +146,7 @@ describe("workspace data model", () => {
 			},
 		);
 
-		expect(setupState.project?.displayName).toBe("Existing codebase workspace");
+		expect(setupState.project?.displayName).toBe("Existing codebase Worker");
 		expect(setupState.runnerBindings[0]).toMatchObject({
 			status: "pairing",
 			pairingStatus: "waiting",

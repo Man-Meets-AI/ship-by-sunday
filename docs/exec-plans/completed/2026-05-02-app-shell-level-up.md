@@ -1,10 +1,10 @@
 ---
 title: AppShell Chrome Level Up
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Lift the workspace AppShell chrome from the Linear/Vercel parity baseline that the prior polish pass landed (`docs/exec-plans/active/2026-05-02-app-shell-polish.md`) to a level where a returning user navigating between `/codebase`, `/review`, and `/lesson/*` notices a perceptible smoothness lift — a ⌘K command menu, a scroll-aware header shadow, route-change focus restoration, persistent shell preferences with a working local-nav collapse, a shared theme-toggle view transition, dropdown reduced-motion gated at the shared primitive, and a synthesized compact local-nav fallback so every mobile view has a usable local nav.
-post_build_recap: null
+post_build_recap: The AppShell level-up pass added shared theme transitions, scroll-aware header chrome, persisted shell preferences, route-change focus restoration, dropdown reduced-motion handling, and a command menu with focused validation recorded in the retrospective.
 read_when:
   - Resuming the AppShell level-up pass mid-flight.
   - Reviewing the level-up diff against the locked behavior contract.

@@ -1,5 +1,6 @@
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
 import type { ProductAccess } from "@/lib/product-access";
+import { productSurfaceCapabilities } from "@/platform/access/product-surface-capabilities";
 
 export type CheckoutSuccessFixture = {
 	readonly checkoutSessionState: CheckoutSessionState;
@@ -31,12 +32,14 @@ const validatedAccessPending: ProductAccess = {
 	clerkUserId: FIXTURE_USER_ID,
 	hasAccess: false,
 	status: "pending",
+	capabilities: [],
 };
 
 const validatedAccessGranted: ProductAccess = {
 	clerkUserId: FIXTURE_USER_ID,
 	hasAccess: true,
 	status: "granted",
+	capabilities: [...productSurfaceCapabilities],
 };
 
 const FIXTURE_BUILDERS: Record<

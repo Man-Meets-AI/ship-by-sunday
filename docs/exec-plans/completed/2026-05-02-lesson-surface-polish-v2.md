@@ -1,10 +1,10 @@
 ---
 title: Lesson Surface Polish v2
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Ship lesson dwell follow-ups — lesson map focus trap and ARIA, retire unused Split/Focus shells, Bunny keyboard affordance with optional player.js forwarding, live browser proof — without touching denylisted files or App Shell.
-post_build_recap: null
+post_build_recap: The v2 lesson surface pass shipped lesson-map focus and ARIA work, retired unused shell primitives, added Bunny keyboard affordance plumbing, documented proof artifacts, and completed the recorded validation matrix.
 read_when:
   - Resuming lesson surface v2 after the six-commit polish on main.
   - Wiring Bunny embed keyboard behavior or lesson map accessibility.

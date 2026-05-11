@@ -1,7 +1,6 @@
 import { getSignInRedirectHref, routeConfig } from "@/config/product";
 import { assertNever } from "@/lib/assert";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
-import type { FulfillmentTrack } from "@/platform/billing/checkout/checkout-intent";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type CheckoutProgressState = "complete" | "active" | "pending";
@@ -31,10 +30,10 @@ export type CheckoutViewModel = {
 	secondaryActionBody: string;
 };
 
-const workspaceOpenLabel = workspaceDisplayConfig.openHomeActionLabel;
-const workspaceNoun = workspaceDisplayConfig.homeNoun;
-const workspaceRouteStepLabel = workspaceDisplayConfig.firstStepLabel;
-const checkoutWelcomePath = `${routeConfig.workspaceChoice}?welcome=checkout`;
+const homeOpenLabel = workspaceDisplayConfig.openHomeActionLabel;
+const homeNoun = workspaceDisplayConfig.homeNoun;
+const homeRouteStepLabel = workspaceDisplayConfig.firstStepLabel;
+const checkoutWelcomePath = `${routeConfig.appHome}?welcome=checkout`;
 
 type ValidatedFulfillmentRouteModel = {
 	actionHref: string;
@@ -43,32 +42,13 @@ type ValidatedFulfillmentRouteModel = {
 	stepLabel: string;
 };
 
-function getValidatedFulfillmentRouteModel(
-	fulfillmentTrack: FulfillmentTrack,
-): ValidatedFulfillmentRouteModel {
-	switch (fulfillmentTrack) {
-		case "generated_codebase":
-			return {
-				actionHref: routeConfig.codebase,
-				openLabel: workspaceOpenLabel,
-				noun: workspaceNoun,
-				stepLabel: workspaceRouteStepLabel,
-			};
-		case "existing_codebase_doctor":
-			return {
-				actionHref: routeConfig.workspaceSetup,
-				openLabel: "Open setup",
-				noun: "codebase setup",
-				stepLabel: "setup step",
-			};
-		case "unspecified":
-			return {
-				actionHref: checkoutWelcomePath,
-				openLabel: "Choose path",
-				noun: "fulfillment choice",
-				stepLabel: "workspace path",
-			};
-	}
+function getValidatedFulfillmentRouteModel(): ValidatedFulfillmentRouteModel {
+	return {
+		actionHref: checkoutWelcomePath,
+		openLabel: homeOpenLabel,
+		noun: homeNoun,
+		stepLabel: homeRouteStepLabel,
+	};
 }
 
 function getCheckoutEmailLabel(checkoutEmail: string | undefined) {
@@ -81,8 +61,8 @@ function getCurrentAccountLabel(currentAccountEmail: string | undefined) {
 
 export const validatedStatusCopy = [
 	"Confirming your product access.",
-	"Unlocking your workspace.",
-	`Preparing your first ${workspaceRouteStepLabel}.`,
+	"Unlocking your product access.",
+	`Preparing your first ${homeRouteStepLabel}.`,
 ] as const;
 
 export function getCheckoutViewModel(
@@ -92,9 +72,7 @@ export function getCheckoutViewModel(
 ): CheckoutViewModel {
 	switch (checkoutSessionState.kind) {
 		case "validated": {
-			const fulfillmentRoute = getValidatedFulfillmentRouteModel(
-				checkoutSessionState.fulfillmentTrack,
-			);
+			const fulfillmentRoute = getValidatedFulfillmentRouteModel();
 			return {
 				shellTitle: "Payment received",
 				shellSubtitle: "We’re unlocking your access now.",
@@ -161,7 +139,7 @@ export function getCheckoutViewModel(
 				statusLabel: "Sign in required",
 				heading: "Sign in to continue",
 				body: checkoutSessionState.checkoutEmail
-					? `We found a paid checkout session for ${signInCheckoutEmail}. Use the normal email-code sign-in for that address so we can continue to workspace choice. Do not buy again while this paid checkout is waiting.`
+					? `We found a paid checkout session for ${signInCheckoutEmail}. Use the normal email-code sign-in for that address so we can continue to home. Do not buy again while this paid checkout is waiting.`
 					: `We found a paid checkout session, but this browser is not signed in. Use ${signInCheckoutEmail}, then we can finish the access handoff. Do not buy again while this paid checkout is waiting.`,
 				progressSteps: [
 					{
@@ -201,8 +179,8 @@ export function getCheckoutViewModel(
 				primaryActionHref: getSignInRedirectHref(checkoutWelcomePath),
 				primaryActionBody: `Use ${signInCheckoutEmail} so we can attach the purchase to the right account.`,
 				secondaryActionBody: checkoutSessionState.checkoutEmail
-					? `After email verification, come back here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`
-					: `After sign-in, come back here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,
+					? `After email verification, come back here or use ${homeOpenLabel} to retry the ${homeNoun} gate.`
+					: `After sign-in, come back here or use ${homeOpenLabel} to retry the ${homeNoun} gate.`,
 			};
 		}
 		case "fulfillment_failed": {
@@ -228,9 +206,9 @@ export function getCheckoutViewModel(
 						detail: "Support needs to inspect Clerk and Convex state.",
 					},
 					{
-						label: "Open workspace",
+						label: homeOpenLabel,
 						state: "pending",
-						detail: "Workspace opens after access is repaired.",
+						detail: `${workspaceDisplayConfig.homeLabel} opens after access is repaired.`,
 					},
 				],
 				helpTitle: "Do not buy again",
@@ -265,7 +243,7 @@ export function getCheckoutViewModel(
 						: "This browser is signed into a different account than the one used at checkout.",
 				statusLabel: "Account mismatch",
 				heading: "Use the checkout account",
-				body: `This paid checkout belongs to ${wrongAccountCheckoutEmail}. This browser is using ${currentAccountEmail}. Do not buy again; sign out, use the checkout email code, then retry this page or use ${workspaceOpenLabel.toLowerCase()}.`,
+				body: `This paid checkout belongs to ${wrongAccountCheckoutEmail}. This browser is using ${currentAccountEmail}. Do not buy again; sign out, use the checkout email code, then retry this page or use ${homeOpenLabel.toLowerCase()}.`,
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -289,14 +267,14 @@ export function getCheckoutViewModel(
 				helpLeadCopy: `The purchase exists, but it belongs to ${wrongAccountCheckoutEmail}, not ${currentAccountEmail}.`,
 				helpItems: [
 					`Sign out of ${currentAccountEmail}, then use the email code sent to ${wrongAccountCheckoutEmail}.`,
-					`Then use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,
+					`Then use ${homeOpenLabel} to retry the ${homeNoun} gate.`,
 					"Do not start another checkout. This payment already exists.",
 				],
 				primaryActionLabel: "Switch accounts",
 				primaryActionHref: getSignInRedirectHref(checkoutWelcomePath),
 				primaryActionKind: "sign_out",
 				primaryActionBody: `Recover this purchase by using ${wrongAccountCheckoutEmail}. Do not buy again from ${currentAccountEmail}.`,
-				secondaryActionBody: `After switching accounts, return here or use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate.`,
+				secondaryActionBody: `After switching accounts, return here or use ${homeOpenLabel} to retry the ${homeNoun} gate.`,
 			};
 		}
 		case "payment_pending":
@@ -332,10 +310,10 @@ export function getCheckoutViewModel(
 					"Come back to this page from the same browser after payment confirms.",
 					"Do not retry checkout unless Stripe shows the payment failed.",
 				],
-				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.workspaceChoice,
-				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
-				secondaryActionBody: `Use ${workspaceOpenLabel} once payment settles to retry the ${workspaceNoun} gate.`,
+				primaryActionLabel: homeOpenLabel,
+				primaryActionHref: routeConfig.appHome,
+				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${homeNoun}. Otherwise it will re-run the ${homeNoun} gate.`,
+				secondaryActionBody: `Use ${homeOpenLabel} once payment settles to retry the ${homeNoun} gate.`,
 			};
 		case "invalid_session":
 			return {
@@ -344,7 +322,7 @@ export function getCheckoutViewModel(
 					"We could not verify the Stripe checkout session attached to this URL.",
 				statusLabel: "Session invalid",
 				heading: "Unable to confirm payment",
-				body: `This page needs a valid Stripe success URL to confirm payment. If you already bought access, use ${workspaceOpenLabel.toLowerCase()} from the same account used at checkout.`,
+				body: `This page needs a valid Stripe success URL to confirm payment. If you already bought access, use ${homeOpenLabel.toLowerCase()} from the same account used at checkout.`,
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -357,7 +335,7 @@ export function getCheckoutViewModel(
 						detail: "We need a verified checkout session first.",
 					},
 					{
-						label: workspaceOpenLabel,
+						label: homeOpenLabel,
 						state: "pending",
 						detail: `${workspaceDisplayConfig.homeLabel} stays locked until purchase is confirmed.`,
 					},
@@ -367,13 +345,13 @@ export function getCheckoutViewModel(
 					"This URL does not include a Stripe session we can trust for the access handoff.",
 				helpItems: [
 					"Return to checkout from the offer page if you still need to buy.",
-					`Use ${workspaceOpenLabel} if you already paid in this account.`,
+					`Use ${homeOpenLabel} if you already paid in this account.`,
 					"Keep the success URL intact when testing the live handoff.",
 				],
-				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.workspaceChoice,
-				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
-				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if payment was already confirmed.`,
+				primaryActionLabel: homeOpenLabel,
+				primaryActionHref: routeConfig.appHome,
+				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${homeNoun}. Otherwise it will re-run the ${homeNoun} gate.`,
+				secondaryActionBody: `Use ${homeOpenLabel} to retry the ${homeNoun} gate if payment was already confirmed.`,
 			};
 		case "missing_session_id":
 			return {
@@ -382,7 +360,7 @@ export function getCheckoutViewModel(
 					"This page works best when you arrive from Stripe with a checkout session attached.",
 				statusLabel: "Missing checkout session",
 				heading: "Verify access",
-				body: `If you already bought access, use ${workspaceOpenLabel.toLowerCase()} from the same signed-in account. Otherwise, return home and start checkout again.`,
+				body: `If you already bought access, use ${homeOpenLabel.toLowerCase()} from the same signed-in account. Otherwise, return home and start checkout again.`,
 				progressSteps: [
 					{
 						label: "Checkout found",
@@ -395,7 +373,7 @@ export function getCheckoutViewModel(
 						detail: `Use ${workspaceDisplayConfig.homeNoun} if you already paid.`,
 					},
 					{
-						label: workspaceOpenLabel,
+						label: homeOpenLabel,
 						state: "pending",
 						detail: "Start checkout first if access has not been purchased.",
 					},
@@ -404,14 +382,14 @@ export function getCheckoutViewModel(
 				helpLeadCopy:
 					"This page works as a recovery surface, but it is strongest when it arrives directly from Stripe.",
 				helpItems: [
-					`Use ${workspaceOpenLabel} if you already completed purchase on this account.`,
+					`Use ${homeOpenLabel} if you already completed purchase on this account.`,
 					"Return home if you still need to start checkout.",
 					"Keep the same browser session for the cleanest handoff.",
 				],
-				primaryActionLabel: workspaceOpenLabel,
-				primaryActionHref: routeConfig.workspaceChoice,
-				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${workspaceNoun}. Otherwise it will re-run the ${workspaceNoun} gate.`,
-				secondaryActionBody: `Use ${workspaceOpenLabel} to retry the ${workspaceNoun} gate if access should already be live.`,
+				primaryActionLabel: homeOpenLabel,
+				primaryActionHref: routeConfig.appHome,
+				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${homeNoun}. Otherwise it will re-run the ${homeNoun} gate.`,
+				secondaryActionBody: `Use ${homeOpenLabel} to retry the ${homeNoun} gate if access should already be live.`,
 			};
 	}
 

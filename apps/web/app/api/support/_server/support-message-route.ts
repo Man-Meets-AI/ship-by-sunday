@@ -1,0 +1,360 @@
+import "server-only";
+
+import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
+
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import type { JsonValue } from "@/lib/json-value";
+import {
+	isSupportScreenshotContentType,
+	normalizeSupportScreenshotFileName,
+	SUPPORT_SCREENSHOT_MAX_BYTES,
+} from "@/lib/support/support-attachment-policy";
+import { getConvexServerSession } from "@/platform/auth/convex-auth";
+import {
+	appendSupportSessionCookie,
+	getSupportSessionCookie,
+	type SupportSessionCookie,
+} from "./support-session-cookie";
+
+type SupportMessageRequestBody = {
+	readonly messageText?: JsonValue;
+	readonly pagePath?: JsonValue;
+	readonly entrySurface?: JsonValue;
+	readonly attachment?: JsonValue;
+};
+
+type SupportAttachmentUploadRequestBody = {
+	readonly fileName?: JsonValue;
+	readonly contentType?: JsonValue;
+	readonly size?: JsonValue;
+};
+
+type SupportSessionRealtime =
+	| {
+			readonly kind: "convex";
+			readonly capabilityToken: string;
+			readonly expiresAt: number;
+	  }
+	| {
+			readonly kind: "unavailable";
+	  };
+
+const SUPPORT_MESSAGE_MAX_LENGTH = 2_000;
+const SUPPORT_FALLBACK_HREF = "https://t.me/parkerrex";
+
+export async function getSupportSessionFromRequest(request: Request) {
+	const supportSessionCookie = getSupportSessionCookie(request);
+	const realtime =
+		await issueSupportConversationCapability(supportSessionCookie);
+	return appendSupportSessionCookie(
+		Response.json({
+			ok: true,
+			realtime,
+		}),
+		supportSessionCookie,
+	);
+}
+
+export async function getSupportMessagesFromRequest(request: Request) {
+	const supportSessionCookie = getSupportSessionCookie(request);
+	const threadState = await fetchQuery(api.support.getThreadBySession, {
+		sessionToken: supportSessionCookie.sessionToken,
+	}).catch(() => ({
+		status: "disabled",
+		supportId: null,
+		messages: [],
+		fallbackHref: SUPPORT_FALLBACK_HREF,
+		error: "Ship by Sunday support is using Telegram directly right now.",
+	}));
+
+	return appendSupportSessionCookie(
+		Response.json(threadState),
+		supportSessionCookie,
+	);
+}
+
+export async function sendSupportMessageFromRequest(request: Request) {
+	const supportSessionCookie = getSupportSessionCookie(request);
+	const body = await readSupportMessageRequestBody(request);
+	const messageText = normalizeSupportMessageText(body?.messageText);
+	if (!messageText) {
+		return jsonWithSupportCookie(
+			{ error: "Message text is required." },
+			{ status: 400 },
+			supportSessionCookie,
+		);
+	}
+
+	try {
+		const actionArgs = {
+			sessionToken: supportSessionCookie.sessionToken,
+			messageText,
+			pagePath: normalizePagePath(body?.pagePath),
+			entrySurface: normalizeEntrySurface(body?.entrySurface),
+			attachment: normalizeSupportAttachment(body?.attachment),
+		};
+		const convexAuthToken = await getOptionalConvexAuthToken();
+		const threadState = convexAuthToken
+			? await fetchAction(api.support.sendVisitorMessage, actionArgs, {
+					token: convexAuthToken,
+				})
+			: await fetchAction(api.support.sendVisitorMessage, actionArgs);
+
+		return jsonWithSupportCookie(threadState, undefined, supportSessionCookie);
+	} catch (error) {
+		const caughtError = error instanceof Error ? error : String(error);
+		return jsonWithSupportCookie(
+			{ error: getSupportMessageError(caughtError) },
+			{ status: getSupportErrorStatus(caughtError) },
+			supportSessionCookie,
+		);
+	}
+}
+
+export async function prepareSupportAttachmentUploadFromRequest(
+	request: Request,
+) {
+	const supportSessionCookie = getSupportSessionCookie(request);
+	const body = await readSupportAttachmentUploadRequestBody(request);
+	const attachment = normalizeSupportAttachmentUploadRequest(body);
+	if (!attachment) {
+		return jsonWithSupportCookie(
+			{ error: "Upload a PNG, JPG, or WebP screenshot up to 10 MB." },
+			{ status: 400 },
+			supportSessionCookie,
+		);
+	}
+
+	try {
+		const uploadUrl = await fetchMutation(
+			api.support.generateVisitorAttachmentUploadUrl,
+			{
+				sessionToken: supportSessionCookie.sessionToken,
+				...attachment,
+			},
+		);
+
+		return jsonWithSupportCookie(
+			{ uploadUrl },
+			undefined,
+			supportSessionCookie,
+		);
+	} catch (error) {
+		return jsonWithSupportCookie(
+			{
+				error: getSupportMessageError(
+					error instanceof Error ? error : String(error),
+				),
+			},
+			{ status: getSupportErrorStatus(error instanceof Error ? error : "") },
+			supportSessionCookie,
+		);
+	}
+}
+
+async function readSupportMessageRequestBody(request: Request) {
+	try {
+		return (await request.json()) as SupportMessageRequestBody;
+	} catch {
+		return null;
+	}
+}
+
+async function readSupportAttachmentUploadRequestBody(request: Request) {
+	try {
+		return (await request.json()) as SupportAttachmentUploadRequestBody;
+	} catch {
+		return null;
+	}
+}
+
+function normalizeSupportMessageText(value: JsonValue | undefined) {
+	if (typeof value !== "string") {
+		return null;
+	}
+
+	const normalized = value.trim();
+	if (!normalized || normalized.length > SUPPORT_MESSAGE_MAX_LENGTH) {
+		return null;
+	}
+
+	return normalized;
+}
+
+function normalizePagePath(value: JsonValue | undefined) {
+	if (typeof value !== "string") {
+		return "/";
+	}
+
+	const normalized = value.trim();
+	if (!normalized.startsWith("/")) {
+		return "/";
+	}
+
+	return normalized.slice(0, 256);
+}
+
+function normalizeEntrySurface(value: JsonValue | undefined) {
+	return typeof value === "string" && value.trim()
+		? value.trim().slice(0, 80)
+		: "homepage_support_widget";
+}
+
+function normalizeSupportAttachment(value: JsonValue | undefined) {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		return null;
+	}
+
+	const attachment = value as Record<string, JsonValue | undefined>;
+	const storageId = attachment.storageId;
+	const fileName = attachment.fileName;
+	const contentType = attachment.contentType;
+	const size = attachment.size;
+	const kind = attachment.kind;
+	if (
+		kind !== "screenshot" ||
+		typeof storageId !== "string" ||
+		typeof fileName !== "string" ||
+		typeof contentType !== "string" ||
+		typeof size !== "number" ||
+		!isSupportScreenshotContentType(contentType) ||
+		!supportAttachmentSizeIsValid(size)
+	) {
+		return null;
+	}
+
+	return {
+		kind: "screenshot" as const,
+		storageId: storageId as Id<"_storage">,
+		fileName: normalizeSupportScreenshotFileName(fileName),
+		contentType,
+		size,
+	};
+}
+
+function normalizeSupportAttachmentUploadRequest(
+	body: SupportAttachmentUploadRequestBody | null,
+) {
+	if (!body) {
+		return null;
+	}
+
+	const { fileName, contentType, size } = body;
+	if (
+		typeof fileName !== "string" ||
+		typeof contentType !== "string" ||
+		typeof size !== "number" ||
+		!isSupportScreenshotContentType(contentType) ||
+		!supportAttachmentSizeIsValid(size)
+	) {
+		return null;
+	}
+
+	return {
+		fileName: normalizeSupportScreenshotFileName(fileName),
+		contentType,
+		size,
+	};
+}
+
+function supportAttachmentSizeIsValid(size: number) {
+	return (
+		Number.isSafeInteger(size) &&
+		size > 0 &&
+		size <= SUPPORT_SCREENSHOT_MAX_BYTES
+	);
+}
+
+async function getOptionalConvexAuthToken() {
+	try {
+		const convexSession = await getConvexServerSession();
+		return convexSession.token;
+	} catch {
+		return null;
+	}
+}
+
+async function issueSupportConversationCapability(
+	supportSessionCookie: SupportSessionCookie,
+): Promise<SupportSessionRealtime> {
+	try {
+		const capability = await fetchMutation(
+			api.support.issueVisitorConversationCapability,
+			{
+				sessionToken: supportSessionCookie.sessionToken,
+			},
+		);
+		if (!capability) {
+			return { kind: "unavailable" };
+		}
+
+		return {
+			kind: "convex",
+			capabilityToken: capability.capabilityToken,
+			expiresAt: capability.expiresAt,
+		};
+	} catch {
+		return { kind: "unavailable" };
+	}
+}
+
+function getSupportMessageError(error: Error | string) {
+	if (error instanceof Error && error.message) {
+		if (error.message.includes("characters or fewer")) {
+			return `Message text must be ${SUPPORT_MESSAGE_MAX_LENGTH} characters or fewer.`;
+		}
+		if (error.message.includes("wait")) {
+			return "Please wait a moment before sending another message.";
+		}
+		if (error.message.includes("Support is busy")) {
+			return "Support is busy. Use Telegram directly for now.";
+		}
+		if (error.message.includes("Parker has your messages")) {
+			return "Parker has your messages. Wait for a reply before sending more.";
+		}
+		if (error.message.includes("Support thread is closed")) {
+			return "This support thread is closed.";
+		}
+	}
+
+	return "Unable to send support message.";
+}
+
+function getSupportErrorStatus(error: Error | string) {
+	if (!(error instanceof Error)) {
+		return 500;
+	}
+
+	if (error.message.includes("Support thread is closed")) {
+		return 409;
+	}
+
+	if (
+		error.message.includes("wait") ||
+		error.message.includes("Support is busy") ||
+		error.message.includes("Parker has your messages")
+	) {
+		return 429;
+	}
+
+	if (
+		error.message.includes("required") ||
+		error.message.includes("characters or fewer")
+	) {
+		return 400;
+	}
+
+	return 500;
+}
+
+function jsonWithSupportCookie(
+	body: object,
+	init: ResponseInit | undefined,
+	supportSessionCookie: SupportSessionCookie,
+) {
+	return appendSupportSessionCookie(
+		Response.json(body, init),
+		supportSessionCookie,
+	);
+}

@@ -38,7 +38,7 @@ export const FRESH_TEMPLATE_PLAN_REASONING_OPTIONS: Array<{
 ];
 
 export function parseFreshTemplatePlanReasoning(
-	value: unknown,
+	value: string | null | undefined,
 ): FreshTemplatePlanReasoning {
 	if (value === "high" || value === "extra_high" || value === "medium") {
 		return value;

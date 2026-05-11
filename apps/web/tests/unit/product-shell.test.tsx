@@ -59,6 +59,10 @@ vi.mock("@/app/(workspace)/_components/app-shell/app-shell-user-menu", () => ({
 	),
 }));
 
+vi.mock("@/app/_components/support-mode/support-mode-bar", () => ({
+	SupportModeBar: () => null,
+}));
+
 vi.mock("@/components/ui/navigation-menu", () => ({
 	NavigationMenu: ({ children }: { children: React.ReactNode }) => (
 		<nav data-slot="navigation-menu">{children}</nav>
@@ -152,7 +156,7 @@ const primaryNav: AppShellPrimaryNav = {
 					kind: "link",
 					id: "bonus-lesson-map",
 					label: "Lesson Map",
-					href: "/review?showLessonMap=1",
+					href: "/generate-codebase/review?showLessonMap=1",
 					state: "available",
 				},
 			],
@@ -183,7 +187,7 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/review"');
+		expect(markup).toContain('href="/generate-codebase/review"');
 		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
 		expect(markup).toContain("Launch Lessons");
 		expect(markup).toContain("Bonus");
@@ -209,7 +213,7 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/codebase"');
+		expect(markup).toContain('href="/generate-codebase"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
 	});

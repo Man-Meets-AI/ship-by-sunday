@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      base_sha:
+        description: Base commit SHA for manual release-scope detection
+        required: true
+        type: string
       force_billing:
         description: Force the billing integration gate for a manual rerun
         required: false
@@ -14,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: production-release-proof-${{ github.ref }}
@@ -26,6 +31,7 @@ jobs:
     outputs:
       base_sha: ${{ steps.refs.outputs.base_sha }}
       billing_sensitive: ${{ steps.scope.outputs.billing_sensitive }}
+      convex_sensitive: ${{ steps.scope.outputs.convex_sensitive }}
       head_sha: ${{ steps.refs.outputs.head_sha }}
     steps:
       - name: Check out repository
@@ -40,13 +46,37 @@ jobs:
 
       - name: Resolve release scope refs
         id: refs
+        env:
+          MANUAL_BASE_SHA: ${{ inputs.base_sha }}
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ github.ref }}" != "refs/heads/main" ]]; then
+              echo "Manual production release proof must run from refs/heads/main." >&2
+              exit 1
+            fi
+
             head_sha="$(git rev-parse HEAD)"
-            if git rev-parse "${head_sha}^" >/dev/null 2>&1; then
-              base_sha="$(git rev-parse "${head_sha}^")"
-            else
-              base_sha="$head_sha"
+            base_sha="$(printf '%s' "$MANUAL_BASE_SHA" | tr -d '[:space:]')"
+
+            if [[ -z "$base_sha" ]]; then
+              echo "Manual production release proof requires inputs.base_sha so billing and Convex release-scope detection covers the intended commit range." >&2
+              exit 1
+            fi
+
+            if ! git cat-file -e "${base_sha}^{commit}" 2>/dev/null; then
+              echo "Manual production release proof base_sha is not a commit in this checkout: $base_sha" >&2
+              exit 1
+            fi
+
+            base_sha="$(git rev-parse "$base_sha")"
+            if [[ "$base_sha" == "$head_sha" ]]; then
+              echo "Manual production release proof base_sha must be an ancestor before HEAD, not HEAD itself." >&2
+              exit 1
+            fi
+
+            if ! git merge-base --is-ancestor "$base_sha" "$head_sha"; then
+              echo "Manual production release proof base_sha must be an ancestor of HEAD." >&2
+              exit 1
             fi
           else
             base_sha="${{ github.event.before }}"
@@ -63,12 +93,11 @@ jobs:
           RELEASE_BASE_SHA: ${{ steps.refs.outputs.base_sha }}
           RELEASE_HEAD_SHA: ${{ steps.refs.outputs.head_sha }}
         run: |
+          node scripts/release/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
+
           if [[ "$FORCE_BILLING" == "true" ]]; then
             echo "billing_sensitive=true" >> "$GITHUB_OUTPUT"
-            exit 0
           fi
-
-          node scripts/release/detect-release-scope.mjs --base="$RELEASE_BASE_SHA" --head="$RELEASE_HEAD_SHA"
 
   default_ship:
     needs: release_scope
@@ -85,6 +114,7 @@ jobs:
       RELEASE_PERSONAS_LOCAL_FILE: tmp/release-personas.local.json
       RELEASE_PERSONAS_LOCAL_JSON: ${{ secrets.PRODUCTION_QA_PERSONAS_LOCAL_JSON }}
       RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
+      CONVEX_PRODUCTION_DEPLOY_ENABLED: ${{ vars.CONVEX_PRODUCTION_DEPLOY_ENABLED }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_TEAM_ID }}
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
@@ -109,10 +139,78 @@ jobs:
       - name: Install Playwright browsers
         run: bun run --cwd apps/web playwright:install
 
+      - name: Wait for matching Convex production deploy
+        if: needs.release_scope.outputs.convex_sensitive == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$CONVEX_PRODUCTION_DEPLOY_ENABLED" != "true" ]]; then
+            echo "Convex-sensitive production proof requires CONVEX_PRODUCTION_DEPLOY_ENABLED=true so the same main commit deploys to Convex production." >&2
+            exit 1
+          fi
+
+          deadline=$((SECONDS + 1200))
+          while (( SECONDS < deadline )); do
+            run_json="$(gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow convex-production-deploy.yml \
+              --event push \
+              --branch main \
+              --commit "$RELEASE_COMMIT_SHA" \
+              --json databaseId,status,conclusion,url,headSha \
+              --limit 10)"
+
+            decision="$(RUN_JSON="$run_json" node - <<'NODE'
+          const runs = JSON.parse(process.env.RUN_JSON || "[]")
+            .filter((run) => run.headSha === process.env.RELEASE_COMMIT_SHA)
+            .sort((left, right) => Number(right.databaseId ?? 0) - Number(left.databaseId ?? 0));
+
+          const latest = runs[0];
+          if (!latest) {
+            console.log("pending no matching Convex Production Deploy run yet");
+          } else if (latest.status !== "completed") {
+            console.log(`pending ${latest.status} ${latest.url}`);
+          } else if (latest.conclusion === "success") {
+            console.log(`success ${latest.databaseId} ${latest.url}`);
+          } else {
+            console.log(`failed ${latest.conclusion || "unknown"} ${latest.url}`);
+          }
+          NODE
+          )"
+
+            case "$decision" in
+              success*)
+                read -r _ convex_run_id convex_run_url <<< "$decision"
+                convex_summary_dir="$(mktemp -d)"
+                gh run download "$convex_run_id" \
+                  --repo "$GITHUB_REPOSITORY" \
+                  --name convex-production-deploy-summary \
+                  --dir "$convex_summary_dir"
+                node scripts/release/verify-convex-production-deploy-summary.mjs \
+                  --summary="$convex_summary_dir/convex-production-deploy-summary.json" \
+                  --commit="$RELEASE_COMMIT_SHA"
+                echo "Matching Convex production deploy passed: $convex_run_url"
+                exit 0
+                ;;
+              failed*)
+                echo "Matching Convex production deploy did not pass: ${decision#failed }" >&2
+                exit 1
+                ;;
+              *)
+                echo "Waiting for matching Convex production deploy: $decision"
+                sleep 20
+                ;;
+            esac
+          done
+
+          echo "Timed out waiting for Convex Production Deploy for commit $RELEASE_COMMIT_SHA." >&2
+          exit 1
+
       - name: Wait for matching Vercel production deployment
         run: |
           node scripts/release/wait-for-vercel-production-deployment.mjs \
-            --commit_sha="$RELEASE_COMMIT_SHA"
+            --commit_sha="$RELEASE_COMMIT_SHA" \
+            --alias_domain=www.man-meets-ai.com
 
       - name: Wait for public release
         run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
@@ -220,7 +318,8 @@ jobs:
       - name: Wait for matching Vercel production deployment
         run: |
           node scripts/release/wait-for-vercel-production-deployment.mjs \
-            --commit_sha="$RELEASE_COMMIT_SHA"
+            --commit_sha="$RELEASE_COMMIT_SHA" \
+            --alias_domain=www.man-meets-ai.com
 
       - name: Wait for public release
         run: node scripts/release/wait-for-host.mjs --url="$PLAYWRIGHT_BASE_URL" --path=/ --path=/checkout/success
@@ -269,7 +368,8 @@ jobs:
           cd apps/web
           bun --env-file=.env.production scripts/verify-managed-stripe-env.ts \
             --expected-mode=live \
-            --app-base-url=https://www.man-meets-ai.com
+            --app-base-url=https://www.man-meets-ai.com \
+            --require-webhook-endpoint
 
       - name: Run production billing integration proof
         run: bun run release:proof -- --proof=billing_integration
@@ -297,6 +397,7 @@ jobs:
         env:
           BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
           BILLING_RESULT: ${{ needs.billing_integration.result }}
+          CONVEX_SENSITIVE: ${{ needs.release_scope.outputs.convex_sensitive }}
           DEFAULT_SHIP_RESULT: ${{ needs.default_ship.result }}
         run: |
           if [[ "$DEFAULT_SHIP_RESULT" != "success" ]]; then
@@ -316,6 +417,7 @@ jobs:
         env:
           BILLING_RESULT: ${{ needs.billing_integration.result }}
           BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
+          CONVEX_SENSITIVE: ${{ needs.release_scope.outputs.convex_sensitive }}
           DEFAULT_SHIP_RESULT: ${{ needs.default_ship.result }}
           RELEASE_BASE_SHA: ${{ needs.release_scope.outputs.base_sha }}
           RELEASE_COMMIT_SHA: ${{ needs.release_scope.outputs.head_sha }}
@@ -335,6 +437,7 @@ jobs:
             environment: "production",
             proof: {
               billingSensitive: process.env.BILLING_SENSITIVE === "true",
+              convexSensitive: process.env.CONVEX_SENSITIVE === "true",
               defaultShip: process.env.DEFAULT_SHIP_RESULT,
               billingIntegration: process.env.BILLING_RESULT,
             },

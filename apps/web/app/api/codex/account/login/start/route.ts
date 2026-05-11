@@ -14,6 +14,7 @@ import {
 	getRequestIdFromRequest,
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,18 @@ export async function POST(request: Request) {
 
 	try {
 		const session = await requireProductAccessApiSession();
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.account.login.start",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex account login is unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 
 		const result = await withCodexAppServerClient(
 			{
@@ -52,7 +65,7 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(
-			error,
+			error instanceof Error ? error : String(error),
 			{
 				unauthorized: "Sign in before managing Codex connection.",
 				forbidden:
@@ -66,12 +79,12 @@ export async function POST(request: Request) {
 		}
 
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.codexAccountLoginStart,
 			source: "codex",
 			defaultMessage: "Unable to start Codex account login.",
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !(error instanceof Error && isCodexAppServerRuntimeError(error)),
 		});
 	}
 }

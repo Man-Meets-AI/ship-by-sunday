@@ -2,12 +2,14 @@ import { jsonWithRequestId } from "@/platform/observability/request-id";
 
 import { captureServerError } from "./capture-server-error";
 import type {
+	IncidentError,
 	ObservabilitySeverity,
 	ObservabilitySource,
 } from "@/lib/observability/error-event";
+import type { JsonObject } from "@/lib/json-value";
 
 type UnexpectedApiErrorResponseOptions = {
-	error: unknown;
+	error: IncidentError;
 	requestId: string;
 	pathname: string;
 	source: ObservabilitySource;
@@ -15,7 +17,7 @@ type UnexpectedApiErrorResponseOptions = {
 	code?: string;
 	userId?: string | null;
 	severity?: ObservabilitySeverity;
-	details?: Record<string, unknown> | null;
+	details?: JsonObject | null;
 	nativeUrl?: string | null;
 	logsUrl?: string | null;
 	nextAction?: string | null;

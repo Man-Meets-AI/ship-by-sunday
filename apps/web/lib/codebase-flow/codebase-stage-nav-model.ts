@@ -4,6 +4,8 @@ import {
 	type CodebaseStageStatus,
 } from "@shipbysunday/codebase-compiler";
 
+import { routeConfig } from "@/config/product";
+
 export type CodebaseStageNavState =
 	| "active"
 	| "complete"
@@ -16,6 +18,15 @@ export type CodebaseStageNavItem = {
 	route: string;
 	state: CodebaseStageNavState;
 };
+
+export function getCodebaseStageRoute(stageId: CodebaseStageId) {
+	switch (stageId) {
+		case "codebase":
+			return routeConfig.codebase;
+		case "review":
+			return routeConfig.review;
+	}
+}
 
 export function buildCodebaseStageNavItems({
 	currentStageId,
@@ -42,7 +53,7 @@ export function buildCodebaseStageNavItems({
 		return {
 			id: stage.id,
 			label: stage.label,
-			route: stage.route,
+			route: getCodebaseStageRoute(stage.id),
 			state,
 		} satisfies CodebaseStageNavItem;
 	});

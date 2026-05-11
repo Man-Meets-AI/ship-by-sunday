@@ -15,6 +15,9 @@ import {
 	type SetupCheckStatus,
 } from "../core/runner-events";
 import { runBrokenAppTriageWorkflow } from "../core/broken-app-triage-workflow";
+import { runDocsOperatingSystemAdoptionWorkflow } from "../core/docs-operating-system-adoption-workflow";
+import { runDocsOperatingSystemLockfileRefreshWorkflow } from "../core/docs-operating-system-lockfile-refresh-workflow";
+import { runDocsOperatingSystemPackageScriptPatchingWorkflow } from "../core/docs-operating-system-package-script-patching-workflow";
 import { runDocsSpineAdoptionWorkflow } from "../core/docs-spine-adoption-workflow";
 import { runDocsSpineApplyWorkflow } from "../core/docs-spine-apply-and-proof-workflow";
 import { runMatureRepoAdoptionWorkflow } from "../core/mature-repo-adoption-workflow";
@@ -33,6 +36,10 @@ type DaemonOptions = {
 	confirmAdoptionAudit?: boolean;
 	confirmDocsSpineAdoption?: boolean;
 	confirmDocsSpineApply?: boolean;
+	confirmDocsOperatingSystemScan?: boolean;
+	confirmDocsOperatingSystemToolingPlan?: boolean;
+	confirmDocsOperatingSystemToolingApply?: boolean;
+	confirmDocsOperatingSystemLockfileRefresh?: boolean;
 	intervalMs: number;
 };
 
@@ -59,6 +66,14 @@ async function runDaemonStart(argv: string[]) {
 			confirmAdoptionAudit: options.confirmAdoptionAudit === true,
 			confirmDocsSpineAdoption: options.confirmDocsSpineAdoption === true,
 			confirmDocsSpineApply: options.confirmDocsSpineApply === true,
+			confirmDocsOperatingSystemScan:
+				options.confirmDocsOperatingSystemScan === true,
+			confirmDocsOperatingSystemToolingPlan:
+				options.confirmDocsOperatingSystemToolingPlan === true,
+			confirmDocsOperatingSystemToolingApply:
+				options.confirmDocsOperatingSystemToolingApply === true,
+			confirmDocsOperatingSystemLockfileRefresh:
+				options.confirmDocsOperatingSystemLockfileRefresh === true,
 		});
 	}
 	const { repositoryRoot, isGitRepository } = await resolveRepositoryRoot({
@@ -83,6 +98,14 @@ async function runDaemonStart(argv: string[]) {
 				confirmAdoptionAudit: options.confirmAdoptionAudit === true,
 				confirmDocsSpineAdoption: options.confirmDocsSpineAdoption === true,
 				confirmDocsSpineApply: options.confirmDocsSpineApply === true,
+				confirmDocsOperatingSystemScan:
+					options.confirmDocsOperatingSystemScan === true,
+				confirmDocsOperatingSystemToolingPlan:
+					options.confirmDocsOperatingSystemToolingPlan === true,
+				confirmDocsOperatingSystemToolingApply:
+					options.confirmDocsOperatingSystemToolingApply === true,
+				confirmDocsOperatingSystemLockfileRefresh:
+					options.confirmDocsOperatingSystemLockfileRefresh === true,
 			});
 		}
 		if (options.once) {
@@ -193,6 +216,10 @@ async function claimAndRunNextWorkflow({
 	confirmAdoptionAudit,
 	confirmDocsSpineAdoption,
 	confirmDocsSpineApply,
+	confirmDocsOperatingSystemScan,
+	confirmDocsOperatingSystemToolingPlan,
+	confirmDocsOperatingSystemToolingApply,
+	confirmDocsOperatingSystemLockfileRefresh,
 }: {
 	repositoryRoot: string;
 	confirmLocalWrites: boolean;
@@ -200,6 +227,10 @@ async function claimAndRunNextWorkflow({
 	confirmAdoptionAudit: boolean;
 	confirmDocsSpineAdoption: boolean;
 	confirmDocsSpineApply: boolean;
+	confirmDocsOperatingSystemScan: boolean;
+	confirmDocsOperatingSystemToolingPlan: boolean;
+	confirmDocsOperatingSystemToolingApply: boolean;
+	confirmDocsOperatingSystemLockfileRefresh: boolean;
 }) {
 	assertDaemonWorkerConfirmations({
 		confirmLocalWrites,
@@ -207,6 +238,10 @@ async function claimAndRunNextWorkflow({
 		confirmAdoptionAudit,
 		confirmDocsSpineAdoption,
 		confirmDocsSpineApply,
+		confirmDocsOperatingSystemScan,
+		confirmDocsOperatingSystemToolingPlan,
+		confirmDocsOperatingSystemToolingApply,
+		confirmDocsOperatingSystemLockfileRefresh,
 	});
 
 	const [state, credential] = await Promise.all([
@@ -278,6 +313,39 @@ async function claimAndRunNextWorkflow({
 			confirmDocsSpineApply,
 		});
 	}
+	if (approvedWorkflowRun.workflowId === "docs-operating-system-adoption") {
+		return await runDocsOperatingSystemAdoptionWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmDocsOperatingSystemScan,
+			confirmDocsOperatingSystemToolingPlan,
+		});
+	}
+	if (
+		approvedWorkflowRun.workflowId ===
+		"docs-operating-system-package-script-patching"
+	) {
+		return await runDocsOperatingSystemPackageScriptPatchingWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmDocsOperatingSystemToolingApply,
+		});
+	}
+	if (
+		approvedWorkflowRun.workflowId === "docs-operating-system-lockfile-refresh"
+	) {
+		return await runDocsOperatingSystemLockfileRefreshWorkflow({
+			repositoryRoot,
+			state,
+			credential,
+			approvedWorkflowRun,
+			confirmDocsOperatingSystemLockfileRefresh,
+		});
+	}
 	throw new Error(
 		`Unsupported approved workflow: ${approvedWorkflowRun.workflowId}`,
 	);
@@ -289,12 +357,20 @@ function assertDaemonWorkerConfirmations({
 	confirmAdoptionAudit,
 	confirmDocsSpineAdoption,
 	confirmDocsSpineApply,
+	confirmDocsOperatingSystemScan,
+	confirmDocsOperatingSystemToolingPlan,
+	confirmDocsOperatingSystemToolingApply,
+	confirmDocsOperatingSystemLockfileRefresh,
 }: {
 	confirmLocalWrites: boolean;
 	confirmObservabilityAudit: boolean;
 	confirmAdoptionAudit: boolean;
 	confirmDocsSpineAdoption: boolean;
 	confirmDocsSpineApply: boolean;
+	confirmDocsOperatingSystemScan: boolean;
+	confirmDocsOperatingSystemToolingPlan: boolean;
+	confirmDocsOperatingSystemToolingApply: boolean;
+	confirmDocsOperatingSystemLockfileRefresh: boolean;
 }) {
 	if (!confirmLocalWrites) {
 		throw new Error(
@@ -319,6 +395,26 @@ function assertDaemonWorkerConfirmations({
 	if (!confirmDocsSpineApply) {
 		throw new Error(
 			"daemon start --work requires --confirm-docs-spine-apply because the queue can claim docs-spine apply jobs.",
+		);
+	}
+	if (!confirmDocsOperatingSystemScan) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-operating-system-scan because the queue can claim docs operating system scan jobs.",
+		);
+	}
+	if (!confirmDocsOperatingSystemToolingPlan) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-operating-system-tooling-plan because the queue can claim docs operating system tooling plan jobs.",
+		);
+	}
+	if (!confirmDocsOperatingSystemToolingApply) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-operating-system-tooling-apply because the queue can claim docs operating system package-script patching jobs.",
+		);
+	}
+	if (!confirmDocsOperatingSystemLockfileRefresh) {
+		throw new Error(
+			"daemon start --work requires --confirm-docs-operating-system-lockfile-refresh because the queue can claim docs operating system lockfile refresh jobs.",
 		);
 	}
 }
@@ -346,6 +442,14 @@ function parseDaemonOptions(argv: string[]): DaemonOptions {
 			options.confirmDocsSpineAdoption = true;
 		} else if (arg === "--confirm-docs-spine-apply") {
 			options.confirmDocsSpineApply = true;
+		} else if (arg === "--confirm-docs-operating-system-scan") {
+			options.confirmDocsOperatingSystemScan = true;
+		} else if (arg === "--confirm-docs-operating-system-tooling-plan") {
+			options.confirmDocsOperatingSystemToolingPlan = true;
+		} else if (arg === "--confirm-docs-operating-system-tooling-apply") {
+			options.confirmDocsOperatingSystemToolingApply = true;
+		} else if (arg === "--confirm-docs-operating-system-lockfile-refresh") {
+			options.confirmDocsOperatingSystemLockfileRefresh = true;
 		} else if (arg === "--interval-ms") {
 			options.intervalMs = Number(
 				requireOptionValue(argv, index, "--interval-ms"),

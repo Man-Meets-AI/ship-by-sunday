@@ -322,7 +322,7 @@ describe("WorkspacePrivacyPage", () => {
 			([title]) => title === "Runner revoked",
 		)?.[1];
 		revokeRunnerToastOptions?.action?.onClick();
-		expect(routerPushMock).toHaveBeenCalledWith("/workspace/setup");
+		expect(routerPushMock).toHaveBeenCalledWith("/workers/setup");
 
 		await user.click(
 			screen.getByRole("button", { name: /Delete synced findings/i }),
@@ -346,7 +346,7 @@ describe("WorkspacePrivacyPage", () => {
 			([title]) => title === "Findings hidden",
 		)?.[1];
 		deleteFindingsToastOptions?.action?.onClick();
-		expect(routerPushMock).toHaveBeenCalledWith("/workspace/findings");
+		expect(routerPushMock).toHaveBeenCalledWith("/workers/findings");
 
 		const visibleText = document.body.textContent?.toLowerCase() ?? "";
 		expect(visibleText).not.toContain("dangerously");
@@ -387,7 +387,7 @@ describe("WorkspacePrivacyPage", () => {
 		});
 		expect(reportClientErrorMock).toHaveBeenCalledWith({
 			error: revokeError,
-			pathname: "/workspace/privacy",
+			pathname: "/workers/privacy",
 			code: "workspace_privacy_runner_revoke_failed",
 			severity: "medium",
 			details: {

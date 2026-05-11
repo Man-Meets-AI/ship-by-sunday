@@ -118,6 +118,7 @@ describe("repo generation", () => {
 				"START-HERE.md",
 				"bootstrap.sh",
 				"scripts/install-codex-skills.sh",
+				"scripts/agentic/check-codebase-contract.mjs",
 				"scripts/agentic/check-programs.mjs",
 				"scripts/agentic/check-exec-plans.mjs",
 				".agents/skills/starter-core-setup/SKILL.md",
@@ -192,6 +193,9 @@ describe("repo generation", () => {
 		expect(packageJson.scripts["codex:skills:install"]).toBe(
 			"bash ./scripts/install-codex-skills.sh",
 		);
+		expect(packageJson.scripts["codebase:contract"]).toBe(
+			"bun scripts/agentic/check-codebase-contract.mjs",
+		);
 		expect(packageJson.scripts["programs:lint"]).toBe(
 			"bun scripts/agentic/check-programs.mjs",
 		);
@@ -202,7 +206,7 @@ describe("repo generation", () => {
 			"bun run programs:lint && bun run plans:lint",
 		);
 		expect(packageJson.scripts["test:compiler"]).toBe(
-			"bun run --cwd packages/codebase-compiler test",
+			"bun run codebase:contract",
 		);
 		expect(skillsManifest.externalSkills).toEqual(
 			expect.arrayContaining([
@@ -232,6 +236,7 @@ describe("repo generation", () => {
 				"START-HERE.md",
 				"bootstrap.sh",
 				"scripts/install-codex-skills.sh",
+				"scripts/agentic/check-codebase-contract.mjs",
 				"scripts/agentic/check-programs.mjs",
 				"scripts/agentic/check-exec-plans.mjs",
 				".agents/skills/starter-core-setup/SKILL.md",
@@ -247,6 +252,10 @@ describe("repo generation", () => {
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
 				"apps/web/app/_content/home-page.ts",
+				"packages/codebase-presentation/package.json",
+				"packages/codebase-presentation/src/index.ts",
+				"packages/telegram-chat-widget/package.json",
+				"packages/telegram-chat-widget/src/index.ts",
 				"docs/index.md",
 				"docs/build/docs/agent-handoff.md",
 				"docs/build/docs/readiness.md",
@@ -292,6 +301,12 @@ describe("repo generation", () => {
 		const linearWorkflowSkill = snapshotFiles.find(
 			(file) => file.path === ".agents/skills/starter-linear-workflow/SKILL.md",
 		);
+		const basicCiWorkflow = snapshotText(
+			snapshotFiles.find(
+				(file) =>
+					file.path === ".github/workflows/examples/basic-ci.example.yml",
+			),
+		);
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
 		expect(rootAgentGuide?.content).toContain("bun run agentic:check");
@@ -310,6 +325,12 @@ describe("repo generation", () => {
 		expect(linearWorkflowSkill?.content).toContain(
 			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
+		expect(basicCiWorkflow).toContain("      - run: bun ci");
+		expect(basicCiWorkflow).toContain("      - run: bun run codebase:contract");
+		expect(basicCiWorkflow).toContain("      - run: bun run agentic:check");
+		expect(basicCiWorkflow).not.toContain("bun install");
+		expect(basicCiWorkflow).not.toContain("bun run build");
+		expect(basicCiWorkflow).not.toContain("bun run lint");
 		expect(forbiddenPaths).toEqual([]);
 	});
 
@@ -353,6 +374,7 @@ describe("repo generation", () => {
 			"bun run programs:lint && bun run plans:lint",
 		);
 		for (const scriptCommand of [
+			packageJson.scripts?.["codebase:contract"],
 			packageJson.scripts?.["programs:lint"],
 			packageJson.scripts?.["plans:lint"],
 		]) {

@@ -402,7 +402,9 @@ describe("CodebasePage", () => {
 		await waitFor(() => {
 			expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
 		});
-		expect(pushMock).toHaveBeenCalledWith("/review?download=1");
+		expect(pushMock).toHaveBeenCalledWith(
+			"/generate-codebase/review?download=1",
+		);
 		expect(replaceMock).not.toHaveBeenCalled();
 	});
 

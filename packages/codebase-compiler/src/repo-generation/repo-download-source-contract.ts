@@ -59,6 +59,22 @@ export const customerSafeCodebaseCompilerDirectoryPaths = [
 	"packages/codebase-compiler/src",
 ] as const;
 
+export const customerSafeCodebasePresentationFilePaths = [
+	"packages/codebase-presentation/package.json",
+] as const;
+
+export const customerSafeCodebasePresentationDirectoryPaths = [
+	"packages/codebase-presentation/src",
+] as const;
+
+export const customerSafeTelegramChatWidgetFilePaths = [
+	"packages/telegram-chat-widget/package.json",
+] as const;
+
+export const customerSafeTelegramChatWidgetDirectoryPaths = [
+	"packages/telegram-chat-widget/src",
+] as const;
+
 export const codebaseCompilerTemplateSourceTracePaths = [
 	"../../docs/openai/**/*",
 	"../../docs/prompts/execplan*.md",
@@ -152,6 +168,14 @@ export function buildRepoDownloadTraceIncludes() {
 		...customerSafeRepoRootFilePaths.map(toRepoTraceFilePath),
 		...customerSafeCodebaseCompilerFilePaths.map(toRepoTraceFilePath),
 		...customerSafeCodebaseCompilerDirectoryPaths.map(toRepoTraceDirectoryGlob),
+		...customerSafeCodebasePresentationFilePaths.map(toRepoTraceFilePath),
+		...customerSafeCodebasePresentationDirectoryPaths.map(
+			toRepoTraceDirectoryGlob,
+		),
+		...customerSafeTelegramChatWidgetFilePaths.map(toRepoTraceFilePath),
+		...customerSafeTelegramChatWidgetDirectoryPaths.map(
+			toRepoTraceDirectoryGlob,
+		),
 		...codebaseCompilerTemplateSourceTracePaths,
 	] as const;
 }

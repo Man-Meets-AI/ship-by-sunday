@@ -26,9 +26,7 @@ export function AccessRequiredStatusPanel({
 			<div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm leading-6 text-muted-foreground">
 				<span className="inline-flex items-center gap-2">
 					<AccessRequiredStatusPulse isPolling={isRetryingAccess} />
-					<span className="font-medium text-foreground/90">
-						Protected workspace
-					</span>
+					<span className="font-medium text-foreground/90">Protected app</span>
 				</span>
 				<span className="hidden text-border sm:inline" aria-hidden>
 					·

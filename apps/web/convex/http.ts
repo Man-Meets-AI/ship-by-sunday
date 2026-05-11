@@ -87,6 +87,63 @@ function buildConvexStripeWebhookResultIncident(
 	});
 }
 
+type StripeWebhookAcceptedResult =
+	| {
+			kind: "payment_pending";
+			paymentStatus: string;
+	  }
+	| {
+			kind: "duplicate";
+			status: string;
+			resultKind: string | null;
+	  }
+	| {
+			kind: "ignored";
+	  }
+	| {
+			kind: "queued";
+	  }
+	| {
+			kind: "granted";
+			grantResult: {
+				granted: "inserted" | "patched";
+			};
+	  };
+
+export function buildStripeWebhookAcceptedResponseBody(
+	result: StripeWebhookAcceptedResult,
+) {
+	switch (result.kind) {
+		case "payment_pending":
+			return {
+				received: true,
+				paymentPending: true,
+				paymentStatus: result.paymentStatus,
+			};
+		case "duplicate":
+			return {
+				received: true,
+				duplicate: true,
+				status: result.status,
+				resultKind: result.resultKind,
+			};
+		case "ignored":
+			return { ignored: true };
+		case "queued":
+			return {
+				received: true,
+				queued: true,
+			};
+		case "granted":
+			return {
+				received: true,
+				grantResult: result.grantResult,
+			};
+		default:
+			return result satisfies never;
+	}
+}
+
 http.route({
 	path: "/stripe/webhook",
 	method: "POST",
@@ -167,13 +224,12 @@ http.route({
 						{ error: "Unable to fulfill paid checkout." },
 						{ status: 500 },
 					);
+				case "payment_pending":
+				case "duplicate":
 				case "ignored":
-					return jsonResponse({ ignored: true });
+				case "queued":
 				case "granted":
-					return jsonResponse({
-						received: true,
-						grantResult: result.grantResult,
-					});
+					return jsonResponse(buildStripeWebhookAcceptedResponseBody(result));
 				default:
 					return jsonResponse(
 						{ error: "Unhandled Stripe webhook result." },
@@ -185,7 +241,7 @@ http.route({
 				ctx,
 				normalizeIncidentEvent({
 					source: "stripe",
-					error,
+					error: error instanceof Error ? error : String(error),
 					pathname: "/stripe/webhook",
 					code: "stripe_webhook_failed",
 					severity: "high",
@@ -201,6 +257,33 @@ http.route({
 				{ status: 500 },
 			);
 		}
+	}),
+});
+
+http.route({
+	path: "/telegram/support/webhook",
+	method: "POST",
+	handler: httpAction(async (ctx, request) => {
+		const expectedSecret = requireConvexEnv("TELEGRAM_SUPPORT_WEBHOOK_SECRET");
+		const actualSecret = request.headers.get("x-telegram-bot-api-secret-token");
+		if (actualSecret !== expectedSecret) {
+			return jsonResponse({ error: "Unauthorized." }, { status: 401 });
+		}
+
+		const payload = (await request.json().catch(() => null)) as unknown;
+		if (!payload) {
+			return jsonResponse(
+				{ error: "Invalid Telegram update payload." },
+				{ status: 400 },
+			);
+		}
+
+		const result = await ctx.runAction(
+			internal.support.processTelegramSupportWebhookUpdate,
+			{ payload },
+		);
+
+		return jsonResponse(result, { status: 200 });
 	}),
 });
 

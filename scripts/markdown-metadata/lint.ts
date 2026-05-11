@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 
 import { lintExecPlan } from "../exec-plan/plan-lint";
 import { lintProgramDocument } from "../programs/document-lint";
+import type { JsonObject, JsonValue } from "../json-value";
 import { extractMarkdownH1, parseMarkdownFrontmatter } from "./frontmatter";
 import { FAMILY_RULES, resolveMarkdownMetadataFamily } from "./families";
 
@@ -17,11 +18,14 @@ export type MarkdownMetadataLintReport = {
 	repoPath: string;
 };
 
-function isNonEmptyString(value: unknown): value is string {
+function isNonEmptyString(value: JsonValue | undefined): value is string {
 	return typeof value === "string" && value.trim() !== "";
 }
 
-function validateReadWhen(value: unknown, issues: string[]): void {
+function validateReadWhen(
+	value: JsonValue | undefined,
+	issues: string[],
+): void {
 	if (!Array.isArray(value) || value.length === 0) {
 		issues.push("Frontmatter read_when must be a non-empty YAML list.");
 		return;
@@ -36,10 +40,7 @@ function validateReadWhen(value: unknown, issues: string[]): void {
 	});
 }
 
-function validateRepoDocMetadata(
-	metadata: Record<string, unknown>,
-	issues: string[],
-): void {
+function validateRepoDocMetadata(metadata: JsonObject, issues: string[]): void {
 	if (!isNonEmptyString(metadata.title)) {
 		issues.push("Frontmatter title must be a non-empty string.");
 	}
@@ -59,7 +60,7 @@ function validateRepoDocMetadata(
 }
 
 function validateWebDocsPageMetadata(
-	metadata: Record<string, unknown>,
+	metadata: JsonObject,
 	issues: string[],
 ): void {
 	if (!isNonEmptyString(metadata.title)) {
@@ -71,7 +72,7 @@ function validateWebDocsPageMetadata(
 }
 
 function validateBlogPostMetadata(
-	metadata: Record<string, unknown>,
+	metadata: JsonObject,
 	issues: string[],
 ): void {
 	if (!isNonEmptyString(metadata.title)) {
@@ -133,7 +134,7 @@ function validateMetadataForFamily(
 		ReturnType<typeof resolveMarkdownMetadataFamily>,
 		null | "exec_plan" | "program_doc"
 	>,
-	metadata: Record<string, unknown>,
+	metadata: JsonObject,
 	issues: string[],
 ): void {
 	switch (family) {

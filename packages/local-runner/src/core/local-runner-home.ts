@@ -4,6 +4,8 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import type { JsonObject, JsonValue } from "./json-value";
+
 export const RUNNER_HOME_ENV_VAR = "SBS_RUNNER_HOME";
 
 export type RunnerCredential = {
@@ -55,16 +57,16 @@ async function readCredentialFile(
 		return { schemaVersion: 1, credentials: {} };
 	}
 
-	const parsed = JSON.parse(await readFile(filePath, "utf8")) as unknown;
+	const parsed = JSON.parse(await readFile(filePath, "utf8")) as JsonValue;
 	if (
 		!parsed ||
 		typeof parsed !== "object" ||
-		(parsed as { schemaVersion?: unknown }).schemaVersion !== 1
+		(parsed as JsonObject).schemaVersion !== 1
 	) {
 		throw new Error("Runner credentials file has an unsupported schema.");
 	}
 
-	const credentials = (parsed as { credentials?: unknown }).credentials;
+	const credentials = (parsed as JsonObject).credentials;
 	if (
 		!credentials ||
 		typeof credentials !== "object" ||

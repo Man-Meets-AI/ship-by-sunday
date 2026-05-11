@@ -36,7 +36,7 @@ The runtime splits into three clear surfaces:
 
 - public marketing surface on `/`
 - public docs surface on `/docs` when the docs module is enabled
-- protected workspace-choice surface on `/workspace/choose`, generated-codebase surface on `/codebase`, legacy redirect surfaces at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/review`, optional `/execute` after review unlock, and `/settings`
+- protected paid app Home on `/home`, Generate Codebase on `/generate-codebase`, Worker on `/workers`, Tutorials on `/tutorials`, legacy redirect surfaces at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/generate-codebase/review`, optional `/execute` after review unlock, and `/settings`
 
 That split matters because checkout and access recovery live between those worlds.
 
@@ -63,8 +63,8 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- the canonical new-buyer flow now uses `/workspace/choose` as the first paid landing surface and `/review` as the generated-codebase final handoff; `/start` and the stage-entry routes stay as compatibility redirects
-- `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/review`
+- the canonical new-buyer flow now uses `/home` as the first paid landing surface and `/generate-codebase/review` as the generated-codebase final handoff; `/start` and the stage-entry routes stay as compatibility redirects
+- `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/generate-codebase/review`
 - the legacy private starter repository invite module has been removed from the customer-visible protected app
 
 These module gates sit above the existing auth, checkout, and access model. They do not replace it.
@@ -85,18 +85,18 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
 5. `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
 6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
-7. `/checkout/success` retries the same idempotent fulfillment if the webhook is delayed. For a signed-out buyer, it then sends them to `/sign-in?redirect_url=/workspace/choose?welcome=checkout`.
+7. `/checkout/success` retries the same idempotent fulfillment if the webhook is delayed. For a signed-out buyer, it then sends them to `/sign-in?redirect_url=/home?welcome=checkout`.
 8. `/sign-in` uses Clerk email-code OTP. When the redirect is the immediate checkout welcome path, it validates the pending Stripe session cookie server-side and locks the email field to the Stripe checkout email.
-9. Once Clerk verifies the email, the buyer lands on `/workspace/choose?welcome=checkout`, sees a one-time access-active banner, and chooses Generate a codebase, Set up an existing codebase, or Tutorial Videos.
-10. `/review` is the final handoff surface. It makes one auto-download attempt for the Ship by Sunday Codebase, then leaves the fallback download link visible if the browser blocks the download.
-11. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/review`.
+9. Once Clerk verifies the email, the buyer lands on `/home?welcome=checkout`, sees the paid app hub, and chooses Generate Codebase, Worker setup, or Tutorials.
+10. `/generate-codebase/review` is the final handoff surface. It makes one auto-download attempt for the Ship by Sunday Codebase, then leaves the fallback download link visible if the browser blocks the download.
+11. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/generate-codebase/review`.
 12. Returning users with granted access who hit `/` are resumed into the first incomplete codebase-first stage unless they explicitly force marketing mode.
 
 Protected app routes also start from server-fetched codebase-workspace or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
 
 ## Review output contract
 
-`/review` is the customer-facing Review handoff for the codebase-first flow. It is not a manual download dashboard.
+`/generate-codebase/review` is the customer-facing Review handoff for the codebase-first flow. It is not a manual download dashboard.
 
 On first entry, the page makes one automatic attempt to download the Ship by Sunday Codebase. If the browser blocks that download, the fallback link stays visible so the buyer can fetch it manually.
 

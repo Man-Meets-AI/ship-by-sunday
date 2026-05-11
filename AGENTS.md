@@ -32,6 +32,13 @@
 7. Update docs or ExecPlans when behavior, public contracts, commands, or operator workflow changes.
 8. Stop and repair failing validation before continuing to unrelated work.
 
+## Agent Notes
+
+- When you make a mistake, append a concise note to root `MISTAKES.md` with the mistake, impact, and corrective action.
+- When you wish you had more context or tools, append a concise note to root `DESIRES.md` with the missing context or capability and why it would have helped.
+- When you learn something durable about the local environment, append a concise note to root `LEARNINGS.md` with the fact and how it was verified.
+- Create these files if they do not exist. Do not include secrets, credentials, or private user data in these notes.
+
 ## Path Triggers
 
 - Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
@@ -106,6 +113,38 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 - The durable required CI contexts are `static` and `integration`.
 - Do not invent alternate release-proof formats in a skill folder, PR comment, or one-off script.
 - Release evidence must name the target environment and must not mix local, preview, dev, and prod proof without saying so.
+
+## Feature Risk Testing Standard
+
+Risk determines test depth. Feature size does not.
+
+Classify every meaningful feature or risky change before deciding validation:
+
+- P0 dangerous: billing, auth, authorization, account or data deletion/export, database migrations, admin tools, webhooks, mutating background jobs, external API integrations, irreversible actions, and anything that sends money, email, SMS, legal notices, or customer-visible notifications.
+- P1 core product: signup, onboarding, invite flow, create/publish/share core object flows, upload, generate, search, main dashboards, checkout entry, and core API endpoints.
+- P2 normal product: profile editing, preferences, filtering, sorting, non-critical settings, UI state, and dashboard widgets.
+- P3 low-risk UI/copy: static copy, spacing, colors, non-critical visual-only changes, and simple marketing layout changes.
+
+Use this minimum testing rule:
+
+- P0: unit tests for pure logic, integration tests at the data/API boundary, permission and failure-mode tests, idempotency/retry tests for mutating paths, migration tests when schema changes, staging smoke when external services are involved, and production preflight/config checks for live provider config.
+- P1: integration tests for the main path and key edge cases, plus one browser/E2E test when the UI flow is critical.
+- P2: unit tests for tricky logic and integration tests when the change hits persistent state or permissions.
+- P3: build/static checks and visual review; avoid heavy tests unless the UI behavior is complex or historically fragile.
+
+For every new feature or risky existing-feature change, write or update a small test brief in the ExecPlan, PR notes, or nearest durable docs:
+
+- Feature: what the user or operator is trying to do.
+- Risk: P0, P1, P2, or P3.
+- Source of truth: DB row, external API state, queued job, file, event, or UI state that proves success.
+- Must work: happy path and important variants.
+- Must fail safely: bad permissions, bad input, missing/expired/deleted state, external failure, duplicate request, or retry.
+- Tests: unit, integration, E2E/browser, staging smoke, production check.
+- CI gate: baseline, auth, billing, db, email, storage, e2e, release proof, or generated-output gate.
+
+Write tests against outcomes, not implementation details. Assert the response, DB state, queued job, emitted event, redirect, or visible UI that would catch a real shipped bug. Mock external dependencies in most tests, but do not mock the boundary you are trying to prove.
+
+Every serious bug gets a regression test. When touching a risky existing feature, leave it with more behavioral coverage than it had before.
 
 ## Verification Matrix
 

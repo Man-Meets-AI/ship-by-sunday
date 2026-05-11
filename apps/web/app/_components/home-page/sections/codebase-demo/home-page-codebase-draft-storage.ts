@@ -1,3 +1,5 @@
+import type { JsonObject, JsonValue } from "@/lib/json-value";
+
 export const HOME_PAGE_CODEBASE_DRAFT_STORAGE_KEY =
 	"sbs:home-codebase-draft:v1";
 
@@ -40,7 +42,7 @@ const HOME_PAGE_CODEBASE_DRAFT_FIELD_KEYS: readonly (keyof HomePageCodebaseDraft
 	];
 
 function isHomePageCodebasePricingModel(
-	value: unknown,
+	value: JsonValue | undefined,
 ): value is HomePageCodebasePricingModel {
 	return (
 		typeof value === "string" &&
@@ -48,7 +50,7 @@ function isHomePageCodebasePricingModel(
 	);
 }
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
+function isPlainObject(value: JsonValue | undefined): value is JsonObject {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -63,9 +65,9 @@ function isValidPricingString(value: string): boolean {
 export function parseHomePageCodebaseDraftEnvelope(
 	raw: string,
 ): HomePageCodebaseDraftEnvelope | null {
-	let parsed: unknown;
+	let parsed: JsonValue;
 	try {
-		parsed = JSON.parse(raw);
+		parsed = JSON.parse(raw) as JsonValue;
 	} catch {
 		return null;
 	}

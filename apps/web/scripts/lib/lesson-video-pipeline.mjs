@@ -883,6 +883,7 @@ export function buildLessonMediaEntry({
 		libraryId,
 		videoId,
 		title: lessonTitle,
+		thumbnailFileName: bunnyVideo.thumbnailFileName ?? "thumbnail.jpg",
 		durationLabel: formatDurationLabel(bunnyVideo.length),
 	};
 }

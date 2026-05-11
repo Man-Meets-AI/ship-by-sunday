@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { getLesson } from "@/lib/course/lesson/model/manifest";
+import { SupportModeBar } from "@/app/_components/support-mode/support-mode-bar";
 import { AppShellFooterRail } from "@/app/(workspace)/_components/app-shell/app-shell-footer-rail";
 import { AppShellHeader } from "@/app/(workspace)/_components/app-shell/app-shell-header";
 import { AppShellLocalNavRail } from "@/app/(workspace)/_components/app-shell/app-shell-local-nav";
@@ -117,6 +118,7 @@ function ShellInner({
 	return (
 		<main className={shellClassName}>
 			<AppShellSkipToContentLink />
+			<SupportModeBar />
 			{viewportMode === "app" ? (
 				<>
 					<header className={headerClassName}>

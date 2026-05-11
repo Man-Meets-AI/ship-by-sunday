@@ -1,4 +1,13 @@
 import { internalMutation, mutation, query } from "./_generated/server";
+import { v } from "convex/values";
+import {
+	createSupportModeBlockedMutationResult,
+	supportModeBlockedMutationResultValidator,
+} from "./impersonation/blockedResult";
+import {
+	appendSupportModeWriteSuccessAuditHandler,
+	assertSupportModeWriteAllowedHandler,
+} from "./impersonation/model";
 import {
 	getProjectDefinitionArgs,
 	getProjectDefinitionHandler,
@@ -35,8 +44,24 @@ export const getProjectDefinition = query({
 
 export const saveProjectDefinitionFacts = mutation({
 	args: saveProjectDefinitionFactsArgs,
-	returns: saveProjectDefinitionFactsReturns,
-	handler: saveProjectDefinitionFactsHandler,
+	returns: v.union(
+		saveProjectDefinitionFactsReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const actionId = "codebase.projectDefinition.saveFacts";
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
+		const result = await saveProjectDefinitionFactsHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const seedCompleteProjectDefinitionForQa = internalMutation({
@@ -53,8 +78,24 @@ export const resetProjectDefinitionForQa = internalMutation({
 
 export const unlockExecuteShip = mutation({
 	args: unlockExecuteShipArgs,
-	returns: unlockExecuteShipReturns,
-	handler: unlockExecuteShipHandler,
+	returns: v.union(
+		unlockExecuteShipReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx) => {
+		const actionId = "codebase.workflow.unlockExecuteShip";
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
+		const result = await unlockExecuteShipHandler(ctx);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const getCodebaseWorkspaceState = query({

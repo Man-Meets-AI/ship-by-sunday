@@ -1,10 +1,10 @@
 ---
 title: Harden Workspace Access Guards
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Stop protected workspace pages from throwing Convex access errors when a signed-in customer lacks product access.
-post_build_recap: null
+post_build_recap: The workspace access guard hardening pass added a reusable server guard, applied it before protected Convex fetches across workspace routes, added no-access route tests, and recorded focused validation.
 read_when:
   - Fixing Access required errors on workspace routes.
   - Changing protected page data loading.

@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 	} catch (error) {
 		await captureServerError({
 			source: "clerk",
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.observabilityClerk,
 			code: "clerk_webhook_verification_failed",

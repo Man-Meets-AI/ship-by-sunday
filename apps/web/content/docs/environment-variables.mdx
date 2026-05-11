@@ -33,14 +33,14 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `STRIPE_SECRET_KEY`: Stripe API access
 - `STRIPE_PUBLISHABLE_KEY`: safe-to-expose Stripe key used by homepage Express Checkout
 - `STRIPE_WEBHOOK_SECRET`: verifies Stripe webhook signatures
-- `CHECKOUT_FULFILLMENT_RETRY_SECRET`: server-only shared secret used by Next.js and Convex when `/checkout/success` retries paid-session fulfillment while webhook delivery catches up; use at least 32 random characters and mirror the same value into the matching Convex deployment
+- `CHECKOUT_FULFILLMENT_RETRY_SECRET`: server-only shared secret used by Next.js and Convex when checkout API routes create purchase-intent records and when `/checkout/success` retries paid-session fulfillment while webhook delivery catches up; use at least 32 random characters and mirror the same value into the matching Convex deployment
 - `STRIPE_PRICE_ID`: optional dashboard-managed price; leave it unset locally until your test account has a managed `$500` price that matches the live list-price contract
 - `STRIPE_PRODUCT_ID`: optional product id emitted by the Stripe script
 - `STRIPE_PROMOTION_CODE_ID`: required when the active public pricing offer is auto-applied at checkout; use the Stripe promotion-code ID, not the customer-facing code string
 
 With the current Pilot Member pricing slice, the app truth is a `$500` list price plus a `50%` auto-applied offer. That means local/test Stripe parity now has two moving parts: a matching `$500` test price and a matching test promotion code. Until those assets exist in the test account, keep `STRIPE_PRICE_ID` unset locally so checkout uses inline `price_data`, and do not hard-code a guessed public code name like `EARLYSHIP` into repo config. The repo consumes Stripe resource IDs and lets dashboard state own the customer-facing code string.
 
-Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout email. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `CHECKOUT_FULFILLMENT_RETRY_SECRET` synced into the active Convex deployment as well as the Next.js runtime. If `STRIPE_WEBHOOK_SECRET` is missing or mismatched, the webhook cannot verify Stripe events. If `CHECKOUT_FULFILLMENT_RETRY_SECRET` is missing, too short, or mismatched, the checkout success page cannot safely trigger the same server-side fulfillment retry.
+Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout email. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `CHECKOUT_FULFILLMENT_RETRY_SECRET` synced into the active Convex deployment as well as the Next.js runtime. If `STRIPE_WEBHOOK_SECRET` is missing or mismatched, the webhook cannot verify Stripe events. If `CHECKOUT_FULFILLMENT_RETRY_SECRET` is missing, too short, or mismatched, checkout cannot write the protected purchase-intent ledger and the checkout success page cannot safely trigger the same server-side fulfillment retry.
 
 ## PostHog and Telegram observability
 
@@ -52,6 +52,21 @@ Stripe guest purchase fulfillment runs inside Convex and calls Clerk by checkout
 - `TELEGRAM_CHAT_ID`: chat or group id that receives alerts
 - `ENABLE_OBSERVABILITY_TEST_TRIGGER`: test-only switch for the Playwright protected-shell failure harness
 - `CHECKOUT_SUCCESS_FIXTURES`: test-only switch that enables the `/checkout/success?fixture=<variant>` deterministic in-memory fixture for capturing the polling -> redirect-armed arc in a real browser. The fixture refuses to activate unless this is set to `1` AND `NODE_ENV !== "production"`. When a `fixture` query is present but the switch is disabled or the slug is invalid, `/checkout/success` returns the normal not-found surface instead of falling through to a customer recovery state. Leave unset outside local development and CI screenshot capture; never set it on a production deployment
+
+## Telegram support bot
+
+These values live in the hosted Convex deployment because the support webhook and Telegram delivery run inside Convex:
+
+- `TELEGRAM_SUPPORT_BOT_TOKEN`: dedicated Telegram bot token for homepage support
+- `TELEGRAM_SUPPORT_CHAT_ID`: dedicated support supergroup id, usually `-100...`
+- `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`: comma-separated Telegram user ids allowed to reply or close support threads
+- `TELEGRAM_SUPPORT_WEBHOOK_SECRET`: shared Telegram webhook secret; use the same value as `setWebhook.secret_token`
+- `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`: maintainer-only token for retrying failed support deliveries
+- `OPENAI_API_KEY`: OpenAI key used by Convex for private support draft generation
+- `SUPPORT_AI_DRAFT_MODEL`: optional OpenAI model override for private support drafts; defaults to `gpt-5.4-mini-2026-03-17`
+- `SUPPORT_CHAT_DISABLED`: optional kill switch; set to `1` or `true` to make the widget fall back to direct Telegram
+
+See [Telegram Support Bot](/docs/telegram-support-bot) for the webhook command, exact Telegram permission names, AI draft setup, and verification steps.
 
 `OBSERVABILITY_INGEST_TOKEN` is a high-entropy shared secret between the Next.js app and Convex. In production, keep `NEXT_PUBLIC_CONVEX_SITE_URL` aligned with the live Convex HTTP-actions host so observability and other HTTP-action traffic do not fall back to the browser-only client origin.
 

@@ -30,6 +30,12 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship the tracked codebase compiler as part of the customer Codebase.",
 		},
 		{
+			pathPattern: "packages/telegram-chat-widget/**",
+			shippingMode: "ship-unchanged",
+			reason:
+				"Ship the standalone Telegram chat widget package required by the generated web app.",
+		},
+		{
 			pathPattern: "docs/prompts/execplan*.md",
 			shippingMode: "ship-unchanged",
 			reason:

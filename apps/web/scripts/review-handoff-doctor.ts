@@ -18,6 +18,9 @@ type Check = {
 	detail: string;
 };
 
+const expectedReviewRoute = "/generate-codebase/review";
+const expectedAutoDownloadHref = `${expectedReviewRoute}?download=1`;
+
 function check(label: string, ok: boolean, detail: string): Check {
 	return { label, ok, detail };
 }
@@ -39,10 +42,14 @@ const checks = [
 		REVIEW_SURFACE_TITLE === "Review",
 		REVIEW_SURFACE_TITLE,
 	),
-	check("review route", routeConfig.review === "/review", routeConfig.review),
+	check(
+		"review route",
+		routeConfig.review === expectedReviewRoute,
+		routeConfig.review,
+	),
 	check(
 		"auto-download route",
-		getReviewAutoDownloadHref() === "/review?download=1",
+		getReviewAutoDownloadHref() === expectedAutoDownloadHref,
 		getReviewAutoDownloadHref(),
 	),
 	check(
@@ -93,7 +100,7 @@ const hasFailure = checks.some((result) => !result.ok);
 if (hasFailure) {
 	console.error("");
 	console.error(
-		"Fix the failed review-handoff contract above before treating the /codebase -> /review flow as validated.",
+		"Fix the failed review-handoff contract above before treating the /generate-codebase -> /generate-codebase/review flow as validated.",
 	);
 	process.exit(1);
 }

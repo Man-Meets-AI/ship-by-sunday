@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject } from "../json-value";
 import {
 	DOCTOR_PASS_ARTIFACT_SCHEMA_VERSION,
 	type DoctorProbeResult,
@@ -71,7 +72,7 @@ export async function writeCommandProofMap({
 	}
 
 	const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
-		scripts?: Record<string, unknown>;
+		scripts?: JsonObject;
 	};
 	const scripts = packageJson.scripts ?? {};
 	const packageScripts = Object.entries(scripts)

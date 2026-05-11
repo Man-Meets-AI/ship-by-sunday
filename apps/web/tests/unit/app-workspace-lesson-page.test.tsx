@@ -253,10 +253,10 @@ describe("workspace lesson route", () => {
 					kind: "post_review",
 					codebaseStageId: null,
 					postReviewTargets: {
-						reviewDestination: "/review",
+						reviewDestination: "/generate-codebase/review",
 						buildLessonsDestination: "/lesson/build-kickoff",
 						launchLessonsDestination: "/lesson/product-review",
-						lessonMapDestination: "/review?showLessonMap=1",
+						lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 						latestLessonDestination: "/lesson/build-kickoff",
 					},
 				};
@@ -358,10 +358,10 @@ describe("workspace lesson route", () => {
 					kind: "post_review",
 					codebaseStageId: null,
 					postReviewTargets: {
-						reviewDestination: "/review",
+						reviewDestination: "/generate-codebase/review",
 						buildLessonsDestination: "/lesson/build-kickoff",
 						launchLessonsDestination: "/lesson/product-review",
-						lessonMapDestination: "/review?showLessonMap=1",
+						lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 						latestLessonDestination: "/lesson/build-kickoff",
 					},
 				};

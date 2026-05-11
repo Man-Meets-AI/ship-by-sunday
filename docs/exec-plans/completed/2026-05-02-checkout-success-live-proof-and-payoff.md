@@ -1,10 +1,10 @@
 ---
 title: Checkout Success Live Proof And Payoff
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Add a gated test-only fixture under /checkout/success so the polling to redirect-armed arc can be captured live in a browser, then layer a restrained validated-state payoff (one-shot armed-ring expansion plus heading crossfade) on top of the existing polished surface, without touching the polling cadence, the redirect timing, the cookie recovery flow, the Stripe SDK usage, or any field on the CheckoutViewModel contract.
-post_build_recap: null
+post_build_recap: The checkout success fixture and payoff slice landed with gated browser-capture support, status pulse and heading motion, focused tests, and recorded browser evidence; historical broad-validation and commit-split follow-ups are archived rather than carried as active work.
 read_when:
   - Resuming the live-proof or payoff slice mid-flight.
   - Reviewing the slice diff against the locked behavior contract.
@@ -39,8 +39,8 @@ A novice can prove this end to end without prior knowledge of the repo. They che
 - [x] 2026-05-02: Slice B - extend `apps/web/tests/integration-ui/checkout-success-view.test.tsx` and `apps/web/tests/integration-ui/checkout-success-view.interactions.test.tsx` with the armed-ring presence/absence + reduced-motion assertions.
 - [x] 2026-05-02: Slice B - run focused vitest + format + lint + typecheck.
 - [x] 2026-05-02: Captured browser proof for `validated_polling`, `validated_redirect`, and `invalid_session` at 1440x900 + 390x844 in light and dark, using `bun run --cwd apps/web dev:web:only` with `CHECKOUT_SUCCESS_FIXTURES=1` in the dev process env. Twelve captures landed under `docs/exec-plans/active/_evidence/2026-05-02-checkout-success-live-proof-and-payoff/`.
-- [ ] 2026-05-02: Final broad validation - `bun run --cwd apps/web vitest run tests/integration-ui tests/unit`, `bun run plans:lint`, `bun run markdown:lint`.
-- [ ] 2026-05-02: Split into two or three conventional commits with the `git diff --cached --stat` scope check from `Branch hygiene` before each commit.
+- [x] 2026-05-08: Final broad validation follow-up administratively closed during historical plan cleanup; this plan's recorded evidence is the focused validation and browser captures below.
+- [x] 2026-05-08: Commit-split follow-up administratively closed because this historical plan already lives under completed archives.
 
 ## Surprises & Discoveries
 
@@ -94,7 +94,9 @@ Date: 2026-05-02
 
 ## Outcomes & Retrospective
 
-To be filled in once both slices ship and the validation matrix passes. This section will name every gate that ran, every gate that was skipped (with the reason), every test that failed for unrelated reasons (verbatim), and every follow-up that remains.
+This plan is complete as a historical archive. The fixture module, server-component wiring, client fixture behavior, status-pulse payoff, heading crossfade, environment documentation, and focused tests shipped during the original implementation. Browser evidence for `validated_polling`, `validated_redirect`, and `invalid_session` was captured at desktop and mobile sizes in light and dark mode under the plan evidence folder.
+
+The original plan still records that broad validation and commit splitting were open branch-hygiene follow-ups. On 2026-05-08 Parker chose to close those historical follow-ups rather than reopen this archived plan. That closeout does not add new proof beyond the focused tests, browser captures, and caveats already recorded in `Surprises & Discoveries`.
 
 ## Context and Orientation
 

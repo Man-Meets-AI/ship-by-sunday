@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
+import type { JsonObject } from "../json-value";
 import {
 	DOCTOR_PASS_ARTIFACT_SCHEMA_VERSION,
 	type DoctorProbeResult,
@@ -117,7 +118,7 @@ async function packageScriptSignal(repositoryRoot: string) {
 	}
 
 	const parsed = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
-		scripts?: Record<string, unknown>;
+		scripts?: JsonObject;
 	};
 	const scripts = Object.keys(parsed.scripts ?? {});
 	const proofScripts = scripts.filter((scriptName) =>

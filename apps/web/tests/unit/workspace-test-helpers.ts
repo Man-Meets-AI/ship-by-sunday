@@ -97,11 +97,13 @@ class FakeQueryResult {
 }
 
 function createSeededTables({
+	capabilities,
 	clerkUserId,
 	hasAccess,
 	fulfillmentTrack,
 	tables,
 }: {
+	capabilities?: string[];
 	clerkUserId: string;
 	hasAccess: boolean;
 	fulfillmentTrack: "existing_codebase_doctor" | "generated_codebase";
@@ -121,6 +123,7 @@ function createSeededTables({
 								? "existing_codebase"
 								: "no_codebase",
 						checkoutCtaId: "unspecified",
+						...(capabilities ? { capabilities } : {}),
 						fulfillmentTrack,
 						grantedAt: 1,
 						updatedAt: 1,
@@ -145,17 +148,20 @@ function createSeededTables({
 }
 
 export function createWorkspaceTestCtx({
+	capabilities,
 	clerkUserId = "user_workspace_123",
 	hasAccess = true,
 	fulfillmentTrack = "existing_codebase_doctor",
 	tables = {},
 }: {
+	capabilities?: string[];
 	clerkUserId?: string;
 	hasAccess?: boolean;
 	fulfillmentTrack?: "existing_codebase_doctor" | "generated_codebase";
 	tables?: FakeTables;
 } = {}) {
 	const seededTables = createSeededTables({
+		capabilities,
 		clerkUserId,
 		hasAccess,
 		fulfillmentTrack,

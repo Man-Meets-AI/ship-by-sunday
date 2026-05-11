@@ -48,9 +48,7 @@ export default async function Page({
 		undefined;
 	const checkoutSessionState = await getCheckoutSessionState(sessionId);
 	if (checkoutSessionState.kind === "sign_in_required") {
-		redirect(
-			getSignInRedirectHref(`${routeConfig.workspaceChoice}?welcome=checkout`),
-		);
+		redirect(getSignInRedirectHref(`${routeConfig.appHome}?welcome=checkout`));
 	}
 
 	const initialProductAccess =

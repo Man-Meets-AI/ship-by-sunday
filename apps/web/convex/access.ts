@@ -4,6 +4,15 @@ import {
 	mutation,
 	query,
 } from "./_generated/server";
+import { v } from "convex/values";
+import {
+	appendSupportModeWriteSuccessAuditHandler,
+	assertSupportModeWriteAllowedHandler,
+} from "./impersonation/model";
+import {
+	createSupportModeBlockedMutationResult,
+	supportModeBlockedMutationResultValidator,
+} from "./impersonation/blockedResult";
 import {
 	getProductAccessDebugArgs,
 	getProductAccessDebugHandler,
@@ -45,8 +54,24 @@ export const grantProductAccessFromStripe = internalMutation({
 
 export const resolveViewerFulfillmentTrack = mutation({
 	args: resolveViewerFulfillmentTrackArgs,
-	returns: resolveViewerFulfillmentTrackReturns,
-	handler: resolveViewerFulfillmentTrackHandler,
+	returns: v.union(
+		resolveViewerFulfillmentTrackReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const actionId = "access.fulfillmentTrack.resolve";
+		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+			actionId,
+		});
+		if (supportModePolicy.kind === "blocked") {
+			return createSupportModeBlockedMutationResult(
+				supportModePolicy.blockReason,
+			);
+		}
+		const result = await resolveViewerFulfillmentTrackHandler(ctx, args);
+		await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+		return result;
+	},
 });
 
 export const resetProductAccess = internalMutation({

@@ -10,6 +10,7 @@ const getPendingCheckoutSessionIdFromCookieMock = vi.fn();
 const getStripeCheckoutSessionEmailMock = vi.fn();
 const isStripeCheckoutSessionForCourseMock = vi.fn();
 const isStripeCheckoutSessionPaidMock = vi.fn();
+const noCapabilities = [] as const;
 
 vi.mock("server-only", () => ({}));
 
@@ -113,11 +114,117 @@ describe("product access server helpers", () => {
 			clerkUserId: null,
 			hasAccess: false,
 			status: "signed_out",
+			capabilities: noCapabilities,
 			pendingCheckoutRecovery: {
 				kind: "sign_in_required",
 				sessionId: "cs_pending_signed_out",
 				checkoutEmail: "buyer@example.com",
 			},
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("ignores a signed-out pending checkout cookie when Stripe cannot find the session", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_missing_signed_out",
+		);
+		getCheckoutSessionForRecoveryMock.mockResolvedValue(null);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+			capabilities: noCapabilities,
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("ignores a signed-out pending checkout cookie for a different product", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_wrong_product_signed_out",
+		);
+		isStripeCheckoutSessionForCourseMock.mockReturnValue(false);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+			capabilities: noCapabilities,
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("keeps a signed-out pending unpaid checkout on the payment-pending recovery path", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_unpaid_signed_out",
+		);
+		getCheckoutSessionForRecoveryMock.mockResolvedValue({
+			payment_status: "unpaid",
+		});
+		isStripeCheckoutSessionPaidMock.mockReturnValue(false);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+			capabilities: noCapabilities,
+			pendingCheckoutRecovery: {
+				kind: "payment_pending",
+				sessionId: "cs_unpaid_signed_out",
+				paymentStatus: "unpaid",
+				checkoutEmail: "buyer@example.com",
+			},
+		});
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).not.toHaveBeenCalled();
+	});
+
+	it("ignores a signed-out paid checkout cookie when Stripe has no checkout email", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: null,
+			token: null,
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_missing_email_signed_out",
+		);
+		getStripeCheckoutSessionEmailMock.mockReturnValue(null);
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			clerkUserId: null,
+			hasAccess: false,
+			status: "signed_out",
+			capabilities: noCapabilities,
 		});
 		expect(fetchQueryMock).not.toHaveBeenCalled();
 		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
@@ -137,6 +244,7 @@ describe("product access server helpers", () => {
 			clerkUserId: "user_123",
 			hasAccess: false,
 			status: "token_missing",
+			capabilities: noCapabilities,
 		});
 	});
 
@@ -268,6 +376,40 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
 
+	it("keeps paid checkout recovery details when verified-email claim needs sign-in", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+		});
+		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
+			kind: "sign_in_required",
+			sessionId: "cs_email_pending_123",
+			checkoutEmail: "buyer@example.com",
+		});
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: false,
+			clerkUserId: "user_123",
+			status: "no_access",
+			pendingCheckoutRecovery: {
+				kind: "sign_in_required",
+				sessionId: "cs_email_pending_123",
+				checkoutEmail: "buyer@example.com",
+			},
+		});
+		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
+		expect(claimLatestPendingCheckoutForViewerMock).toHaveBeenCalledTimes(1);
+		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
 	it("keeps paid checkout recovery details when the fallback checkout claim finds the wrong account", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -306,7 +448,7 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("redirects home visitors to their saved resume destination when allowed", async () => {
+	it("redirects granted home visitors to the paid app home when allowed", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -330,7 +472,7 @@ describe("product access server helpers", () => {
 
 		await redirectGrantedHomeVisitor({ allowMarketing: false });
 
-		expect(redirectMock).toHaveBeenCalledWith("/design");
+		expect(redirectMock).toHaveBeenCalledWith("/home");
 	});
 
 	it("does nothing when the home page explicitly allows marketing mode", async () => {
@@ -343,7 +485,7 @@ describe("product access server helpers", () => {
 		expect(redirectMock).not.toHaveBeenCalled();
 	});
 
-	it("returns null when a granted viewer cannot mint a Convex token for resume data", async () => {
+	it("returns app home without minting a second Convex token for resume data", async () => {
 		getConvexServerSessionMock
 			.mockResolvedValueOnce({
 				userId: "user_123",
@@ -363,7 +505,12 @@ describe("product access server helpers", () => {
 		const { getServerResumeDestination } =
 			await import("@/platform/access/product-access");
 
-		await expect(getServerResumeDestination()).resolves.toBeNull();
+		await expect(getServerResumeDestination()).resolves.toEqual({
+			destination: "/home",
+			kind: "fulfillment_choice",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		});
 	});
 
 	it("returns null when the viewer still does not have access", async () => {
@@ -384,7 +531,7 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("routes existing-codebase viewers to workspace setup before codebase resume", async () => {
+	it("routes existing-codebase viewers to app home", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -400,15 +547,15 @@ describe("product access server helpers", () => {
 			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toEqual({
-			destination: "/workspace/setup",
-			kind: "existing_codebase_setup",
+			destination: "/home",
+			kind: "fulfillment_choice",
 			codebaseStageId: null,
 			postReviewTargets: null,
 		});
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("routes unspecified fulfillment viewers to the path choice screen", async () => {
+	it("routes unspecified fulfillment viewers to app home", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -424,7 +571,7 @@ describe("product access server helpers", () => {
 			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toEqual({
-			destination: "/workspace/choose",
+			destination: "/home",
 			kind: "fulfillment_choice",
 			codebaseStageId: null,
 			postReviewTargets: null,
@@ -432,7 +579,7 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("routes legacy grants without fulfillment metadata to the path choice screen", async () => {
+	it("routes legacy grants without fulfillment metadata to app home", async () => {
 		getConvexServerSessionMock.mockResolvedValue({
 			userId: "user_123",
 			token: "token_123",
@@ -447,7 +594,7 @@ describe("product access server helpers", () => {
 			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toEqual({
-			destination: "/workspace/choose",
+			destination: "/home",
 			kind: "fulfillment_choice",
 			codebaseStageId: null,
 			postReviewTargets: null,
@@ -455,7 +602,7 @@ describe("product access server helpers", () => {
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
 	});
 
-	it("relays the centralized post-review resume destination for generated-codebase viewers", async () => {
+	it("routes generated-codebase viewers to app home instead of codebase resume", async () => {
 		getConvexServerSessionMock
 			.mockResolvedValueOnce({
 				userId: "user_123",
@@ -477,10 +624,10 @@ describe("product access server helpers", () => {
 				kind: "post_review",
 				codebaseStageId: null,
 				postReviewTargets: {
-					reviewDestination: "/review",
+					reviewDestination: "/generate-codebase/review",
 					buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
 					launchLessonsDestination: "/lesson/product-review",
-					lessonMapDestination: "/review?showLessonMap=1",
+					lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 					latestLessonDestination: "/lesson/product-review",
 				},
 			});
@@ -489,16 +636,10 @@ describe("product access server helpers", () => {
 			await import("@/platform/access/product-access");
 
 		await expect(getServerResumeDestination()).resolves.toEqual({
-			destination: "/lesson/product-review",
-			kind: "post_review",
+			destination: "/home",
+			kind: "fulfillment_choice",
 			codebaseStageId: null,
-			postReviewTargets: {
-				reviewDestination: "/review",
-				buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
-				launchLessonsDestination: "/lesson/product-review",
-				lessonMapDestination: "/review?showLessonMap=1",
-				latestLessonDestination: "/lesson/product-review",
-			},
+			postReviewTargets: null,
 		});
 	});
 });

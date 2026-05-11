@@ -1,15 +1,17 @@
 import YAML from "yaml";
 
+import type { JsonObject, JsonValue } from "../json-value";
+
 export type ParsedMarkdownFrontmatter =
 	| {
 			body: string;
-			metadata: Record<string, unknown>;
+			metadata: JsonObject;
 	  }
 	| {
 			issue: string;
 	  };
 
-function isYamlObject(value: unknown): value is Record<string, unknown> {
+function isYamlObject(value: JsonValue): value is JsonObject {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -38,7 +40,7 @@ export function parseMarkdownFrontmatter(
 		};
 	}
 
-	const parsedValue = document.toJS();
+	const parsedValue = document.toJS() as JsonValue;
 	if (!isYamlObject(parsedValue)) {
 		return {
 			issue: "Frontmatter must parse to a YAML object.",

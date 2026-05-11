@@ -27,6 +27,13 @@ describe("docs content loader", () => {
 			description:
 				"Boot the starter locally in the right order so auth, payments, and protected access do not drift out of sync.",
 		});
+		await expect(
+			getDocsContentMetadata(["telegram-support-bot"]),
+		).resolves.toEqual({
+			title: "Telegram Support Bot",
+			description:
+				"Set up the first-party homepage support widget and the dedicated Telegram support bot that backs it.",
+		});
 	});
 
 	it("returns null for unknown docs routes", async () => {

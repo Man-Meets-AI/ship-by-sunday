@@ -22,6 +22,7 @@ import {
 	jsonWithRequestId,
 } from "@/platform/observability/request-id";
 import { codebaseSectionDraftTemplateIdValues } from "@/lib/codebase-flow/codebase-section-draft-assistant";
+import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 
 const codexGenerateTemplateIds = [
 	...codebaseSectionDraftTemplateIdValues,
@@ -51,6 +52,18 @@ export async function POST(request: Request) {
 	try {
 		const productAccessSession = await requireProductAccessApiSession();
 		session = productAccessSession;
+		if (
+			await recordBlockedSupportModeActionForRequest(request, {
+				actionId: "codex.generate",
+				blockReason: "external_side_effect_blocked",
+			})
+		) {
+			return jsonWithRequestId(
+				{ error: "Codex generation is unavailable during support mode." },
+				{ status: 403 },
+				requestId,
+			);
+		}
 		const body = (await request.json().catch(() => null)) as unknown;
 		const parsed = generateRequestSchema.safeParse(body);
 		if (!parsed.success) {
@@ -175,7 +188,7 @@ export async function POST(request: Request) {
 		);
 	} catch (error) {
 		const authErrorResponse = getApiAuthErrorResponse(
-			error,
+			error instanceof Error ? error : String(error),
 			{
 				unauthorized: "Sign in before using Codex generation.",
 				forbidden: "Product access is required before using Codex generation.",
@@ -199,7 +212,8 @@ export async function POST(request: Request) {
 			} catch (persistError) {
 				await captureServerError({
 					source: "codex",
-					error: persistError,
+					error:
+						persistError instanceof Error ? persistError : String(persistError),
 					requestId,
 					pathname: apiRouteConfig.codexGenerate,
 					userId: session.userId,
@@ -209,13 +223,13 @@ export async function POST(request: Request) {
 		}
 
 		return await getUnexpectedApiErrorResponse({
-			error,
+			error: error instanceof Error ? error : String(error),
 			requestId,
 			pathname: apiRouteConfig.codexGenerate,
 			source: "codex",
 			defaultMessage: "Codex generation failed.",
 			userId: session?.userId ?? null,
-			capture: !isCodexAppServerRuntimeError(error),
+			capture: !(error instanceof Error && isCodexAppServerRuntimeError(error)),
 		});
 	}
 }

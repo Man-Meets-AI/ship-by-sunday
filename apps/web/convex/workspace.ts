@@ -1,4 +1,16 @@
+import { v } from "convex/values";
+
 import { internalMutation, mutation, query } from "./_generated/server";
+import {
+	createSupportModeBlockedMutationResult,
+	supportModeBlockedMutationResultValidator,
+	type SupportModeBlockedMutationResult,
+} from "./impersonation/blockedResult";
+import {
+	appendSupportModeWriteSuccessAuditHandler,
+	assertSupportModeWriteAllowedHandler,
+	recordBlockedSupportModeActionHandler,
+} from "./impersonation/model";
 import {
 	approveWorkspaceSyncPreviewArgs,
 	approveWorkspaceSyncPreviewHandler,
@@ -98,6 +110,44 @@ import {
 	getWorkspaceSetupStateReturns,
 } from "./workspace/model";
 
+async function runAllowedSupportModeWrite<T>(
+	ctx: Parameters<typeof appendSupportModeWriteSuccessAuditHandler>[0],
+	actionId: string,
+	write: () => Promise<T>,
+): Promise<T | SupportModeBlockedMutationResult> {
+	const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
+		actionId,
+	});
+	if (supportModePolicy.kind === "blocked") {
+		return createSupportModeBlockedMutationResult(
+			supportModePolicy.blockReason,
+		);
+	}
+	const result = await write();
+	await appendSupportModeWriteSuccessAuditHandler(ctx, { actionId });
+	return result;
+}
+
+async function blockSupportModeOnly(
+	ctx: Parameters<typeof recordBlockedSupportModeActionHandler>[0],
+	actionId: string,
+	blockReason:
+		| "customer_repository_operation_blocked"
+		| "destructive_action_blocked",
+): Promise<SupportModeBlockedMutationResult | null> {
+	const auditResult = await recordBlockedSupportModeActionHandler(ctx, {
+		actionId,
+		blockReason,
+		eventType: "write_attempted",
+	});
+	if (auditResult.kind === "not_impersonating") {
+		return null;
+	}
+	return createSupportModeBlockedMutationResult(
+		auditResult.kind === "not_recorded" ? auditResult.reason : blockReason,
+	);
+}
+
 export const getWorkspaceProjectState = query({
 	args: getWorkspaceProjectStateArgs,
 	returns: getWorkspaceProjectStateReturns,
@@ -112,26 +162,50 @@ export const getWorkspaceSetupState = query({
 
 export const createOrLoadWorkspaceProject = mutation({
 	args: createOrLoadWorkspaceProjectArgs,
-	returns: createOrLoadWorkspaceProjectReturns,
-	handler: createOrLoadWorkspaceProjectHandler,
+	returns: v.union(
+		createOrLoadWorkspaceProjectReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) =>
+		runAllowedSupportModeWrite(ctx, "workspace.project.createOrLoad", () =>
+			createOrLoadWorkspaceProjectHandler(ctx, args),
+		),
 });
 
 export const prepareWorkspaceSetupPairing = mutation({
 	args: prepareWorkspaceSetupPairingArgs,
-	returns: prepareWorkspaceSetupPairingReturns,
-	handler: prepareWorkspaceSetupPairingHandler,
+	returns: v.union(
+		prepareWorkspaceSetupPairingReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) =>
+		runAllowedSupportModeWrite(ctx, "workspace.setup.preparePairing", () =>
+			prepareWorkspaceSetupPairingHandler(ctx, args),
+		),
 });
 
 export const cancelWorkspaceSetupPairing = mutation({
 	args: cancelWorkspaceSetupPairingArgs,
-	returns: cancelWorkspaceSetupPairingReturns,
-	handler: cancelWorkspaceSetupPairingHandler,
+	returns: v.union(
+		cancelWorkspaceSetupPairingReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) =>
+		runAllowedSupportModeWrite(ctx, "workspace.setup.cancelPairing", () =>
+			cancelWorkspaceSetupPairingHandler(ctx, args),
+		),
 });
 
 export const bindWorkspaceRunner = mutation({
 	args: bindWorkspaceRunnerArgs,
-	returns: bindWorkspaceRunnerReturns,
-	handler: bindWorkspaceRunnerHandler,
+	returns: v.union(
+		bindWorkspaceRunnerReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) =>
+		runAllowedSupportModeWrite(ctx, "workspace.runner.bind", () =>
+			bindWorkspaceRunnerHandler(ctx, args),
+		),
 });
 
 export const bindWorkspaceRunnerByPairingToken = mutation({
@@ -142,14 +216,33 @@ export const bindWorkspaceRunnerByPairingToken = mutation({
 
 export const bindWorkspaceRepository = mutation({
 	args: bindWorkspaceRepositoryArgs,
-	returns: bindWorkspaceRepositoryReturns,
-	handler: bindWorkspaceRepositoryHandler,
+	returns: v.union(
+		bindWorkspaceRepositoryReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) =>
+		runAllowedSupportModeWrite(ctx, "workspace.repository.bind", () =>
+			bindWorkspaceRepositoryHandler(ctx, args),
+		),
 });
 
 export const startWorkspaceDoctorPassRun = mutation({
 	args: startWorkspaceDoctorPassRunArgs,
-	returns: startWorkspaceDoctorPassRunReturns,
-	handler: startWorkspaceDoctorPassRunHandler,
+	returns: v.union(
+		startWorkspaceDoctorPassRunReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.doctorPass.startRun",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return startWorkspaceDoctorPassRunHandler(ctx, args);
+	},
 });
 
 export const startWorkspaceDoctorPassRunByCredential = mutation({
@@ -160,8 +253,21 @@ export const startWorkspaceDoctorPassRunByCredential = mutation({
 
 export const requestWorkspaceWorkflowRun = mutation({
 	args: requestWorkspaceWorkflowRunArgs,
-	returns: requestWorkspaceWorkflowRunReturns,
-	handler: requestWorkspaceWorkflowRunHandler,
+	returns: v.union(
+		requestWorkspaceWorkflowRunReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.workflow.requestRun",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return requestWorkspaceWorkflowRunHandler(ctx, args);
+	},
 });
 
 export const getWorkspaceWorkflowRunByCredential = query({
@@ -184,20 +290,59 @@ export const getWorkspaceWorkerQueueState = query({
 
 export const pauseWorkspaceWorkflowRun = mutation({
 	args: pauseWorkspaceWorkflowRunArgs,
-	returns: pauseWorkspaceWorkflowRunReturns,
-	handler: pauseWorkspaceWorkflowRunHandler,
+	returns: v.union(
+		pauseWorkspaceWorkflowRunReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.workflow.pauseRun",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return pauseWorkspaceWorkflowRunHandler(ctx, args);
+	},
 });
 
 export const resumeWorkspaceWorkflowRun = mutation({
 	args: resumeWorkspaceWorkflowRunArgs,
-	returns: resumeWorkspaceWorkflowRunReturns,
-	handler: resumeWorkspaceWorkflowRunHandler,
+	returns: v.union(
+		resumeWorkspaceWorkflowRunReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.workflow.resumeRun",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return resumeWorkspaceWorkflowRunHandler(ctx, args);
+	},
 });
 
 export const stopWorkspaceWorkflowRun = mutation({
 	args: stopWorkspaceWorkflowRunArgs,
-	returns: stopWorkspaceWorkflowRunReturns,
-	handler: stopWorkspaceWorkflowRunHandler,
+	returns: v.union(
+		stopWorkspaceWorkflowRunReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.workflow.stopRun",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return stopWorkspaceWorkflowRunHandler(ctx, args);
+	},
 });
 
 export const ingestWorkspaceRunnerEvent = internalMutation({
@@ -214,14 +359,40 @@ export const ingestWorkspaceRunnerEventByCredential = mutation({
 
 export const approveWorkspaceSyncPreview = mutation({
 	args: approveWorkspaceSyncPreviewArgs,
-	returns: approveWorkspaceSyncPreviewReturns,
-	handler: approveWorkspaceSyncPreviewHandler,
+	returns: v.union(
+		approveWorkspaceSyncPreviewReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.syncPreview.approve",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return approveWorkspaceSyncPreviewHandler(ctx, args);
+	},
 });
 
 export const syncApprovedCodebaseFindings = mutation({
 	args: syncApprovedCodebaseFindingsArgs,
-	returns: syncApprovedCodebaseFindingsReturns,
-	handler: syncApprovedCodebaseFindingsHandler,
+	returns: v.union(
+		syncApprovedCodebaseFindingsReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.findings.syncApproved",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return syncApprovedCodebaseFindingsHandler(ctx, args);
+	},
 });
 
 export const syncApprovedCodebaseFindingsByCredential = mutation({
@@ -256,14 +427,40 @@ export const getManagedGithubExecutionState = query({
 
 export const requestManagedGithubExecutionConsent = mutation({
 	args: requestManagedGithubExecutionConsentArgs,
-	returns: requestManagedGithubExecutionConsentReturns,
-	handler: requestManagedGithubExecutionConsentHandler,
+	returns: v.union(
+		requestManagedGithubExecutionConsentReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.managedGithub.requestConsent",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return requestManagedGithubExecutionConsentHandler(ctx, args);
+	},
 });
 
 export const revokeManagedGithubExecutionConsent = mutation({
 	args: revokeManagedGithubExecutionConsentArgs,
-	returns: revokeManagedGithubExecutionConsentReturns,
-	handler: revokeManagedGithubExecutionConsentHandler,
+	returns: v.union(
+		revokeManagedGithubExecutionConsentReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.managedGithub.revokeConsent",
+			"customer_repository_operation_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return revokeManagedGithubExecutionConsentHandler(ctx, args);
+	},
 });
 
 export const getWorkspaceSyncPreviewState = query({
@@ -274,18 +471,57 @@ export const getWorkspaceSyncPreviewState = query({
 
 export const revokeWorkspaceRunner = mutation({
 	args: revokeWorkspaceRunnerArgs,
-	returns: revokeWorkspaceRunnerReturns,
-	handler: revokeWorkspaceRunnerHandler,
+	returns: v.union(
+		revokeWorkspaceRunnerReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.runner.revoke",
+			"destructive_action_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return revokeWorkspaceRunnerHandler(ctx, args);
+	},
 });
 
 export const markWorkspaceFindingsDeleted = mutation({
 	args: markWorkspaceFindingsDeletedArgs,
-	returns: markWorkspaceFindingsDeletedReturns,
-	handler: markWorkspaceFindingsDeletedHandler,
+	returns: v.union(
+		markWorkspaceFindingsDeletedReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.findings.markDeleted",
+			"destructive_action_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return markWorkspaceFindingsDeletedHandler(ctx, args);
+	},
 });
 
 export const markWorkspaceProjectDeleted = mutation({
 	args: markWorkspaceProjectDeletedArgs,
-	returns: markWorkspaceProjectDeletedReturns,
-	handler: markWorkspaceProjectDeletedHandler,
+	returns: v.union(
+		markWorkspaceProjectDeletedReturns,
+		supportModeBlockedMutationResultValidator,
+	),
+	handler: async (ctx, args) => {
+		const supportModeBlock = await blockSupportModeOnly(
+			ctx,
+			"workspace.project.markDeleted",
+			"destructive_action_blocked",
+		);
+		if (supportModeBlock) {
+			return supportModeBlock;
+		}
+		return markWorkspaceProjectDeletedHandler(ctx, args);
+	},
 });

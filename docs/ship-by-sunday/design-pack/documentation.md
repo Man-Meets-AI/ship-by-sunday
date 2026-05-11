@@ -207,6 +207,15 @@ If helpful, also record the external official references used for the work:
 - **Out of scope:** No generated customer starter font contract changes beyond the active app presentation layer.
 - **Verification:** Run focused app checks, broad repo gates, and desktop/mobile browser proof for the global typography pass before release.
 
+## Shipped Note: Tutorial Video Library Thumbnails
+
+- **Date:** 2026-05-06
+- **Surface:** `/tutorials`.
+- **Change:** Reworked the protected Tutorial Videos index from a text-only lesson list into a thumbnail-first video library. The page now shows block jump cards, per-block video counts, Build subgroups, compact video rows, duration metadata, and first-party thumbnail images.
+- **Design direction:** Keep the surface operational and quiet: no marketing hero, no decorative grid, no iframe thumbnails. Thumbnails are small visual anchors inside reusable rows, and the long Build block is split into scan-friendly work phases.
+- **Out of scope:** No lesson watch-page change, no route entitlement change, and no new customer setup. Bunny thumbnail delivery is handled through the app's validated thumbnail proxy.
+- **Verification:** Focused tutorial library, route, video helper, pipeline, and thumbnail proxy tests should pass; desktop and mobile browser proof should confirm all 29 thumbnails load without layout overlap.
+
 ## Shipped Note: Homepage Starting-Point Branches
 
 - **Date:** 2026-05-03

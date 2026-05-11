@@ -2,14 +2,15 @@
 
 import type { KeyboardEvent, RefObject } from "react";
 import { useCallback, useRef } from "react";
+import type { JsonValue, MutableJsonObject } from "@/lib/json-value";
 
 function postCommand(
 	iframe: HTMLIFrameElement,
 	method: string,
-	value?: unknown,
+	value?: JsonValue,
 	uuid?: string,
 ) {
-	const payload: Record<string, unknown> = {
+	const payload: MutableJsonObject = {
 		context: "player.js",
 		version: "1",
 		method,
@@ -23,8 +24,8 @@ function postCommand(
 async function rpc(
 	iframe: HTMLIFrameElement,
 	method: string,
-	value?: unknown,
-): Promise<unknown> {
+	value?: JsonValue,
+): Promise<JsonValue | undefined> {
 	return new Promise((resolve) => {
 		const uuid =
 			typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -36,7 +37,7 @@ async function rpc(
 		}, 220);
 		const onMsg = (event: MessageEvent) => {
 			if (event.source !== iframe.contentWindow) return;
-			let data: { uuid?: string; value?: unknown; event?: string };
+			let data: { uuid?: string; value?: JsonValue; event?: string };
 			try {
 				data =
 					typeof event.data === "string"

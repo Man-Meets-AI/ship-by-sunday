@@ -1,10 +1,10 @@
 ---
 title: Landing Page Polish 3
-status: active
+status: complete
 created_at: 2026-05-02
-completed_at: null
+completed_at: 2026-05-08
 summary: Resolve the structural debt the d1cad98 and ff4988e landing-page polish passes intentionally deferred so the public homepage at /?marketing=1 reads as one cohesive design system, with no remaining structural debt visible to a careful designer.
-post_build_recap: null
+post_build_recap: The third landing-page polish pass resolved primary-token decisions, cross-section rhythm, dead code, ExecLoop structure, gated microinteractions, accessibility audit notes, and validation caveats for parallel-suite failures.
 read_when:
   - Resuming the third landing-page polish pass mid-flight.
   - Reviewing the polish-pass diff against the locked behavior contract.

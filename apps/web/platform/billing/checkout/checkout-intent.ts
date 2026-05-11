@@ -34,10 +34,12 @@ export type CheckoutIntent = {
 	readonly fulfillmentTrack: FulfillmentTrack;
 };
 
+type CheckoutIntentRawField = string | null | undefined;
+
 export type CheckoutIntentInput = {
-	readonly buyerStartingPoint?: unknown;
-	readonly checkoutCtaId?: unknown;
-	readonly fulfillmentTrack?: unknown;
+	readonly buyerStartingPoint?: CheckoutIntentRawField;
+	readonly checkoutCtaId?: CheckoutIntentRawField;
+	readonly fulfillmentTrack?: CheckoutIntentRawField;
 };
 
 const checkoutBuyerStartingPointSet = new Set<string>(
@@ -47,20 +49,24 @@ const checkoutFulfillmentTrackSet = new Set<string>(checkoutFulfillmentTracks);
 const checkoutCtaIdSet = new Set<string>(checkoutCtaIds);
 
 export function normalizeBuyerStartingPoint(
-	value: unknown,
+	value: CheckoutIntentRawField,
 ): BuyerStartingPoint {
 	return typeof value === "string" && checkoutBuyerStartingPointSet.has(value)
 		? (value as BuyerStartingPoint)
 		: "unspecified";
 }
 
-export function normalizeFulfillmentTrack(value: unknown): FulfillmentTrack {
+export function normalizeFulfillmentTrack(
+	value: CheckoutIntentRawField,
+): FulfillmentTrack {
 	return typeof value === "string" && checkoutFulfillmentTrackSet.has(value)
 		? (value as FulfillmentTrack)
 		: "unspecified";
 }
 
-export function normalizeCheckoutCtaId(value: unknown): CheckoutCtaId {
+export function normalizeCheckoutCtaId(
+	value: CheckoutIntentRawField,
+): CheckoutCtaId {
 	return typeof value === "string" && checkoutCtaIdSet.has(value)
 		? (value as CheckoutCtaId)
 		: "unspecified";

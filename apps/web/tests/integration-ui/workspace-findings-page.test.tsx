@@ -108,7 +108,7 @@ describe("WorkspaceFindingsPage", () => {
 					name: /Source truth needs the first workflow/i,
 				})
 				.getAttribute("href"),
-		).toBe("/workspace/findings/finding-source-truth-readiness");
+		).toBe("/workers/findings/finding-source-truth-readiness");
 		expect(screen.getByText("Observability proof is thin")).toBeTruthy();
 		expect(screen.getByText("Source Truth Agent Readiness")).toBeTruthy();
 		expect(screen.getByText("Observability Debuggability")).toBeTruthy();
@@ -116,7 +116,7 @@ describe("WorkspaceFindingsPage", () => {
 			screen
 				.getByRole("link", { name: /Run doctor pass again/i })
 				.getAttribute("href"),
-		).toBe("/workspace/doctor-pass");
+		).toBe("/workers/doctor-pass");
 		expect(
 			screen.getByTestId("workspace-findings-local-nav").textContent,
 		).toContain("Findings");
@@ -142,7 +142,7 @@ describe("WorkspaceFindingsPage", () => {
 			screen
 				.getByRole("link", { name: "Open Doctor Pass" })
 				.getAttribute("href"),
-		).toBe("/workspace/doctor-pass");
+		).toBe("/workers/doctor-pass");
 		expect(screen.queryByText("Recommended first")).toBeNull();
 	});
 });

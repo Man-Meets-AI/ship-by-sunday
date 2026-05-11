@@ -3,8 +3,42 @@ import type { LessonConfig, LessonVideoContent } from "./contracts";
 import { videoAssets } from "./media";
 import { resolveLessonVideoAssetId } from "./video-assignments";
 
+export const BUNNY_DEFAULT_THUMBNAIL_FILE_NAME = "thumbnail.jpg";
+
 export function getBunnyEmbedUrl(libraryId: number | string, videoId: string) {
 	return `${apiConfig.bunnyEmbedBaseUrl}/${libraryId}/${videoId}`;
+}
+
+export function getBunnyThumbnailSourceUrl({
+	videoId,
+	thumbnailFileName = BUNNY_DEFAULT_THUMBNAIL_FILE_NAME,
+}: {
+	videoId: string;
+	thumbnailFileName?: string;
+}) {
+	return `${apiConfig.bunnyStreamCdnBaseUrl}/${encodeURIComponent(videoId)}/${encodeURIComponent(thumbnailFileName)}`;
+}
+
+export function getBunnyThumbnailProxyUrl(videoId: string) {
+	return `/api/video/thumbnails/${encodeURIComponent(videoId)}`;
+}
+
+export function resolveLessonVideoPosterUrl(
+	video?: LessonVideoContent | null,
+): string | null {
+	if (!video || video.status !== "ready") {
+		return null;
+	}
+
+	if (video.posterUrl) {
+		return video.posterUrl;
+	}
+
+	if (video.provider === "bunny" && video.libraryId && video.videoId) {
+		return getBunnyThumbnailProxyUrl(video.videoId);
+	}
+
+	return null;
 }
 
 export function resolveLessonVideoUrl(
@@ -38,17 +72,40 @@ export function hydrateLessonVideoContent(
 
 	const resolvedUrl = resolveLessonVideoUrl(video);
 	if (!resolvedUrl || resolvedUrl === video.url) {
-		return video;
+		const resolvedPosterUrl = resolveLessonVideoPosterUrl(video);
+		if (!resolvedPosterUrl || resolvedPosterUrl === video.posterUrl) {
+			return video;
+		}
+
+		return {
+			...video,
+			posterUrl: resolvedPosterUrl,
+		};
 	}
 
 	return {
 		...video,
 		url: resolvedUrl,
+		posterUrl: resolveLessonVideoPosterUrl(video) ?? video.posterUrl,
 	};
 }
 
 export function getVideoAsset(assetId?: string | null) {
 	return assetId ? (videoAssets[assetId] ?? null) : null;
+}
+
+export function getVideoAssetByBunnyVideoId(videoId?: string | null) {
+	if (!videoId) {
+		return null;
+	}
+
+	for (const video of Object.values(videoAssets)) {
+		if (video?.provider === "bunny" && video.videoId === videoId) {
+			return video;
+		}
+	}
+
+	return null;
 }
 
 export function getLessonVideoAsset(

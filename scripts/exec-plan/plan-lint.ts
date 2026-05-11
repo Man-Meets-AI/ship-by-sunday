@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import YAML from "yaml";
 
+import type { JsonObject, JsonValue } from "../json-value";
 import { resolvePlanFilePath } from "./cli";
 import { buildExecPlanMaintenanceSentence } from "./paths";
 
@@ -106,7 +107,7 @@ function parsePlanFrontmatter(text: string): FrontmatterParseResult {
 }
 
 function parseYamlMetadata(source: string): {
-	metadata: Record<string, unknown>;
+	metadata: JsonObject;
 	issues: string[];
 } {
 	const document = YAML.parseDocument(source);
@@ -119,7 +120,7 @@ function parseYamlMetadata(source: string): {
 		};
 	}
 
-	const parsedValue = document.toJS();
+	const parsedValue = document.toJS() as JsonValue;
 	if (
 		typeof parsedValue !== "object" ||
 		parsedValue === null ||
@@ -132,12 +133,12 @@ function parseYamlMetadata(source: string): {
 	}
 
 	return {
-		metadata: parsedValue as Record<string, unknown>,
+		metadata: parsedValue as JsonObject,
 		issues: [],
 	};
 }
 
-function isNonEmptyString(value: unknown): value is string {
+function isNonEmptyString(value: JsonValue | undefined): value is string {
 	return typeof value === "string" && value.trim() !== "";
 }
 
@@ -273,7 +274,7 @@ function isMeaningfulRetrospective(sectionBody: string | null): boolean {
 }
 
 function validateStringField(
-	metadata: Record<string, unknown>,
+	metadata: JsonObject,
 	key: (typeof REQUIRED_FRONTMATTER_KEYS)[number],
 	issues: string[],
 ): void {
@@ -283,7 +284,7 @@ function validateStringField(
 }
 
 function validateDateField(
-	metadata: Record<string, unknown>,
+	metadata: JsonObject,
 	key: "created_at" | "completed_at",
 	issues: string[],
 ): void {
@@ -300,10 +301,7 @@ function validateDateField(
 	}
 }
 
-function validateReadWhen(
-	metadata: Record<string, unknown>,
-	issues: string[],
-): void {
+function validateReadWhen(metadata: JsonObject, issues: string[]): void {
 	const value = metadata.read_when;
 	if (!Array.isArray(value) || value.length === 0) {
 		issues.push("Frontmatter read_when must be a non-empty YAML list.");
@@ -319,10 +317,7 @@ function validateReadWhen(
 	});
 }
 
-function validatePostBuildRecap(
-	metadata: Record<string, unknown>,
-	issues: string[],
-): void {
+function validatePostBuildRecap(metadata: JsonObject, issues: string[]): void {
 	const value = metadata.post_build_recap;
 	if (value !== null && !isNonEmptyString(value)) {
 		issues.push(
@@ -331,10 +326,7 @@ function validatePostBuildRecap(
 	}
 }
 
-function validateProgramLinkage(
-	metadata: Record<string, unknown>,
-	issues: string[],
-): void {
+function validateProgramLinkage(metadata: JsonObject, issues: string[]): void {
 	const programId = metadata.program_id;
 	const planningBrief = metadata.planning_brief;
 	const hasProgramId = programId !== undefined;
@@ -496,7 +488,7 @@ function validateMaintenanceSentence(body: string, issues: string[]): void {
 
 function validatePlanLaneAgainstStatus(
 	planPath: string,
-	metadata: Record<string, unknown>,
+	metadata: JsonObject,
 	issues: string[],
 ): void {
 	const status = metadata.status;

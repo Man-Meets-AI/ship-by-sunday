@@ -19,6 +19,10 @@ import {
 } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
+import {
+	getSupportModeBlockedMutationMessage,
+	isSupportModeBlockedMutationResult,
+} from "@/platform/admin-impersonation";
 import { SetupDoctorPassAction } from "./setup-doctor-pass-action";
 import { SetupOpenDestinationControl } from "./setup-open-destination-control";
 import { SetupPairingPanel } from "./setup-pairing-panel";
@@ -101,6 +105,9 @@ export function ExistingCodebaseSetupPage({
 				runnerMode,
 				regenerate: true,
 			});
+			if (isSupportModeBlockedMutationResult(nextState)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setLastMutationState(nextState as WorkspaceSetupState);
 			showWorkspaceActionSuccessToast({
 				id: workspaceSetupToastIds.pairingSuccess,
@@ -112,10 +119,10 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.pairingError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to prepare pairing token.",
 				report: {
-					title: "Workspace setup pairing preparation failed",
+					title: "Worker setup pairing preparation failed",
 					code: "workspace_setup_pairing_prepare_failed",
 					pathname: routeConfig.workspaceSetup,
 					details: {
@@ -140,6 +147,9 @@ export function ExistingCodebaseSetupPage({
 				projectId: setupState.project._id,
 				runnerId: cancelRunnerId,
 			});
+			if (isSupportModeBlockedMutationResult(nextState)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			setLastMutationState(nextState as WorkspaceSetupState);
 			showWorkspaceActionSuccessToast({
 				id: workspaceSetupToastIds.cancelPairingSuccess,
@@ -148,10 +158,10 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.cancelPairingError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to cancel pairing.",
 				report: {
-					title: "Workspace setup pairing cancel failed",
+					title: "Worker setup pairing cancel failed",
 					code: "workspace_setup_pairing_cancel_failed",
 					pathname: routeConfig.workspaceSetup,
 				},
@@ -166,7 +176,12 @@ export function ExistingCodebaseSetupPage({
 	) {
 		setPendingAction("open_destination");
 		try {
-			await saveWorkspaceProject({ defaultOpenDestination });
+			const saveResult = await saveWorkspaceProject({
+				defaultOpenDestination,
+			});
+			if (isSupportModeBlockedMutationResult(saveResult)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			showWorkspaceActionSuccessToast({
 				id: workspaceSetupToastIds.openDestinationSuccess,
 				title: "Open destination saved",
@@ -178,10 +193,10 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.openDestinationError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to save open destination.",
 				report: {
-					title: "Workspace setup open destination save failed",
+					title: "Worker setup open destination save failed",
 					code: "workspace_setup_open_destination_save_failed",
 					pathname: routeConfig.workspaceSetup,
 					details: {
@@ -207,12 +222,15 @@ export function ExistingCodebaseSetupPage({
 		try {
 			const runnerId = setupState.activeRunner?._id;
 			const repositoryBindingId = setupState.repositoryBinding?._id;
-			await startDoctorPassRun({
+			const doctorPassRun = await startDoctorPassRun({
 				projectId: setupState.project._id,
 				runnerMode: setupState.activeRunner?.runnerMode ?? "daemon",
 				...(runnerId ? { runnerId } : {}),
 				...(repositoryBindingId ? { repositoryBindingId } : {}),
 			});
+			if (isSupportModeBlockedMutationResult(doctorPassRun)) {
+				throw new Error(getSupportModeBlockedMutationMessage());
+			}
 			showWorkspaceActionSuccessToast({
 				action: {
 					label: "Open Doctor Pass",
@@ -224,10 +242,10 @@ export function ExistingCodebaseSetupPage({
 		} catch (error) {
 			showWorkspaceActionErrorToast({
 				id: workspaceSetupToastIds.doctorPassError,
-				error,
+				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to start doctor pass.",
 				report: {
-					title: "Workspace setup doctor pass start failed",
+					title: "Worker setup doctor pass start failed",
 					code: "workspace_setup_doctor_pass_start_failed",
 					pathname: routeConfig.workspaceSetup,
 					details: {

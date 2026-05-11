@@ -34,11 +34,11 @@ describe("sign-up route", () => {
 	it("preserves a safe post-checkout redirect path", async () => {
 		await Page({
 			searchParams: Promise.resolve({
-				redirect_url: "/codebase",
+				redirect_url: "/generate-codebase",
 				session_id: "cs_test_123",
 			}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith("/codebase");
+		expect(redirectMock).toHaveBeenCalledWith("/generate-codebase");
 	});
 });

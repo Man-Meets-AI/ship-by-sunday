@@ -97,10 +97,10 @@ export function createCodebaseBonusMissionState(): BonusMissionState {
 
 export function createCodebasePostReviewTargets(): PostReviewNavigationTargets {
 	return {
-		reviewDestination: "/review",
+		reviewDestination: "/generate-codebase/review",
 		buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
 		launchLessonsDestination: "/lesson/product-review",
-		lessonMapDestination: "/review?showLessonMap=1",
+		lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 		latestLessonDestination: "/lesson/iterate-the-product-with-ai",
 	};
 }

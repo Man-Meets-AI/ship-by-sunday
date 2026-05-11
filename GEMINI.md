@@ -40,7 +40,7 @@ Use this exact priority order when sources conflict:
 
 ### Web App (`apps/web`)
 - **Codebase-First:** This product is codebase-first, not course-first.
-- **Protected Handoff:** The current journey is `/codebase -> /review`; staged routes are compatibility redirects only.
+- **Protected Handoff:** The current journey is `/home -> /generate-codebase -> /generate-codebase/review`; staged routes are compatibility redirects only.
 - **Unlock Logic:** Ensure the Ship by Sunday Codebase handoff and optional Execute / Ship bonus library unlock exactly as defined in `apps/web/AGENTS.md`.
 - **Homepage:** Changes to `/` must follow `starterConfig.homePage` in `apps/web/config/product.ts` and related files. Read `apps/web/content/docs/configure-the-homepage.mdx` first.
 
