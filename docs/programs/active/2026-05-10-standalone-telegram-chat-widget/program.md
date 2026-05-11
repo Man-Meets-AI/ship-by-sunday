@@ -72,7 +72,7 @@ This Program depends on the active Telegram Support Bot Program for the current 
 - [x] 2026-05-11: Locked a minimal skeletal `TelegramChatWidget` export in the scaffold slice, with real UI deferred.
 - [x] 2026-05-11: Locked no AI Elements primitive placeholder files in the scaffold; real adapted primitives arrive in the UI extraction slice.
 - [x] 2026-05-11: Locked package README for package API docs and app docs for provider/runtime setup.
-- [ ] Create the first child ExecPlan from `planning-brief-1.md`.
+- [x] 2026-05-11: Created child ExecPlan `docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md` from `planning-brief-1.md`.
 - [ ] Land the package contract and scaffold.
 - [ ] Migrate the Ship by Sunday support widget to consume the package without behavior regression.
 - [ ] Add the Convex realtime adapter and remove visitor-side polling where the host provides Convex.
@@ -222,7 +222,11 @@ Date: 2026-05-11
 
 ## Slice Ledger
 
-No child ExecPlan exists yet. Child ExecPlans should carry `program_id: standalone-telegram-chat-widget` and `planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-<N>.md` in their frontmatter.
+Child ExecPlans should carry `program_id: standalone-telegram-chat-widget` and `planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-<N>.md` in their frontmatter.
+
+Active child ExecPlans:
+
+- `docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md`: active first slice for `Package Contract And Scaffold`.
 
 Planned slices:
 
@@ -235,7 +239,7 @@ Planned slices:
 
 ## Next Slice
 
-No child ExecPlan exists yet. The first recommended slice is `Package Contract And Scaffold`, created from `planning-brief-1.md`.
+The active child ExecPlan is `docs/exec-plans/active/2026-05-11-package-contract-and-scaffold.md`. Its remaining outcome is the package contract and scaffold: create `packages/telegram-chat-widget`, define the package contracts, add the configurable fetch adapter, reserve the Convex subpath, add package README docs, add focused tests, and wire the package into root package validation without moving the current `apps/web` widget UI.
 
 That slice should establish the package directory, public exports, types, styling strategy, test config, and host integration contract without moving runtime behavior yet. It must keep the package free of Next.js dependencies, avoid Convex Component APIs, keep Convex under an optional adapter subpath export, and update workspace/package validation so later implementation slices can build on a stable package shell. It should also create or reserve package-local primitive modules for selected AI Elements-inspired Conversation, Prompt Input, and Attachments primitives so later UI extraction does not create host-local component imports. Package CSS should follow shadcn's CSS-variable token model and map widget-specific variables to host tokens with branded fallbacks. Do not add a widget-specific theme provider in v1. Transport should be modeled as one typed client adapter object, with fetch and Convex implementations behind subpath exports. Analytics should be modeled as a host-provided typed event sink and must stay metadata-only. The primary React export should be an all-in-one `TelegramChatWidget` that owns launcher, panel, open state, and default fixed placement. Placement should be a narrow enum with bottom-right as the default, not a free-form positioning config bag. Content should have Parker/Ship by Sunday-branded package defaults with partial host overrides, not a required exhaustive copy object. Actual upload support should be screenshot/image-only in v1, with one screenshot per message. Bug reporting should remain an inline composer mode and should produce structured metadata plus a rendered body.
 
