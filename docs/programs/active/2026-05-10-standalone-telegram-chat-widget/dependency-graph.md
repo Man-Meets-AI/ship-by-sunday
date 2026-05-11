@@ -14,13 +14,13 @@ The hard dependency is that the package contract must exist before UI extraction
 
 ## Ordered Dependencies
 
-1. Package contract and scaffold. Create `packages/telegram-chat-widget`, exports, scripts, tsconfig, test config, CSS strategy, and public types.
+1. Package contract and scaffold. Create `packages/telegram-chat-widget`, exports, scripts, tsconfig, test config, CSS strategy, public types, a working configurable fetch adapter, and a reserved Convex subpath without live realtime implementation.
 
-2. UI extraction with fetch transport. Move the polished widget UI and state orchestration into the package while keeping the current app support route bridge.
+2. UI extraction with fetch transport. Move the polished widget UI and state orchestration into the package, then make the app consume the package with the tested fetch adapter while keeping the current app support route bridge.
 
 3. Ship by Sunday consumer migration. Replace app-local support widget internals with package imports and keep homepage/workspace wrappers in `apps/web`.
 
-4. Convex realtime adapter. Add optional Convex subscriptions and mutations through a host-provided adapter, then remove visitor-side polling where safe.
+4. Convex realtime adapter. Fill in the reserved Convex subpath with optional Convex subscriptions and mutations through a host-provided adapter, then remove visitor-side polling where safe.
 
 5. Anonymous direct-realtime authority. Decide and implement scoped conversation capability or preserve host bridge for anonymous transcript access.
 

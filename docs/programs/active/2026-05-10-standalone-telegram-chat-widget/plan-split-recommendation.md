@@ -16,7 +16,7 @@ This Program should be split into several child ExecPlans so package extraction,
 
 1. `Package Contract And Scaffold`
 
-Create `packages/telegram-chat-widget` with package metadata, TypeScript config, Vitest config, exports, initial CSS strategy, core public types, and empty or skeletal adapter boundaries. Update workspace validation and app transpilation assumptions only as needed. Do not move runtime UI yet.
+Create `packages/telegram-chat-widget` with package metadata, TypeScript config, Vitest config, exports, initial CSS strategy, core public types, content defaults, event sink types, attachment policy, focused contract tests, a working configurable fetch adapter, and a reserved Convex subpath without live realtime behavior. Update root package validation scripts so lint, typecheck, and package tests include the new package immediately. Do not move runtime UI yet.
 
 2. `Support Widget UI Extraction With Fetch Transport`
 

@@ -60,7 +60,7 @@ The exact file names can change during implementation if the package conventions
 
 The root export should include the default React widget, core types, and the fetch transport helpers needed by `apps/web`.
 
-Convex-specific code should be behind a separate entrypoint, such as:
+Convex-specific code should be behind a separate entrypoint inside the same package, such as:
 
 - `@shipbysunday/telegram-chat-widget`
 - `@shipbysunday/telegram-chat-widget/fetch`
@@ -68,7 +68,7 @@ Convex-specific code should be behind a separate entrypoint, such as:
 - `@shipbysunday/telegram-chat-widget/styles.css`
 - `@shipbysunday/telegram-chat-widget/testing`
 
-This keeps the base React package usable without forcing Convex dependencies on every consumer.
+This keeps the base React package usable without forcing Convex dependencies on every consumer. It also gives coding agents one clear ownership root and avoids repetitive package boilerplate while the adapter surfaces are still young.
 
 ## Dependencies
 
@@ -76,11 +76,27 @@ React and React DOM should be peer dependencies. If the package keeps lucide ico
 
 The package should not depend on Next.js. It should not import app routes, app content, Clerk-specific hooks, or generated Convex API references from `apps/web`.
 
+For v1, prefer the narrowest runtime dependency surface: peer `react` and `react-dom`; normal `lucide-react` only if the package owns icon rendering; normal `clsx` only if class composition needs it; avoid `tailwind-merge` because package styling is not a Tailwind utility override API. Keep Next.js, Clerk, PostHog, and app-local utilities out of package dependencies.
+
 ## Styling
 
 The current app UI uses Tailwind classes. That is not a good standalone package contract.
 
 The reusable package should ship styles through a CSS file and CSS variables. The host should import the CSS once and may override variables or pass a small set of class hooks. The package can keep a headless or lightly controlled internal state API, but v1 should ship a complete default styled widget because the product goal is a polished support experience, not only primitives.
+
+The shadcn theming docs recommend CSS variables for theming. Their convention is semantic surface and foreground pairs such as `background` / `foreground`, `card` / `card-foreground`, `popover` / `popover-foreground`, `primary` / `primary-foreground`, `secondary` / `secondary-foreground`, `muted` / `muted-foreground`, and `accent` / `accent-foreground`, plus `destructive`, `border`, `input`, `ring`, and `radius`. Dark mode works by overriding the same tokens under `.dark`. The current web app already follows this shape in `apps/web/app/globals.css` with `@theme inline`, `:root`, and `.dark`.
+
+For the package, the best contract is package-owned CSS classes backed by widget-specific variables that map to shadcn tokens, for example `--sbs-chat-background: var(--popover, oklch(...))` and `--sbs-chat-ring: var(--ring, oklch(...))`. This keeps the package aligned with shadcn while avoiding a hard requirement that every host run Tailwind over package internals. The default behavior should inherit host tokens. Fixed light or dark treatments should be expressed through CSS variable overrides by the host wrapper, not through a widget-specific React theme provider in v1.
+
+AI Elements is relevant, but it is source-added component code built on shadcn/ui, React 19, and Tailwind CSS 4. The docs show components installed into a local components directory, usually `@/components/ai-elements/`, through commands such as `npx ai-elements@latest add conversation`. The package must not depend on those app-local import paths. AI Elements primitives should be copied or adapted into `packages/telegram-chat-widget` so the package owns its UI boundary and can heavily modify the primitives for Ship by Sunday branding.
+
+Useful AI Elements inputs:
+
+- Conversation: automatic bottom scrolling and scroll button behavior.
+- Prompt Input: textarea, submit button, attachment actions, screenshot action, and attachment state hook.
+- Attachments: grid, inline, and list attachment displays with media detection and remove behavior.
+- Task: optional structured progress display for future support automation or bug-report diagnostics.
+- Stack Trace: optional formatted stack trace display if bug reports collect developer errors.
 
 ## Tests And Validation
 

@@ -90,4 +90,8 @@ The widget currently polls the support route to refresh transcript state. The pa
 
 Screenshot and bug-report UX exists in the current app-local widget, but the package must make the boundary explicit: core UI can validate file policy and collect metadata, while the active adapter owns upload URL creation, storage, and backend message shape.
 
+The current bug-report UX is an inline composer mode, not a separate route, modal, or wizard. `use-support-chat.ts` tracks `chatMode: "message" | "bug_report"`, stores a bug report draft with summary, steps, expected result, and impact, and sends through the same `sendSupportMessage` path used for ordinary chat.
+
+The current bug-report payload is rendered into plain message text before sending. Package extraction should improve that boundary by preserving typed bug-report metadata alongside a readable fallback body, while the fetch adapter can flatten back to the current backend shape until the backend accepts structured fields.
+
 The existing app-local UI uses Tailwind classes. A reusable package should not require the host Tailwind configuration. The first package slice should define the final styling strategy before moving the UI.
