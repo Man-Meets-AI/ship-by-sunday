@@ -83,6 +83,7 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 - `apps/web/vercel.json` removes cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` must exist before release proofs can wait for the exact Vercel deployment.
+- GitHub environment `production-billing-integration` must include `PRODUCTION_CHECKOUT_FULFILLMENT_RETRY_SECRET`, `PRODUCTION_STRIPE_SECRET_KEY`, and `PRODUCTION_STRIPE_WEBHOOK_SECRET`. These mirror the production runtime values without depending on `vercel env pull` to expose sensitive production secrets during hosted billing proof.
 - GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys.
 - Tag protection should use a GitHub ruleset or equivalent policy for `refs/tags/v*`.
 

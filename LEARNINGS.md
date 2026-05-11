@@ -49,6 +49,11 @@
 - Fact: Neutral checkout improves the product and the code.
   Verified by: Removing active checkout intents from new public checkout creation while still preserving legacy readers for old records. Buyers discover the available workspace paths after purchase instead of being locked into a pre-checkout branch.
 
+## 2026-05-11 Production Billing Proof Repair
+
+- Fact: Vercel production environment variables created with the current CLI's sensitive default may not round-trip into `.env.production` through `vercel env pull`; the production proof still receives the authoritative Stripe webhook secret from the GitHub `production-billing-integration` environment.
+  Verified by: After replacing the live Stripe webhook endpoint, `vercel env pull --environment production` left `STRIPE_WEBHOOK_SECRET` empty locally, while `STRIPE_WEBHOOK_SECRET` supplied from Convex/GitHub let `scripts/verify-managed-stripe-env.ts --expected-mode=live --app-base-url=https://www.man-meets-ai.com --require-webhook-endpoint` pass against endpoint `we_1TVzknCgIdJ1QglPmXzIqO3V`.
+
 ## 2026-05-06 Stripe Link Express Checkout Stall
 
 - Fact: For Stripe custom Checkout Sessions, `payment_intent=null` on repeated `open` / `unpaid` sessions means confirmation did not progress far enough to create a PaymentIntent.
