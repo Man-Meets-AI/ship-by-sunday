@@ -301,7 +301,7 @@ export function buildSupportOperatorActionEffect(
 		case "send_checkout_link":
 			return buildCustomerVisibleEffect(
 				"Sent checkout link.",
-				`Checkout starts from the pricing section: ${SUPPORT_PUBLIC_BASE_URL}/#pricing\n\nUse Generate my codebase when you're ready.`,
+				`Checkout starts from the pricing section: ${SUPPORT_PUBLIC_BASE_URL}/#pricing\n\nUse Start my AI build when you're ready.`,
 			);
 		case "draft_reply":
 			return buildOperatorOnlyEffect(

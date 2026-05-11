@@ -83,14 +83,14 @@ describe("CodebaseDemoSectionBlock", () => {
 		expect(
 			screen
 				.getByRole("button", {
-					name: "I have an idea for a product",
+					name: "I want an AI starter template",
 				})
 				.getAttribute("aria-pressed"),
 		).toBe("true");
 		expect(
 			screen
 				.getByRole("button", {
-					name: "I have a codebase already",
+					name: "I want an AI worker",
 				})
 				.getAttribute("aria-pressed"),
 		).toBe("false");
@@ -147,7 +147,9 @@ describe("CodebaseDemoSectionBlock", () => {
 		).toContain("monthly");
 
 		const checkoutButton = screen.getByTestId("codebase-demo-checkout-cta");
-		expect(checkoutButton.textContent).toContain("Generate my codebase");
+		expect(checkoutButton.textContent).toContain(
+			"Start my AI starter template",
+		);
 		await user.click(checkoutButton);
 
 		await waitFor(() => {
@@ -172,10 +174,10 @@ describe("CodebaseDemoSectionBlock", () => {
 		);
 
 		const codebaseOption = screen.getByRole("button", {
-			name: "I have a codebase already",
+			name: "I want an AI worker",
 		});
 		const ideaOption = screen.getByRole("button", {
-			name: "I have an idea for a product",
+			name: "I want an AI starter template",
 		});
 
 		expect(ideaOption.getAttribute("aria-pressed")).toBe("true");
@@ -209,13 +211,13 @@ describe("CodebaseDemoSectionBlock", () => {
 
 		await user.click(
 			screen.getByRole("button", {
-				name: "I have a codebase already",
+				name: "I want an AI worker",
 			}),
 		);
 
 		expect(screen.getByTestId("codebase-demo-codebase-branch")).toBeTruthy();
 		expectPageTextToContain("Agent doctor for web apps");
-		expectPageTextToContain("How Workers Work.");
+		expectPageTextNotToContain("How Workers Work.");
 		expectPageTextToContain("A worker layer. each hat, a trained role.");
 		expectPageTextToContain("Role packets");
 		expectPageTextToContain("PARKER, shipper of products,");

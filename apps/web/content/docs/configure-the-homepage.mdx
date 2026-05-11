@@ -190,17 +190,17 @@ Edit:
 
 The first-screen `productPreview` section opens with the dark leverage hero from
 the Figma landing-page selection and a two-option starting-point selector. The
-default `I have an idea for a product` branch continues into the interactive
-Codebase demo that mirrors the real `/generate-codebase` workspace. The `I have a
-codebase already` branch shows the Figma-sourced codebase audit path. Both
-starting points then continue through the same homepage story: hero, exec-loop,
+default `I want an AI starter template` branch continues into the interactive
+Codebase demo that mirrors the real `/generate-codebase` workspace. The `I want
+an AI worker` branch shows the Figma-sourced codebase audit path. Both
+starting points then continue through the same homepage story: hero,
 starter-system, optional durability, social proof, Programs, FAQ, PLANS.md,
 pricing, and footer.
 
 The idea-branch product-preview CTA is a real checkout action: clicking
-"Generate my codebase" persists the latest demo draft to `localStorage` (key
-`sbs:home-codebase-draft:v1`) before starting Stripe checkout. After payment,
-the buyer lands on `/home`; if they choose Generate Codebase, a
+"Start my AI starter template" persists the latest demo draft to `localStorage`
+(key `sbs:home-codebase-draft:v1`) before starting Stripe checkout. After
+payment, the buyer lands on `/home`; if they choose Generate Codebase, a
 workspace-mounted seeder hydrates that draft into Convex on the first
 authenticated `/generate-codebase` load when the buyer has no saved facts.
 

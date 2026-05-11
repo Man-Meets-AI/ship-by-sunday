@@ -70,14 +70,14 @@ describe("HomePagePrimaryCta", () => {
 				target={{
 					kind: "checkout",
 				}}
-				label="Generate my codebase"
+				label="Start my AI build"
 				testId="demo-cta"
 				onBeforeCheckout={onBeforeCheckout}
 			/>,
 		);
 
 		const button = screen.getByRole("button", {
-			name: "Generate my codebase",
+			name: "Start my AI build",
 		});
 		expect(button.getAttribute("data-has-before-checkout")).toBe("true");
 		button.click();

@@ -89,7 +89,7 @@ export const starterHomePageConfig = {
 	sections: {
 		productPreview: true,
 		hero: true,
-		execLoop: true,
+		execLoop: false,
 		starterSystem: true,
 		durability: false,
 		socialProof: true,
@@ -156,7 +156,7 @@ export const starterConfig = {
 	marketing: {
 		docsLabel: "Docs",
 		loginLabel: "Sign in",
-		primaryCtaLabel: "Generate my codebase",
+		primaryCtaLabel: "Start my AI build",
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {

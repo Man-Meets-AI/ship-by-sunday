@@ -15,7 +15,7 @@ describe("home page render model", () => {
 		expect(renderModel.sectionOrder).toEqual(homePageSectionOrder);
 		expect(renderModel.productPreview.isEnabled).toBe(true);
 		expect(renderModel.productPreview.section.cta.label).toBe(
-			"Generate my codebase",
+			"Start my AI starter template",
 		);
 		expect(renderModel.productPreview.section.leverageHero.headline).toBe(
 			"Install leverage",
@@ -27,7 +27,7 @@ describe("home page render model", () => {
 		expect(renderModel.hero.primaryCtaTarget).toEqual({
 			kind: "checkout",
 		});
-		expect(renderModel.execLoop.isEnabled).toBe(true);
+		expect(renderModel.execLoop.isEnabled).toBe(false);
 		expect(
 			renderModel.execLoop.section.steps.map((step) => step.label),
 		).toEqual(["Shippie", "Healios", "Goalie", "Loopie"]);

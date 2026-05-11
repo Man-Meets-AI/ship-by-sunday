@@ -70,7 +70,7 @@ describe("home page content", () => {
 		expect(productPreviewSection.leverageHero.defaultOptionId).toBe("idea");
 		expect(
 			productPreviewSection.leverageHero.options.map((option) => option.label),
-		).toEqual(["I have a codebase already", "I have an idea for a product"]);
+		).toEqual(["I want an AI worker", "I want an AI starter template"]);
 		expect(productPreviewSection.codebaseBranch.intro).toContain(
 			"private doctor pass through your local runner",
 		);
@@ -94,7 +94,9 @@ describe("home page content", () => {
 			"Next recommendation",
 		]);
 
-		expect(productPreviewSection.cta.label).toBe("Generate my codebase");
+		expect(productPreviewSection.cta.label).toBe(
+			"Start my AI starter template",
+		);
 
 		expect(homePageContent.hero.headlineLead).toBe("Agent doctor");
 		expect(homePageContent.hero.headlineTailPrefix).toBe("for ");
@@ -231,9 +233,7 @@ describe("home page content", () => {
 			label: "Pilot Member",
 			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
 		});
-		expect(homePageContent.pricingSection.ctaTitle).toBe(
-			"Generate my codebase",
-		);
+		expect(homePageContent.pricingSection.ctaTitle).toBe("Start my AI build");
 	});
 
 	it("keeps the faq focused on the offer", () => {

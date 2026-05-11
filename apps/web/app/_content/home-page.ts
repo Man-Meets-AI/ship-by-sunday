@@ -196,11 +196,11 @@ const productPreviewSection = {
 		options: [
 			{
 				id: "codebase",
-				label: "I have a codebase already",
+				label: "I want an AI worker",
 			},
 			{
 				id: "idea",
-				label: "I have an idea for a product",
+				label: "I want an AI starter template",
 			},
 		],
 	},
@@ -295,7 +295,7 @@ const productPreviewSection = {
 		pricePlaceholder: codebaseFieldPlaceholder("pricing") ?? "",
 	},
 	cta: {
-		label: "Generate my codebase",
+		label: "Start my AI starter template",
 		lockedNote:
 			"We'll save your draft, take you to Stripe, and bring you back to the workspace prefilled with these answers.",
 	},
