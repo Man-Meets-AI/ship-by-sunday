@@ -245,7 +245,7 @@ export const generateVisitorAttachmentUploadUrl = mutation({
 	},
 	returns: v.string(),
 	handler: async (ctx, args) => {
-		await validateSupportAttachmentUploadRequest(args);
+		await validateSupportAttachmentUploadRequest(ctx, args);
 		return await ctx.storage.generateUploadUrl();
 	},
 });

@@ -31,6 +31,117 @@ describe("convex support model", () => {
 		);
 	});
 
+	it("rate limits support attachment upload URL issuance by session and globally", async () => {
+		const {
+			createSupportSessionTokenHash,
+			validateSupportAttachmentUploadRequest,
+		} = await import("@/convex/support/model");
+		const now = Date.parse("2026-05-11T15:30:00.000Z");
+		const rateLimitHour = Math.floor(now / (60 * 60 * 1_000));
+		const windowStartedAt = rateLimitHour * 60 * 60 * 1_000;
+		const sessionToken = "d".repeat(64);
+		const sessionTokenHash = await createSupportSessionTokenHash(sessionToken);
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+		}> = [];
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = createSupportUploadRateLimitContext({
+			bucketsByKey: new Map(),
+			inserted,
+			patches,
+		}) as unknown as Parameters<
+			typeof validateSupportAttachmentUploadRequest
+		>[0];
+
+		vi.useFakeTimers();
+		vi.setSystemTime(now);
+		try {
+			await validateSupportAttachmentUploadRequest(fakeCtx, {
+				sessionToken,
+				fileName: "checkout.png",
+				contentType: "image/png",
+				size: 1234,
+			});
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect(inserted).toEqual([
+			{
+				table: "supportRateLimitBuckets",
+				document: expect.objectContaining({
+					bucketKey: `attachment:session:${sessionTokenHash}:${rateLimitHour}`,
+					messageCount: 1,
+					windowStartedAt,
+					updatedAt: now,
+				}),
+			},
+			{
+				table: "supportRateLimitBuckets",
+				document: expect.objectContaining({
+					bucketKey: `attachment:global:${rateLimitHour}`,
+					messageCount: 1,
+					windowStartedAt,
+					updatedAt: now,
+				}),
+			},
+		]);
+		expect(patches).toEqual([]);
+	});
+
+	it("blocks support attachment upload URL issuance after the session bucket is spent", async () => {
+		const {
+			createSupportSessionTokenHash,
+			validateSupportAttachmentUploadRequest,
+		} = await import("@/convex/support/model");
+		const now = Date.parse("2026-05-11T15:30:00.000Z");
+		const rateLimitHour = Math.floor(now / (60 * 60 * 1_000));
+		const sessionToken = "e".repeat(64);
+		const sessionTokenHash = await createSupportSessionTokenHash(sessionToken);
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+		}> = [];
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = createSupportUploadRateLimitContext({
+			bucketsByKey: new Map([
+				[
+					`attachment:session:${sessionTokenHash}:${rateLimitHour}`,
+					{
+						_id: "session_bucket",
+						bucketKey: `attachment:session:${sessionTokenHash}:${rateLimitHour}`,
+						messageCount: 10,
+					},
+				],
+			]),
+			inserted,
+			patches,
+		}) as unknown as Parameters<
+			typeof validateSupportAttachmentUploadRequest
+		>[0];
+
+		vi.useFakeTimers();
+		vi.setSystemTime(now);
+		try {
+			await expect(
+				validateSupportAttachmentUploadRequest(fakeCtx, {
+					sessionToken,
+					fileName: "checkout.png",
+					contentType: "image/png",
+					size: 1234,
+				}),
+			).rejects.toThrow(
+				"Too many screenshots uploaded. Send a message or try again later.",
+			);
+		} finally {
+			vi.useRealTimers();
+		}
+
+		expect(inserted).toEqual([]);
+		expect(patches).toEqual([]);
+	});
+
 	it("hashes support conversation capability tokens separately from session tokens", async () => {
 		const {
 			createSupportConversationCapabilityTokenHash,
@@ -1661,6 +1772,55 @@ function createSequencedQueryContext(
 					throw new Error("Unsupported query result.");
 				}),
 			})),
+		},
+	};
+}
+
+function createSupportUploadRateLimitContext({
+	bucketsByKey,
+	inserted,
+	patches,
+}: {
+	bucketsByKey: Map<string, Record<string, unknown>>;
+	inserted: Array<{ table: string; document: Record<string, unknown> }>;
+	patches: Array<{ id: string; patch: Record<string, unknown> }>;
+}) {
+	return {
+		db: {
+			query: (table: string) => ({
+				withIndex: (
+					indexName: string,
+					buildQuery?: (query: {
+						eq: (fieldName: string, value: string) => unknown;
+					}) => unknown,
+				) => {
+					if (
+						table !== "supportRateLimitBuckets" ||
+						indexName !== "by_bucket_key"
+					) {
+						throw new Error(`Unexpected query: ${table}.${indexName}`);
+					}
+
+					let bucketKey = "";
+					buildQuery?.({
+						eq: (_fieldName: string, value: string) => {
+							bucketKey = value;
+							return {};
+						},
+					});
+
+					return {
+						unique: async () => bucketsByKey.get(bucketKey) ?? null,
+					};
+				},
+			}),
+			insert: async (table: string, document: Record<string, unknown>) => {
+				inserted.push({ table, document });
+				return `${table}_inserted`;
+			},
+			patch: async (id: string, patch: Record<string, unknown>) => {
+				patches.push({ id, patch });
+			},
 		},
 	};
 }

@@ -99,3 +99,9 @@
 - Mistake: I used chained shell commands while reading repo guidance and locating Telegram support files.
   Impact: The command output was noisier than needed and repeated a known local workflow miss.
   Corrective action: Run independent reads as separate `exec_command` calls through `multi_tool_use.parallel` instead of shell chaining.
+
+## 2026-05-11 Release Review Validation
+
+- Mistake: I ran `bun run --cwd apps/web typecheck` once without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The command passed, but it created a local PostHog release and uploaded source maps from the credentialed environment.
+  Corrective action: Keep `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` on every local app build/typecheck unless source-map upload behavior is the thing under test.

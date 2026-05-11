@@ -37,6 +37,8 @@ const SUPPORT_MESSAGE_MAX_LENGTH = 2_000;
 const SUPPORT_SEND_COOLDOWN_MS = 2_000;
 const SUPPORT_PENDING_VISITOR_MESSAGE_LIMIT = 5;
 const SUPPORT_GLOBAL_HOURLY_LIMIT = 60;
+const SUPPORT_ATTACHMENT_UPLOAD_SESSION_HOURLY_LIMIT = 10;
+const SUPPORT_ATTACHMENT_UPLOAD_GLOBAL_HOURLY_LIMIT = 120;
 const SUPPORT_CONVERSATION_CAPABILITY_TTL_MS = 30 * 24 * 60 * 60 * 1_000;
 const SUPPORT_IDLE_CLOSE_MS = 14 * 24 * 60 * 60 * 1_000;
 const SUPPORT_CLOSED_RETENTION_MS = 90 * 24 * 60 * 60 * 1_000;
@@ -290,18 +292,28 @@ export function normalizeSupportAttachmentMetadata(input: {
 	};
 }
 
-export async function validateSupportAttachmentUploadRequest(args: {
-	sessionToken: string;
-	fileName: string;
-	contentType: string;
-	size: number;
-}) {
+export async function validateSupportAttachmentUploadRequest(
+	ctx: MutationCtx,
+	args: {
+		sessionToken: string;
+		fileName: string;
+		contentType: string;
+		size: number;
+	},
+) {
 	if (isSupportChatDisabled()) {
 		throw new Error("Support is using Telegram directly right now.");
 	}
 
-	await createSupportSessionTokenHash(args.sessionToken);
+	const now = Date.now();
+	const sessionTokenHash = await createSupportSessionTokenHash(
+		args.sessionToken,
+	);
 	normalizeSupportAttachmentMetadata(args);
+	await assertAttachmentUploadHourlyLimits(ctx, {
+		sessionTokenHash,
+		now,
+	});
 }
 
 export async function getThreadBySessionHandler(
@@ -2153,28 +2165,73 @@ function assertThreadCanAcceptVisitorMessage(
 }
 
 async function assertGlobalHourlyLimit(ctx: MutationCtx, now: number) {
-	const bucketKey = `global:${Math.floor(now / (60 * 60 * 1_000))}`;
+	await assertSupportRateLimitBucket(ctx, {
+		bucketKey: `global:${getSupportRateLimitHour(now)}`,
+		limit: SUPPORT_GLOBAL_HOURLY_LIMIT,
+		now,
+		errorMessage: "Support is busy. Use Telegram directly for now.",
+	});
+}
+
+async function assertAttachmentUploadHourlyLimits(
+	ctx: MutationCtx,
+	args: {
+		sessionTokenHash: string;
+		now: number;
+	},
+) {
+	const rateLimitHour = getSupportRateLimitHour(args.now);
+	await assertSupportRateLimitBucket(ctx, {
+		bucketKey: `attachment:session:${args.sessionTokenHash}:${rateLimitHour}`,
+		limit: SUPPORT_ATTACHMENT_UPLOAD_SESSION_HOURLY_LIMIT,
+		now: args.now,
+		errorMessage:
+			"Too many screenshots uploaded. Send a message or try again later.",
+	});
+	await assertSupportRateLimitBucket(ctx, {
+		bucketKey: `attachment:global:${rateLimitHour}`,
+		limit: SUPPORT_ATTACHMENT_UPLOAD_GLOBAL_HOURLY_LIMIT,
+		now: args.now,
+		errorMessage: "Support uploads are busy. Use Telegram directly for now.",
+	});
+}
+
+async function assertSupportRateLimitBucket(
+	ctx: MutationCtx,
+	args: {
+		bucketKey: string;
+		limit: number;
+		now: number;
+		errorMessage: string;
+	},
+) {
 	const existing = await ctx.db
 		.query("supportRateLimitBuckets")
-		.withIndex("by_bucket_key", (query) => query.eq("bucketKey", bucketKey))
+		.withIndex("by_bucket_key", (query) =>
+			query.eq("bucketKey", args.bucketKey),
+		)
 		.unique();
-	if (existing && existing.messageCount >= SUPPORT_GLOBAL_HOURLY_LIMIT) {
-		throw new Error("Support is busy. Use Telegram directly for now.");
+	if (existing && existing.messageCount >= args.limit) {
+		throw new Error(args.errorMessage);
 	}
 	if (existing) {
 		await ctx.db.patch(existing._id, {
 			messageCount: existing.messageCount + 1,
-			updatedAt: now,
+			updatedAt: args.now,
 		});
 		return;
 	}
 
 	await ctx.db.insert("supportRateLimitBuckets", {
-		bucketKey,
-		windowStartedAt: Math.floor(now / (60 * 60 * 1_000)) * 60 * 60 * 1_000,
+		bucketKey: args.bucketKey,
+		windowStartedAt: getSupportRateLimitHour(args.now) * 60 * 60 * 1_000,
 		messageCount: 1,
-		updatedAt: now,
+		updatedAt: args.now,
 	});
+}
+
+function getSupportRateLimitHour(now: number) {
+	return Math.floor(now / (60 * 60 * 1_000));
 }
 
 async function requireSupportThread(
