@@ -59,7 +59,7 @@ export function ExistingCodebaseSetupPage({
 	initialSetupState: WorkspaceSetupState;
 	initialRenderedAt: number;
 }) {
-	const router = useRouter();
+	const { push } = useRouter();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const [lastMutationState, setLastMutationState] =
 		useState<WorkspaceSetupState | null>(null);
@@ -234,7 +234,7 @@ export function ExistingCodebaseSetupPage({
 			showWorkspaceActionSuccessToast({
 				action: {
 					label: "Open Doctor Pass",
-					onClick: () => router.push(routeConfig.workspaceDoctorPass),
+					onClick: () => push(routeConfig.workspaceDoctorPass),
 				},
 				id: workspaceSetupToastIds.doctorPassSuccess,
 				title: "Doctor pass started",

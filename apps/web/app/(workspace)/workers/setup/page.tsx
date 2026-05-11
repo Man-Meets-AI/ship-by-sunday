@@ -39,11 +39,12 @@ export default async function Page() {
 	if (isSupportModeBlockedMutationResult(initialSetupState)) {
 		throw new Error(getSupportModeBlockedMutationMessage());
 	}
+	const initialRenderedAt = Date.now();
 
 	return (
 		<ExistingCodebaseSetupPage
 			initialSetupState={initialSetupState}
-			initialRenderedAt={Date.now()}
+			initialRenderedAt={initialRenderedAt}
 		/>
 	);
 }

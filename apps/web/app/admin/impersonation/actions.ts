@@ -1,5 +1,7 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+
 import type { Id } from "@/convex/_generated/dataModel";
 
 import {
@@ -27,7 +29,8 @@ export type StartAdminImpersonationResult =
 	  };
 
 export async function searchAdminImpersonationCustomersAction(query: string) {
-	const context = await requireAdminImpersonationActionContext();
+	const authState = await auth();
+	const context = await requireAdminImpersonationActionContext(authState);
 	if (!context.ok) {
 		return {
 			ok: false as const,
@@ -51,7 +54,8 @@ export async function startAdminImpersonationAction(input: {
 	subjectEmail: string;
 	reason: string;
 }): Promise<StartAdminImpersonationResult> {
-	const context = await requireAdminImpersonationActionContext();
+	const authState = await auth();
+	const context = await requireAdminImpersonationActionContext(authState);
 	if (!context.ok) {
 		return {
 			ok: false,
@@ -137,6 +141,16 @@ export async function startAdminImpersonationAction(input: {
 }
 
 export async function completeAdminImpersonationHandoffAction() {
+	const authState = await auth();
+	const context = await requireAdminImpersonationActionContext(authState);
+	if (!context.ok) {
+		return {
+			ok: false as const,
+			status: context.status,
+			message: context.message,
+		};
+	}
+
 	await markConvexImpersonationHandoffActive();
 	return { ok: true as const };
 }
@@ -144,6 +158,16 @@ export async function completeAdminImpersonationHandoffAction() {
 export async function failAdminImpersonationHandoffAction(
 	sessionId: Id<"impersonationSessions">,
 ) {
+	const authState = await auth();
+	const context = await requireAdminImpersonationActionContext(authState);
+	if (!context.ok) {
+		return {
+			ok: false as const,
+			status: context.status,
+			message: context.message,
+		};
+	}
+
 	await markConvexImpersonationStartFailed({
 		sessionId,
 		failureReason: "session_handoff_failed",

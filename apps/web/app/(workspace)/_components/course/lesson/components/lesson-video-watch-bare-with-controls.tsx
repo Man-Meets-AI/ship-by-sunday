@@ -33,6 +33,8 @@ export function LessonVideoWatchBareWithControls({
 			<div className="flex flex-col gap-3">
 				<div
 					data-testid="lesson-video-focus-catcher"
+					role="region"
+					aria-label={`${video.title} video controls`}
 					tabIndex={isBunny ? 0 : -1}
 					onKeyDown={isBunny ? onKeyDown : undefined}
 					className={cn(

@@ -69,7 +69,7 @@ export function WorkspaceFindingDetailPage({
 	activeRunnerId: string | null;
 	approvalTimestamp: number;
 }) {
-	const router = useRouter();
+	const { push } = useRouter();
 	const requestWorkflowRun = useMutation(
 		api.workspace.requestWorkspaceWorkflowRun,
 	);
@@ -102,7 +102,7 @@ export function WorkspaceFindingDetailPage({
 		showWorkspaceActionSuccessToast({
 			action: {
 				label: "View runs",
-				onClick: () => router.push(routeConfig.workspaceRuns),
+				onClick: () => push(routeConfig.workspaceRuns),
 			},
 			id: workspaceFindingDetailToastIds.copyEvidenceRefSuccess,
 			title: "Local evidence ref copied.",

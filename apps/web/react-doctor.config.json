@@ -1,0 +1,27 @@
+{
+	"ignore": {
+		"rules": [
+			"react-doctor/use-lazy-motion",
+			"react-doctor/nextjs-missing-metadata",
+			"react-doctor/design-no-redundant-padding-axes",
+			"react-doctor/design-no-bold-heading",
+			"react-doctor/design-no-redundant-size-axes",
+			"react-doctor/design-no-three-period-ellipsis",
+			"react-doctor/design-no-vague-button-label",
+			"react-doctor/no-long-transition-duration",
+			"react-doctor/nextjs-no-img-element",
+			"jsx-a11y/iframe-has-title",
+			"react-doctor/no-inline-exhaustive-style",
+			"react/no-danger"
+		],
+		"files": [
+			"tests/**",
+			"convex/**",
+			"scripts/**",
+			"src/**",
+			"remotion.config.ts",
+			"../../scripts/**",
+			"../../.agents/**"
+		]
+	}
+}

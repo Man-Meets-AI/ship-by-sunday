@@ -103,7 +103,7 @@ export function AppShellCommandMenuItems({
 	primaryNav,
 	onSelect,
 }: AppShellCommandMenuItemsProps) {
-	const router = useRouter();
+	const { push } = useRouter();
 	const pathname = usePathname();
 	const { setTheme } = useTheme();
 	const prefersReducedMotion = useReducedMotion();
@@ -112,7 +112,7 @@ export function AppShellCommandMenuItems({
 
 	const navigateTo = (href: string) => {
 		onSelect();
-		router.push(href);
+		push(href);
 	};
 
 	const setThemeWithTransition = (theme: "light" | "dark" | "system") => {

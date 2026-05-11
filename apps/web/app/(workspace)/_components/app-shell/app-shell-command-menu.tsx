@@ -67,7 +67,7 @@ export function AppShellCommandMenu({ primaryNav }: AppShellCommandMenuProps) {
 		return () => window.removeEventListener("keydown", handler);
 	}, []);
 
-	const handleClick = useCallback(() => {
+	const openCommandMenu = useCallback(() => {
 		setOpen(true);
 		captureOpenedEvent("click");
 	}, []);
@@ -81,7 +81,7 @@ export function AppShellCommandMenu({ primaryNav }: AppShellCommandMenuProps) {
 			<Button
 				type="button"
 				variant="outline"
-				onClick={handleClick}
+				onClick={openCommandMenu}
 				data-testid="app-shell-command-menu-trigger"
 				className={cn("size-8 rounded-full p-0 sm:w-auto", triggerClassName)}
 				aria-label="Open command menu"

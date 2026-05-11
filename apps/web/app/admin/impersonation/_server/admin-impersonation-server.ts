@@ -52,6 +52,7 @@ export const ADMIN_IMPERSONATION_WORKSPACE_DESTINATION = routeConfig.appHome;
 
 type ClerkBackendClient = Awaited<ReturnType<typeof clerkClient>>;
 type ClerkUser = Awaited<ReturnType<ClerkBackendClient["users"]["getUser"]>>;
+type ClerkAuthState = Awaited<ReturnType<typeof auth>>;
 
 function normalizeEmail(value: string) {
 	return value.trim().toLowerCase();
@@ -169,14 +170,16 @@ export function getAdminImpersonationActionError(
 	return null;
 }
 
-export async function getCurrentAdminImpersonationAuthority() {
-	const authState = await auth();
+export async function getCurrentAdminImpersonationAuthority(
+	authState?: ClerkAuthState,
+) {
+	const resolvedAuthState = authState ?? (await auth());
 	const actorClerkUserId =
-		typeof authState.actor?.sub === "string" &&
-		authState.actor.sub.trim().length > 0
-			? authState.actor.sub
+		typeof resolvedAuthState.actor?.sub === "string" &&
+		resolvedAuthState.actor.sub.trim().length > 0
+			? resolvedAuthState.actor.sub
 			: null;
-	const authorityClerkUserId = actorClerkUserId ?? authState.userId;
+	const authorityClerkUserId = actorClerkUserId ?? resolvedAuthState.userId;
 	if (!authorityClerkUserId) {
 		return {
 			kind: "unauthenticated" as const,
@@ -209,8 +212,10 @@ export async function getCurrentAdminImpersonationAuthority() {
 	};
 }
 
-export async function requireAdminImpersonationActionContext() {
-	const authContext = await getCurrentAdminImpersonationAuthority();
+export async function requireAdminImpersonationActionContext(
+	authState?: ClerkAuthState,
+) {
+	const authContext = await getCurrentAdminImpersonationAuthority(authState);
 	if (authContext.kind === "unauthenticated") {
 		return {
 			ok: false as const,
