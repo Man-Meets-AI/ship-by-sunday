@@ -123,15 +123,15 @@ test.describe("member with access", () => {
 	test("@default_ship can open the canonical codebase flow and settings", async ({
 		page,
 	}) => {
-		await page.goto("/codebase");
-		await expect(page).toHaveURL(/\/codebase$/);
+		await page.goto("/generate-codebase");
+		await expect(page).toHaveURL(/\/generate-codebase$/);
 		await expect(
 			page.getByRole("button", { name: "Continue to Review" }),
 		).toBeVisible();
 		await expect(page.getByRole("heading", { name: "Design" })).toBeVisible();
 
-		await page.goto("/review");
-		await expect(page).toHaveURL(/\/review$/);
+		await page.goto("/generate-codebase/review");
+		await expect(page).toHaveURL(/\/generate-codebase\/review$/);
 		await expect(
 			page.getByRole("heading", {
 				name: "What you just got and where to go next",
@@ -158,7 +158,7 @@ test.describe("member with access", () => {
 test.describe("member without access", () => {
 	test.use({ storageState: memberWithoutAccessStorageStatePath });
 
-	test("@billing_integration full paid handoff moves from checkout success into the codebase entry", async ({
+	test("@billing_integration full paid handoff moves from checkout success into home", async ({
 		page,
 	}) => {
 		test.setTimeout(120_000);
@@ -178,13 +178,15 @@ test.describe("member without access", () => {
 		await page.waitForURL(/\/checkout\/success\?session_id=/, {
 			timeout: 60_000,
 		});
-		await page.waitForURL(/\/codebase/, {
+		await page.waitForURL(/\/home\?welcome=checkout/, {
 			timeout: 60_000,
 		});
 
-		await expect(page.getByRole("heading", { name: "Codebase" })).toBeVisible();
 		await expect(
-			page.getByRole("button", { name: "Continue to Review" }),
+			page.getByRole("heading", { name: "You're in." }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("link", { name: "Start a new idea" }),
 		).toBeVisible();
 	});
 });

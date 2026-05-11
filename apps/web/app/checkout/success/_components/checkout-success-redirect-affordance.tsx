@@ -32,7 +32,7 @@ export function CheckoutSuccessRedirectAffordance({
 			transition={transition}
 		>
 			<Loader2 className="size-3.5 shrink-0 animate-spin" aria-hidden />
-			<span>Opening your workspace…</span>
+			<span>Opening home…</span>
 		</motion.p>
 	);
 }

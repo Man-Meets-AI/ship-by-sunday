@@ -63,7 +63,7 @@ describe("CheckoutSuccessView interactions", () => {
 		vi.useRealTimers();
 	});
 
-	it("arms the codebase redirect once access is ready", async () => {
+	it("arms the home redirect once access is ready", async () => {
 		vi.useFakeTimers();
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
@@ -92,16 +92,16 @@ describe("CheckoutSuccessView interactions", () => {
 		expect(
 			screen.getByTestId("checkout-success-redirect-affordance"),
 		).toBeTruthy();
-		expect(screen.getByText("Opening your workspace…")).toBeTruthy();
+		expect(screen.getByText("Opening home…")).toBeTruthy();
 
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1);
 		});
 
-		expect(replaceMock).toHaveBeenCalledWith("/codebase");
+		expect(replaceMock).toHaveBeenCalledWith("/home?welcome=checkout");
 	});
 
-	it("arms the existing-codebase setup redirect when access is ready", async () => {
+	it("routes existing-codebase fulfillment through the home redirect", async () => {
 		vi.useFakeTimers();
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
@@ -124,7 +124,7 @@ describe("CheckoutSuccessView interactions", () => {
 			await vi.advanceTimersByTimeAsync(700);
 		});
 
-		expect(replaceMock).toHaveBeenCalledWith("/workspace/setup");
+		expect(replaceMock).toHaveBeenCalledWith("/home?welcome=checkout");
 	});
 
 	it("does not render the redirect affordance while access is still pending", () => {
@@ -148,7 +148,7 @@ describe("CheckoutSuccessView interactions", () => {
 		expect(
 			screen.queryByTestId("checkout-success-redirect-affordance"),
 		).toBeNull();
-		expect(screen.queryByText("Opening your workspace…")).toBeNull();
+		expect(screen.queryByText("Opening home…")).toBeNull();
 	});
 
 	it("rotates the validated status copy while access is still pending", async () => {
@@ -175,14 +175,12 @@ describe("CheckoutSuccessView interactions", () => {
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1_600);
 		});
-		expect(screen.getByText("Unlocking your workspace.")).toBeTruthy();
+		expect(screen.getByText("Unlocking your product access.")).toBeTruthy();
 
 		await act(async () => {
 			await vi.advanceTimersByTimeAsync(1_600);
 		});
-		expect(
-			screen.getByText("Preparing your first workspace step."),
-		).toBeTruthy();
+		expect(screen.getByText("Preparing your first home path.")).toBeTruthy();
 	});
 
 	it("renders the armed-ring expansion in the access-ready state", () => {
@@ -254,8 +252,7 @@ describe("CheckoutSuccessView interactions", () => {
 		await userEvent.click(screen.getByTestId("checkout-success-cta-primary"));
 
 		expect(signOutMock).toHaveBeenCalledWith({
-			redirectUrl:
-				"/sign-in?redirect_url=%2Fworkspace%2Fchoose%3Fwelcome%3Dcheckout",
+			redirectUrl: "/sign-in?redirect_url=%2Fhome%3Fwelcome%3Dcheckout",
 		});
 	});
 });

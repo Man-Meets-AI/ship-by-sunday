@@ -27,7 +27,7 @@ describe("post-review destination helpers", () => {
 			resolveWorkspaceResumeDestination({
 				executeShipUnlockedAt: 500,
 				firstIncompleteStageId: "review",
-				codebaseStageDestination: "/review",
+				codebaseStageDestination: "/generate-codebase/review",
 				postReviewLessonStates: [],
 			}),
 		).toEqual({
@@ -35,10 +35,10 @@ describe("post-review destination helpers", () => {
 			kind: "post_review",
 			codebaseStageId: null,
 			postReviewTargets: {
-				reviewDestination: "/review",
+				reviewDestination: "/generate-codebase/review",
 				buildLessonsDestination: getLessonHref("iterate-the-product-with-ai"),
 				launchLessonsDestination: getLessonHref("product-review"),
-				lessonMapDestination: "/review?showLessonMap=1",
+				lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 				latestLessonDestination: getLessonHref("iterate-the-product-with-ai"),
 			},
 		});
@@ -64,10 +64,10 @@ describe("post-review destination helpers", () => {
 				500,
 			),
 		).toEqual({
-			reviewDestination: "/review",
+			reviewDestination: "/generate-codebase/review",
 			buildLessonsDestination: getLessonHref("iterate-the-product-with-ai"),
 			launchLessonsDestination: getLessonHref("product-review"),
-			lessonMapDestination: "/review?showLessonMap=1",
+			lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
 			latestLessonDestination: getLessonHref("welcome-to-ship-by-sunday"),
 		});
 	});

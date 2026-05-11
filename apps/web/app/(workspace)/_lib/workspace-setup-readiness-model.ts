@@ -346,7 +346,7 @@ const projectCheckDefinitions: CheckDefinition[] = [
 		readySummary: "A Git remote is available for repo identity.",
 		warningCause: "A Git remote exists with setup warnings.",
 		blocksBecause:
-			"Workspace identity and later handoffs need a repository remote.",
+			"Worker identity and later handoffs need a repository remote.",
 		allowsBecause:
 			"The doctor pass can rank findings with reduced handoff detail.",
 		localAction: "Add or fix the repo remote in terminal, then retry.",
@@ -859,7 +859,7 @@ export function buildWorkspaceSetupReadinessModel(
 		title: "Setup",
 		subtitle:
 			"Pair the local runner, confirm readiness, and start the private doctor pass without syncing raw source.",
-		projectLabel: state.project?.displayName ?? "Existing codebase workspace",
+		projectLabel: state.project?.displayName ?? "Existing codebase Worker",
 		repositoryLabel: getRepositoryLabel(state.repositoryBinding),
 		pairing: {
 			status: pairingStatus,

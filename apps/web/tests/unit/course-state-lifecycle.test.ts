@@ -198,7 +198,7 @@ describe("course state lifecycle", () => {
 		const resume = await getResumeDestinationHandler._handler(ctx);
 
 		expect(resume).toEqual({
-			destination: "/review?showLessonMap=1",
+			destination: "/generate-codebase/review?showLessonMap=1",
 			lessonKey: null,
 		});
 	});

@@ -100,9 +100,6 @@ describe("getStripeLineItem", () => {
 				product_data: {
 					name: productConfig.name,
 					description: productConfig.promise,
-					metadata: {
-						courseSlug: productConfig.courseSlug,
-					},
 				},
 				unit_amount: productConfig.priceUsdCents,
 			},
@@ -440,7 +437,7 @@ describe("getStripeLineItem", () => {
 		});
 	});
 
-	it("accepts wildcard Stripe webhook event subscriptions", async () => {
+	it("rejects wildcard Stripe webhook event subscriptions", async () => {
 		setWebhookPreflightEnv();
 
 		const { assertManagedStripeWebhookEndpointReadyForRelease } =
@@ -456,10 +453,9 @@ describe("getStripeLineItem", () => {
 			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
 				expectedMode: "live",
 			}),
-		).resolves.toMatchObject({
-			enabledEvents: ["*"],
-			endpointId: "we_wildcard_events",
-		});
+		).rejects.toThrow(
+			"Stripe webhook endpoint https://convex-site.example/stripe/webhook uses wildcard event subscriptions. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded.",
+		);
 	});
 
 	it("rejects a still-enabled app-origin Stripe webhook endpoint", async () => {

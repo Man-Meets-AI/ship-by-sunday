@@ -60,7 +60,7 @@ import {
 	workflowRunDocumentValidator,
 } from "./validators";
 
-const DEFAULT_WORKSPACE_PROJECT_NAME = "Existing codebase workspace";
+const DEFAULT_WORKSPACE_PROJECT_NAME = "Existing codebase Worker";
 const MAX_SYNCED_FINDINGS_PER_RUN = 9;
 const PAIRING_TOKEN_TTL_MS = 30 * 60 * 1000;
 const SETUP_EVENT_READ_LIMIT = 30;

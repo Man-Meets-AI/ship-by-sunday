@@ -8,9 +8,9 @@ import {
 import { createWorkspaceTestCtx } from "./workspace-test-helpers";
 
 describe("generated-codebase data model", () => {
-	it("rejects existing-codebase grants from generated-codebase state", async () => {
+	it("rejects grants without Generate Codebase capability from generated-codebase state", async () => {
 		const { ctx } = createWorkspaceTestCtx({
-			fulfillmentTrack: "existing_codebase_doctor",
+			capabilities: ["worker"],
 		});
 
 		await expect(

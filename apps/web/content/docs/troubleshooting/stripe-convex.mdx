@@ -59,7 +59,7 @@ If the app reaches Stripe and returns `202` or `200` but nothing shows up in Con
 
 ### 6. Payment succeeded but access still did not grant
 
-If the Stripe event exists and the buyer still cannot reach `/workspace/choose`, check:
+If the Stripe event exists and the buyer still cannot reach `/home`, check:
 
 - whether the webhook used the current signing secret
 - whether Convex accepted the same webhook secret and Stripe secret key
@@ -87,4 +87,4 @@ Stripe and Convex are aligned when:
 - Stripe forwards `checkout.session.completed`
 - the webhook accepts the signature
 - Convex writes or updates the access grant
-- the buyer leaves `/checkout/success`, signs in with email-code OTP if needed, and lands in `/workspace/choose`
+- the buyer leaves `/checkout/success`, signs in with email-code OTP if needed, and lands in `/home`

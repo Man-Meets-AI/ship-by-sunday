@@ -4,19 +4,19 @@ import { getLegacyCodebaseRouteRedirectHref } from "@/app/(workspace)/_lib/legac
 describe("legacy codebase route redirects", () => {
 	it("maps old stage roots into canonical Codebase destinations", () => {
 		expect(getLegacyCodebaseRouteRedirectHref({ route: "start" })).toBe(
-			"/codebase",
+			"/generate-codebase",
 		);
 		expect(getLegacyCodebaseRouteRedirectHref({ route: "product" })).toBe(
-			"/codebase#problem",
+			"/generate-codebase#problem",
 		);
 		expect(getLegacyCodebaseRouteRedirectHref({ route: "design" })).toBe(
-			"/codebase#design",
+			"/generate-codebase#design",
 		);
 		expect(getLegacyCodebaseRouteRedirectHref({ route: "marketing" })).toBe(
-			"/codebase#generated-preview",
+			"/generate-codebase#generated-preview",
 		);
 		expect(getLegacyCodebaseRouteRedirectHref({ route: "build-plan" })).toBe(
-			"/codebase#setup",
+			"/generate-codebase#setup",
 		);
 	});
 
@@ -26,30 +26,30 @@ describe("legacy codebase route redirects", () => {
 				route: "product",
 				stepId: "foundation",
 			}),
-		).toBe("/codebase#foundation");
+		).toBe("/generate-codebase#foundation");
 		expect(
 			getLegacyCodebaseRouteRedirectHref({
 				route: "product",
 				stepId: "outcome",
 			}),
-		).toBe("/codebase#outcome");
+		).toBe("/generate-codebase#outcome");
 		expect(
 			getLegacyCodebaseRouteRedirectHref({
 				route: "marketing",
 				stepId: "operating-system",
 			}),
-		).toBe("/codebase#generated-preview");
+		).toBe("/generate-codebase#generated-preview");
 		expect(
 			getLegacyCodebaseRouteRedirectHref({
 				route: "build-plan",
 				stepId: "pricing",
 			}),
-		).toBe("/codebase#pricing");
+		).toBe("/generate-codebase#pricing");
 		expect(
 			getLegacyCodebaseRouteRedirectHref({
 				route: "build-plan",
 				stepId: "unknown",
 			}),
-		).toBe("/codebase#setup");
+		).toBe("/generate-codebase#setup");
 	});
 });

@@ -15,14 +15,14 @@ test.describe("protected routes", () => {
 	test("@default_ship signed-out users are redirected away from the protected codebase workspace", async ({
 		page,
 	}) => {
-		await page.goto("/codebase");
+		await page.goto("/generate-codebase");
 		await expect(page).toHaveURL(/\/sign-in/);
 	});
 
 	test("@default_ship signed-out sign-in stays passwordless", async ({
 		page,
 	}) => {
-		await page.goto("/sign-in?redirect_url=%2Fcodebase");
+		await page.goto("/sign-in?redirect_url=%2Fgenerate-codebase");
 
 		await expect(page.getByLabel(/^email$/i)).toBeVisible();
 		await expect(page.getByLabel(/^password$/i)).toHaveCount(0);
@@ -37,8 +37,8 @@ test.describe("protected routes", () => {
 		test("@default_ship sees inline access recovery on the canonical codebase entry", async ({
 			page,
 		}) => {
-			await page.goto("/codebase");
-			await expect(page).toHaveURL(/\/codebase/);
+			await page.goto("/generate-codebase");
+			await expect(page).toHaveURL(/\/generate-codebase/);
 			await expect(
 				page.getByText("Access not attached to this account"),
 			).toBeVisible();
@@ -59,8 +59,8 @@ test.describe("protected routes", () => {
 		test("@default_ship can render the canonical codebase page", async ({
 			page,
 		}) => {
-			await page.goto("/codebase");
-			await expect(page).toHaveURL(/\/codebase/);
+			await page.goto("/generate-codebase");
+			await expect(page).toHaveURL(/\/generate-codebase/);
 			await expect(
 				page.getByRole("heading", { name: "Codebase" }),
 			).toBeVisible();
@@ -73,7 +73,7 @@ test.describe("protected routes", () => {
 			page,
 		}) => {
 			await page.goto("/lesson/not-a-real-lesson");
-			await expect(page).toHaveURL(/\/codebase/);
+			await expect(page).toHaveURL(/\/generate-codebase/);
 			await expect(
 				page.getByRole("heading", { name: "Codebase" }),
 			).toBeVisible();

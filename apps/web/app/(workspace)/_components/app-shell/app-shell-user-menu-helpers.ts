@@ -8,19 +8,24 @@ export function isPathPrefixActive(pathname: string, href: string) {
 export function workspaceMenuLinks(pathname: string) {
 	return [
 		{
-			href: routeConfig.codebase,
+			href: routeConfig.appHome,
 			label: workspaceDisplayConfig.homeLabel,
+			active: isPathPrefixActive(pathname, routeConfig.appHome),
+		},
+		{
+			href: routeConfig.codebase,
+			label: "Generate Codebase",
 			active: isPathPrefixActive(pathname, routeConfig.codebase),
 		},
 		{
-			href: routeConfig.review,
-			label: "Review",
-			active: isPathPrefixActive(pathname, routeConfig.review),
+			href: routeConfig.tutorials,
+			label: "Tutorials",
+			active: isPathPrefixActive(pathname, routeConfig.tutorials),
 		},
 		{
-			href: routeConfig.tutorials,
-			label: "Tutorial Videos",
-			active: isPathPrefixActive(pathname, routeConfig.tutorials),
+			href: routeConfig.workers,
+			label: "Worker",
+			active: isPathPrefixActive(pathname, routeConfig.workers),
 		},
 		{
 			href: routeConfig.settings,

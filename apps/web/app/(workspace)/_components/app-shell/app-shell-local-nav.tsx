@@ -13,7 +13,7 @@ function getLocalNavLabel(kind: AppShellLocalNav["kind"]) {
 		case "review":
 			return "Review local navigation";
 		case "workspace":
-			return "Workspace local navigation";
+			return "Worker local navigation";
 	}
 }
 

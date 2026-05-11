@@ -122,7 +122,7 @@ export function ExistingCodebaseSetupPage({
 				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to prepare pairing token.",
 				report: {
-					title: "Workspace setup pairing preparation failed",
+					title: "Worker setup pairing preparation failed",
 					code: "workspace_setup_pairing_prepare_failed",
 					pathname: routeConfig.workspaceSetup,
 					details: {
@@ -161,7 +161,7 @@ export function ExistingCodebaseSetupPage({
 				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to cancel pairing.",
 				report: {
-					title: "Workspace setup pairing cancel failed",
+					title: "Worker setup pairing cancel failed",
 					code: "workspace_setup_pairing_cancel_failed",
 					pathname: routeConfig.workspaceSetup,
 				},
@@ -196,7 +196,7 @@ export function ExistingCodebaseSetupPage({
 				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to save open destination.",
 				report: {
-					title: "Workspace setup open destination save failed",
+					title: "Worker setup open destination save failed",
 					code: "workspace_setup_open_destination_save_failed",
 					pathname: routeConfig.workspaceSetup,
 					details: {
@@ -245,7 +245,7 @@ export function ExistingCodebaseSetupPage({
 				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to start doctor pass.",
 				report: {
-					title: "Workspace setup doctor pass start failed",
+					title: "Worker setup doctor pass start failed",
 					code: "workspace_setup_doctor_pass_start_failed",
 					pathname: routeConfig.workspaceSetup,
 					details: {

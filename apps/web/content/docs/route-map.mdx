@@ -20,24 +20,24 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/checkout/cancel`: checkout cancel return; redirects through pending-cookie cleanup
 - `/checkout/cancel/confirmed`: checkout canceled confirmation surface
 - `/session-tasks/reset-password`: Clerk password-reset task inside the shared identity shell
-- `/workspace/choose`: first paid product destination after new checkout; lets the buyer choose Generate a codebase, Set up an existing codebase, or Tutorial Videos
-- `/codebase`: generated-codebase protected landing after the buyer chooses the generated-codebase path
-- `/workspace/setup`: existing-codebase protected setup console after the buyer chooses the existing-codebase path
+- `/home`: first paid product destination after new checkout; lets the buyer choose Generate Codebase, Worker setup, or Tutorials
+- `/generate-codebase`: generated-codebase protected landing for new-idea work
+- `/workers/setup`: Worker setup console for installing the local worker against an existing codebase
 - `/tutorials`: protected Tutorial Videos library for paid customers who want to watch without choosing or changing a product path
 - `/mission`: protected compatibility entry for the post-review Lesson Map; it stays locked until Review unlocks the post-review branch
 
 ## Protected product routes
 
-- `/codebase`: generated-codebase workspace with the overview block plus the `foundation`, `problem`, `outcome`, `design`, `pricing`, `setup`, and `generated-preview` sections
-- `/workspace/choose`: protected fulfillment choice for new checkout and legacy unresolved access; saves the selected fulfillment track before redirecting
-- `/workspace/setup`: existing-codebase setup console for local runner pairing, Machine Setup readiness, Project Setup readiness, privacy defaults, default open destination, and doctor-pass readiness
-- `/workspace/doctor-pass`: planned existing-codebase doctor-pass progress route after setup; it must not stream raw terminal logs by default
-- `/workspace/findings`: planned Top 9 findings ledger after the doctor pass sync preview is approved
-- `/workspace/findings/[findingId]`: planned finding decision route for approving one concrete workflow
-- `/workspace/loops`: planned finding-filtered workflow catalog; not an always-on queue in Crawl
-- `/workspace/runs`: planned doctor-pass and approved-workflow run history; no queue controls in Crawl
-- `/workspace/privacy`: planned local-execution and sync-boundary controls for runner revocation and report deletion
-- `/review`: customer-facing `Review` handoff; it makes one auto-download attempt for the Ship by Sunday Codebase, then keeps the fallback download link visible if the browser blocks the download
+- `/generate-codebase`: generated-codebase workspace with the overview block plus the `foundation`, `problem`, `outcome`, `design`, `pricing`, `setup`, and `generated-preview` sections
+- `/home`: protected paid app hub for first-purchase welcome, cross-surface navigation, and returning-user app entry
+- `/workers/setup`: existing-codebase setup console for local runner pairing, Machine Setup readiness, Project Setup readiness, privacy defaults, default open destination, and doctor-pass readiness
+- `/workers/doctor-pass`: planned existing-codebase doctor-pass progress route after setup; it must not stream raw terminal logs by default
+- `/workers/findings`: planned Top 9 findings ledger after the doctor pass sync preview is approved
+- `/workers/findings/[findingId]`: planned finding decision route for approving one concrete workflow
+- `/workers/loops`: planned finding-filtered workflow catalog; not an always-on queue in Crawl
+- `/workers/runs`: planned doctor-pass and approved-workflow run history; no queue controls in Crawl
+- `/workers/privacy`: planned local-execution and sync-boundary controls for runner revocation and report deletion
+- `/generate-codebase/review`: customer-facing `Review` handoff; it makes one auto-download attempt for the Ship by Sunday Codebase, then keeps the fallback download link visible if the browser blocks the download
 - `/tutorials`: protected Tutorial Videos index; available to paid customers across generated-codebase, existing-codebase, and unresolved product paths
 - `/tutorials/[lessonKey]`: protected video-first tutorial watch page; uses the same lesson video content as the post-review lesson flow without generated-codebase unlock or progress state
 - `/settings`: protected account and product settings
@@ -45,15 +45,15 @@ description: See the main public, protected, and purchase-related routes in one 
 
 ## Protected compatibility routes
 
-- `/execute`: compatibility route for old Execute / Ship links; before post-review unlock it redirects to `/review`, and after unlock it redirects to the canonical Build Lessons destination
-- `/mission`: compatibility route for old bonus-library links; before post-review unlock it renders Review guidance, and after unlock it redirects to the Review Lesson Map at `/review?showLessonMap=1`
-- `/artifacts`: legacy compatibility route that now forwards into `/review`
-- `/start`: compatibility redirect to `/codebase`
-- `/product`, `/product/[stepId]`, `/design`, `/design/[stepId]`, `/marketing`, `/marketing/[stepId]`, `/build-plan`, `/build-plan/[stepId]`: compatibility redirects to the matching `/codebase#<section>` anchor; `/marketing/operating-system` redirects to `/codebase#generated-preview`
+- `/execute`: compatibility route for old Execute / Ship links; before post-review unlock it redirects to `/generate-codebase/review`, and after unlock it redirects to the canonical Build Lessons destination
+- `/mission`: compatibility route for old bonus-library links; before post-review unlock it renders Review guidance, and after unlock it redirects to the Review Lesson Map at `/generate-codebase/review?showLessonMap=1`
+- `/artifacts`: legacy compatibility route that now forwards into `/generate-codebase/review`
+- `/start`: compatibility redirect to `/generate-codebase`
+- `/product`, `/product/[stepId]`, `/design`, `/design/[stepId]`, `/marketing`, `/marketing/[stepId]`, `/build-plan`, `/build-plan/[stepId]`: compatibility redirects to the matching `/generate-codebase#<section>` anchor; `/marketing/operating-system` redirects to `/generate-codebase#generated-preview`
 
 Repeat-routing note: `/execute` does not render a bridge page. Review owns the post-download continue action, `/execute` preserves old links by sending unlocked members into Build Lessons, and `/mission` preserves old library links by sending unlocked members into the Review Lesson Map.
 
-These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or codebase-workspace data before the browser resumes live Convex subscriptions. The canonical intake is now `/workspace/choose`, then the selected workspace path; the old staged URLs survive only as compatibility redirects.
+These protected routes render behind `app/(workspace)/layout.tsx`, starting from server-fetched access or codebase-workspace data before the browser resumes live Convex subscriptions. The canonical paid intake is now `/home`, then the selected product surface.
 
 ## Why this matters
 

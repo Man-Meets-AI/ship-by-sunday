@@ -13,7 +13,6 @@ import {
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
-	DEFAULT_PROOF_COURSE_SLUG,
 	HOMEPAGE_CHECKOUT_PROOF_PATH,
 	isHostedProofCheckoutSessionFulfilled,
 	isExpressCheckoutRouteUrl,
@@ -41,8 +40,7 @@ const releasePersonaLocalPath = path.resolve(
 	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
 const expectedWebhookAccessSource = "stripe_webhook";
-const hostedCheckoutWorkspacePathPattern =
-	/\/(start|codebase|workspace\/choose)(\?|$)/;
+const hostedCheckoutAppPathPattern = /\/home(\?|$)/;
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -176,6 +174,70 @@ async function resetHostedProofProductAccess(clerkUserId) {
 			result.stderr ||
 				result.stdout ||
 				"Convex product-access reset failed before hosted billing proof.",
+		);
+	}
+}
+
+async function createHostedProofCheckoutPurchaseIntent({
+	checkoutEmail,
+	clerkUserId,
+}) {
+	const result = await spawnCommand(
+		process.execPath,
+		[
+			convexBinPath,
+			"run",
+			"--prod",
+			"checkoutClaims:createCheckoutPurchaseIntent",
+			JSON.stringify({
+				checkoutEmail,
+				checkoutSurface: "hosted_checkout",
+				...(clerkUserId ? { clerkUserId } : {}),
+			}),
+		],
+		{ timeoutMs: 15_000 },
+	);
+
+	if (result.code !== 0) {
+		throw new Error(
+			result.stderr ||
+				result.stdout ||
+				"Convex checkout purchase intent creation failed before hosted billing proof.",
+		);
+	}
+
+	const parsed = result.stdout ? JSON.parse(result.stdout) : null;
+	if (!parsed?.purchaseIntentId) {
+		throw new Error("Convex did not return a checkout purchase intent id.");
+	}
+
+	return parsed.purchaseIntentId;
+}
+
+async function attachHostedProofCheckoutPurchaseIntent({
+	purchaseIntentId,
+	stripeCheckoutSessionId,
+}) {
+	const result = await spawnCommand(
+		process.execPath,
+		[
+			convexBinPath,
+			"run",
+			"--prod",
+			"checkoutClaims:attachStripeCheckoutSessionToPurchaseIntent",
+			JSON.stringify({
+				purchaseIntentId,
+				stripeCheckoutSessionId,
+			}),
+		],
+		{ timeoutMs: 15_000 },
+	);
+
+	if (result.code !== 0) {
+		throw new Error(
+			result.stderr ||
+				result.stdout ||
+				"Convex checkout purchase intent attach failed before hosted billing proof.",
 		);
 	}
 }
@@ -466,7 +528,7 @@ async function waitForHostedCheckoutReturn(page) {
 	await page.waitForURL(
 		(url) =>
 			/\/checkout\/success\?session_id=/.test(url.toString()) ||
-			hostedCheckoutWorkspacePathPattern.test(url.toString()),
+			hostedCheckoutAppPathPattern.test(url.toString()),
 		{
 			timeout: 120_000,
 			waitUntil: "commit",
@@ -477,14 +539,14 @@ async function waitForHostedCheckoutReturn(page) {
 		console.log("Reached /checkout/success");
 	}
 
-	if (!hostedCheckoutWorkspacePathPattern.test(page.url())) {
-		await page.waitForURL(hostedCheckoutWorkspacePathPattern, {
+	if (!hostedCheckoutAppPathPattern.test(page.url())) {
+		await page.waitForURL(hostedCheckoutAppPathPattern, {
 			timeout: 120_000,
 			waitUntil: "commit",
 		});
 	}
 
-	console.log(`Reached protected workspace at ${page.url()}`);
+	console.log(`Reached protected app home at ${page.url()}`);
 }
 
 async function isAccessRequiredScreenVisible(page) {
@@ -494,14 +556,14 @@ async function isAccessRequiredScreenVisible(page) {
 		.catch(() => false);
 }
 
-async function verifyAuthorizedWorkspace(page, { baseUrl, timeoutMs }) {
+async function verifyAuthorizedAppAccess(page, { baseUrl, timeoutMs }) {
 	const verificationPage = await page.context().newPage();
 
 	try {
 		const deadline = Date.now() + timeoutMs;
 
 		while (Date.now() < deadline) {
-			await verificationPage.goto(`${baseUrl}/codebase`, {
+			await verificationPage.goto(`${baseUrl}/generate-codebase`, {
 				waitUntil: "networkidle",
 			});
 
@@ -515,14 +577,14 @@ async function verifyAuthorizedWorkspace(page, { baseUrl, timeoutMs }) {
 				.getByRole("button", { name: /Continue to Review/i })
 				.isVisible()
 				.catch(() => false);
-			const workspaceChoiceHeadingVisible = await verificationPage
-				.getByRole("heading", { name: "Choose your workspace path" })
+			const appHomeHeadingVisible = await verificationPage
+				.getByRole("heading", { name: "Home" })
 				.isVisible()
 				.catch(() => false);
 
 			if (
 				!accessRequiredVisible &&
-				(headingVisible || reviewButtonVisible || workspaceChoiceHeadingVisible)
+				(headingVisible || reviewButtonVisible || appHomeHeadingVisible)
 			) {
 				return {
 					accessRequiredVisible,
@@ -608,16 +670,25 @@ try {
 		baseUrl,
 	});
 	console.log("Verified homepage checkout contract");
+	const purchaseIntentId = await createHostedProofCheckoutPurchaseIntent({
+		checkoutEmail: buyerCredentials.email,
+		clerkUserId,
+	});
+	console.log(`Created checkout purchase intent ${purchaseIntentId}`);
 	const checkoutSession = await stripe.checkout.sessions.create(
 		buildHostedProofCheckoutSessionParams({
 			appBaseUrl: baseUrl,
 			checkoutEmail: buyerCredentials.email,
 			clerkUserId,
 			couponId: coupon.id,
-			courseSlug: process.env.QA_COURSE_SLUG ?? DEFAULT_PROOF_COURSE_SLUG,
+			purchaseIntentId,
 			priceId: stripePriceId,
 		}),
 	);
+	await attachHostedProofCheckoutPurchaseIntent({
+		purchaseIntentId,
+		stripeCheckoutSessionId: checkoutSession.id,
+	});
 	assertHostedProofCheckoutSessionSafe({
 		checkoutSession,
 		isLiveStripeMode,
@@ -654,7 +725,7 @@ try {
 		sessionId: checkoutSession.id,
 		timeoutMs: requireConvexDebug ? timeoutMs : 15_000,
 	});
-	const workspaceVerification = await verifyAuthorizedWorkspace(page, {
+	const appVerification = await verifyAuthorizedAppAccess(page, {
 		baseUrl,
 		timeoutMs,
 	});
@@ -691,15 +762,15 @@ try {
 	printCheck(
 		"Hosted success redirect",
 		/\/checkout\/success\?session_id=/.test(page.url()) ||
-			hostedCheckoutWorkspacePathPattern.test(page.url()),
+			hostedCheckoutAppPathPattern.test(page.url()),
 		page.url(),
 	);
 	printCheck(
-		"Workspace reached",
-		workspaceVerification.authorized,
-		workspaceVerification.accessRequiredVisible
-			? `access required at ${workspaceVerification.url}`
-			: workspaceVerification.url,
+		"App home reached",
+		appVerification.authorized,
+		appVerification.accessRequiredVisible
+			? `access required at ${appVerification.url}`
+			: appVerification.url,
 	);
 	if (productAccess) {
 		printCheck(
@@ -723,7 +794,7 @@ try {
 		printCheck("Session id linked", false, "missing");
 	} else {
 		console.log(
-			"- INFO Convex product access debug: unavailable in the local environment; browser proof reached the protected workspace successfully.",
+			"- INFO Convex product access debug: unavailable in the local environment; browser proof reached the protected app successfully.",
 		);
 	}
 
@@ -733,13 +804,14 @@ try {
 				checkoutSessionId: checkoutSession.id,
 				checkoutUrl: checkoutSession.url,
 				couponId: coupon.id,
+				purchaseIntentId,
 				finalPageUrl: page.url(),
 				appCheckoutSession,
 				appCheckoutSessionExpiry,
 				clerkUserId,
 				homepageCheckoutContract,
 				productAccess,
-				workspaceVerification,
+				appVerification,
 				sessionStatus: finalSession.status,
 				paymentStatus: finalSession.payment_status,
 			},
@@ -759,7 +831,7 @@ try {
 		) ||
 		homepageCheckoutContract.hostedCheckoutButtonCount <= 0 ||
 		homepageCheckoutContract.expressCheckoutRequestCount !== 0 ||
-		!workspaceVerification.authorized ||
+		!appVerification.authorized ||
 		(requireConvexDebug &&
 			(!productAccess ||
 				productAccess.status !== "granted" ||

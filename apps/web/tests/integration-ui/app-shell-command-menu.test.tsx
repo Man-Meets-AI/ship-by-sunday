@@ -21,7 +21,7 @@ const captureProductEventMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({ push: pushMock }),
-	usePathname: () => "/codebase",
+	usePathname: () => "/generate-codebase",
 }));
 
 vi.mock("next-themes", () => ({
@@ -170,15 +170,13 @@ describe("AppShellCommandMenu", () => {
 		expect(pushMock.mock.calls[0]?.[0]).toMatch(/codebase/i);
 	});
 
-	it("navigates to Tutorial Videos from the workspace command group", async () => {
+	it("navigates to Tutorials from the app command group", async () => {
 		const user = userEvent.setup();
 		renderMenu();
 		fireEvent.keyDown(window, { key: "k", metaKey: true });
 		await screen.findByPlaceholderText(/search actions/i);
 
-		await user.click(
-			screen.getByRole("option", { name: /^Tutorial Videos$/i }),
-		);
+		await user.click(screen.getByRole("option", { name: /^Tutorials$/i }));
 
 		expect(pushMock).toHaveBeenCalledWith("/tutorials");
 	});

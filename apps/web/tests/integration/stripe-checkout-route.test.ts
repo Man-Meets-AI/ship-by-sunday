@@ -14,6 +14,11 @@ const getStripePublishableKeyMock = vi.fn();
 const getStripeModeLabelMock = vi.fn();
 const getStripeDashboardUrlMock = vi.fn();
 const getStripeProductDashboardUrlMock = vi.fn();
+const fetchMutationMock = vi.fn();
+
+vi.mock("convex/nextjs", () => ({
+	fetchMutation: fetchMutationMock,
+}));
 
 vi.mock("@clerk/nextjs/server", () => ({
 	auth: authMock,
@@ -35,6 +40,19 @@ vi.mock("@/platform/billing/stripe", () => ({
 vi.mock("@/platform/next/app-url", () => ({
 	getAppBaseUrl: getAppBaseUrlMock,
 }));
+
+const hostedCheckoutMetadata = {
+	metadataSchema: "mma_checkout_v1",
+	app: "man_meets_ai",
+	accessProduct: "paid_app_access",
+	purchaseIntentId: "purchase_intent_123",
+	checkoutSurface: "hosted_checkout",
+} as const;
+
+const expressCheckoutMetadata = {
+	...hostedCheckoutMetadata,
+	checkoutSurface: "express_checkout",
+} as const;
 
 function createAuthState(userId: string | null) {
 	return {
@@ -71,6 +89,20 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeModeLabelMock.mockReset();
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
+		fetchMutationMock.mockReset();
+		fetchMutationMock.mockImplementation(
+			async (_ref: unknown, args: Record<string, unknown>) => {
+				if ("checkoutSurface" in args) {
+					return { purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId };
+				}
+				if ("purchaseIntentId" in args && "stripeCheckoutSessionId" in args) {
+					return { attached: "attached" };
+				}
+				throw new Error(
+					`Unexpected fetchMutation args: ${JSON.stringify(args)}`,
+				);
+			},
+		);
 		getStripeModeLabelMock.mockReturnValue("test");
 		getStripeDashboardUrlMock.mockImplementation((path?: string) =>
 			path
@@ -130,9 +162,7 @@ describe("POST /api/stripe/checkout", () => {
 			expect.objectContaining({
 				client_reference_id: undefined,
 				customer_email: undefined,
-				metadata: {
-					courseSlug: "ship-by-sunday",
-				},
+				metadata: hostedCheckoutMetadata,
 				line_items: [
 					{
 						price_data: {
@@ -145,9 +175,7 @@ describe("POST /api/stripe/checkout", () => {
 				],
 				discounts: [{ promotion_code: "promo_50_off" }],
 				payment_intent_data: {
-					metadata: {
-						courseSlug: "ship-by-sunday",
-					},
+					metadata: hostedCheckoutMetadata,
 				},
 			}),
 		);
@@ -219,14 +247,14 @@ describe("POST /api/stripe/checkout", () => {
 					},
 				],
 				metadata: {
+					...hostedCheckoutMetadata,
 					clerkUserId: "user_123",
-					courseSlug: "ship-by-sunday",
 				},
 				mode: "payment",
 				payment_intent_data: {
 					metadata: {
+						...hostedCheckoutMetadata,
 						clerkUserId: "user_123",
-						courseSlug: "ship-by-sunday",
 					},
 				},
 				success_url:
@@ -374,13 +402,13 @@ describe("POST /api/stripe/checkout", () => {
 				discounts: [{ promotion_code: "promo_50_off" }],
 				mode: "payment",
 				metadata: expect.objectContaining({
+					...expressCheckoutMetadata,
 					clerkUserId: "user_123",
-					courseSlug: "ship-by-sunday",
 				}),
 				payment_intent_data: {
 					metadata: expect.objectContaining({
+						...expressCheckoutMetadata,
 						clerkUserId: "user_123",
-						courseSlug: "ship-by-sunday",
 					}),
 				},
 				return_url:

@@ -7,12 +7,17 @@ const fetchAuthenticatedMutationMock = vi.fn();
 const notFoundMock = vi.fn(() => {
 	throw new Error("NEXT_NOT_FOUND");
 });
+const loadWorkspacePageAccessMock = vi.fn();
 
 vi.mock("server-only", () => ({}));
 
 vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedMutation: fetchAuthenticatedMutationMock,
 	fetchAuthenticatedQuery: fetchAuthenticatedQueryMock,
+}));
+
+vi.mock("@/app/(workspace)/_server/load-workspace-page-access", () => ({
+	loadWorkspacePageAccess: loadWorkspacePageAccessMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -69,6 +74,14 @@ describe("workspace tutorial routes", () => {
 	beforeEach(() => {
 		fetchAuthenticatedMutationMock.mockReset();
 		fetchAuthenticatedQueryMock.mockReset();
+		loadWorkspacePageAccessMock.mockReset();
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			access: {
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				hasAccess: true,
+			},
+			kind: "granted",
+		});
 		notFoundMock.mockClear();
 		vi.resetModules();
 	});

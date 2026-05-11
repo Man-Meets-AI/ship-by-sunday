@@ -54,7 +54,7 @@ describe("sign-in route", () => {
 		expect(redirectMock).toHaveBeenCalledWith("/settings");
 	});
 
-	it("redirects authenticated visits without a target to workspace choice", async () => {
+	it("redirects authenticated visits without a target to app home", async () => {
 		authMock.mockResolvedValue({
 			isAuthenticated: true,
 		});
@@ -63,7 +63,7 @@ describe("sign-in route", () => {
 			searchParams: Promise.resolve({}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith("/workspace/choose");
+		expect(redirectMock).toHaveBeenCalledWith("/home");
 	});
 
 	it("renders the sign-in page for signed-out visits", async () => {
@@ -89,7 +89,7 @@ describe("sign-in route", () => {
 
 		const result = await Page({
 			searchParams: Promise.resolve({
-				redirect_url: "/workspace/choose?welcome=checkout",
+				redirect_url: "/home?welcome=checkout",
 			}),
 		});
 

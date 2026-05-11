@@ -1,8 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { productConfig } from "@/config/product";
-
 vi.mock("server-only", () => ({}));
+
+const hostedCheckoutMetadata = {
+	metadataSchema: "mma_checkout_v1",
+	app: "man_meets_ai",
+	accessProduct: "paid_app_access",
+	purchaseIntentId: "purchase_intent_123",
+	checkoutSurface: "hosted_checkout",
+} as const;
+
+const expressCheckoutMetadata = {
+	...hostedCheckoutMetadata,
+	checkoutSurface: "express_checkout",
+} as const;
 
 describe("buildStripeCheckoutSessionCreateParams", () => {
 	const originalEnv = { ...process.env };
@@ -30,6 +41,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 				appBaseUrl: "https://app.example.com",
 				clerkUserId: "user_123",
 				customerEmail: "buyer@example.com",
+				purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
 			}),
 		).toEqual({
 			mode: "payment",
@@ -43,13 +55,13 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			discounts: [{ promotion_code: "promo_50_off" }],
 			line_items: [{ price: "price_250_managed", quantity: 1 }],
 			metadata: {
+				...hostedCheckoutMetadata,
 				clerkUserId: "user_123",
-				courseSlug: productConfig.courseSlug,
 			},
 			payment_intent_data: {
 				metadata: {
+					...hostedCheckoutMetadata,
 					clerkUserId: "user_123",
-					courseSlug: productConfig.courseSlug,
 				},
 			},
 		});
@@ -63,6 +75,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			appBaseUrl: "https://app.example.com",
 			clerkUserId: null,
 			customerEmail: null,
+			purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
 		});
 
 		expect(params).toMatchObject({
@@ -70,13 +83,9 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			customer_creation: "always",
 			customer_email: undefined,
 			discounts: [{ promotion_code: "promo_50_off" }],
-			metadata: {
-				courseSlug: productConfig.courseSlug,
-			},
+			metadata: hostedCheckoutMetadata,
 			payment_intent_data: {
-				metadata: {
-					courseSlug: productConfig.courseSlug,
-				},
+				metadata: hostedCheckoutMetadata,
 			},
 		});
 		expect(params).not.toHaveProperty("allow_promotion_codes");
@@ -95,6 +104,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 				appBaseUrl: "https://app.example.com",
 				clerkUserId: "user_123",
 				customerEmail: "buyer@example.com",
+				purchaseIntentId: expressCheckoutMetadata.purchaseIntentId,
 			}),
 		).toEqual({
 			mode: "payment",
@@ -108,13 +118,13 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			discounts: [{ promotion_code: "promo_50_off" }],
 			line_items: [{ price: "price_250_managed", quantity: 1 }],
 			metadata: {
+				...expressCheckoutMetadata,
 				clerkUserId: "user_123",
-				courseSlug: productConfig.courseSlug,
 			},
 			payment_intent_data: {
 				metadata: {
+					...expressCheckoutMetadata,
 					clerkUserId: "user_123",
-					courseSlug: productConfig.courseSlug,
 				},
 			},
 		});
@@ -128,13 +138,16 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			appBaseUrl: "https://app.example.com",
 			clerkUserId: null,
 			customerEmail: null,
+			purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
 		});
 
-		expect(params.metadata).toEqual({
-			courseSlug: productConfig.courseSlug,
-		});
-		expect(params.payment_intent_data?.metadata).toEqual({
-			courseSlug: productConfig.courseSlug,
-		});
+		expect(params.metadata).toEqual(hostedCheckoutMetadata);
+		expect(params.payment_intent_data?.metadata).toEqual(
+			hostedCheckoutMetadata,
+		);
+		expect(params.metadata).not.toHaveProperty("courseSlug");
+		expect(params.metadata).not.toHaveProperty("buyerStartingPoint");
+		expect(params.metadata).not.toHaveProperty("checkoutCtaId");
+		expect(params.metadata).not.toHaveProperty("fulfillmentTrack");
 	});
 });

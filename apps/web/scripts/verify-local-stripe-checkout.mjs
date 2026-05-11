@@ -157,7 +157,15 @@ if (!sessionId) {
 const session = await stripe.checkout.sessions.retrieve(sessionId);
 const clerkUserId =
 	session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
-const courseSlug = session.metadata?.courseSlug ?? "ship-by-sunday";
+const purchaseIntentId = session.metadata?.purchaseIntentId ?? null;
+const checkoutMetadataValid =
+	session.metadata?.metadataSchema === "mma_checkout_v1" &&
+	session.metadata?.app === "man_meets_ai" &&
+	session.metadata?.accessProduct === "paid_app_access" &&
+	session.metadata?.checkoutSurface === "hosted_checkout" &&
+	typeof purchaseIntentId === "string" &&
+	purchaseIntentId.length > 0 &&
+	session.metadata?.courseSlug === undefined;
 
 const deadline = Date.now() + timeoutMs;
 let productAccess = null;
@@ -178,9 +186,9 @@ printCheck(
 	`status=${session.status}, payment_status=${session.payment_status}`,
 );
 printCheck(
-	"Course metadata present",
-	Boolean(courseSlug),
-	`clerkUserId=${clerkUserId ?? "missing"}, courseSlug=${courseSlug ?? "missing"}`,
+	"Checkout purchase metadata present",
+	checkoutMetadataValid,
+	`clerkUserId=${clerkUserId ?? "missing"}, purchaseIntentId=${purchaseIntentId ?? "missing"}, metadata=${JSON.stringify(session.metadata)}`,
 );
 printCheck(
 	"Convex product access found",
@@ -216,7 +224,7 @@ console.log(
 			sessionStatus: session.status,
 			paymentStatus: session.payment_status,
 			clerkUserId,
-			courseSlug,
+			purchaseIntentId,
 			productAccess,
 		},
 		null,
@@ -227,6 +235,7 @@ console.log(
 if (
 	session.status !== "complete" ||
 	session.payment_status !== "paid" ||
+	!checkoutMetadataValid ||
 	!productAccess ||
 	productAccess.status !== "granted" ||
 	!VALID_PRODUCT_ACCESS_SOURCES.has(productAccess.source) ||

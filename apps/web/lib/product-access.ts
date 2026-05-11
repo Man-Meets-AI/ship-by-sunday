@@ -3,6 +3,7 @@ import type {
 	CheckoutCtaId,
 	FulfillmentTrack,
 } from "@/platform/billing/checkout/checkout-intent";
+import type { ProductSurfaceCapability } from "@/platform/access/product-surface-capabilities";
 
 export type StoredProductAccessStatus =
 	| "granted"
@@ -41,6 +42,7 @@ export type ProductAccess = {
 	clerkUserId: string | null;
 	hasAccess: boolean;
 	status: ProductAccessStatus;
+	capabilities: ProductSurfaceCapability[];
 	buyerStartingPoint?: BuyerStartingPoint;
 	checkoutCtaId?: CheckoutCtaId;
 	fulfillmentTrack?: FulfillmentTrack;

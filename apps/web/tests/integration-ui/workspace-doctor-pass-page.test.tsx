@@ -205,7 +205,7 @@ describe("WorkspaceDoctorPassPage", () => {
 		});
 		expect(reportClientErrorMock).toHaveBeenCalledWith({
 			error: approvalError,
-			pathname: "/workspace/doctor-pass",
+			pathname: "/workers/doctor-pass",
 			code: "workspace_doctor_pass_sync_preview_approval_failed",
 			severity: "medium",
 			details: {
@@ -257,10 +257,10 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(screen.getByText("Open Findings")).toBeTruthy();
 		expect(
 			screen.getByRole("link", { name: "View findings" }).getAttribute("href"),
-		).toBe("/workspace/findings");
+		).toBe("/workers/findings");
 		expect(
 			screen.getByRole("link", { name: "View runs" }).getAttribute("href"),
-		).toBe("/workspace/runs");
+		).toBe("/workers/runs");
 	});
 
 	it("shows failed run status and next action", async () => {

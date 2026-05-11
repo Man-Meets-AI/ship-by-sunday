@@ -40,7 +40,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 			checkoutEmail: "buyer@example.com",
 			clerkUserId: "user_123",
 			couponId: "coupon_123",
-			courseSlug: "ship-by-sunday",
+			purchaseIntentId: "j123purchaseintent",
 			priceId: "price_123",
 		});
 
@@ -52,14 +52,22 @@ describe("hosted Stripe checkout proof helpers", () => {
 			discounts: [{ coupon: "coupon_123" }],
 			line_items: [{ price: "price_123", quantity: 1 }],
 			metadata: {
+				accessProduct: "paid_app_access",
+				app: "man_meets_ai",
+				checkoutSurface: "hosted_checkout",
 				clerkUserId: "user_123",
-				courseSlug: "ship-by-sunday",
+				metadataSchema: "mma_checkout_v1",
+				purchaseIntentId: "j123purchaseintent",
 			},
 			mode: "payment",
 			payment_intent_data: {
 				metadata: {
+					accessProduct: "paid_app_access",
+					app: "man_meets_ai",
+					checkoutSurface: "hosted_checkout",
 					clerkUserId: "user_123",
-					courseSlug: "ship-by-sunday",
+					metadataSchema: "mma_checkout_v1",
+					purchaseIntentId: "j123purchaseintent",
 				},
 			},
 			success_url:
@@ -69,7 +77,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 
 	it("builds the hosted proof sign-in path", () => {
 		expect(buildHostedProofSignInPath({})).toBe(
-			"/sign-in?redirect_url=%2Fworkspace%2Fchoose",
+			"/sign-in?redirect_url=%2Fhome",
 		);
 	});
 

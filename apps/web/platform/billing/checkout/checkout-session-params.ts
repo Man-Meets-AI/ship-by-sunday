@@ -2,11 +2,8 @@ import "server-only";
 
 import type Stripe from "stripe";
 
-import {
-	getCheckoutSuccessHref,
-	productConfig,
-	routeConfig,
-} from "@/config/product";
+import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
+import { buildCheckoutPurchaseMetadata } from "@/platform/billing/checkout/checkout-metadata";
 import {
 	getStripeCheckoutDiscounts,
 	getStripeLineItem,
@@ -16,18 +13,32 @@ type BuildStripeCheckoutSessionCreateParamsInput = {
 	readonly appBaseUrl: string;
 	readonly clerkUserId: string | null;
 	readonly customerEmail: string | null;
+	readonly purchaseIntentId: string;
 };
+
+function requirePurchaseIntentId(purchaseIntentId: string) {
+	const trimmedPurchaseIntentId = purchaseIntentId.trim();
+	if (!trimmedPurchaseIntentId) {
+		throw new Error(
+			"purchaseIntentId is required for Stripe checkout metadata",
+		);
+	}
+
+	return trimmedPurchaseIntentId;
+}
 
 export function buildStripeCheckoutSessionCreateParams({
 	appBaseUrl,
 	clerkUserId,
 	customerEmail,
+	purchaseIntentId,
 }: BuildStripeCheckoutSessionCreateParamsInput): Stripe.Checkout.SessionCreateParams {
 	const checkoutDiscounts = getStripeCheckoutDiscounts();
-	const checkoutMetadata = {
-		...(clerkUserId ? { clerkUserId } : {}),
-		courseSlug: productConfig.courseSlug,
-	};
+	const checkoutMetadata = buildCheckoutPurchaseMetadata({
+		checkoutSurface: "hosted_checkout",
+		clerkUserId,
+		purchaseIntentId: requirePurchaseIntentId(purchaseIntentId),
+	});
 
 	return {
 		mode: "payment",
@@ -51,12 +62,14 @@ export function buildStripeExpressCheckoutSessionCreateParams({
 	appBaseUrl,
 	clerkUserId,
 	customerEmail,
+	purchaseIntentId,
 }: BuildStripeCheckoutSessionCreateParamsInput): Stripe.Checkout.SessionCreateParams {
 	const checkoutDiscounts = getStripeCheckoutDiscounts();
-	const checkoutMetadata = {
-		...(clerkUserId ? { clerkUserId } : {}),
-		courseSlug: productConfig.courseSlug,
-	};
+	const checkoutMetadata = buildCheckoutPurchaseMetadata({
+		checkoutSurface: "express_checkout",
+		clerkUserId,
+		purchaseIntentId: requirePurchaseIntentId(purchaseIntentId),
+	});
 
 	return {
 		mode: "payment",

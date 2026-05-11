@@ -12,8 +12,9 @@ const clerkAuthorizedParties = getClerkAuthorizedParties();
 const canonicalWorkspaceRoutes = [
 	routeConfig.codebase,
 	routeConfig.review,
+	routeConfig.appHome,
+	routeConfig.workers,
 	routeConfig.settings,
-	routeConfig.workspaceChoice,
 	routeConfig.workspaceSetup,
 	routeConfig.workspaceDoctorPass,
 	routeConfig.workspaceFindings,

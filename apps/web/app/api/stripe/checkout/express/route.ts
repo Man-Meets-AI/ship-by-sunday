@@ -1,6 +1,8 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { fetchMutation } from "convex/nextjs";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { api } from "@/convex/_generated/api";
 import { buildStripeExpressCheckoutSessionCreateParams } from "@/platform/billing/checkout/checkout-session-params";
 import { createPendingCheckoutSessionCookieOptions } from "@/platform/billing/checkout/pending-checkout-session-cookie";
 import {
@@ -48,11 +50,21 @@ export async function POST(request: Request) {
 		const stripe = getStripe();
 		await assertManagedStripePriceMatchesProductConfig(stripe);
 		const user = userId ? await currentUser() : null;
+		const checkoutEmail = user?.primaryEmailAddress?.emailAddress ?? null;
+		const purchaseIntent = await fetchMutation(
+			api.checkoutClaims.createCheckoutPurchaseIntent,
+			{
+				checkoutSurface: "express_checkout",
+				...(userId ? { clerkUserId: userId } : {}),
+				...(checkoutEmail ? { checkoutEmail } : {}),
+			},
+		);
 		const session = await stripe.checkout.sessions.create(
 			buildStripeExpressCheckoutSessionCreateParams({
 				appBaseUrl,
 				clerkUserId: userId,
-				customerEmail: user?.primaryEmailAddress?.emailAddress ?? null,
+				customerEmail: checkoutEmail,
+				purchaseIntentId: purchaseIntent.purchaseIntentId,
 			}),
 		);
 
@@ -76,6 +88,13 @@ export async function POST(request: Request) {
 				requestId,
 			);
 		}
+		await fetchMutation(
+			api.checkoutClaims.attachStripeCheckoutSessionToPurchaseIntent,
+			{
+				purchaseIntentId: purchaseIntent.purchaseIntentId,
+				stripeCheckoutSessionId: session.id,
+			},
+		);
 
 		const returnUrl = `${appBaseUrl}/checkout/success?session_id=${session.id}`;
 		const response = jsonWithRequestId(

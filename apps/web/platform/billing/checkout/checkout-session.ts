@@ -14,6 +14,7 @@ import {
 	readCheckoutIntentFromMetadata,
 	type FulfillmentTrack,
 } from "@/platform/billing/checkout/checkout-intent";
+import { readCheckoutMetadataClerkUserId } from "@/platform/billing/checkout/checkout-metadata";
 
 export type CheckoutSessionState =
 	| {
@@ -189,8 +190,10 @@ export async function getCheckoutSessionState(
 		};
 	}
 
-	const clerkUserId =
-		session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
+	const clerkUserId = readCheckoutMetadataClerkUserId({
+		metadata: session.metadata,
+		clientReferenceId: session.client_reference_id,
+	});
 	if (!isStripeCheckoutSessionForCourse(session)) {
 		return {
 			kind: "invalid_session",

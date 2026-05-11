@@ -116,9 +116,9 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Polling access");
 		expect(markup).toContain("Confirming your product access.");
 		expect(markup).toContain("What happens next");
-		expect(markup).toContain("Open workspace");
-		expect(markup).toContain('href="/codebase"');
-		expect(markup).not.toContain("Opening your workspace");
+		expect(markup).toContain("Open home");
+		expect(markup).toContain('href="/home?welcome=checkout"');
+		expect(markup).not.toContain("Opening home");
 		expect(markup).not.toContain("checkout-success-redirect-affordance");
 		expect(markup).not.toContain("checkout-success-status-pulse-armed-ring");
 	});
@@ -138,12 +138,12 @@ describe("CheckoutSuccessView", () => {
 			fulfillmentTrack: "generated_codebase",
 		});
 
-		expect(markup).toContain("Opening workspace");
+		expect(markup).toContain("Opening home");
 		expect(markup).toContain("Access ready");
 		expect(markup).toContain("Redirect armed");
 		expect(markup).toContain("Access confirmed");
-		expect(markup).toContain('href="/codebase"');
-		expect(markup).toContain("Opening your workspace");
+		expect(markup).toContain('href="/home?welcome=checkout"');
+		expect(markup).toContain("Opening home");
 		expect(markup).toContain(
 			'data-testid="checkout-success-redirect-affordance"',
 		);
@@ -171,11 +171,11 @@ describe("CheckoutSuccessView", () => {
 			{ initialProductAccess: { hasAccess: true } },
 		);
 
-		expect(markup).toContain("Opening workspace");
+		expect(markup).toContain("Opening home");
 		expect(markup).toContain("Access ready");
 	});
 
-	it("routes existing-codebase fulfillment to setup", () => {
+	it("routes existing-codebase fulfillment through home", () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
 			isLoading: false,
@@ -190,12 +190,12 @@ describe("CheckoutSuccessView", () => {
 			fulfillmentTrack: "existing_codebase_doctor",
 		});
 
-		expect(markup).toContain("Opening codebase setup");
-		expect(markup).toContain("Open setup");
-		expect(markup).toContain('href="/workspace/setup"');
+		expect(markup).toContain("Opening home");
+		expect(markup).toContain("Open home");
+		expect(markup).toContain('href="/home?welcome=checkout"');
 	});
 
-	it("routes legacy missing intent to the protected choice screen", () => {
+	it("routes legacy missing intent through home", () => {
 		useConvexAuthMock.mockReturnValue({
 			isAuthenticated: true,
 			isLoading: false,
@@ -210,9 +210,9 @@ describe("CheckoutSuccessView", () => {
 			fulfillmentTrack: "unspecified",
 		});
 
-		expect(markup).toContain("Opening fulfillment choice");
-		expect(markup).toContain("Choose path");
-		expect(markup).toContain('href="/workspace/choose?welcome=checkout"');
+		expect(markup).toContain("Opening home");
+		expect(markup).toContain("Open home");
+		expect(markup).toContain('href="/home?welcome=checkout"');
 	});
 
 	it("renders the normal sign-in path for a paid checkout email", () => {
@@ -235,7 +235,7 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Payment is confirmed for buyer@example.com");
 		expect(markup).toContain("Do not buy again");
 		expect(markup).toContain(
-			'href="/sign-in?redirect_url=%2Fworkspace%2Fchoose%3Fwelcome%3Dcheckout"',
+			'href="/sign-in?redirect_url=%2Fhome%3Fwelcome%3Dcheckout"',
 		);
 		expect(markup).not.toContain("Create account");
 		expect(markup).not.toContain("/checkout/email-handoff");
@@ -259,7 +259,7 @@ describe("CheckoutSuccessView", () => {
 		expect(markup).toContain("Do not buy again");
 		expect(markup).toContain("Clerk API unavailable.");
 		expect(markup).toContain(
-			'href="/sign-in?redirect_url=%2Fworkspace%2Fchoose%3Fwelcome%3Dcheckout"',
+			'href="/sign-in?redirect_url=%2Fhome%3Fwelcome%3Dcheckout"',
 		);
 		expect(markup).not.toContain("/checkout/email-handoff");
 	});
@@ -320,7 +320,7 @@ describe("CheckoutSuccessView", () => {
 			const markup = renderView(checkoutSessionState);
 
 			expect(markup).toContain(expectedStatusLabel);
-			expect(markup).toContain("Open workspace");
+			expect(markup).toContain("Open home");
 			expect(markup).toContain("Go home");
 		},
 	);

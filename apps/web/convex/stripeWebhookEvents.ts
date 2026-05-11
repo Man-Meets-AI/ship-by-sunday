@@ -1,24 +1,34 @@
 import { ConvexError, v } from "convex/values";
 
+import { internal } from "./_generated/api";
 import { internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 
 const stripeWebhookEventStatusValidator = v.union(
 	v.literal("processing"),
+	v.literal("queued"),
 	v.literal("processed"),
 	v.literal("failed"),
 	v.literal("ignored"),
 	v.literal("payment_pending"),
 );
 
-const terminalStripeWebhookEventStatuses = new Set([
+const completedStripeWebhookEventStatuses = new Set([
 	"processed",
 	"ignored",
 	"payment_pending",
 ]);
+const duplicateBlockingStripeWebhookEventStatuses = new Set([
+	...completedStripeWebhookEventStatuses,
+	"queued",
+]);
 
-function isTerminalStripeWebhookEventStatus(status: string) {
-	return terminalStripeWebhookEventStatuses.has(status);
+function isCompletedStripeWebhookEventStatus(status: string) {
+	return completedStripeWebhookEventStatuses.has(status);
+}
+
+function isDuplicateBlockingStripeWebhookEventStatus(status: string) {
+	return duplicateBlockingStripeWebhookEventStatuses.has(status);
 }
 
 async function getStripeWebhookEventByStripeEventId(
@@ -59,7 +69,7 @@ async function getTerminalStripeWebhookEventByObjectAndType(
 		matchingEvents.find(
 			(event) =>
 				event.stripeEventId !== args.stripeEventId &&
-				isTerminalStripeWebhookEventStatus(event.status),
+				isDuplicateBlockingStripeWebhookEventStatus(event.status),
 		) ?? null
 	);
 }
@@ -81,7 +91,7 @@ function shouldRecordStripeWebhookEventResult({
 	}
 
 	if (
-		isTerminalStripeWebhookEventStatus(existingEvent.status) &&
+		isCompletedStripeWebhookEventStatus(existingEvent.status) &&
 		status !== existingEvent.status
 	) {
 		return false;
@@ -145,7 +155,7 @@ export const beginStripeWebhookEventProcessing = internalMutation({
 		if (existingEvent) {
 			assertStripeWebhookEventMatchesExisting(existingEvent, args);
 
-			if (isTerminalStripeWebhookEventStatus(existingEvent.status)) {
+			if (isDuplicateBlockingStripeWebhookEventStatus(existingEvent.status)) {
 				return {
 					decision: "skip" as const,
 					status: existingEvent.status,
@@ -197,6 +207,67 @@ export const beginStripeWebhookEventProcessing = internalMutation({
 			decision: "process" as const,
 			attemptCount,
 		};
+	},
+});
+
+export const queueStripeWebhookEventFulfillment = internalMutation({
+	args: {
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		stripeObjectId: v.string(),
+		courseSlug: v.optional(v.string()),
+		attemptCount: v.number(),
+	},
+	returns: v.object({
+		queued: v.union(v.literal("scheduled"), v.literal("skipped_stale")),
+	}),
+	handler: async (ctx, args) => {
+		const now = Date.now();
+		const existingEvent = await getStripeWebhookEventByStripeEventId(
+			ctx,
+			args.stripeEventId,
+		);
+		if (!existingEvent) {
+			await ctx.db.insert("stripeWebhookEvents", {
+				stripeEventId: args.stripeEventId,
+				eventType: args.eventType,
+				stripeObjectId: args.stripeObjectId,
+				courseSlug: args.courseSlug,
+				status: "queued",
+				resultKind: "queued",
+				attemptCount: args.attemptCount,
+				firstSeenAt: now,
+				updatedAt: now,
+			});
+		} else {
+			assertStripeWebhookEventMatchesExisting(existingEvent, args);
+			if (isCompletedStripeWebhookEventStatus(existingEvent.status)) {
+				return { queued: "skipped_stale" as const };
+			}
+			await ctx.db.patch(existingEvent._id, {
+				stripeObjectId: args.stripeObjectId,
+				courseSlug: args.courseSlug ?? existingEvent.courseSlug,
+				status: "queued",
+				resultKind: "queued",
+				errorMessage: undefined,
+				attemptCount: Math.max(existingEvent.attemptCount, args.attemptCount),
+				updatedAt: now,
+				completedAt: undefined,
+			});
+		}
+
+		await ctx.scheduler.runAfter(
+			0,
+			internal.stripeWebhook.fulfillQueuedStripeWebhookEvent,
+			{
+				stripeEventId: args.stripeEventId,
+				eventType: args.eventType,
+				sessionId: args.stripeObjectId,
+				attemptCount: args.attemptCount,
+			},
+		);
+
+		return { queued: "scheduled" as const };
 	},
 });
 

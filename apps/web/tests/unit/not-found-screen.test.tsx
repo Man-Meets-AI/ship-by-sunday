@@ -37,11 +37,11 @@ vi.mock("motion/react", async () => {
 });
 
 describe("app not-found route", () => {
-	it("renders the branded workspace 404", () => {
+	it("renders the branded app 404", () => {
 		const markup = renderToStaticMarkup(<NotFound />);
 
 		expect(markup).toContain("Path Not");
-		expect(markup).toContain("Open workspace");
+		expect(markup).toContain("Open home");
 		expect(markup).toContain("Exit to safety");
 	});
 });

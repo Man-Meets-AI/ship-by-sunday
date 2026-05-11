@@ -5,6 +5,10 @@ import { v } from "convex/values";
 
 import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
 import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
+import {
+	isPaidAppCheckoutMetadata,
+	readCheckoutMetadataClerkUserId,
+} from "../platform/billing/checkout/checkout-metadata";
 import { internal } from "./_generated/api";
 import { action, internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
@@ -544,7 +548,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 	stripeEventId: string;
 	stripeEventType: string;
 }): Promise<CheckoutSessionFulfillmentResult> {
-	if (session.metadata?.courseSlug !== PRODUCT_COURSE_SLUG) {
+	if (!isPaidAppCheckoutMetadata(session.metadata)) {
 		return {
 			kind: "invalid_session",
 			sessionId: session.id,
@@ -834,7 +838,7 @@ export const claimCheckoutSessionForViewer = action({
 			throw error;
 		}
 
-		if (session.metadata?.courseSlug !== PRODUCT_COURSE_SLUG) {
+		if (!isPaidAppCheckoutMetadata(session.metadata)) {
 			return {
 				kind: "invalid_session" as const,
 				sessionId: session.id,
@@ -852,8 +856,10 @@ export const claimCheckoutSessionForViewer = action({
 			};
 		}
 
-		const checkoutSessionClerkUserId =
-			session.metadata?.clerkUserId ?? session.client_reference_id ?? null;
+		const checkoutSessionClerkUserId = readCheckoutMetadataClerkUserId({
+			metadata: session.metadata,
+			clientReferenceId: session.client_reference_id,
+		});
 		const currentAccountEmail = getCurrentAccountEmail(identity);
 
 		if (checkoutSessionClerkUserId) {

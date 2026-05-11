@@ -78,7 +78,7 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("SHIP BY SUNDAY");
 		expect(markup).toContain("Access Required");
 		expect(markup).toContain("Checking product access");
-		expect(markup).toContain("Protected workspace");
+		expect(markup).toContain("Protected app");
 		expect(markup).toContain("What to do next");
 		expect(markup).not.toContain("Need help reconnecting access?");
 		expect(markup).toContain(

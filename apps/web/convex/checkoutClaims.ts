@@ -7,7 +7,7 @@ import {
 	type CheckoutCtaId,
 	type FulfillmentTrack,
 } from "../platform/billing/checkout/checkout-intent";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalMutation, internalQuery, mutation } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { upsertProductAccessGrant } from "./access/model";
 import {
@@ -20,6 +20,23 @@ const pendingCheckoutClaimStatusValidator = v.union(
 	v.literal("pending"),
 	v.literal("claimed"),
 );
+
+const checkoutSurfaceValidator = v.union(
+	v.literal("hosted_checkout"),
+	v.literal("express_checkout"),
+);
+
+const checkoutPurchaseIntentCreateResultValidator = v.object({
+	purchaseIntentId: v.id("checkoutPurchaseIntents"),
+});
+
+const checkoutPurchaseIntentAttachResultValidator = v.object({
+	attached: v.union(v.literal("attached"), v.literal("already_attached")),
+});
+
+const checkoutPurchaseIntentFulfillmentResultValidator = v.object({
+	fulfilled: v.union(v.literal("fulfilled"), v.literal("missing_intent")),
+});
 
 const pendingCheckoutClaimReturnValidator = v.union(
 	v.object({
@@ -111,6 +128,89 @@ const paidCheckoutClaimRepairResultValidator = v.union(
 export function normalizeCheckoutEmail(email: string) {
 	return email.trim().toLowerCase();
 }
+
+export const createCheckoutPurchaseIntent = mutation({
+	args: {
+		clerkUserId: v.optional(v.string()),
+		checkoutEmail: v.optional(v.string()),
+		checkoutSurface: checkoutSurfaceValidator,
+	},
+	returns: checkoutPurchaseIntentCreateResultValidator,
+	handler: async (ctx, args) => {
+		const now = Date.now();
+		const checkoutEmail = args.checkoutEmail?.trim();
+		const purchaseIntentId = await ctx.db.insert("checkoutPurchaseIntents", {
+			clerkUserId: args.clerkUserId,
+			checkoutEmail: checkoutEmail || undefined,
+			checkoutEmailNormalized: checkoutEmail
+				? normalizeCheckoutEmail(checkoutEmail)
+				: undefined,
+			checkoutSurface: args.checkoutSurface,
+			status: "created",
+			createdAt: now,
+			updatedAt: now,
+		});
+
+		return { purchaseIntentId };
+	},
+});
+
+export const attachStripeCheckoutSessionToPurchaseIntent = mutation({
+	args: {
+		purchaseIntentId: v.id("checkoutPurchaseIntents"),
+		stripeCheckoutSessionId: v.string(),
+	},
+	returns: checkoutPurchaseIntentAttachResultValidator,
+	handler: async (ctx, args) => {
+		const purchaseIntent = await ctx.db.get(args.purchaseIntentId);
+		if (!purchaseIntent) {
+			throw new ConvexError("Checkout purchase intent not found");
+		}
+		if (
+			purchaseIntent.stripeCheckoutSessionId === args.stripeCheckoutSessionId
+		) {
+			return { attached: "already_attached" as const };
+		}
+		if (purchaseIntent.stripeCheckoutSessionId) {
+			throw new ConvexError(
+				"Checkout purchase intent already has a Stripe session",
+			);
+		}
+
+		await ctx.db.patch(args.purchaseIntentId, {
+			stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+			status: "stripe_session_attached",
+			updatedAt: Date.now(),
+		});
+
+		return { attached: "attached" as const };
+	},
+});
+
+export const recordCheckoutPurchaseIntentFulfillment = internalMutation({
+	args: {
+		purchaseIntentId: v.id("checkoutPurchaseIntents"),
+		stripeCheckoutSessionId: v.string(),
+		clerkUserId: v.optional(v.string()),
+	},
+	returns: checkoutPurchaseIntentFulfillmentResultValidator,
+	handler: async (ctx, args) => {
+		const purchaseIntent = await ctx.db.get(args.purchaseIntentId);
+		if (!purchaseIntent) {
+			return { fulfilled: "missing_intent" as const };
+		}
+
+		await ctx.db.patch(args.purchaseIntentId, {
+			clerkUserId: args.clerkUserId ?? purchaseIntent.clerkUserId,
+			stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+			status: "fulfilled",
+			fulfilledAt: Date.now(),
+			updatedAt: Date.now(),
+		});
+
+		return { fulfilled: "fulfilled" as const };
+	},
+});
 
 function requireNonEmptySupportInput(value: string, fieldName: string) {
 	const trimmedValue = value.trim();

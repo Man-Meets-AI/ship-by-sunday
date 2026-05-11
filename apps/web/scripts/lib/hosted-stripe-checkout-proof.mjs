@@ -1,4 +1,3 @@
-export const DEFAULT_PROOF_COURSE_SLUG = "ship-by-sunday";
 export const DEFAULT_PROOF_COUPON_LIFETIME_SECONDS = 15 * 60;
 export const HOMEPAGE_CHECKOUT_PROOF_PATH = "/?marketing=1";
 export const EXPRESS_CHECKOUT_ROUTE_PATH = "/api/stripe/checkout/express";
@@ -96,10 +95,24 @@ export function buildHostedProofCheckoutSessionParams({
 	checkoutEmail,
 	clerkUserId,
 	couponId,
-	courseSlug = DEFAULT_PROOF_COURSE_SLUG,
+	purchaseIntentId,
 	priceId,
 }) {
 	const normalizedAppBaseUrl = normalizeAppBaseUrl(appBaseUrl);
+	if (!purchaseIntentId) {
+		throw new Error(
+			"Hosted billing proof requires a checkout purchase intent id.",
+		);
+	}
+
+	const checkoutMetadata = {
+		accessProduct: "paid_app_access",
+		app: "man_meets_ai",
+		checkoutSurface: "hosted_checkout",
+		...(clerkUserId ? { clerkUserId } : {}),
+		metadataSchema: "mma_checkout_v1",
+		purchaseIntentId,
+	};
 
 	return {
 		billing_address_collection: "auto",
@@ -108,24 +121,16 @@ export function buildHostedProofCheckoutSessionParams({
 		customer_email: checkoutEmail,
 		discounts: [{ coupon: couponId }],
 		line_items: [{ price: priceId, quantity: 1 }],
-		metadata: {
-			...(clerkUserId ? { clerkUserId } : {}),
-			courseSlug,
-		},
+		metadata: checkoutMetadata,
 		mode: "payment",
 		payment_intent_data: {
-			metadata: {
-				...(clerkUserId ? { clerkUserId } : {}),
-				courseSlug,
-			},
+			metadata: checkoutMetadata,
 		},
 		success_url: `${normalizedAppBaseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
 	};
 }
 
-export function buildHostedProofSignInPath({
-	redirectPath = "/workspace/choose",
-}) {
+export function buildHostedProofSignInPath({ redirectPath = "/home" }) {
 	return `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}`;
 }
 

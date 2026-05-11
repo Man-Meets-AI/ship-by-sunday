@@ -47,6 +47,7 @@ import {
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 } from "./checkoutIntentValidators";
+import { productAccessCapabilityValidator } from "./access/validators";
 import {
 	impersonationAuditEventTypeValidator,
 	impersonationAuditResultValidator,
@@ -80,6 +81,7 @@ export default defineSchema({
 		stripeCustomerId: v.optional(v.string()),
 		stripeCheckoutSessionId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
+		capabilities: v.optional(v.array(productAccessCapabilityValidator)),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -90,6 +92,26 @@ export default defineSchema({
 		.index("by_clerk_user_id", ["clerkUserId"])
 		.index("by_stripe_customer_id", ["stripeCustomerId"])
 		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"]),
+	checkoutPurchaseIntents: defineTable({
+		clerkUserId: v.optional(v.string()),
+		checkoutEmail: v.optional(v.string()),
+		checkoutEmailNormalized: v.optional(v.string()),
+		checkoutSurface: v.union(
+			v.literal("hosted_checkout"),
+			v.literal("express_checkout"),
+		),
+		stripeCheckoutSessionId: v.optional(v.string()),
+		status: v.union(
+			v.literal("created"),
+			v.literal("stripe_session_attached"),
+			v.literal("fulfilled"),
+		),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		fulfilledAt: v.optional(v.number()),
+	})
+		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"])
+		.index("by_clerk_user_id", ["clerkUserId"]),
 	pendingCheckoutClaims: defineTable({
 		stripeCheckoutSessionId: v.string(),
 		checkoutEmail: v.string(),
@@ -123,6 +145,7 @@ export default defineSchema({
 		courseSlug: v.optional(v.string()),
 		status: v.union(
 			v.literal("processing"),
+			v.literal("queued"),
 			v.literal("processed"),
 			v.literal("failed"),
 			v.literal("ignored"),

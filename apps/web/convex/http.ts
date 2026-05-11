@@ -101,6 +101,9 @@ type StripeWebhookAcceptedResult =
 			kind: "ignored";
 	  }
 	| {
+			kind: "queued";
+	  }
+	| {
 			kind: "granted";
 			grantResult: {
 				granted: "inserted" | "patched";
@@ -126,6 +129,11 @@ export function buildStripeWebhookAcceptedResponseBody(
 			};
 		case "ignored":
 			return { ignored: true };
+		case "queued":
+			return {
+				received: true,
+				queued: true,
+			};
 		case "granted":
 			return {
 				received: true,
@@ -219,6 +227,7 @@ http.route({
 				case "payment_pending":
 				case "duplicate":
 				case "ignored":
+				case "queued":
 				case "granted":
 					return jsonResponse(buildStripeWebhookAcceptedResponseBody(result));
 				default:

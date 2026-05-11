@@ -113,7 +113,7 @@ export function WorkspaceDoctorPassPage({
 				error: error instanceof Error ? error : String(error),
 				fallbackMessage: "Unable to approve sync preview.",
 				report: {
-					title: "Workspace doctor pass sync preview approval failed",
+					title: "Worker doctor pass sync preview approval failed",
 					code: "workspace_doctor_pass_sync_preview_approval_failed",
 					pathname: routeConfig.workspaceDoctorPass,
 					details: {
@@ -582,7 +582,7 @@ function buildDoctorPassSteps(doctorPassRun: DoctorPassRun): DoctorPassStep[] {
 					: "pending",
 		},
 		{
-			label: "View findings in workspace",
+			label: "View findings in Worker",
 			status: hasUpload ? "current" : "pending",
 		},
 	];
@@ -603,7 +603,7 @@ function getDoctorPassPresentation(doctorPassRun: DoctorPassRun) {
 		return {
 			title: "Findings uploaded",
 			subtitle:
-				"Approved structured findings are now available in the workspace.",
+				"Approved structured findings are now available in Worker findings.",
 			statusLabel: "Findings uploaded.",
 			approvalCopy:
 				"Upload is complete. Open the synced findings or run history.",

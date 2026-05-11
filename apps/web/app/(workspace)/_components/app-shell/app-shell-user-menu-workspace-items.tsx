@@ -1,4 +1,11 @@
-import { Flag, House, ListVideo, Settings, ShieldCheck } from "lucide-react";
+import {
+	Bot,
+	Code2,
+	House,
+	ListVideo,
+	Settings,
+	ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 
@@ -13,9 +20,10 @@ import { cn } from "@/lib/utils";
 import { workspaceMenuLinks } from "./app-shell-user-menu-helpers";
 
 const workspaceLinkIcons = {
-	[routeConfig.codebase]: House,
-	[routeConfig.review]: Flag,
+	[routeConfig.appHome]: House,
+	[routeConfig.codebase]: Code2,
 	[routeConfig.tutorials]: ListVideo,
+	[routeConfig.workers]: Bot,
 	[routeConfig.settings]: Settings,
 } as const;
 

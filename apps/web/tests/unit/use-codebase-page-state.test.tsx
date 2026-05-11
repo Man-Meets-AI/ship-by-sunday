@@ -177,7 +177,9 @@ describe("useCodebasePageState", () => {
 		});
 
 		expect(unlockExecuteShipSpy).toHaveBeenCalledWith({});
-		expect(navigateToHref).toHaveBeenCalledWith("/review?download=1");
+		expect(navigateToHref).toHaveBeenCalledWith(
+			"/generate-codebase/review?download=1",
+		);
 	});
 
 	it("clears stale derived design facts when the preset changes", async () => {

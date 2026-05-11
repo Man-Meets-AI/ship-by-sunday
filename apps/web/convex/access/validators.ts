@@ -19,6 +19,12 @@ export const productAccessSourceValidator = v.union(
 	v.literal("stripe_webhook"),
 );
 
+export const productAccessCapabilityValidator = v.union(
+	v.literal("generate_codebase"),
+	v.literal("tutorials"),
+	v.literal("worker"),
+);
+
 export const productAccessGrantOutcomeValidator = v.union(
 	v.literal("inserted"),
 	v.literal("patched"),
@@ -38,6 +44,7 @@ export const productAccessReturnValidator = v.object({
 		v.literal("no_access"),
 		productAccessGrantStatusValidator,
 	),
+	capabilities: v.array(productAccessCapabilityValidator),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -60,6 +67,7 @@ export const productAccessGrantDocumentValidator = v.object({
 	stripeCustomerId: v.optional(v.string()),
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
+	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),

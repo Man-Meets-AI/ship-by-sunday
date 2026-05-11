@@ -17,7 +17,12 @@ const testCardNumber = "4242 4242 4242 4242";
 const testCardExpiry = "12 / 34";
 const testCardCvc = "123";
 const checkoutEmail = `dev-checkout-${Date.now()}@example.com`;
-const expectedCourseSlug = "ship-by-sunday";
+const expectedCheckoutMetadata = {
+	accessProduct: "paid_app_access",
+	app: "man_meets_ai",
+	checkoutSurface: "hosted_checkout",
+	metadataSchema: "mma_checkout_v1",
+};
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -78,6 +83,32 @@ function parseArgs(argv) {
 
 function getCheckoutSessionIdFromUrl(urlString) {
 	return urlString.match(/cs_(?:live|test)_[A-Za-z0-9]+/)?.[0] ?? null;
+}
+
+function isExpectedCheckoutMetadata(metadata) {
+	return (
+		metadata?.metadataSchema === expectedCheckoutMetadata.metadataSchema &&
+		metadata?.app === expectedCheckoutMetadata.app &&
+		metadata?.accessProduct === expectedCheckoutMetadata.accessProduct &&
+		metadata?.checkoutSurface === expectedCheckoutMetadata.checkoutSurface &&
+		typeof metadata?.purchaseIntentId === "string" &&
+		metadata.purchaseIntentId.length > 0 &&
+		metadata.courseSlug === undefined &&
+		metadata.buyerStartingPoint === undefined &&
+		metadata.checkoutCtaId === undefined &&
+		metadata.fulfillmentTrack === undefined
+	);
+}
+
+function metadataMatchesCheckoutSession(
+	sessionMetadata,
+	paymentIntentMetadata,
+) {
+	return (
+		isExpectedCheckoutMetadata(sessionMetadata) &&
+		isExpectedCheckoutMetadata(paymentIntentMetadata) &&
+		paymentIntentMetadata.purchaseIntentId === sessionMetadata.purchaseIntentId
+	);
 }
 
 async function primeVercelAccessCookie(page, { baseUrl, vercelShareUrl }) {
@@ -391,11 +422,10 @@ try {
 	const checkoutSuccessPath = finalSession.success_url
 		? new URL(finalSession.success_url).pathname
 		: null;
-	const paymentIntentMetadataIsNeutral =
-		paymentIntent?.metadata?.courseSlug === expectedCourseSlug &&
-		paymentIntent?.metadata?.buyerStartingPoint === undefined &&
-		paymentIntent?.metadata?.checkoutCtaId === undefined &&
-		paymentIntent?.metadata?.fulfillmentTrack === undefined;
+	const checkoutMetadataMatches = metadataMatchesCheckoutSession(
+		finalSession.metadata,
+		paymentIntent?.metadata,
+	);
 
 	printCheck(
 		"Dev staging uses Stripe test mode",
@@ -424,12 +454,8 @@ try {
 		hostedLinkSignalText ?? "missing",
 	);
 	printCheck(
-		"Checkout used neutral product metadata",
-		finalSession.metadata?.courseSlug === expectedCourseSlug &&
-			finalSession.metadata?.buyerStartingPoint === undefined &&
-			finalSession.metadata?.checkoutCtaId === undefined &&
-			finalSession.metadata?.fulfillmentTrack === undefined &&
-			paymentIntentMetadataIsNeutral,
+		"Checkout used paid-app purchase metadata",
+		checkoutMetadataMatches,
 		`session_metadata=${JSON.stringify(finalSession.metadata)}, payment_intent_metadata=${JSON.stringify(paymentIntent?.metadata)}`,
 	);
 	printCheck(
@@ -451,7 +477,7 @@ try {
 	);
 	printCheck(
 		"Checkout reached passwordless workspace handoff",
-		checkoutHandoff.redirectUrl === "/workspace/choose?welcome=checkout" &&
+		checkoutHandoff.redirectUrl === "/home?welcome=checkout" &&
 			checkoutHandoff.emailValue === checkoutEmail &&
 			checkoutHandoff.emailLocked &&
 			!checkoutHandoff.passwordVisible &&
@@ -508,18 +534,14 @@ try {
 		!checkoutRouteResponses.some((response) => response.ok) ||
 		typeof hostedLinkSignalText !== "string" ||
 		!/Link is accepted/i.test(hostedLinkSignalText) ||
-		finalSession.metadata?.courseSlug !== expectedCourseSlug ||
-		finalSession.metadata?.buyerStartingPoint !== undefined ||
-		finalSession.metadata?.checkoutCtaId !== undefined ||
-		finalSession.metadata?.fulfillmentTrack !== undefined ||
-		!paymentIntentMetadataIsNeutral ||
+		!checkoutMetadataMatches ||
 		checkoutSuccessPath !== "/checkout/success" ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
 		finalSession.amount_total !== 25_000 ||
 		paymentIntent?.status !== "succeeded" ||
 		paymentIntent.amount !== 25_000 ||
-		checkoutHandoff.redirectUrl !== "/workspace/choose?welcome=checkout" ||
+		checkoutHandoff.redirectUrl !== "/home?welcome=checkout" ||
 		checkoutHandoff.emailValue !== checkoutEmail ||
 		!checkoutHandoff.emailLocked ||
 		checkoutHandoff.passwordVisible ||

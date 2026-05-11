@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { User } from "@clerk/backend";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { headers } from "next/headers";
@@ -13,6 +12,7 @@ import {
 	type AdminImpersonationAuthority,
 } from "@/platform/admin-impersonation";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
+import { routeConfig } from "@/config/product";
 
 export type AdminImpersonationCustomer = {
 	clerkUserId: string;
@@ -48,16 +48,16 @@ export type AdminImpersonationPageData = {
 };
 
 export const ADMIN_IMPERSONATION_PATH = "/admin/impersonation" as const;
-export const ADMIN_IMPERSONATION_WORKSPACE_DESTINATION =
-	"/workspace/choose" as const;
+export const ADMIN_IMPERSONATION_WORKSPACE_DESTINATION = routeConfig.appHome;
 
 type ClerkBackendClient = Awaited<ReturnType<typeof clerkClient>>;
+type ClerkUser = Awaited<ReturnType<ClerkBackendClient["users"]["getUser"]>>;
 
 function normalizeEmail(value: string) {
 	return value.trim().toLowerCase();
 }
 
-function getPrimaryEmail(user: User) {
+function getPrimaryEmail(user: ClerkUser) {
 	const primaryEmail =
 		user.emailAddresses.find(
 			(emailAddress) => emailAddress.id === user.primaryEmailAddressId,
@@ -78,20 +78,20 @@ function getPrimaryEmail(user: User) {
 	};
 }
 
-function getNormalizedUserEmails(user: User) {
+function getNormalizedUserEmails(user: ClerkUser) {
 	return user.emailAddresses.map((emailAddress) =>
 		normalizeEmail(emailAddress.emailAddress),
 	);
 }
 
-function userHasConfiguredAdminEmail(user: User, adminEmails: string[]) {
+function userHasConfiguredAdminEmail(user: ClerkUser, adminEmails: string[]) {
 	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
 	return getNormalizedUserEmails(user).some((email) =>
 		adminEmailSet.has(email),
 	);
 }
 
-function getVerifiedAllowlistedEmail(user: User, adminEmails: string[]) {
+function getVerifiedAllowlistedEmail(user: ClerkUser, adminEmails: string[]) {
 	const adminEmailSet = new Set(adminEmails.map(normalizeEmail));
 	const emailAddress = user.emailAddresses.find((candidate) => {
 		const email = normalizeEmail(candidate.emailAddress);
@@ -109,7 +109,7 @@ function getVerifiedAllowlistedEmail(user: User, adminEmails: string[]) {
 	};
 }
 
-function formatClerkName(user: User) {
+function formatClerkName(user: ClerkUser) {
 	const fullName = [user.firstName, user.lastName]
 		.map((part) => part?.trim())
 		.filter(Boolean)
@@ -117,7 +117,7 @@ function formatClerkName(user: User) {
 	return fullName.length > 0 ? fullName : null;
 }
 
-function toCustomerSummary(user: User): AdminImpersonationCustomer | null {
+function toCustomerSummary(user: ClerkUser): AdminImpersonationCustomer | null {
 	const primaryEmail = getPrimaryEmail(user);
 	if (!primaryEmail?.email) {
 		return null;
@@ -283,7 +283,7 @@ export async function resolveAdminImpersonationTarget(
 
 	const requestedEmail = normalizeEmail(input.subjectEmail);
 	const resolvedClient = client ?? (await clerkClient());
-	let user: User;
+	let user: ClerkUser;
 	try {
 		user = await resolvedClient.users.getUser(subjectClerkUserId);
 	} catch (error) {

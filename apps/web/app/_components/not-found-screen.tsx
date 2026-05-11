@@ -39,8 +39,8 @@ export function NotFoundScreen() {
 						transition={{ delay: 0.2, duration: 0.6 }}
 						className="max-w-md mx-auto text-lg text-white/60 leading-relaxed"
 					>
-						The coordinates you requested do not exist in this workspace. The
-						codebase may have been moved or the logic was never compiled.
+						The coordinates you requested do not exist in this app. The codebase
+						may have been moved or the logic was never compiled.
 					</motion.p>
 
 					<motion.div
@@ -54,7 +54,7 @@ export function NotFoundScreen() {
 							size="lg"
 							className="h-14 px-8 text-lg rounded-full bg-white text-ink hover:bg-white/90"
 						>
-							<Link href={routeConfig.codebase}>
+							<Link href={routeConfig.appHome}>
 								{workspaceDisplayConfig.openHomeActionLabel}
 							</Link>
 						</Button>

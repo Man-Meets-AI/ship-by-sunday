@@ -144,7 +144,7 @@ describe("WorkspaceLoopsPage", () => {
 			screen
 				.getAllByRole("link", { name: /Review finding/i })[0]
 				.getAttribute("href"),
-		).toBe("/workspace/findings/finding-source-truth-readiness");
+		).toBe("/workers/findings/finding-source-truth-readiness");
 		expect(
 			screen.getByTestId("workspace-loops-local-nav").textContent,
 		).toContain("Loops");
@@ -173,6 +173,6 @@ describe("WorkspaceLoopsPage", () => {
 			screen
 				.getByRole("link", { name: "Open Doctor Pass" })
 				.getAttribute("href"),
-		).toBe("/workspace/doctor-pass");
+		).toBe("/workers/doctor-pass");
 	});
 });

@@ -70,7 +70,7 @@ describe("AdminImpersonationPageClient", () => {
 			ok: true,
 			token: "ticket_123",
 			sessionId: "session_1",
-			destination: "/workspace/choose",
+			destination: "/home",
 		});
 		completeActionMock.mockReset().mockResolvedValue({ ok: true });
 		failActionMock.mockReset().mockResolvedValue({ ok: true });
@@ -110,6 +110,6 @@ describe("AdminImpersonationPageClient", () => {
 			session: "sess_impersonated",
 		});
 		expect(completeActionMock).toHaveBeenCalled();
-		expect(pushMock).toHaveBeenCalledWith("/workspace/choose");
+		expect(pushMock).toHaveBeenCalledWith("/home");
 	});
 });

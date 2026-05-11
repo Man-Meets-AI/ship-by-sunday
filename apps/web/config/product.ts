@@ -18,10 +18,12 @@ export const brandColorConfig = {
 
 export const routeConfig = {
 	home: "/",
-	codebase: "/codebase",
-	review: "/review",
+	appHome: "/home",
+	codebase: "/generate-codebase",
+	review: "/generate-codebase/review",
 	execute: "/execute",
 	tutorials: "/tutorials",
+	workers: "/workers",
 	docs: "/docs",
 	blog: "/blog",
 	mission: "/mission",
@@ -34,13 +36,12 @@ export const routeConfig = {
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
-	workspaceChoice: "/workspace/choose",
-	workspaceSetup: "/workspace/setup",
-	workspaceDoctorPass: "/workspace/doctor-pass",
-	workspaceFindings: "/workspace/findings",
-	workspaceLoops: "/workspace/loops",
-	workspaceRuns: "/workspace/runs",
-	workspacePrivacy: "/workspace/privacy",
+	workspaceSetup: "/workers/setup",
+	workspaceDoctorPass: "/workers/doctor-pass",
+	workspaceFindings: "/workers/findings",
+	workspaceLoops: "/workers/loops",
+	workspaceRuns: "/workers/runs",
+	workspacePrivacy: "/workers/privacy",
 	pricingHash: "#pricing",
 } as const;
 
@@ -159,11 +160,11 @@ export const starterConfig = {
 		previewImageAlt: "Ship by Sunday system preview",
 	},
 	workspace: {
-		homeLabel: "Workspace",
-		homeNoun: "workspace",
-		homeSubtitle: "Your product, one step at a time",
-		openHomeActionLabel: "Open workspace",
-		firstStepLabel: "workspace step",
+		homeLabel: "Home",
+		homeNoun: "home",
+		homeSubtitle: "Choose your next path",
+		openHomeActionLabel: "Open home",
+		firstStepLabel: "home path",
 		artifactsLabel: "Artifacts",
 		settingsLabel: "Settings",
 	},
@@ -381,7 +382,7 @@ export const courseResourceConfig = {
 } as const;
 
 export const authViewConfig = {
-	fallbackRedirectUrl: routeConfig.workspaceChoice,
+	fallbackRedirectUrl: routeConfig.appHome,
 } as const;
 
 export function getSignInRedirectHref(redirectPath: string) {

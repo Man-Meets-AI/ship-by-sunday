@@ -14,7 +14,8 @@ const product = await stripe.products.create({
 	name: "Ship by Sunday",
 	description: "Go from idea to v1 this weekend.",
 	metadata: {
-		courseSlug: "ship-by-sunday",
+		accessProduct: "paid_app_access",
+		app: "man_meets_ai",
 	},
 	default_price_data: {
 		currency: "usd",

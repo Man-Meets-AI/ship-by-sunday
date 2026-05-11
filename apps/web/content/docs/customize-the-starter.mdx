@@ -24,11 +24,11 @@ These are the intended extension points for the starter. Change these first inst
 A strong early milestone is:
 
 1. the public landing page is rewritten
-2. the protected workspace reflects your product language
+2. the protected app reflects your product language
 3. the first real protected user flow is visible
 4. the paid-access contract still works
 
-If you are not keeping the guided course, the first real protected user flow should now be the codebase-first workspace on `/codebase`, not a dead-end disabled shell.
+If you are not keeping the guided course, the first real protected user flow should now be the codebase-first app surface on `/generate-codebase`, not a dead-end disabled shell.
 
 ## Leave these alone until later
 
@@ -59,9 +59,9 @@ The starter now has a deliberate `course = false` mode.
 
 When `starterConfig.modules.course` is `false`:
 
-- `/codebase` is the first protected workspace surface
+- `/generate-codebase` is the first protected app surface
 - `/product`, `/design`, `/marketing`, and `/build-plan` stay as stable stage-entry routes but redirect into nested codebase pages
-- `/mission` and `/lesson/[lessonKey]` become the optional post-review bonus library after unlock, while `/artifacts` remains a compatibility forward into `/review`
+- `/mission` and `/lesson/[lessonKey]` become the optional post-review bonus library after unlock, while `/artifacts` remains a compatibility forward into `/generate-codebase/review`
 - the paid-access and access-recovery contract stays unchanged
 
 That is the preferred way to move toward a non-course product. Do not start by renaming routes or rewriting the access stack.

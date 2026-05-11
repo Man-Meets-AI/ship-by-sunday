@@ -68,7 +68,7 @@ describe("WorkspaceDoctorPassToastWatcher", () => {
 			isAuthenticated: true,
 			isLoading: false,
 		});
-		pathnameMock.mockReturnValue("/workspace/setup");
+		pathnameMock.mockReturnValue("/workers/setup");
 		routerPushMock.mockReset();
 		toastErrorMock.mockReset();
 		toastSuccessMock.mockReset();
@@ -97,7 +97,7 @@ describe("WorkspaceDoctorPassToastWatcher", () => {
 
 		const toastOptions = toastSuccessMock.mock.calls[0]?.[1];
 		toastOptions?.action?.onClick();
-		expect(routerPushMock).toHaveBeenCalledWith("/workspace/doctor-pass");
+		expect(routerPushMock).toHaveBeenCalledWith("/workers/doctor-pass");
 
 		toastSuccessMock.mockClear();
 		rerender(<WorkspaceDoctorPassToastWatcher />);
@@ -127,11 +127,11 @@ describe("WorkspaceDoctorPassToastWatcher", () => {
 
 		const toastOptions = toastSuccessMock.mock.calls[0]?.[1];
 		toastOptions?.action?.onClick();
-		expect(routerPushMock).toHaveBeenCalledWith("/workspace/findings");
+		expect(routerPushMock).toHaveBeenCalledWith("/workers/findings");
 	});
 
 	it("notifies when Doctor Pass fails and focuses details on the Doctor Pass page", async () => {
-		pathnameMock.mockReturnValue("/workspace/doctor-pass");
+		pathnameMock.mockReturnValue("/workers/doctor-pass");
 		const scrollIntoViewMock = vi.fn();
 		const focusMock = vi.fn();
 		useQueryMock.mockReturnValue({

@@ -139,7 +139,7 @@ function hasRequiredStripeWebhookEvents(
 	requiredEvents: readonly string[],
 ) {
 	if (endpoint.enabled_events.includes("*")) {
-		return true;
+		return false;
 	}
 
 	return requiredEvents.every((eventType) =>
@@ -151,10 +151,6 @@ function getMissingStripeWebhookEvents(
 	endpoint: Pick<Stripe.WebhookEndpoint, "enabled_events">,
 	requiredEvents: readonly string[],
 ) {
-	if (endpoint.enabled_events.includes("*")) {
-		return [];
-	}
-
 	return requiredEvents.filter(
 		(eventType) => !endpoint.enabled_events.includes(eventType),
 	);
@@ -256,9 +252,6 @@ export function getStripeLineItem(config: ManagedStripeConfig) {
 			product_data: {
 				name: productConfig.name,
 				description: productConfig.promise,
-				metadata: {
-					courseSlug: productConfig.courseSlug,
-				},
 			},
 			unit_amount: productConfig.priceUsdCents,
 		},
@@ -465,6 +458,15 @@ export async function assertManagedStripeWebhookEndpointReadyForRelease(
 			.join(", ");
 		throw new Error(
 			`Stripe webhook endpoint ${expectedUrl} is in ${actualModes} mode, expected ${expectedLivemode ? "live" : "test"}.`,
+		);
+	}
+
+	const wildcardEndpoint = modeMatchingEndpoints.find((endpoint) =>
+		endpoint.enabled_events.includes("*"),
+	);
+	if (wildcardEndpoint) {
+		throw new Error(
+			`Stripe webhook endpoint ${expectedUrl} uses wildcard event subscriptions. Subscribe only to required event types: ${requiredEvents.join(", ")}.`,
 		);
 	}
 

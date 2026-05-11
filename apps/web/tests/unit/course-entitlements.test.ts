@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const clerkUserId = "user_product_access_123";
 const convexTokenIdentifier =
 	"https://clerk.example.com|user_product_access_123";
+const allProductCapabilities = ["generate_codebase", "tutorials", "worker"];
 
 function createProductAccessGrant(
 	status: "granted" | "pending" | "revoked" | "refunded",
@@ -76,6 +77,7 @@ describe("convex/access/model", () => {
 			clerkUserId: null,
 			hasAccess: false,
 			status: "signed_out",
+			capabilities: [],
 		});
 	});
 
@@ -92,6 +94,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: false,
 			status: "no_access",
+			capabilities: [],
 		});
 	});
 
@@ -110,6 +113,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
+			capabilities: allProductCapabilities,
 			buyerStartingPoint: "unspecified",
 			checkoutCtaId: "unspecified",
 			fulfillmentTrack: "unspecified",
@@ -135,6 +139,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
+			capabilities: allProductCapabilities,
 			buyerStartingPoint: "existing_codebase",
 			checkoutCtaId: "codebase_demo_existing",
 			fulfillmentTrack: "existing_codebase_doctor",

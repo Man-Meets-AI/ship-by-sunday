@@ -182,7 +182,7 @@ async function signIn(
 		pageErrors: string[];
 	},
 ) {
-	const signInPath = "/sign-in?redirect_url=%2Fcodebase";
+	const signInPath = "/sign-in?redirect_url=%2Fgenerate-codebase";
 	await assertPasswordlessOtpCanSend(page, {
 		diagnostics,
 		email,
@@ -193,7 +193,7 @@ async function signIn(
 	});
 	await waitForClerkLoaded(page, { diagnostics, email, signInPath });
 	await clerk.signIn({ page, emailAddress: email });
-	await page.goto("/codebase", {
+	await page.goto("/generate-codebase", {
 		waitUntil: "networkidle",
 	});
 	try {
@@ -325,9 +325,9 @@ async function assertPasswordlessOtpCanSend(
 async function waitForSignedInWorkspaceLanding(page: Page) {
 	await page.waitForURL(
 		(url) =>
-			url.pathname === "/codebase" ||
-			url.pathname === "/workspace/choose" ||
-			url.pathname === "/workspace/setup",
+			url.pathname === "/generate-codebase" ||
+			url.pathname === "/home" ||
+			url.pathname === "/workers/setup",
 		{
 			timeout: 15_000,
 		},
