@@ -93,3 +93,9 @@
 - Mistake: I accidentally replaced the existing `apps/web/tests/unit/checkout-claims.test.ts` coverage while adding a small purchase-intent token test.
   Impact: The local diff temporarily removed existing checkout-claim regression coverage before validation.
   Corrective action: Restore the file from the pre-edit state, append the new assertions instead of replacing the file, and inspect diffs before running broad validation.
+
+## 2026-05-11 Telegram Support Widget Send State
+
+- Mistake: I used chained shell commands while reading repo guidance and locating Telegram support files.
+  Impact: The command output was noisier than needed and repeated a known local workflow miss.
+  Corrective action: Run independent reads as separate `exec_command` calls through `multi_tool_use.parallel` instead of shell chaining.

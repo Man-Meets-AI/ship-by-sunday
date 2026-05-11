@@ -250,6 +250,83 @@ describe("HomePageSupportWidget", () => {
 		});
 	});
 
+	it("settles the optimistic send state when realtime delivers before the post resolves", async () => {
+		let realtimeThreadState: ReturnType<typeof createThreadState> =
+			createThreadState("Realtime got this");
+		const unresolvedPostResponse = new Promise<Response>(() => {
+			void 0;
+		});
+		useConvexTelegramChatRealtimeMock.mockImplementation(
+			(input: { enabled?: boolean }) =>
+				input.enabled
+					? { status: "ready", threadState: realtimeThreadState }
+					: { status: "unavailable" },
+		);
+		const fetchMock = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						ok: true,
+						realtime: {
+							kind: "convex",
+							capabilityToken: "r".repeat(64),
+							expiresAt: 1_764_566_400_000,
+						},
+					}),
+					{ status: 200 },
+				),
+			)
+			.mockImplementationOnce(() => unresolvedPostResponse);
+
+		const user = userEvent.setup();
+		const { rerender } = render(
+			<HomePageSupportWidget supportWidget={supportWidget} />,
+		);
+
+		await user.click(screen.getByRole("button", { name: "Message Parker" }));
+		await screen.findByText("Realtime got this");
+
+		const textarea = screen.getByPlaceholderText("Type your question...");
+		await user.type(textarea, "Realtime got this{Enter}");
+
+		expect(await screen.findByText("Sending")).toBeTruthy();
+
+		realtimeThreadState = {
+			...realtimeThreadState,
+			messages: [
+				...realtimeThreadState.messages,
+				{
+					id: "message_4",
+					source: "visitor",
+					body: "Realtime got this",
+					attachment: null,
+					createdAt: 4,
+					deliveryStatus: "delivered_to_parker",
+					deliveryFailureClass: null,
+				},
+			],
+		};
+		rerender(<HomePageSupportWidget supportWidget={supportWidget} />);
+
+		await waitFor(() => expect(screen.queryByText("Sending")).toBeNull());
+		expect(screen.getAllByText("Delivered to Parker")).toHaveLength(2);
+		expect(screen.getAllByText("Realtime got this")).toHaveLength(2);
+		expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/support/messages", {
+			method: "POST",
+			headers: {
+				Accept: "application/json",
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				messageText: "Realtime got this",
+				pagePath: "/",
+				entrySurface: "homepage_support_widget",
+				attachment: null,
+			}),
+		});
+	});
+
 	it("uploads a screenshot and sends a structured bug report", async () => {
 		const bugReportState = {
 			...createThreadState("Bug report\nImpact: Blocking me"),

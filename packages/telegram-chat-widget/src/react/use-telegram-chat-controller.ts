@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import {
 	normalizeTelegramChatScreenshotFileName,
@@ -31,6 +31,12 @@ import type {
 } from "../core/telegram-chat-types";
 
 export const telegramChatPollIntervalMs = 3_000;
+
+type TelegramChatPendingVisitorMessage = {
+	readonly body: string;
+	readonly attachment: TelegramChatMessage["attachment"];
+	readonly existingMessageIds: ReadonlySet<string>;
+};
 
 export function useTelegramChatController({
 	client,
@@ -71,6 +77,9 @@ export function useTelegramChatController({
 	const [status, setStatus] = useState<TelegramChatStatus>("idle");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [hasLoadedThread, setHasLoadedThread] = useState(false);
+	const pendingVisitorMessageRef =
+		useRef<TelegramChatPendingVisitorMessage | null>(null);
+	const realtimeSettledPendingSendRef = useRef(false);
 
 	const isBusy = status === "loading" || status === "sending";
 	const outgoingMessage = useMemo(
@@ -141,12 +150,36 @@ export function useTelegramChatController({
 
 	const applyThreadState = useCallback(
 		(nextThreadState: TelegramChatThreadState) => {
+			const matchingPendingMessage = pendingVisitorMessageRef.current
+				? findMatchingVisitorMessage(
+						nextThreadState,
+						pendingVisitorMessageRef.current,
+					)
+				: null;
+			if (matchingPendingMessage) {
+				setOptimisticMessage(null);
+			}
+			if (
+				matchingPendingMessage &&
+				matchingPendingMessage.deliveryStatus !== "sending"
+			) {
+				pendingVisitorMessageRef.current = null;
+				realtimeSettledPendingSendRef.current = true;
+			}
+
 			setThreadState(nextThreadState);
 			setErrorMessage(nextThreadState.error);
 			setHasLoadedThread(true);
-			setStatus((currentStatus) =>
-				currentStatus === "sending" ? currentStatus : "idle",
-			);
+			setStatus((currentStatus) => {
+				if (currentStatus !== "sending") {
+					return "idle";
+				}
+
+				return matchingPendingMessage &&
+					matchingPendingMessage.deliveryStatus !== "sending"
+					? "idle"
+					: currentStatus;
+			});
 		},
 		[],
 	);
@@ -181,6 +214,13 @@ export function useTelegramChatController({
 		const currentBugReportDraft = bugReportDraft;
 		const currentAttachmentFile = attachmentFile;
 		const sendInput = outgoingMessage.sendInput;
+		const pendingVisitorMessage = createPendingVisitorMessage(
+			outgoingMessage.optimisticBody,
+			currentAttachmentFile,
+			threadState.messages,
+		);
+		pendingVisitorMessageRef.current = pendingVisitorMessage;
+		realtimeSettledPendingSendRef.current = false;
 		setStatus("sending");
 		setErrorMessage(null);
 		setDraftMessage("");
@@ -195,15 +235,12 @@ export function useTelegramChatController({
 			});
 			setChatMode("message");
 		}
-		setOptimisticMessage(
-			createOptimisticVisitorMessage(
-				outgoingMessage.optimisticBody,
-				currentAttachmentFile,
-			),
-		);
+		setOptimisticMessage(createOptimisticVisitorMessage(pendingVisitorMessage));
 		onSend?.(sendInput);
 		try {
 			const nextThreadState = await client.sendMessage(sendInput);
+			pendingVisitorMessageRef.current = null;
+			realtimeSettledPendingSendRef.current = false;
 			setThreadState(nextThreadState);
 			setOptimisticMessage(null);
 			setStatus("idle");
@@ -216,6 +253,14 @@ export function useTelegramChatController({
 				...getTelegramChatLatestVisitorDeliveryMetadata(nextThreadState),
 			});
 		} catch (error) {
+			if (realtimeSettledPendingSendRef.current) {
+				realtimeSettledPendingSendRef.current = false;
+				setOptimisticMessage(null);
+				setStatus("idle");
+				return;
+			}
+
+			pendingVisitorMessageRef.current = null;
 			const caughtError = error instanceof Error ? error : String(error);
 			setErrorMessage(
 				getErrorMessage(caughtError, content.genericErrorMessage),
@@ -246,6 +291,7 @@ export function useTelegramChatController({
 		onSend,
 		outgoingMessage,
 		surface,
+		threadState.messages,
 		threadState.status,
 	]);
 
@@ -311,6 +357,28 @@ export function useTelegramChatController({
 	};
 }
 
+function createPendingVisitorMessage(
+	messageText: string,
+	attachmentFile: File | null,
+	existingMessages: readonly TelegramChatMessage[],
+): TelegramChatPendingVisitorMessage {
+	return {
+		body: messageText,
+		attachment: attachmentFile
+			? {
+					kind: "screenshot",
+					fileName: normalizeTelegramChatScreenshotFileName(
+						attachmentFile.name,
+					),
+					contentType: attachmentFile.type,
+					size: attachmentFile.size,
+					url: null,
+				}
+			: null,
+		existingMessageIds: new Set(existingMessages.map((message) => message.id)),
+	};
+}
+
 function createOutgoingMessage({
 	attachmentFile,
 	bugReportDraft,
@@ -372,25 +440,15 @@ function createOutgoingMessage({
 	};
 }
 
-function createOptimisticVisitorMessage(
-	messageText: string,
-	attachmentFile: File | null,
-): TelegramChatMessage {
+function createOptimisticVisitorMessage({
+	body,
+	attachment,
+}: TelegramChatPendingVisitorMessage): TelegramChatMessage {
 	return {
 		id: `optimistic-${Date.now()}`,
 		source: "visitor",
-		body: messageText,
-		attachment: attachmentFile
-			? {
-					kind: "screenshot",
-					fileName: normalizeTelegramChatScreenshotFileName(
-						attachmentFile.name,
-					),
-					contentType: attachmentFile.type,
-					size: attachmentFile.size,
-					url: null,
-				}
-			: null,
+		body,
+		attachment,
 		createdAt: Date.now(),
 		deliveryStatus: "sending",
 		deliveryFailureClass: null,
@@ -460,4 +518,42 @@ function getSupportFailureAnalyticsClass(error: Error | string) {
 	}
 
 	return "request_failed";
+}
+
+function findMatchingVisitorMessage(
+	threadState: TelegramChatThreadState,
+	pendingMessage: TelegramChatPendingVisitorMessage,
+) {
+	for (let index = threadState.messages.length - 1; index >= 0; index -= 1) {
+		const message = threadState.messages[index];
+		if (
+			message.source === "visitor" &&
+			!pendingMessage.existingMessageIds.has(message.id) &&
+			message.body === pendingMessage.body &&
+			telegramChatAttachmentsMatch(
+				message.attachment,
+				pendingMessage.attachment,
+			)
+		) {
+			return message;
+		}
+	}
+
+	return null;
+}
+
+function telegramChatAttachmentsMatch(
+	messageAttachment: TelegramChatMessage["attachment"],
+	pendingAttachment: TelegramChatPendingVisitorMessage["attachment"],
+) {
+	if (!messageAttachment || !pendingAttachment) {
+		return messageAttachment === pendingAttachment;
+	}
+
+	return (
+		messageAttachment.kind === pendingAttachment.kind &&
+		messageAttachment.fileName === pendingAttachment.fileName &&
+		messageAttachment.contentType === pendingAttachment.contentType &&
+		messageAttachment.size === pendingAttachment.size
+	);
 }
