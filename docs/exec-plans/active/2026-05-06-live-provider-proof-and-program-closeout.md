@@ -44,6 +44,11 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - [x] 2026-05-08: Verified hosted Convex dev and production both have `OPENAI_API_KEY` present without printing values. Production support Telegram env remains missing, so production Telegram support proof is still blocked.
 - [x] 2026-05-08: Re-ran the hosted Convex dev live AI draft proof on a fresh synthetic support thread. The visitor message delivered to Telegram, the signed draft callback returned `200`, the action completed with `generatedOutputSource: "openai_responses"` and model `gpt-5.4-mini-2026-03-17`, and the private Telegram operator note delivered.
 - [x] 2026-05-08: Closed the synthetic OpenAI smoke thread through the signed callback path and verified closed status plus retention timestamps.
+- [x] 2026-05-11: Probed production Convex without printing secret values; `TELEGRAM_SUPPORT_BOT_TOKEN`, `TELEGRAM_SUPPORT_CHAT_ID`, `TELEGRAM_SUPPORT_OPERATOR_USER_IDS`, `TELEGRAM_SUPPORT_WEBHOOK_SECRET`, `TELEGRAM_SUPPORT_ADMIN_RECOVERY_TOKEN`, and `OPENAI_API_KEY` are now present.
+- [x] 2026-05-11: Deployed current Convex support functions to production deployment `helpful-meadowlark-297` and verified the support webhook route responds with `401` instead of `404` when the Telegram secret header is absent.
+- [x] 2026-05-11: Registered Telegram webhook delivery to `https://helpful-meadowlark-297.convex.site/telegram/support/webhook`; `getWebhookInfo` reports the production host/path, `message` plus `callback_query`, zero pending updates, and no last error.
+- [x] 2026-05-11: Ran a production synthetic support smoke. `support:sendVisitorMessage` created support id `SBS-0511-1787`, delivered the visitor message to Parker's Telegram support topic, created the two website-only acknowledgement messages, and returned an open support state.
+- [x] 2026-05-11: Closed the synthetic production support thread through the signed webhook callback path, verified the thread is `closed` with `closedAt` and `purgeAfter`, and confirmed the visitor message has `deliveryStatus: "delivered_to_parker"`.
 
 ## Surprises & Discoveries
 
@@ -56,7 +61,8 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - 2026-05-07: Reusing the Worker forum bot required registering a webhook. This is safe only if Worker is not relying on `getUpdates` polling for the same bot while support is active, because Telegram does not support webhook delivery and polling at the same time for one bot.
 - 2026-05-07: `support:sendVisitorMessage` was unavailable until `bunx convex dev --once --typecheck disable` pushed the current support functions to hosted Convex dev. After that deploy, the support function and webhook smoke passed.
 - 2026-05-07: A signed inbound webhook smoke found and fixed a real argument validation bug: parsed operator-message updates included a local `kind` discriminator, but `recordOperatorReply` rejected that extra field. The fix strips parser discriminators before calling internal Convex mutations.
-- 2026-05-08: Live OpenAI proof succeeded on hosted Convex dev after `OPENAI_API_KEY` was configured. Production has the OpenAI key, but production support Telegram env is still missing, so production support proof cannot run yet.
+- 2026-05-08: Live OpenAI proof succeeded on hosted Convex dev after `OPENAI_API_KEY` was configured. Production had the OpenAI key, but production support Telegram env was still missing at that point.
+- 2026-05-11: Production Convex did not have the support functions deployed before closeout; `https://helpful-meadowlark-297.convex.site/telegram/support/webhook` returned `404`. A production Convex deploy fixed the route and made the support actions available.
 
 ## Decision Log
 
@@ -72,7 +78,7 @@ Date: 2026-05-06
 
 This plan is active. The expected finished state is either a completed Program with concise live proof evidence, or an explicit active Program blocker naming which hosted Convex env values, Telegram webhook registration, bot permissions, operator access, or OpenAI setup remain missing.
 
-The hosted Convex dev support loop is now smoke-proven through Telegram delivery, signed operator reply ingestion, customer-visible callback actions, live OpenAI Responses draft generation, close-thread lifecycle, and metadata-only operations snapshot. The Program remains active because production support Telegram env is still missing and a human Telegram-client reply has not been manually exercised even though the signed webhook path records operator replies correctly.
+The hosted Convex dev support loop is smoke-proven through Telegram delivery, signed operator reply ingestion, customer-visible callback actions, live OpenAI Responses draft generation, close-thread lifecycle, and metadata-only operations snapshot. Production Convex is now configured with support Telegram env, OpenAI, deployed support functions, and Telegram webhook registration. A production synthetic smoke proved visitor delivery and close-thread lifecycle. The Program remains active only for final closeout policy and, if required, a manual human Telegram-client reply proof; the signed production webhook path is functioning.
 
 ## Context and Orientation
 
