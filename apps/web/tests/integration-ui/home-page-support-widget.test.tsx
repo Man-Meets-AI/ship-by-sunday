@@ -6,10 +6,18 @@ import type { HomePageRenderModel } from "@/app/_lib/home-page-render-model";
 import { HomePageSupportWidget } from "@/app/_components/home-page/support/home-page-support-widget";
 
 const capturePostHogProductEventMock = vi.hoisted(() => vi.fn());
+const useConvexTelegramChatRealtimeMock = vi.hoisted(() =>
+	vi.fn(() => ({ status: "unavailable" })),
+);
 
 vi.mock("@/lib/observability/posthog-client", () => ({
 	capturePostHogProductEvent: (input: unknown) =>
 		capturePostHogProductEventMock(input),
+}));
+
+vi.mock("@shipbysunday/telegram-chat-widget/convex", () => ({
+	useConvexTelegramChatRealtime: (input: unknown) =>
+		useConvexTelegramChatRealtimeMock(input),
 }));
 
 const supportWidget = {
@@ -38,6 +46,9 @@ const supportWidget = {
 		deliveredLabel: "Delivered to Parker",
 		failedLabel: "Parker may not have seen this.",
 		closedLabel: "This thread is closed.",
+		screenshotRejectedTypeMessage: "Upload a PNG, JPG, or WebP screenshot.",
+		screenshotRejectedSizeMessage: "Screenshots must be 10 MB or smaller.",
+		genericErrorMessage: "Unable to reach support.",
 	},
 } satisfies HomePageRenderModel["supportWidget"];
 
@@ -83,11 +94,24 @@ describe("HomePageSupportWidget", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		capturePostHogProductEventMock.mockReset();
+		useConvexTelegramChatRealtimeMock.mockReset();
+		useConvexTelegramChatRealtimeMock.mockReturnValue({
+			status: "unavailable",
+		});
 	});
 
 	it("opens the first-party widget, masks transcript DOM, and sends through the route", async () => {
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						ok: true,
+						realtime: { kind: "unavailable" },
+					}),
+					{ status: 200 },
+				),
+			)
 			.mockResolvedValueOnce(
 				new Response(
 					JSON.stringify({
@@ -144,7 +168,7 @@ describe("HomePageSupportWidget", () => {
 				"Parker usually catches these pretty quickly when he's near his phone.",
 			),
 		).toBeTruthy();
-		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/messages", {
+		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/session", {
 			method: "GET",
 			headers: {
 				Accept: "application/json",
@@ -152,6 +176,13 @@ describe("HomePageSupportWidget", () => {
 			cache: "no-store",
 		});
 		expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/support/messages", {
+			method: "GET",
+			headers: {
+				Accept: "application/json",
+			},
+			cache: "no-store",
+		});
+		expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/support/messages", {
 			method: "POST",
 			headers: {
 				Accept: "application/json",
@@ -181,6 +212,43 @@ describe("HomePageSupportWidget", () => {
 		).not.toContain("Can this help my SaaS?");
 	});
 
+	it("uses realtime thread state without loading the thread through the messages route", async () => {
+		useConvexTelegramChatRealtimeMock.mockReturnValue({
+			status: "ready",
+			threadState: createThreadState("Realtime reply is already here."),
+		});
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+			new Response(
+				JSON.stringify({
+					ok: true,
+					realtime: {
+						kind: "convex",
+						capabilityToken: "r".repeat(64),
+						expiresAt: 1_764_566_400_000,
+					},
+				}),
+				{ status: 200 },
+			),
+		);
+
+		const user = userEvent.setup();
+		render(<HomePageSupportWidget supportWidget={supportWidget} />);
+
+		await user.click(screen.getByRole("button", { name: "Message Parker" }));
+
+		expect(
+			await screen.findByText("Realtime reply is already here."),
+		).toBeTruthy();
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(fetchMock).toHaveBeenCalledWith("/api/support/session", {
+			method: "GET",
+			headers: {
+				Accept: "application/json",
+			},
+			cache: "no-store",
+		});
+	});
+
 	it("uploads a screenshot and sends a structured bug report", async () => {
 		const bugReportState = {
 			...createThreadState("Bug report\nImpact: Blocking me"),
@@ -204,6 +272,15 @@ describe("HomePageSupportWidget", () => {
 		};
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						ok: true,
+						realtime: { kind: "unavailable" },
+					}),
+					{ status: 200 },
+				),
+			)
 			.mockResolvedValueOnce(
 				new Response(
 					JSON.stringify({
@@ -261,7 +338,7 @@ describe("HomePageSupportWidget", () => {
 		await waitFor(() =>
 			expect(screen.getByText("Delivered to Parker")).toBeTruthy(),
 		);
-		expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/support/attachments", {
+		expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/support/attachments", {
 			method: "POST",
 			headers: {
 				Accept: "application/json",
@@ -274,7 +351,7 @@ describe("HomePageSupportWidget", () => {
 			}),
 		});
 		expect(fetchMock).toHaveBeenNthCalledWith(
-			3,
+			4,
 			"https://storage.example/upload",
 			expect.objectContaining({
 				method: "POST",
@@ -284,14 +361,14 @@ describe("HomePageSupportWidget", () => {
 			}),
 		);
 		expect(fetchMock).toHaveBeenNthCalledWith(
-			4,
+			5,
 			"/api/support/messages",
 			expect.objectContaining({
 				method: "POST",
 				body: expect.stringContaining("Bug report"),
 			}),
 		);
-		const messageRequestInit = fetchMock.mock.calls[3]?.[1] as
+		const messageRequestInit = fetchMock.mock.calls[4]?.[1] as
 			| RequestInit
 			| undefined;
 		if (!messageRequestInit || typeof messageRequestInit.body !== "string") {

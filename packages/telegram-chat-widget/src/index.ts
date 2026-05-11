@@ -11,6 +11,7 @@ export {
 export {
 	type TelegramChatClient,
 	type TelegramChatOutgoingScreenshot,
+	type TelegramChatRealtimeState,
 	type TelegramChatSendInput,
 	type TelegramChatSendBugReportInput,
 	type TelegramChatSendTextInput,
@@ -33,8 +34,12 @@ export {
 	type TelegramChatMessage,
 	type TelegramChatMessageAttachment,
 	type TelegramChatMessageSource,
+	type TelegramChatMode,
 	type TelegramChatPageContext,
 	type TelegramChatPlacement,
+	type TelegramChatLauncherMotion,
+	type TelegramChatStatus,
+	type TelegramChatSurface,
 	type TelegramChatThreadState,
 	type TelegramChatThreadStatus,
 } from "./core/telegram-chat-types";

@@ -11,6 +11,10 @@ vi.mock("@/lib/observability/posthog-client", () => ({
 		capturePostHogProductEventMock(input),
 }));
 
+vi.mock("@shipbysunday/telegram-chat-widget/convex", () => ({
+	useConvexTelegramChatRealtime: () => ({ status: "unavailable" }),
+}));
+
 function createThreadState(messageText = "Can you review my workspace setup?") {
 	return {
 		status: "open",
@@ -59,6 +63,15 @@ describe("WorkspaceSupportWidget", () => {
 	it("opens workspace support without exposing transcript DOM and sends workspace-scoped metadata", async () => {
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						ok: true,
+						realtime: { kind: "unavailable" },
+					}),
+					{ status: 200 },
+				),
+			)
 			.mockResolvedValueOnce(
 				new Response(
 					JSON.stringify({
@@ -117,7 +130,7 @@ describe("WorkspaceSupportWidget", () => {
 				"Parker usually catches these pretty quickly when he's near his phone.",
 			),
 		).toBeTruthy();
-		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/messages", {
+		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/session", {
 			method: "GET",
 			headers: {
 				Accept: "application/json",
@@ -125,6 +138,13 @@ describe("WorkspaceSupportWidget", () => {
 			cache: "no-store",
 		});
 		expect(fetchMock).toHaveBeenNthCalledWith(2, "/api/support/messages", {
+			method: "GET",
+			headers: {
+				Accept: "application/json",
+			},
+			cache: "no-store",
+		});
+		expect(fetchMock).toHaveBeenNthCalledWith(3, "/api/support/messages", {
 			method: "POST",
 			headers: {
 				Accept: "application/json",

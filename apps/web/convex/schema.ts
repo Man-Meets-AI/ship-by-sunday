@@ -16,6 +16,7 @@ import {
 import {
 	supportAiDraftGenerationStatusValidator,
 	supportAttachmentKindValidator,
+	supportConversationCapabilityStatusValidator,
 	supportDeliveryFailureClassValidator,
 	supportDeliveryStatusValidator,
 	supportGeneratedOutputSourceValidator,
@@ -524,6 +525,19 @@ export default defineSchema({
 	})
 		.index("by_bucket_key", ["bucketKey"])
 		.index("by_updated_at", ["updatedAt"]),
+	supportConversationCapabilities: defineTable({
+		capabilityTokenHash: v.string(),
+		sessionTokenHash: v.string(),
+		threadId: v.optional(v.id("supportThreads")),
+		status: supportConversationCapabilityStatusValidator,
+		createdAt: v.number(),
+		expiresAt: v.number(),
+		lastIssuedAt: v.number(),
+		revokedAt: v.optional(v.number()),
+	})
+		.index("by_capability_token_hash", ["capabilityTokenHash"])
+		.index("by_session_token_hash_and_status", ["sessionTokenHash", "status"])
+		.index("by_status_and_expires_at", ["status", "expiresAt"]),
 	errorEvents: defineTable({
 		fingerprint: v.string(),
 		fingerprintKey: v.string(),

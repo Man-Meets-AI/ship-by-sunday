@@ -29,6 +29,9 @@
 - Fact: This checkout's Convex CLI is authenticated enough to run `bunx convex deploy --dry-run -y` against the production deployment from `apps/web`; the production deployment URL is redacted from this repo note.
   Verified by: The Convex billing runtime hardening slice dry-run completed schema validation and reported that it would have deployed functions to the redacted production deployment without deleting indexes.
 
+- Fact: Hosted Convex dev sync must run from `apps/web` in this monorepo when using the raw Convex CLI; the root `release:convex:sync-hosted-dev` helper currently runs from the repo root and fails because root `package.json` does not depend on `convex`.
+  Verified by: `bun run release:convex:sync-hosted-dev` failed with "add `convex` to your package.json dependencies", while `bunx convex dev --once --typecheck disable` from `apps/web` succeeded and synced hosted dev indexes.
+
 ## 2026-05-07 Passwordless Checkout Account Handoff
 
 - Fact: A Stripe Checkout payment cannot safely create an authenticated browser session by itself.

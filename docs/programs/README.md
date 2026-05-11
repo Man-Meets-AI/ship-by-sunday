@@ -22,6 +22,7 @@ Active:
 
 Recently completed:
 
+- `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/`: completed standalone Telegram chat widget Program that extracted the polished support chat into an internal React package, preserved screenshot and bug-report support, added optional Convex realtime with scoped conversation capabilities, and removed visitor-side polling while realtime is active.
 - `docs/programs/completed/2026-05-09-shipping-evidence-hardening/`: completed shipping evidence hardening Program that added risk-matched source gates, Convex and billing runtime proof, explicit staging and production preflight contracts, artifact-derived tag release evidence, and clean-room generated repo command-contract proof.
 - `docs/programs/completed/2026-05-09-worker-install-compatibility-matrix/`: completed Worker Foundations install compatibility Program that proves the practical repo matrix through source and CI gates, with package smoke covering the shipped local-runner artifact path.
 - `docs/programs/completed/2026-05-05-docs-spine-adoption-quality-reset/`: completed docs-spine adoption reset that added deterministic evals, source-truth scanner repair, contract-grade rendering, apply proof hardening, weak-output replacement, and live Arena CRM acceptance with quality score 100.

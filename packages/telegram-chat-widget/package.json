@@ -18,8 +18,17 @@
 		"test": "vitest run --config vitest.config.ts"
 	},
 	"peerDependencies": {
+		"convex": "^1.37.0",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0"
+	},
+	"peerDependenciesMeta": {
+		"convex": {
+			"optional": true
+		}
+	},
+	"dependencies": {
+		"lucide-react": "^1.11.0"
 	},
 	"devDependencies": {
 		"@types/node": "25.5.0",

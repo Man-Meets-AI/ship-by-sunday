@@ -31,6 +31,142 @@ describe("convex support model", () => {
 		);
 	});
 
+	it("hashes support conversation capability tokens separately from session tokens", async () => {
+		const {
+			createSupportConversationCapabilityTokenHash,
+			createSupportSessionTokenHash,
+		} = await import("@/convex/support/model");
+		const token = "r".repeat(64);
+
+		const capabilityTokenHash =
+			await createSupportConversationCapabilityTokenHash(token);
+
+		expect(capabilityTokenHash).toMatch(/^[a-f0-9]{64}$/);
+		expect(capabilityTokenHash).not.toBe(token);
+		await expect(createSupportSessionTokenHash(token)).resolves.not.toBe(
+			capabilityTokenHash,
+		);
+		await expect(
+			createSupportConversationCapabilityTokenHash("short"),
+		).rejects.toThrow("Support conversation capability token is too short.");
+	});
+
+	it("issues hash-stored conversation capabilities for realtime reads", async () => {
+		const { issueVisitorConversationCapabilityHandler } =
+			await import("@/convex/support/model");
+		const inserted: Array<{
+			table: string;
+			document: Record<string, unknown>;
+		}> = [];
+		const patches: Array<{ id: string; patch: Record<string, unknown> }> = [];
+		const fakeCtx = createConversationCapabilityIssueContext({
+			activeCapabilities: [{ _id: "capability_old" }],
+			inserted,
+			patches,
+			thread: null,
+			visitor: null,
+		}) as unknown as Parameters<
+			typeof issueVisitorConversationCapabilityHandler
+		>[0];
+
+		const capability = await issueVisitorConversationCapabilityHandler(
+			fakeCtx,
+			{ sessionToken: "a".repeat(64) },
+		);
+
+		expect(capability.capabilityToken).toHaveLength(64);
+		expect(capability.expiresAt).toBeGreaterThan(Date.now());
+		expect(inserted).toEqual([
+			expect.objectContaining({
+				table: "supportConversationCapabilities",
+				document: expect.objectContaining({
+					status: "active",
+					capabilityTokenHash: expect.stringMatching(/^[a-f0-9]{64}$/),
+					sessionTokenHash: expect.stringMatching(/^[a-f0-9]{64}$/),
+				}),
+			}),
+		]);
+		expect(JSON.stringify(inserted)).not.toContain(capability.capabilityToken);
+		expect(JSON.stringify(inserted)).not.toContain("a".repeat(64));
+		expect(patches).toEqual([
+			{
+				id: "capability_old",
+				patch: expect.objectContaining({ status: "revoked" }),
+			},
+		]);
+	});
+
+	it("reads the realtime thread through a valid conversation capability", async () => {
+		const {
+			createSupportConversationCapabilityTokenHash,
+			createSupportSessionTokenHash,
+			getThreadByConversationCapabilityHandler,
+		} = await import("@/convex/support/model");
+		const capabilityToken = "r".repeat(64);
+		const sessionToken = "a".repeat(64);
+		const fakeCtx = createSequencedQueryContext([
+			{
+				unique: async () => ({
+					_id: "capability_1",
+					capabilityTokenHash:
+						await createSupportConversationCapabilityTokenHash(capabilityToken),
+					sessionTokenHash: await createSupportSessionTokenHash(sessionToken),
+					status: "active",
+					expiresAt: Date.now() + 60_000,
+				}),
+			},
+			{ unique: async () => ({ _id: "visitor_1" }) },
+			{
+				unique: async () => ({
+					_id: "thread_1",
+					visitorId: "visitor_1",
+					status: "open",
+					supportId: "SBS-0506-1234",
+				}),
+			},
+			{ order: () => ({ take: async () => [] }) },
+		]) as unknown as Parameters<
+			typeof getThreadByConversationCapabilityHandler
+		>[0];
+
+		const state = await getThreadByConversationCapabilityHandler(fakeCtx, {
+			capabilityToken,
+		});
+
+		expect(state).toMatchObject({
+			status: "open",
+			supportId: "SBS-0506-1234",
+			messages: [],
+		});
+	});
+
+	it("does not read support transcripts through expired conversation capabilities", async () => {
+		const { getThreadByConversationCapabilityHandler } =
+			await import("@/convex/support/model");
+		const fakeCtx = createSequencedQueryContext([
+			{
+				unique: async () => ({
+					_id: "capability_1",
+					sessionTokenHash: "hash_1",
+					status: "active",
+					expiresAt: Date.now() - 1,
+				}),
+			},
+		]) as unknown as Parameters<
+			typeof getThreadByConversationCapabilityHandler
+		>[0];
+
+		await expect(
+			getThreadByConversationCapabilityHandler(fakeCtx, {
+				capabilityToken: "r".repeat(64),
+			}),
+		).resolves.toMatchObject({
+			status: "disabled",
+			messages: [],
+			error: "Support realtime session expired. Refresh support.",
+		});
+	});
+
 	it("normalizes support message text at the boundary", async () => {
 		const { normalizeSupportMessageText } =
 			await import("@/convex/support/model");
@@ -1501,6 +1637,48 @@ function createSequencedQueryContext(
 					throw new Error("Unsupported query result.");
 				}),
 			})),
+		},
+	};
+}
+
+function createConversationCapabilityIssueContext({
+	activeCapabilities,
+	inserted,
+	patches,
+	thread,
+	visitor,
+}: {
+	activeCapabilities: Array<Record<string, unknown>>;
+	inserted: Array<{ table: string; document: Record<string, unknown> }>;
+	patches: Array<{ id: string; patch: Record<string, unknown> }>;
+	thread: Record<string, unknown> | null;
+	visitor: Record<string, unknown> | null;
+}) {
+	return {
+		db: {
+			query: (table: string) => ({
+				withIndex: () => {
+					if (table === "supportVisitors") {
+						return { unique: async () => visitor };
+					}
+					if (table === "supportThreads") {
+						return thread
+							? { unique: async () => thread }
+							: { unique: async () => null };
+					}
+					if (table === "supportConversationCapabilities") {
+						return { take: async () => activeCapabilities };
+					}
+					throw new Error(`Unexpected table ${table}`);
+				},
+			}),
+			insert: async (table: string, document: Record<string, unknown>) => {
+				inserted.push({ table, document });
+				return `${table}_inserted`;
+			},
+			patch: async (id: string, patch: Record<string, unknown>) => {
+				patches.push({ id, patch });
+			},
 		},
 	};
 }

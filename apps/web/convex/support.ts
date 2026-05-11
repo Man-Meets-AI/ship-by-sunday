@@ -32,10 +32,12 @@ import {
 	createVisitorMessageForDeliveryHandler,
 	deliverSupportVisitorMessage,
 	failOperatorActionAiDraftHandler,
-	getSupportOperationsSnapshotHandler,
 	getFailedVisitorMessageForRecoveryHandler,
+	getSupportOperationsSnapshotHandler,
 	getOperatorActionAiDraftContextHandler,
+	getThreadByConversationCapabilityHandler,
 	getThreadBySessionHandler,
+	issueVisitorConversationCapabilityHandler,
 	markOperatorActionNoteDeliveryHandler,
 	markSupportThreadTelegramTopicCleanupHandler,
 	markThreadTelegramHeaderHandler,
@@ -49,6 +51,7 @@ import {
 	validateSupportAttachmentUploadRequest,
 	type CreateVisitorMessageResult,
 	type FailedMessageForRecovery,
+	type SupportConversationCapability,
 	type SupportMessageAttachment,
 	type SupportRetentionMaintenanceResult,
 	type SupportOperatorAiDraftContext,
@@ -147,6 +150,11 @@ const supportRetentionMaintenanceResultValidator = v.object({
 	telegramTopicCleanups: v.array(supportTelegramTopicCleanupValidator),
 });
 
+const supportConversationCapabilityValidator = v.object({
+	capabilityToken: v.string(),
+	expiresAt: v.number(),
+});
+
 const supportActionMessageContextValidator = v.object({
 	id: v.id("supportMessages"),
 	source: v.union(
@@ -206,6 +214,23 @@ export const getThreadBySession = query({
 	},
 	returns: supportThreadStateValidator,
 	handler: getThreadBySessionHandler,
+});
+
+export const issueVisitorConversationCapability = mutation({
+	args: {
+		sessionToken: v.string(),
+	},
+	returns: supportConversationCapabilityValidator,
+	handler: async (ctx, args): Promise<SupportConversationCapability> =>
+		await issueVisitorConversationCapabilityHandler(ctx, args),
+});
+
+export const getThreadByConversationCapability = query({
+	args: {
+		capabilityToken: v.string(),
+	},
+	returns: supportThreadStateValidator,
+	handler: getThreadByConversationCapabilityHandler,
 });
 
 export const generateVisitorAttachmentUploadUrl = mutation({

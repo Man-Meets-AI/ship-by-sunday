@@ -6,7 +6,7 @@ completed_at: 2026-05-11
 summary: Create the internal telegram chat widget package shell, contracts, fetch adapter, package docs, and validation gates without moving app UI yet.
 post_build_recap: Added the internal telegram chat widget package scaffold with typed contracts, screenshot and bug-report helpers, metadata-only events, CSS token shell, reserved Convex subpath, tested fetch adapter, README, lockfile entry, and root package validation wiring.
 program_id: standalone-telegram-chat-widget
-planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/planning-brief-1.md
 read_when:
   - Starting the standalone telegram chat widget package scaffold.
   - Resuming package contract implementation.
@@ -25,7 +25,7 @@ Ship by Sunday already has a polished Telegram-backed support widget in the web 
 
 ## Progress
 
-- [x] 2026-05-11: Created this child ExecPlan from `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-1.md`.
+- [x] 2026-05-11: Created this child ExecPlan from `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/planning-brief-1.md`.
 - [x] 2026-05-11: Created the package manifest, TypeScript config, Vitest config, README, and source/test directories.
 - [x] 2026-05-11: Defined core public types, content defaults, privacy hook constants, attachment policy, bug-report payload helpers, analytics event helpers, and client adapter interface.
 - [x] 2026-05-11: Added a working configurable fetch adapter that defaults to the current support routes.
@@ -69,7 +69,7 @@ The current route bridge lives in `apps/web/app/api/support/_server/support-mess
 
 The new package root is `packages/telegram-chat-widget`. Existing internal packages such as `packages/codebase-compiler` and `packages/codebase-presentation` are TypeScript source-first packages with `package.json`, `tsconfig.json`, `vitest.config.ts`, `src/index.ts`, package-local `lint`, `format`, `format:check`, `typecheck`, and `test` scripts, and root package validation wiring in `package.json`.
 
-The Program packet for the larger initiative lives in `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/`. The immutable brief for this slice is `planning-brief-1.md`. When implementation discovers new facts, update this ExecPlan first, then the Program if the discovery changes initiative-level truth.
+The Program packet for the larger initiative lives in `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/`. The immutable brief for this slice is `planning-brief-1.md`. When implementation discovers new facts, update this ExecPlan first, then the Program if the discovery changes initiative-level truth.
 
 ### In Scope
 
@@ -103,7 +103,7 @@ Create `packages/telegram-chat-widget/README.md`. Document package imports, CSS 
 
 Update the root `package.json` scripts `lint:packages`, `typecheck:packages`, and `test:packages` to include `packages/telegram-chat-widget`. If the root lockfile changes because of package metadata or dependency additions, commit that lockfile change. Do not update `apps/web/next.config.ts` in this slice unless TypeScript or package validation proves it is required before the app consumes the package.
 
-Update this ExecPlan as implementation proceeds. When the scaffold is complete, update the owning Program in `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/program.md` to mark this child plan created or completed as appropriate and to name the next recommended slice.
+Update this ExecPlan as implementation proceeds. When the scaffold is complete, update the owning Program in `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/program.md` to mark this child plan created or completed as appropriate and to name the next recommended slice.
 
 ## Milestones
 
@@ -168,12 +168,12 @@ If these commands fail because of the new package, fix the package. If they fail
 Validate docs and plan state:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md docs/programs/active/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md docs/programs/completed/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
     git diff --check
 
 Run `bun run programs:lint` if the unrelated Program tree is in a valid state. If it is blocked by unrelated dirty files, record that exact blocker and the targeted Program metadata result. The standalone widget Program should remain valid.
 
-When complete, update the `Progress`, `Surprises & Discoveries`, `Outcomes & Retrospective`, and `Artifacts and Notes` sections in this plan. Then update `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/program.md` so the Program ledger names this active or completed child plan and the next recommended slice.
+When complete, update the `Progress`, `Surprises & Discoveries`, `Outcomes & Retrospective`, and `Artifacts and Notes` sections in this plan. Then update `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/program.md` so the Program ledger names this active or completed child plan and the next recommended slice.
 
 ## Validation and Acceptance
 
@@ -195,7 +195,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run typecheck:packages
     bun run test:packages
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md docs/programs/active/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md docs/programs/completed/2026-05-10-standalone-telegram-chat-widget packages/telegram-chat-widget/README.md
     git diff --check
 
 Run this command too when the unrelated Program tree is valid:

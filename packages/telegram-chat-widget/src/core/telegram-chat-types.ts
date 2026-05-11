@@ -41,6 +41,14 @@ export type TelegramChatEntrySurface =
 
 export type TelegramChatPlacement = "bottom-right" | "bottom-left";
 
+export type TelegramChatLauncherMotion = "standard" | "squishy";
+
+export type TelegramChatSurface = "homepage" | "workspace" | (string & {});
+
+export type TelegramChatStatus = "idle" | "loading" | "sending" | "error";
+
+export type TelegramChatMode = "message" | "bug_report";
+
 export type TelegramChatBugImpact = "blocked" | "not_blocked" | "question";
 
 export type TelegramChatBugReportDraft = {

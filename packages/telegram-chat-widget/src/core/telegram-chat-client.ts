@@ -35,3 +35,19 @@ export type TelegramChatClient = {
 		input: TelegramChatSendInput,
 	) => Promise<TelegramChatThreadState>;
 };
+
+export type TelegramChatRealtimeState =
+	| {
+			readonly status: "unavailable";
+	  }
+	| {
+			readonly status: "loading";
+	  }
+	| {
+			readonly status: "ready";
+			readonly threadState: TelegramChatThreadState;
+	  }
+	| {
+			readonly status: "error";
+			readonly errorMessage: string;
+	  };

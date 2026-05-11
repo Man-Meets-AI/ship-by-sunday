@@ -1,5 +1,5 @@
 import { SupportWidget } from "@/app/_components/support/support-widget";
-import type { SupportWidgetContent } from "@/app/_components/support/support-widget-panel";
+import type { SupportWidgetContent } from "@/app/_components/support/support-widget";
 
 const workspaceSupportWidgetContent = {
 	launcherLabel: "Ask Parker",
@@ -24,6 +24,9 @@ const workspaceSupportWidgetContent = {
 	deliveredLabel: "Delivered to Parker",
 	failedLabel: "Parker may not have seen this.",
 	closedLabel: "This thread is closed.",
+	screenshotRejectedTypeMessage: "Upload a PNG, JPG, or WebP screenshot.",
+	screenshotRejectedSizeMessage: "Screenshots must be 10 MB or smaller.",
+	genericErrorMessage: "Unable to reach support.",
 } satisfies SupportWidgetContent;
 
 export function WorkspaceSupportWidget({

@@ -1,11 +1,11 @@
 ---
 program_id: standalone-telegram-chat-widget
 title: Standalone Telegram Chat Widget
-status: active
+status: complete
 created_at: 2026-05-10
-completed_at: null
+completed_at: 2026-05-11
 summary: Extract the first-party Telegram support experience into a standalone React package with optional Convex realtime support, without depending on Next.js or Convex Component packaging.
-post_build_recap: null
+post_build_recap: The Telegram support widget now lives in a standalone internal React package consumed by apps/web, owns the polished ChatGPT-like customer UI, screenshot and inline bug-report behavior, fetch transport, package CSS, and optional Convex realtime subscription state; the web host now supplies only app-specific transport, content, analytics, and capability wiring.
 read_when:
   - Planning or implementing the standalone Telegram chat widget package.
   - Changing support widget package boundaries, realtime transport, attachment handling, or host-app integration.
@@ -20,25 +20,25 @@ This Program must be maintained in accordance with `docs/programs/PROGRAMS.md`.
 
 ## Purpose / Big Picture
 
-Ship by Sunday now has a working first-party Telegram-backed support widget, but the implementation still lives as app-local components, routes, and Convex support code. The next product step is to turn the chat experience into `packages/telegram-chat-widget`: a reusable React package that can be mounted by Ship by Sunday first and later reused in other hosts without depending on Next.js, a router, or a Convex Component install model.
+Ship by Sunday now has a first-party Telegram-backed support widget packaged as `packages/telegram-chat-widget`: a reusable React package that can be mounted by Ship by Sunday first and later reused in other hosts without depending on Next.js, a router, or a Convex Component install model.
 
-The initiative is moving in the right direction when the widget UI, composer behavior, attachment affordances, and chat state orchestration live behind a clear package API; the Ship by Sunday web app consumes that package as the first production host; Convex realtime replaces visitor-side polling through an adapter; anonymous and signed-in thread access are explicit; and external setup requirements are documented where a future maintainer will look.
+The initiative is complete because the widget UI, composer behavior, attachment affordances, and chat state orchestration live behind a clear package API; the Ship by Sunday web app consumes that package as the first production host; Convex realtime replaces visitor-side polling where enabled; anonymous realtime access uses an explicit scoped capability; and package setup is documented where a future maintainer will look.
 
 ## Program Inputs
 
-The durable packet artifacts for this Program live in `docs/programs/active/2026-05-10-standalone-telegram-chat-widget/`.
+The durable packet artifacts for this Program live in `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/`.
 
-The current support runtime research is recorded in `research-pass-current-support-runtime.md`. Convex realtime and auth research is recorded in `research-pass-convex-realtime-and-auth.md`. Package boundary research is recorded in `research-pass-package-boundaries-and-distribution.md`. The normalized architecture is recorded in `normalized-pass-standalone-widget-architecture.md`. Locked initiative decisions are in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. The first immutable implementation brief is `planning-brief-1.md`, and `current-planning-brief.txt` points at that brief.
+The current support runtime research is recorded in `research-pass-current-support-runtime.md`. Convex realtime and auth research is recorded in `research-pass-convex-realtime-and-auth.md`. Package boundary research is recorded in `research-pass-package-boundaries-and-distribution.md`. The normalized architecture is recorded in `normalized-pass-standalone-widget-architecture.md`. Locked initiative decisions are in `converged-decision-packet.md`. Ordering is in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is in `cross-repo-review.md`. Immutable implementation briefs are versioned as `planning-brief-<N>.md`, and `current-planning-brief.txt` points at `planning-brief-3.md`, the final Convex realtime adapter slice.
 
 ## Current State
 
-The current support system is implemented in the web app and Convex runtime. `apps/web/app/_components/support/` owns the React widget modules. `apps/web/app/api/support/_server/` owns the Next support-session bridge and HttpOnly cookie behavior. `apps/web/convex/support.ts`, `apps/web/convex/support/model.ts`, `apps/web/convex/support/telegram.ts`, and `apps/web/convex/http.ts` own support threads, messages, Telegram delivery, webhook ingestion, operator actions, retention, and recovery.
+The current support system is split between the standalone widget package, the web app host bridge, and the Convex runtime. `packages/telegram-chat-widget` owns the React widget UI, controller, typed client contracts, fetch adapter, optional Convex realtime state contract, content contract, privacy DOM hooks, screenshot policy, bug-report rendering, and CSS. `apps/web/app/_components/support/support-widget.tsx` is now only a host wrapper that creates the fetch client, supplies branded content and surface metadata, maps package events to PostHog, requests a realtime capability, and passes Convex subscription state into the package. `apps/web/app/api/support/_server/` owns the Next support-session bridge and HttpOnly cookie behavior. `apps/web/convex/support.ts`, `apps/web/convex/support/model.ts`, `apps/web/convex/support/telegram.ts`, and `apps/web/convex/http.ts` own support threads, messages, Telegram delivery, webhook ingestion, operator actions, retention, and recovery.
 
 Recent support work landed the custom Telegram bridge, authenticated workspace entry, screenshot and bug-report UX, a ChatGPT-like visual polish pass, removal of the redundant `Replies stay in this thread` copy, and Enter-to-send behavior. The latest focused UI polish is committed as `31742e66 feat: polish support widget chat UI`.
 
-As of 2026-05-11, `packages/telegram-chat-widget` exists as the first internal package scaffold. It owns the initial public contracts, screenshot policy, bug-report rendering, metadata-only analytics helpers, privacy constants, CSS token shell, a tested fetch adapter, a reserved non-live Convex subpath, and package README docs. `apps/web` does not consume the package yet, so the current app-local widget remains the customer-facing implementation.
+As of 2026-05-11, `packages/telegram-chat-widget` is the customer-facing widget implementation consumed by `apps/web`. It renders the polished launcher, panel, transcript, composer, inline bug-report fields, screenshot chip, optimistic send state, Enter-to-send behavior, privacy hooks, and fallback fetch behavior.
 
-The existing implementation still polls through the app support route for visitor transcript updates. Convex already supports realtime subscriptions through React hooks, and `apps/web/platform/convex/convex-client-provider.tsx` already wraps the web app with `ConvexProviderWithClerk`. The package extraction should use this existing host capability rather than introduce a manual WebSocket or a package-specific server.
+Visitor transcript reads now use Convex realtime when the Ship by Sunday host can issue a support conversation capability. The browser-visible capability is high entropy, hash-stored in Convex, scoped to the current support conversation, and separate from the HttpOnly support-session cookie. While realtime is loading or ready, the package suppresses the former three-second `/api/support/messages` polling loop. If capability issuance or Convex subscription is unavailable, the package falls back to the existing fetch bridge.
 
 This Program depends on the active Telegram Support Bot Program for the current backend behavior and provider setup truth. It should not re-litigate the customer-support bot architecture. Its job is to package and harden the widget boundary.
 
@@ -76,9 +76,10 @@ This Program depends on the active Telegram Support Bot Program for the current 
 - [x] 2026-05-11: Locked package README for package API docs and app docs for provider/runtime setup.
 - [x] 2026-05-11: Created child ExecPlan `docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md` from `planning-brief-1.md`.
 - [x] 2026-05-11: Landed the package contract and scaffold in `packages/telegram-chat-widget` with focused package tests and root package script wiring.
-- [ ] Migrate the Ship by Sunday support widget to consume the package without behavior regression.
-- [ ] Add the Convex realtime adapter and remove visitor-side polling where the host provides Convex.
-- [ ] Document standalone setup, auth/session tradeoffs, attachment limits, and verification.
+- [x] 2026-05-11: Migrated the Ship by Sunday support widget to consume the package with the existing fetch transport and app route bridge.
+- [x] 2026-05-11: Added the Convex realtime adapter and removed visitor-side polling where the host provides Convex.
+- [x] 2026-05-11: Documented standalone setup, auth/session tradeoffs, attachment limits, Convex realtime usage, and verification in the package README and child ExecPlans.
+- [x] 2026-05-11: Completed this Program and moved it to `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/`.
 
 ## Decision Log
 
@@ -222,35 +223,37 @@ Decision: Split package API docs from provider/runtime setup docs.
 Rationale: `packages/telegram-chat-widget/README.md` should document package usage, imports, CSS, adapters, content overrides, privacy hooks, and test commands. App docs should continue owning Telegram bot setup, Convex env, webhook setup, production verification, and operator workflow because those are host/runtime responsibilities.
 Date: 2026-05-11
 
+Decision: Make `apps/web` a thin host wrapper over the package widget.
+Rationale: The package now owns the full customer-facing support chat UI and state machine. The web app should keep only host concerns: fetch transport creation, content selection, support entry/surface metadata, fallback URL, launcher motion, CSS import, Next package transpilation, and PostHog event adaptation.
+Date: 2026-05-11
+
+Decision: Use a scoped support conversation capability for browser Convex realtime reads.
+Rationale: The browser cannot and should not read the HttpOnly support-session cookie. A random capability token stored only as a Convex hash gives the package enough authority to subscribe to the current conversation without exposing the long-lived session token.
+Date: 2026-05-11
+
+Decision: Keep message sends and screenshot uploads on the fetch bridge while realtime reads use Convex.
+Rationale: The existing fetch bridge already owns HttpOnly session authority, attachment upload preparation, Telegram delivery, and error handling. Moving reads first removes polling without expanding the mutation/auth surface in the same slice.
+Date: 2026-05-11
+
 ## Slice Ledger
 
-Child ExecPlans should carry `program_id: standalone-telegram-chat-widget` and `planning_brief: docs/programs/active/2026-05-10-standalone-telegram-chat-widget/planning-brief-<N>.md` in their frontmatter.
+Child ExecPlans should carry `program_id: standalone-telegram-chat-widget` and `planning_brief: docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/planning-brief-<N>.md` in their frontmatter.
 
 Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md`: completed first slice for `Package Contract And Scaffold`.
-
-Planned slices:
-
-- UI Extraction With Fetch Transport: move the current polished widget UI and hook orchestration into the package while preserving the existing Next route bridge.
-- Ship By Sunday Consumer Migration: replace app-local support widget internals with package imports while keeping homepage and workspace placement in `apps/web`.
-- Convex Realtime Adapter: add optional direct Convex subscriptions and mutations so host apps can stream updates without polling.
-- Attachments And Bug Report Hardening: make screenshot upload, bug report metadata, file limits, and retention behavior package-aware and adapter-safe.
-- Standalone Docs And Example: document install, CSS import, host adapter contracts, Convex env setup, Telegram setup, Clerk association, and verification.
+- `docs/exec-plans/completed/2026-05-11-ui-extraction-with-fetch-transport.md`: completed second slice for `UI Extraction With Fetch Transport`.
+- `docs/exec-plans/completed/2026-05-11-convex-realtime-adapter.md`: completed final slice for Convex-backed realtime reads, support conversation capabilities, and no-poll browser proof.
 
 ## Next Slice
 
-No child ExecPlan is active right now. The next recommended child ExecPlan is `UI Extraction With Fetch Transport`.
-
-That slice should move the current polished launcher, panel, composer, message rendering, screenshot chip, bug-report mode, Enter-to-send behavior, open/close state, optimistic send behavior, loading and error states, and privacy hooks from `apps/web/app/_components/support/` into `packages/telegram-chat-widget`. It should use the package's existing typed client adapter and the `createFetchTelegramChatClient` subpath so `apps/web` can keep today's `/api/support/messages` and `/api/support/attachments` bridge, HttpOnly support-session cookie, and polling behavior while the UI moves. It should bring the selected AI Elements-inspired primitives into the package only when they are real, branded, and tested as part of the UI implementation. It should not add live Convex realtime, direct browser-visible conversation tokens, backend schema changes, provider setup changes, arbitrary file uploads, or a public package release.
-
-The proof for that next slice should include package-local React/UI tests for the extracted state behavior, app integration tests proving homepage and workspace support widget behavior still works, and desktop plus mobile browser proof because it changes the customer-visible chat surface.
+No required next slice remains inside this Program.
 
 ## Risks and Watchpoints
 
-The largest risk is mixing three separate problems in one slice: packaging the UI, changing auth/session authority, and replacing polling with realtime. The migration should land those boundaries in order.
+The largest historical risk was mixing three separate problems in one slice: packaging the UI, changing auth/session authority, and replacing polling with realtime. The migration landed those boundaries in order: package contract, UI extraction with fetch transport, then Convex realtime.
 
-The current app's anonymous transcript authority is an HttpOnly support-session cookie. Direct Convex subscriptions from browser code cannot use that cookie directly. A future realtime adapter must either preserve a host server bridge for sensitive reads or introduce a scoped browser-visible conversation capability with clear limits.
+The current app's anonymous transcript authority is still an HttpOnly support-session cookie. Direct Convex subscriptions from browser code use a separate scoped conversation capability. Future work must not expose the raw support-session token or broaden that capability beyond support-thread reads.
 
 Package styling can accidentally couple the widget to `apps/web` Tailwind classes. The reusable package should converge on a CSS import and variables so other React hosts can render the widget without copying the app Tailwind setup.
 
@@ -258,19 +261,21 @@ Convex subscriptions should use the official Convex React client behavior. Do no
 
 The existing Telegram Support Bot Program still owns backend provider setup, production bot decisions, operator action semantics, and retention policy. This Program should reference that truth instead of duplicating or drifting it.
 
-There is unrelated dirty billing/release work in the local checkout. Program and package commits should stage only files belonging to this initiative unless the product owner explicitly asks for a broader commit.
+There is unrelated dirty billing/release work in the local checkout. Commits for this initiative should stage only files belonging to this Program unless the product owner explicitly asks for a broader commit.
 
 ## Outcomes & Retrospective
 
-This Program is active. The expected outcome is a first-party standalone chat widget package that Ship by Sunday consumes in production, with a polished ChatGPT-like UX built from package-owned, heavily branded AI Elements-inspired primitives, screenshot and bug-report support, optional Convex realtime, host-owned auth/session integration, documented setup, and no hard dependency on Next.js or Convex Component packaging.
+This Program is complete. The first-party support widget now lives in `packages/telegram-chat-widget` and is consumed by `apps/web` through stable package exports. The package owns the polished ChatGPT-like support UI, package CSS, privacy hooks, screenshot validation, inline bug-report mode, optimistic send state, Enter-to-send behavior, fetch adapter, and optional Convex realtime state. The web app owns only host concerns: route bridge, content overrides, fallback link, surface metadata, PostHog event mapping, Convex query reference, and support conversation capability issuance.
 
-The retrospective should be filled after the package is consumed by `apps/web`, polling is removed where realtime is available, docs and examples are complete, and validation proves both the package and host integration.
+The main lesson is that the cleanest boundary was not a Convex Component or a Next.js feature extraction. The durable split is a React package with optional adapter subpaths, plus app-owned provider/session bridges. Keeping send/upload on fetch while moving reads to Convex realtime removed the customer-visible polling problem without expanding the mutation surface.
+
+Intentionally deferred work belongs outside this Program: arbitrary file uploads, multiple attachments per message, public npm publishing, non-Ship by Sunday generic copy defaults, and extraction of Telegram backend provider setup. The active Telegram Support Bot Program remains the owner for backend provider setup, operator action semantics, and retention policy.
 
 ## Validation and Acceptance
 
-The Program can move to completed only when `packages/telegram-chat-widget` exists, the package passes its own lint/typecheck/test gates, `apps/web` consumes the package through stable exports, support widget browser proof covers desktop and mobile, Convex realtime is proven where enabled, screenshot and bug-report behavior still works, and setup docs describe every required Telegram, Convex, Clerk, env, and host-app value.
+This Program is complete because `packages/telegram-chat-widget` exists, the package passes its own lint/typecheck/test gates, `apps/web` consumes the package through stable exports, support widget browser proof covers desktop and mobile, Convex realtime is proven where enabled, screenshot and bug-report behavior still works, and package setup docs describe CSS import, host adapter contracts, attachment limits, auth/session tradeoffs, Convex realtime usage, and verification.
 
-Each runtime slice should run the narrowest package and app tests for the touched behavior, then broaden to `bun run format`, `bun lint`, and `bun typecheck` before completion when code changes are involved. Program-only doc slices should run `bun run programs:lint` and markdown validation when available.
+Final proof is recorded in the child ExecPlans. The latest realtime slice passed focused app unit tests, package lint/format/typecheck/tests, app lint/typecheck, app integration UI tests, package aggregate gates, hosted Convex dev sync from `apps/web`, and desktop/mobile browser proof that opening the widget makes one `/api/support/session` request and no `/api/support/messages` polling GETs while realtime is active.
 
 ## Artifacts and Notes
 
@@ -292,11 +297,15 @@ Current code anchors:
 
 - Package root: `packages/telegram-chat-widget`
 - Package fetch adapter: `packages/telegram-chat-widget/src/adapters/fetch/fetch-telegram-chat-client.ts`
+- Package Convex adapter: `packages/telegram-chat-widget/src/adapters/convex/index.ts`
 - Package public exports: `packages/telegram-chat-widget/src/index.ts`
 - Completed package scaffold ExecPlan: `docs/exec-plans/completed/2026-05-11-package-contract-and-scaffold.md`
-- Widget UI: `apps/web/app/_components/support/support-widget-panel.tsx`
-- Widget orchestration: `apps/web/app/_components/support/use-support-chat.ts`
-- Support API client: `apps/web/app/_components/support/support-api-client.ts`
+- Completed UI extraction ExecPlan: `docs/exec-plans/completed/2026-05-11-ui-extraction-with-fetch-transport.md`
+- Completed Convex realtime ExecPlan: `docs/exec-plans/completed/2026-05-11-convex-realtime-adapter.md`
+- Widget UI: `packages/telegram-chat-widget/src/react/telegram-chat-widget.tsx`
+- Widget orchestration: `packages/telegram-chat-widget/src/react/use-telegram-chat-controller.ts`
+- App host wrapper: `apps/web/app/_components/support/support-widget.tsx`
+- App realtime capability hook: `apps/web/app/_components/support/use-support-realtime-capability.ts`
 - Next support bridge: `apps/web/app/api/support/_server/support-message-route.ts`
 - Support session cookie: `apps/web/app/api/support/_server/support-session-cookie.ts`
 - Convex public support API: `apps/web/convex/support.ts`
@@ -309,6 +318,6 @@ The package depends on the repo workspace convention for packages under `package
 
 The Ship by Sunday host app depends on Convex through `apps/web/platform/convex/convex-client-provider.tsx` and Clerk through the existing Convex provider integration.
 
-The package should expose a React-facing interface that can run with a fetch transport first and a Convex transport later. The primary React interface should be an all-in-one `TelegramChatWidget`; lower-level panel or primitive exports should stay private or testing-only until a real host need appears. Transport should be represented by one typed client adapter object, not a loose bag of callbacks. In v1, those surfaces should live in one package with subpath exports rather than separate packages. Host apps own fallback links, analytics event sinks, auth context, provider env, provider deployment, and any copy overrides needed for their surface. The package owns Parker/Ship by Sunday-branded defaults. The styling interface should be a package CSS file that follows shadcn semantic token conventions, inherits from the host's token values by default, and allows host overrides through `--sbs-chat-*` variables. Placement should default to fixed bottom-right with narrow alternatives such as bottom-left and inline.
+The package exposes a React-facing interface that can run with a fetch transport and optional Convex realtime state. The primary React interface is an all-in-one `TelegramChatWidget`; lower-level panel or primitive exports stay private or testing-only until a real host need appears. Transport is represented by one typed client adapter object, not a loose bag of callbacks. In v1, those surfaces live in one package with subpath exports rather than separate packages. Host apps own fallback links, analytics event sinks, auth context, provider env, provider deployment, realtime capability issuance, and any copy overrides needed for their surface. The package owns Parker/Ship by Sunday-branded defaults. The styling interface is a package CSS file that follows shadcn semantic token conventions, inherits from the host's token values by default, and allows host overrides through `--sbs-chat-*` variables. Placement defaults to fixed bottom-right with narrow alternatives such as bottom-left and inline.
 
 The backend behavior depends on the Telegram Support Bot Program until and unless backend helper code is deliberately extracted into this package or a sibling package.

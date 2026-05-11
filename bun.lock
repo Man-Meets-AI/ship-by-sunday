@@ -23,6 +23,7 @@
         "@remotion/player": "^4.0.455",
         "@shipbysunday/codebase-compiler": "workspace:*",
         "@shipbysunday/codebase-presentation": "workspace:*",
+        "@shipbysunday/telegram-chat-widget": "workspace:*",
         "@stripe/react-stripe-js": "^6.3.0",
         "@stripe/stripe-js": "^9.4.0",
         "@tabler/icons-react": "^3.40.0",
@@ -123,6 +124,9 @@
     "packages/telegram-chat-widget": {
       "name": "@shipbysunday/telegram-chat-widget",
       "version": "0.1.0",
+      "dependencies": {
+        "lucide-react": "^1.11.0",
+      },
       "devDependencies": {
         "@types/node": "25.5.0",
         "@types/react": "19.2.14",
@@ -133,9 +137,13 @@
         "vitest": "^4.1.0",
       },
       "peerDependencies": {
+        "convex": "^1.37.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
       },
+      "optionalPeers": [
+        "convex",
+      ],
     },
   },
   "packages": {

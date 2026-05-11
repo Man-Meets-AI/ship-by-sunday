@@ -49,6 +49,8 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/apps/web/config/generated-design-system.ts",
 				"ship-by-sunday-os/packages/codebase-presentation/package.json",
 				"ship-by-sunday-os/packages/codebase-presentation/src/index.ts",
+				"ship-by-sunday-os/packages/telegram-chat-widget/package.json",
+				"ship-by-sunday-os/packages/telegram-chat-widget/src/index.ts",
 				"ship-by-sunday-os/docs/index.md",
 				"ship-by-sunday-os/docs/build/docs/prompt.md",
 				"ship-by-sunday-os/docs/facts/design-system.json",

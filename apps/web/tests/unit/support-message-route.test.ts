@@ -70,6 +70,56 @@ describe("support message route", () => {
 		});
 	});
 
+	it("issues a browser-visible realtime capability without exposing the session token", async () => {
+		fetchMutationMock.mockResolvedValueOnce({
+			capabilityToken: "r".repeat(64),
+			expiresAt: 1_764_566_400_000,
+		});
+		const { GET } = await import("@/app/api/support/session/route");
+
+		const response = await GET(
+			new Request("https://example.test/api/support/session"),
+		);
+		const body = await response.json();
+		const setCookieHeader = response.headers.get("set-cookie");
+		const cookieValue = setCookieHeader?.match(
+			/__Host-sbs_support_session=([^;]+)/,
+		)?.[1];
+
+		expect(response.status).toBe(200);
+		expect(setCookieHeader).toContain("HttpOnly");
+		expect(body).toEqual({
+			ok: true,
+			realtime: {
+				kind: "convex",
+				capabilityToken: "r".repeat(64),
+				expiresAt: 1_764_566_400_000,
+			},
+		});
+		expect(JSON.stringify(body)).not.toContain(cookieValue ?? "missing");
+		expect(fetchMutationMock).toHaveBeenCalledWith(expect.anything(), {
+			sessionToken: cookieValue,
+		});
+	});
+
+	it("keeps the session route available when realtime capability issuance fails", async () => {
+		fetchMutationMock.mockRejectedValueOnce(new Error("convex unavailable"));
+		const { GET } = await import("@/app/api/support/session/route");
+
+		const response = await GET(
+			new Request("https://example.test/api/support/session"),
+		);
+
+		await expect(response.json()).resolves.toEqual({
+			ok: true,
+			realtime: {
+				kind: "unavailable",
+			},
+		});
+		expect(response.status).toBe(200);
+		expect(response.headers.get("set-cookie")).toContain("HttpOnly");
+	});
+
 	it("sends messages with the existing cookie token and no browser-held bearer", async () => {
 		const { POST } = await import("@/app/api/support/messages/route");
 		const existingToken = "b".repeat(64);

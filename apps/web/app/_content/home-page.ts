@@ -628,6 +628,9 @@ export const homePageContent = {
 		deliveredLabel: "Delivered to Parker",
 		failedLabel: "Parker may not have seen this.",
 		closedLabel: "This thread is closed.",
+		screenshotRejectedTypeMessage: "Upload a PNG, JPG, or WebP screenshot.",
+		screenshotRejectedSizeMessage: "Screenshots must be 10 MB or smaller.",
+		genericErrorMessage: "Unable to reach support.",
 	},
 	footerWordmark: productName,
 } as const;

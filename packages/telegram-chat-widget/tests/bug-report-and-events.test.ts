@@ -86,11 +86,21 @@ describe("telegram chat events", () => {
 	});
 
 	it("rejects message bodies and object-shaped analytics properties", () => {
-		expect(() =>
-			createTelegramChatEvent("support_widget_message_sent", {
-				messageText: "secret transcript",
-			}),
-		).toThrow("not metadata");
+		const sensitivePropertyNames = [
+			"messageText",
+			"MessageText",
+			"raw_transcript",
+			"session_token",
+			"screenshot_url",
+			"telegram_id",
+		];
+		for (const propertyName of sensitivePropertyNames) {
+			expect(() =>
+				createTelegramChatEvent("support_widget_message_sent", {
+					[propertyName]: "secret transcript",
+				}),
+			).toThrow("not metadata");
+		}
 
 		expect(() =>
 			createTelegramChatEvent("support_widget_message_sent", {

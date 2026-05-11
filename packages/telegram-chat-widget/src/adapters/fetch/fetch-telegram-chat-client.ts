@@ -34,6 +34,15 @@ type UploadedTelegramChatScreenshot = TelegramChatScreenshotDescriptor & {
 const defaultMessagesEndpoint = "/api/support/messages";
 const defaultAttachmentsEndpoint = "/api/support/attachments";
 
+type TelegramChatJsonPrimitive = string | number | boolean | null;
+type TelegramChatJsonObject = {
+	readonly [key: string]: TelegramChatJsonValue | undefined;
+};
+type TelegramChatJsonValue =
+	| TelegramChatJsonPrimitive
+	| TelegramChatJsonObject
+	| readonly TelegramChatJsonValue[];
+
 export function createFetchTelegramChatClient(
 	options: FetchTelegramChatClientOptions = {},
 ): TelegramChatClient {
@@ -187,12 +196,14 @@ async function readTelegramChatThreadResponse(response: Response) {
 }
 
 async function readJsonObject(response: Response) {
-	const body = (await response.json().catch(() => null)) as unknown;
+	const body = (await response
+		.json()
+		.catch(() => null)) as TelegramChatJsonValue;
 	return isRecord(body) ? body : null;
 }
 
 function readErrorMessage(
-	body: Record<string, unknown> | null,
+	body: TelegramChatJsonObject | null,
 	fallbackMessage: string,
 ) {
 	return typeof body?.error === "string" && body.error
@@ -222,7 +233,7 @@ function getFetchImplementation(fetchImpl: FetchTelegramChatFetch | undefined) {
 }
 
 function isTelegramChatThreadState(
-	value: Record<string, unknown> | null,
+	value: TelegramChatJsonObject | null,
 ): value is TelegramChatThreadState {
 	if (!value) {
 		return false;
@@ -238,7 +249,9 @@ function isTelegramChatThreadState(
 	);
 }
 
-function isTelegramChatMessage(value: unknown): value is TelegramChatMessage {
+function isTelegramChatMessage(
+	value: TelegramChatJsonValue,
+): value is TelegramChatMessage {
 	if (!isRecord(value)) {
 		return false;
 	}
@@ -256,7 +269,7 @@ function isTelegramChatMessage(value: unknown): value is TelegramChatMessage {
 }
 
 function isTelegramChatMessageAttachment(
-	value: unknown,
+	value: TelegramChatJsonValue | undefined,
 ): value is TelegramChatMessageAttachment | null {
 	if (value === null) {
 		return true;
@@ -276,7 +289,7 @@ function isTelegramChatMessageAttachment(
 }
 
 function isTelegramChatThreadStatus(
-	value: unknown,
+	value: TelegramChatJsonValue | undefined,
 ): value is TelegramChatThreadStatus {
 	return (
 		value === "empty" ||
@@ -287,13 +300,13 @@ function isTelegramChatThreadStatus(
 }
 
 function isTelegramChatMessageSource(
-	value: unknown,
+	value: TelegramChatJsonValue | undefined,
 ): value is TelegramChatMessageSource {
 	return value === "visitor" || value === "operator" || value === "system";
 }
 
 function isTelegramChatDeliveryStatus(
-	value: unknown,
+	value: TelegramChatJsonValue | undefined,
 ): value is TelegramChatDeliveryStatus {
 	return (
 		value === "not_required" ||
@@ -303,6 +316,8 @@ function isTelegramChatDeliveryStatus(
 	);
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(
+	value: TelegramChatJsonValue | undefined,
+): value is TelegramChatJsonObject {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }

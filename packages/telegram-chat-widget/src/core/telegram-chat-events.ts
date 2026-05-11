@@ -24,17 +24,15 @@ export type TelegramChatEvent = {
 
 export type TelegramChatEventSink = (event: TelegramChatEvent) => void;
 
-const sensitiveEventPropertyNames = new Set([
-	"attachmentUrl",
-	"body",
-	"email",
-	"message",
-	"messageText",
-	"rawTranscript",
-	"screenshotUrl",
-	"sessionToken",
-	"telegramId",
-	"text",
+const allowedEventPropertyNames = new Set([
+	"entrySurface",
+	"failureClass",
+	"latestDeliveryFailureClass",
+	"latestDeliveryStatus",
+	"messageCount",
+	"pagePath",
+	"surface",
+	"threadStatus",
 ]);
 
 export function createTelegramChatEvent(
@@ -69,7 +67,7 @@ function validateTelegramChatEventMetadata(
 ) {
 	const validatedProperties: TelegramChatEventMetadata = {};
 	for (const [key, value] of Object.entries(properties)) {
-		if (sensitiveEventPropertyNames.has(key)) {
+		if (!allowedEventPropertyNames.has(key)) {
 			throw new Error(`Support analytics property "${key}" is not metadata.`);
 		}
 

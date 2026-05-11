@@ -31,10 +31,13 @@ import type { SupportDeliveryFailureClass } from "./types";
 
 const SUPPORT_FALLBACK_HREF = "https://t.me/parkerrex";
 const SUPPORT_SESSION_HASH_PREFIX = "support-session:";
+const SUPPORT_CONVERSATION_CAPABILITY_HASH_PREFIX =
+	"support-conversation-capability:";
 const SUPPORT_MESSAGE_MAX_LENGTH = 2_000;
 const SUPPORT_SEND_COOLDOWN_MS = 2_000;
 const SUPPORT_PENDING_VISITOR_MESSAGE_LIMIT = 5;
 const SUPPORT_GLOBAL_HOURLY_LIMIT = 60;
+const SUPPORT_CONVERSATION_CAPABILITY_TTL_MS = 30 * 24 * 60 * 60 * 1_000;
 const SUPPORT_IDLE_CLOSE_MS = 14 * 24 * 60 * 60 * 1_000;
 const SUPPORT_CLOSED_RETENTION_MS = 90 * 24 * 60 * 60 * 1_000;
 const SUPPORT_VISITOR_DELIVERY_RETRY_LIMIT = 5;
@@ -51,6 +54,11 @@ type SupportThreadId = GenericId<"supportThreads">;
 type SupportMessageId = GenericId<"supportMessages">;
 type SupportOperatorActionId = GenericId<"supportOperatorActions">;
 type SupportStorageId = GenericId<"_storage">;
+
+export type SupportConversationCapability = {
+	capabilityToken: string;
+	expiresAt: number;
+};
 
 export type SupportMessageAttachment = {
 	kind: "screenshot";
@@ -201,14 +209,39 @@ export type SupportOperationsSnapshot = {
 };
 
 export async function createSupportSessionTokenHash(sessionToken: string) {
-	const normalizedToken = sessionToken.trim();
+	return await createSupportSecretHash({
+		prefix: SUPPORT_SESSION_HASH_PREFIX,
+		secret: sessionToken,
+		shortSecretErrorMessage: "Support session token is too short.",
+	});
+}
+
+export async function createSupportConversationCapabilityTokenHash(
+	capabilityToken: string,
+) {
+	return await createSupportSecretHash({
+		prefix: SUPPORT_CONVERSATION_CAPABILITY_HASH_PREFIX,
+		secret: capabilityToken,
+		shortSecretErrorMessage:
+			"Support conversation capability token is too short.",
+	});
+}
+
+async function createSupportSecretHash({
+	prefix,
+	secret,
+	shortSecretErrorMessage,
+}: {
+	prefix: string;
+	secret: string;
+	shortSecretErrorMessage: string;
+}) {
+	const normalizedToken = secret.trim();
 	if (normalizedToken.length < 32) {
-		throw new Error("Support session token is too short.");
+		throw new Error(shortSecretErrorMessage);
 	}
 
-	const encoded = new TextEncoder().encode(
-		`${SUPPORT_SESSION_HASH_PREFIX}${normalizedToken}`,
-	);
+	const encoded = new TextEncoder().encode(`${prefix}${normalizedToken}`);
 	const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
 	return [...new Uint8Array(hashBuffer)]
 		.map((byte) => byte.toString(16).padStart(2, "0"))
@@ -293,6 +326,93 @@ export async function getThreadBySessionHandler(
 
 	const thread = await findCurrentSupportThreadByVisitorId(ctx, visitor._id);
 	if (!thread) {
+		return supportChatDisabled
+			? createDisabledThreadState()
+			: createEmptyThreadState();
+	}
+
+	return await buildSupportThreadState(ctx, thread);
+}
+
+export async function issueVisitorConversationCapabilityHandler(
+	ctx: MutationCtx,
+	args: {
+		sessionToken: string;
+	},
+): Promise<SupportConversationCapability> {
+	const now = Date.now();
+	const sessionTokenHash = await createSupportSessionTokenHash(
+		args.sessionToken,
+	);
+	const visitor = await findSupportVisitorBySessionTokenHash(
+		ctx,
+		sessionTokenHash,
+	);
+	const thread = visitor
+		? await findCurrentSupportThreadByVisitorId(ctx, visitor._id)
+		: null;
+
+	await revokeActiveSupportConversationCapabilitiesForSession(ctx, {
+		sessionTokenHash,
+		now,
+	});
+
+	const capabilityToken = createSupportConversationCapabilityToken();
+	await ctx.db.insert("supportConversationCapabilities", {
+		capabilityTokenHash:
+			await createSupportConversationCapabilityTokenHash(capabilityToken),
+		sessionTokenHash,
+		threadId: thread?._id,
+		status: "active",
+		createdAt: now,
+		expiresAt: now + SUPPORT_CONVERSATION_CAPABILITY_TTL_MS,
+		lastIssuedAt: now,
+		revokedAt: undefined,
+	});
+
+	return {
+		capabilityToken,
+		expiresAt: now + SUPPORT_CONVERSATION_CAPABILITY_TTL_MS,
+	};
+}
+
+export async function getThreadByConversationCapabilityHandler(
+	ctx: QueryCtx,
+	args: {
+		capabilityToken: string;
+	},
+): Promise<SupportThreadState> {
+	const supportChatDisabled = isSupportChatDisabled();
+	const capabilityTokenHash =
+		await createSupportConversationCapabilityTokenHash(args.capabilityToken);
+	const capability = await ctx.db
+		.query("supportConversationCapabilities")
+		.withIndex("by_capability_token_hash", (query) =>
+			query.eq("capabilityTokenHash", capabilityTokenHash),
+		)
+		.unique();
+	if (
+		!capability ||
+		capability.status !== "active" ||
+		capability.expiresAt <= Date.now()
+	) {
+		return createRealtimeUnavailableThreadState();
+	}
+
+	const visitor = await findSupportVisitorBySessionTokenHash(
+		ctx,
+		capability.sessionTokenHash,
+	);
+	if (!visitor) {
+		return supportChatDisabled
+			? createDisabledThreadState()
+			: createEmptyThreadState();
+	}
+
+	const thread = capability.threadId
+		? await ctx.db.get(capability.threadId)
+		: await findCurrentSupportThreadByVisitorId(ctx, visitor._id);
+	if (!thread || thread.visitorId !== visitor._id) {
 		return supportChatDisabled
 			? createDisabledThreadState()
 			: createEmptyThreadState();
@@ -1702,6 +1822,16 @@ function createDisabledThreadState(): SupportThreadState {
 	};
 }
 
+function createRealtimeUnavailableThreadState(): SupportThreadState {
+	return {
+		status: "disabled",
+		supportId: null,
+		messages: [],
+		fallbackHref: SUPPORT_FALLBACK_HREF,
+		error: "Support realtime session expired. Refresh support.",
+	};
+}
+
 async function buildSupportThreadState(
 	ctx: QueryCtx | MutationCtx,
 	thread: Doc<"supportThreads">,
@@ -1845,6 +1975,31 @@ async function findLatestUnpurgedClosedSupportThreadByVisitorId(
 				!thread.purgedAt && (!thread.purgeAfter || thread.purgeAfter > now),
 		) ?? null
 	);
+}
+
+async function revokeActiveSupportConversationCapabilitiesForSession(
+	ctx: MutationCtx,
+	args: {
+		sessionTokenHash: string;
+		now: number;
+	},
+) {
+	const activeCapabilities = await ctx.db
+		.query("supportConversationCapabilities")
+		.withIndex("by_session_token_hash_and_status", (query) =>
+			query
+				.eq("sessionTokenHash", args.sessionTokenHash)
+				.eq("status", "active"),
+		)
+		.take(20);
+
+	for (const capability of activeCapabilities) {
+		await ctx.db.patch(capability._id, {
+			status: "revoked",
+			revokedAt: args.now,
+			lastIssuedAt: args.now,
+		});
+	}
 }
 
 async function getOrCreateSupportVisitor(
@@ -2162,6 +2317,12 @@ function createSupportId(now: number) {
 	const day = String(date.getUTCDate()).padStart(2, "0");
 	const suffix = Math.floor(1000 + Math.random() * 9000);
 	return `SBS-${month}${day}-${suffix}`;
+}
+
+function createSupportConversationCapabilityToken() {
+	return `${crypto.randomUUID().replaceAll("-", "")}${crypto
+		.randomUUID()
+		.replaceAll("-", "")}`;
 }
 
 function trimProviderError(message: string) {

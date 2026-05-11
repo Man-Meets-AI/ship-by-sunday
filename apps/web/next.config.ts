@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
 	transpilePackages: [
 		"@shipbysunday/codebase-compiler",
 		"@shipbysunday/codebase-presentation",
+		"@shipbysunday/telegram-chat-widget",
 	],
 	images: {
 		remotePatterns: [

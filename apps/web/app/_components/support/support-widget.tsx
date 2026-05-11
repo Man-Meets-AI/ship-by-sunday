@@ -1,19 +1,26 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-import { type SupportWidgetEntrySurface } from "./support-api-client";
 import {
-	SupportWidgetPanel,
-	type SupportWidgetContent,
-} from "./support-widget-panel";
-import {
-	type SupportWidgetAnalyticsSurface,
-	useSupportChat,
-} from "./use-support-chat";
+	TelegramChatWidget,
+	type TelegramChatContent,
+	type TelegramChatEntrySurface,
+	type TelegramChatEvent,
+	type TelegramChatLauncherMotion,
+	type TelegramChatRealtimeState,
+	type TelegramChatSurface,
+} from "@shipbysunday/telegram-chat-widget";
+import { useConvexTelegramChatRealtime } from "@shipbysunday/telegram-chat-widget/convex";
+import { createFetchTelegramChatClient } from "@shipbysunday/telegram-chat-widget/fetch";
+import { useCallback, useMemo } from "react";
 
-type SupportWidgetLauncherMotion = "standard" | "squishy";
+import { api } from "@/convex/_generated/api";
+import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
+import { useSupportRealtimeCapability } from "./use-support-realtime-capability";
+
+export type SupportWidgetAnalyticsSurface = TelegramChatSurface;
+export type SupportWidgetContent = TelegramChatContent;
+export type SupportWidgetEntrySurface = TelegramChatEntrySurface;
+export type SupportWidgetLauncherMotion = TelegramChatLauncherMotion;
 
 export function SupportWidget({
 	analyticsSurface,
@@ -28,64 +35,34 @@ export function SupportWidget({
 	readonly fallbackHref: string;
 	readonly launcherMotion: SupportWidgetLauncherMotion;
 }) {
-	const supportChat = useSupportChat({
-		analyticsSurface,
-		entrySurface,
-		fallbackHref,
+	const supportChatClient = useMemo(() => createFetchTelegramChatClient(), []);
+	const realtimeCapability = useSupportRealtimeCapability();
+	const convexRealtimeState = useConvexTelegramChatRealtime({
+		capabilityToken: realtimeCapability.capabilityToken,
+		enabled: realtimeCapability.status === "ready",
+		query: api.support.getThreadByConversationCapability,
 	});
+	const realtimeState: TelegramChatRealtimeState =
+		realtimeCapability.status === "loading"
+			? { status: "loading" }
+			: convexRealtimeState;
+	const recordSupportEvent = useCallback((event: TelegramChatEvent) => {
+		capturePostHogProductEvent({
+			event: event.name,
+			properties: event.properties,
+		});
+	}, []);
 
 	return (
-		<div
-			className={cn(
-				"fixed z-50",
-				supportChat.isOpen
-					? "inset-x-3 bottom-3 sm:inset-auto sm:right-6 sm:bottom-6"
-					: "right-4 bottom-4 sm:right-6 sm:bottom-6",
-			)}
-		>
-			{supportChat.isOpen ? (
-				<SupportWidgetPanel
-					attachmentErrorMessage={supportChat.attachmentErrorMessage}
-					attachmentFile={supportChat.attachmentFile}
-					bugReportDraft={supportChat.bugReportDraft}
-					canSend={supportChat.canSend}
-					chatMode={supportChat.chatMode}
-					content={content}
-					draftMessage={supportChat.draftMessage}
-					errorMessage={supportChat.errorMessage}
-					fallbackHref={fallbackHref}
-					onClose={supportChat.closeChat}
-					onDraftMessageChange={supportChat.setDraftMessage}
-					onFallbackClick={supportChat.recordFallbackClick}
-					onSend={supportChat.sendMessage}
-					onSetAttachmentFile={supportChat.setAttachmentFile}
-					onSetBugReportDraft={supportChat.setBugReportDraft}
-					onSetChatMode={supportChat.setChatMode}
-					status={supportChat.status}
-					threadState={supportChat.threadState}
-				/>
-			) : (
-				<button
-					type="button"
-					onClick={supportChat.openChat}
-					className={cn(
-						"pointer-events-auto group inline-flex origin-bottom-right items-center gap-2 rounded-full border border-white/15 bg-[#111418] px-4 py-3 text-sm font-semibold text-white shadow-2xl shadow-black/25 outline-none transition-[transform,background-color,box-shadow] duration-200 ease-out focus-visible:ring-2 focus-visible:ring-[#D8FF76] motion-reduce:transition-none",
-						launcherMotion === "squishy"
-							? "hover:-translate-y-1 hover:scale-[1.03] hover:bg-[#1a1f25] hover:shadow-black/35 active:translate-y-0.5 active:scale-x-[1.06] active:scale-y-[0.94]"
-							: "hover:-translate-y-0.5 hover:bg-[#1a1f25] active:translate-y-px",
-					)}
-				>
-					<MessageCircle
-						className={cn(
-							"size-4",
-							launcherMotion === "squishy" &&
-								"transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 group-active:scale-95 motion-reduce:transition-none",
-						)}
-						aria-hidden="true"
-					/>
-					<span>{content.launcherLabel}</span>
-				</button>
-			)}
-		</div>
+		<TelegramChatWidget
+			client={supportChatClient}
+			content={content}
+			entrySurface={entrySurface}
+			eventSink={recordSupportEvent}
+			fallbackHref={fallbackHref}
+			launcherMotion={launcherMotion}
+			realtime={realtimeState}
+			surface={analyticsSurface}
+		/>
 	);
 }

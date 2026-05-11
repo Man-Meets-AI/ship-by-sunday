@@ -54,6 +54,10 @@ export const supportTelegramTopicCleanupStatusValues = [
 	"completed",
 	"failed",
 ] as const;
+export const supportConversationCapabilityStatusValues = [
+	"active",
+	"revoked",
+] as const;
 
 export const supportVisitorStatusValidator = v.union(
 	v.literal("active"),
@@ -143,6 +147,10 @@ export const supportTelegramTopicCleanupStatusValidator = v.union(
 	v.literal("pending"),
 	v.literal("completed"),
 	v.literal("failed"),
+);
+export const supportConversationCapabilityStatusValidator = v.union(
+	v.literal("active"),
+	v.literal("revoked"),
 );
 
 export const supportPublicMessageValidator = v.object({

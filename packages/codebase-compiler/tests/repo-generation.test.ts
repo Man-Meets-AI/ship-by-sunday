@@ -254,6 +254,8 @@ describe("repo generation", () => {
 				"apps/web/app/_content/home-page.ts",
 				"packages/codebase-presentation/package.json",
 				"packages/codebase-presentation/src/index.ts",
+				"packages/telegram-chat-widget/package.json",
+				"packages/telegram-chat-widget/src/index.ts",
 				"docs/index.md",
 				"docs/build/docs/agent-handoff.md",
 				"docs/build/docs/readiness.md",

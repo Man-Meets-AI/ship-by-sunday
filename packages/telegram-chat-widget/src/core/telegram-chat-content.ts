@@ -2,18 +2,24 @@ export type TelegramChatContent = {
 	readonly launcherLabel: string;
 	readonly panelTitle: string;
 	readonly panelSubtitle: string;
+	readonly starterMessage: string;
 	readonly messagePlaceholder: string;
-	readonly bugReportSummaryPlaceholder: string;
-	readonly bugReportStepsPlaceholder: string;
-	readonly bugReportExpectedPlaceholder: string;
+	readonly bugReportLabel: string;
+	readonly bugSummaryPlaceholder: string;
+	readonly bugStepsPlaceholder: string;
+	readonly bugExpectedPlaceholder: string;
+	readonly bugImpactLabel: string;
 	readonly attachScreenshotLabel: string;
-	readonly bugReportModeLabel: string;
-	readonly messageModeLabel: string;
+	readonly removeAttachmentLabel: string;
 	readonly sendLabel: string;
+	readonly closeLabel: string;
 	readonly fallbackLabel: string;
-	readonly emptyStateTitle: string;
-	readonly emptyStateBody: string;
-	readonly disabledStateBody: string;
+	readonly directTelegramLabel: string;
+	readonly loadingLabel: string;
+	readonly sendingLabel: string;
+	readonly deliveredLabel: string;
+	readonly failedLabel: string;
+	readonly closedLabel: string;
 	readonly screenshotRejectedTypeMessage: string;
 	readonly screenshotRejectedSizeMessage: string;
 	readonly genericErrorMessage: string;
@@ -23,21 +29,27 @@ export type TelegramChatContentOverrides = Partial<TelegramChatContent>;
 
 export const defaultTelegramChatContent = {
 	launcherLabel: "Message Parker",
-	panelTitle: "Ship by Sunday support",
-	panelSubtitle: "Send Parker the context, screenshot, or bug details.",
-	messagePlaceholder: "Ask a question or share what is stuck.",
-	bugReportSummaryPlaceholder: "What happened?",
-	bugReportStepsPlaceholder: "What were you doing?",
-	bugReportExpectedPlaceholder: "What did you expect?",
+	panelTitle: "Message Parker",
+	panelSubtitle: "Ask about fit, scope, or what to do next.",
+	starterMessage:
+		"Send a note here. Parker replies from Telegram and the thread stays on this page.",
+	messagePlaceholder: "Type your question...",
+	bugReportLabel: "Bug",
+	bugSummaryPlaceholder: "What broke?",
+	bugStepsPlaceholder: "What were you trying to do?",
+	bugExpectedPlaceholder: "What did you expect instead?",
+	bugImpactLabel: "Bug impact",
 	attachScreenshotLabel: "Attach screenshot",
-	bugReportModeLabel: "Report a bug",
-	messageModeLabel: "Message",
+	removeAttachmentLabel: "Remove screenshot",
 	sendLabel: "Send",
+	closeLabel: "Close support chat",
 	fallbackLabel: "Open Telegram",
-	emptyStateTitle: "Start a support thread",
-	emptyStateBody: "Parker will see this in Telegram with your page context.",
-	disabledStateBody:
-		"Ship by Sunday support is using Telegram directly right now.",
+	directTelegramLabel: "Use Telegram directly",
+	loadingLabel: "Loading conversation",
+	sendingLabel: "Sending",
+	deliveredLabel: "Delivered to Parker",
+	failedLabel: "Parker may not have seen this.",
+	closedLabel: "This thread is closed.",
 	screenshotRejectedTypeMessage: "Upload a PNG, JPG, or WebP screenshot.",
 	screenshotRejectedSizeMessage: "Screenshots must be 10 MB or smaller.",
 	genericErrorMessage: "Unable to reach support.",

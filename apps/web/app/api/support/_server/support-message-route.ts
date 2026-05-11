@@ -30,13 +30,28 @@ type SupportAttachmentUploadRequestBody = {
 	readonly size?: JsonValue;
 };
 
+type SupportSessionRealtime =
+	| {
+			readonly kind: "convex";
+			readonly capabilityToken: string;
+			readonly expiresAt: number;
+	  }
+	| {
+			readonly kind: "unavailable";
+	  };
+
 const SUPPORT_MESSAGE_MAX_LENGTH = 2_000;
 const SUPPORT_FALLBACK_HREF = "https://t.me/parkerrex";
 
 export async function getSupportSessionFromRequest(request: Request) {
 	const supportSessionCookie = getSupportSessionCookie(request);
+	const realtime =
+		await issueSupportConversationCapability(supportSessionCookie);
 	return appendSupportSessionCookie(
-		Response.json({ ok: true }),
+		Response.json({
+			ok: true,
+			realtime,
+		}),
 		supportSessionCookie,
 	);
 }
@@ -257,6 +272,26 @@ async function getOptionalConvexAuthToken() {
 		return convexSession.token;
 	} catch {
 		return null;
+	}
+}
+
+async function issueSupportConversationCapability(
+	supportSessionCookie: SupportSessionCookie,
+): Promise<SupportSessionRealtime> {
+	try {
+		const capability = await fetchMutation(
+			api.support.issueVisitorConversationCapability,
+			{
+				sessionToken: supportSessionCookie.sessionToken,
+			},
+		);
+		return {
+			kind: "convex",
+			capabilityToken: capability.capabilityToken,
+			expiresAt: capability.expiresAt,
+		};
+	} catch {
+		return { kind: "unavailable" };
 	}
 }
 
