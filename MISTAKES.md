@@ -89,3 +89,7 @@
 - Mistake: I repeated the guarded-typecheck miss during the production preflight hardening fix by polling an already-started `bun run --cwd apps/web typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
   Impact: The command passed, but it created a PostHog release and uploaded source maps from the local environment.
   Corrective action: Restart release-sensitive app validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` before accepting the result, and keep the guard in the command line for every local typecheck/build run.
+
+- Mistake: I accidentally replaced the existing `apps/web/tests/unit/checkout-claims.test.ts` coverage while adding a small purchase-intent token test.
+  Impact: The local diff temporarily removed existing checkout-claim regression coverage before validation.
+  Corrective action: Restore the file from the pre-edit state, append the new assertions instead of replacing the file, and inspect diffs before running broad validation.

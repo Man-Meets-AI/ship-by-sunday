@@ -530,4 +530,65 @@ describe("convex/checkoutClaims", () => {
 		expect(insert).not.toHaveBeenCalled();
 		expect(patch).not.toHaveBeenCalled();
 	});
+
+	it("requires the server checkout token before creating purchase intents", async () => {
+		const previousToken = process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET;
+		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET =
+			"checkout_server_secret_123456789012345";
+		const runMutation = vi.fn();
+
+		try {
+			await expect(
+				moduleUnderTest.createCheckoutPurchaseIntent._handler(
+					{ runMutation } as never,
+					{
+						checkoutServerToken: "wrong-token",
+						checkoutSurface: "hosted_checkout",
+					},
+				),
+			).rejects.toThrow("Unauthorized checkout purchase intent write");
+
+			expect(runMutation).not.toHaveBeenCalled();
+		} finally {
+			if (previousToken === undefined) {
+				delete process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET;
+			} else {
+				process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET = previousToken;
+			}
+		}
+	});
+
+	it("keeps the server token out of the internal purchase-intent write", async () => {
+		const checkoutServerToken = "checkout_server_secret_123456789012345";
+		const previousToken = process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET;
+		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET = checkoutServerToken;
+		const runMutation = vi
+			.fn()
+			.mockResolvedValue({ purchaseIntentId: "purchase_intent_123" });
+
+		try {
+			await expect(
+				moduleUnderTest.createCheckoutPurchaseIntent._handler(
+					{ runMutation } as never,
+					{
+						checkoutServerToken,
+						checkoutSurface: "hosted_checkout",
+						checkoutEmail: "buyer@example.com",
+					},
+				),
+			).resolves.toEqual({ purchaseIntentId: "purchase_intent_123" });
+
+			expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+				clerkUserId: undefined,
+				checkoutEmail: "buyer@example.com",
+				checkoutSurface: "hosted_checkout",
+			});
+		} finally {
+			if (previousToken === undefined) {
+				delete process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET;
+			} else {
+				process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET = previousToken;
+			}
+		}
+	});
 });

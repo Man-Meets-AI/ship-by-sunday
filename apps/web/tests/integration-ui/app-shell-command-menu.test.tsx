@@ -167,7 +167,7 @@ describe("AppShellCommandMenu", () => {
 		await user.click(screen.getByRole("option", { name: /^Codebase$/i }));
 
 		expect(pushMock).toHaveBeenCalled();
-		expect(pushMock.mock.calls[0]?.[0]).toMatch(/codebase/i);
+		expect(pushMock.mock.calls[0]?.[0]).toBe("/generate-codebase");
 	});
 
 	it("navigates to Tutorials from the app command group", async () => {

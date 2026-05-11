@@ -85,10 +85,14 @@ describe("convex/checkoutClaimsActions", () => {
 		retrieveSessionMock.mockResolvedValue({
 			id: "cs_test_123",
 			metadata: {
+				metadataSchema: "mma_checkout_v1",
+				app: "man_meets_ai",
+				accessProduct: "paid_app_access",
+				purchaseIntentId: "purchase_intent_123",
+				checkoutSurface: "hosted_checkout",
 				buyerStartingPoint: "existing_codebase",
 				checkoutCtaId: "codebase_demo_existing",
 				clerkUserId: "user_123",
-				courseSlug: "ship-by-sunday",
 				fulfillmentTrack: "existing_codebase_doctor",
 			},
 			client_reference_id: null,
@@ -120,6 +124,7 @@ describe("convex/checkoutClaimsActions", () => {
 				stripeCheckoutSessionId: "cs_test_123",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				checkoutPurchaseIntentId: "purchase_intent_123",
 				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
@@ -315,9 +320,13 @@ describe("convex/checkoutClaimsActions", () => {
 		retrieveSessionMock.mockResolvedValue({
 			id: "cs_guest_fulfill",
 			metadata: {
+				metadataSchema: "mma_checkout_v1",
+				app: "man_meets_ai",
+				accessProduct: "paid_app_access",
+				purchaseIntentId: "purchase_intent_guest",
+				checkoutSurface: "hosted_checkout",
 				buyerStartingPoint: "existing_codebase",
 				checkoutCtaId: "codebase_demo_existing",
-				courseSlug: "ship-by-sunday",
 				fulfillmentTrack: "existing_codebase_doctor",
 			},
 			client_reference_id: null,
@@ -375,6 +384,7 @@ describe("convex/checkoutClaimsActions", () => {
 				checkoutEmail: "Buyer@Example.com",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
+				checkoutPurchaseIntentId: "purchase_intent_guest",
 				fulfillmentTrack: "existing_codebase_doctor",
 				stripeEventId: "evt_123",
 				stripeEventType: "checkout.session.completed",

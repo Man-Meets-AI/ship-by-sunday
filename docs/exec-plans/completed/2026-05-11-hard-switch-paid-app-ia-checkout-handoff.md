@@ -166,7 +166,7 @@ Acceptance requires a paid customer to land on `/home` after checkout and see th
 
 Checkout acceptance requires every new Checkout Session to have metadata `{ metadataSchema: "mma_checkout_v1", app: "man_meets_ai", accessProduct: "paid_app_access", purchaseIntentId, checkoutSurface, clerkUserId? }` on both `metadata` and `payment_intent_data.metadata`. The purchase intent must exist in Convex before Stripe session creation and must be attached to the Stripe Checkout Session id after creation.
 
-Webhook acceptance requires release preflight to fail `enabled_events: ["*"]`, accept only explicit required Checkout events, verify Stripe signatures before any event recording, record the event durably, return quickly for queued/duplicate/ignored/payment-pending outcomes, and fulfill grants asynchronously with the existing idempotent Stripe object plus event-type duplicate guard.
+Webhook acceptance requires release preflight to fail `enabled_events: ["*"]`, accept only explicit required Checkout events, verify Stripe signatures before any event recording, record the event durably, return quickly for queued/duplicate/ignored/payment-pending outcomes, retry failed or stale queued fulfillment internally, and fulfill grants asynchronously with the existing idempotent Stripe object plus event-type duplicate guard.
 
 Documentation acceptance requires `docs/release-workflow.md` to name `/home` as the post-checkout paid handoff and require explicit Stripe event subscriptions rather than wildcard subscriptions.
 
@@ -190,7 +190,7 @@ Route moves are source changes only. If a move breaks imports, use `rg` to find 
 
 Checkout purchase intent creation is additive. If Stripe session creation fails after intent creation, keep the intent record as failed or abandoned rather than trying to erase it. If attaching the session id fails, fail the checkout API response before sending the buyer to Stripe so operators do not create an unreconciled buyer handoff.
 
-Webhook scheduling must be idempotent. Exact Stripe event ids and logical duplicates by Stripe Checkout Session id plus event type must not schedule duplicate fulfillment after a terminal result. Failed async fulfillment may be retried by calling the scheduled fulfillment action again with the same recorded event.
+Webhook scheduling must be idempotent. Exact Stripe event ids and logical duplicates by Stripe Checkout Session id plus event type must not schedule duplicate fulfillment after a terminal result. Failed async fulfillment is retried by the internal retry mutation, and stale queued or processing attempts are rescheduled by the watchdog mutation before final failure is recorded.
 
 ## Artifacts and Notes
 
@@ -212,7 +212,7 @@ Important source guidance loaded for this slice:
 
 The route constants in `apps/web/config/product.ts` are the app-wide route source of truth. Use them instead of raw path strings except in App Router folder names and tests that intentionally assert URL behavior.
 
-The public checkout API routes depend on `convex/nextjs` `fetchMutation` to create and attach purchase intents. Any new Convex functions referenced from Next.js should be exported from an existing generated API module such as `apps/web/convex/checkoutClaims.ts`, or Convex generated API types must be regenerated.
+The public checkout API routes depend on `convex/nextjs` `fetchAction` plus the server-only `CHECKOUT_FULFILLMENT_RETRY_SECRET` to create and attach purchase intents through secret-gated Convex actions. Any new Convex functions referenced from Next.js should be exported from an existing generated API module such as `apps/web/convex/checkoutClaims.ts`, or Convex generated API types must be regenerated.
 
 The Stripe metadata helper must be imported by Checkout creation, Checkout recovery, Convex checkout claims, and Convex webhook code so the app has one definition of `mma_checkout_v1`.
 
