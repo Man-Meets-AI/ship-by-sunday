@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const pushMock = vi.fn();
 const setActiveMock = vi.fn();
+const signOutMock = vi.fn();
 const signInCreateMock = vi.fn();
 const startActionMock = vi.fn();
 const completeActionMock = vi.fn();
@@ -17,6 +18,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("@clerk/nextjs", () => ({
 	useClerk: () => ({
 		setActive: setActiveMock,
+		signOut: signOutMock,
 	}),
 	useSignIn: () => ({
 		signIn: { create: signInCreateMock },
@@ -63,6 +65,7 @@ describe("AdminImpersonationPageClient", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
 		setActiveMock.mockReset().mockResolvedValue(undefined);
+		signOutMock.mockReset().mockResolvedValue(undefined);
 		signInCreateMock
 			.mockReset()
 			.mockResolvedValue({ createdSessionId: "sess_impersonated" });
@@ -140,5 +143,6 @@ describe("AdminImpersonationPageClient", () => {
 		await screen.findByText("Admin context is required.");
 		expect(pushMock).not.toHaveBeenCalled();
 		expect(failActionMock).toHaveBeenCalledWith("session_1");
+		expect(signOutMock).toHaveBeenCalled();
 	});
 });

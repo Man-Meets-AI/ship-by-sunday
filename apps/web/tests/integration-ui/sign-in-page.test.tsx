@@ -232,7 +232,7 @@ describe("SignInPage", () => {
 		expect(screen.queryByLabelText("Password")).toBeNull();
 	});
 
-	it("shows a purchase-license message for an email without an account", async () => {
+	it("shows a generic inbox message for an email without an account", async () => {
 		const signInState = createSignInState();
 		const missingAccountError = {
 			code: "form_identifier_not_found",
@@ -256,20 +256,16 @@ describe("SignInPage", () => {
 
 		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
 		expect(
-			await screen.findByText(/We don't have an account for that email/),
+			await screen.findByText(/If that email can sign in, we sent a code/),
 		).toBeTruthy();
-		const purchaseLink = screen.getByRole("link", {
-			name: "Purchase a license",
-		}) as HTMLAnchorElement;
-		expect(purchaseLink.getAttribute("href")).toBe("/#pricing");
 		expect(
-			screen.getByText(/first, then sign in with the checkout email/),
-		).toBeTruthy();
+			screen.queryByRole("link", { name: "Purchase a license" }),
+		).toBeNull();
 		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
 		expect(screen.queryByText("Couldn't find your account.")).toBeNull();
 	});
 
-	it("shows the purchase-license message when Clerk reports a transferable sign-in", async () => {
+	it("moves to the code step when Clerk reports a transferable sign-in", async () => {
 		const signInState = createSignInState({
 			isTransferable: true,
 		});
@@ -282,19 +278,10 @@ describe("SignInPage", () => {
 		await user.click(screen.getByRole("button", { name: "Send email code" }));
 
 		expect(signInState.signIn.emailCode.sendCode).not.toHaveBeenCalled();
+		expect(await screen.findByLabelText("Email code")).toBeTruthy();
 		expect(
-			await screen.findByText(/We don't have an account for that email/),
-		).toBeTruthy();
-		expect(
-			(
-				screen.getByRole("link", {
-					name: "Purchase a license",
-				}) as HTMLAnchorElement
-			).getAttribute("href"),
-		).toBe("/#pricing");
-		expect(
-			screen.getByText(/first, then sign in with the checkout email/),
-		).toBeTruthy();
+			screen.queryByRole("link", { name: "Purchase a license" }),
+		).toBeNull();
 		expect(screen.queryByText("We couldn't sign you in.")).toBeNull();
 		expect(reportClientErrorMock).not.toHaveBeenCalled();
 	});
