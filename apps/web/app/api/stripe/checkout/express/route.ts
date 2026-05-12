@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { fetchAction } from "convex/nextjs";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import { api } from "@/convex/_generated/api";
 import { buildStripeExpressCheckoutSessionCreateParams } from "@/platform/billing/checkout/checkout-session-params";
 import { createPendingCheckoutSessionCookieOptions } from "@/platform/billing/checkout/pending-checkout-session-cookie";
@@ -32,6 +33,17 @@ export async function POST(request: Request) {
 	});
 
 	try {
+		const rateLimitedResponse = getRateLimitedResponse({
+			bucket: "stripe.checkout.createExpressSession",
+			identity: userId,
+			request,
+			limit: 10,
+			windowMs: 60_000,
+		});
+		if (rateLimitedResponse) {
+			return rateLimitedResponse;
+		}
+
 		if (
 			await recordBlockedSupportModeActionForRequest(request, {
 				actionId: "stripe.checkout.createExpressSession",

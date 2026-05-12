@@ -3,7 +3,7 @@ import type { JsonValue } from "./json-value";
 const SECRET_PATTERNS = [
 	/(sbs_run_)[A-Za-z0-9_-]+/g,
 	/(sbs_pair_)[A-Za-z0-9_-]+/g,
-	/(sk-[A-Za-z0-9_-]{8,})/g,
+	/(sk-)[A-Za-z0-9_-]{8,}/g,
 	/([A-Za-z0-9_-]*token[A-Za-z0-9_-]*=)[^\s&]+/gi,
 	/([A-Za-z0-9_-]*secret[A-Za-z0-9_-]*=)[^\s&]+/gi,
 ];

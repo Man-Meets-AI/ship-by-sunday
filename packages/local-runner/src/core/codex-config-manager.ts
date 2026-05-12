@@ -351,6 +351,22 @@ function hasManagedCodexPermissions({
 	return (
 		hasParsedTomlTable(parsedConfig, projectRootPermissionsTableName) &&
 		hasParsedTomlTable(parsedConfig, networkPermissionsTableName) &&
+		hasTomlAssignment(contents, projectRootPermissionsTableName, {
+			key: '"."',
+			value:
+				permissionsName.includes("readonly") ||
+				permissionsName.includes("read-only")
+					? '"read"'
+					: '"write"',
+		}) &&
+		hasTomlAssignment(contents, projectRootPermissionsTableName, {
+			key: '".env*"',
+			value: '"none"',
+		}) &&
+		hasTomlAssignment(contents, projectRootPermissionsTableName, {
+			key: '"**/.env*"',
+			value: '"none"',
+		}) &&
 		hasTomlAssignment(contents, networkPermissionsTableName, {
 			key: "enabled",
 			value: "false",

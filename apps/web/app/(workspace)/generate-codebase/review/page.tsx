@@ -33,6 +33,9 @@ export default async function Page({
 	if (!initialWorkspaceState) {
 		throw new Error("Codebase workspace state missing");
 	}
+	if (!initialWorkspaceState.codebaseReadiness.review.isReady) {
+		redirect(routeConfig.codebase);
+	}
 
 	const isUnlocked = Boolean(
 		initialWorkspaceState.workflowState?.executeShipUnlockedAt,

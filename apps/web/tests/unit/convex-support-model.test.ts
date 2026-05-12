@@ -189,7 +189,7 @@ describe("convex support model", () => {
 		}
 		expect(capability.capabilityToken).toHaveLength(64);
 		expect(capability.expiresAt).toBeGreaterThan(Date.now());
-		expect(inserted).toEqual([
+		expect(inserted).toContainEqual(
 			expect.objectContaining({
 				table: "supportConversationCapabilities",
 				document: expect.objectContaining({
@@ -198,7 +198,7 @@ describe("convex support model", () => {
 					sessionTokenHash: expect.stringMatching(/^[a-f0-9]{64}$/),
 				}),
 			}),
-		]);
+		);
 		expect(JSON.stringify(inserted)).not.toContain(capability.capabilityToken);
 		expect(JSON.stringify(inserted)).not.toContain("a".repeat(64));
 		expect(patches).toEqual([]);
@@ -1847,6 +1847,12 @@ function createConversationCapabilityIssueContext({
 						return thread
 							? { unique: async () => thread }
 							: { unique: async () => null };
+					}
+					if (table === "supportRateLimitBuckets") {
+						return { unique: async () => null };
+					}
+					if (table === "supportConversationCapabilities") {
+						return { collect: async () => [] };
 					}
 					throw new Error(`Unexpected table ${table}`);
 				},

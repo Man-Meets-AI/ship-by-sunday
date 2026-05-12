@@ -48,7 +48,15 @@ export function resolvePlanFilePath(
 	repoRootDir: string,
 	planPath: string,
 ): string {
-	return path.join(repoRootDir, validatePlanPath(planPath));
+	const resolvedPath = path.resolve(repoRootDir, validatePlanPath(planPath));
+	const resolvedRoot = path.resolve(repoRootDir);
+	if (
+		resolvedPath !== resolvedRoot &&
+		!resolvedPath.startsWith(`${resolvedRoot}${path.sep}`)
+	) {
+		throw new Error(`Invalid --plan value outside repository: ${planPath}.`);
+	}
+	return resolvedPath;
 }
 
 export function buildLintUsage(): string {

@@ -25,6 +25,10 @@ describe("sign-in route utils", () => {
 	it("falls back for invalid redirect paths", () => {
 		expect(getSafeRedirectPath("https://example.com/settings")).toBe("/home");
 		expect(getSafeRedirectPath("//example.com/settings")).toBe("/home");
+		expect(getSafeRedirectPath("/\\\\example.com/settings")).toBe("/home");
+		expect(getSafeRedirectPath("/%5C%5Cexample.com/settings")).toBe("/home");
+		expect(getSafeRedirectPath("/%2F%2Fexample.com/settings")).toBe("/home");
+		expect(getSafeRedirectPath("/settings\n/evil")).toBe("/home");
 	});
 
 	it("builds task routes that preserve the redirect target", () => {

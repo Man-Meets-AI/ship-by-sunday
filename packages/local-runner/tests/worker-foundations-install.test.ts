@@ -8,7 +8,10 @@ import { promisify } from "node:util";
 
 import { runInstallCommand } from "../src/commands/install";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
-import { RUNNER_HOME_ENV_VAR, writeRunnerCredential } from "../src/core/local-runner-home";
+import {
+	RUNNER_HOME_ENV_VAR,
+	writeRunnerCredential,
+} from "../src/core/local-runner-home";
 import { readQueuedRunnerEvents } from "../src/core/runner-events";
 import {
 	runWorkerFoundationsInstall,
@@ -1039,6 +1042,10 @@ describe("Worker Foundations install command", () => {
 		const workerHome = await createWorkerHome({
 			expires_at: "2000-01-01T00:00:00.000Z",
 			machineCredential: "sbs_machine_test_credential",
+			licenseSignature:
+				"_-0uFWcv1HgkqxeZeCHDtV4_okmrxHRMOImCysbOdLKp0eiS5RKi_NYkyYTLxRJMA2nn86rGLKn4GEgfgp46DQ",
+			machineId: "machine_test",
+			issued_at: "2026-05-08T00:00:00.000Z",
 			schemaVersion: "shipbysunday-worker-license.v1",
 			status: "active",
 		});
@@ -1065,6 +1072,42 @@ describe("Worker Foundations install command", () => {
 				expect.objectContaining({
 					blockerId: "license",
 					reason: expect.stringContaining("invalid"),
+				}),
+			]),
+		);
+		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
+		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
+	});
+
+	it("blocks forged local licenses before repo mutation", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome({
+			...activeWorkerLicense(),
+			machineCredential: "sbs_machine_forged_test",
+		});
+		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+				{
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				},
+			),
+		).resolves.toBe(2);
+
+		const output = logSpy.mock.calls.join("\n");
+		const result = JSON.parse(output) as {
+			outcome: string;
+			plan: { blockers: Array<{ blockerId: string; reason: string }> };
+		};
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					blockerId: "license",
+					reason: expect.stringContaining("signature"),
 				}),
 			]),
 		);
@@ -1652,6 +1695,8 @@ function activeWorkerLicense() {
 	return {
 		expires_at: "2999-01-01T00:00:00.000Z",
 		issued_at: "2026-05-08T00:00:00.000Z",
+		licenseSignature:
+			"xyZ_Fw-aFmRO1PY4EQvEvCAR-GOwAP0Ekw5oFeN65uXb0WC_HUz99X1u0FtNgVFD2lA0RXEXq4l7XkiRRUGDBw",
 		machineCredential: "sbs_machine_test_credential",
 		machineId: "machine_test",
 		schemaVersion: "shipbysunday-worker-license.v1",
@@ -1768,6 +1813,8 @@ async function createActivationServer(
 						status: "approved",
 						license: {
 							...activeWorkerLicense(),
+							licenseSignature:
+								"WMWr9OTUunxzuDvB96V3pQeVE8oiiZZO3-bT4jSewRD--bsoO06s_6Dgm4tZWVQYx2XAAvZgOyc4gS-j_b7iDg",
 							machineCredential: "sbs_machine_activated_test",
 						},
 					},

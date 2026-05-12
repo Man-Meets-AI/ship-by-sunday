@@ -7,6 +7,8 @@ import {
 	DOCS_OPERATING_SYSTEM_CANONICAL_SCRIPTS,
 	DOCS_OPERATING_SYSTEM_MODULE_IDS,
 	DOCS_OPERATING_SYSTEM_SCRIPT_WRAPPER_TARGETS,
+	DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME,
+	DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_VERSION,
 } from "./manifest";
 import type {
 	DocsOperatingSystemBlockedOperation,
@@ -25,6 +27,8 @@ import type { JsonObject } from "../../core/json-value";
 type RootPackageManifestFacts = {
 	name?: string;
 	scripts: JsonObject;
+	dependencies?: JsonObject;
+	devDependencies?: JsonObject;
 };
 
 export type BuildDocsOperatingSystemInstallPlanOptions = {
@@ -285,8 +289,14 @@ function resolveShipBySundayDependencyStatus({
 	if (rootPackageManifest?.name === "ship-by-sunday") {
 		return "already-present" as const;
 	}
-	if (repoFacts.repositoryShape.dependencyNames.includes("ship-by-sunday")) {
+	if (
+		rootPackageManifest &&
+		hasPinnedSharedToolingDependency(rootPackageManifest)
+	) {
 		return "already-present" as const;
+	}
+	if (repoFacts.repositoryShape.dependencyNames.includes("ship-by-sunday")) {
+		return "blocked" as const;
 	}
 	if (repoFacts.repositoryShape.packageManager === "unknown") {
 		return "blocked" as const;
@@ -304,13 +314,32 @@ function resolveShipBySundayDependencyReason({
 	if (rootPackageManifest?.name === "ship-by-sunday") {
 		return "The target repo is the Ship by Sunday package itself.";
 	}
+	if (
+		rootPackageManifest &&
+		hasPinnedSharedToolingDependency(rootPackageManifest)
+	) {
+		return "The shared tooling package is already listed at the exact pinned version.";
+	}
 	if (repoFacts.repositoryShape.dependencyNames.includes("ship-by-sunday")) {
-		return "The shared tooling package is already listed as a dependency.";
+		return "The shared tooling package is present but not verified at the exact pinned version.";
 	}
 	if (repoFacts.repositoryShape.packageManager === "unknown") {
 		return "No supported package manager was detected for dependency planning.";
 	}
 	return "The shared tooling package can be added in a later approved dependency patching slice.";
+}
+
+function hasPinnedSharedToolingDependency(
+	rootPackageManifest: RootPackageManifestFacts,
+) {
+	return (
+		rootPackageManifest.dependencies?.[
+			DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME
+		] === DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_VERSION ||
+		rootPackageManifest.devDependencies?.[
+			DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME
+		] === DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_VERSION
+	);
 }
 
 function resolveValidatorFileStatus(

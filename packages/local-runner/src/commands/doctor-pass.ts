@@ -12,6 +12,7 @@ type DoctorPassOptions = {
 	localOnly?: boolean;
 	runId?: string;
 	intakeProbePath?: string;
+	allowCustomIntakeProbe?: boolean;
 	codexBinary?: string;
 };
 
@@ -46,6 +47,7 @@ async function runDoctorPassRunCommand(argv: string[]) {
 		runId: options.runId,
 		localOnly: options.localOnly,
 		intakeProbePath: options.intakeProbePath,
+		allowCustomIntakeProbe: options.allowCustomIntakeProbe,
 		codexBinary: options.codexBinary,
 	});
 
@@ -107,6 +109,7 @@ function parseDoctorPassOptions(argv: string[]): DoctorPassOptions {
 				index,
 				"--intake-probe",
 			);
+			options.allowCustomIntakeProbe = true;
 			index += 1;
 		} else if (arg === "--codex-binary") {
 			options.codexBinary = requireOptionValue(argv, index, "--codex-binary");

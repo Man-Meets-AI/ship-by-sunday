@@ -51,7 +51,7 @@ export function initializePostHogClient() {
 		capture_pageview: "history_change",
 		autocapture: true,
 		capture_exceptions: true,
-		disable_session_recording: false,
+		disable_session_recording: true,
 		enable_recording_console_log: false,
 		session_recording: {
 			maskAllInputs: true,

@@ -2,6 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GET } from "@/app/api/video/thumbnails/[videoId]/route";
 
+vi.mock("@clerk/nextjs/server", () => ({
+	auth: vi.fn(async () => ({
+		userId: "user_123",
+		getToken: vi.fn(async () => "convex-token"),
+	})),
+}));
+
+vi.mock("convex/nextjs", () => ({
+	fetchQuery: vi.fn(async () => ({ hasAccess: true })),
+}));
+
 function createThumbnailRequest(videoId: string) {
 	return new Request(`https://example.test/api/video/thumbnails/${videoId}`);
 }

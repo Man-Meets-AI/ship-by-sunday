@@ -112,6 +112,10 @@ export function AppShellCommandMenuItems({
 
 	const navigateTo = (href: string) => {
 		onSelect();
+		if (primaryNav?.onNavigate) {
+			primaryNav.onNavigate(href);
+			return;
+		}
 		push(href);
 	};
 

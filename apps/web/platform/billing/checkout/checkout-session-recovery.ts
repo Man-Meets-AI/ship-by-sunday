@@ -11,6 +11,8 @@ import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import { getStripe } from "@/platform/billing/stripe";
 import { requireServerEnv } from "@/platform/env/server";
 
+const stripeCheckoutSessionIdPattern = /^cs_(?:test|live)_[A-Za-z0-9]+$/;
+
 export type CheckoutSessionClaimResult =
 	| {
 			kind: "sign_in_required";
@@ -138,6 +140,10 @@ export function isStripeCheckoutSessionForCourse(
 export async function getCheckoutSessionForRecovery(
 	sessionId: string,
 ): Promise<Stripe.Checkout.Session | null> {
+	if (!stripeCheckoutSessionIdPattern.test(sessionId)) {
+		return null;
+	}
+
 	try {
 		return await getStripe().checkout.sessions.retrieve(sessionId);
 	} catch (error) {
@@ -182,6 +188,13 @@ export async function getValidatedPendingCheckoutEmailFromCookie() {
 export async function claimCheckoutSessionForViewer(
 	sessionId: string,
 ): Promise<CheckoutSessionClaimResult> {
+	if (!stripeCheckoutSessionIdPattern.test(sessionId)) {
+		return {
+			kind: "invalid_session",
+			sessionId,
+		};
+	}
+
 	const session = await getConvexServerSession();
 	if (!session.token) {
 		return {
@@ -202,6 +215,13 @@ export async function claimCheckoutSessionForViewer(
 export async function fulfillCheckoutSessionFromSuccessPage(
 	sessionId: string,
 ): Promise<CheckoutSessionFulfillmentResult> {
+	if (!stripeCheckoutSessionIdPattern.test(sessionId)) {
+		return {
+			kind: "invalid_session",
+			sessionId,
+		};
+	}
+
 	return (await fetchAction(
 		api.checkoutClaimsActions.fulfillCheckoutSessionFromSuccessPage,
 		{

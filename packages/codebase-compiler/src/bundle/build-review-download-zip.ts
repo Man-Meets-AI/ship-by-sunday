@@ -11,6 +11,14 @@ export async function buildReviewDownloadZip(
 	const files = await materializeRepoSnapshot(projectDefinition);
 
 	for (const file of files) {
+		if (
+			file.path.startsWith("/") ||
+			file.path.startsWith("\\") ||
+			file.path.split(/[\\/]/).includes("..")
+		) {
+			throw new Error(`Unsafe generated repo path: ${file.path}`);
+		}
+
 		zip.file(`${manifest.repoName}/${file.path}`, file.content);
 	}
 

@@ -3911,7 +3911,16 @@ async function insertWorkspaceRunnerEvent(
 	}
 
 	if (args.doctorPassRunId) {
-		await requireDoctorPassRun(ctx, args.project._id, args.doctorPassRunId);
+		const doctorPassRun = await requireDoctorPassRun(
+			ctx,
+			args.project._id,
+			args.doctorPassRunId,
+		);
+		if (doctorPassRun.runnerId !== args.runnerBinding._id) {
+			throw new ConvexError(
+				"Runner event doctor pass run does not match runner",
+			);
+		}
 	}
 	if (args.workflowRunId) {
 		const workflowRun = await requireWorkflowRun(

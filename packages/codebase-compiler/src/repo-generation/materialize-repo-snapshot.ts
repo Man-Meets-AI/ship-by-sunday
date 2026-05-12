@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
 import type { RenderedCodebaseFile } from "../codebases/render-types";
@@ -28,6 +28,12 @@ async function collectDirectoryFiles(
 	directoryPath: string,
 	manifest: RepoGenerationManifest,
 ): Promise<RepoSnapshotFile[]> {
+	const realRootPath = await realpath(rootPath);
+	const realDirectoryPath = await realpath(directoryPath);
+	if (!pathIsInsideRoot(realRootPath, realDirectoryPath)) {
+		throw new Error(`Snapshot directory escapes repo root: ${directoryPath}`);
+	}
+
 	const entries = await readdir(directoryPath, { withFileTypes: true });
 	const files = await Promise.all(
 		entries.map(async (entry) => {
@@ -48,6 +54,10 @@ async function collectDirectoryFiles(
 			if (entry.isDirectory()) {
 				return collectDirectoryFiles(rootPath, absolutePath, manifest);
 			}
+			const realFilePath = await realpath(absolutePath);
+			if (!pathIsInsideRoot(realRootPath, realFilePath)) {
+				throw new Error(`Snapshot file escapes repo root: ${relativePath}`);
+			}
 			return [
 				{
 					path: relativePath,
@@ -58,6 +68,14 @@ async function collectDirectoryFiles(
 	);
 
 	return files.flat();
+}
+
+function pathIsInsideRoot(rootPath: string, targetPath: string) {
+	const relativePath = path.relative(rootPath, targetPath);
+	return (
+		relativePath === "" ||
+		(!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
+	);
 }
 
 function renderIncludedRepoFile(file: RepoSnapshotFile): RepoSnapshotFile {
@@ -77,10 +95,18 @@ export async function materializeRepoSnapshot(
 	const manifest = buildRepoGenerationManifest(projectDefinition);
 	const rootPath = repoRootPath();
 	const includedFiles = await Promise.all(
-		manifest.includedFiles.map(async (relativePath) => ({
-			path: relativePath,
-			content: await readFile(path.join(rootPath, relativePath)),
-		})),
+		manifest.includedFiles.map(async (relativePath) => {
+			const absolutePath = path.join(rootPath, relativePath);
+			const realRootPath = await realpath(rootPath);
+			const realFilePath = await realpath(absolutePath);
+			if (!pathIsInsideRoot(realRootPath, realFilePath)) {
+				throw new Error(`Snapshot file escapes repo root: ${relativePath}`);
+			}
+			return {
+				path: relativePath,
+				content: await readFile(absolutePath),
+			};
+		}),
 	);
 	const includedDirectories = await Promise.all(
 		manifest.includedDirectories.map((relativePath) =>

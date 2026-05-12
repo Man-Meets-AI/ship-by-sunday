@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, verify } from "node:crypto";
 import { existsSync } from "node:fs";
 import {
 	chmod,
@@ -204,6 +204,7 @@ type WorkerLicenseFile = {
 	accountId?: string;
 	expires_at?: string;
 	issued_at?: string;
+	licenseSignature: string;
 	machineCredential: string;
 	machineId?: string;
 	schemaVersion: "shipbysunday-worker-license.v1";
@@ -261,6 +262,11 @@ const WORKER_MANIFEST_MANAGED_REFS = [
 const DEFAULT_WORKER_LICENSE_API_BASE_URL = "https://www.man-meets-ai.com";
 const WORKER_LICENSE_ACTIVATION_START_PATH = "/api/worker/license/device/start";
 const WORKER_LICENSE_ACTIVATION_POLL_PATH = "/api/worker/license/device/poll";
+const WORKER_LICENSE_SIGNATURE_PUBLIC_KEY = [
+	"-----BEGIN PUBLIC KEY-----",
+	"MCowBQYDK2VwAyEA7OwhZk5d2NxVCVxbAHHEigPG3/Sr3oYMXNy/SpbFmLc=",
+	"-----END PUBLIC KEY-----",
+].join("\n");
 const MIN_ACTIVATION_POLL_INTERVAL_MS = 1_000;
 const MAX_ACTIVATION_POLL_INTERVAL_MS = 10_000;
 const DEFAULT_ACTIVATION_TIMEOUT_MS = 5 * 60_000;
@@ -944,6 +950,16 @@ function validateWorkerLicenseFile(
 				"License activation is invalid because the machine credential is missing.",
 		};
 	}
+	if (
+		typeof parsed.licenseSignature !== "string" ||
+		parsed.licenseSignature.trim() === ""
+	) {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because the license signature is missing.",
+		};
+	}
 	for (const key of ["issued_at", "expires_at"] as const) {
 		if (parsed[key] === undefined) {
 			continue;
@@ -962,12 +978,23 @@ function validateWorkerLicenseFile(
 			};
 		}
 	}
+	const canonicalLicense = canonicalizeWorkerLicenseFields(parsed);
+	if (
+		!verifyWorkerLicenseSignature(canonicalLicense, parsed.licenseSignature)
+	) {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because the license signature is not trusted.",
+		};
+	}
 	return {
 		valid: true,
 		license: {
 			schemaVersion: parsed.schemaVersion,
 			status: parsed.status,
 			machineCredential: parsed.machineCredential,
+			licenseSignature: parsed.licenseSignature,
 			...(typeof parsed.accountId === "string"
 				? { accountId: parsed.accountId }
 				: {}),
@@ -982,6 +1009,42 @@ function validateWorkerLicenseFile(
 				: {}),
 		},
 	};
+}
+
+function canonicalizeWorkerLicenseFields(license: JsonObject) {
+	return JSON.stringify({
+		schemaVersion: license.schemaVersion,
+		status: license.status,
+		machineCredential: license.machineCredential,
+		...(typeof license.accountId === "string"
+			? { accountId: license.accountId }
+			: {}),
+		...(typeof license.machineId === "string"
+			? { machineId: license.machineId }
+			: {}),
+		...(typeof license.issued_at === "string"
+			? { issued_at: license.issued_at }
+			: {}),
+		...(typeof license.expires_at === "string"
+			? { expires_at: license.expires_at }
+			: {}),
+	});
+}
+
+function verifyWorkerLicenseSignature(
+	canonicalLicense: string,
+	licenseSignature: string,
+) {
+	try {
+		return verify(
+			null,
+			Buffer.from(canonicalLicense, "utf8"),
+			WORKER_LICENSE_SIGNATURE_PUBLIC_KEY,
+			Buffer.from(licenseSignature, "base64url"),
+		);
+	} catch {
+		return false;
+	}
 }
 
 function shouldAttemptInteractiveLicenseActivation(

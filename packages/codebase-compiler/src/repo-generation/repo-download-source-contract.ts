@@ -48,7 +48,6 @@ export const customerSafeAppDirectoryPaths = [
 	"apps/web/platform",
 	"apps/web/public",
 	"apps/web/scripts",
-	"apps/web/tests",
 ] as const;
 
 export const customerSafeCodebaseCompilerFilePaths = [
@@ -83,13 +82,17 @@ export const codebaseCompilerTemplateSourceTracePaths = [
 const excludedSnapshotFileSuffixes = [
 	".DS_Store",
 	".env.local",
+	".env.preview",
 	".env.production",
+	".env.test",
 	".mp4",
 	".tsbuildinfo",
 ] as const;
 
 const excludedSnapshotPathFragments = [
 	"/.codex/",
+	"/.deepsec/",
+	"/.sbs/",
 	"/.venv/",
 	"/coverage/",
 	"/docs/exec-plans/",
@@ -102,6 +105,7 @@ const excludedSnapshotPathFragments = [
 	"/docs/ship-by-sunday/",
 	"docs/ship-by-sunday/",
 	"/output/",
+	"/playwright-report/",
 	"/test-results/",
 ] as const;
 

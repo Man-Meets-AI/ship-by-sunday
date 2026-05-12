@@ -132,13 +132,15 @@ async function primeVercelAccessCookie(page, { baseUrl, vercelShareUrl }) {
 		};
 	}
 
-	const bypassUrl = new URL("/", baseUrl);
-	bypassUrl.searchParams.set("x-vercel-protection-bypass", bypassSecret);
-	bypassUrl.searchParams.set("x-vercel-set-bypass-cookie", "true");
+	await page.setExtraHTTPHeaders({
+		"x-vercel-protection-bypass": bypassSecret,
+		"x-vercel-set-bypass-cookie": "true",
+	});
 
-	await page.goto(bypassUrl.toString(), {
+	await page.goto(new URL("/", baseUrl).toString(), {
 		waitUntil: "domcontentloaded",
 	});
+	await page.setExtraHTTPHeaders({});
 
 	return {
 		enabled: true,

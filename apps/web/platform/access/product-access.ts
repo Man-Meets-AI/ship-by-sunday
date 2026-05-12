@@ -24,6 +24,7 @@ type ExistingCodebaseResumeDestination = {
 	postReviewTargets: null;
 };
 type ServerResumeDestination = ExistingCodebaseResumeDestination;
+export const stripeCheckoutSessionIdPattern = /^cs_(?:test|live)_[A-Za-z0-9]+$/;
 
 async function refreshViewerProductAccess(token: string) {
 	return (await fetchQuery(
@@ -47,6 +48,9 @@ async function getSignedOutPendingCheckoutRecovery(): Promise<PaidCheckoutRecove
 	const pendingCheckoutSessionId =
 		await getPendingCheckoutSessionIdFromCookie();
 	if (!pendingCheckoutSessionId) {
+		return null;
+	}
+	if (!stripeCheckoutSessionIdPattern.test(pendingCheckoutSessionId)) {
 		return null;
 	}
 
@@ -112,6 +116,9 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 	const pendingCheckoutSessionId =
 		await getPendingCheckoutSessionIdFromCookie();
 	if (pendingCheckoutSessionId) {
+		if (!stripeCheckoutSessionIdPattern.test(pendingCheckoutSessionId)) {
+			return access;
+		}
 		const claimResult = await claimCheckoutSessionForViewer(
 			pendingCheckoutSessionId,
 		);

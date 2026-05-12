@@ -1,6 +1,7 @@
 import { verifyWebhook } from "@clerk/backend/webhooks";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import { normalizeIncidentEvent } from "@/lib/observability/incident";
 import { buildClerkWebhookIncident } from "@/platform/observability/source-adapters/clerk-webhook";
 import { captureServerError } from "@/platform/observability/capture-server-error";
@@ -15,6 +16,15 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
+	const rateLimitedResponse = getRateLimitedResponse({
+		bucket: "observability.clerk",
+		request,
+		limit: 20,
+		windowMs: 60_000,
+	});
+	if (rateLimitedResponse) {
+		return rateLimitedResponse;
+	}
 
 	if (!serverEnv.CLERK_WEBHOOK_SIGNING_SECRET) {
 		await captureServerError({

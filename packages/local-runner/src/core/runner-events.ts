@@ -3,15 +3,19 @@ import { existsSync } from "node:fs";
 import {
 	appendFile,
 	open,
+	readdir,
 	readFile,
 	rename,
 	rm,
 	unlink,
 } from "node:fs/promises";
-import path from "node:path";
 
 import type { RunnerCredential } from "./local-runner-home";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
+import {
+	assertNoRepositorySymlinkPath,
+	resolveRepositoryPath,
+} from "./repository-boundary";
 import { assertSyncSafeValue } from "./redaction";
 
 export const RUNNER_EVENT_SCHEMA_VERSION = "workspace.runner-event.v1" as const;
@@ -194,11 +198,11 @@ export type RunnerEventFlushResult = {
 };
 
 function eventOutboxPath(repositoryRoot: string) {
-	return path.join(repositoryRoot, ".sbs", "events", "outbox.jsonl");
+	return resolveRepositoryPath(repositoryRoot, ".sbs/events/outbox.jsonl");
 }
 
 function eventOutboxLockPath(repositoryRoot: string) {
-	return path.join(repositoryRoot, ".sbs", "events", "outbox.lock");
+	return resolveRepositoryPath(repositoryRoot, ".sbs/events/outbox.lock");
 }
 
 export function createRunnerEvent({
@@ -253,6 +257,10 @@ export async function queueRunnerEvent(
 	await ensureLocalProjectStateDirectory(repositoryRoot, {
 		updateGitExclude: options.updateGitExclude ?? true,
 	});
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/events/outbox.jsonl",
+	);
 	await appendFile(
 		eventOutboxPath(repositoryRoot),
 		`${JSON.stringify(event)}\n`,
@@ -275,6 +283,10 @@ async function appendQueuedRunnerEvents(
 		updateGitExclude: options.updateGitExclude ?? true,
 	});
 	const outboxPath = eventOutboxPath(repositoryRoot);
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/events/outbox.jsonl",
+	);
 	await appendFile(
 		outboxPath,
 		`${events.map((event) => JSON.stringify(event)).join("\n")}\n`,
@@ -295,7 +307,12 @@ export async function flushRunnerEvents({
 	updateGitExclude?: boolean;
 }): Promise<RunnerEventFlushResult> {
 	await ensureLocalProjectStateDirectory(repositoryRoot, { updateGitExclude });
+	await restoreStrandedFlushingOutboxes(repositoryRoot, { updateGitExclude });
 	const lockPath = eventOutboxLockPath(repositoryRoot);
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/events/outbox.lock",
+	);
 	let lockHandle;
 	try {
 		lockHandle = await open(lockPath, "wx");
@@ -364,6 +381,32 @@ export async function flushRunnerEvents({
 		delivered,
 		remaining: remainingEvents.length,
 	};
+}
+
+async function restoreStrandedFlushingOutboxes(
+	repositoryRoot: string,
+	options: { updateGitExclude: boolean },
+) {
+	const eventsDirectory = resolveRepositoryPath(repositoryRoot, ".sbs/events");
+	const entries = await readdir(eventsDirectory, { withFileTypes: true }).catch(
+		() => [],
+	);
+	for (const entry of entries) {
+		if (
+			!entry.isFile() ||
+			!entry.name.startsWith("outbox.jsonl.") ||
+			!entry.name.endsWith(".flushing")
+		) {
+			continue;
+		}
+		const flushingPath = resolveRepositoryPath(
+			repositoryRoot,
+			`.sbs/events/${entry.name}`,
+		);
+		const events = await readQueuedRunnerEventsFromPath(flushingPath);
+		await appendQueuedRunnerEvents(repositoryRoot, events, options);
+		await rm(flushingPath, { force: true });
+	}
 }
 
 async function fetchRunnerEventWithTimeout({

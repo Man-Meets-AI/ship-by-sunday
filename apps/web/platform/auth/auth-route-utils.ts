@@ -7,6 +7,18 @@ export const sessionTaskUrls = {
 export type SessionTaskKey = keyof typeof sessionTaskUrls;
 
 const redirectUrlParam = "redirect_url";
+const redirectValidationOrigin = "https://ship-by-sunday.local";
+const encodedPathSeparatorPattern = /%(?:2f|5c)/i;
+
+function hasUnsafeRedirectCharacter(value: string) {
+	for (const character of value) {
+		const codePoint = character.charCodeAt(0);
+		if (character === "\\" || codePoint < 32 || codePoint === 127) {
+			return true;
+		}
+	}
+	return false;
+}
 
 export function getSafeRedirectPath(rawPath?: string | string[] | null) {
 	if (Array.isArray(rawPath)) {
@@ -17,11 +29,32 @@ export function getSafeRedirectPath(rawPath?: string | string[] | null) {
 		return authViewConfig.fallbackRedirectUrl;
 	}
 
-	if (!rawPath.startsWith("/") || rawPath.startsWith("//")) {
+	if (
+		!rawPath.startsWith("/") ||
+		rawPath.startsWith("//") ||
+		encodedPathSeparatorPattern.test(rawPath) ||
+		hasUnsafeRedirectCharacter(rawPath)
+	) {
 		return authViewConfig.fallbackRedirectUrl;
 	}
 
-	return rawPath;
+	let redirectUrl: URL;
+	try {
+		redirectUrl = new URL(rawPath, redirectValidationOrigin);
+	} catch {
+		return authViewConfig.fallbackRedirectUrl;
+	}
+
+	if (redirectUrl.origin !== redirectValidationOrigin) {
+		return authViewConfig.fallbackRedirectUrl;
+	}
+
+	const safePath = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+	if (!safePath.startsWith("/") || safePath.startsWith("//")) {
+		return authViewConfig.fallbackRedirectUrl;
+	}
+
+	return safePath;
 }
 
 export function getPricingHref() {
@@ -86,13 +119,16 @@ export function buildClearPendingCheckoutSessionHref(
 }
 
 export function isCheckoutWelcomeRedirectPath(rawPath?: string | null) {
-	if (!rawPath || !rawPath.startsWith("/") || rawPath.startsWith("//")) {
+	if (!rawPath) {
 		return false;
 	}
 
 	let redirectUrl: URL;
 	try {
-		redirectUrl = new URL(rawPath, "https://ship-by-sunday.local");
+		redirectUrl = new URL(
+			getSafeRedirectPath(rawPath),
+			redirectValidationOrigin,
+		);
 	} catch {
 		return false;
 	}

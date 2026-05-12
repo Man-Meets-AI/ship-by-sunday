@@ -1361,42 +1361,21 @@ async function runNativeGateProof(
 		repoFacts?.repositoryShape.packageManager,
 		nativeGateScriptName,
 	);
-	const result = await runBoundedProcess({
-		command: command.command,
-		args: command.args,
-		cwd: repositoryRoot,
-		timeoutMs: 120_000,
-	});
 	const commandName = command.commandName;
-	if (result.succeeded) {
-		return {
-			commandResult: {
-				commandName,
-				status: "passed",
-				exitCodeSummary: "passed",
-			},
-		};
-	}
-	const outputSummary = summarizeCommandOutput(result);
-	const blockedBySetup = isNativeGateSetupBlocker(outputSummary);
-	const status = blockedBySetup ? "blocked" : "failed";
-	const exitCodeSummary = result.timedOut
-		? "timed out"
-		: `${status}: ${outputSummary}`;
+	const exitCodeSummary =
+		"blocked: docs-spine apply proof does not execute repository-controlled package scripts. Run native gates in an explicit command-proof workflow after reviewing the script body.";
 	return {
 		commandResult: {
 			commandName,
-			status,
+			status: "blocked",
 			exitCodeSummary,
 		},
-		blockedProof: blockedBySetup
-			? {
-					stage: "native-gate",
-					commandName,
-					reason: exitCodeSummary,
-					nextApprovalRequired: false,
-				}
-			: undefined,
+		blockedProof: {
+			stage: "native-gate",
+			commandName,
+			reason: exitCodeSummary,
+			nextApprovalRequired: true,
+		},
 	};
 }
 
@@ -1446,62 +1425,6 @@ function buildNativeGateCommand(
 		args: ["run", scriptName],
 		commandName: `npm run ${scriptName}`,
 	};
-}
-
-function summarizeCommandOutput(result: {
-	stdout: string;
-	stderr: string;
-	timedOut: boolean;
-	exitCode?: number;
-	failureCode?: string;
-}) {
-	if (result.timedOut) {
-		return "command timed out";
-	}
-	const outputLines = [result.stderr, result.stdout]
-		.join("\n")
-		.split(/\r?\n/)
-		.map((line) => line.trim())
-		.filter(Boolean);
-	const explicitSetupBlockerLines = outputLines.filter((line) =>
-		/(error: cannot find package|cannot find (module|package)|could not resolve|module not found|missing dependency|enoent|spawnsync? .*enoent|failed to run biome|happy-dom)/i.test(
-			line,
-		),
-	);
-	const setupBlockerLines = outputLines.filter(
-		(line) =>
-			/(command not found|not found:)/i.test(line) &&
-			!explicitSetupBlockerLines.includes(line) &&
-			line.length < 300,
-	);
-	const genericFailureLines = outputLines.filter(
-		(line) =>
-			/(error|failed|failure|timed out)/i.test(line) &&
-			!explicitSetupBlockerLines.includes(line) &&
-			!setupBlockerLines.includes(line),
-	);
-	const combinedOutput = [
-		...explicitSetupBlockerLines.slice(0, 4),
-		...setupBlockerLines.slice(0, 2),
-		...genericFailureLines.slice(0, 2),
-		...outputLines.slice(0, 2),
-	]
-		.slice(0, 6)
-		.join(" | ");
-	const exitCodeSummary =
-		typeof result.exitCode === "number"
-			? `exit ${result.exitCode}`
-			: (result.failureCode ?? "failed");
-	if (!combinedOutput) {
-		return exitCodeSummary;
-	}
-	return `${exitCodeSummary}: ${combinedOutput}`.slice(0, 700);
-}
-
-function isNativeGateSetupBlocker(outputSummary: string) {
-	return /(cannot find (module|package)|could not resolve|module not found|missing dependency|enoent|spawn .* enoent|failed to run biome|command not found|not found:)/i.test(
-		outputSummary,
-	);
 }
 
 async function writeMarkdownFile(

@@ -14,6 +14,7 @@ import { isLessonVideoReady as isRenderableLessonVideoReady } from "../video";
 import { normalizeLessonFieldValues } from "./legacy";
 import {
 	getObjectiveMode,
+	getCandidateProblemOptions,
 	getRequiredFields,
 	getWorkbenchSections,
 } from "./progression";
@@ -341,9 +342,49 @@ function isFieldComplete(field: WorkbenchField, value: unknown) {
 		return countFilledBoardLines(value) >= getFieldMinimumItems(field);
 	}
 
+	if (field.kind === "select" || field.kind === "radio_group") {
+		return (
+			typeof value === "string" &&
+			value.trim().length > 0 &&
+			(!field.options || field.options.includes(value))
+		);
+	}
+
+	if (field.kind === "number") {
+		const numericValue =
+			typeof value === "number"
+				? value
+				: typeof value === "string" && value.trim()
+					? Number(value)
+					: Number.NaN;
+		return Number.isFinite(numericValue);
+	}
+
+	if (field.kind === "toggle") {
+		return value === true;
+	}
+
+	if (field.kind === "url") {
+		if (typeof value !== "string" || !value.trim()) {
+			return false;
+		}
+		try {
+			const url = new URL(value);
+			return url.protocol === "https:" || url.protocol === "http:";
+		} catch {
+			return false;
+		}
+	}
+
 	if (field.kind === "checklist") {
 		if (!isChecklistItemArray(value) || value.length === 0) {
 			return false;
+		}
+		if (field.options) {
+			const validOptions = new Set(field.options);
+			if (value.some((item) => !validOptions.has(item.label))) {
+				return false;
+			}
 		}
 		if (field.required) {
 			return value.every((item) => item.checked);
@@ -431,15 +472,23 @@ export function getObjectiveTasks(
 	}
 
 	if (lesson.handoff?.mode === "select_candidate_problem") {
+		const selectedProblemIndex = values[lesson.handoff.selectionFieldId];
+		const candidateProblemIndexSet = new Set(
+			getCandidateProblemOptions(lesson.handoff, values).map((option) =>
+				String(option.index),
+			),
+		);
 		tasks.push({
 			id: lesson.handoff.selectionFieldId,
 			label:
 				lesson.id === "1.4"
 					? "Commit to the user behind the problem"
 					: "Pick problem to carry forward",
-			status: isFilled(values[lesson.handoff.selectionFieldId])
-				? "complete"
-				: "incomplete",
+			status:
+				typeof selectedProblemIndex === "string" &&
+				candidateProblemIndexSet.has(selectedProblemIndex)
+					? "complete"
+					: "incomplete",
 			source: "handoff",
 			fieldId: lesson.handoff.selectionFieldId,
 			sectionId: "handoff",

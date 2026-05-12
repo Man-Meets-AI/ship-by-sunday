@@ -600,8 +600,8 @@ function hasPackageEntry(packageJson: JsonObject, dependencyField: string) {
 	const dependencies = packageJson[dependencyField];
 	return (
 		isJsonObject(dependencies) &&
-		typeof dependencies[DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME] ===
-			"string"
+		dependencies[DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_NAME] ===
+			DOCS_OPERATING_SYSTEM_SHARED_TOOLING_PACKAGE_VERSION
 	);
 }
 

@@ -8,6 +8,8 @@ const localServerHost = new URL(baseURL).hostname;
 const appsWebDirectory = __dirname;
 const shouldUseLocalServer = process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1";
 const shouldRunSandboxAuth = process.env.E2E_RUN_SANDBOX === "1";
+const shouldKeepSensitiveArtifacts =
+	process.env.PLAYWRIGHT_KEEP_SENSITIVE_ARTIFACTS !== "0";
 const localhostHosts = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const smokeTestConvexUrl = "https://smoke-test.convex.cloud";
 const localServerCommand = [
@@ -66,9 +68,9 @@ export default defineConfig({
 	reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
 	use: {
 		baseURL,
-		trace: "retain-on-failure",
-		screenshot: "only-on-failure",
-		video: "retain-on-failure",
+		trace: shouldKeepSensitiveArtifacts ? "retain-on-failure" : "off",
+		screenshot: shouldKeepSensitiveArtifacts ? "only-on-failure" : "off",
+		video: shouldKeepSensitiveArtifacts ? "retain-on-failure" : "off",
 	},
 	projects: [
 		{

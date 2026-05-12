@@ -43,21 +43,6 @@ async function readBonusLessonViewedRequestBody(request: Request) {
 
 export async function markBonusLessonViewedFromRequest(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
-	const body = await readBonusLessonViewedRequestBody(request);
-	const lessonKey = normalizeLessonKey(body?.lessonKey);
-
-	if (!lessonKey) {
-		return jsonWithRequestId(
-			{
-				error: "lessonKey is required.",
-				code: BONUS_LESSON_VIEW_ERROR_CODES.badRequest,
-				requestId,
-			},
-			{ status: 400 },
-			requestId,
-		);
-	}
-
 	const authState = await auth();
 	if (!authState.userId) {
 		return jsonWithRequestId(
@@ -82,6 +67,21 @@ export async function markBonusLessonViewedFromRequest(request: Request) {
 				requestId,
 			},
 			{ status: 401 },
+			requestId,
+		);
+	}
+
+	const body = await readBonusLessonViewedRequestBody(request);
+	const lessonKey = normalizeLessonKey(body?.lessonKey);
+
+	if (!lessonKey) {
+		return jsonWithRequestId(
+			{
+				error: "lessonKey is required.",
+				code: BONUS_LESSON_VIEW_ERROR_CODES.badRequest,
+				requestId,
+			},
+			{ status: 400 },
 			requestId,
 		);
 	}
