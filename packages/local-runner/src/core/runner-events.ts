@@ -15,6 +15,7 @@ import { ensureLocalProjectStateDirectory } from "./local-project-state";
 import { assertSyncSafeValue } from "./redaction";
 
 export const RUNNER_EVENT_SCHEMA_VERSION = "workspace.runner-event.v1" as const;
+const DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS = 5_000;
 
 export type SetupCheckStatus = "unknown" | "blocked" | "warning" | "ready";
 export type RunnerEventType =
@@ -284,10 +285,12 @@ export async function flushRunnerEvents({
 	repositoryRoot,
 	credential,
 	fetchRunnerEvent = fetch,
+	deliveryTimeoutMs = DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS,
 	updateGitExclude = true,
 }: {
 	repositoryRoot: string;
 	credential: RunnerCredential;
+	deliveryTimeoutMs?: number;
 	fetchRunnerEvent?: typeof fetch;
 	updateGitExclude?: boolean;
 }): Promise<RunnerEventFlushResult> {
@@ -331,9 +334,10 @@ export async function flushRunnerEvents({
 	let delivered = 0;
 
 	for (const event of queuedEvents) {
-		const response = await fetchRunnerEvent(
-			new URL(credential.eventEndpoint, credential.apiBaseUrl),
-			{
+		const response = await fetchRunnerEventWithTimeout({
+			deliveryTimeoutMs,
+			fetchRunnerEvent,
+			request: {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -341,7 +345,8 @@ export async function flushRunnerEvents({
 				},
 				body: JSON.stringify(event),
 			},
-		).catch(() => null);
+			url: new URL(credential.eventEndpoint, credential.apiBaseUrl),
+		});
 
 		if (response?.ok) {
 			delivered += 1;
@@ -359,6 +364,43 @@ export async function flushRunnerEvents({
 		delivered,
 		remaining: remainingEvents.length,
 	};
+}
+
+async function fetchRunnerEventWithTimeout({
+	deliveryTimeoutMs,
+	fetchRunnerEvent,
+	request,
+	url,
+}: {
+	deliveryTimeoutMs: number;
+	fetchRunnerEvent: typeof fetch;
+	request: RequestInit;
+	url: URL;
+}) {
+	if (deliveryTimeoutMs <= 0) {
+		return await fetchRunnerEvent(url, request).catch(() => null);
+	}
+
+	const abortController = new AbortController();
+	let timeout: ReturnType<typeof setTimeout> | undefined;
+	const delivery = fetchRunnerEvent(url, {
+		...request,
+		signal: abortController.signal,
+	}).catch(() => null);
+	const timeoutResult = new Promise<null>((resolve) => {
+		timeout = setTimeout(() => {
+			abortController.abort();
+			resolve(null);
+		}, deliveryTimeoutMs);
+	});
+
+	try {
+		return await Promise.race([delivery, timeoutResult]);
+	} finally {
+		if (timeout) {
+			clearTimeout(timeout);
+		}
+	}
 }
 
 async function readQueuedRunnerEventsFromPath(outboxPath: string) {

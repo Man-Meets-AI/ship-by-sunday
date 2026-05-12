@@ -39,8 +39,12 @@ const UNSAFE_FIELD_NAMES = new Set(
 	].map(normalizeFieldName),
 );
 
-const POSIX_ABSOLUTE_PATH_PATTERN =
-	/(^|[\s"'`])\/(?:Users|home|var|tmp|private|opt)\//;
+const EMBEDDED_LOCAL_ABSOLUTE_PATH_PATTERNS = [
+	/(^|[\s"'`([{<:=])~[\\/][^\s"'`)\]}>]+/,
+	/(^|[\s"'`([{<:=])\/(?:Users|home|private|tmp|var\/folders|Volumes|workspace|workspaces|mnt|repo|repos)[\\/][^\s"'`)\]}>]*/i,
+	/(^|[\s"'`([{<:=])[A-Za-z]:[\\/][^\s"'`)\]}>]+/,
+	/(^|[\s"'`([{<:=])\\\\[^\\\s"'`)\]}>]+\\[^\\\s"'`)\]}>]+/,
+];
 const WINDOWS_ABSOLUTE_PATH_PATTERN = /[A-Za-z]:\\/;
 
 export function redactSensitiveText(text: string) {
@@ -66,10 +70,7 @@ export function assertSyncSafeValue(
 
 function findUnsafeValueReason(value: JsonValue | undefined): string | null {
 	if (typeof value === "string") {
-		if (
-			POSIX_ABSOLUTE_PATH_PATTERN.test(value) ||
-			WINDOWS_ABSOLUTE_PATH_PATTERN.test(value)
-		) {
+		if (looksLikeLocalAbsolutePath(value)) {
 			return "local absolute path";
 		}
 		return null;
@@ -99,4 +100,22 @@ function findUnsafeValueReason(value: JsonValue | undefined): string | null {
 	}
 
 	return null;
+}
+
+function looksLikeLocalAbsolutePath(value: string) {
+	if (
+		value.startsWith("~/") ||
+		value.startsWith("/") ||
+		value.startsWith("\\\\")
+	) {
+		return true;
+	}
+
+	if (WINDOWS_ABSOLUTE_PATH_PATTERN.test(value)) {
+		return true;
+	}
+
+	return EMBEDDED_LOCAL_ABSOLUTE_PATH_PATTERNS.some((pattern) =>
+		pattern.test(value),
+	);
 }
