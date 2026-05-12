@@ -24,11 +24,11 @@ export default async function Page({
 		redirect(routeConfig.appHome);
 	}
 
-	const initialWorkspaceState = await fetchAuthenticatedQuery(
-		api.codebase.getCodebaseWorkspaceState,
-		{},
-	);
-	const { download, showLessonMap } = await searchParams;
+	const [initialWorkspaceState, { download, showLessonMap }] =
+		await Promise.all([
+			fetchAuthenticatedQuery(api.codebase.getCodebaseWorkspaceState, {}),
+			searchParams,
+		]);
 
 	if (!initialWorkspaceState) {
 		throw new Error("Codebase workspace state missing");

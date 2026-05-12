@@ -26,7 +26,7 @@ export function AdminImpersonationPageClient({
 }: {
 	data: AdminImpersonationPageData;
 }) {
-	const router = useRouter();
+	const { push } = useRouter();
 	const clerk = useClerk();
 	const { signIn } = useSignIn();
 	const [selectedCustomer, setSelectedCustomer] =
@@ -74,8 +74,11 @@ export function AdminImpersonationPageClient({
 					throw new Error("Clerk did not create an impersonated session.");
 				}
 				await clerk.setActive({ session: createdSessionId });
-				await completeAdminImpersonationHandoffAction();
-				router.push(result.destination);
+				const completeResult = await completeAdminImpersonationHandoffAction();
+				if (!completeResult.ok) {
+					throw new Error(completeResult.message);
+				}
+				push(result.destination);
 			} catch (error) {
 				await failAdminImpersonationHandoffAction(result.sessionId).catch(
 					() => null,

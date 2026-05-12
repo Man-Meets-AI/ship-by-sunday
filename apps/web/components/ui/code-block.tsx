@@ -40,17 +40,20 @@ type CodeBlockProps = {
 	  }
 );
 
+const EMPTY_HIGHLIGHT_LINES: number[] = [];
+const EMPTY_CODE_BLOCK_TABS: CodeBlockTab[] = [];
+
 export function CodeBlock({
 	language,
 	filename,
-	highlightLines = [],
+	highlightLines = EMPTY_HIGHLIGHT_LINES,
 	showLineNumbers = false,
 	wrapLongLines = true,
 	copyable = true,
 	className,
 	contentClassName,
 	code,
-	tabs = [],
+	tabs = EMPTY_CODE_BLOCK_TABS,
 }: CodeBlockProps) {
 	const { resolvedTheme } = useTheme();
 	const [activeTab, setActiveTab] = React.useState(0);
@@ -91,7 +94,7 @@ export function CodeBlock({
 					{tabsExist ? (
 						tabs.map((tab, index) => (
 							<button
-								key={`${tab.name}-${index}`}
+								key={tab.name}
 								type="button"
 								onClick={() => setActiveTab(index)}
 								className={cn(

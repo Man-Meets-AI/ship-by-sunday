@@ -32,7 +32,7 @@ const doctorPassToastIds = {
 const notificationStoragePrefix = "sbs:doctor-pass-toast:";
 
 export function WorkspaceDoctorPassToastWatcher() {
-	const router = useRouter();
+	const { push } = useRouter();
 	const pathname = usePathname();
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const syncPreviewState = useQuery(
@@ -56,7 +56,7 @@ export function WorkspaceDoctorPassToastWatcher() {
 			showWorkspaceActionSuccessToast({
 				action: {
 					label: "View findings",
-					onClick: () => router.push(routeConfig.workspaceFindings),
+					onClick: () => push(routeConfig.workspaceFindings),
 				},
 				id: `${doctorPassToastIds.uploadCompleted}-${doctorPassRun._id}`,
 				title: "Findings uploaded.",
@@ -72,7 +72,7 @@ export function WorkspaceDoctorPassToastWatcher() {
 						openDoctorPassDestination({
 							panelId: doctorPassPreviewPanelId,
 							pathname,
-							router,
+							push,
 						}),
 				},
 				id: `${doctorPassToastIds.runCompleted}-${doctorPassRun._id}`,
@@ -91,14 +91,14 @@ export function WorkspaceDoctorPassToastWatcher() {
 					openDoctorPassDestination({
 						panelId: doctorPassDetailsPanelId,
 						pathname,
-						router,
+						push,
 					}),
 			},
 			id: `${doctorPassToastIds.runFailed}-${doctorPassRun._id}`,
 			duration: WORKSPACE_ERROR_TOAST_DURATION_MS,
 			position: WORKSPACE_TOAST_POSITION,
 		});
-	}, [doctorPassRun, pathname, router]);
+	}, [doctorPassRun, pathname, push]);
 
 	return null;
 }
@@ -131,18 +131,18 @@ function getDoctorPassNotification(doctorPassRun: DoctorPassRun) {
 function openDoctorPassDestination({
 	panelId,
 	pathname,
-	router,
+	push,
 }: {
 	panelId: string;
 	pathname: string;
-	router: { push: (href: string) => void };
+	push: (href: string) => void;
 }) {
 	if (pathname === routeConfig.workspaceDoctorPass) {
 		focusDoctorPassPanel(panelId);
 		return;
 	}
 
-	router.push(routeConfig.workspaceDoctorPass);
+	push(routeConfig.workspaceDoctorPass);
 }
 
 function wasDoctorPassNotificationShown(key: string) {

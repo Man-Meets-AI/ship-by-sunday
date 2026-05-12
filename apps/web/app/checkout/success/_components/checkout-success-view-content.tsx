@@ -23,7 +23,7 @@ export function CheckoutSuccessViewContent({
 	suppressRedirect: boolean;
 	fixtureSlug?: string;
 }) {
-	const router = useRouter();
+	const { replace } = useRouter();
 	const [statusIndex, setStatusIndex] = useState(0);
 	const canAutoRedirect =
 		checkoutSessionState.kind === "validated" && isAccessReady;
@@ -39,11 +39,11 @@ export function CheckoutSuccessViewContent({
 		}
 
 		const timeout = window.setTimeout(() => {
-			router.replace(viewModel.primaryActionHref);
+			replace(viewModel.primaryActionHref);
 		}, timingConfig.checkoutAutoRedirectMs);
 
 		return () => window.clearTimeout(timeout);
-	}, [canAutoRedirect, router, suppressRedirect, viewModel.primaryActionHref]);
+	}, [canAutoRedirect, replace, suppressRedirect, viewModel.primaryActionHref]);
 
 	useEffect(() => {
 		if (checkoutSessionState.kind !== "validated" || isAccessReady) {

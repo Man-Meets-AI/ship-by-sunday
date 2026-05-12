@@ -18,7 +18,10 @@ export default async function Page({
 }: {
 	params: Promise<{ findingId: string }>;
 }) {
-	const workspaceAccess = await loadWorkspacePageAccess();
+	const [workspaceAccess, { findingId }] = await Promise.all([
+		loadWorkspacePageAccess(),
+		params,
+	]);
 	if (workspaceAccess.kind === "access_required") {
 		return <AccessRequiredPage initialAccess={workspaceAccess.access} />;
 	}
@@ -26,7 +29,6 @@ export default async function Page({
 		redirect(routeConfig.appHome);
 	}
 
-	const { findingId } = await params;
 	const [initialFindings, setupState] = await Promise.all([
 		fetchAuthenticatedQuery(api.workspace.listWorkspaceFindings, {}),
 		fetchAuthenticatedQuery(api.workspace.getWorkspaceSetupState, {}),
@@ -37,6 +39,7 @@ export default async function Page({
 	if (!setupState) {
 		throw new Error("Worker setup state requires authentication");
 	}
+	const approvalTimestamp = Date.now();
 
 	return (
 		<WorkspaceFindingDetailPage
@@ -44,7 +47,7 @@ export default async function Page({
 			findingRouteId={findingId}
 			projectId={setupState.project?._id ?? null}
 			activeRunnerId={setupState.activeRunner?._id ?? null}
-			approvalTimestamp={Date.now()}
+			approvalTimestamp={approvalTimestamp}
 		/>
 	);
 }

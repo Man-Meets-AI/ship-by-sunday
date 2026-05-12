@@ -16,7 +16,7 @@ description: See the main public, protected, and purchase-related routes in one 
 ## Purchase and recovery routes
 
 - `/checkout/success`: transient post-checkout fulfillment and validation route; it retries the webhook fulfillment path and sends signed-out paid buyers to normal passwordless sign-in
-- `/checkout/clear-pending`: route-handler-only stale pending-checkout cookie cleanup, then safe redirect
+- `/checkout/clear-pending`: stale pending-checkout recovery screen that posts to `/checkout/clear-pending/submit` for cookie cleanup, then safe redirect
 - `/checkout/cancel`: checkout cancel return; redirects through pending-cookie cleanup
 - `/checkout/cancel/confirmed`: checkout canceled confirmation surface
 - `/session-tasks/reset-password`: Clerk password-reset task inside the shared identity shell

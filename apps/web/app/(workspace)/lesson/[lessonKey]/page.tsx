@@ -17,8 +17,10 @@ export default async function Page({
 	params: Promise<{ lessonKey: string }>;
 	searchParams: Promise<{ showLessonMap?: string }>;
 }) {
-	const { lessonKey: routeSegment } = await params;
-	const { showLessonMap } = await searchParams;
+	const [{ lessonKey: routeSegment }, { showLessonMap }] = await Promise.all([
+		params,
+		searchParams,
+	]);
 	const lesson = getLessonByRouteSegment(routeSegment);
 
 	if (!lesson) {
@@ -45,14 +47,10 @@ export default async function Page({
 		);
 	}
 
-	const missionState = await fetchAuthenticatedQuery(
-		api.course.getBonusMissionState,
-		{},
-	);
-	const resumeDestination = await fetchAuthenticatedQuery(
-		api.codebase.getCodebaseResumeDestination,
-		{},
-	);
+	const [missionState, resumeDestination] = await Promise.all([
+		fetchAuthenticatedQuery(api.course.getBonusMissionState, {}),
+		fetchAuthenticatedQuery(api.codebase.getCodebaseResumeDestination, {}),
+	]);
 
 	if (!missionState) {
 		throw new Error("Bonus mission state missing");

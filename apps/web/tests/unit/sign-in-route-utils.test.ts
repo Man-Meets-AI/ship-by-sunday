@@ -13,6 +13,15 @@ describe("sign-in route utils", () => {
 		expect(getSafeRedirectPath("/settings")).toBe("/settings");
 	});
 
+	it("normalizes duplicate redirect query params to the first value", () => {
+		expect(getSafeRedirectPath(["/settings", "https://example.com"])).toBe(
+			"/settings",
+		);
+		expect(getSafeRedirectPath(["https://example.com", "/settings"])).toBe(
+			"/home",
+		);
+	});
+
 	it("falls back for invalid redirect paths", () => {
 		expect(getSafeRedirectPath("https://example.com/settings")).toBe("/home");
 		expect(getSafeRedirectPath("//example.com/settings")).toBe("/home");

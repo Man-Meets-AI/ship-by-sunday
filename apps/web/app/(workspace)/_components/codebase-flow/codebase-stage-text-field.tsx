@@ -53,7 +53,7 @@ export function CodebaseStageTextField({
 	const describedBy =
 		[errorId, isOverBudget ? budgetId : undefined].filter(Boolean).join(" ") ||
 		undefined;
-	const handleChange = (
+	const updateCodebaseTextField = (
 		event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => onChange(fieldKey, event.target.value);
 
@@ -71,7 +71,7 @@ export function CodebaseStageTextField({
 						className="min-h-24 py-2.5 text-sm leading-relaxed"
 						value={value}
 						placeholder={placeholder}
-						onChange={handleChange}
+						onChange={updateCodebaseTextField}
 						rows={fieldKey === "section_narrative" ? 6 : 4}
 						aria-describedby={describedBy}
 						aria-invalid={errorMessage ? true : undefined}
@@ -83,7 +83,7 @@ export function CodebaseStageTextField({
 						className={isShortField ? "h-10 max-w-48" : "h-10"}
 						value={value}
 						placeholder={placeholder}
-						onChange={handleChange}
+						onChange={updateCodebaseTextField}
 						aria-describedby={describedBy}
 						aria-invalid={errorMessage ? true : undefined}
 					/>
