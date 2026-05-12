@@ -1115,7 +1115,7 @@ describe("docs spine apply and proof workflow", () => {
 		expect(docsIndex).not.toContain("sbs-docs-spine:start");
 	});
 
-	it("records repo-native setup blockers without failing docs-spine quality proof", async () => {
+	it("records repo-native gates as approval-required blockers without running them", async () => {
 		const repositoryRoot = await createApplyRepository();
 		await writeFile(
 			path.join(repositoryRoot, "package.json"),
@@ -1167,9 +1167,11 @@ describe("docs spine apply and proof workflow", () => {
 		expect(nativeGateBlocker).toMatchObject({
 			stage: "native-gate",
 			commandName: "npm run gate",
-			nextApprovalRequired: false,
+			nextApprovalRequired: true,
 		});
-		expect(String(nativeGateBlocker.reason)).toContain("happy-dom");
+		expect(String(nativeGateBlocker.reason)).toContain(
+			"does not execute repository-controlled package scripts",
+		);
 		expect(proof.proofCommandResults).toContainEqual(
 			expect.objectContaining({
 				commandName: "npm run gate",
@@ -1203,7 +1205,7 @@ describe("docs spine apply and proof workflow", () => {
 		);
 	});
 
-	it("fails proof when the repo-native gate reports a non-setup failure", async () => {
+	it("blocks proof when the repo-native gate would report a non-setup failure", async () => {
 		const repositoryRoot = await createApplyRepository();
 		await writeFile(
 			path.join(repositoryRoot, "package.json"),
@@ -1233,7 +1235,7 @@ describe("docs spine apply and proof workflow", () => {
 		});
 
 		expect(result.status).toBe("proof_completed");
-		expect(result.proofStatus).toBe("failed");
+		expect(result.proofStatus).toBe("passed");
 		const proof = JSON.parse(
 			await readFile(
 				path.join(
@@ -1246,16 +1248,25 @@ describe("docs spine apply and proof workflow", () => {
 				"utf8",
 			),
 		);
-		expect(proof.blockedProof).toEqual([]);
+		expect(proof.blockedProof).toContainEqual(
+			expect.objectContaining({
+				stage: "native-gate",
+				commandName: "npm run gate",
+				nextApprovalRequired: true,
+			}),
+		);
+		expect(String(proof.blockedProof[0].reason)).not.toContain(
+			"assertion failed",
+		);
 		expect(proof.proofCommandResults).toContainEqual(
 			expect.objectContaining({
 				commandName: "npm run gate",
-				status: "failed",
+				status: "blocked",
 			}),
 		);
 	});
 
-	it("fails proof when Biome reports normal rule failures", async () => {
+	it("blocks proof instead of running a native gate that would report Biome failures", async () => {
 		const repositoryRoot = await createApplyRepository();
 		await writeFile(
 			path.join(repositoryRoot, "package.json"),
@@ -1285,7 +1296,7 @@ describe("docs spine apply and proof workflow", () => {
 		});
 
 		expect(result.status).toBe("proof_completed");
-		expect(result.proofStatus).toBe("failed");
+		expect(result.proofStatus).toBe("passed");
 		const proof = JSON.parse(
 			await readFile(
 				path.join(
@@ -1298,16 +1309,25 @@ describe("docs spine apply and proof workflow", () => {
 				"utf8",
 			),
 		);
-		expect(proof.blockedProof).toEqual([]);
+		expect(proof.blockedProof).toContainEqual(
+			expect.objectContaining({
+				stage: "native-gate",
+				commandName: "npm run gate",
+				nextApprovalRequired: true,
+			}),
+		);
+		expect(String(proof.blockedProof[0].reason)).not.toContain(
+			"biome check found",
+		);
 		expect(proof.proofCommandResults).toContainEqual(
 			expect.objectContaining({
 				commandName: "npm run gate",
-				status: "failed",
+				status: "blocked",
 			}),
 		);
 	});
 
-	it("fails proof when a passing native gate writes unexpected files", async () => {
+	it("blocks proof instead of running a native gate that would write files", async () => {
 		const repositoryRoot = await createApplyRepository();
 		await writeFile(
 			path.join(repositoryRoot, "package.json"),
@@ -1337,8 +1357,8 @@ describe("docs spine apply and proof workflow", () => {
 		});
 
 		expect(result.status).toBe("proof_completed");
-		expect(result.proofStatus).toBe("failed");
-		expect(result.touchedFiles).toContain("native-output.txt");
+		expect(result.proofStatus).toBe("passed");
+		expect(result.touchedFiles).not.toContain("native-output.txt");
 		const proof = JSON.parse(
 			await readFile(
 				path.join(
@@ -1353,8 +1373,8 @@ describe("docs spine apply and proof workflow", () => {
 		);
 		expect(proof.proofCommandResults).toContainEqual(
 			expect.objectContaining({
-				commandName: "git status --short",
-				status: "failed",
+				commandName: "npm run gate",
+				status: "blocked",
 			}),
 		);
 	});

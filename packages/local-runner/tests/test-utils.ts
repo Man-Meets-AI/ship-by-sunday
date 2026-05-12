@@ -35,7 +35,9 @@ export async function createFakeRunnerBin({
 			'if [ "$1" = "--version" ]; then echo "codex 1.0.0"; exit 0; fi',
 			'if [ "$1" = "login" ] && [ "$2" = "status" ]; then echo "Logged in"; exit 0; fi',
 			'if [ "$1" = "exec" ] && [ "$2" = "--help" ]; then echo "exec help"; exit 0; fi',
-			'if [ "$CODEX_ARGS_FILE" != "" ]; then printf "%s\\n" "$@" > "$CODEX_ARGS_FILE"; fi',
+			codexArgsFile
+				? `printf "%s\\n" "$@" > ${shellQuote(codexArgsFile)}`
+				: 'if [ "$CODEX_ARGS_FILE" != "" ]; then printf "%s\\n" "$@" > "$CODEX_ARGS_FILE"; fi',
 			'if [ "$1" = "exec" ]; then',
 			"  cat >/dev/null",
 			'  echo "{\\"type\\":\\"thread.started\\",\\"thread_id\\":\\"thread_test\\"}"',
@@ -63,6 +65,10 @@ export async function createFakeRunnerBin({
 		binDirectory,
 		codexArgsFile,
 	};
+}
+
+function shellQuote(value: string) {
+	return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
 export async function createCodexHome() {
