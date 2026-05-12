@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function Page({
 	searchParams,
 }: {
-	searchParams: Promise<{ redirect_url?: string }>;
+	searchParams: Promise<{ redirect_url?: string | string[] }>;
 }) {
 	const { redirect_url: redirectUrl } = await searchParams;
 	const redirectPath = getSafeRedirectPath(redirectUrl);

@@ -8,7 +8,11 @@ export type SessionTaskKey = keyof typeof sessionTaskUrls;
 
 const redirectUrlParam = "redirect_url";
 
-export function getSafeRedirectPath(rawPath?: string | null) {
+export function getSafeRedirectPath(rawPath?: string | string[] | null) {
+	if (Array.isArray(rawPath)) {
+		return getSafeRedirectPath(rawPath[0]);
+	}
+
 	if (!rawPath) {
 		return authViewConfig.fallbackRedirectUrl;
 	}
