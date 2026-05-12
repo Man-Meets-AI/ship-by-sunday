@@ -1,5 +1,11 @@
 # Mistakes
 
+## 2026-05-12 App Typecheck Side Effect
+
+- Mistake: I ran `bun run --cwd apps/web typecheck` without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The app typecheck path ran the production compile hook and uploaded source maps for a local verification build.
+  Corrective action: Set `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` for app typecheck/build verification unless source-map upload is the behavior under test.
+
 ## 2026-05-07 Bun Command Standard
 
 - Mistake: I copied `npx convex` commands into Telegram support docs and briefly reused that command form after Parker clarified this repo uses Bun.
@@ -109,3 +115,29 @@
 - Mistake: I used `bunx convex env list --prod` while checking production runtime configuration.
   Impact: The command printed production environment variable values into the local tool transcript instead of returning a presence-only view.
   Corrective action: Use provider commands that prove presence or update a single named variable without printing values; treat any secret-inspection command as unsafe unless its output is known to redact values.
+
+## 2026-05-11 DeepSec Package Manager
+
+- Mistake: I followed DeepSec's generated `pnpm install` instruction instead of the repo's Bun package-manager contract.
+  Impact: The first install attempt failed because `pnpm` was not on PATH; no app files changed, but it wasted a step and required cleaning the generated install artifacts.
+  Corrective action: Check the repo `packageManager` before following third-party generated setup commands, and translate tool commands to Bun in this workspace.
+
+- Mistake: I used `status` as a shell variable while testing Codex auth under a temporary `CODEX_HOME`.
+  Impact: zsh rejected the assignment because `status` is read-only; no files changed and the auth check still showed the temporary home was not logged in.
+  Corrective action: Avoid reserved zsh parameter names in shell probes; use neutral names such as `result`.
+
+## 2026-05-12 Discord Support Scoping
+
+- Mistake: I used a broad `.env` search in the Worker repo while scoping Discord support and printed a live Discord bot token into the local tool transcript.
+  Impact: No token was included in the user-facing answer, but the inspection command violated the provider-secret handling standard.
+  Corrective action: For environment discovery, use presence-only probes or name-only key extraction that strips values before output; treat this Discord token as needing rotation before production confidence.
+
+## 2026-05-12 Worker Setup Install Affordance
+
+- Mistake: I mistyped the integration test path as `workspace-setup-page.test.ts` during a mechanical command update.
+  Impact: The command updated the unit test file, then failed before touching the intended integration test; no source code was changed by the failed path.
+  Corrective action: Re-run the mechanical update with the exact `workspace-setup-page.test.tsx` path and verify with `rg` before continuing.
+
+- Mistake: I ran root `bun typecheck` while shepherding the release without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The command passed, but it created a PostHog release and uploaded source maps for the local branch commit from the credentialed environment.
+  Corrective action: Run local app build/typecheck validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is explicitly under test.

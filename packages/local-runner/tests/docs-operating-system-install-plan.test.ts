@@ -136,6 +136,9 @@ describe("docs operating system install plan", () => {
 			}),
 			rootPackageManifest: {
 				name: "customer-repo",
+				devDependencies: {
+					"ship-by-sunday": "0.1.0",
+				},
 				scripts: {
 					"programs:lint": "bun scripts/programs/run-lint.ts",
 					"plans:lint": "bun scripts/exec-plan/run-lint.ts",

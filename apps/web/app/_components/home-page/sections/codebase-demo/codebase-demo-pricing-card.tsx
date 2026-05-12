@@ -130,7 +130,7 @@ export function CodebaseDemoPricingCard({
 							type="number"
 							inputMode="decimal"
 							min={0}
-							step={1}
+							step={0.01}
 							value={fields.pricing}
 							placeholder={pricing.pricePlaceholder}
 							onChange={(event) => onPricingChange(event.target.value)}

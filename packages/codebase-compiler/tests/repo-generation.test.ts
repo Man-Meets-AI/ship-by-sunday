@@ -98,13 +98,53 @@ describe("repo generation", () => {
 		expect(manifest.includedDirectories).toEqual(
 			expect.arrayContaining([
 				"apps/web/app",
-				"apps/web/tests",
 				"packages/codebase-compiler/src",
 			]),
 		);
+		expect(manifest.includedDirectories).not.toContain("apps/web/tests");
 		expect(manifest.includedFiles).toEqual(
 			expect.arrayContaining(["bunfig.toml", "apps/web/.env.local.example"]),
 		);
+	});
+
+	it("falls back to a safe repo name for product names without ascii slugs", () => {
+		const manifest = buildRepoGenerationManifest(
+			createCompleteProjectDefinition({
+				facts: {
+					product_name: "🚀",
+				},
+			}),
+		);
+
+		expect(manifest.repoName).toBe("generated-codebase");
+	});
+
+	it("renders untrusted product names without executable shell or mdx syntax", () => {
+		const overrides = renderTemplateOverrides(
+			createCompleteProjectDefinition({
+				facts: {
+					product_name: "Bad $(touch owned) `{mdx}` <script>",
+				},
+			}),
+		);
+		const bootstrap = snapshotText(
+			overrides.find((file) => file.path === "bootstrap.sh"),
+		);
+		const docsIndex = snapshotText(
+			overrides.find((file) => file.path === "apps/web/content/docs/index.mdx"),
+		);
+
+		expect(bootstrap).toContain(
+			"PRODUCT_NAME='Bad $(touch owned) `{mdx}` <script>'",
+		);
+		expect(bootstrap).toContain(
+			"Skipping shadcn preset apply because the generated preset code is invalid.",
+		);
+		expect(docsIndex).toContain(
+			"Bad $(touch owned) `&#123;mdx&#125;` &lt;script&gt;",
+		);
+		expect(docsIndex).not.toContain("{mdx}");
+		expect(docsIndex).not.toContain("<script>");
 	});
 
 	it("renders starter overrides for product config and home content", () => {

@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
+import path from "node:path";
 
 import YAML from "yaml";
 
@@ -517,7 +518,7 @@ export async function lintExecPlan(params: {
 	planPath: string;
 }): Promise<ExecPlanLintReport> {
 	const fullPath = resolvePlanFilePath(params.repoRootDir, params.planPath);
-	const text = await readFile(fullPath, "utf8");
+	const text = await readPlanFileWithinRepo(params.repoRootDir, fullPath);
 	const issues: string[] = [];
 	const parsedFrontmatter = parsePlanFrontmatter(text);
 
@@ -616,6 +617,22 @@ export async function lintExecPlan(params: {
 		planPath: params.planPath,
 		issues,
 	};
+}
+
+async function readPlanFileWithinRepo(repoRootDir: string, fullPath: string) {
+	const stats = await lstat(fullPath);
+	if (stats.isSymbolicLink()) {
+		throw new Error("ExecPlan lint refuses to read plan symlinks.");
+	}
+	const [realRootPath, realPlanPath] = await Promise.all([
+		realpath(repoRootDir),
+		realpath(fullPath),
+	]);
+	const relativePath = path.relative(realRootPath, realPlanPath);
+	if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+		throw new Error("ExecPlan lint refuses to read paths outside the repo.");
+	}
+	return await readFile(fullPath, "utf8");
 }
 
 export async function lintExecPlans(params: {

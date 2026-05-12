@@ -60,6 +60,19 @@ type JsonRpcNotification = {
 
 type RpcMessage = JsonRpcResponse | JsonRpcNotification;
 
+const codexAppServerEnvAllowlist = [
+	"HOME",
+	"LANG",
+	"LC_ALL",
+	"LOGNAME",
+	"PATH",
+	"SHELL",
+	"SSL_CERT_FILE",
+	"TERM",
+	"TMPDIR",
+	"USER",
+] as const;
+
 type PendingRequest = {
 	resolve: (value: JsonValue | undefined) => void;
 	reject: (reason?: Error) => void;
@@ -199,10 +212,7 @@ export class CodexAppServerClient {
 				["app-server"],
 				{
 					stdio: ["pipe", "pipe", "pipe"],
-					env: {
-						...process.env,
-						CODEX_HOME: codexHome,
-					},
+					env: buildCodexAppServerEnv(codexHome),
 				},
 			);
 		} catch (error) {
@@ -232,14 +242,15 @@ export class CodexAppServerClient {
 				return;
 			}
 
-			console.warn("[codex-app-server]", stderr);
+			const safeStderr = sanitizeCodexDiagnosticText(stderr);
+			console.warn("[codex-app-server]", safeStderr);
 			if (shouldEscalateStderr(stderr)) {
 				this.reportRuntimeIncident(
 					this.createRuntimeError(
 						"codex_app_server_stderr",
 						"Codex app-server wrote an error to stderr.",
 						{
-							stderr,
+							stderr: safeStderr,
 						},
 					),
 				);
@@ -320,13 +331,14 @@ export class CodexAppServerClient {
 			try {
 				message = JSON.parse(line) as RpcMessage;
 			} catch {
-				console.warn("[codex-app-server] non-json line:", line);
+				const safeLine = sanitizeCodexDiagnosticText(line);
+				console.warn("[codex-app-server] non-json line:", safeLine);
 				this.reportRuntimeIncident(
 					this.createRuntimeError(
 						"codex_app_server_bad_stdout",
 						"Codex app-server emitted a non-JSON stdout line.",
 						{
-							line,
+							line: safeLine,
 						},
 					),
 				);
@@ -701,4 +713,38 @@ export async function withCodexAppServerClient<T>(
 
 function shouldEscalateStderr(stderr: string) {
 	return /\b(error|fatal|panic|exception|enoent)\b/i.test(stderr);
+}
+
+function buildCodexAppServerEnv(codexHome: string): NodeJS.ProcessEnv {
+	const env: NodeJS.ProcessEnv = {
+		CODEX_HOME: codexHome,
+		NODE_ENV: process.env.NODE_ENV,
+	};
+
+	for (const key of codexAppServerEnvAllowlist) {
+		const value = process.env[key];
+		if (value) {
+			env[key] = value;
+		}
+	}
+
+	return env;
+}
+
+function sanitizeCodexDiagnosticText(value: string) {
+	const redacted = value
+		.replace(/\b(?:sk|rk|pk)_(?:live|test)_[A-Za-z0-9_=-]+/g, "[redacted]")
+		.replace(/\bwhsec_[A-Za-z0-9_=-]+/g, "[redacted]")
+		.replace(
+			/\b[A-Za-z0-9_-]{24,}\.[A-Za-z0-9_-]{24,}\.[A-Za-z0-9_-]{24,}\b/g,
+			"[redacted]",
+		)
+		.replace(
+			/\b(?:CLERK|STRIPE|CONVEX|VERCEL|POSTHOG|WEBHOOK|SECRET|TOKEN|KEY|PASSWORD)_[A-Z0-9_]*=([^\s]+)/g,
+			(match) => `${match.split("=")[0]}=[redacted]`,
+		);
+
+	return redacted.length > 2_000
+		? `${redacted.slice(0, 2_000)}...[truncated]`
+		: redacted;
 }

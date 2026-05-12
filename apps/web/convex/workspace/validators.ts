@@ -233,6 +233,22 @@ export const workflowProofCommandResultValidator = v.object({
 	),
 });
 
+export const workerInstallProofCommandResultValidator = v.object({
+	commandLabel: v.string(),
+	status: v.union(
+		v.literal("passed"),
+		v.literal("failed"),
+		v.literal("blocked"),
+		v.literal("skipped"),
+	),
+});
+
+export const workerInstallBlockedStatusValidator = v.union(
+	v.literal("blocked"),
+	v.literal("failed"),
+	v.literal("cancelled"),
+);
+
 export const workflowApprovalSourceValidator = v.union(
 	v.literal("finding_detail"),
 	v.literal("runner_cli"),
@@ -252,6 +268,9 @@ export const workspaceRunnerEventTypeValidator = v.union(
 	v.literal("runner.heartbeat"),
 	v.literal("setup.check.started"),
 	v.literal("setup.check.completed"),
+	v.literal("worker.install.previewed"),
+	v.literal("worker.install.completed"),
+	v.literal("worker.install.blocked"),
 	v.literal("doctor.stage.started"),
 	v.literal("doctor.probe.completed"),
 	v.literal("doctor.sync_preview.ready"),
@@ -309,6 +328,47 @@ export const workspaceRunnerEventPayloadValidator = v.union(
 		status: setupCheckStatusValidator,
 		summary: v.string(),
 		remediationAction: v.optional(v.string()),
+	}),
+	v.object({
+		eventType: v.literal("worker.install.previewed"),
+		outcome: v.literal("ready"),
+		status: v.literal("ready"),
+		summary: v.string(),
+		branch: v.optional(v.string()),
+		commitHash: v.optional(v.string()),
+		reportRef: v.optional(v.string()),
+		localProofRef: v.optional(v.string()),
+		createdRefs: v.array(v.string()),
+		changedRefs: v.array(v.string()),
+		proofCommandResults: v.array(workerInstallProofCommandResultValidator),
+	}),
+	v.object({
+		eventType: v.literal("worker.install.completed"),
+		outcome: v.literal("installed"),
+		status: v.literal("installed"),
+		summary: v.string(),
+		branch: v.optional(v.string()),
+		commitHash: v.optional(v.string()),
+		reportRef: v.optional(v.string()),
+		localProofRef: v.optional(v.string()),
+		createdRefs: v.array(v.string()),
+		changedRefs: v.array(v.string()),
+		proofCommandResults: v.array(workerInstallProofCommandResultValidator),
+	}),
+	v.object({
+		eventType: v.literal("worker.install.blocked"),
+		outcome: workerInstallBlockedStatusValidator,
+		status: workerInstallBlockedStatusValidator,
+		summary: v.string(),
+		branch: v.optional(v.string()),
+		commitHash: v.optional(v.string()),
+		reportRef: v.optional(v.string()),
+		localProofRef: v.optional(v.string()),
+		createdRefs: v.array(v.string()),
+		changedRefs: v.array(v.string()),
+		blockerIds: v.array(v.string()),
+		blockerReasons: v.array(v.string()),
+		proofCommandResults: v.array(workerInstallProofCommandResultValidator),
 	}),
 	v.object({
 		eventType: v.literal("doctor.stage.started"),

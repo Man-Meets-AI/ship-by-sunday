@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import {
 	appendFile,
-	mkdir,
+	lstat,
 	readFile,
 	rename,
 	rm,
@@ -11,6 +11,12 @@ import os from "node:os";
 import path from "node:path";
 
 import type { JsonObject, JsonValue } from "./json-value";
+import {
+	ensureRepositoryDirectory,
+	assertNoRepositorySymlinkPath,
+	resolveRepositoryPath,
+	writeRepositoryTextFile,
+} from "./repository-boundary";
 
 export const LOCAL_STATE_DIRECTORY_NAME = ".sbs";
 
@@ -80,10 +86,15 @@ export async function ensureLocalProjectStateDirectory(
 	options: { updateGitExclude?: boolean } = {},
 ) {
 	const stateDirectory = getLocalStateDirectory(repositoryRoot);
-	await mkdir(path.join(stateDirectory, "events"), { recursive: true });
-	await mkdir(path.join(stateDirectory, "runs"), { recursive: true });
-	await writeFile(
-		path.join(stateDirectory, ".gitignore"),
+	const existingStateDirectory = await lstat(stateDirectory).catch(() => null);
+	if (existingStateDirectory?.isSymbolicLink()) {
+		throw new Error("Refusing to use repository .sbs symlink for local state.");
+	}
+	await ensureRepositoryDirectory(repositoryRoot, ".sbs/events");
+	await ensureRepositoryDirectory(repositoryRoot, ".sbs/runs");
+	await writeRepositoryTextFile(
+		repositoryRoot,
+		".sbs/.gitignore",
 		["*", "!.gitignore", ""].join("\n"),
 	);
 	if (options.updateGitExclude ?? true) {
@@ -134,6 +145,7 @@ export async function writeLocalProjectState(
 	await ensureLocalProjectStateDirectory(repositoryRoot);
 	const statePath = localProjectStatePath(repositoryRoot);
 	const temporaryPath = `${statePath}.${process.pid}.tmp`;
+	await assertNoRepositorySymlinkPath(repositoryRoot, ".sbs/config.json");
 	await writeFile(temporaryPath, `${JSON.stringify(state, null, 2)}\n`);
 	await rename(temporaryPath, statePath);
 }
@@ -153,6 +165,10 @@ export async function writeLocalDaemonStatus(
 ) {
 	await ensureLocalProjectStateDirectory(repositoryRoot);
 	const statusPath = localDaemonStatusPath(repositoryRoot);
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/daemon-status.json",
+	);
 	await writeFile(statusPath, `${JSON.stringify(status, null, 2)}\n`);
 }
 
@@ -185,17 +201,27 @@ export async function writeLocalCodexThreadState(
 	await ensureLocalProjectStateDirectory(repositoryRoot);
 	const threadStatePath = localCodexThreadStatePath(repositoryRoot);
 	const temporaryPath = `${threadStatePath}.${process.pid}.tmp`;
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/runs/codex-thread.json",
+	);
 	await writeFile(temporaryPath, `${JSON.stringify(threadState, null, 2)}\n`);
 	await rename(temporaryPath, threadStatePath);
 }
 
 export async function requestLocalDaemonStop(repositoryRoot: string) {
 	await ensureLocalProjectStateDirectory(repositoryRoot);
-	await writeFile(localDaemonStopPath(repositoryRoot), `${Date.now()}\n`);
+	await writeRepositoryTextFile(
+		repositoryRoot,
+		".sbs/daemon.stop",
+		`${Date.now()}\n`,
+	);
 }
 
 export async function clearLocalDaemonStop(repositoryRoot: string) {
-	await rm(localDaemonStopPath(repositoryRoot), { force: true });
+	await rm(resolveRepositoryPath(repositoryRoot, ".sbs/daemon.stop"), {
+		force: true,
+	});
 }
 
 export function shouldStopLocalDaemon(repositoryRoot: string) {

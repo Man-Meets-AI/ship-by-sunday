@@ -42,8 +42,10 @@ function createSetupState(
 			runnerId: "workspaceRunnerBindings_1",
 			token: "sbs_pair_test_token",
 			tokenExpiresAt: now + 900_000,
-			primaryCommand: "bunx ship-by-sunday setup pair sbs_pair_test_token",
-			fallbackCommand: "npx ship-by-sunday setup pair sbs_pair_test_token",
+			primaryCommand:
+				"bunx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			fallbackCommand:
+				"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
 		},
 		...overrides,
 	};
@@ -103,16 +105,30 @@ function requiredReadySetupEvents() {
 	];
 }
 
+function pairedRunner() {
+	return {
+		_id: "workspaceRunnerBindings_1",
+		status: "paired" as const,
+		pairingStatus: "paired" as const,
+		runnerMode: "daemon" as const,
+		runnerLabel: "Local daemon",
+		machineDisplayName: "Parker MacBook",
+		machineHealthStatus: "ready" as const,
+		projectHealthStatus: "ready" as const,
+		lastHeartbeatAt: now - 10_000,
+	};
+}
+
 describe("workspace setup readiness model", () => {
 	it("derives the waiting pairing command and blocks doctor pass on blockers", () => {
 		const model = buildWorkspaceSetupReadinessModel(createSetupState(), now);
 
 		expect(model.pairing.statusLabel).toBe("waiting");
 		expect(model.pairing.primaryCommand).toBe(
-			"bunx ship-by-sunday setup pair sbs_pair_test_token",
+			"bunx ship-by-sunday setup pair sbs_pair_test_token --repo .",
 		);
 		expect(model.pairing.fallbackCommand).toBe(
-			"npx ship-by-sunday setup pair sbs_pair_test_token",
+			"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
 		);
 		expect(model.pairing.tokenExpiresLabel).toBe(
 			"Pairing token expires in 15 min.",
@@ -393,6 +409,169 @@ describe("workspace setup readiness model", () => {
 			expect(model.pairing.statusLabel).toBe(label);
 		},
 	);
+
+	it("gates Worker install until pairing completes", () => {
+		const model = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				setupEvents: [
+					{
+						eventType: "worker.install.completed",
+						createdAt: now - 1_000,
+						payload: {
+							eventType: "worker.install.completed",
+							outcome: "installed",
+							status: "installed",
+							summary: "Worker Foundations installed.",
+							branch: "shipbysunday/install",
+							commitHash: "abc1234",
+							reportRef: "docs/worker/install-report.md",
+							createdRefs: ["apps/worker"],
+							changedRefs: ["README.md"],
+							proofCommandResults: [
+								{ commandLabel: "bun run worker:test", status: "passed" },
+							],
+						},
+					},
+				],
+			}),
+			now,
+		);
+
+		expect(model.workerInstall).toMatchObject({
+			status: "waiting",
+			statusLabel: "waiting on pairing",
+			gated: true,
+			description:
+				"Pair the local runner before copying install commands. The install stage is shown now so the local Worker handoff stays visible.",
+			previewCommand:
+				"bunx ship-by-sunday install --repo . --dry-run --json --no-kickoff",
+			installCommand:
+				"bunx ship-by-sunday install --repo . --yes --json --no-kickoff",
+			branchLabel: "shipbysunday/install",
+			reportRef: null,
+			createdRefs: [],
+		});
+	});
+
+	it("marks Worker install ready after pairing before any install sync", () => {
+		const runner = pairedRunner();
+		const model = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				runnerBindings: [runner],
+				activeRunner: runner,
+				pairingCommand: null,
+			}),
+			now,
+		);
+
+		expect(model.workerInstall).toMatchObject({
+			status: "ready",
+			statusLabel: "ready to install",
+			gated: false,
+			latestSyncedLabel: "No install runner sync yet",
+		});
+	});
+
+	it("derives Worker install preview, installed, and blocked states from runner events", () => {
+		const runner = pairedRunner();
+		const previewed = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				runnerBindings: [runner],
+				activeRunner: runner,
+				setupEvents: [
+					{
+						eventType: "worker.install.previewed",
+						createdAt: now - 1_000,
+						payload: {
+							eventType: "worker.install.previewed",
+							outcome: "ready",
+							status: "ready",
+							summary: "Worker Foundations install is ready.",
+							branch: "shipbysunday/install",
+							reportRef: "docs/worker/install-report.md",
+							createdRefs: ["apps/worker"],
+							changedRefs: ["README.md"],
+							proofCommandResults: [],
+						},
+					},
+				],
+				pairingCommand: null,
+			}),
+			now,
+		);
+		const installed = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				runnerBindings: [runner],
+				activeRunner: runner,
+				setupEvents: [
+					{
+						eventType: "worker.install.completed",
+						createdAt: now - 500,
+						payload: {
+							eventType: "worker.install.completed",
+							outcome: "installed",
+							status: "installed",
+							summary: "Worker Foundations installed.",
+							branch: "shipbysunday/install",
+							commitHash: "abc123def456",
+							reportRef: "docs/worker/install-report.md",
+							createdRefs: ["apps/worker"],
+							changedRefs: ["README.md", "AGENTS.md", "package.json"],
+							proofCommandResults: [
+								{ commandLabel: "bun run docs:validate", status: "passed" },
+							],
+						},
+					},
+				],
+				pairingCommand: null,
+			}),
+			now,
+		);
+		const blocked = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				runnerBindings: [runner],
+				activeRunner: runner,
+				setupEvents: [
+					{
+						eventType: "worker.install.blocked",
+						createdAt: now - 250,
+						payload: {
+							eventType: "worker.install.blocked",
+							outcome: "blocked",
+							status: "blocked",
+							summary: "Worker Foundations install is blocked.",
+							createdRefs: [],
+							changedRefs: [],
+							blockerIds: ["license"],
+							blockerReasons: ["Worker license is missing."],
+							proofCommandResults: [],
+						},
+					},
+				],
+				pairingCommand: null,
+			}),
+			now,
+		);
+
+		expect(previewed.workerInstall).toMatchObject({
+			status: "previewed",
+			statusLabel: "previewed",
+			reportRef: "docs/worker/install-report.md",
+			createdRefs: ["apps/worker"],
+		});
+		expect(installed.workerInstall).toMatchObject({
+			status: "installed",
+			commitHash: "abc123def456",
+			proofCommandResults: [
+				{ commandLabel: "bun run docs:validate", status: "passed" },
+			],
+		});
+		expect(blocked.workerInstall).toMatchObject({
+			status: "blocked",
+			blockerIds: ["license"],
+			blockerReasons: ["Worker license is missing."],
+		});
+	});
 
 	it("builds the existing-codebase stage local navigation", () => {
 		const nav = buildExistingCodebaseWorkspaceLocalNavModel("setup");

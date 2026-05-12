@@ -34,9 +34,6 @@ const stripeSecretKey = normalizeStripeSecretKey(
 const stripePriceId = normalizeStripeSecretKey(
 	process.env.STRIPE_PRICE_ID ?? "",
 );
-const checkoutServerToken = normalizeStripeSecretKey(
-	process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET ?? "",
-);
 const releasePersonaLocalPath = path.resolve(
 	import.meta.dirname,
 	"../../..",
@@ -44,19 +41,14 @@ const releasePersonaLocalPath = path.resolve(
 );
 const expectedWebhookAccessSource = "stripe_webhook";
 const hostedCheckoutAppPathPattern = /\/home(\?|$)/;
+const hostedCheckoutProofIdentity = JSON.stringify({
+	tokenIdentifier: "release-proof:hosted-checkout-billing",
+	subject: "release-proof",
+	issuer: "ship-by-sunday-release-proof",
+});
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
-}
-
-function requireCheckoutServerToken() {
-	if (!checkoutServerToken) {
-		throw new Error(
-			"Missing CHECKOUT_FULFILLMENT_RETRY_SECRET before hosted checkout proof.",
-		);
-	}
-
-	return checkoutServerToken;
 }
 
 function parseArgs(argv) {
@@ -201,9 +193,10 @@ async function createHostedProofCheckoutPurchaseIntent({
 			convexBinPath,
 			"run",
 			"--prod",
+			"--identity",
+			hostedCheckoutProofIdentity,
 			"checkoutClaims:createCheckoutPurchaseIntent",
 			JSON.stringify({
-				checkoutServerToken: requireCheckoutServerToken(),
 				checkoutEmail,
 				checkoutSurface: "hosted_checkout",
 				...(clerkUserId ? { clerkUserId } : {}),
@@ -238,9 +231,10 @@ async function attachHostedProofCheckoutPurchaseIntent({
 			convexBinPath,
 			"run",
 			"--prod",
+			"--identity",
+			hostedCheckoutProofIdentity,
 			"checkoutClaims:attachStripeCheckoutSessionToPurchaseIntent",
 			JSON.stringify({
-				checkoutServerToken: requireCheckoutServerToken(),
 				purchaseIntentId,
 				stripeCheckoutSessionId,
 			}),

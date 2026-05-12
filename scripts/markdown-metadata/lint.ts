@@ -288,7 +288,20 @@ async function collectMarkdownFilesFromPath(params: {
 	const normalizedRequestedPath = params.requestedPath
 		.replaceAll("\\", "/")
 		.replace(/\/+$/, "");
-	const absolutePath = path.join(params.repoRootDir, normalizedRequestedPath);
+	if (
+		path.isAbsolute(normalizedRequestedPath) ||
+		normalizedRequestedPath.split("/").includes("..")
+	) {
+		throw new Error(`Markdown lint path must stay inside the repository: ${params.requestedPath}`);
+	}
+	const absolutePath = path.resolve(params.repoRootDir, normalizedRequestedPath);
+	const repoRootDir = path.resolve(params.repoRootDir);
+	if (
+		absolutePath !== repoRootDir &&
+		!absolutePath.startsWith(`${repoRootDir}${path.sep}`)
+	) {
+		throw new Error(`Markdown lint path must stay inside the repository: ${params.requestedPath}`);
+	}
 	const fileStat = await stat(absolutePath);
 
 	if (fileStat.isFile()) {

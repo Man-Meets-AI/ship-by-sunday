@@ -3,18 +3,23 @@ import { existsSync } from "node:fs";
 import {
 	appendFile,
 	open,
+	readdir,
 	readFile,
 	rename,
 	rm,
 	unlink,
 } from "node:fs/promises";
-import path from "node:path";
 
 import type { RunnerCredential } from "./local-runner-home";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
+import {
+	assertNoRepositorySymlinkPath,
+	resolveRepositoryPath,
+} from "./repository-boundary";
 import { assertSyncSafeValue } from "./redaction";
 
 export const RUNNER_EVENT_SCHEMA_VERSION = "workspace.runner-event.v1" as const;
+const DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS = 5_000;
 
 export type SetupCheckStatus = "unknown" | "blocked" | "warning" | "ready";
 export type RunnerEventType =
@@ -22,6 +27,9 @@ export type RunnerEventType =
 	| "runner.heartbeat"
 	| "setup.check.started"
 	| "setup.check.completed"
+	| "worker.install.previewed"
+	| "worker.install.completed"
+	| "worker.install.blocked"
 	| "doctor.stage.started"
 	| "doctor.probe.completed"
 	| "doctor.sync_preview.ready"
@@ -65,6 +73,47 @@ export type RunnerEventPayload =
 			status: SetupCheckStatus;
 			summary: string;
 			remediationAction?: string;
+	  }
+	| {
+			eventType: "worker.install.previewed";
+			outcome: "ready";
+			status: "ready";
+			summary: string;
+			branch?: string;
+			commitHash?: string;
+			reportRef?: string;
+			localProofRef?: string;
+			createdRefs: string[];
+			changedRefs: string[];
+			proofCommandResults: WorkerInstallProofCommandResult[];
+	  }
+	| {
+			eventType: "worker.install.completed";
+			outcome: "installed";
+			status: "installed";
+			summary: string;
+			branch?: string;
+			commitHash?: string;
+			reportRef?: string;
+			localProofRef?: string;
+			createdRefs: string[];
+			changedRefs: string[];
+			proofCommandResults: WorkerInstallProofCommandResult[];
+	  }
+	| {
+			eventType: "worker.install.blocked";
+			outcome: "blocked" | "failed" | "cancelled";
+			status: "blocked" | "failed" | "cancelled";
+			summary: string;
+			branch?: string;
+			commitHash?: string;
+			reportRef?: string;
+			localProofRef?: string;
+			createdRefs: string[];
+			changedRefs: string[];
+			blockerIds: string[];
+			blockerReasons: string[];
+			proofCommandResults: WorkerInstallProofCommandResult[];
 	  }
 	| {
 			eventType: "doctor.stage.started";
@@ -126,6 +175,11 @@ export type RunnerEventPayload =
 			reason?: string;
 	  };
 
+export type WorkerInstallProofCommandResult = {
+	commandLabel: string;
+	status: "passed" | "failed" | "blocked" | "skipped";
+};
+
 export type RunnerEvent = {
 	eventId: string;
 	projectId: string;
@@ -144,11 +198,11 @@ export type RunnerEventFlushResult = {
 };
 
 function eventOutboxPath(repositoryRoot: string) {
-	return path.join(repositoryRoot, ".sbs", "events", "outbox.jsonl");
+	return resolveRepositoryPath(repositoryRoot, ".sbs/events/outbox.jsonl");
 }
 
 function eventOutboxLockPath(repositoryRoot: string) {
-	return path.join(repositoryRoot, ".sbs", "events", "outbox.lock");
+	return resolveRepositoryPath(repositoryRoot, ".sbs/events/outbox.lock");
 }
 
 export function createRunnerEvent({
@@ -203,6 +257,10 @@ export async function queueRunnerEvent(
 	await ensureLocalProjectStateDirectory(repositoryRoot, {
 		updateGitExclude: options.updateGitExclude ?? true,
 	});
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/events/outbox.jsonl",
+	);
 	await appendFile(
 		eventOutboxPath(repositoryRoot),
 		`${JSON.stringify(event)}\n`,
@@ -225,6 +283,10 @@ async function appendQueuedRunnerEvents(
 		updateGitExclude: options.updateGitExclude ?? true,
 	});
 	const outboxPath = eventOutboxPath(repositoryRoot);
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/events/outbox.jsonl",
+	);
 	await appendFile(
 		outboxPath,
 		`${events.map((event) => JSON.stringify(event)).join("\n")}\n`,
@@ -235,15 +297,22 @@ export async function flushRunnerEvents({
 	repositoryRoot,
 	credential,
 	fetchRunnerEvent = fetch,
+	deliveryTimeoutMs = DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS,
 	updateGitExclude = true,
 }: {
 	repositoryRoot: string;
 	credential: RunnerCredential;
+	deliveryTimeoutMs?: number;
 	fetchRunnerEvent?: typeof fetch;
 	updateGitExclude?: boolean;
 }): Promise<RunnerEventFlushResult> {
 	await ensureLocalProjectStateDirectory(repositoryRoot, { updateGitExclude });
+	await restoreStrandedFlushingOutboxes(repositoryRoot, { updateGitExclude });
 	const lockPath = eventOutboxLockPath(repositoryRoot);
+	await assertNoRepositorySymlinkPath(
+		repositoryRoot,
+		".sbs/events/outbox.lock",
+	);
 	let lockHandle;
 	try {
 		lockHandle = await open(lockPath, "wx");
@@ -282,9 +351,10 @@ export async function flushRunnerEvents({
 	let delivered = 0;
 
 	for (const event of queuedEvents) {
-		const response = await fetchRunnerEvent(
-			new URL(credential.eventEndpoint, credential.apiBaseUrl),
-			{
+		const response = await fetchRunnerEventWithTimeout({
+			deliveryTimeoutMs,
+			fetchRunnerEvent,
+			request: {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -292,7 +362,8 @@ export async function flushRunnerEvents({
 				},
 				body: JSON.stringify(event),
 			},
-		).catch(() => null);
+			url: new URL(credential.eventEndpoint, credential.apiBaseUrl),
+		});
 
 		if (response?.ok) {
 			delivered += 1;
@@ -310,6 +381,69 @@ export async function flushRunnerEvents({
 		delivered,
 		remaining: remainingEvents.length,
 	};
+}
+
+async function restoreStrandedFlushingOutboxes(
+	repositoryRoot: string,
+	options: { updateGitExclude: boolean },
+) {
+	const eventsDirectory = resolveRepositoryPath(repositoryRoot, ".sbs/events");
+	const entries = await readdir(eventsDirectory, { withFileTypes: true }).catch(
+		() => [],
+	);
+	for (const entry of entries) {
+		if (
+			!entry.isFile() ||
+			!entry.name.startsWith("outbox.jsonl.") ||
+			!entry.name.endsWith(".flushing")
+		) {
+			continue;
+		}
+		const flushingPath = resolveRepositoryPath(
+			repositoryRoot,
+			`.sbs/events/${entry.name}`,
+		);
+		const events = await readQueuedRunnerEventsFromPath(flushingPath);
+		await appendQueuedRunnerEvents(repositoryRoot, events, options);
+		await rm(flushingPath, { force: true });
+	}
+}
+
+async function fetchRunnerEventWithTimeout({
+	deliveryTimeoutMs,
+	fetchRunnerEvent,
+	request,
+	url,
+}: {
+	deliveryTimeoutMs: number;
+	fetchRunnerEvent: typeof fetch;
+	request: RequestInit;
+	url: URL;
+}) {
+	if (deliveryTimeoutMs <= 0) {
+		return await fetchRunnerEvent(url, request).catch(() => null);
+	}
+
+	const abortController = new AbortController();
+	let timeout: ReturnType<typeof setTimeout> | undefined;
+	const delivery = fetchRunnerEvent(url, {
+		...request,
+		signal: abortController.signal,
+	}).catch(() => null);
+	const timeoutResult = new Promise<null>((resolve) => {
+		timeout = setTimeout(() => {
+			abortController.abort();
+			resolve(null);
+		}, deliveryTimeoutMs);
+	});
+
+	try {
+		return await Promise.race([delivery, timeoutResult]);
+	} finally {
+		if (timeout) {
+			clearTimeout(timeout);
+		}
+	}
 }
 
 async function readQueuedRunnerEventsFromPath(outboxPath: string) {

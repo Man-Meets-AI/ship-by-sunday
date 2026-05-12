@@ -338,9 +338,10 @@ describe("docs operating system lockfile refresh workflow", () => {
 			"--ignore-scripts",
 			"--ignore-pnpmfile",
 			"--no-frozen-lockfile",
+			"--offline",
 		]);
 		expect(commandResolution.command.commandName).toBe(
-			"pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile",
+			"pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile --offline",
 		);
 	});
 
@@ -400,7 +401,7 @@ describe("docs operating system lockfile refresh workflow", () => {
 		expect(proof.touchedFiles).toEqual(["bun.lock"]);
 		expect(proof.unexpectedTouchedFiles).toEqual([]);
 		expect(proof.proofCommandResults[0]).toMatchObject({
-			commandName: "bun install --lockfile-only --ignore-scripts",
+			commandName: "bun install --lockfile-only --ignore-scripts --offline",
 			status: "passed",
 		});
 
@@ -414,7 +415,7 @@ describe("docs operating system lockfile refresh workflow", () => {
 		);
 		expect(summary.status).toBe("refreshed");
 		expect(summary.commandName).toBe(
-			"bun install --lockfile-only --ignore-scripts",
+			"bun install --lockfile-only --ignore-scripts --offline",
 		);
 		expect(summary.touchedLockfileRefs).toEqual(["bun.lock"]);
 	});

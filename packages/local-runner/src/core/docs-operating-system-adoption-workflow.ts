@@ -66,6 +66,8 @@ type RunDocsOperatingSystemAdoptionWorkflowOptions = {
 type RootPackageManifestFacts = {
 	name?: string;
 	scripts: JsonObject;
+	dependencies?: JsonObject;
+	devDependencies?: JsonObject;
 };
 
 export async function runDocsOperatingSystemAdoptionWorkflow({
@@ -650,6 +652,8 @@ async function readRootPackageManifest(
 	const parsed = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
 		name?: string;
 		scripts?: JsonValue;
+		dependencies?: JsonValue;
+		devDependencies?: JsonValue;
 	};
 	const scripts =
 		parsed.scripts &&
@@ -657,9 +661,23 @@ async function readRootPackageManifest(
 		!Array.isArray(parsed.scripts)
 			? { ...(parsed.scripts as JsonObject) }
 			: {};
+	const dependencies =
+		parsed.dependencies &&
+		typeof parsed.dependencies === "object" &&
+		!Array.isArray(parsed.dependencies)
+			? { ...(parsed.dependencies as JsonObject) }
+			: {};
+	const devDependencies =
+		parsed.devDependencies &&
+		typeof parsed.devDependencies === "object" &&
+		!Array.isArray(parsed.devDependencies)
+			? { ...(parsed.devDependencies as JsonObject) }
+			: {};
 	return {
 		name: typeof parsed.name === "string" ? parsed.name : undefined,
 		scripts,
+		dependencies,
+		devDependencies,
 	};
 }
 

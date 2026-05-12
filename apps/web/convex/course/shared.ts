@@ -23,7 +23,7 @@ import {
 	prepareFieldValuesForPersistence,
 } from "../../lib/course/lesson/model/registry";
 import type { Id } from "../_generated/dataModel";
-import { requireGrantedProductAccess } from "../access/model";
+import { requireTutorialsProductAccess } from "../access/model";
 import type {
 	CourseMutationCtx,
 	CourseQueryCtx,
@@ -95,7 +95,7 @@ function getCompatibleCompletedLessonIds(lessonStates: LessonStateDoc[]) {
 export async function loadViewerCourseState(
 	ctx: CourseReadCtx,
 ): Promise<ViewerCourseState> {
-	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const clerkUserId = await requireTutorialsProductAccess(ctx);
 	const lessonStates = await getViewerLessonStates(ctx, clerkUserId);
 	const compatibleCompletedLessonKeys =
 		getCompatibleCompletedLessonIds(lessonStates);
@@ -118,6 +118,72 @@ export async function loadViewerCourseState(
 			getUnlockedLessonKeys(compatibleCompletedLessonKeys),
 		),
 	};
+}
+
+function collectStorageIdsFromFieldValues(
+	fieldValues: PersistedFieldValues | null | undefined,
+) {
+	const storageIds = new Set<Id<"_storage">>();
+	const values = normalizeFieldValues(fieldValues);
+
+	function collectValue(value: unknown) {
+		if (isReferenceGalleryValue(value)) {
+			for (const item of value.items) {
+				if (item.storageId) {
+					storageIds.add(item.storageId);
+				}
+			}
+			return;
+		}
+		if (isUploadFieldValueArray(value)) {
+			for (const item of value) {
+				if (item.storageId) {
+					storageIds.add(item.storageId);
+				}
+			}
+			return;
+		}
+		if (isUploadFieldValue(value) && value.storageId) {
+			storageIds.add(value.storageId);
+		}
+	}
+
+	for (const value of Object.values(values)) {
+		collectValue(value);
+	}
+
+	return storageIds;
+}
+
+function getViewerPersistedStorageIds(viewerState: ViewerCourseState) {
+	const storageIds = new Set<Id<"_storage">>();
+	for (const lessonState of viewerState.lessonStates) {
+		for (const storageId of collectStorageIdsFromFieldValues(
+			lessonState.fieldValues,
+		)) {
+			storageIds.add(storageId);
+		}
+	}
+	return storageIds;
+}
+
+function assertFieldValuesUseKnownStorageIds(
+	viewerState: ViewerCourseState,
+	fieldValues: PersistedFieldValues,
+) {
+	const storageIds = collectStorageIdsFromFieldValues(fieldValues);
+	if (storageIds.size === 0) {
+		return;
+	}
+
+	const knownStorageIds = getViewerPersistedStorageIds(viewerState);
+	for (const storageId of storageIds) {
+		if (!knownStorageIds.has(storageId)) {
+			throw new ConvexError(
+				"Uploaded lesson media is not bound to this viewer",
+			);
+		}
+	}
 }
 
 export function canAccessLesson(
@@ -208,6 +274,7 @@ export async function upsertLessonState(
 		lesson,
 		options.fieldValues,
 	);
+	assertFieldValuesUseKnownStorageIds(viewerState, fieldValues);
 
 	if (existingState) {
 		await ctx.db.patch(existingState._id, {
@@ -247,18 +314,17 @@ export async function upsertLessonState(
 }
 
 export async function hydrateUploadUrls(
-	ctx: CourseQueryCtx,
+	_ctx: CourseQueryCtx,
 	fieldValues: PersistedFieldValues | null | undefined,
 ): Promise<PersistedFieldValues> {
 	const values = normalizeFieldValues(fieldValues);
 
-	async function hydrateUploadValue(value: UploadHydrationCandidate) {
-		const url = await ctx.storage.getUrl(value.storageId);
-
+	function hydrateUploadValue(value: UploadHydrationCandidate) {
 		return {
 			...value,
 			status: "stored",
-			url: url ?? undefined,
+			url: undefined,
+			previewUrl: undefined,
 		};
 	}
 
@@ -268,9 +334,7 @@ export async function hydrateUploadUrls(
 				if (isReferenceGalleryValue(value)) {
 					return [
 						fieldId,
-						await hydrateReferenceGalleryValue(value, async (storageId) =>
-							ctx.storage.getUrl(storageId),
-						),
+						await hydrateReferenceGalleryValue(value, async () => null),
 					];
 				}
 
@@ -293,10 +357,7 @@ export async function hydrateUploadUrls(
 					return [fieldId, value];
 				}
 
-				return [
-					fieldId,
-					await hydrateUploadValue(value as UploadHydrationCandidate),
-				];
+				return [fieldId, hydrateUploadValue(value as UploadHydrationCandidate)];
 			}),
 		),
 	) as PersistedFieldValues;

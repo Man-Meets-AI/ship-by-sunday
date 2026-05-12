@@ -39,6 +39,8 @@ const SUPPORT_PENDING_VISITOR_MESSAGE_LIMIT = 5;
 const SUPPORT_GLOBAL_HOURLY_LIMIT = 60;
 const SUPPORT_ATTACHMENT_UPLOAD_SESSION_HOURLY_LIMIT = 10;
 const SUPPORT_ATTACHMENT_UPLOAD_GLOBAL_HOURLY_LIMIT = 120;
+const SUPPORT_CONVERSATION_CAPABILITY_SESSION_HOURLY_LIMIT = 30;
+const SUPPORT_CONVERSATION_CAPABILITY_THREAD_ACTIVE_LIMIT = 3;
 const SUPPORT_CONVERSATION_CAPABILITY_TTL_MS = 30 * 24 * 60 * 60 * 1_000;
 const SUPPORT_IDLE_CLOSE_MS = 14 * 24 * 60 * 60 * 1_000;
 const SUPPORT_CLOSED_RETENTION_MS = 90 * 24 * 60 * 60 * 1_000;
@@ -365,6 +367,36 @@ export async function issueVisitorConversationCapabilityHandler(
 		: null;
 	if (!visitor || !thread) {
 		return null;
+	}
+
+	await assertConversationCapabilityHourlyLimit(ctx, {
+		sessionTokenHash,
+		now,
+	});
+
+	const activeCapabilities = await ctx.db
+		.query("supportConversationCapabilities")
+		.withIndex("by_session_token_hash_and_status", (query) =>
+			query.eq("sessionTokenHash", sessionTokenHash).eq("status", "active"),
+		)
+		.collect();
+	const activeThreadCapabilities = activeCapabilities.filter(
+		(capability) =>
+			capability.threadId === thread._id && capability.expiresAt > now,
+	);
+	if (
+		activeThreadCapabilities.length >=
+		SUPPORT_CONVERSATION_CAPABILITY_THREAD_ACTIVE_LIMIT
+	) {
+		const oldestCapability = activeThreadCapabilities.toSorted(
+			(left, right) => left.lastIssuedAt - right.lastIssuedAt,
+		)[0];
+		if (oldestCapability) {
+			await ctx.db.patch(oldestCapability._id, {
+				status: "revoked",
+				revokedAt: now,
+			});
+		}
 	}
 
 	const capabilityToken = createSupportConversationCapabilityToken();
@@ -2193,6 +2225,22 @@ async function assertAttachmentUploadHourlyLimits(
 		limit: SUPPORT_ATTACHMENT_UPLOAD_GLOBAL_HOURLY_LIMIT,
 		now: args.now,
 		errorMessage: "Support uploads are busy. Use Telegram directly for now.",
+	});
+}
+
+async function assertConversationCapabilityHourlyLimit(
+	ctx: MutationCtx,
+	args: {
+		sessionTokenHash: string;
+		now: number;
+	},
+) {
+	const rateLimitHour = getSupportRateLimitHour(args.now);
+	await assertSupportRateLimitBucket(ctx, {
+		bucketKey: `conversation-capability:session:${args.sessionTokenHash}:${rateLimitHour}`,
+		limit: SUPPORT_CONVERSATION_CAPABILITY_SESSION_HOURLY_LIMIT,
+		now: args.now,
+		errorMessage: "Support realtime is busy. Refresh again in a minute.",
 	});
 }
 

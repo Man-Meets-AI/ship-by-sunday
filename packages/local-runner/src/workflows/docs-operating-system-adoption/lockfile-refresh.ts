@@ -26,8 +26,8 @@ export function resolveDocsOperatingSystemLockfileRefreshCommand(
 			command: {
 				packageManager,
 				command: "bun",
-				args: ["install", "--lockfile-only", "--ignore-scripts"],
-				commandName: "bun install --lockfile-only --ignore-scripts",
+				args: ["install", "--lockfile-only", "--ignore-scripts", "--offline"],
+				commandName: "bun install --lockfile-only --ignore-scripts --offline",
 				expectedLockfileRefs: ["bun.lock", "bun.lockb"],
 			},
 		};
@@ -39,8 +39,14 @@ export function resolveDocsOperatingSystemLockfileRefreshCommand(
 			command: {
 				packageManager,
 				command: "npm",
-				args: ["install", "--package-lock-only", "--ignore-scripts"],
-				commandName: "npm install --package-lock-only --ignore-scripts",
+				args: [
+					"install",
+					"--package-lock-only",
+					"--ignore-scripts",
+					"--offline",
+				],
+				commandName:
+					"npm install --package-lock-only --ignore-scripts --offline",
 				expectedLockfileRefs: ["package-lock.json", "npm-shrinkwrap.json"],
 			},
 		};
@@ -58,9 +64,10 @@ export function resolveDocsOperatingSystemLockfileRefreshCommand(
 					"--ignore-scripts",
 					"--ignore-pnpmfile",
 					"--no-frozen-lockfile",
+					"--offline",
 				],
 				commandName:
-					"pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile",
+					"pnpm install --lockfile-only --ignore-scripts --ignore-pnpmfile --no-frozen-lockfile --offline",
 				expectedLockfileRefs: ["pnpm-lock.yaml"],
 			},
 		};

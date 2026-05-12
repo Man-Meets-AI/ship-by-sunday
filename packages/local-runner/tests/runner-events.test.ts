@@ -104,6 +104,43 @@ describe("runner events", () => {
 		]);
 	});
 
+	it("retains events when delivery times out", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-runner-events-");
+		const event = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "worker.install.previewed",
+				outcome: "ready",
+				status: "ready",
+				summary: "Worker Foundations install is ready.",
+				createdRefs: [],
+				changedRefs: [],
+				proofCommandResults: [],
+			},
+		});
+
+		await queueRunnerEvent(repositoryRoot, event);
+		const result = await flushRunnerEvents({
+			repositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_secret",
+				apiBaseUrl: "https://example.com/",
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
+			deliveryTimeoutMs: 1,
+			fetchRunnerEvent: () => new Promise<Response>(() => undefined),
+		});
+
+		expect(result).toEqual({ delivered: 0, remaining: 1 });
+		await expect(readQueuedRunnerEvents(repositoryRoot)).resolves.toEqual([
+			event,
+		]);
+	});
+
 	it("rejects unsafe payload fields before enqueue", () => {
 		expect(() =>
 			createRunnerEvent({
@@ -119,5 +156,25 @@ describe("runner events", () => {
 				} as never,
 			}),
 		).toThrow(/unsafe field token/);
+	});
+
+	it("rejects Worker install absolute paths before enqueue", () => {
+		expect(() =>
+			createRunnerEvent({
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				payload: {
+					eventType: "worker.install.blocked",
+					outcome: "blocked",
+					status: "blocked",
+					summary: "Worker install is blocked at /workspace/customer-app.",
+					createdRefs: [],
+					changedRefs: [],
+					blockerIds: ["license"],
+					blockerReasons: ["Check /workspace/customer-app locally."],
+					proofCommandResults: [],
+				},
+			}),
+		).toThrow(/local absolute path/);
 	});
 });

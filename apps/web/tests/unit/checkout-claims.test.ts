@@ -536,11 +536,14 @@ describe("convex/checkoutClaims", () => {
 		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET =
 			"checkout_server_secret_123456789012345";
 		const runMutation = vi.fn();
+		const auth = {
+			getUserIdentity: vi.fn().mockResolvedValue(null),
+		};
 
 		try {
 			await expect(
 				moduleUnderTest.createCheckoutPurchaseIntent._handler(
-					{ runMutation } as never,
+					{ auth, runMutation } as never,
 					{
 						checkoutServerToken: "wrong-token",
 						checkoutSurface: "hosted_checkout",
@@ -562,6 +565,9 @@ describe("convex/checkoutClaims", () => {
 		const checkoutServerToken = "checkout_server_secret_123456789012345";
 		const previousToken = process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET;
 		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET = checkoutServerToken;
+		const auth = {
+			getUserIdentity: vi.fn().mockResolvedValue(null),
+		};
 		const runMutation = vi
 			.fn()
 			.mockResolvedValue({ purchaseIntentId: "purchase_intent_123" });
@@ -569,7 +575,7 @@ describe("convex/checkoutClaims", () => {
 		try {
 			await expect(
 				moduleUnderTest.createCheckoutPurchaseIntent._handler(
-					{ runMutation } as never,
+					{ auth, runMutation } as never,
 					{
 						checkoutServerToken,
 						checkoutSurface: "hosted_checkout",

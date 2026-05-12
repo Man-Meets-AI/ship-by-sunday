@@ -1,4 +1,3 @@
-import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { JsonValue } from "./json-value";
@@ -6,6 +5,10 @@ import { runBoundedProcess } from "./bounded-process";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
+import {
+	ensureRepositoryDirectory,
+	writeRepositoryTextFile,
+} from "./repository-boundary";
 import {
 	createRunnerEvent,
 	flushRunnerEvents,
@@ -119,7 +122,7 @@ export async function runBrokenAppTriageWorkflow({
 	await ensureLocalProjectStateDirectory(repositoryRoot, {
 		updateGitExclude: false,
 	});
-	await mkdir(localRunDirectory, { recursive: true });
+	await ensureRepositoryDirectory(repositoryRoot, localRunDirectoryRef);
 
 	await queueRunnerEvent(
 		repositoryRoot,
@@ -382,7 +385,8 @@ async function blockWorkflow({
 	const proofRef = `${localRunDirectoryRef}/proof.json`;
 	const syncPreviewRef = `${localRunDirectoryRef}/sync-preview.json`;
 	const createdArtifacts = [proofRef, syncPreviewRef];
-	await mkdir(localRunDirectory, { recursive: true });
+	void localRunDirectory;
+	await ensureRepositoryDirectory(repositoryRoot, localRunDirectoryRef);
 	await writeJsonArtifact(repositoryRoot, proofRef, {
 		schemaVersion: "broken-app-triage-proof.v1",
 		workflowId: BROKEN_APP_TRIAGE_WORKFLOW_ID,
@@ -468,9 +472,11 @@ async function writeJsonArtifact(
 	repoRelativePath: string,
 	value: JsonValue,
 ) {
-	const artifactPath = path.join(repositoryRoot, repoRelativePath);
-	await mkdir(path.dirname(artifactPath), { recursive: true });
-	await writeFile(artifactPath, `${JSON.stringify(value, null, 2)}\n`);
+	await writeRepositoryTextFile(
+		repositoryRoot,
+		repoRelativePath,
+		`${JSON.stringify(value, null, 2)}\n`,
+	);
 }
 
 function assertSafeWorkflowRunId(workflowRunId: string) {

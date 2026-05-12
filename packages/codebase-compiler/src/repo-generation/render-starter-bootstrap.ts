@@ -6,6 +6,10 @@ const CLERK_SIGN_UP_URL = "https://dashboard.clerk.com/sign-up";
 const CONVEX_DASHBOARD_URL = "https://dashboard.convex.dev";
 const STRIPE_REGISTER_URL = "https://dashboard.stripe.com/register";
 
+function shellQuote(value: string) {
+	return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
 function renderStarterBootstrapContent(productName: string) {
 	return [
 		"#!/usr/bin/env bash",
@@ -14,14 +18,14 @@ function renderStarterBootstrapContent(productName: string) {
 		'SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"',
 		'cd "$SCRIPT_DIR"',
 		"",
-		`PRODUCT_NAME=${JSON.stringify(productName)}`,
+		`PRODUCT_NAME=${shellQuote(productName)}`,
 		'ENV_EXAMPLE_PATH="apps/web/.env.local.example"',
 		'ENV_FILE_PATH="apps/web/.env.local"',
 		'DESIGN_SYSTEM_FACTS_PATH="docs/facts/design-system.json"',
-		`BUN_INSTALL_DOCS_URL=${JSON.stringify(BUN_INSTALL_DOCS_URL)}`,
-		`CLERK_SIGN_UP_URL=${JSON.stringify(CLERK_SIGN_UP_URL)}`,
-		`CONVEX_DASHBOARD_URL=${JSON.stringify(CONVEX_DASHBOARD_URL)}`,
-		`STRIPE_REGISTER_URL=${JSON.stringify(STRIPE_REGISTER_URL)}`,
+		`BUN_INSTALL_DOCS_URL=${shellQuote(BUN_INSTALL_DOCS_URL)}`,
+		`CLERK_SIGN_UP_URL=${shellQuote(CLERK_SIGN_UP_URL)}`,
+		`CONVEX_DASHBOARD_URL=${shellQuote(CONVEX_DASHBOARD_URL)}`,
+		`STRIPE_REGISTER_URL=${shellQuote(STRIPE_REGISTER_URL)}`,
 		"",
 		"step() {",
 		"  printf '\\n==> %s\\n' \"$1\"",
@@ -132,6 +136,11 @@ function renderStarterBootstrapContent(productName: string) {
 		"",
 		'  if [ -z "$preset_code" ]; then',
 		'    warn "No shadcn preset code was found in $DESIGN_SYSTEM_FACTS_PATH."',
+		"    return 0",
+		"  fi",
+		"",
+		'  if [[ ! "$preset_code" =~ ^[a-z0-9][a-z0-9-]{0,80}$ ]]; then',
+		'    warn "Skipping shadcn preset apply because the generated preset code is invalid."',
 		"    return 0",
 		"  fi",
 		"",

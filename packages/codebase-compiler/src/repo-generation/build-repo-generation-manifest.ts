@@ -19,11 +19,15 @@ export type RepoGenerationManifest = {
 	repoName: string;
 };
 
-function slugify(value: string) {
-	return value
+const fallbackRepoName = "generated-codebase";
+
+export function slugifyRepoName(value: string) {
+	const slug = value
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/^-+|-+$/g, "");
+
+	return slug || fallbackRepoName;
 }
 
 export function buildRepoGenerationManifest(
@@ -44,6 +48,6 @@ export function buildRepoGenerationManifest(
 			...customerSafeCodebasePresentationFilePaths,
 			...customerSafeTelegramChatWidgetFilePaths,
 		],
-		repoName: slugify(projectDefinition.facts.product_name),
+		repoName: slugifyRepoName(projectDefinition.facts.product_name),
 	};
 }

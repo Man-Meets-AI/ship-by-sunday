@@ -10,7 +10,6 @@ import {
 	type ClerkSignInWithFirstFactors,
 } from "@/app/(identity)/_lib/email-code-sign-in-factor";
 import {
-	getMissingPasswordlessAccountError,
 	getPasswordlessCodeError,
 	getPasswordlessEmailError,
 	getPasswordlessGlobalErrors,
@@ -185,7 +184,9 @@ export function useSignInFlow({
 	}
 
 	function reportMissingAccount() {
-		setLocalEmailErrorMessage(getMissingPasswordlessAccountError().message);
+		setLocalEmailErrorMessage(null);
+		setVerificationCode("");
+		setStep("email_code");
 	}
 
 	function updateEmailAddress(value: string) {

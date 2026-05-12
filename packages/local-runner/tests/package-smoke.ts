@@ -240,8 +240,10 @@ async function createWorkerInstallWorkerHome() {
 			{
 				expires_at: "2999-01-01T00:00:00.000Z",
 				issued_at: "2026-05-08T00:00:00.000Z",
-				machineCredential: "sbs_machine_package_smoke",
-				machineId: "machine_package_smoke",
+				licenseSignature:
+					"xyZ_Fw-aFmRO1PY4EQvEvCAR-GOwAP0Ekw5oFeN65uXb0WC_HUz99X1u0FtNgVFD2lA0RXEXq4l7XkiRRUGDBw",
+				machineCredential: "sbs_machine_test_credential",
+				machineId: "machine_test",
 				schemaVersion: "shipbysunday-worker-license.v1",
 				status: "active",
 			},

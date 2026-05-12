@@ -23,7 +23,7 @@ const invalidEmailCodeCodes = new Set([
 ]);
 
 export const missingPasswordlessAccountMessage =
-	"We don't have an account for that email. Purchase a license first, then sign in with the checkout email.";
+	"If that email can sign in, we sent a code. Check the inbox tied to your purchased access.";
 
 export const invalidEmailCodeMessage =
 	"That code is incorrect. Use the latest email code or send a new one.";

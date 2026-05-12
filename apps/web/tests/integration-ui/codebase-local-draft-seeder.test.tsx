@@ -12,7 +12,7 @@ const baseFields: HomePageCodebaseDraftFields = {
 	design_preset_id: "linear",
 	theme_preset: "abc123",
 	pricing_model: "monthly",
-	pricing: "29",
+	pricing: "29.99",
 };
 
 const baseEmptyWorkspaceState: CodebaseWorkspaceState = {
@@ -91,7 +91,7 @@ describe("useCodebaseLocalDraftSeeder", () => {
 			  }
 			| undefined;
 		expect(callArgs?.factsPatch.product_name).toBe("Telemetry Pro");
-		expect(callArgs?.factsPatch.pricing).toBe(29);
+		expect(callArgs?.factsPatch.pricing).toBe(29.99);
 
 		await waitFor(() => {
 			expect(clearDraftFromStorage).toHaveBeenCalledTimes(1);

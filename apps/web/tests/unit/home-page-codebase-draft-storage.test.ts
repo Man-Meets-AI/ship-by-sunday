@@ -122,6 +122,17 @@ describe("home page codebase draft storage parser", () => {
 		expect(envelope?.fields.pricing).toBe("");
 	});
 
+	it("accepts decimal pricing strings", () => {
+		const envelope = parseHomePageCodebaseDraftEnvelope(
+			JSON.stringify({
+				version: 1,
+				savedAt: 1,
+				fields: { ...baseFields, pricing: "29.99" },
+			}),
+		);
+		expect(envelope?.fields.pricing).toBe("29.99");
+	});
+
 	it("returns null for an unsupported pricing_model", () => {
 		expect(
 			parseHomePageCodebaseDraftEnvelope(

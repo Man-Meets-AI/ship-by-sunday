@@ -10,7 +10,7 @@ import {
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation, internalQuery } from "./_generated/server";
-import type { MutationCtx, QueryCtx } from "./_generated/server";
+import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
 import { upsertProductAccessGrant } from "./access/model";
 import { productAccessGrantResultValidator } from "./access/validators";
 import {
@@ -142,10 +142,22 @@ export function normalizeCheckoutEmail(email: string) {
 	return email.trim().toLowerCase();
 }
 
-function assertCheckoutServerToken(checkoutServerToken: string) {
+const hostedCheckoutProofTokenIdentifier =
+	"release-proof:hosted-checkout-billing";
+
+async function assertCheckoutPurchaseIntentWriteAllowed(
+	ctx: ActionCtx,
+	checkoutServerToken?: string,
+) {
+	const identity = await ctx.auth.getUserIdentity();
+	if (identity?.tokenIdentifier === hostedCheckoutProofTokenIdentifier) {
+		return;
+	}
+
 	if (
+		!checkoutServerToken ||
 		checkoutServerToken !==
-		requireConvexEnv("CHECKOUT_FULFILLMENT_RETRY_SECRET")
+			requireConvexEnv("CHECKOUT_FULFILLMENT_RETRY_SECRET")
 	) {
 		throw new ConvexError("Unauthorized checkout purchase intent write");
 	}
@@ -153,14 +165,17 @@ function assertCheckoutServerToken(checkoutServerToken: string) {
 
 export const createCheckoutPurchaseIntent = action({
 	args: {
-		checkoutServerToken: v.string(),
+		checkoutServerToken: v.optional(v.string()),
 		clerkUserId: v.optional(v.string()),
 		checkoutEmail: v.optional(v.string()),
 		checkoutSurface: checkoutSurfaceValidator,
 	},
 	returns: checkoutPurchaseIntentCreateResultValidator,
 	handler: async (ctx, args): Promise<CheckoutPurchaseIntentCreateResult> => {
-		assertCheckoutServerToken(args.checkoutServerToken);
+		await assertCheckoutPurchaseIntentWriteAllowed(
+			ctx,
+			args.checkoutServerToken,
+		);
 		return await ctx.runMutation(
 			internal.checkoutClaims.createCheckoutPurchaseIntentRecord,
 			{
@@ -200,13 +215,16 @@ export const createCheckoutPurchaseIntentRecord = internalMutation({
 
 export const attachStripeCheckoutSessionToPurchaseIntent = action({
 	args: {
-		checkoutServerToken: v.string(),
+		checkoutServerToken: v.optional(v.string()),
 		purchaseIntentId: v.id("checkoutPurchaseIntents"),
 		stripeCheckoutSessionId: v.string(),
 	},
 	returns: checkoutPurchaseIntentAttachResultValidator,
 	handler: async (ctx, args): Promise<CheckoutPurchaseIntentAttachResult> => {
-		assertCheckoutServerToken(args.checkoutServerToken);
+		await assertCheckoutPurchaseIntentWriteAllowed(
+			ctx,
+			args.checkoutServerToken,
+		);
 		return await ctx.runMutation(
 			internal.checkoutClaims.attachStripeCheckoutSessionToPurchaseIntentRecord,
 			{

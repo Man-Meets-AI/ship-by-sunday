@@ -40,12 +40,12 @@ jobs:
       tag_target_sha: ${{ steps.release_identity.outputs.tag_target_sha }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24.12.0
 
@@ -79,6 +79,18 @@ jobs:
 
           main_sha="$(git rev-parse origin/main)"
 
+          if [[ "$dry_run" != "true" ]]; then
+            if ! existing_tag_sha="$(git rev-parse "refs/tags/$git_tag^{commit}" 2>/dev/null)"; then
+              echo "Release publication requires an existing protected tag ref: refs/tags/$git_tag" >&2
+              exit 1
+            fi
+
+            if [[ "$existing_tag_sha" != "$tag_target_sha" ]]; then
+              echo "Release tag $git_tag resolves to $existing_tag_sha, not requested target $tag_target_sha." >&2
+              exit 1
+            fi
+          fi
+
           echo "git_tag=$git_tag" >> "$GITHUB_OUTPUT"
           echo "tag_target_sha=$tag_target_sha" >> "$GITHUB_OUTPUT"
           echo "main_sha=$main_sha" >> "$GITHUB_OUTPUT"
@@ -105,10 +117,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24.12.0
 
@@ -175,7 +187,7 @@ jobs:
             --output=release-notes.md
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: release-evidence-v1
           path: |
@@ -190,14 +202,16 @@ jobs:
       - build_release_evidence
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment:
+      name: release-publication
     permissions:
       contents: write
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24.12.0
 
@@ -303,10 +317,10 @@ jobs:
       vercel_notes: ${{ steps.proof.outputs.vercel_notes }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Set up Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
           node-version: 24.12.0
 

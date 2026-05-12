@@ -53,6 +53,7 @@ export async function runCodexExec({
 
 	const child = spawn(codexBinary, args, {
 		stdio: ["pipe", "pipe", "pipe"],
+		env: buildCodexExecEnvironment(),
 	});
 	child.stdin.write(prompt);
 	child.stdin.end();
@@ -105,6 +106,27 @@ export async function runCodexExec({
 		stderr,
 		timedOut,
 	};
+}
+
+function buildCodexExecEnvironment(): NodeJS.ProcessEnv {
+	const env: NodeJS.ProcessEnv = {};
+	for (const key of [
+		"CODEX_HOME",
+		"HOME",
+		"LANG",
+		"LC_ALL",
+		"PATH",
+		"SHELL",
+		"TERM",
+		"TMPDIR",
+		"USER",
+	] as const) {
+		const value = process.env[key];
+		if (value) {
+			env[key] = value;
+		}
+	}
+	return env;
 }
 
 export function parseJsonlEvents(stdout: string) {

@@ -250,6 +250,39 @@ export const generateVisitorAttachmentUploadUrl = mutation({
 	},
 });
 
+export const recordAdminRecoveryTokenAttempt = internalMutation({
+	args: {
+		accepted: v.boolean(),
+	},
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const now = Date.now();
+		const rateLimitHour = Math.floor(now / (60 * 60 * 1_000));
+		const bucketKey = `support-admin-recovery:global:${rateLimitHour}`;
+		const existing = await ctx.db
+			.query("supportRateLimitBuckets")
+			.withIndex("by_bucket_key", (query) => query.eq("bucketKey", bucketKey))
+			.unique();
+		if (existing && existing.messageCount >= 5 && !args.accepted) {
+			throw new Error("Too many support recovery attempts.");
+		}
+		if (existing) {
+			await ctx.db.patch(existing._id, {
+				messageCount: existing.messageCount + (args.accepted ? 0 : 1),
+				updatedAt: now,
+			});
+			return null;
+		}
+		await ctx.db.insert("supportRateLimitBuckets", {
+			bucketKey,
+			windowStartedAt: rateLimitHour * 60 * 60 * 1_000,
+			messageCount: args.accepted ? 0 : 1,
+			updatedAt: now,
+		});
+		return null;
+	},
+});
+
 export const sendVisitorMessage = action({
 	args: publicVisitorMessageArgs,
 	returns: supportThreadStateValidator,

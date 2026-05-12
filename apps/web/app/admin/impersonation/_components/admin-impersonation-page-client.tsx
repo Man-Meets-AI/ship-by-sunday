@@ -83,6 +83,7 @@ export function AdminImpersonationPageClient({
 				await failAdminImpersonationHandoffAction(result.sessionId).catch(
 					() => null,
 				);
+				await clerk.signOut().catch(() => null);
 				setMessage(
 					error instanceof Error
 						? error.message

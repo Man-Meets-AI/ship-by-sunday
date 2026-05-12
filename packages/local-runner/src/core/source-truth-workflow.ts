@@ -1,11 +1,15 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { JsonValue } from "./json-value";
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
+import {
+	ensureRepositoryDirectory,
+	writeRepositoryTextFile,
+} from "./repository-boundary";
 import { runBoundedProcess } from "./bounded-process";
 import {
 	createRunnerEvent,
@@ -126,7 +130,7 @@ export async function runSourceTruthWorkflow({
 	await ensureLocalProjectStateDirectory(repositoryRoot, {
 		updateGitExclude: false,
 	});
-	await mkdir(localRunDirectory, { recursive: true });
+	await ensureRepositoryDirectory(repositoryRoot, localRunDirectoryRef);
 
 	const baseBranchResult = await runGit(repositoryRoot, [
 		"rev-parse",
@@ -262,7 +266,12 @@ export async function runSourceTruthWorkflow({
 		profileName,
 	});
 
-	const proofCommandResults = await runProofCommands(repositoryRoot);
+	const proofCommandResults = [
+		...(await runProofCommands(repositoryRoot)),
+		await proveTouchedFileBoundaries(repositoryRoot, {
+			allowedTouchedFiles: agentsUpdated ? ["AGENTS.md"] : [],
+		}),
+	];
 	const proofStatus = proofCommandResults.every(
 		(result) => result.status === "passed",
 	)
@@ -390,7 +399,8 @@ async function blockWorkflow({
 	const proofRef = `${localRunDirectoryRef}/proof.json`;
 	const syncPreviewRef = `${localRunDirectoryRef}/sync-preview.json`;
 	const createdArtifacts = [proofRef, syncPreviewRef];
-	await mkdir(localRunDirectory, { recursive: true });
+	void localRunDirectory;
+	await ensureRepositoryDirectory(repositoryRoot, localRunDirectoryRef);
 	await writeJsonArtifact(repositoryRoot, proofRef, {
 		schemaVersion: "source-truth-proof.v1",
 		workflowId: SOURCE_TRUTH_WORKFLOW_ID,
@@ -548,6 +558,30 @@ async function readGitDiffSummary(repositoryRoot: string) {
 		.filter(Boolean);
 }
 
+async function proveTouchedFileBoundaries(
+	repositoryRoot: string,
+	options: { allowedTouchedFiles: string[] },
+): Promise<ProofCommandResult> {
+	const changedFiles = await readGitDiffSummary(repositoryRoot);
+	const allowedFileSet = new Set(options.allowedTouchedFiles);
+	const unexpectedFiles = changedFiles.filter(
+		(filePath) => !allowedFileSet.has(filePath),
+	);
+	if (unexpectedFiles.length === 0) {
+		return {
+			commandName: "source-truth touched-file boundary",
+			status: "passed",
+			exitCodeSummary: "passed",
+		};
+	}
+
+	return {
+		commandName: "source-truth touched-file boundary",
+		status: "failed",
+		exitCodeSummary: `unexpected touched files: ${unexpectedFiles.join(", ")}`,
+	};
+}
+
 async function buildCommandProofMap(repositoryRoot: string) {
 	const packageJsonPath = path.join(repositoryRoot, "package.json");
 	if (!existsSync(packageJsonPath)) {
@@ -611,7 +645,7 @@ async function writeSourceTruthAgentsBlock({
 		SBS_SOURCE_TRUTH_BLOCK_END,
 		"",
 	].join("\n");
-	await writeFile(agentsPath, nextContents);
+	await writeRepositoryTextFile(repositoryRoot, "AGENTS.md", nextContents);
 	return true;
 }
 
@@ -620,9 +654,11 @@ async function writeJsonArtifact(
 	repoRelativePath: string,
 	value: JsonValue,
 ) {
-	const artifactPath = path.join(repositoryRoot, repoRelativePath);
-	await mkdir(path.dirname(artifactPath), { recursive: true });
-	await writeFile(artifactPath, `${JSON.stringify(value, null, 2)}\n`);
+	await writeRepositoryTextFile(
+		repositoryRoot,
+		repoRelativePath,
+		`${JSON.stringify(value, null, 2)}\n`,
+	);
 }
 
 function assertSafeWorkflowRunId(workflowRunId: string) {

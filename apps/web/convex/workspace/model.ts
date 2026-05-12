@@ -2149,8 +2149,8 @@ function buildPairingCommand(
 		runnerId: runnerBinding._id,
 		token: runnerBinding.pairingToken,
 		tokenExpiresAt,
-		primaryCommand: `bunx ship-by-sunday setup pair ${runnerBinding.pairingToken}`,
-		fallbackCommand: `npx ship-by-sunday setup pair ${runnerBinding.pairingToken}`,
+		primaryCommand: `bunx ship-by-sunday setup pair ${runnerBinding.pairingToken} --repo .`,
+		fallbackCommand: `npx ship-by-sunday setup pair ${runnerBinding.pairingToken} --repo .`,
 	};
 }
 
@@ -2158,22 +2158,51 @@ async function getLatestSetupEvents(
 	ctx: WorkspaceReadCtx,
 	projectId: WorkspaceProjectId,
 ) {
-	const startedEvents = await ctx.db
-		.query("workspaceRunnerEvents")
-		.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
-			query.eq("projectId", projectId).eq("eventType", "setup.check.started"),
-		)
-		.order("desc")
-		.take(SETUP_EVENT_READ_LIMIT);
-	const completedEvents = await ctx.db
-		.query("workspaceRunnerEvents")
-		.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
-			query.eq("projectId", projectId).eq("eventType", "setup.check.completed"),
-		)
-		.order("desc")
-		.take(SETUP_EVENT_READ_LIMIT);
+	const setupEventTypes: WorkspaceRunnerEventType[] = [
+		"setup.check.started",
+		"setup.check.completed",
+	];
+	const workerInstallEventTypes: WorkspaceRunnerEventType[] = [
+		"worker.install.previewed",
+		"worker.install.completed",
+		"worker.install.blocked",
+	];
+	const eventGroups = await Promise.all(
+		[...setupEventTypes, ...workerInstallEventTypes].map((eventType) =>
+			ctx.db
+				.query("workspaceRunnerEvents")
+				.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
+					query.eq("projectId", projectId).eq("eventType", eventType),
+				)
+				.order("desc")
+				.take(
+					workerInstallEventTypes.includes(eventType)
+						? 1
+						: SETUP_EVENT_READ_LIMIT,
+				),
+		),
+	);
+	const latestWorkerInstallEvent =
+		eventGroups
+			.slice(setupEventTypes.length)
+			.flat()
+			.sort((left, right) => right.createdAt - left.createdAt)[0] ?? null;
+	const latestEvents = eventGroups
+		.flat()
+		.sort((left, right) => right.createdAt - left.createdAt)
+		.slice(0, SETUP_EVENT_READ_LIMIT);
 
-	return [...startedEvents, ...completedEvents]
+	if (
+		!latestWorkerInstallEvent ||
+		latestEvents.some((event) => event._id === latestWorkerInstallEvent._id)
+	) {
+		return latestEvents;
+	}
+
+	return [
+		...latestEvents.slice(0, SETUP_EVENT_READ_LIMIT - 1),
+		latestWorkerInstallEvent,
+	]
 		.sort((left, right) => right.createdAt - left.createdAt)
 		.slice(0, SETUP_EVENT_READ_LIMIT);
 }
@@ -3597,6 +3626,20 @@ async function applyEventDerivedState(
 			]);
 			return;
 		}
+		case "worker.install.previewed":
+		case "worker.install.completed":
+		case "worker.install.blocked": {
+			await Promise.all([
+				ctx.db.patch(args.project._id, {
+					updatedAt: now,
+				}),
+				ctx.db.patch(args.runnerBinding._id, {
+					lastEventAt: args.createdAt,
+					updatedAt: now,
+				}),
+			]);
+			return;
+		}
 		case "doctor.stage.started": {
 			const doctorPassRun = await requireDoctorPassRunForEvent(
 				ctx,
@@ -3868,7 +3911,16 @@ async function insertWorkspaceRunnerEvent(
 	}
 
 	if (args.doctorPassRunId) {
-		await requireDoctorPassRun(ctx, args.project._id, args.doctorPassRunId);
+		const doctorPassRun = await requireDoctorPassRun(
+			ctx,
+			args.project._id,
+			args.doctorPassRunId,
+		);
+		if (doctorPassRun.runnerId !== args.runnerBinding._id) {
+			throw new ConvexError(
+				"Runner event doctor pass run does not match runner",
+			);
+		}
 	}
 	if (args.workflowRunId) {
 		const workflowRun = await requireWorkflowRun(

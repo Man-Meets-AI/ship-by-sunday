@@ -93,9 +93,9 @@ describe("customer-safe snapshot contract", () => {
 			expect.arrayContaining([
 				"../../docs/prompts/execplan*.md",
 				"./.env.local.example",
-				"./tests/**/*",
 			]),
 		);
+		expect(buildRepoDownloadTraceIncludes()).not.toContain("./tests/**/*");
 		expect(buildRepoDownloadTraceIncludes()).not.toContain(
 			"../../docs/prompts/exec-plan*.md",
 		);

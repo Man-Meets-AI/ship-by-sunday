@@ -1,4 +1,5 @@
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import {
 	getCodexAppServerUnavailableMessage,
 	isCodexAppServerRuntimeError,
@@ -24,6 +25,17 @@ export async function GET(request: Request) {
 
 	try {
 		const session = await requireProductAccessApiSession();
+		const rateLimitedResponse = getRateLimitedResponse({
+			bucket: "codex.account.rateLimits",
+			identity: session.userId,
+			request,
+			limit: 10,
+			windowMs: 60_000,
+		});
+		if (rateLimitedResponse) {
+			return rateLimitedResponse;
+		}
+
 		if (
 			await recordBlockedSupportModeActionForRequest(request, {
 				actionId: "codex.account.rateLimits",

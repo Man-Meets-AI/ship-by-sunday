@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, verify } from "node:crypto";
 import { existsSync } from "node:fs";
 import {
 	chmod,
@@ -24,8 +24,18 @@ import {
 	rollbackShipbysundayWorkerCodexConfigPatch,
 } from "../../core/codex-config-manager";
 import type { JsonObject, JsonValue } from "../../core/json-value";
+import {
+	readRunnerCredential,
+	resolveLocalRunnerHome,
+} from "../../core/local-runner-home";
 import { assertSyncSafeValue } from "../../core/redaction";
 import { resolveRepositoryRoot } from "../../core/repository-root";
+import {
+	createRunnerEvent,
+	flushRunnerEvents,
+	queueRunnerEvent,
+	type RunnerEventPayload,
+} from "../../core/runner-events";
 import {
 	WORKER_CODEX_PROJECT_WRITE_PROFILE,
 	WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR,
@@ -155,6 +165,22 @@ type WorkerInstallContext = {
 	runId: string;
 };
 
+type FinishResultInput = {
+	outcome: WorkerInstallResult["outcome"];
+	exitCode: WorkerInstallResult["exitCode"];
+	summary: string;
+	context: WorkerInstallContext;
+	plan: WorkerInstallPlan;
+	proof: WorkerProofCommandStatus[];
+	createdRefs: string[];
+	changedRefs: string[];
+	branch: string | null;
+	commit: string | null;
+	localProofRef: string | null;
+	reportRef: string | null;
+	kickoff: WorkerKickoffStatus;
+};
+
 type TargetRepoInspection = {
 	packageManager: RootPackageManager;
 	packageJsonText: string;
@@ -178,6 +204,7 @@ type WorkerLicenseFile = {
 	accountId?: string;
 	expires_at?: string;
 	issued_at?: string;
+	licenseSignature: string;
 	machineCredential: string;
 	machineId?: string;
 	schemaVersion: "shipbysunday-worker-license.v1";
@@ -235,6 +262,11 @@ const WORKER_MANIFEST_MANAGED_REFS = [
 const DEFAULT_WORKER_LICENSE_API_BASE_URL = "https://www.man-meets-ai.com";
 const WORKER_LICENSE_ACTIVATION_START_PATH = "/api/worker/license/device/start";
 const WORKER_LICENSE_ACTIVATION_POLL_PATH = "/api/worker/license/device/poll";
+const WORKER_LICENSE_SIGNATURE_PUBLIC_KEY = [
+	"-----BEGIN PUBLIC KEY-----",
+	"MCowBQYDK2VwAyEA7OwhZk5d2NxVCVxbAHHEigPG3/Sr3oYMXNy/SpbFmLc=",
+	"-----END PUBLIC KEY-----",
+].join("\n");
 const MIN_ACTIVATION_POLL_INTERVAL_MS = 1_000;
 const MAX_ACTIVATION_POLL_INTERVAL_MS = 10_000;
 const DEFAULT_ACTIVATION_TIMEOUT_MS = 5 * 60_000;
@@ -312,7 +344,7 @@ export async function runWorkerFoundationsInstall({
 					},
 				],
 			});
-			return finishResult({
+			return await finishAndMaybeSyncResult({
 				outcome: activationResult.status === "blocked" ? "blocked" : "failed",
 				exitCode: activationResult.status === "blocked" ? 2 : 1,
 				summary: "Worker license activation did not complete.",
@@ -332,7 +364,7 @@ export async function runWorkerFoundationsInstall({
 	}
 	const plan = buildInstallPlan(inspection);
 	if (options.dryRun) {
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome: plan.blockers.length > 0 ? "blocked" : "ready",
 			exitCode: plan.blockers.length > 0 ? 2 : 0,
 			summary:
@@ -353,7 +385,7 @@ export async function runWorkerFoundationsInstall({
 	}
 
 	if (options.json && !options.noKickoff) {
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome: "blocked",
 			exitCode: 2,
 			summary: "JSON install requires --no-kickoff.",
@@ -375,7 +407,7 @@ export async function runWorkerFoundationsInstall({
 	}
 
 	if (plan.blockers.length > 0) {
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome: "blocked",
 			exitCode: 2,
 			summary: "Worker Foundations install is blocked.",
@@ -393,7 +425,7 @@ export async function runWorkerFoundationsInstall({
 	}
 
 	if (!options.yes && (options.json || !process.stdin.isTTY)) {
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome: "blocked",
 			exitCode: 2,
 			summary: "Noninteractive install requires --yes.",
@@ -418,7 +450,7 @@ export async function runWorkerFoundationsInstall({
 	if (!options.yes) {
 		const confirmed = await confirmInstall({ options, plan });
 		if (!confirmed) {
-			return finishResult({
+			return await finishAndMaybeSyncResult({
 				outcome: "cancelled",
 				exitCode: 130,
 				summary: "Worker Foundations install cancelled.",
@@ -439,7 +471,7 @@ export async function runWorkerFoundationsInstall({
 	try {
 		await ensureWorkerBunToolchain(context, inspection.bunToolchain);
 	} catch (error) {
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome: "failed",
 			exitCode: 1,
 			summary:
@@ -461,7 +493,7 @@ export async function runWorkerFoundationsInstall({
 
 	const branchResult = await prepareInstallBranch(context);
 	if (branchResult.status === "blocked") {
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome: "blocked",
 			exitCode: 2,
 			summary: branchResult.reason,
@@ -529,7 +561,7 @@ export async function runWorkerFoundationsInstall({
 					kickoff,
 				}),
 			});
-			return finishResult({
+			return await finishAndMaybeSyncResult({
 				outcome: "failed",
 				exitCode: 1,
 				summary: "Worker Foundations dogfood proof failed.",
@@ -572,7 +604,7 @@ export async function runWorkerFoundationsInstall({
 					kickoff,
 				}),
 			});
-			return finishResult({
+			return await finishAndMaybeSyncResult({
 				outcome: "failed",
 				exitCode: 1,
 				summary: "Worker Foundations proof failed.",
@@ -670,7 +702,7 @@ export async function runWorkerFoundationsInstall({
 			kickoff,
 		});
 
-		return finishResult({
+		return await finishAndMaybeSyncResult({
 			outcome,
 			exitCode,
 			summary:
@@ -918,6 +950,16 @@ function validateWorkerLicenseFile(
 				"License activation is invalid because the machine credential is missing.",
 		};
 	}
+	if (
+		typeof parsed.licenseSignature !== "string" ||
+		parsed.licenseSignature.trim() === ""
+	) {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because the license signature is missing.",
+		};
+	}
 	for (const key of ["issued_at", "expires_at"] as const) {
 		if (parsed[key] === undefined) {
 			continue;
@@ -936,12 +978,23 @@ function validateWorkerLicenseFile(
 			};
 		}
 	}
+	const canonicalLicense = canonicalizeWorkerLicenseFields(parsed);
+	if (
+		!verifyWorkerLicenseSignature(canonicalLicense, parsed.licenseSignature)
+	) {
+		return {
+			valid: false,
+			reason:
+				"License activation is invalid because the license signature is not trusted.",
+		};
+	}
 	return {
 		valid: true,
 		license: {
 			schemaVersion: parsed.schemaVersion,
 			status: parsed.status,
 			machineCredential: parsed.machineCredential,
+			licenseSignature: parsed.licenseSignature,
 			...(typeof parsed.accountId === "string"
 				? { accountId: parsed.accountId }
 				: {}),
@@ -956,6 +1009,42 @@ function validateWorkerLicenseFile(
 				: {}),
 		},
 	};
+}
+
+function canonicalizeWorkerLicenseFields(license: JsonObject) {
+	return JSON.stringify({
+		schemaVersion: license.schemaVersion,
+		status: license.status,
+		machineCredential: license.machineCredential,
+		...(typeof license.accountId === "string"
+			? { accountId: license.accountId }
+			: {}),
+		...(typeof license.machineId === "string"
+			? { machineId: license.machineId }
+			: {}),
+		...(typeof license.issued_at === "string"
+			? { issued_at: license.issued_at }
+			: {}),
+		...(typeof license.expires_at === "string"
+			? { expires_at: license.expires_at }
+			: {}),
+	});
+}
+
+function verifyWorkerLicenseSignature(
+	canonicalLicense: string,
+	licenseSignature: string,
+) {
+	try {
+		return verify(
+			null,
+			Buffer.from(canonicalLicense, "utf8"),
+			WORKER_LICENSE_SIGNATURE_PUBLIC_KEY,
+			Buffer.from(licenseSignature, "base64url"),
+		);
+	} catch {
+		return false;
+	}
 }
 
 function shouldAttemptInteractiveLicenseActivation(
@@ -2772,6 +2861,117 @@ async function readHeadCommit(context: WorkerInstallContext) {
 	return hashResult.succeeded ? hashResult.stdout.trim() : null;
 }
 
+async function finishAndMaybeSyncResult(
+	input: FinishResultInput,
+): Promise<WorkerInstallResult> {
+	const result = finishResult(input);
+	await emitWorkerInstallRunnerEvent({
+		context: input.context,
+		result,
+	}).catch(() => undefined);
+	return result;
+}
+
+async function emitWorkerInstallRunnerEvent({
+	context,
+	result,
+}: {
+	context: WorkerInstallContext;
+	result: WorkerInstallResult;
+}) {
+	const payload = buildWorkerInstallRunnerEventPayload(result);
+	if (!payload) {
+		return;
+	}
+
+	const credential = await readRunnerCredential({
+		repositoryRoot: context.repositoryRoot,
+		runnerHome: resolveLocalRunnerHome(context.env),
+	});
+	if (!credential) {
+		return;
+	}
+
+	const event = createRunnerEvent({
+		projectId: credential.projectId,
+		runnerId: credential.runnerId,
+		payload,
+	});
+	await queueRunnerEvent(context.repositoryRoot, event);
+	await flushRunnerEvents({
+		repositoryRoot: context.repositoryRoot,
+		credential,
+	});
+}
+
+function buildWorkerInstallRunnerEventPayload(
+	result: WorkerInstallResult,
+): RunnerEventPayload | null {
+	const report = result.report;
+	if (!report) {
+		return null;
+	}
+
+	const basePayload = {
+		summary: result.summary,
+		...(report.branch ? { branch: report.branch } : {}),
+		...(report.commit ? { commitHash: report.commit.slice(0, 12) } : {}),
+		...(report.reportRef ? { reportRef: report.reportRef } : {}),
+		...(isSyncSafeRepoRelativeRef(report.localProofRef)
+			? { localProofRef: report.localProofRef }
+			: {}),
+		createdRefs: report.createdRefs,
+		changedRefs: report.changedRefs,
+		proofCommandResults: report.proof.map((proof) => ({
+			commandLabel: proof.command,
+			status: proof.status,
+		})),
+	};
+
+	if (report.outcome === "ready") {
+		return {
+			eventType: "worker.install.previewed",
+			outcome: "ready",
+			status: "ready",
+			...basePayload,
+		};
+	}
+
+	if (report.outcome === "installed") {
+		return {
+			eventType: "worker.install.completed",
+			outcome: "installed",
+			status: "installed",
+			...basePayload,
+		};
+	}
+
+	if (
+		report.outcome === "blocked" ||
+		report.outcome === "failed" ||
+		report.outcome === "cancelled"
+	) {
+		return {
+			eventType: "worker.install.blocked",
+			outcome: report.outcome,
+			status: report.outcome,
+			...basePayload,
+			blockerIds: report.plan.blockers.map((blocker) => blocker.blockerId),
+			blockerReasons: report.plan.blockers.map((blocker) => blocker.reason),
+		};
+	}
+
+	return null;
+}
+
+function isSyncSafeRepoRelativeRef(ref: string | null): ref is string {
+	if (!ref || path.isAbsolute(ref) || ref.startsWith("../")) {
+		return false;
+	}
+
+	return !ref.split(/[\\/]/).includes("..");
+}
+
 function finishResult({
 	outcome,
 	exitCode,
@@ -2786,21 +2986,7 @@ function finishResult({
 	localProofRef,
 	reportRef,
 	kickoff,
-}: {
-	outcome: WorkerInstallResult["outcome"];
-	exitCode: WorkerInstallResult["exitCode"];
-	summary: string;
-	context: WorkerInstallContext;
-	plan: WorkerInstallPlan;
-	proof: WorkerProofCommandStatus[];
-	createdRefs: string[];
-	changedRefs: string[];
-	branch: string | null;
-	commit: string | null;
-	localProofRef: string | null;
-	reportRef: string | null;
-	kickoff: WorkerKickoffStatus;
-}): WorkerInstallResult {
+}: FinishResultInput): WorkerInstallResult {
 	const report = buildReport({
 		context,
 		outcome,

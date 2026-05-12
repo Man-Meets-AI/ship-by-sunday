@@ -174,6 +174,11 @@ describe("workspace codebase, review, and setup routes", () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
 			if (query === "getCodebaseWorkspaceState") {
 				return {
+					codebaseReadiness: {
+						review: {
+							isReady: true,
+						},
+					},
 					workflowState: null,
 				};
 			}

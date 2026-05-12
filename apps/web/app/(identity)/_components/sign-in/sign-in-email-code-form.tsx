@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,8 +19,6 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 
 import { SignInBanners } from "@/app/(identity)/_components/sign-in/sign-in-banners";
-import { missingPasswordlessAccountMessage } from "@/app/(identity)/_lib/passwordless-auth-errors";
-import { routeConfig } from "@/config/product";
 
 type SignInEmailCodeFormProps = {
 	emailAddress: string;
@@ -69,9 +66,6 @@ export function SignInEmailCodeForm({
 		await submitEmailCode();
 	}
 
-	const missingAccountError =
-		emailError?.message === missingPasswordlessAccountMessage;
-
 	return (
 		<div className="flex flex-col gap-5">
 			<SignInBanners globalErrors={globalErrors} />
@@ -92,20 +86,7 @@ export function SignInEmailCodeForm({
 							value={emailAddress}
 							onChange={(event) => setEmailAddress(event.target.value)}
 						/>
-						{missingAccountError ? (
-							<FieldError>
-								We don&apos;t have an account for that email.{" "}
-								<Link
-									href={`${routeConfig.home}${routeConfig.pricingHash}`}
-									className="underline underline-offset-4 hover:text-destructive/80"
-								>
-									Purchase a license
-								</Link>{" "}
-								first, then sign in with the checkout email.
-							</FieldError>
-						) : (
-							<FieldError errors={[emailError ?? undefined]} />
-						)}
+						<FieldError errors={[emailError ?? undefined]} />
 					</Field>
 					{step === "email_code" ? (
 						<Field data-invalid={Boolean(verificationError) || undefined}>

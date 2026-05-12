@@ -2,6 +2,7 @@ import "server-only";
 
 import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { JsonValue } from "@/lib/json-value";
@@ -45,6 +46,16 @@ const SUPPORT_FALLBACK_HREF = "https://t.me/parkerrex";
 
 export async function getSupportSessionFromRequest(request: Request) {
 	const supportSessionCookie = getSupportSessionCookie(request);
+	const rateLimitedResponse = getRateLimitedResponse({
+		bucket: "support.session",
+		identity: supportSessionCookie.sessionToken,
+		request,
+		limit: 20,
+		windowMs: 60_000,
+	});
+	if (rateLimitedResponse) {
+		return rateLimitedResponse;
+	}
 	const realtime =
 		await issueSupportConversationCapability(supportSessionCookie);
 	return appendSupportSessionCookie(
@@ -116,6 +127,16 @@ export async function prepareSupportAttachmentUploadFromRequest(
 	request: Request,
 ) {
 	const supportSessionCookie = getSupportSessionCookie(request);
+	const rateLimitedResponse = getRateLimitedResponse({
+		bucket: "support.attachments",
+		identity: supportSessionCookie.sessionToken,
+		request,
+		limit: 10,
+		windowMs: 60_000,
+	});
+	if (rateLimitedResponse) {
+		return rateLimitedResponse;
+	}
 	const body = await readSupportAttachmentUploadRequestBody(request);
 	const attachment = normalizeSupportAttachmentUploadRequest(body);
 	if (!attachment) {

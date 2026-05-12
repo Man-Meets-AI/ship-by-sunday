@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import type { JsonValue } from "@/lib/json-value";
 import { normalizeIncidentEvent } from "@/lib/observability/incident";
 import { captureServerError } from "@/platform/observability/capture-server-error";
@@ -16,6 +17,15 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
+	const rateLimitedResponse = getRateLimitedResponse({
+		bucket: "observability.vercel",
+		request,
+		limit: 20,
+		windowMs: 60_000,
+	});
+	if (rateLimitedResponse) {
+		return rateLimitedResponse;
+	}
 
 	if (!serverEnv.OBSERVABILITY_VERCEL_WEBHOOK_SECRET) {
 		await captureServerError({
@@ -119,16 +129,20 @@ function isValidVercelWebhookSignature({
 		return false;
 	}
 
+	if (!/^[a-f0-9]{40}$/i.test(signature)) {
+		return false;
+	}
+
 	const expectedSignature = createHmac("sha1", signingSecret)
 		.update(rawBody)
 		.digest("hex");
 
-	if (expectedSignature.length !== signature.length) {
+	const expectedSignatureBytes = Buffer.from(expectedSignature, "hex");
+	const signatureBytes = Buffer.from(signature, "hex");
+
+	if (expectedSignatureBytes.length !== signatureBytes.length) {
 		return false;
 	}
 
-	return timingSafeEqual(
-		Buffer.from(expectedSignature),
-		Buffer.from(signature),
-	);
+	return timingSafeEqual(expectedSignatureBytes, signatureBytes);
 }

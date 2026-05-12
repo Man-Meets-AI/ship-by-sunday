@@ -199,6 +199,27 @@ export const beginStripeWebhookEventProcessing = internalMutation({
 			assertStripeWebhookEventMatchesExisting(existingEvent, args);
 
 			if (isDuplicateBlockingStripeWebhookEventStatus(existingEvent.status)) {
+				const isRetryableStaleEvent =
+					(existingEvent.status === "processing" ||
+						existingEvent.status === "queued") &&
+					now - existingEvent.updatedAt >= STRIPE_WEBHOOK_FULFILLMENT_STALE_MS;
+				if (isRetryableStaleEvent) {
+					const attemptCount = existingEvent.attemptCount + 1;
+					await ctx.db.patch(existingEvent._id, {
+						status: "processing",
+						stripeObjectId: args.stripeObjectId ?? existingEvent.stripeObjectId,
+						courseSlug: args.courseSlug ?? existingEvent.courseSlug,
+						errorMessage: undefined,
+						attemptCount,
+						updatedAt: now,
+						completedAt: undefined,
+					});
+					return {
+						decision: "process" as const,
+						attemptCount,
+					};
+				}
+
 				return {
 					decision: "skip" as const,
 					status: existingEvent.status,

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { routeConfig } from "@/config/product";
+import { hasProductSurfaceCapability } from "@/platform/access/product-surface-capabilities";
 import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
 import { BonusRouteStatePanel } from "@/app/(workspace)/_components/execute-ship/bonus-route-state-panel";
 import { loadWorkspacePageAccess } from "@/app/(workspace)/_server/load-workspace-page-access";
@@ -10,6 +11,9 @@ export default async function Page() {
 	const workspaceAccess = await loadWorkspacePageAccess();
 	if (workspaceAccess.kind === "access_required") {
 		return <AccessRequiredPage initialAccess={workspaceAccess.access} />;
+	}
+	if (!hasProductSurfaceCapability(workspaceAccess.access, "tutorials")) {
+		redirect(routeConfig.appHome);
 	}
 
 	const resumeDestination = await fetchAuthenticatedQuery(

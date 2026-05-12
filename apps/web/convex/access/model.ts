@@ -155,6 +155,20 @@ export async function requireGeneratedCodebaseProductAccess(
 	return clerkUserId;
 }
 
+export async function requireTutorialsProductAccess(ctx: AccessReadCtx) {
+	const clerkUserId = await requireGrantedProductAccess(ctx);
+	const accessGrant = await getProductAccessGrantByClerkUserId(
+		ctx,
+		clerkUserId,
+	);
+
+	if (!getStoredProductSurfaceCapabilities(accessGrant).includes("tutorials")) {
+		throw new ConvexError("Tutorials access required");
+	}
+
+	return clerkUserId;
+}
+
 export async function upsertProductAccessGrant(
 	ctx: AccessMutationCtx,
 	input: ProductAccessGrantUpsertInput,

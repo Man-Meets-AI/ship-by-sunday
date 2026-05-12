@@ -336,8 +336,9 @@ function renderOnboardingBody(
 }
 
 function renderSharedIntro(productName: string) {
+	const safeProductName = renderMdxText(productName);
 	return [
-		`${productName} should feel obvious on day one.`,
+		`${safeProductName} should feel obvious on day one.`,
 		"",
 		"This is the recommended order for every buyer. Follow it once before you start reshaping the product:",
 		"- `bun run bootstrap`",
@@ -356,16 +357,28 @@ function renderSharedIntro(productName: string) {
 	].join("\n");
 }
 
+function renderMdxText(value: string) {
+	return value
+		.replace(/\s+/g, " ")
+		.trim()
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/{/g, "&#123;")
+		.replace(/}/g, "&#125;");
+}
+
 export function renderStarterProjectOnboardingFiles(
 	projectDefinition: CanonicalProjectDefinition,
 ): RenderedCodebaseFile[] {
 	const { product_name: productName } = projectDefinition.facts;
+	const safeProductName = renderMdxText(productName);
 
 	return [
 		{
 			path: "START-HERE.md",
 			content: [
-				`# Start Here — ${productName}`,
+				`# Start Here - ${safeProductName}`,
 				"",
 				renderSharedIntro(productName),
 				"",
@@ -377,7 +390,9 @@ export function renderStarterProjectOnboardingFiles(
 			content: [
 				"---",
 				'title: "Start Here"',
-				`description: "Boot ${productName}, install the recommended Codex skills, and follow the Codebase setup in the right order before customizing the product."`,
+				`description: ${JSON.stringify(
+					`Boot ${safeProductName}, install the recommended Codex skills, and follow the Codebase setup in the right order before customizing the product.`,
+				)}`,
 				"---",
 				"",
 				"# Start Here",

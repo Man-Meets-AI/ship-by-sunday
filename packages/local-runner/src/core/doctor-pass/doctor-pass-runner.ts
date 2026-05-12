@@ -45,6 +45,7 @@ export type RunDoctorPassOptions = {
 	runId?: string;
 	localOnly?: boolean;
 	intakeProbePath?: string;
+	allowCustomIntakeProbe?: boolean;
 	codexBinary?: string;
 	fetchRunnerApi?: typeof fetch;
 };
@@ -77,6 +78,7 @@ export async function runDoctorPass(
 		repositoryRoot: options.repositoryRoot,
 		reportDirectory,
 		intakeProbePath: options.intakeProbePath,
+		allowCustomIntakeProbe: options.allowCustomIntakeProbe,
 	});
 	const codebaseIntakeJsonRead = await readProbeJsonOrBlocked({
 		filePath: codebaseIntake.jsonPath,

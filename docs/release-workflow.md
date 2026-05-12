@@ -82,8 +82,11 @@ Publish-mode evidence fails closed until required hosted proof is `passed` or ex
 - Root `bunfig.toml` forces `install.linker = "hoisted"` so GitHub Actions and Vercel installs do not use Bun's isolated symlink-heavy workspace layout during builds and serverless packaging.
 - `apps/web/vercel.json` removes cached `node_modules` trees before `bun install --frozen-lockfile`, because switching linkers alone does not rewrite a restored isolated-install cache.
 - GitHub repository secret `CONVEX_DEPLOY_KEY` must exist before remote Convex dry-runs or production deploys can succeed.
+- GitHub environment `convex-production-deploy` must exist and require reviewer approval before Convex production deploy jobs can access `CONVEX_DEPLOY_KEY`.
 - GitHub repository secret `VERCEL_TOKEN` plus repository variables `VERCEL_PROJECT_ID` and `VERCEL_TEAM_ID` must exist before release proofs can wait for the exact Vercel deployment.
-- GitHub environment `production-billing-integration` must include `PRODUCTION_CHECKOUT_FULFILLMENT_RETRY_SECRET`, `PRODUCTION_STRIPE_SECRET_KEY`, and `PRODUCTION_STRIPE_WEBHOOK_SECRET`. These mirror the production runtime values without depending on `vercel env pull` to expose sensitive production secrets during hosted billing proof.
+- GitHub environment `dev-staging-payment-proof` must exist and require reviewer approval before the dev branch payment proof can access `VERCEL_TOKEN`, preview provider env, or `VERCEL_AUTOMATION_BYPASS_SECRET`.
+- GitHub environment `release-publication` must exist and require reviewer approval before a manual non-dry-run tag publication can use `contents: write`.
+- GitHub environment `production-billing-integration` must include `PRODUCTION_STRIPE_SECRET_KEY` and `PRODUCTION_STRIPE_WEBHOOK_SECRET`. These mirror the production runtime values without depending on `vercel env pull` to expose sensitive production secrets during hosted billing proof. Hosted checkout purchase-intent writes are authorized through the release-proof Convex CLI identity, not by passing checkout retry secrets through child-process arguments.
 - GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is the live pause switch for automatic Convex production deploys.
 - Tag protection should use a GitHub ruleset or equivalent policy for `refs/tags/v*`.
 

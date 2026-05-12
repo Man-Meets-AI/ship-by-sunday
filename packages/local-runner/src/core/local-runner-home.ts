@@ -1,6 +1,14 @@
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	open,
+	readFile,
+	rename,
+	unlink,
+	writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -47,6 +55,39 @@ export function createRepositoryCredentialKey(repositoryRoot: string) {
 
 function credentialsFilePath(runnerHome: string) {
 	return path.join(runnerHome, "credentials.json");
+}
+
+function credentialsLockPath(runnerHome: string) {
+	return path.join(runnerHome, "credentials.lock");
+}
+
+async function withCredentialsFileLock<T>(
+	runnerHome: string,
+	callback: () => Promise<T>,
+): Promise<T> {
+	const lockPath = credentialsLockPath(runnerHome);
+	const startedAt = Date.now();
+	let lockHandle;
+	while (!lockHandle) {
+		try {
+			lockHandle = await open(lockPath, "wx", 0o600);
+		} catch (error) {
+			if ((error as { code?: string }).code !== "EEXIST") {
+				throw error;
+			}
+			if (Date.now() - startedAt > 5_000) {
+				throw new Error("Timed out waiting for runner credential lock.");
+			}
+			await new Promise((resolve) => setTimeout(resolve, 50));
+		}
+	}
+
+	try {
+		return await callback();
+	} finally {
+		await lockHandle.close();
+		await unlink(lockPath).catch(() => undefined);
+	}
 }
 
 async function readCredentialFile(
@@ -102,18 +143,20 @@ export async function writeRunnerCredential({
 	credential: RunnerCredential;
 }) {
 	await ensureLocalRunnerHome(runnerHome);
-	const credentialFile = await readCredentialFile(runnerHome);
-	credentialFile.credentials[createRepositoryCredentialKey(repositoryRoot)] =
-		credential;
-	const filePath = credentialsFilePath(runnerHome);
-	const temporaryPath = `${filePath}.${process.pid}.tmp`;
-	await writeFile(
-		temporaryPath,
-		`${JSON.stringify(credentialFile, null, 2)}\n`,
-		{
-			mode: 0o600,
-		},
-	);
-	await rename(temporaryPath, filePath);
-	await chmod(filePath, 0o600).catch(() => undefined);
+	await withCredentialsFileLock(runnerHome, async () => {
+		const credentialFile = await readCredentialFile(runnerHome);
+		credentialFile.credentials[createRepositoryCredentialKey(repositoryRoot)] =
+			credential;
+		const filePath = credentialsFilePath(runnerHome);
+		const temporaryPath = `${filePath}.${process.pid}.tmp`;
+		await writeFile(
+			temporaryPath,
+			`${JSON.stringify(credentialFile, null, 2)}\n`,
+			{
+				mode: 0o600,
+			},
+		);
+		await rename(temporaryPath, filePath);
+		await chmod(filePath, 0o600).catch(() => undefined);
+	});
 }

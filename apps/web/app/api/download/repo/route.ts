@@ -1,4 +1,5 @@
 import { getCodebaseDownloadContext } from "@/app/api/download/repo/_server/downloads";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import {
 	assertSupportModeDownloadAllowedForRequest,
 	recordSupportModeDownloadForRequest,
@@ -18,6 +19,17 @@ export async function GET(request: Request) {
 	const context = await getCodebaseDownloadContext();
 	if (!context) {
 		return new Response("Unauthorized", { status: 401 });
+	}
+
+	const rateLimitedResponse = getRateLimitedResponse({
+		bucket: "download.reviewRepo",
+		identity: context.workspaceState.projectDefinition?.clerkUserId,
+		request,
+		limit: 5,
+		windowMs: 60_000,
+	});
+	if (rateLimitedResponse) {
+		return rateLimitedResponse;
 	}
 
 	if (!context.workspaceState.codebaseReadiness.review.isReady) {

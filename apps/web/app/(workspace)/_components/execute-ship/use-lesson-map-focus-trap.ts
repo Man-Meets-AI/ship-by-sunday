@@ -68,7 +68,7 @@ export function useLessonMapFocusTrap({
 				return;
 			}
 
-			if (event.key !== "Tab") return;
+			if (event.key !== "Tab" || !onDismiss) return;
 
 			const focusables = listFocusable(section);
 			if (focusables.length === 0) return;

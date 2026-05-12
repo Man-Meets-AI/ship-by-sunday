@@ -382,6 +382,19 @@ export async function assertManagedStripePromotionCodeMatchesProductConfig(
 			`Configured Stripe promotion code ${config.promotionCodeId} requires at least ${minimumAmount} ${productConfig.currency} cents, but the current order is ${productConfig.priceUsdCents}.`,
 		);
 	}
+
+	const expectedPercentOff = productConfig.activeOffer.percentOff;
+	const expectedAmountOff = Math.round(
+		(productConfig.priceUsdCents * expectedPercentOff) / 100,
+	);
+	if (
+		coupon.percent_off !== expectedPercentOff &&
+		coupon.amount_off !== expectedAmountOff
+	) {
+		throw new Error(
+			`Configured Stripe promotion code ${config.promotionCodeId} discounts ${coupon.percent_off ?? coupon.amount_off}, expected ${expectedPercentOff}% off.`,
+		);
+	}
 }
 
 export async function assertManagedStripeWebhookEndpointReadyForRelease(

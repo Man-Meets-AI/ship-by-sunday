@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import {
 	getCodexAppServerUnavailableMessage,
 	isCodexAppServerRuntimeError,
@@ -52,6 +53,17 @@ export async function POST(request: Request) {
 	try {
 		const productAccessSession = await requireProductAccessApiSession();
 		session = productAccessSession;
+		const rateLimitedResponse = getRateLimitedResponse({
+			bucket: "codex.generate",
+			identity: productAccessSession.userId,
+			request,
+			limit: 6,
+			windowMs: 60_000,
+		});
+		if (rateLimitedResponse) {
+			return rateLimitedResponse;
+		}
+
 		if (
 			await recordBlockedSupportModeActionForRequest(request, {
 				actionId: "codex.generate",
@@ -75,6 +87,14 @@ export async function POST(request: Request) {
 		}
 		const requestInput = parsed.data;
 		parsedInput = requestInput;
+		const allowedModels = new Set([getCodexDefaultModel()]);
+		if (requestInput.model && !allowedModels.has(requestInput.model)) {
+			return jsonWithRequestId(
+				{ error: "Unsupported Codex model." },
+				{ status: 400 },
+				requestId,
+			);
+		}
 
 		const output = await withCodexAppServerClient(
 			{

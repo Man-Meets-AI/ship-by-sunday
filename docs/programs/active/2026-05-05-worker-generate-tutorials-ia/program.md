@@ -43,6 +43,8 @@ The remaining desired end state is that `Worker` is the product noun everywhere 
 - [x] 2026-05-11: Refreshed the Program with the protected `/home` decision and Stripe checkout handoff cleanup scope in `planning-brief-2.md`.
 - [x] 2026-05-11: Created and completed the first child ExecPlan from `planning-brief-2.md`: `docs/exec-plans/completed/2026-05-11-hard-switch-paid-app-ia-checkout-handoff.md`.
 - [x] 2026-05-11: Hard-switched paid app access capabilities, checkout handoff, protected route families, route guards, resume destinations, top-level navigation, visible Home/Worker copy, Stripe metadata, purchase intents, and webhook queueing in the first child ExecPlan.
+- [x] 2026-05-12: Created and advanced the Worker setup install affordance child ExecPlan: `docs/exec-plans/active/2026-05-12-workers-setup-install-affordance.md`.
+- [ ] Complete the Worker setup install affordance slice so `/workers/setup` carries clean install guidance and sync-safe install status.
 - [ ] Hard-switch Worker runtime contracts that are Ship by Sunday-owned.
 - [ ] Finish migrating generated customer-facing instructions, Worker runtime contract naming, and any remaining workspace-named product tests/docs not covered by the first slice.
 - [ ] Run scans proving workspace-named product and owned runtime surfaces are gone or explicitly classified as unrelated external/tooling language.
@@ -81,11 +83,13 @@ Date: 2026-05-11.
 
 The first child ExecPlan is `docs/exec-plans/completed/2026-05-11-hard-switch-paid-app-ia-checkout-handoff.md`. It owns the paid app route/access/checkout/webhook hard switch from `planning-brief-2.md`.
 
+The current child ExecPlan is `docs/exec-plans/active/2026-05-12-workers-setup-install-affordance.md`. It owns the `/workers/setup` Worker install stage, package-runner command affordance, and sync-safe Worker install runner events.
+
 The intended later slices are Worker runtime contract hard switch, generated-output hard switch, and final scan/proof cleanup. These slices should not preserve old workspace or route names as supported aliases.
 
 ## Next Slice
 
-The next slice is Worker runtime and generated-output naming. It must classify every remaining `workspace` use, rename Ship by Sunday-owned Worker runtime contracts where feasible, update generated customer-facing instructions from source rather than generated mirrors alone, and leave external/tooling uses documented as intentional.
+The current slice is the Worker setup install affordance child ExecPlan. After it is completed, return to Worker runtime and generated-output naming: classify every remaining `workspace` use, rename Ship by Sunday-owned Worker runtime contracts where feasible, update generated customer-facing instructions from source rather than generated mirrors alone, and leave external/tooling uses documented as intentional.
 
 ## Risks and Watchpoints
 

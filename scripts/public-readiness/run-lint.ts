@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
+import { lstat, realpath } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -230,7 +231,7 @@ async function main(): Promise<void> {
 	const issues = (
 		await Promise.all(
 			repoPaths.map(async (repoPath) => {
-				const text = await readFile(path.join(repoRootDir, repoPath), "utf8");
+				const text = await readTrackedFileWithinRepo(repoRootDir, repoPath);
 				return collectIssuesForFile(repoPath, text);
 			}),
 		)
@@ -241,6 +242,23 @@ async function main(): Promise<void> {
 	if (issues.length > 0) {
 		process.exitCode = 1;
 	}
+}
+
+async function readTrackedFileWithinRepo(repoRootDir: string, repoPath: string) {
+	const fullPath = path.join(repoRootDir, repoPath);
+	const stats = await lstat(fullPath);
+	if (stats.isSymbolicLink()) {
+		throw new Error(`public-readiness refuses to read symlink: ${repoPath}`);
+	}
+	const [realRootPath, realFilePath] = await Promise.all([
+		realpath(repoRootDir),
+		realpath(fullPath),
+	]);
+	const relativePath = path.relative(realRootPath, realFilePath);
+	if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+		throw new Error(`public-readiness path escapes repository: ${repoPath}`);
+	}
+	return await readFile(fullPath, "utf8");
 }
 
 if (import.meta.url === new URL(process.argv[1] ?? "", "file://").href) {

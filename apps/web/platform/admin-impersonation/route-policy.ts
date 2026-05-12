@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHmac, randomUUID } from "node:crypto";
 
+import { auth } from "@clerk/nextjs/server";
 import { fetchMutation } from "convex/nextjs";
 
 import { api } from "@/convex/_generated/api";
@@ -96,6 +97,15 @@ function requireRecordedSupportModeRouteAudit(
 	}
 }
 
+async function requestHasClerkActorContext() {
+	try {
+		const authState = await auth();
+		return Boolean(authState.actor);
+	} catch {
+		return false;
+	}
+}
+
 export async function recordBlockedSupportModeActionForRequest(
 	request: Request,
 	input: {
@@ -106,7 +116,7 @@ export async function recordBlockedSupportModeActionForRequest(
 ) {
 	const session = await getConvexServerSession();
 	if (!session.token) {
-		return false;
+		return await requestHasClerkActorContext();
 	}
 
 	const result = await fetchMutation(
@@ -142,7 +152,9 @@ export async function recordSupportModeDownloadForRequest(
 ) {
 	const session = await getConvexServerSession();
 	if (!session.token) {
-		return { kind: "not_impersonating" as const };
+		return (await requestHasClerkActorContext())
+			? { kind: "blocked" as const }
+			: { kind: "not_impersonating" as const };
 	}
 
 	return await fetchMutation(
@@ -171,7 +183,9 @@ export async function assertSupportModeDownloadAllowedForRequest(
 ) {
 	const session = await getConvexServerSession();
 	if (!session.token) {
-		return { kind: "not_impersonating" as const };
+		return (await requestHasClerkActorContext())
+			? { kind: "blocked" as const }
+			: { kind: "not_impersonating" as const };
 	}
 
 	const status = await fetchMutation(

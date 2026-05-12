@@ -262,8 +262,12 @@ describe("getStripeLineItem", () => {
 						products: ["prod_correct"],
 					},
 					id: "coupon_50_off",
+					percent_off: productConfig.activeOffer?.percentOff,
 					valid: true,
-				} satisfies Pick<Stripe.Coupon, "applies_to" | "id" | "valid">),
+				} satisfies Pick<
+					Stripe.Coupon,
+					"applies_to" | "id" | "percent_off" | "valid"
+				>),
 			},
 			prices: {
 				retrieve: vi.fn().mockResolvedValue({
@@ -316,8 +320,12 @@ describe("getStripeLineItem", () => {
 						products: ["prod_other"],
 					},
 					id: "coupon_wrong_product",
+					percent_off: productConfig.activeOffer?.percentOff,
 					valid: true,
-				} satisfies Pick<Stripe.Coupon, "applies_to" | "id" | "valid">),
+				} satisfies Pick<
+					Stripe.Coupon,
+					"applies_to" | "id" | "percent_off" | "valid"
+				>),
 			},
 			prices: {
 				retrieve: vi.fn().mockResolvedValue({
@@ -372,8 +380,12 @@ describe("getStripeLineItem", () => {
 						products: ["prod_correct"],
 					},
 					id: "coupon_high_minimum",
+					percent_off: productConfig.activeOffer?.percentOff,
 					valid: true,
-				} satisfies Pick<Stripe.Coupon, "applies_to" | "id" | "valid">),
+				} satisfies Pick<
+					Stripe.Coupon,
+					"applies_to" | "id" | "percent_off" | "valid"
+				>),
 			},
 			prices: {
 				retrieve: vi.fn().mockResolvedValue({

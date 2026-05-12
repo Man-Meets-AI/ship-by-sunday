@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import { api } from "@/convex/_generated/api";
 import { CheckoutSuccessView } from "@/app/checkout/success/_components/checkout-success-view";
 import {
@@ -23,6 +25,7 @@ export default async function Page({
 }: {
 	searchParams: Promise<{ session_id?: string; fixture?: string }>;
 }) {
+	const requestHeaders = await headers();
 	const { session_id: searchSessionId, fixture } = await searchParams;
 	const fixturePacket = getCheckoutSuccessFixture({ fixture });
 	if (fixturePacket) {
@@ -46,6 +49,21 @@ export default async function Page({
 		searchSessionId ??
 		(await getPendingCheckoutSessionIdFromCookie()) ??
 		undefined;
+	if (sessionId) {
+		const rateLimitedResponse = getRateLimitedResponse({
+			bucket: "checkout.success.recovery",
+			identity: sessionId,
+			request: new Request("https://ship-by-sunday.local/checkout/success", {
+				headers: requestHeaders,
+			}),
+			limit: 10,
+			windowMs: 60_000,
+		});
+		if (rateLimitedResponse) {
+			notFound();
+		}
+	}
+
 	const checkoutSessionState = await getCheckoutSessionState(sessionId);
 	if (checkoutSessionState.kind === "sign_in_required") {
 		redirect(getSignInRedirectHref(`${routeConfig.appHome}?welcome=checkout`));

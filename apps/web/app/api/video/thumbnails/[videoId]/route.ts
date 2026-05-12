@@ -1,3 +1,8 @@
+import { auth } from "@clerk/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
+
+import { apiConfig } from "@/config/product";
+import { api } from "@/convex/_generated/api";
 import {
 	BUNNY_DEFAULT_THUMBNAIL_FILE_NAME,
 	getBunnyEmbedUrl,
@@ -25,6 +30,22 @@ export async function GET(
 	_request: Request,
 	context: { params: Promise<{ videoId: string }> },
 ) {
+	const authState = await auth();
+	const token = authState.userId
+		? await authState.getToken({ template: apiConfig.convexAuthTokenTemplate })
+		: null;
+	if (!token) {
+		return new Response("Unauthorized", { status: 401 });
+	}
+	const access = await fetchQuery(
+		api.access.viewerProductAccess,
+		{},
+		{ token },
+	);
+	if (!access.hasAccess) {
+		return new Response("Forbidden", { status: 403 });
+	}
+
 	const { videoId } = await context.params;
 	const video = getVideoAssetByBunnyVideoId(videoId);
 
