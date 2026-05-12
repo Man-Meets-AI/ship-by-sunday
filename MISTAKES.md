@@ -137,3 +137,7 @@
 - Mistake: I mistyped the integration test path as `workspace-setup-page.test.ts` during a mechanical command update.
   Impact: The command updated the unit test file, then failed before touching the intended integration test; no source code was changed by the failed path.
   Corrective action: Re-run the mechanical update with the exact `workspace-setup-page.test.tsx` path and verify with `rg` before continuing.
+
+- Mistake: I ran root `bun typecheck` while shepherding the release without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The command passed, but it created a PostHog release and uploaded source maps for the local branch commit from the credentialed environment.
+  Corrective action: Run local app build/typecheck validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is explicitly under test.
