@@ -22,6 +22,9 @@ export type RunnerEventType =
 	| "runner.heartbeat"
 	| "setup.check.started"
 	| "setup.check.completed"
+	| "worker.install.previewed"
+	| "worker.install.completed"
+	| "worker.install.blocked"
 	| "doctor.stage.started"
 	| "doctor.probe.completed"
 	| "doctor.sync_preview.ready"
@@ -65,6 +68,47 @@ export type RunnerEventPayload =
 			status: SetupCheckStatus;
 			summary: string;
 			remediationAction?: string;
+	  }
+	| {
+			eventType: "worker.install.previewed";
+			outcome: "ready";
+			status: "ready";
+			summary: string;
+			branch?: string;
+			commitHash?: string;
+			reportRef?: string;
+			localProofRef?: string;
+			createdRefs: string[];
+			changedRefs: string[];
+			proofCommandResults: WorkerInstallProofCommandResult[];
+	  }
+	| {
+			eventType: "worker.install.completed";
+			outcome: "installed";
+			status: "installed";
+			summary: string;
+			branch?: string;
+			commitHash?: string;
+			reportRef?: string;
+			localProofRef?: string;
+			createdRefs: string[];
+			changedRefs: string[];
+			proofCommandResults: WorkerInstallProofCommandResult[];
+	  }
+	| {
+			eventType: "worker.install.blocked";
+			outcome: "blocked" | "failed" | "cancelled";
+			status: "blocked" | "failed" | "cancelled";
+			summary: string;
+			branch?: string;
+			commitHash?: string;
+			reportRef?: string;
+			localProofRef?: string;
+			createdRefs: string[];
+			changedRefs: string[];
+			blockerIds: string[];
+			blockerReasons: string[];
+			proofCommandResults: WorkerInstallProofCommandResult[];
 	  }
 	| {
 			eventType: "doctor.stage.started";
@@ -125,6 +169,11 @@ export type RunnerEventPayload =
 			eventType: "runner.revoked";
 			reason?: string;
 	  };
+
+export type WorkerInstallProofCommandResult = {
+	commandLabel: string;
+	status: "passed" | "failed" | "blocked" | "skipped";
+};
 
 export type RunnerEvent = {
 	eventId: string;

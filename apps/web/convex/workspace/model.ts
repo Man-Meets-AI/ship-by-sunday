@@ -2149,8 +2149,8 @@ function buildPairingCommand(
 		runnerId: runnerBinding._id,
 		token: runnerBinding.pairingToken,
 		tokenExpiresAt,
-		primaryCommand: `bunx ship-by-sunday setup pair ${runnerBinding.pairingToken}`,
-		fallbackCommand: `npx ship-by-sunday setup pair ${runnerBinding.pairingToken}`,
+		primaryCommand: `bunx ship-by-sunday setup pair ${runnerBinding.pairingToken} --repo .`,
+		fallbackCommand: `npx ship-by-sunday setup pair ${runnerBinding.pairingToken} --repo .`,
 	};
 }
 
@@ -2158,22 +2158,27 @@ async function getLatestSetupEvents(
 	ctx: WorkspaceReadCtx,
 	projectId: WorkspaceProjectId,
 ) {
-	const startedEvents = await ctx.db
-		.query("workspaceRunnerEvents")
-		.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
-			query.eq("projectId", projectId).eq("eventType", "setup.check.started"),
-		)
-		.order("desc")
-		.take(SETUP_EVENT_READ_LIMIT);
-	const completedEvents = await ctx.db
-		.query("workspaceRunnerEvents")
-		.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
-			query.eq("projectId", projectId).eq("eventType", "setup.check.completed"),
-		)
-		.order("desc")
-		.take(SETUP_EVENT_READ_LIMIT);
+	const eventTypes: WorkspaceRunnerEventType[] = [
+		"setup.check.started",
+		"setup.check.completed",
+		"worker.install.previewed",
+		"worker.install.completed",
+		"worker.install.blocked",
+	];
+	const eventGroups = await Promise.all(
+		eventTypes.map((eventType) =>
+			ctx.db
+				.query("workspaceRunnerEvents")
+				.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
+					query.eq("projectId", projectId).eq("eventType", eventType),
+				)
+				.order("desc")
+				.take(SETUP_EVENT_READ_LIMIT),
+		),
+	);
 
-	return [...startedEvents, ...completedEvents]
+	return eventGroups
+		.flat()
 		.sort((left, right) => right.createdAt - left.createdAt)
 		.slice(0, SETUP_EVENT_READ_LIMIT);
 }
@@ -3591,6 +3596,20 @@ async function applyEventDerivedState(
 					...(args.payload.scope === "machine"
 						? { machineHealthStatus: args.payload.status }
 						: { projectHealthStatus: args.payload.status }),
+					lastEventAt: args.createdAt,
+					updatedAt: now,
+				}),
+			]);
+			return;
+		}
+		case "worker.install.previewed":
+		case "worker.install.completed":
+		case "worker.install.blocked": {
+			await Promise.all([
+				ctx.db.patch(args.project._id, {
+					updatedAt: now,
+				}),
+				ctx.db.patch(args.runnerBinding._id, {
 					lastEventAt: args.createdAt,
 					updatedAt: now,
 				}),

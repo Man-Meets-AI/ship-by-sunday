@@ -1037,6 +1037,50 @@ describe("workspace runner events", () => {
 		});
 	});
 
+	it("surfaces Worker install runner events in setup state", async () => {
+		const { ctx, tables, project, runner } = await createProjectAndRunner();
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-worker-install-previewed",
+			projectId: project._id,
+			runnerId: runner._id,
+			eventType: "worker.install.previewed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 70_000,
+			payload: {
+				eventType: "worker.install.previewed",
+				outcome: "ready",
+				status: "ready",
+				summary: "Worker Foundations install is ready.",
+				branch: "shipbysunday/install",
+				reportRef: "docs/worker/install-report.md",
+				localProofRef: ".sbs/worker-install/proof.json",
+				createdRefs: ["apps/worker", "docs/worker/install-report.md"],
+				changedRefs: ["README.md", "AGENTS.md", "package.json"],
+				proofCommandResults: [
+					{ commandLabel: "bun run docs:validate", status: "skipped" },
+				],
+			},
+		});
+
+		const setupState = await getWorkspaceSetupState._handler(ctx as never, {
+			projectId: project._id,
+		});
+		const installEvent = setupState.setupEvents.find(
+			(event) => event.eventType === "worker.install.previewed",
+		);
+
+		expect(installEvent?.payload).toMatchObject({
+			eventType: "worker.install.previewed",
+			status: "ready",
+			reportRef: "docs/worker/install-report.md",
+			createdRefs: ["apps/worker", "docs/worker/install-report.md"],
+		});
+		expect(tables.workspaceRunnerBindings[0]).toMatchObject({
+			lastEventAt: 70_000,
+		});
+	});
+
 	it("consumes setup pairing tokens after the first successful bind", async () => {
 		const testContext = createWorkspaceTestCtx();
 		vi.spyOn(Date, "now").mockReturnValue(110_000);
@@ -3669,6 +3713,33 @@ describe("workspace runner events", () => {
 						findingsCount: 1,
 						excludedArtifactCount: 0,
 						localReportRef: "/Users/customer/repo/.sbs/report.json",
+					},
+				} as never,
+			),
+		).rejects.toThrow("local absolute path");
+
+		await expect(
+			ingestWorkspaceRunnerEvent._handler(
+				ctx as never,
+				{
+					eventId: "evt-worker-install-absolute-path",
+					projectId: project._id,
+					runnerId: runner._id,
+					eventType: "worker.install.blocked",
+					schemaVersion: "workspace.runner-event.v1",
+					createdAt: 1,
+					payload: {
+						eventType: "worker.install.blocked",
+						outcome: "blocked",
+						status: "blocked",
+						summary: "Worker install is blocked.",
+						localProofRef:
+							"/Users/customer/repo/.sbs/worker-install/proof.json",
+						createdRefs: [],
+						changedRefs: [],
+						blockerIds: ["license"],
+						blockerReasons: ["Worker license is missing."],
+						proofCommandResults: [],
 					},
 				} as never,
 			),

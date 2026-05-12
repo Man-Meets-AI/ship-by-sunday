@@ -158,9 +158,9 @@ describe("workspace data model", () => {
 		expect(setupState.pairingCommand).toMatchObject({
 			token: "sbs_pair_111111112222_4333844455555555",
 			primaryCommand:
-				"bunx ship-by-sunday setup pair sbs_pair_111111112222_4333844455555555",
+				"bunx ship-by-sunday setup pair sbs_pair_111111112222_4333844455555555 --repo .",
 			fallbackCommand:
-				"npx ship-by-sunday setup pair sbs_pair_111111112222_4333844455555555",
+				"npx ship-by-sunday setup pair sbs_pair_111111112222_4333844455555555 --repo .",
 		});
 
 		const loadedState = await getWorkspaceSetupState._handler(ctx as never, {

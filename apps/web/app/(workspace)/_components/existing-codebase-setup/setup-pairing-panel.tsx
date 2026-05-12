@@ -1,39 +1,16 @@
-import {
-	Check,
-	Copy,
-	RefreshCw,
-	Terminal,
-	Wrench,
-	XCircle,
-	Zap,
-} from "lucide-react";
-import { useEffect, useState } from "react";
+import { RefreshCw, Wrench, XCircle, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { buildWorkspaceSetupReadinessModel } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
 import { cn } from "@/lib/utils";
+import {
+	buildPackageRunnerCommands,
+	SetupPackageRunnerCommand,
+} from "./setup-package-runner-command";
 
 type SetupPairingModel = ReturnType<
 	typeof buildWorkspaceSetupReadinessModel
 >["pairing"];
-
-const packageRunnerIds = ["bun", "npm", "pnpm", "yarn"] as const;
-
-type PackageRunnerId = (typeof packageRunnerIds)[number];
-
-type PackageRunnerCommand = {
-	id: PackageRunnerId;
-	label: string;
-	command: string;
-};
-
-const packageRunnerPrefixes: Record<PackageRunnerId, string> = {
-	bun: "bunx",
-	npm: "npx",
-	pnpm: "pnpm dlx",
-	yarn: "yarn dlx",
-};
 
 const pairingStages = [
 	"waiting",
@@ -50,147 +27,6 @@ const pairingStageLabels = {
 	verifying_project: "verifying project",
 	paired: "paired",
 } as const;
-
-function commandWithPackageRunner(
-	command: string,
-	packageRunner: PackageRunnerId,
-) {
-	const nextPrefix = packageRunnerPrefixes[packageRunner];
-	const knownPrefixes = [
-		`${packageRunnerPrefixes.pnpm} `,
-		`${packageRunnerPrefixes.yarn} `,
-		`${packageRunnerPrefixes.bun} `,
-		`${packageRunnerPrefixes.npm} `,
-	];
-
-	for (const knownPrefix of knownPrefixes) {
-		if (command.startsWith(knownPrefix)) {
-			return `${nextPrefix} ${command.slice(knownPrefix.length)}`;
-		}
-	}
-
-	return command;
-}
-
-function buildPackageRunnerCommands({
-	primaryCommand,
-	fallbackCommand,
-}: Pick<SetupPairingModel, "primaryCommand" | "fallbackCommand">) {
-	const baseCommand = fallbackCommand ?? primaryCommand;
-	if (!baseCommand) {
-		return [];
-	}
-
-	return packageRunnerIds.map((id) => {
-		if (id === "bun" && primaryCommand) {
-			return { id, label: id, command: primaryCommand };
-		}
-		if (id === "npm" && fallbackCommand) {
-			return { id, label: id, command: fallbackCommand };
-		}
-
-		return {
-			id,
-			label: id,
-			command: commandWithPackageRunner(baseCommand, id),
-		};
-	});
-}
-
-function CopyCommandButton({ command }: { command: string }) {
-	const [copied, setCopied] = useState(false);
-
-	useEffect(() => {
-		if (!copied) {
-			return;
-		}
-
-		const timeout = window.setTimeout(() => setCopied(false), 1600);
-		return () => window.clearTimeout(timeout);
-	}, [copied]);
-
-	async function copyCommand() {
-		await navigator.clipboard.writeText(command);
-		setCopied(true);
-	}
-
-	return (
-		<Button
-			type="button"
-			variant="ghost"
-			size="sm"
-			onClick={() => void copyCommand()}
-			aria-label={copied ? "Copied pairing command" : "Copy pairing command"}
-		>
-			{copied ? (
-				<Check className="size-3.5" aria-hidden />
-			) : (
-				<Copy className="size-3.5" aria-hidden />
-			)}
-			{copied ? "Copied" : "Copy"}
-		</Button>
-	);
-}
-
-function CommandLine({
-	label,
-	commands,
-}: {
-	label: string;
-	commands: PackageRunnerCommand[];
-}) {
-	const [selectedPackageRunner, setSelectedPackageRunner] =
-		useState<PackageRunnerId>("bun");
-	const selectedCommand =
-		commands.find((command) => command.id === selectedPackageRunner) ??
-		commands[0] ??
-		null;
-
-	return (
-		<div className="rounded-lg border border-border/60 bg-muted/20">
-			<div className="flex flex-col gap-2 border-b border-border/50 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-				<div className="flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground">
-					<Terminal className="size-3.5 shrink-0" aria-hidden />
-					<span className="truncate">{label}</span>
-				</div>
-				{selectedCommand ? (
-					<div className="flex items-center gap-2">
-						<ToggleGroup
-							type="single"
-							value={selectedCommand.id}
-							onValueChange={(value) => {
-								if (packageRunnerIds.includes(value as PackageRunnerId)) {
-									setSelectedPackageRunner(value as PackageRunnerId);
-								}
-							}}
-							variant="outline"
-							size="sm"
-							aria-label="Package manager"
-							className="overflow-hidden"
-						>
-							{commands.map((command) => (
-								<ToggleGroupItem
-									key={command.id}
-									value={command.id}
-									aria-label={`Use ${command.label}`}
-									className="h-7 px-2 text-xs"
-								>
-									{command.label}
-								</ToggleGroupItem>
-							))}
-						</ToggleGroup>
-						<CopyCommandButton command={selectedCommand.command} />
-					</div>
-				) : null}
-			</div>
-			<pre className="overflow-x-auto px-3 py-3 text-xs leading-6">
-				<code className="font-mono">
-					{selectedCommand?.command ?? "Regenerate a pairing token."}
-				</code>
-			</pre>
-		</div>
-	);
-}
 
 export function SetupPairingPanel({
 	pairing,
@@ -301,7 +137,7 @@ export function SetupPairingPanel({
 					)}
 
 					{!isPaired || hasRepairCommand ? (
-						<CommandLine
+						<SetupPackageRunnerCommand
 							label={isPaired ? "Repair command" : "Pairing command"}
 							commands={packageRunnerCommands}
 						/>

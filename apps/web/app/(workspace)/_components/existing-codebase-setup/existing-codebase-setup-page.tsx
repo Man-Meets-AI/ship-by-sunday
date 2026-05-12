@@ -28,6 +28,7 @@ import { SetupOpenDestinationControl } from "./setup-open-destination-control";
 import { SetupPairingPanel } from "./setup-pairing-panel";
 import { SetupPrivacySummary } from "./setup-privacy-summary";
 import { SetupReadinessSection } from "./setup-readiness-section";
+import { SetupWorkerInstallPanel } from "./setup-worker-install-panel";
 
 type WorkspaceSetupState = FunctionReturnType<
 	typeof api.workspace.getWorkspaceSetupState
@@ -314,6 +315,8 @@ export function ExistingCodebaseSetupPage({
 							: pendingAction
 					}
 				/>
+
+				<SetupWorkerInstallPanel workerInstall={model.workerInstall} />
 
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<div className="grid min-w-0 gap-5">

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -137,8 +137,10 @@ function createSetupState(
 			runnerId: "workspaceRunnerBindings_1",
 			token: "sbs_pair_test_token",
 			tokenExpiresAt: renderedAt + 900_000,
-			primaryCommand: "bunx ship-by-sunday setup pair sbs_pair_test_token",
-			fallbackCommand: "npx ship-by-sunday setup pair sbs_pair_test_token",
+			primaryCommand:
+				"bunx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			fallbackCommand:
+				"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
 		},
 		...overrides,
 	};
@@ -244,15 +246,47 @@ describe("ExistingCodebaseSetupPage", () => {
 		).toBeTruthy();
 		expect(screen.getByText("Pending Project Setup")).toBeTruthy();
 		expect(
-			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+			screen.getByText(
+				"bunx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeTruthy();
 		expect(
-			screen.queryByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+			screen.queryByText(
+				"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeNull();
 		expect(screen.queryByText("npx fallback")).toBeNull();
-		await user.click(screen.getByRole("radio", { name: "Use npm" }));
+		const installSection = within(
+			screen
+				.getByRole("heading", { name: "Worker install" })
+				.closest("section") as HTMLElement,
+		);
+		expect(installSection.getByText("waiting on pairing")).toBeTruthy();
 		expect(
-			screen.getByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+			installSection.getByText(
+				"bunx ship-by-sunday install --repo . --dry-run --json --no-kickoff",
+			),
+		).toBeTruthy();
+		expect(
+			installSection.getByText(
+				"bunx ship-by-sunday install --repo . --yes --json --no-kickoff",
+			),
+		).toBeTruthy();
+		expect(
+			installSection.getByText(/Install commits by default on/),
+		).toBeTruthy();
+		expect(
+			(
+				installSection.getByRole("button", {
+					name: "Copy Preview install command",
+				}) as HTMLButtonElement
+			).disabled,
+		).toBe(true);
+		await user.click(screen.getAllByRole("radio", { name: "Use npm" })[0]);
+		expect(
+			screen.getByText(
+				"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeTruthy();
 		expect(screen.getByText("runner detected")).toBeTruthy();
 		expect(screen.getByText("verifying machine")).toBeTruthy();
@@ -344,7 +378,9 @@ describe("ExistingCodebaseSetupPage", () => {
 		expect(screen.getAllByText(/Warnings can remain visible/).length).toBe(2);
 		expect(screen.getAllByText("customer-app").length).toBeGreaterThan(0);
 		expect(
-			screen.queryByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+			screen.queryByText(
+				"bunx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeNull();
 		expect(screen.queryByText("npx fallback")).toBeNull();
 		expect(screen.queryByText("Regenerate token")).toBeNull();
@@ -383,18 +419,129 @@ describe("ExistingCodebaseSetupPage", () => {
 
 		expect(screen.getByText("Repair command")).toBeTruthy();
 		expect(
-			screen.getByText("bunx ship-by-sunday setup pair sbs_pair_test_token"),
+			screen.getByText(
+				"bunx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeTruthy();
 		expect(screen.queryByText("npx repair fallback")).toBeNull();
 		expect(
-			screen.queryByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+			screen.queryByText(
+				"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeNull();
 
-		await user.click(screen.getByRole("radio", { name: "Use npm" }));
+		await user.click(screen.getAllByRole("radio", { name: "Use npm" })[0]);
 
 		expect(
-			screen.getByText("npx ship-by-sunday setup pair sbs_pair_test_token"),
+			screen.getByText(
+				"npx ship-by-sunday setup pair sbs_pair_test_token --repo .",
+			),
 		).toBeTruthy();
+	});
+
+	it("shows runner sync-backed Worker install status and handoff details", async () => {
+		const user = userEvent.setup();
+		const pairedRunner = {
+			_id: "workspaceRunnerBindings_1",
+			status: "paired" as const,
+			pairingStatus: "paired" as const,
+			runnerMode: "daemon" as const,
+			runnerLabel: "Local daemon",
+			machineDisplayName: "Parker MacBook",
+			machineHealthStatus: "ready" as const,
+			projectHealthStatus: "ready" as const,
+			lastHeartbeatAt: renderedAt - 20_000,
+		};
+
+		renderSetupPage(
+			createSetupState({
+				runnerBindings: [pairedRunner],
+				activeRunner: pairedRunner,
+				repositoryBinding: {
+					_id: "workspaceRepositoryBindings_1",
+					displayName: "customer-app",
+					provider: "github",
+					remoteHost: "github.com",
+					remoteOwner: "customer",
+					remoteName: "app",
+				},
+				setupEvents: [
+					...requiredReadySetupEvents(),
+					{
+						eventType: "worker.install.completed",
+						createdAt: renderedAt - 2_000,
+						payload: {
+							eventType: "worker.install.completed",
+							outcome: "installed",
+							status: "installed",
+							summary: "Worker Foundations installed.",
+							branch: "shipbysunday/install",
+							commitHash: "abc123def456",
+							reportRef: "docs/worker/install-report.md",
+							localProofRef: ".sbs/worker-install/proof.json",
+							createdRefs: [
+								"apps/worker",
+								"apps/worker/package.json",
+								"apps/worker/src/worker-cli.ts",
+								"scripts/run-worker.sh",
+								"docs/worker/install-report.md",
+								"docs/programs/active/worker/program.md",
+								"docs/exec-plans/active/worker-first-plan.md",
+							],
+							changedRefs: [
+								"README.md",
+								"AGENTS.md",
+								"package.json",
+								".gitignore",
+								"docs/index.md",
+								"docs/programs/README.md",
+							],
+							proofCommandResults: [
+								{ commandLabel: "bun run docs:validate", status: "passed" },
+								{ commandLabel: "bun run worker:test", status: "passed" },
+							],
+						},
+					},
+				],
+				pairingCommand: null,
+			}),
+		);
+
+		const installSection = within(
+			screen
+				.getByRole("heading", { name: "Worker install" })
+				.closest("section") as HTMLElement,
+		);
+
+		expect(installSection.getByText("installed")).toBeTruthy();
+		expect(installSection.getByText("shipbysunday/install")).toBeTruthy();
+		expect(
+			installSection.getByText("docs/worker/install-report.md"),
+		).toBeTruthy();
+		expect(
+			installSection.getByText("./scripts/run-worker.sh --help"),
+		).toBeTruthy();
+
+		await user.click(
+			installSection.getAllByRole("radio", { name: "Use npm" })[0],
+		);
+
+		expect(
+			installSection.getByText(
+				"npx ship-by-sunday install --repo . --dry-run --json --no-kickoff",
+			),
+		).toBeTruthy();
+		expect(installSection.getByText("npm run docs:validate")).toBeTruthy();
+		expect(installSection.getByText("npm run worker:test")).toBeTruthy();
+
+		await user.click(
+			installSection.getByRole("button", { name: "Runner sync details" }),
+		);
+
+		expect(installSection.getByText("abc123def456")).toBeTruthy();
+		expect(installSection.getByText("and 2 more")).toBeTruthy();
+		expect(installSection.getByText("and 1 more")).toBeTruthy();
+		expect(installSection.getAllByText("passed").length).toBeGreaterThan(1);
 	});
 
 	it("starts a doctor pass run when readiness has no blockers", async () => {

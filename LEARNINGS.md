@@ -67,3 +67,11 @@
 
 - Fact: Production billing proof may use zero-cost hosted Checkout to avoid moving real money; dev staging covers the full paid card path in Stripe test mode.
   Verified by: The post-mortem validation and residual-risk sections.
+
+## 2026-05-12 Worker Setup Install Affordance
+
+- Fact: `apps/web` does not define a generic `test` script; focused app unit tests should use `bun run --cwd apps/web test:unit -- <paths>`.
+  Verified by: `bun run --cwd apps/web test -- tests/unit/workspace-runner-events.test.ts tests/unit/workspace-setup-readiness-model.test.ts` failed before Vitest, while `bun run --cwd apps/web test:unit -- tests/unit/workspace-data-model.test.ts tests/unit/workspace-runner-events.test.ts tests/unit/workspace-setup-readiness-model.test.ts` passed.
+
+- Fact: An unauthenticated in-app browser navigation to `/workers/setup` redirects to the custom sign-in screen.
+  Verified by: Running `bun run --cwd apps/web dev:web:only` and opening `http://localhost:3000/workers/setup` in the in-app browser produced `/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fworkers%2Fsetup`.

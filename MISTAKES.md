@@ -109,3 +109,9 @@
 - Mistake: I used `bunx convex env list --prod` while checking production runtime configuration.
   Impact: The command printed production environment variable values into the local tool transcript instead of returning a presence-only view.
   Corrective action: Use provider commands that prove presence or update a single named variable without printing values; treat any secret-inspection command as unsafe unless its output is known to redact values.
+
+## 2026-05-12 Worker Setup Install Affordance
+
+- Mistake: I mistyped the integration test path as `workspace-setup-page.test.ts` during a mechanical command update.
+  Impact: The command updated the unit test file, then failed before touching the intended integration test; no source code was changed by the failed path.
+  Corrective action: Re-run the mechanical update with the exact `workspace-setup-page.test.tsx` path and verify with `rg` before continuing.

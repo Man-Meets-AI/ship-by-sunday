@@ -126,6 +126,7 @@ type WorkspaceSetupEvent = {
 	createdAt: number;
 	payload:
 		| CompletedSetupPayload
+		| WorkerInstallEventPayload
 		| {
 				eventType: string;
 				[key: string]: JsonValue | undefined;
@@ -139,6 +140,70 @@ type CompletedSetupPayload = {
 	status: "unknown" | "blocked" | "warning" | "ready";
 	summary: string;
 	remediationAction?: string;
+};
+
+export type WorkerInstallProofCommandResult = {
+	commandLabel: string;
+	status: "passed" | "failed" | "blocked" | "skipped";
+};
+
+type WorkerInstallBasePayload = {
+	summary: string;
+	branch?: string;
+	commitHash?: string;
+	reportRef?: string;
+	localProofRef?: string;
+	createdRefs: string[];
+	changedRefs: string[];
+	proofCommandResults: WorkerInstallProofCommandResult[];
+};
+
+type WorkerInstallEventPayload =
+	| (WorkerInstallBasePayload & {
+			eventType: "worker.install.previewed";
+			outcome: "ready";
+			status: "ready";
+	  })
+	| (WorkerInstallBasePayload & {
+			eventType: "worker.install.completed";
+			outcome: "installed";
+			status: "installed";
+	  })
+	| (WorkerInstallBasePayload & {
+			eventType: "worker.install.blocked";
+			outcome: "blocked" | "failed" | "cancelled";
+			status: "blocked" | "failed" | "cancelled";
+			blockerIds: string[];
+			blockerReasons: string[];
+	  });
+
+export type WorkspaceWorkerInstallStatus =
+	| "waiting"
+	| "ready"
+	| "previewed"
+	| "installed"
+	| "blocked";
+
+export type WorkspaceWorkerInstallModel = {
+	status: WorkspaceWorkerInstallStatus;
+	statusLabel: string;
+	description: string;
+	gated: boolean;
+	latestSyncedLabel: string;
+	previewCommand: string;
+	installCommand: string;
+	noCommitCommand: string;
+	interactiveCommand: string;
+	generatedSummary: readonly string[];
+	branchLabel: string;
+	commitHash: string | null;
+	reportRef: string | null;
+	localProofRef: string | null;
+	createdRefs: string[];
+	changedRefs: string[];
+	blockerIds: string[];
+	blockerReasons: string[];
+	proofCommandResults: WorkerInstallProofCommandResult[];
 };
 
 export type WorkspacePairingCommand = {
@@ -469,6 +534,22 @@ export const setupPrivacyDefaults = [
 		description:
 			"Only approved finding metadata, proof status, and repo-relative refs can sync.",
 	},
+] as const;
+
+const workerInstallCommands = {
+	preview: "bunx ship-by-sunday install --repo . --dry-run --json --no-kickoff",
+	install: "bunx ship-by-sunday install --repo . --yes --json --no-kickoff",
+	noCommit:
+		"bunx ship-by-sunday install --repo . --yes --json --no-kickoff --no-commit",
+	interactive: "bunx ship-by-sunday install --repo . --no-kickoff",
+} as const;
+
+const workerInstallGeneratedSummary = [
+	"apps/worker local Worker app",
+	"scripts/run-worker.sh launcher",
+	"docs/worker/install-report.md handoff report",
+	"README.md, AGENTS.md, package.json managed updates",
+	"local .worker/ state excluded from Git",
 ] as const;
 
 function normalizeBackendStatus(
@@ -824,6 +905,142 @@ function getDoctorPassBlockers(
 	return rowBlockers;
 }
 
+function isWorkerInstallEventPayload(
+	payload: WorkspaceSetupEvent["payload"],
+): payload is WorkerInstallEventPayload {
+	return (
+		payload.eventType === "worker.install.previewed" ||
+		payload.eventType === "worker.install.completed" ||
+		payload.eventType === "worker.install.blocked"
+	);
+}
+
+function latestWorkerInstallEvent(state: WorkspaceSetupState) {
+	let latestEvent: WorkspaceSetupEvent | null = null;
+
+	for (const event of state.setupEvents) {
+		if (!isWorkerInstallEventPayload(event.payload)) {
+			continue;
+		}
+
+		if (!latestEvent || latestEvent.createdAt < event.createdAt) {
+			latestEvent = event;
+		}
+	}
+
+	return latestEvent;
+}
+
+function getWorkerInstallStatus(
+	event: WorkspaceSetupEvent | null,
+	isPaired: boolean,
+): WorkspaceWorkerInstallStatus {
+	if (!isPaired) {
+		return "waiting";
+	}
+
+	if (!event || !isWorkerInstallEventPayload(event.payload)) {
+		return "ready";
+	}
+
+	switch (event.payload.eventType) {
+		case "worker.install.previewed":
+			return "previewed";
+		case "worker.install.completed":
+			return "installed";
+		case "worker.install.blocked":
+			return "blocked";
+	}
+}
+
+function getWorkerInstallStatusLabel(status: WorkspaceWorkerInstallStatus) {
+	switch (status) {
+		case "waiting":
+			return "waiting on pairing";
+		case "ready":
+			return "ready to install";
+		case "previewed":
+			return "previewed";
+		case "installed":
+			return "installed";
+		case "blocked":
+			return "blocked";
+	}
+}
+
+function getWorkerInstallDescription({
+	status,
+	eventPayload,
+}: {
+	status: WorkspaceWorkerInstallStatus;
+	eventPayload: WorkerInstallEventPayload | null;
+}) {
+	if (eventPayload?.summary) {
+		return eventPayload.summary;
+	}
+
+	switch (status) {
+		case "waiting":
+			return "Pair the local runner before copying install commands. The install stage is shown now so the local Worker handoff stays visible.";
+		case "ready":
+			return "Preview the clean Worker install, then install when the generated Program and first ExecPlan handoff look right.";
+		case "previewed":
+			return "The latest runner sync says the Worker install preview is ready. Preview is recommended, not required.";
+		case "installed":
+			return "The latest runner sync says Worker foundations are installed. Continue from the installed report and active ExecPlan.";
+		case "blocked":
+			return "The latest runner sync says the Worker install is blocked. Fix the local blocker and rerun preview or install.";
+	}
+}
+
+function buildWorkerInstallModel(
+	state: WorkspaceSetupState,
+	pairingStatus: WorkspaceSetupRunnerBinding["pairingStatus"],
+	now: number,
+): WorkspaceWorkerInstallModel {
+	const latestEvent = latestWorkerInstallEvent(state);
+	const eventPayload =
+		latestEvent && isWorkerInstallEventPayload(latestEvent.payload)
+			? latestEvent.payload
+			: null;
+	const status = getWorkerInstallStatus(
+		latestEvent,
+		pairingStatus === "paired",
+	);
+
+	return {
+		status,
+		statusLabel: getWorkerInstallStatusLabel(status),
+		description: getWorkerInstallDescription({ status, eventPayload }),
+		gated: status === "waiting",
+		latestSyncedLabel: latestEvent
+			? `runner sync ${formatLastRunnerSync(latestEvent.createdAt, now)}`
+			: pairingStatus === "paired"
+				? "No install runner sync yet"
+				: "Waiting for runner pairing",
+		previewCommand: workerInstallCommands.preview,
+		installCommand: workerInstallCommands.install,
+		noCommitCommand: workerInstallCommands.noCommit,
+		interactiveCommand: workerInstallCommands.interactive,
+		generatedSummary: workerInstallGeneratedSummary,
+		branchLabel: eventPayload?.branch ?? "shipbysunday/install",
+		commitHash: eventPayload?.commitHash ?? null,
+		reportRef: eventPayload?.reportRef ?? null,
+		localProofRef: eventPayload?.localProofRef ?? null,
+		createdRefs: eventPayload?.createdRefs ?? [],
+		changedRefs: eventPayload?.changedRefs ?? [],
+		blockerIds:
+			eventPayload?.eventType === "worker.install.blocked"
+				? eventPayload.blockerIds
+				: [],
+		blockerReasons:
+			eventPayload?.eventType === "worker.install.blocked"
+				? eventPayload.blockerReasons
+				: [],
+		proofCommandResults: eventPayload?.proofCommandResults ?? [],
+	};
+}
+
 export function buildWorkspaceSetupReadinessModel(
 	state: WorkspaceSetupState,
 	now = Date.now(),
@@ -854,6 +1071,7 @@ export function buildWorkspaceSetupReadinessModel(
 			(runnerBinding) => runnerBinding.runnerMode === "one_shot",
 		) ?? null;
 	const doctorPassBlockers = getDoctorPassBlockers(sections, state, now);
+	const workerInstall = buildWorkerInstallModel(state, pairingStatus, now);
 
 	return {
 		title: "Setup",
@@ -895,6 +1113,7 @@ export function buildWorkspaceSetupReadinessModel(
 			cancelRunnerId: state.pairingCommand?.runnerId ?? null,
 		},
 		sections,
+		workerInstall,
 		privacyDefaults: setupPrivacyDefaults,
 		openDestination: {
 			value: state.project?.defaultOpenDestination ?? "cursor",

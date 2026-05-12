@@ -1,13 +1,15 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
 
 import { runInstallCommand } from "../src/commands/install";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
+import { RUNNER_HOME_ENV_VAR, writeRunnerCredential } from "../src/core/local-runner-home";
+import { readQueuedRunnerEvents } from "../src/core/runner-events";
 import {
 	runWorkerFoundationsInstall,
 	type WorkerInstallOptions,
@@ -54,6 +56,149 @@ describe("Worker Foundations install command", () => {
 		expect(output).not.toContain(workerHome);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 		expect(existsSync(path.join(repositoryRoot, ".worker"))).toBe(false);
+	});
+
+	it("syncs a Worker install preview event when runner credentials exist", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const runnerHome = await createTemporaryDirectory("worker-runner-home-");
+		const pairedRepositoryRoot = await realpath(repositoryRoot);
+		const runnerEventServer = await createRunnerEventServer();
+		await writeRunnerCredential({
+			runnerHome,
+			repositoryRoot: pairedRepositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_install_preview",
+				apiBaseUrl: runnerEventServer.baseUrl,
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
+		});
+
+		try {
+			const result = await runWorkerFoundationsInstall({
+				options: {
+					...workerInstallOptions({ repoPath: repositoryRoot }),
+					dryRun: true,
+				},
+				env: {
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+					[RUNNER_HOME_ENV_VAR]: runnerHome,
+				},
+			});
+
+			expect(result.outcome).toBe("ready");
+			expect(runnerEventServer.requests).toHaveLength(1);
+			expect(runnerEventServer.requests[0]).toMatchObject({
+				authorization: "Bearer sbs_run_install_preview",
+				method: "POST",
+				url: "/api/workspace/runner/events",
+			});
+			const syncedEvent = JSON.parse(runnerEventServer.requests[0].body) as {
+				payload: {
+					eventType: string;
+					outcome: string;
+					status: string;
+					summary: string;
+					createdRefs: string[];
+					changedRefs: string[];
+					proofCommandResults: unknown[];
+				};
+			};
+			expect(syncedEvent.payload).toMatchObject({
+				eventType: "worker.install.previewed",
+				outcome: "ready",
+				status: "ready",
+				summary: "Worker Foundations install is ready.",
+			});
+			expect(syncedEvent.payload.createdRefs).toEqual([]);
+			expect(syncedEvent.payload.changedRefs).toEqual([]);
+			expect(syncedEvent.payload.proofCommandResults).toEqual([]);
+			expect(JSON.stringify(syncedEvent)).not.toContain(repositoryRoot);
+			expect(JSON.stringify(syncedEvent)).not.toContain(workerHome);
+			expect(await readQueuedRunnerEvents(repositoryRoot)).toEqual([]);
+		} finally {
+			await runnerEventServer.close();
+		}
+	});
+
+	it("does not sync Worker install events when runner credentials are absent", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		const runnerHome = await createTemporaryDirectory("worker-runner-home-");
+		const fetchSpy = vi
+			.spyOn(globalThis, "fetch")
+			.mockResolvedValue(new Response(null, { status: 200 }));
+
+		const result = await runWorkerFoundationsInstall({
+			options: {
+				...workerInstallOptions({ repoPath: repositoryRoot }),
+				dryRun: true,
+			},
+			env: {
+				...process.env,
+				SHIPBYSUNDAY_WORKER_HOME: workerHome,
+				[RUNNER_HOME_ENV_VAR]: runnerHome,
+			},
+		});
+
+		expect(result.outcome).toBe("ready");
+		expect(fetchSpy).not.toHaveBeenCalled();
+		expect(await readQueuedRunnerEvents(repositoryRoot)).toEqual([]);
+	});
+
+	it("queues blocked Worker install events when immediate sync fails", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome(null);
+		const runnerHome = await createTemporaryDirectory("worker-runner-home-");
+		const pairedRepositoryRoot = await realpath(repositoryRoot);
+		const runnerEventServer = await createRunnerEventServer({ status: 503 });
+		await writeRunnerCredential({
+			runnerHome,
+			repositoryRoot: pairedRepositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_install_blocked",
+				apiBaseUrl: runnerEventServer.baseUrl,
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
+		});
+
+		try {
+			const result = await runWorkerFoundationsInstall({
+				options: workerInstallOptions({ repoPath: repositoryRoot }),
+				env: {
+					...process.env,
+					SHIPBYSUNDAY_WORKER_HOME: workerHome,
+					[RUNNER_HOME_ENV_VAR]: runnerHome,
+				},
+			});
+
+			expect(result.exitCode).toBe(2);
+			expect(runnerEventServer.requests).toHaveLength(1);
+			const queuedEvents = await readQueuedRunnerEvents(repositoryRoot);
+			expect(queuedEvents).toHaveLength(1);
+			expect(queuedEvents[0].payload).toMatchObject({
+				eventType: "worker.install.blocked",
+				outcome: "blocked",
+				status: "blocked",
+				blockerIds: ["license"],
+			});
+			expect(
+				queuedEvents[0].payload.eventType === "worker.install.blocked"
+					? queuedEvents[0].payload.blockerReasons[0]
+					: "",
+			).toContain("missing");
+			expect(JSON.stringify(queuedEvents[0])).not.toContain(repositoryRoot);
+			expect(JSON.stringify(queuedEvents[0])).not.toContain(workerHome);
+		} finally {
+			await runnerEventServer.close();
+		}
 	});
 
 	it("shows a grouped checklist before interactive confirmation", async () => {
@@ -228,42 +373,99 @@ describe("Worker Foundations install command", () => {
 	it("auto-commits tracked install files without staging ignored Worker state", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
+		const runnerHome = await createTemporaryDirectory("worker-runner-home-");
+		const pairedRepositoryRoot = await realpath(repositoryRoot);
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		await expect(
-			runInstallCommand(
-				["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
-				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
-			),
-		).resolves.toBe(0);
-
-		const result = JSON.parse(logSpy.mock.calls.join("\n")) as {
-			commit: string | null;
-		};
-		expect(result.commit).toMatch(/^[0-9a-f]+$/);
-
-		const committedFiles = await execFileAsync(
-			"git",
-			["show", "--name-only", "--format=", "HEAD"],
-			{ cwd: repositoryRoot },
-		);
-		expect(committedFiles.stdout).toContain("docs/worker/install-report.md");
-		expect(committedFiles.stdout).toContain("apps/worker/package.json");
-		expect(committedFiles.stdout).not.toContain(".worker/");
-
-		const installReport = await readFile(
-			path.join(repositoryRoot, "docs/worker/install-report.md"),
-			"utf8",
-		);
-		expect(installReport).toContain(
-			"Commit: `current branch HEAD after install`",
-		);
-		expect(installReport).not.toContain("Commit: `not-created`");
-
-		const status = await execFileAsync("git", ["status", "--porcelain"], {
-			cwd: repositoryRoot,
+		const runnerEventServer = await createRunnerEventServer();
+		await writeRunnerCredential({
+			runnerHome,
+			repositoryRoot: pairedRepositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_install_completed",
+				apiBaseUrl: runnerEventServer.baseUrl,
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
 		});
-		expect(status.stdout.trim()).toBe("");
+
+		try {
+			await expect(
+				runInstallCommand(
+					["--repo", repositoryRoot, "--yes", "--json", "--no-kickoff"],
+					{
+						...process.env,
+						SHIPBYSUNDAY_WORKER_HOME: workerHome,
+						[RUNNER_HOME_ENV_VAR]: runnerHome,
+					},
+				),
+			).resolves.toBe(0);
+
+			const result = JSON.parse(logSpy.mock.calls.join("\n")) as {
+				commit: string | null;
+			};
+			expect(result.commit).toMatch(/^[0-9a-f]+$/);
+			expect(runnerEventServer.requests).toHaveLength(1);
+			const syncedEvent = JSON.parse(runnerEventServer.requests[0].body) as {
+				payload: {
+					eventType: string;
+					outcome: string;
+					status: string;
+					branch: string;
+					commitHash: string;
+					reportRef: string;
+					proofCommandResults: Array<{
+						commandLabel: string;
+						status: string;
+					}>;
+				};
+			};
+			expect(syncedEvent.payload).toMatchObject({
+				eventType: "worker.install.completed",
+				outcome: "installed",
+				status: "installed",
+				branch: "shipbysunday/install",
+				reportRef: "docs/worker/install-report.md",
+			});
+			expect(syncedEvent.payload.commitHash).toMatch(/^[0-9a-f]{7,12}$/);
+			expect(result.commit?.startsWith(syncedEvent.payload.commitHash)).toBe(
+				true,
+			);
+			expect(syncedEvent.payload.proofCommandResults).toEqual(
+				expect.arrayContaining([
+					{ commandLabel: "bun run docs:validate", status: "passed" },
+					{ commandLabel: "bun run worker:test", status: "passed" },
+				]),
+			);
+			expect(JSON.stringify(syncedEvent)).not.toContain(repositoryRoot);
+			expect(JSON.stringify(syncedEvent)).not.toContain(workerHome);
+
+			const committedFiles = await execFileAsync(
+				"git",
+				["show", "--name-only", "--format=", "HEAD"],
+				{ cwd: repositoryRoot },
+			);
+			expect(committedFiles.stdout).toContain("docs/worker/install-report.md");
+			expect(committedFiles.stdout).toContain("apps/worker/package.json");
+			expect(committedFiles.stdout).not.toContain(".worker/");
+
+			const installReport = await readFile(
+				path.join(repositoryRoot, "docs/worker/install-report.md"),
+				"utf8",
+			);
+			expect(installReport).toContain(
+				"Commit: `current branch HEAD after install`",
+			);
+			expect(installReport).not.toContain("Commit: `not-created`");
+
+			const status = await execFileAsync("git", ["status", "--porcelain"], {
+				cwd: repositoryRoot,
+			});
+			expect(status.stdout.trim()).toBe("");
+		} finally {
+			await runnerEventServer.close();
+		}
 	});
 
 	it("does not write packageManager identity for Bun lockfile-owned roots", async () => {
@@ -1588,6 +1790,37 @@ async function createActivationServer(
 		get startRequests() {
 			return startRequests;
 		},
+		baseUrl: `http://127.0.0.1:${address.port}`,
+		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
+	};
+}
+
+async function createRunnerEventServer(options: { status?: number } = {}) {
+	const requests: Array<{
+		authorization: string;
+		body: string;
+		method: string | undefined;
+		url: string | undefined;
+	}> = [];
+	const status = options.status ?? 200;
+	const server = createServer(async (request, response) => {
+		const body = await readRequestBody(request);
+		requests.push({
+			authorization: request.headers.authorization ?? "",
+			body,
+			method: request.method,
+			url: request.url,
+		});
+		response.writeHead(status, { "Content-Type": "application/json" });
+		response.end("{}");
+	});
+	await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+	const address = server.address();
+	if (!address || typeof address === "string") {
+		throw new Error("Runner event test server did not expose a TCP port.");
+	}
+	return {
+		requests,
 		baseUrl: `http://127.0.0.1:${address.port}`,
 		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
 	};
