@@ -21,7 +21,7 @@ The browser never receives a support bearer token. The widget talks to `/api/sup
 6. Find the support group chat id and store it as `TELEGRAM_SUPPORT_CHAT_ID` in Convex. Supergroup ids usually look like `-100...`.
 7. Find each allowed operator's Telegram user id and store a comma-separated list as `TELEGRAM_SUPPORT_OPERATOR_USER_IDS` in Convex.
 
-The 2026-05-08 hosted dev smoke uses `@sbsprodbot` in the `SBS Website` forum group. The 2026-05-11 production Convex setup uses the same support bot/group with webhook delivery pointed at `helpful-meadowlark-297.convex.site/telegram/support/webhook`. The bot must be an administrator with `can_manage_topics` and `can_delete_messages`. Reusing any existing bot is only safe when nothing else depends on long polling for that bot, because Telegram allows either a webhook or `getUpdates` polling, not both. Rotate any bot token that was pasted into chat or a terminal transcript before treating the setup as production-safe.
+Hosted smoke and production setups can share the same support bot/group when webhook delivery points at the active Convex site URL: `https://<your-convex-site>.convex.site/telegram/support/webhook`. The bot must be an administrator with `can_manage_topics` and `can_delete_messages`. Reusing any existing bot is only safe when nothing else depends on long polling for that bot, because Telegram allows either a webhook or `getUpdates` polling, not both. Rotate any bot token that was pasted into chat or a terminal transcript before treating the setup as production-safe.
 
 ## Configure Convex env
 
