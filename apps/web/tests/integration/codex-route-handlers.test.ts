@@ -51,6 +51,7 @@ import { POST as postCodexLogout } from "@/app/api/codex/account/logout/route";
 import { GET as getCodexAccountRead } from "@/app/api/codex/account/read/route";
 import { GET as getCodexRateLimits } from "@/app/api/codex/account/rate-limits/route";
 import { POST as postCodexGenerate } from "@/app/api/codex/generate/route";
+import { resetRequestRateLimitBucketsForTests } from "@/app/api/_lib/request-rate-limit";
 
 function createRequest(url: string, init?: RequestInit) {
 	return new Request(url, init);
@@ -65,6 +66,7 @@ describe("codex route handlers", () => {
 		upsertViewerCodexConnectionMock.mockReset();
 		recordCodexRunMock.mockReset();
 		withCodexAppServerClientMock.mockReset();
+		resetRequestRateLimitBucketsForTests();
 	});
 
 	function mockClient<T extends Record<string, unknown>>(client: T) {
@@ -236,6 +238,41 @@ describe("codex route handlers", () => {
 		);
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
+	});
+
+	it("rate limits repeated Codex login starts before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			loginStartManagedChatGPT: vi.fn().mockResolvedValue({
+				loginId: "login_123",
+				authUrl: "https://auth.example.test",
+			}),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		for (let index = 0; index < 3; index += 1) {
+			const response = await postCodexLoginStart(
+				createRequest("https://example.test/api/codex/account/login/start", {
+					method: "POST",
+				}),
+			);
+			expect(response.status).toBe(200);
+		}
+		const response = await postCodexLoginStart(
+			createRequest("https://example.test/api/codex/account/login/start", {
+				method: "POST",
+			}),
+		);
+
+		expect(response.status).toBe(429);
+		expect(await response.text()).toBe("Too many requests");
+		expect(withCodexAppServerClientMock).toHaveBeenCalledTimes(3);
 	});
 
 	it("returns a mapped auth response when Codex access is missing", async () => {
@@ -410,6 +447,38 @@ describe("codex route handlers", () => {
 		);
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 		expect(upsertViewerCodexConnectionMock).not.toHaveBeenCalled();
+	});
+
+	it("rate limits repeated Codex logout requests before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		mockClient({
+			logout: vi.fn().mockResolvedValue(undefined),
+		});
+		upsertViewerCodexConnectionMock.mockResolvedValue({
+			connectionId: "connection_1",
+			mode: "patched",
+		});
+
+		for (let index = 0; index < 3; index += 1) {
+			const response = await postCodexLogout(
+				createRequest("https://example.test/api/codex/account/logout", {
+					method: "POST",
+				}),
+			);
+			expect(response.status).toBe(200);
+		}
+		const response = await postCodexLogout(
+			createRequest("https://example.test/api/codex/account/logout", {
+				method: "POST",
+			}),
+		);
+
+		expect(response.status).toBe(429);
+		expect(await response.text()).toBe("Too many requests");
+		expect(withCodexAppServerClientMock).toHaveBeenCalledTimes(3);
 	});
 
 	it("returns a mapped auth response when logout access is missing", async () => {
@@ -631,6 +700,35 @@ describe("codex route handlers", () => {
 		expect(recordCodexRunMock).not.toHaveBeenCalled();
 	});
 
+	it("rejects unsupported Codex models before contacting Codex", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: JSON.stringify({
+					templateId: "competitor_research",
+					prompt: "Research the offer",
+					model: "unsupported-model",
+				}),
+			}),
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(400);
+		expect(body).toEqual({
+			error: "Unsupported Codex model.",
+		});
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(recordCodexRunMock).not.toHaveBeenCalled();
+	});
+
 	it("blocks Codex generation during support mode before parsing the request body", async () => {
 		requireProductAccessApiSessionMock.mockResolvedValue({
 			userId: "user_123",
@@ -663,6 +761,40 @@ describe("codex route handlers", () => {
 				blockReason: "external_side_effect_blocked",
 			},
 		);
+		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
+		expect(recordCodexRunMock).not.toHaveBeenCalled();
+	});
+
+	it("rate limits repeated Codex generation requests before parsing the body", async () => {
+		requireProductAccessApiSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+
+		for (let index = 0; index < 6; index += 1) {
+			const response = await postCodexGenerate(
+				new Request("https://example.test/api/codex/generate", {
+					method: "POST",
+					headers: {
+						"content-type": "application/json",
+					},
+					body: "{not-json",
+				}),
+			);
+			expect(response.status).toBe(400);
+		}
+		const response = await postCodexGenerate(
+			new Request("https://example.test/api/codex/generate", {
+				method: "POST",
+				headers: {
+					"content-type": "application/json",
+				},
+				body: "{not-json",
+			}),
+		);
+
+		expect(response.status).toBe(429);
+		expect(await response.text()).toBe("Too many requests");
 		expect(withCodexAppServerClientMock).not.toHaveBeenCalled();
 		expect(recordCodexRunMock).not.toHaveBeenCalled();
 	});

@@ -11,6 +11,10 @@ type RateLimitOptions = RateLimitKey & {
 
 const rateLimitBuckets = new Map<string, { count: number; resetAt: number }>();
 
+export function resetRequestRateLimitBucketsForTests() {
+	rateLimitBuckets.clear();
+}
+
 export function getRateLimitedResponse({
 	bucket,
 	identity,
