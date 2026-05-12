@@ -1081,6 +1081,60 @@ describe("workspace runner events", () => {
 		});
 	});
 
+	it("keeps latest Worker install status visible when setup checks are noisy", async () => {
+		const { ctx, project, runner } = await createProjectAndRunner();
+
+		await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+			eventId: "evt-worker-install-completed-before-noise",
+			projectId: project._id,
+			runnerId: runner._id,
+			eventType: "worker.install.completed",
+			schemaVersion: "workspace.runner-event.v1",
+			createdAt: 70_000,
+			payload: {
+				eventType: "worker.install.completed",
+				outcome: "installed",
+				status: "installed",
+				summary: "Worker Foundations installed.",
+				branch: "shipbysunday/install",
+				commitHash: "abc1234",
+				reportRef: "docs/worker/install-report.md",
+				createdRefs: ["apps/worker"],
+				changedRefs: ["README.md"],
+				proofCommandResults: [
+					{ commandLabel: "bun run worker:test", status: "passed" },
+				],
+			},
+		});
+		for (let index = 0; index < 35; index += 1) {
+			await ingestWorkspaceRunnerEvent._handler(ctx as never, {
+				eventId: `evt-setup-check-noise-${index}`,
+				projectId: project._id,
+				runnerId: runner._id,
+				eventType: "setup.check.completed",
+				schemaVersion: "workspace.runner-event.v1",
+				createdAt: 80_000 + index,
+				payload: {
+					eventType: "setup.check.completed",
+					scope: "project",
+					checkKey: `noise-${index}`,
+					status: "ready",
+					summary: `Noise check ${index} is ready.`,
+				},
+			});
+		}
+
+		const setupState = await getWorkspaceSetupState._handler(ctx as never, {
+			projectId: project._id,
+		});
+
+		expect(
+			setupState.setupEvents.some(
+				(event) => event.eventType === "worker.install.completed",
+			),
+		).toBe(true);
+	});
+
 	it("consumes setup pairing tokens after the first successful bind", async () => {
 		const testContext = createWorkspaceTestCtx();
 		vi.spyOn(Date, "now").mockReturnValue(110_000);

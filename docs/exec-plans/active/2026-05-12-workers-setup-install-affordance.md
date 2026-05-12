@@ -33,6 +33,7 @@ After this change, a customer pairing a local runner on `/workers/setup` can see
 - [x] 2026-05-12: Added focused local-runner, Convex event, readiness-model, and setup-page UI tests for the new install affordance and event sync.
 - [x] 2026-05-12: Updated the active Program ledger with this child ExecPlan.
 - [x] 2026-05-12: Ran focused validation, package smoke, formatting checks, program lint, broad lint, guarded typecheck, and whitespace validation.
+- [x] 2026-05-12: Follow-up quality pass hardened stale install-event handling before pairing and preserved latest install status when setup-check events are noisy.
 
 ## Surprises & Discoveries
 
@@ -68,6 +69,8 @@ Implemented the Worker setup install affordance and sync-safe runner event path.
 
 The setup page now renders a Worker install panel after pairing. It is visible before pairing but command actions are gated until pairing completes. It shows the required Bun-default package-runner variants, explicit `--repo .` commands, default commit behavior on `shipbysunday/install`, no automatic Doctor Pass, concise generated summary, capped synced refs, and installed handoff actions. Pairing commands also include `--repo .` because the setup-pair CLI already supports that option.
 
+The follow-up quality pass made the install model ignore old install payload details while pairing is incomplete and made setup-state projection keep the latest Worker install event even when recent setup-check events exceed the default setup event read limit.
+
 Validation passed:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-12-workers-setup-install-affordance.md
@@ -82,6 +85,11 @@ Validation passed:
     git diff --check
     bun run lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run typecheck
+
+Follow-up quality pass validation:
+
+    bun run --cwd apps/web test:unit -- tests/unit/workspace-runner-events.test.ts tests/unit/workspace-setup-readiness-model.test.ts
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/workspace-setup-page.test.tsx
 
 The prompt's app unit command used `bun run --cwd apps/web test -- ...`, but `apps/web` does not define a `test` script. The supported focused invocation is `bun run --cwd apps/web test:unit -- ...`, which is the command recorded above. No Doctor Pass automation, `apps/web/content/docs`, or existing `workspace*` internals were changed.
 

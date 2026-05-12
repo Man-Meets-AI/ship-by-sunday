@@ -2158,27 +2158,51 @@ async function getLatestSetupEvents(
 	ctx: WorkspaceReadCtx,
 	projectId: WorkspaceProjectId,
 ) {
-	const eventTypes: WorkspaceRunnerEventType[] = [
+	const setupEventTypes: WorkspaceRunnerEventType[] = [
 		"setup.check.started",
 		"setup.check.completed",
+	];
+	const workerInstallEventTypes: WorkspaceRunnerEventType[] = [
 		"worker.install.previewed",
 		"worker.install.completed",
 		"worker.install.blocked",
 	];
 	const eventGroups = await Promise.all(
-		eventTypes.map((eventType) =>
+		[...setupEventTypes, ...workerInstallEventTypes].map((eventType) =>
 			ctx.db
 				.query("workspaceRunnerEvents")
 				.withIndex("by_project_id_and_event_type_and_created_at", (query) =>
 					query.eq("projectId", projectId).eq("eventType", eventType),
 				)
 				.order("desc")
-				.take(SETUP_EVENT_READ_LIMIT),
+				.take(
+					workerInstallEventTypes.includes(eventType)
+						? 1
+						: SETUP_EVENT_READ_LIMIT,
+				),
 		),
 	);
-
-	return eventGroups
+	const latestWorkerInstallEvent =
+		eventGroups
+			.slice(setupEventTypes.length)
+			.flat()
+			.sort((left, right) => right.createdAt - left.createdAt)[0] ?? null;
+	const latestEvents = eventGroups
 		.flat()
+		.sort((left, right) => right.createdAt - left.createdAt)
+		.slice(0, SETUP_EVENT_READ_LIMIT);
+
+	if (
+		!latestWorkerInstallEvent ||
+		latestEvents.some((event) => event._id === latestWorkerInstallEvent._id)
+	) {
+		return latestEvents;
+	}
+
+	return [
+		...latestEvents.slice(0, SETUP_EVENT_READ_LIMIT - 1),
+		latestWorkerInstallEvent,
+	]
 		.sort((left, right) => right.createdAt - left.createdAt)
 		.slice(0, SETUP_EVENT_READ_LIMIT);
 }

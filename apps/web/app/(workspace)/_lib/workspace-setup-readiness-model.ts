@@ -998,15 +998,13 @@ function buildWorkerInstallModel(
 	pairingStatus: WorkspaceSetupRunnerBinding["pairingStatus"],
 	now: number,
 ): WorkspaceWorkerInstallModel {
-	const latestEvent = latestWorkerInstallEvent(state);
+	const isPaired = pairingStatus === "paired";
+	const latestEvent = isPaired ? latestWorkerInstallEvent(state) : null;
 	const eventPayload =
 		latestEvent && isWorkerInstallEventPayload(latestEvent.payload)
 			? latestEvent.payload
 			: null;
-	const status = getWorkerInstallStatus(
-		latestEvent,
-		pairingStatus === "paired",
-	);
+	const status = getWorkerInstallStatus(latestEvent, isPaired);
 
 	return {
 		status,

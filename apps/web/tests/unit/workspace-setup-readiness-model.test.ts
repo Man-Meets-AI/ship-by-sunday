@@ -411,17 +411,45 @@ describe("workspace setup readiness model", () => {
 	);
 
 	it("gates Worker install until pairing completes", () => {
-		const model = buildWorkspaceSetupReadinessModel(createSetupState(), now);
+		const model = buildWorkspaceSetupReadinessModel(
+			createSetupState({
+				setupEvents: [
+					{
+						eventType: "worker.install.completed",
+						createdAt: now - 1_000,
+						payload: {
+							eventType: "worker.install.completed",
+							outcome: "installed",
+							status: "installed",
+							summary: "Worker Foundations installed.",
+							branch: "shipbysunday/install",
+							commitHash: "abc1234",
+							reportRef: "docs/worker/install-report.md",
+							createdRefs: ["apps/worker"],
+							changedRefs: ["README.md"],
+							proofCommandResults: [
+								{ commandLabel: "bun run worker:test", status: "passed" },
+							],
+						},
+					},
+				],
+			}),
+			now,
+		);
 
 		expect(model.workerInstall).toMatchObject({
 			status: "waiting",
 			statusLabel: "waiting on pairing",
 			gated: true,
+			description:
+				"Pair the local runner before copying install commands. The install stage is shown now so the local Worker handoff stays visible.",
 			previewCommand:
 				"bunx ship-by-sunday install --repo . --dry-run --json --no-kickoff",
 			installCommand:
 				"bunx ship-by-sunday install --repo . --yes --json --no-kickoff",
 			branchLabel: "shipbysunday/install",
+			reportRef: null,
+			createdRefs: [],
 		});
 	});
 
