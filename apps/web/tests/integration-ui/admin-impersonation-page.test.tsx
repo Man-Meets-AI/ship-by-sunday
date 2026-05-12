@@ -112,4 +112,33 @@ describe("AdminImpersonationPageClient", () => {
 		expect(completeActionMock).toHaveBeenCalled();
 		expect(pushMock).toHaveBeenCalledWith("/home");
 	});
+
+	it("stays on the page when the server rejects handoff completion", async () => {
+		completeActionMock.mockResolvedValue({
+			ok: false,
+			status: 403,
+			message: "Admin context is required.",
+		});
+
+		render(<AdminImpersonationPageClient data={pageData} />);
+
+		await userEvent.click(screen.getByText("customer@example.com"));
+		await userEvent.type(
+			screen.getByLabelText("Reason for support access"),
+			"Debugging checkout handoff",
+		);
+		const [startButton] = screen.getAllByRole("button", {
+			name: "Start impersonating customer",
+		});
+		fireEvent.click(startButton);
+		await screen.findByText("Start impersonating customer?");
+		const confirmButtons = screen.getAllByRole("button", {
+			name: "Start impersonating customer",
+		});
+		fireEvent.click(confirmButtons[confirmButtons.length - 1]);
+
+		await screen.findByText("Admin context is required.");
+		expect(pushMock).not.toHaveBeenCalled();
+		expect(failActionMock).toHaveBeenCalledWith("session_1");
+	});
 });

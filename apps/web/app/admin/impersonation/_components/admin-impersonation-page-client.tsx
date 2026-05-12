@@ -74,7 +74,10 @@ export function AdminImpersonationPageClient({
 					throw new Error("Clerk did not create an impersonated session.");
 				}
 				await clerk.setActive({ session: createdSessionId });
-				await completeAdminImpersonationHandoffAction();
+				const completeResult = await completeAdminImpersonationHandoffAction();
+				if (!completeResult.ok) {
+					throw new Error(completeResult.message);
+				}
 				push(result.destination);
 			} catch (error) {
 				await failAdminImpersonationHandoffAction(result.sessionId).catch(
