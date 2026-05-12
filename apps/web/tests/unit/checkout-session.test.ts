@@ -95,9 +95,9 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_missing")).resolves.toEqual({
+		await expect(getCheckoutSessionState("cs_test_missing")).resolves.toEqual({
 			kind: "invalid_session",
-			sessionId: "cs_missing",
+			sessionId: "cs_test_missing",
 		});
 		expect(authMock).not.toHaveBeenCalled();
 	});
@@ -115,9 +115,11 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_wrong_course")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_wrong_course"),
+		).resolves.toEqual({
 			kind: "invalid_session",
-			sessionId: "cs_wrong_course",
+			sessionId: "cs_test_wrong_course",
 		});
 		expect(authMock).not.toHaveBeenCalled();
 	});
@@ -135,10 +137,10 @@ describe("getCheckoutSessionState", () => {
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_missing_course_metadata"),
+			getCheckoutSessionState("cs_test_missing_course_metadata"),
 		).resolves.toEqual({
 			kind: "invalid_session",
-			sessionId: "cs_missing_course_metadata",
+			sessionId: "cs_test_missing_course_metadata",
 		});
 		expect(authMock).not.toHaveBeenCalled();
 	});
@@ -150,9 +152,11 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_signed_out")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_signed_out"),
+		).resolves.toEqual({
 			kind: "sign_in_required",
-			sessionId: "cs_signed_out",
+			sessionId: "cs_test_signed_out",
 		});
 	});
 
@@ -168,7 +172,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: null });
 		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "fulfilled",
-			sessionId: "cs_guest_signed_out",
+			sessionId: "cs_test_guest_signed_out",
 			clerkUserId: "user_buyer",
 			checkoutEmail: "buyer@example.com",
 			grantResult: { granted: "inserted" },
@@ -178,15 +182,15 @@ describe("getCheckoutSessionState", () => {
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_guest_signed_out"),
+			getCheckoutSessionState("cs_test_guest_signed_out"),
 		).resolves.toEqual({
 			kind: "sign_in_required",
-			sessionId: "cs_guest_signed_out",
+			sessionId: "cs_test_guest_signed_out",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: undefined,
 		});
 		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
-			"cs_guest_signed_out",
+			"cs_test_guest_signed_out",
 		);
 	});
 
@@ -205,7 +209,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: null });
 		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "fulfilled",
-			sessionId: "cs_guest_signed_out_email",
+			sessionId: "cs_test_guest_signed_out_email",
 			clerkUserId: "user_buyer",
 			checkoutEmail: "buyer@example.com",
 			grantResult: { granted: "inserted" },
@@ -215,15 +219,15 @@ describe("getCheckoutSessionState", () => {
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_guest_signed_out_email"),
+			getCheckoutSessionState("cs_test_guest_signed_out_email"),
 		).resolves.toEqual({
 			kind: "sign_in_required",
-			sessionId: "cs_guest_signed_out_email",
+			sessionId: "cs_test_guest_signed_out_email",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: undefined,
 		});
 		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
-			"cs_guest_signed_out_email",
+			"cs_test_guest_signed_out_email",
 		);
 	});
 
@@ -239,7 +243,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: "user_123" });
 		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "fulfilled",
-			sessionId: "cs_guest_claimed",
+			sessionId: "cs_test_guest_claimed",
 			clerkUserId: "user_123",
 			checkoutEmail: "buyer@example.com",
 			grantResult: { granted: "inserted" },
@@ -248,13 +252,15 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_guest_claimed")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_guest_claimed"),
+		).resolves.toEqual({
 			kind: "validated",
-			sessionId: "cs_guest_claimed",
+			sessionId: "cs_test_guest_claimed",
 			fulfillmentTrack: "unspecified",
 		});
 		expect(fulfillCheckoutSessionFromSuccessPageMock).toHaveBeenCalledWith(
-			"cs_guest_claimed",
+			"cs_test_guest_claimed",
 		);
 		expect(claimCheckoutSessionForViewerMock).not.toHaveBeenCalled();
 	});
@@ -279,7 +285,7 @@ describe("getCheckoutSessionState", () => {
 		});
 		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "fulfilled",
-			sessionId: "cs_guest_wrong_account",
+			sessionId: "cs_test_guest_wrong_account",
 			clerkUserId: "user_123",
 			checkoutEmail: "buyer@example.com",
 			grantResult: { granted: "patched" },
@@ -289,10 +295,10 @@ describe("getCheckoutSessionState", () => {
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_guest_wrong_account"),
+			getCheckoutSessionState("cs_test_guest_wrong_account"),
 		).resolves.toEqual({
 			kind: "wrong_account",
-			sessionId: "cs_guest_wrong_account",
+			sessionId: "cs_test_guest_wrong_account",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "other@example.com",
 		});
@@ -310,16 +316,18 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: "user_other" });
 		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "payment_pending",
-			sessionId: "cs_guest_pending",
+			sessionId: "cs_test_guest_pending",
 			paymentStatus: "unpaid",
 		});
 
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_guest_pending")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_guest_pending"),
+		).resolves.toEqual({
 			kind: "payment_pending",
-			sessionId: "cs_guest_pending",
+			sessionId: "cs_test_guest_pending",
 			paymentStatus: "unpaid",
 		});
 	});
@@ -344,7 +352,7 @@ describe("getCheckoutSessionState", () => {
 		});
 		fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 			kind: "grant_failed",
-			sessionId: "cs_guest_fulfillment_failed",
+			sessionId: "cs_test_guest_fulfillment_failed",
 			checkoutEmail: "buyer@example.com",
 			message: "Convex grant failed.",
 		});
@@ -353,10 +361,10 @@ describe("getCheckoutSessionState", () => {
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_guest_fulfillment_failed"),
+			getCheckoutSessionState("cs_test_guest_fulfillment_failed"),
 		).resolves.toEqual({
 			kind: "fulfillment_failed",
-			sessionId: "cs_guest_fulfillment_failed",
+			sessionId: "cs_test_guest_fulfillment_failed",
 			checkoutEmail: "buyer@example.com",
 			message: "Convex grant failed.",
 		});
@@ -376,17 +384,17 @@ describe("getCheckoutSessionState", () => {
 			authMock.mockResolvedValue({ userId: "user_other" });
 			fulfillCheckoutSessionFromSuccessPageMock.mockResolvedValue({
 				kind: fulfillmentKind,
-				sessionId: `cs_${fulfillmentKind}`,
+				sessionId: `cs_test_${fulfillmentKind}`,
 			});
 
 			const { getCheckoutSessionState } =
 				await import("@/platform/billing/checkout/checkout-session");
 
 			await expect(
-				getCheckoutSessionState(`cs_${fulfillmentKind}`),
+				getCheckoutSessionState(`cs_test_${fulfillmentKind}`),
 			).resolves.toEqual({
 				kind: "invalid_session",
-				sessionId: `cs_${fulfillmentKind}`,
+				sessionId: `cs_test_${fulfillmentKind}`,
 			});
 		},
 	);
@@ -409,9 +417,11 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_wrong_account")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_wrong_account"),
+		).resolves.toEqual({
 			kind: "wrong_account",
-			sessionId: "cs_wrong_account",
+			sessionId: "cs_test_wrong_account",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "other@example.com",
 		});
@@ -428,9 +438,9 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_pending")).resolves.toEqual({
+		await expect(getCheckoutSessionState("cs_test_pending")).resolves.toEqual({
 			kind: "payment_pending",
-			sessionId: "cs_pending",
+			sessionId: "cs_test_pending",
 			paymentStatus: "unpaid",
 		});
 	});
@@ -446,7 +456,7 @@ describe("getCheckoutSessionState", () => {
 			authMock.mockResolvedValue({ userId: "user_123" });
 			claimCheckoutSessionForViewerMock.mockResolvedValue({
 				kind: "validated",
-				sessionId: `cs_${paymentStatus}`,
+				sessionId: `cs_test_${paymentStatus}`,
 				claimResult: {
 					granted: "patched",
 				},
@@ -456,14 +466,14 @@ describe("getCheckoutSessionState", () => {
 				await import("@/platform/billing/checkout/checkout-session");
 
 			await expect(
-				getCheckoutSessionState(`cs_${paymentStatus}`),
+				getCheckoutSessionState(`cs_test_${paymentStatus}`),
 			).resolves.toEqual({
 				kind: "validated",
-				sessionId: `cs_${paymentStatus}`,
+				sessionId: `cs_test_${paymentStatus}`,
 				fulfillmentTrack: "generated_codebase",
 			});
 			expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
-				`cs_${paymentStatus}`,
+				`cs_test_${paymentStatus}`,
 			);
 		},
 	);
@@ -483,7 +493,7 @@ describe("getCheckoutSessionState", () => {
 		authMock.mockResolvedValue({ userId: "user_123" });
 		claimCheckoutSessionForViewerMock.mockResolvedValue({
 			kind: "validated",
-			sessionId: "cs_existing_codebase",
+			sessionId: "cs_test_existing_codebase",
 			claimResult: {
 				granted: "patched",
 			},
@@ -493,10 +503,10 @@ describe("getCheckoutSessionState", () => {
 			await import("@/platform/billing/checkout/checkout-session");
 
 		await expect(
-			getCheckoutSessionState("cs_existing_codebase"),
+			getCheckoutSessionState("cs_test_existing_codebase"),
 		).resolves.toEqual({
 			kind: "validated",
-			sessionId: "cs_existing_codebase",
+			sessionId: "cs_test_existing_codebase",
 			fulfillmentTrack: "existing_codebase_doctor",
 		});
 	});
@@ -524,9 +534,11 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_claim_wrong")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_claim_wrong"),
+		).resolves.toEqual({
 			kind: "wrong_account",
-			sessionId: "cs_claim_wrong",
+			sessionId: "cs_test_claim_wrong",
 			checkoutEmail: "claim@example.com",
 			currentAccountEmail: "claim-current@example.com",
 		});
@@ -553,9 +565,11 @@ describe("getCheckoutSessionState", () => {
 		const { getCheckoutSessionState } =
 			await import("@/platform/billing/checkout/checkout-session");
 
-		await expect(getCheckoutSessionState("cs_claim_sign_in")).resolves.toEqual({
+		await expect(
+			getCheckoutSessionState("cs_test_claim_sign_in"),
+		).resolves.toEqual({
 			kind: "sign_in_required",
-			sessionId: "cs_claim_sign_in",
+			sessionId: "cs_test_claim_sign_in",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "current@example.com",
 		});
@@ -574,10 +588,10 @@ describe("getCheckoutSessionState", () => {
 				await import("@/platform/billing/checkout/checkout-session");
 
 			await expect(
-				getCheckoutSessionState(`cs_claim_${claimKind}`),
+				getCheckoutSessionState(`cs_test_claim_${claimKind}`),
 			).resolves.toEqual({
 				kind: "invalid_session",
-				sessionId: `cs_claim_${claimKind}`,
+				sessionId: `cs_test_claim_${claimKind}`,
 			});
 		},
 	);

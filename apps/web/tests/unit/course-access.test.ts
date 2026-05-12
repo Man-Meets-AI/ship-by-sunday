@@ -104,7 +104,7 @@ describe("product access server helpers", () => {
 			token: null,
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_pending_signed_out",
+			"cs_test_pending_signed_out",
 		);
 
 		const { getServerProductAccess } =
@@ -117,7 +117,7 @@ describe("product access server helpers", () => {
 			capabilities: noCapabilities,
 			pendingCheckoutRecovery: {
 				kind: "sign_in_required",
-				sessionId: "cs_pending_signed_out",
+				sessionId: "cs_test_pending_signed_out",
 				checkoutEmail: "buyer@example.com",
 			},
 		});
@@ -132,7 +132,7 @@ describe("product access server helpers", () => {
 			token: null,
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_missing_signed_out",
+			"cs_test_missing_signed_out",
 		);
 		getCheckoutSessionForRecoveryMock.mockResolvedValue(null);
 
@@ -156,7 +156,7 @@ describe("product access server helpers", () => {
 			token: null,
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_wrong_product_signed_out",
+			"cs_test_wrong_product_signed_out",
 		);
 		isStripeCheckoutSessionForCourseMock.mockReturnValue(false);
 
@@ -180,7 +180,7 @@ describe("product access server helpers", () => {
 			token: null,
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_unpaid_signed_out",
+			"cs_test_unpaid_signed_out",
 		);
 		getCheckoutSessionForRecoveryMock.mockResolvedValue({
 			payment_status: "unpaid",
@@ -197,7 +197,7 @@ describe("product access server helpers", () => {
 			capabilities: noCapabilities,
 			pendingCheckoutRecovery: {
 				kind: "payment_pending",
-				sessionId: "cs_unpaid_signed_out",
+				sessionId: "cs_test_unpaid_signed_out",
 				paymentStatus: "unpaid",
 				checkoutEmail: "buyer@example.com",
 			},
@@ -213,7 +213,7 @@ describe("product access server helpers", () => {
 			token: null,
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_missing_email_signed_out",
+			"cs_test_missing_email_signed_out",
 		);
 		getStripeCheckoutSessionEmailMock.mockReturnValue(null);
 
@@ -277,7 +277,7 @@ describe("product access server helpers", () => {
 			token: "token_123",
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_pending_123",
+			"cs_test_pending_123",
 		);
 		fetchQueryMock
 			.mockResolvedValueOnce({
@@ -292,7 +292,7 @@ describe("product access server helpers", () => {
 			});
 		claimCheckoutSessionForViewerMock.mockResolvedValue({
 			kind: "validated",
-			sessionId: "cs_pending_123",
+			sessionId: "cs_test_pending_123",
 			claimResult: {
 				claim: "claimed",
 				grantResult: { granted: "inserted" },
@@ -308,7 +308,7 @@ describe("product access server helpers", () => {
 			status: "granted",
 		});
 		expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
-			"cs_pending_123",
+			"cs_test_pending_123",
 		);
 		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
@@ -356,7 +356,7 @@ describe("product access server helpers", () => {
 			});
 		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
 			kind: "validated",
-			sessionId: "cs_email_pending_123",
+			sessionId: "cs_test_email_pending_123",
 			claimResult: {
 				claim: "claimed",
 				grantResult: { granted: "inserted" },
@@ -388,7 +388,7 @@ describe("product access server helpers", () => {
 		});
 		claimLatestPendingCheckoutForViewerMock.mockResolvedValue({
 			kind: "sign_in_required",
-			sessionId: "cs_email_pending_123",
+			sessionId: "cs_test_email_pending_123",
 			checkoutEmail: "buyer@example.com",
 		});
 
@@ -401,7 +401,7 @@ describe("product access server helpers", () => {
 			status: "no_access",
 			pendingCheckoutRecovery: {
 				kind: "sign_in_required",
-				sessionId: "cs_email_pending_123",
+				sessionId: "cs_test_email_pending_123",
 				checkoutEmail: "buyer@example.com",
 			},
 		});
@@ -421,11 +421,11 @@ describe("product access server helpers", () => {
 			status: "no_access",
 		});
 		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
-			"cs_pending_123",
+			"cs_test_pending_123",
 		);
 		claimCheckoutSessionForViewerMock.mockResolvedValue({
 			kind: "wrong_account",
-			sessionId: "cs_pending_123",
+			sessionId: "cs_test_pending_123",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "other@example.com",
 		});
@@ -439,7 +439,7 @@ describe("product access server helpers", () => {
 			status: "no_access",
 			pendingCheckoutRecovery: {
 				kind: "wrong_account",
-				sessionId: "cs_pending_123",
+				sessionId: "cs_test_pending_123",
 				checkoutEmail: "buyer@example.com",
 				currentAccountEmail: "other@example.com",
 			},

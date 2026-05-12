@@ -24,7 +24,8 @@ type ExistingCodebaseResumeDestination = {
 	postReviewTargets: null;
 };
 type ServerResumeDestination = ExistingCodebaseResumeDestination;
-export const stripeCheckoutSessionIdPattern = /^cs_(?:test|live)_[A-Za-z0-9]+$/;
+export const stripeCheckoutSessionIdPattern =
+	/^cs_(?:test|live)_[A-Za-z0-9_]+$/;
 
 async function refreshViewerProductAccess(token: string) {
 	return (await fetchQuery(

@@ -11,7 +11,7 @@ import { getConvexServerSession } from "@/platform/auth/convex-auth";
 import { getStripe } from "@/platform/billing/stripe";
 import { requireServerEnv } from "@/platform/env/server";
 
-const stripeCheckoutSessionIdPattern = /^cs_(?:test|live)_[A-Za-z0-9]+$/;
+const stripeCheckoutSessionIdPattern = /^cs_(?:test|live)_[A-Za-z0-9_]+$/;
 
 export type CheckoutSessionClaimResult =
 	| {
