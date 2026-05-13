@@ -9,6 +9,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 ## Read Before Editing
 
 - For any `apps/web` task, start with the repo root `AGENTS.md`.
+- Before changing app architecture, route groups, Convex module shape, billing boundaries, provider setup, Sentry, Resend, or debug tooling, read `apps/web/ARCHITECTURE.md` and `apps/web/CONVENTIONS.md`.
 - For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
 - For UI layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation, read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md`.
 - Before changing the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx`.
@@ -17,13 +18,14 @@ This app is codebase-first, not course-first. The public customer outcome is one
 
 ## Product Contract
 
-- Required protected handoff: `/home -> /generate-codebase -> /generate-codebase/review`, with Worker under `/workers/*` and Tutorials under `/tutorials`.
-- `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are compatibility redirects, not the current product journey.
+- Current pre-migration protected handoff: `/home -> /generate-codebase -> /generate-codebase/review`, with Worker under `/workers/*` and Tutorials under `/tutorials`.
+- Target route, provider, and Convex architecture are governed by `apps/web/ARCHITECTURE.md`, `apps/web/CONVENTIONS.md`, and the active Program inventory. Current paths are not preservation constraints unless a slice documents a live customer, provider callback, or release dependency plus the removal path.
+- `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are current compatibility redirects, not target architecture.
 - Optional post-download library: Execute / Ship.
 - Do not preserve old CEO / Design / Build / Ship framing if it conflicts with codebase-first logic.
 - Do not reintroduce separate pre-review download artifacts or staged download contracts into the UI unless the live product changes first.
 - Do not turn workflow or ephemeral state into canonical intake.
-- Use current `apps/web` routes, features, config, and local instruction files as the live product contract. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code does not answer the question.
+- Use current `apps/web` runtime code to understand behavior that exists today, but use the template-first app docs and Program packet to choose migration targets. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code and active Program docs do not answer the question.
 
 ## State Rules
 
@@ -68,6 +70,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 - Run focused tests for the touched feature first.
 - For UI route changes, prefer focused integration-ui tests or release-owned browser proof before broad validation.
 - For Convex-backed changes, validate against hosted Convex dev only.
+- Do not edit or commit `apps/web/next-env.d.ts`. Next.js generates it and rewrites the route type import differently for `next dev` and `next build`.
 - Before completing code work, the repo-level gates from root still apply: `bun run format`, `bun lint`, and `bun typecheck`.
 
 <!-- convex-ai-start -->
