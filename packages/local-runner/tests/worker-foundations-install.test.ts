@@ -1,5 +1,4 @@
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import { chmod, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -16,11 +15,8 @@ import { readQueuedRunnerEvents } from "../src/core/runner-events";
 import {
 	runWorkerFoundationsInstall,
 	type WorkerInstallOptions,
-	type WorkerInstallResult,
 } from "../src/workflows/worker-foundations-install/workflow";
 import {
-	WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR,
-	WORKER_BUN_DOWNLOAD_URL_ENV_VAR,
 	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
 	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
 } from "../src/workflows/worker-foundations-install/manifest";
@@ -54,7 +50,7 @@ describe("Worker Foundations install command", () => {
 			plan: { proofCommands: string[] };
 		};
 		expect(result.outcome).toBe("ready");
-		expect(result.plan.proofCommands).toContain("bun run docs:validate");
+		expect(result.plan.proofCommands).toContain("npm run docs:validate");
 		expect(output).not.toContain(repositoryRoot);
 		expect(output).not.toContain(workerHome);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
@@ -319,14 +315,15 @@ describe("Worker Foundations install command", () => {
 		expect(result.outcome).toBe("installed");
 		expect(result.proof).toEqual(
 			expect.arrayContaining([
-				{ command: "bun run docs:validate", status: "passed" },
-				{ command: "bun run worker:test", status: "passed" },
+				{ command: "npm run docs:validate", status: "passed" },
+				{ command: "npm run worker:test", status: "passed" },
 			]),
 		);
 
 		const packageJson = JSON.parse(
 			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-		) as { scripts: Record<string, string> };
+		) as { packageManager: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBe("npm@11.12.1");
 		expect(packageJson.scripts["docs:validate"]).toBe(
 			"./scripts/run-worker.sh docs:validate",
 		);
@@ -335,7 +332,7 @@ describe("Worker Foundations install command", () => {
 		);
 		expect(
 			await readFile(
-				path.join(repositoryRoot, "apps/worker/src/worker-cli.ts"),
+				path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs"),
 				"utf8",
 			),
 		).toContain("program:write-child-plan");
@@ -358,7 +355,7 @@ describe("Worker Foundations install command", () => {
 		);
 		await expect(
 			execFileAsync(
-				"bun",
+				"npm",
 				["run", "plans:lint", "--", "--plan", completedPlanRef],
 				{ cwd: repositoryRoot },
 			),
@@ -437,8 +434,8 @@ describe("Worker Foundations install command", () => {
 			);
 			expect(syncedEvent.payload.proofCommandResults).toEqual(
 				expect.arrayContaining([
-					{ commandLabel: "bun run docs:validate", status: "passed" },
-					{ commandLabel: "bun run worker:test", status: "passed" },
+					{ commandLabel: "npm run docs:validate", status: "passed" },
+					{ commandLabel: "npm run worker:test", status: "passed" },
 				]),
 			);
 			expect(JSON.stringify(syncedEvent)).not.toContain(repositoryRoot);
@@ -471,7 +468,7 @@ describe("Worker Foundations install command", () => {
 		}
 	});
 
-	it("does not write packageManager identity for Bun lockfile-owned roots", async () => {
+	it("cuts Bun lockfile-owned roots over to npm identity", async () => {
 		const repositoryRoot = await createFixtureRepository({
 			files: {
 				"bun.lock": "# existing owner lockfile\n",
@@ -505,18 +502,18 @@ describe("Worker Foundations install command", () => {
 		const result = JSON.parse(output) as {
 			plan: { packageManager: string };
 		};
-		expect(result.plan.packageManager).toBe("bun");
+		expect(result.plan.packageManager).toBe("npm");
 		const packageJson = JSON.parse(
 			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-		) as { packageManager?: string; scripts: Record<string, string> };
-		expect(packageJson.packageManager).toBeUndefined();
+		) as { packageManager: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBe("npm@11.12.1");
 		expect(packageJson.scripts.dev).toBe("bun --version");
 		expect(await readFile(path.join(repositoryRoot, "bun.lock"), "utf8")).toBe(
 			"# existing owner lockfile\n",
 		);
-	});
+	}, 45_000);
 
-	it("does not write packageManager identity for legacy Bun lockfile-owned roots", async () => {
+	it("cuts legacy Bun lockfile-owned roots over to npm identity", async () => {
 		const repositoryRoot = await createFixtureRepository({
 			files: {
 				"bun.lockb": "legacy bun binary lock placeholder\n",
@@ -550,16 +547,16 @@ describe("Worker Foundations install command", () => {
 		const result = JSON.parse(output) as {
 			plan: { packageManager: string };
 		};
-		expect(result.plan.packageManager).toBe("bun");
+		expect(result.plan.packageManager).toBe("npm");
 		const packageJson = JSON.parse(
 			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-		) as { packageManager?: string; scripts: Record<string, string> };
-		expect(packageJson.packageManager).toBeUndefined();
+		) as { packageManager: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBe("npm@11.12.1");
 		expect(packageJson.scripts.dev).toBe("bun --version");
 		expect(await readFile(path.join(repositoryRoot, "bun.lockb"), "utf8")).toBe(
 			"legacy bun binary lock placeholder\n",
 		);
-	});
+	}, 45_000);
 
 	it("does not write packageManager identity for npm shrinkwrap-owned roots", async () => {
 		const repositoryRoot = await createFixtureRepository({
@@ -611,7 +608,7 @@ describe("Worker Foundations install command", () => {
 		expect(packageJson.scripts.dev).toBe("node server.js");
 	});
 
-	it("blocks missing non-Bun package-manager commands before repo mutation", async () => {
+	it("blocks missing package-manager commands before repo mutation", async () => {
 		const repositoryRoot = await createFixtureRepository({
 			packageJson: {
 				name: "missing-pnpm-command",
@@ -695,302 +692,39 @@ describe("Worker Foundations install command", () => {
 			"utf8",
 		);
 		expect(countWorkerManagedStarts(agents)).toBe(1);
-	});
+	}, 45_000);
 
-	it("provisions a Worker-managed Bun toolchain when Bun is not on PATH", async () => {
+	it("blocks before repo mutation when Node is not on PATH", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
+		const pathWithoutNode = await createTemporaryDirectory(
+			"worker-no-node-path-",
 		);
-		const bunExecutable = findExecutableOnPath("bun");
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
 		await expect(
 			runInstallCommand(
-				[
-					"--repo",
-					repositoryRoot,
-					"--yes",
-					"--json",
-					"--no-kickoff",
-					"--no-commit",
-				],
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
 				{
 					...process.env,
-					PATH: pathWithoutBun,
-					SHIPBYSUNDAY_WORKER_HOME: workerHome,
-					SHIPBYSUNDAY_WORKER_BUN: bunExecutable,
-				},
-			),
-		).resolves.toBe(0);
-
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-			plan: {
-				toolchain: {
-					runtime: string;
-					status: string;
-					origin: string;
-					targetRef: string;
-				};
-			};
-			proof: Array<{ command: string; status: string }>;
-		};
-		expect(result.outcome).toBe("installed");
-		expect(result.plan.toolchain).toEqual({
-			runtime: "bun",
-			status: "provisionable",
-			origin: "explicit-env",
-			targetRef: "worker-home/toolchains/bun/bin/bun",
-		});
-		expect(output).not.toContain(workerHome);
-		expect(existsSync(path.join(workerHome, "toolchains/bun/bin/bun"))).toBe(
-			true,
-		);
-		expect(result.proof).toEqual(
-			expect.arrayContaining([
-				{ command: "bun run docs:validate", status: "passed" },
-			]),
-		);
-	});
-
-	it("lets BUN override a stale Worker-managed Bun in the direct launcher", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const staleManagedBun = path.join(workerHome, "toolchains/bun/bin/bun");
-		await mkdir(path.dirname(staleManagedBun), { recursive: true });
-		await writeFile(staleManagedBun, "#!/bin/sh\necho 1.2.3\n");
-		await chmod(staleManagedBun, 0o755);
-		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		await expect(
-			runInstallCommand(
-				[
-					"--repo",
-					repositoryRoot,
-					"--yes",
-					"--json",
-					"--no-kickoff",
-					"--no-commit",
-				],
-				{
-					...process.env,
-					BUN: findExecutableOnPath("bun"),
+					PATH: pathWithoutNode,
 					SHIPBYSUNDAY_WORKER_HOME: workerHome,
 				},
 			),
-		).resolves.toBe(0);
+		).resolves.toBe(2);
 
 		const result = JSON.parse(logSpy.mock.calls.join("\n")) as {
 			outcome: string;
-			proof: Array<{ command: string; status: string }>;
+			plan: { blockers: Array<{ blockerId: string }> };
 		};
-		expect(result.outcome).toBe("installed");
-		expect(result.proof).toEqual(
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
 			expect.arrayContaining([
-				{ command: "bun run worker:test", status: "passed" },
+				expect.objectContaining({ blockerId: "worker-node-runtime" }),
 			]),
 		);
-	});
-
-	it("downloads a Worker-managed Bun toolchain when no local Bun source is usable", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunPayload = await readFile(findExecutableOnPath("bun"));
-		const bunDownloadServer = await createBunDownloadServer(bunPayload);
-		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		try {
-			await expect(
-				runInstallCommand(
-					[
-						"--repo",
-						repositoryRoot,
-						"--yes",
-						"--json",
-						"--no-kickoff",
-						"--no-commit",
-					],
-					{
-						...process.env,
-						PATH: pathWithoutBun,
-						SHIPBYSUNDAY_WORKER_HOME: workerHome,
-						[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunPayload),
-						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-					},
-				),
-			).resolves.toBe(0);
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-			plan: {
-				toolchain: {
-					origin: string;
-					status: string;
-				};
-			};
-			proof: Array<{ command: string; status: string }>;
-		};
-		expect(result.outcome).toBe("installed");
-		expect(result.plan.toolchain).toMatchObject({
-			origin: "download",
-			status: "provisionable",
-		});
-		expect(output).not.toContain(workerHome);
-		expect(output).not.toContain(bunDownloadServer.url);
-		expect(existsSync(path.join(workerHome, "toolchains/bun/bin/bun"))).toBe(
-			true,
-		);
-		expect(result.proof).toEqual(
-			expect.arrayContaining([
-				{ command: "bun run docs:validate", status: "passed" },
-			]),
-		);
-	});
-
-	it("fails before repo mutation when downloaded Bun does not run", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunPayload = Buffer.from("#!/bin/sh\necho 1.2.3\n");
-		const bunDownloadServer = await createBunDownloadServer(bunPayload);
-		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		try {
-			await expect(
-				runInstallCommand(
-					[
-						"--repo",
-						repositoryRoot,
-						"--yes",
-						"--json",
-						"--no-kickoff",
-						"--no-commit",
-					],
-					{
-						...process.env,
-						PATH: pathWithoutBun,
-						SHIPBYSUNDAY_WORKER_HOME: workerHome,
-						[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunPayload),
-						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-					},
-				),
-			).resolves.toBe(1);
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-		};
-		expect(result.outcome).toBe("failed");
-		expect(output).not.toContain(bunDownloadServer.url);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
-	});
-
-	it("rejects unsafe downloaded Bun zip entries before repo mutation", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunArchiveAssetName = currentBunArchiveAssetName();
-		const archiveRoot = bunArchiveAssetName.replace(/\.zip$/u, "");
-		const executableName = process.platform === "win32" ? "bun.exe" : "bun";
-		const bunArchive = createStoredZip([
-			{
-				name: `${archiveRoot}/`,
-				content: Buffer.alloc(0),
-				unixMode: 0o040755,
-			},
-			{
-				name: `${archiveRoot}/${executableName}`,
-				content: Buffer.from("#!/bin/sh\necho 1.3.5\n"),
-				unixMode: 0o100755,
-			},
-			{
-				name: "../escape",
-				content: Buffer.from("unsafe"),
-				unixMode: 0o100644,
-			},
-		]);
-		const bunDownloadServer = await createBunDownloadServer(bunArchive, {
-			contentType: "application/zip",
-			route: `/${bunArchiveAssetName}`,
-		});
-		let result: WorkerInstallResult | null = null;
-
-		try {
-			result = await runWorkerFoundationsInstall({
-				options: workerInstallOptions({
-					repoPath: repositoryRoot,
-				}),
-				env: {
-					...process.env,
-					PATH: pathWithoutBun,
-					SHIPBYSUNDAY_WORKER_HOME: workerHome,
-					[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunArchive),
-					[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-				},
-			});
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		if (!result)
-			throw new Error("Unsafe archive test did not produce a result.");
-		expect(result.outcome).toBe("failed");
-		expect(result.summary).toContain("unsafe entries");
-		expect(JSON.stringify(result.report)).not.toContain("escape");
-		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
-		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
-	});
-
-	it("fails before repo mutation when downloaded Bun checksum mismatches", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunPayload = await readFile(findExecutableOnPath("bun"));
-		const bunDownloadServer = await createBunDownloadServer(bunPayload);
-		let result: WorkerInstallResult | null = null;
-
-		try {
-			result = await runWorkerFoundationsInstall({
-				options: workerInstallOptions({
-					repoPath: repositoryRoot,
-				}),
-				env: {
-					...process.env,
-					PATH: pathWithoutBun,
-					SHIPBYSUNDAY_WORKER_HOME: workerHome,
-					[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: "0".repeat(64),
-					[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-				},
-			});
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		if (!result) throw new Error("Checksum test did not produce a result.");
-		expect(result.outcome).toBe("failed");
-		expect(result.summary).toContain("integrity validation");
-		expect(JSON.stringify(result.report)).not.toContain(bunDownloadServer.url);
-		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
 	it("blocks unrecognized same-name scripts without leaking script bodies", async () => {
@@ -1447,7 +1181,7 @@ describe("Worker Foundations install command", () => {
 			),
 		).toBe("# Owner Worker Area\n");
 		expect(
-			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs")),
 		).toBe(false);
 	});
 
@@ -1477,7 +1211,7 @@ describe("Worker Foundations install command", () => {
 			await readFile(path.join(repositoryRoot, "apps/worker"), "utf8"),
 		).toBe("owner worker file\n");
 		expect(
-			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs")),
 		).toBe(false);
 	});
 
@@ -1506,7 +1240,7 @@ describe("Worker Foundations install command", () => {
 			true,
 		);
 		expect(
-			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs")),
 		).toBe(false);
 	});
 
@@ -1548,7 +1282,7 @@ describe("Worker Foundations install command", () => {
 				cwd: repositoryRoot,
 			}),
 		).rejects.toThrow();
-	});
+	}, 45_000);
 
 	it("starts foreground Codex kickoff after proof and commit", async () => {
 		const repositoryRoot = await createFixtureRepository();
@@ -1660,7 +1394,7 @@ async function createFixtureRepository({
 		({
 			name: "worker-install-fixture",
 			private: true,
-			packageManager: "bun@1.3.5",
+			packageManager: "npm@11.12.1",
 			scripts,
 		} as Record<string, unknown>);
 	await writeFile(
@@ -1741,39 +1475,6 @@ function mockInteractiveInstallInput(answer: string) {
 			configurable: true,
 			value: originalIsTty,
 		});
-	};
-}
-
-async function createBunDownloadServer(
-	payload: Buffer,
-	options: { contentType?: string; route?: string } = {},
-) {
-	let requestCount = 0;
-	const route = options.route ?? "/bun";
-	const server = createServer(async (request, response) => {
-		await readRequestBody(request);
-		if (request.method === "GET" && request.url === route) {
-			requestCount += 1;
-			response.writeHead(200, {
-				"Content-Type": options.contentType ?? "application/octet-stream",
-			});
-			response.end(payload);
-			return;
-		}
-		response.writeHead(404);
-		response.end();
-	});
-	await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-	const address = server.address();
-	if (!address || typeof address === "string") {
-		throw new Error("Bun download test server did not expose a TCP port.");
-	}
-	return {
-		get requestCount() {
-			return requestCount;
-		},
-		url: `http://127.0.0.1:${address.port}${route}`,
-		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
 	};
 }
 
@@ -1957,112 +1658,6 @@ function shellQuote(value: string) {
 	return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }
 
-function sha256(value: Buffer) {
-	return createHash("sha256").update(value).digest("hex");
-}
-
-function currentBunArchiveAssetName() {
-	if (process.platform === "darwin") {
-		if (process.arch === "arm64") return "bun-darwin-aarch64.zip";
-		if (process.arch === "x64") return "bun-darwin-x64.zip";
-	}
-	if (process.platform === "linux") {
-		if (process.arch === "arm64") return "bun-linux-aarch64.zip";
-		if (process.arch === "x64") return "bun-linux-x64.zip";
-	}
-	if (process.platform === "win32" && process.arch === "x64") {
-		return "bun-windows-x64.zip";
-	}
-	throw new Error(
-		`Unsupported Bun archive platform ${process.platform}/${process.arch}`,
-	);
-}
-
-function createStoredZip(
-	entries: Array<{ content: Buffer; name: string; unixMode: number }>,
-) {
-	const localFileParts: Buffer[] = [];
-	const centralDirectoryParts: Buffer[] = [];
-	let offset = 0;
-	for (const entry of entries) {
-		const name = Buffer.from(entry.name);
-		const crc = crc32(entry.content);
-		const localHeader = Buffer.alloc(30);
-		localHeader.writeUInt32LE(0x04034b50, 0);
-		localHeader.writeUInt16LE(20, 4);
-		localHeader.writeUInt16LE(0, 6);
-		localHeader.writeUInt16LE(0, 8);
-		localHeader.writeUInt16LE(0, 10);
-		localHeader.writeUInt16LE(0, 12);
-		localHeader.writeUInt32LE(crc, 14);
-		localHeader.writeUInt32LE(entry.content.length, 18);
-		localHeader.writeUInt32LE(entry.content.length, 22);
-		localHeader.writeUInt16LE(name.length, 26);
-		localHeader.writeUInt16LE(0, 28);
-		localFileParts.push(localHeader, name, entry.content);
-
-		const centralDirectoryHeader = Buffer.alloc(46);
-		centralDirectoryHeader.writeUInt32LE(0x02014b50, 0);
-		centralDirectoryHeader.writeUInt16LE((3 << 8) | 20, 4);
-		centralDirectoryHeader.writeUInt16LE(20, 6);
-		centralDirectoryHeader.writeUInt16LE(0, 8);
-		centralDirectoryHeader.writeUInt16LE(0, 10);
-		centralDirectoryHeader.writeUInt16LE(0, 12);
-		centralDirectoryHeader.writeUInt16LE(0, 14);
-		centralDirectoryHeader.writeUInt32LE(crc, 16);
-		centralDirectoryHeader.writeUInt32LE(entry.content.length, 20);
-		centralDirectoryHeader.writeUInt32LE(entry.content.length, 24);
-		centralDirectoryHeader.writeUInt16LE(name.length, 28);
-		centralDirectoryHeader.writeUInt16LE(0, 30);
-		centralDirectoryHeader.writeUInt16LE(0, 32);
-		centralDirectoryHeader.writeUInt16LE(0, 34);
-		centralDirectoryHeader.writeUInt16LE(0, 36);
-		centralDirectoryHeader.writeUInt32LE((entry.unixMode << 16) >>> 0, 38);
-		centralDirectoryHeader.writeUInt32LE(offset, 42);
-		centralDirectoryParts.push(centralDirectoryHeader, name);
-
-		offset += localHeader.length + name.length + entry.content.length;
-	}
-	const centralDirectory = Buffer.concat(centralDirectoryParts);
-	const localFiles = Buffer.concat(localFileParts);
-	const endOfCentralDirectory = Buffer.alloc(22);
-	endOfCentralDirectory.writeUInt32LE(0x06054b50, 0);
-	endOfCentralDirectory.writeUInt16LE(0, 4);
-	endOfCentralDirectory.writeUInt16LE(0, 6);
-	endOfCentralDirectory.writeUInt16LE(entries.length, 8);
-	endOfCentralDirectory.writeUInt16LE(entries.length, 10);
-	endOfCentralDirectory.writeUInt32LE(centralDirectory.length, 12);
-	endOfCentralDirectory.writeUInt32LE(localFiles.length, 16);
-	endOfCentralDirectory.writeUInt16LE(0, 20);
-	return Buffer.concat([localFiles, centralDirectory, endOfCentralDirectory]);
-}
-
-function crc32(value: Buffer) {
-	let crc = 0xffffffff;
-	for (const byte of value) {
-		crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ byte) & 0xff];
-	}
-	return (crc ^ 0xffffffff) >>> 0;
-}
-
-const CRC32_TABLE = Array.from({ length: 256 }, (_value, index) => {
-	let crc = index;
-	for (let bit = 0; bit < 8; bit += 1) {
-		crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
-	}
-	return crc >>> 0;
-});
-
 function countWorkerManagedStarts(content: string) {
 	return content.match(/<!-- shipbysunday-worker:start -->/gu)?.length ?? 0;
-}
-
-function findExecutableOnPath(executableName: string) {
-	for (const directory of (process.env.PATH ?? "").split(path.delimiter)) {
-		const candidatePath = path.join(directory, executableName);
-		if (existsSync(candidatePath)) {
-			return candidatePath;
-		}
-	}
-	throw new Error(`${executableName} was not found on PATH.`);
 }

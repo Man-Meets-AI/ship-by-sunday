@@ -18,7 +18,7 @@ const packageRoot = path.resolve(
 );
 const builtCliPath = path.join(packageRoot, "dist", "cli.js");
 if (!existsSync(builtCliPath)) {
-	throw new Error("dist/cli.js is missing. Run bun run build first.");
+	throw new Error("dist/cli.js is missing. Run npm run build first.");
 }
 
 const runnerHome = await mkdtemp(path.join(os.tmpdir(), "sbs-smoke-home-"));
@@ -81,14 +81,13 @@ if (!address || typeof address === "string") {
 try {
 	const apiBaseUrl = `http://127.0.0.1:${address.port}`;
 	const packagePackResult = await runProcess(
-		"bun",
+		"npm",
 		[
-			"pm",
 			"pack",
-			"--destination",
+			"--pack-destination",
 			packagePackDirectory,
 			"--ignore-scripts",
-			"--quiet",
+			"--silent",
 		],
 		{ cwd: packageRoot },
 	);
@@ -99,40 +98,18 @@ try {
 	}
 	const packageTarballPath = readPackedTarballPath(packagePackResult.stdout);
 	await assertPackedTarballContents(packageTarballPath);
-	const bunxRepositoryRoot = await createSmokeRepository(
-		"sbs-bunx-smoke-repo-",
-	);
 	const npxRepositoryRoot = await createSmokeRepository("sbs-npx-smoke-repo-");
 	const docsCommandRepositoryRoot = await createDocsCommandRepository();
 	const installCommandRepositoryRoot =
 		await createWorkerInstallSmokeRepository();
 	const installCommandWorkerHome = await createWorkerInstallWorkerHome();
-	const nativeInstallRepositoryRoot = await createWorkerInstallSmokeRepository(
-		"sbs-native-install-smoke-repo-",
+	const builtInstallRepositoryRoot = await createWorkerInstallSmokeRepository(
+		"sbs-built-install-smoke-repo-",
 	);
-	const nativePackageManagerRepositoryRoot =
+	const builtPackageManagerRepositoryRoot =
 		await createPackageManagerSmokeRepository();
-	const nativeInstallWorkerHome = await createWorkerInstallWorkerHome();
+	const builtInstallWorkerHome = await createWorkerInstallWorkerHome();
 
-	await runSmokePairCommand({
-		commandName: "bunx",
-		command: "bunx",
-		args: [
-			"--bun",
-			"--package",
-			packageTarballPath,
-			"ship-by-sunday",
-			"setup",
-			"pair",
-			"sbs_pair_bunx_smoke",
-			"--repo",
-			bunxRepositoryRoot,
-			"--api-url",
-			apiBaseUrl,
-			"--json",
-		],
-		repositoryRoot: bunxRepositoryRoot,
-	});
 	await runSmokePairCommand({
 		commandName: "npx",
 		command: "npx",
@@ -161,10 +138,10 @@ try {
 		repositoryRoot: installCommandRepositoryRoot,
 		workerHome: installCommandWorkerHome,
 	});
-	await runNativeWorkerInstallCommandSmoke({
-		installRepositoryRoot: nativeInstallRepositoryRoot,
-		packageManagerRepositoryRoot: nativePackageManagerRepositoryRoot,
-		workerHome: nativeInstallWorkerHome,
+	await runBuiltWorkerInstallCommandSmoke({
+		installRepositoryRoot: builtInstallRepositoryRoot,
+		packageManagerRepositoryRoot: builtPackageManagerRepositoryRoot,
+		workerHome: builtInstallWorkerHome,
 	});
 	if (!existsSync(path.join(runnerHome, "credentials.json"))) {
 		throw new Error("package smoke did not write runner credentials");
@@ -204,14 +181,14 @@ async function createWorkerInstallSmokeRepository(
 
 async function createPackageManagerSmokeRepository() {
 	const repositoryRoot = await mkdtemp(
-		path.join(os.tmpdir(), "sbs-native-pnpm-smoke-repo-"),
+		path.join(os.tmpdir(), "sbs-package-manager-pnpm-smoke-repo-"),
 	);
 	await initializeGitRepository(repositoryRoot);
 	await writeFile(
 		path.join(repositoryRoot, "package.json"),
 		`${JSON.stringify(
 			{
-				name: "native-pnpm-smoke",
+				name: "package-manager-pnpm-smoke",
 				packageManager: "pnpm@9.12.0",
 				private: true,
 			},
@@ -221,11 +198,11 @@ async function createPackageManagerSmokeRepository() {
 	);
 	await runRequiredProcess("git", ["add", "package.json"], {
 		cwd: repositoryRoot,
-		label: "native package-manager smoke git add",
+		label: "package-manager smoke git add",
 	});
 	await runRequiredProcess("git", ["commit", "-m", "smoke fixture"], {
 		cwd: repositoryRoot,
-		label: "native package-manager smoke git commit",
+		label: "package-manager smoke git commit",
 	});
 	return repositoryRoot;
 }
@@ -303,7 +280,7 @@ async function runSmokePairCommand({
 	}
 	if (!existsSync(path.join(repositoryRoot, ".sbs", "config.json"))) {
 		throw new Error(
-			`${commandName} package smoke did not write .sbs/config.json`,
+			`${commandName} package smoke did not write .sbs/config.json\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
 		);
 	}
 }
@@ -370,9 +347,9 @@ async function runPackedWorkerInstallCommandSmoke({
 	workerHome: string;
 }) {
 	const installCommandResult = await runProcess(
-		"bunx",
+		"npx",
 		[
-			"--bun",
+			"--yes",
 			"--package",
 			packageTarballPath,
 			"shipbysunday",
@@ -411,9 +388,9 @@ async function runPackedWorkerInstallCommandSmoke({
 	}
 
 	const mutatingInstallResult = await runProcess(
-		"bunx",
+		"npx",
 		[
-			"--bun",
+			"--yes",
 			"--package",
 			packageTarballPath,
 			"shipbysunday",
@@ -466,7 +443,7 @@ async function runPackedWorkerInstallCommandSmoke({
 	}
 }
 
-async function runNativeWorkerInstallCommandSmoke({
+async function runBuiltWorkerInstallCommandSmoke({
 	installRepositoryRoot,
 	packageManagerRepositoryRoot,
 	workerHome,
@@ -475,26 +452,10 @@ async function runNativeWorkerInstallCommandSmoke({
 	packageManagerRepositoryRoot: string;
 	workerHome: string;
 }) {
-	const nativeCliPath = path.join(
-		await mkdtemp(path.join(os.tmpdir(), "sbs-native-cli-")),
-		"shipbysunday",
-	);
-	await runRequiredProcess(
-		"bun",
+	const builtInstallResult = await runProcess(
+		"node",
 		[
-			"build",
-			"./src/cli.ts",
-			"--target=bun",
-			"--compile",
-			"--outfile",
-			nativeCliPath,
-		],
-		{ cwd: packageRoot, label: "native cli build" },
-	);
-
-	const nativeInstallResult = await runProcess(
-		nativeCliPath,
-		[
+			builtCliPath,
 			"install",
 			"--repo",
 			installRepositoryRoot,
@@ -508,21 +469,21 @@ async function runNativeWorkerInstallCommandSmoke({
 			},
 		},
 	);
-	if (nativeInstallResult.exitCode !== 0) {
+	if (builtInstallResult.exitCode !== 0) {
 		throw new Error(
-			`native install smoke failed with ${nativeInstallResult.exitCode}\nSTDOUT:\n${nativeInstallResult.stdout}\nSTDERR:\n${nativeInstallResult.stderr}`,
+			`built Node install smoke failed with ${builtInstallResult.exitCode}\nSTDOUT:\n${builtInstallResult.stdout}\nSTDERR:\n${builtInstallResult.stderr}`,
 		);
 	}
-	const nativeInstall = JSON.parse(nativeInstallResult.stdout) as {
+	const builtInstall = JSON.parse(builtInstallResult.stdout) as {
 		outcome?: string;
 		workflowId?: string;
 	};
 	if (
-		nativeInstall.outcome !== "installed" ||
-		nativeInstall.workflowId !== "worker-foundations-install"
+		builtInstall.outcome !== "installed" ||
+		builtInstall.workflowId !== "worker-foundations-install"
 	) {
 		throw new Error(
-			`native install smoke returned an unexpected result\nSTDOUT:\n${nativeInstallResult.stdout}\nSTDERR:\n${nativeInstallResult.stderr}`,
+			`built Node install smoke returned an unexpected result\nSTDOUT:\n${builtInstallResult.stdout}\nSTDERR:\n${builtInstallResult.stderr}`,
 		);
 	}
 	if (
@@ -530,20 +491,21 @@ async function runNativeWorkerInstallCommandSmoke({
 			path.join(installRepositoryRoot, "docs", "worker", "install-report.md"),
 		)
 	) {
-		throw new Error("native install smoke did not write install report");
+		throw new Error("built Node install smoke did not write install report");
 	}
 	const installStatus = await runProcess("git", ["status", "--short"], {
 		cwd: installRepositoryRoot,
 	});
 	if (installStatus.exitCode !== 0 || installStatus.stdout.trim() !== "") {
 		throw new Error(
-			`native install smoke left dirty worktree\nSTDOUT:\n${installStatus.stdout}\nSTDERR:\n${installStatus.stderr}`,
+			`built Node install smoke left dirty worktree\nSTDOUT:\n${installStatus.stdout}\nSTDERR:\n${installStatus.stderr}`,
 		);
 	}
 
-	const nativeDryRunResult = await runProcess(
-		nativeCliPath,
+	const builtDryRunResult = await runProcess(
+		"node",
 		[
+			builtCliPath,
 			"install",
 			"--repo",
 			packageManagerRepositoryRoot,
@@ -558,25 +520,25 @@ async function runNativeWorkerInstallCommandSmoke({
 			},
 		},
 	);
-	if (nativeDryRunResult.exitCode !== 0) {
+	if (builtDryRunResult.exitCode !== 0) {
 		throw new Error(
-			`native package-manager dry-run smoke failed with ${nativeDryRunResult.exitCode}\nSTDOUT:\n${nativeDryRunResult.stdout}\nSTDERR:\n${nativeDryRunResult.stderr}`,
+			`built Node package-manager dry-run smoke failed with ${builtDryRunResult.exitCode}\nSTDOUT:\n${builtDryRunResult.stdout}\nSTDERR:\n${builtDryRunResult.stderr}`,
 		);
 	}
-	const nativeDryRun = JSON.parse(nativeDryRunResult.stdout) as {
+	const builtDryRun = JSON.parse(builtDryRunResult.stdout) as {
 		outcome?: string;
 		plan?: { packageManager?: string };
 	};
 	if (
-		nativeDryRun.outcome !== "ready" ||
-		nativeDryRun.plan?.packageManager !== "pnpm"
+		builtDryRun.outcome !== "ready" ||
+		builtDryRun.plan?.packageManager !== "pnpm"
 	) {
 		throw new Error(
-			`native package-manager dry-run smoke returned an unexpected result\nSTDOUT:\n${nativeDryRunResult.stdout}\nSTDERR:\n${nativeDryRunResult.stderr}`,
+			`built Node package-manager dry-run smoke returned an unexpected result\nSTDOUT:\n${builtDryRunResult.stdout}\nSTDERR:\n${builtDryRunResult.stderr}`,
 		);
 	}
 	if (existsSync(path.join(packageManagerRepositoryRoot, "apps", "worker"))) {
-		throw new Error("native package-manager dry-run wrote apps/worker");
+		throw new Error("built Node package-manager dry-run wrote apps/worker");
 	}
 }
 
@@ -701,10 +663,16 @@ async function runRequiredProcess(
 }
 
 function readPackedTarballPath(stdout: string) {
-	const tarballPath = stdout
+	const tarballPathText = stdout
 		.split(/\r?\n/)
 		.map((line) => line.trim())
 		.find((line) => line.endsWith(".tgz"));
+	const tarballPath =
+		tarballPathText && path.isAbsolute(tarballPathText)
+			? tarballPathText
+			: tarballPathText
+				? path.join(packagePackDirectory, tarballPathText)
+				: null;
 	if (!tarballPath || !existsSync(tarballPath)) {
 		throw new Error(`Packed tarball was not created.\nSTDOUT:\n${stdout}`);
 	}

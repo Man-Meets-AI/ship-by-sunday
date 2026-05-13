@@ -1,0 +1,652 @@
+import { execFile } from "node:child_process";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { promisify } from "node:util";
+
+import {
+	extractProgramRunSliceProofCommands,
+	runProgramRunSlice,
+	type ProgramRunSliceExecutor,
+	type ProgramRunSliceReviewResult,
+} from "../src/core/program-run-slice";
+import {
+	createTemporaryDirectory,
+	initializeGitRepository,
+} from "./test-utils";
+
+const execFileAsync = promisify(execFile);
+
+describe("program run slice", () => {
+	it("runs one child ExecPlan through execute, proof, review, docs sync, and checkpoint", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			reviews: [
+				{
+					findings: [],
+					openQuestions: [],
+					validationNotes: ["Focused fixture proof passed."],
+				},
+			],
+		});
+
+		const result = await runProgramRunSlice({
+			executor,
+			planPath: PLAN_PATH,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "run-happy",
+			timeoutMs: 15_000,
+		});
+
+		expect(result.finalStatus).toBe("complete");
+		expect(result.fixAttempts).toBe(0);
+		expect(result.proofResults).toHaveLength(1);
+		expect(result.reviewFindings).toHaveLength(0);
+		await expect(
+			readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-happy/review-prompt.md",
+				),
+				"utf8",
+			),
+		).resolves.toContain("Review this completed ExecPlan slice");
+		await expect(
+			readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-happy/review-prompt-1.md",
+				),
+				"utf8",
+			),
+		).resolves.toContain("Review this completed ExecPlan slice");
+		await expect(
+			readFile(path.join(repositoryRoot, PLAN_PATH), "utf8"),
+		).resolves.toContain("Autonomous Run run-happy");
+		await expect(
+			readFile(
+				path.join(
+					repositoryRoot,
+					"docs/programs/active/2026-05-13-autonomous-program-execution-loop/program.md",
+				),
+				"utf8",
+			),
+		).resolves.toContain("Completed autonomous run `run-happy`");
+		await expect(
+			readFile(path.join(repositoryRoot, ".git/info/exclude"), "utf8"),
+		).resolves.toContain(".sbs/");
+		const gitStatus = await execFileAsync(
+			"git",
+			["status", "--short", "--untracked-files=all"],
+			{ cwd: repositoryRoot },
+		);
+		expect(gitStatus.stdout).not.toContain(".sbs/");
+	});
+
+	it("fixes must-fix review findings and reruns proof and review", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			onFix: async () => {
+				await writeRepoFile(repositoryRoot, "fixed.txt", "fixed\n");
+				await writeRepoFile(
+					repositoryRoot,
+					PLAN_PATH,
+					buildFixturePlan({
+						testCommands: [
+							accessCommand("implemented.txt"),
+							accessCommand("fixed.txt"),
+						],
+					}),
+				);
+			},
+			reviews: [
+				{
+					findings: [
+						{
+							impact: "The fixture still lacks the reviewed fix marker.",
+							minimalFix: "Write fixed.txt.",
+							mustFix: true,
+							severity: "high",
+							title: "Missing fix marker",
+						},
+					],
+					openQuestions: [],
+					validationNotes: [],
+				},
+				{
+					findings: [],
+					openQuestions: [],
+					validationNotes: ["The fix marker exists."],
+				},
+			],
+		});
+
+		const result = await runProgramRunSlice({
+			executor,
+			maxFixAttempts: 2,
+			planPath: PLAN_PATH,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "run-fix",
+			timeoutMs: 15_000,
+		});
+
+		expect(result.finalStatus).toBe("complete");
+		expect(result.fixAttempts).toBe(1);
+		expect(
+			result.proofResults.map((proofResult) => proofResult.command),
+		).toEqual([accessCommand("implemented.txt"), accessCommand("fixed.txt")]);
+		await expect(
+			readFile(path.join(repositoryRoot, "fixed.txt"), "utf8"),
+		).resolves.toBe("fixed\n");
+	});
+
+	it("rejects unsafe program ids before creating run artifacts", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: "../autonomous-program-execution-loop",
+				repoRootDir: repositoryRoot,
+				runId: "run-unsafe-program",
+			}),
+		).rejects.toThrow("Invalid Program id");
+	});
+
+	it("rejects ExecPlans that belong to a different Program", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		await writeRepoFile(
+			repositoryRoot,
+			PLAN_PATH,
+			buildFixturePlan({ programId: "other-program" }),
+		);
+		await execFileAsync("git", ["add", PLAN_PATH], { cwd: repositoryRoot });
+		await execFileAsync("git", ["commit", "-m", "mismatch plan program"], {
+			cwd: repositoryRoot,
+		});
+		const executor = createFakeExecutor({
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-plan-mismatch",
+			}),
+		).rejects.toThrow("belongs to program_id other-program");
+	});
+
+	it("blocks before review when deterministic proof fails", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-proof-fails",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow("Program run slice proof failed.");
+
+		const state = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-proof-fails/state.json",
+				),
+				"utf8",
+			),
+		) as { currentPhase: string; errorMessage: string };
+		expect(state.currentPhase).toBe("blocked");
+		expect(state.errorMessage).toContain("Program run slice proof failed.");
+	});
+
+	it("blocks when review findings remain after capped fix attempts", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			reviews: [buildPersistentFindingReview(), buildPersistentFindingReview()],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				maxFixAttempts: 1,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-review-fails",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow("Review still has 1 must-fix finding");
+	});
+
+	it("refuses to start with unrelated dirty worktree state", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		await writeRepoFile(repositoryRoot, "dirty.txt", "uncommitted\n");
+		const executor = createFakeExecutor({
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-dirty",
+			}),
+		).rejects.toThrow(
+			"Refusing to start program run slice with a dirty worktree",
+		);
+	});
+
+	it("extracts runnable Test Commands from indented blocks", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+
+		await expect(
+			extractProgramRunSliceProofCommands({
+				planPath: PLAN_PATH,
+				repoRootDir: repositoryRoot,
+			}),
+		).resolves.toEqual([
+			expect.objectContaining({
+				command: "node -e \"require('node:fs').accessSync('implemented.txt')\"",
+				cwd: repositoryRoot,
+			}),
+		]);
+	});
+
+	it("extracts continued commands and skips long-running package scripts", async () => {
+		const repositoryRoot = await createProgramRunFixture({
+			planText: buildFixturePlan({
+				testCommands: [
+					"bun test packages/local-runner/tests/program-run-slice.test.ts \\",
+					"  --timeout 30000",
+					"bun run --cwd apps/web dev",
+					"npm run start",
+				],
+			}),
+		});
+
+		await expect(
+			extractProgramRunSliceProofCommands({
+				planPath: PLAN_PATH,
+				repoRootDir: repositoryRoot,
+			}),
+		).resolves.toEqual([
+			expect.objectContaining({
+				command:
+					"bun test packages/local-runner/tests/program-run-slice.test.ts --timeout 30000",
+				cwd: repositoryRoot,
+			}),
+		]);
+	});
+
+	it("rejects proof command cwd changes outside the repository", async () => {
+		const repositoryRoot = await createProgramRunFixture({
+			planText: buildFixturePlan({
+				testCommands: ["cd /tmp", "node -e \"console.log('outside')\""],
+			}),
+		});
+		const executor = createFakeExecutor({
+			onExecute: async () => {},
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-cwd-escape",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow("Proof command cd must stay inside the repository");
+	});
+
+	it("rejects shell operators in proof commands", async () => {
+		const repositoryRoot = await createProgramRunFixture({
+			planText: buildFixturePlan({
+				testCommands: [
+					"node -e \"console.log('unsafe')\" && node -e \"console.log('second')\"",
+				],
+			}),
+		});
+		const executor = createFakeExecutor({
+			onExecute: async () => {},
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-shell-operator",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow(
+			"Proof commands must use one direct executable without shell operators",
+		);
+	});
+
+	it("rejects malformed review schema output instead of treating it as passing", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor: ProgramRunSliceExecutor = async (input) => {
+			if (input.purpose === "execute") {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+				return {
+					finalMessage: "execute complete",
+					structuredOutput: null,
+					threadId: "thread-execute",
+				};
+			}
+			return {
+				finalMessage: "malformed review",
+				structuredOutput: {
+					findings: [
+						{
+							impact: "The schema value is not boolean.",
+							minimalFix: "Return a boolean mustFix value.",
+							mustFix: "true",
+							severity: "high",
+							title: "Malformed mustFix",
+						},
+					],
+					openQuestions: [],
+					validationNotes: [],
+				},
+				threadId: "thread-review",
+			};
+		};
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-malformed-review",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow("Review finding mustFix must be a boolean");
+	});
+
+	it("syncs docs into real markdown headings instead of fenced decoys", async () => {
+		const repositoryRoot = await createProgramRunFixture({
+			planText: buildFixturePlan({ includeHeadingDecoys: true }),
+			programText: buildFixtureProgram({ includeHeadingDecoys: true }),
+		});
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			reviews: [
+				{
+					findings: [],
+					openQuestions: [],
+					validationNotes: [],
+				},
+			],
+		});
+
+		await runProgramRunSlice({
+			executor,
+			planPath: PLAN_PATH,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "run-heading-decoys",
+			timeoutMs: 15_000,
+		});
+
+		const planText = await readFile(
+			path.join(repositoryRoot, PLAN_PATH),
+			"utf8",
+		);
+		const fencedArtifactsIndex = planText.indexOf(
+			"```md\n## Artifacts and Notes",
+		);
+		const realArtifactsIndex = planText.indexOf(
+			"## Artifacts and Notes",
+			fencedArtifactsIndex + 1,
+		);
+		expect(
+			planText.indexOf("### Autonomous Run run-heading-decoys"),
+		).toBeGreaterThan(realArtifactsIndex);
+
+		const programText = await readFile(
+			path.join(
+				repositoryRoot,
+				"docs/programs/active/2026-05-13-autonomous-program-execution-loop/program.md",
+			),
+			"utf8",
+		);
+		const fencedProgressIndex = programText.indexOf("```md\n## Progress");
+		const realProgressIndex = programText.indexOf(
+			"## Progress",
+			fencedProgressIndex + 1,
+		);
+		expect(
+			programText.indexOf("Completed autonomous run `run-heading-decoys`"),
+		).toBeGreaterThan(realProgressIndex);
+	});
+});
+
+const PROGRAM_ID = "autonomous-program-execution-loop";
+const PLAN_PATH = "docs/exec-plans/active/2026-05-13-fixture-plan.md";
+
+async function createProgramRunFixture(
+	options: {
+		planText?: string;
+		programText?: string;
+	} = {},
+) {
+	const repositoryRoot = await createTemporaryDirectory("sbs-program-run-");
+	await initializeGitRepository(repositoryRoot);
+	await writeRepoFile(repositoryRoot, "AGENTS.md", "# Test Agents\n");
+	await writeRepoFile(
+		repositoryRoot,
+		"docs/programs/active/2026-05-13-autonomous-program-execution-loop/current-planning-brief.txt",
+		"planning-brief-1.md\n",
+	);
+	await writeRepoFile(
+		repositoryRoot,
+		"docs/programs/active/2026-05-13-autonomous-program-execution-loop/planning-brief-1.md",
+		[
+			"---",
+			"title: Fixture Brief",
+			"program_id: autonomous-program-execution-loop",
+			"brief_version: 1",
+			"status: current",
+			"summary: Fixture brief.",
+			"read_when:",
+			"  - Testing.",
+			"---",
+			"",
+			"# Fixture Brief",
+			"",
+		].join("\n"),
+	);
+	await writeRepoFile(
+		repositoryRoot,
+		"docs/programs/active/2026-05-13-autonomous-program-execution-loop/program.md",
+		options.programText ?? buildFixtureProgram(),
+	);
+	await writeRepoFile(
+		repositoryRoot,
+		PLAN_PATH,
+		options.planText ?? buildFixturePlan(),
+	);
+	await execFileAsync("git", ["add", "."], { cwd: repositoryRoot });
+	await execFileAsync("git", ["commit", "-m", "initial fixture"], {
+		cwd: repositoryRoot,
+	});
+	return repositoryRoot;
+}
+
+function buildFixtureProgram(
+	options: {
+		includeHeadingDecoys?: boolean;
+	} = {},
+) {
+	return [
+		"---",
+		"program_id: autonomous-program-execution-loop",
+		"title: Autonomous Program Execution Loop",
+		"status: active",
+		"created_at: 2026-05-13",
+		"completed_at: null",
+		"summary: Fixture Program.",
+		"post_build_recap: null",
+		"read_when:",
+		"  - Testing.",
+		"---",
+		"",
+		"# Autonomous Program Execution Loop",
+		"",
+		"Fixture Program.",
+		"",
+		...(options.includeHeadingDecoys
+			? ["```md", "## Progress", "Do not insert here.", "```", ""]
+			: []),
+		"## Progress",
+		"",
+		"- [x] Fixture created.",
+		"",
+		"## Artifacts and Notes",
+		"",
+	].join("\n");
+}
+
+function buildFixturePlan(
+	options: {
+		includeHeadingDecoys?: boolean;
+		programId?: string;
+		testCommands?: string[];
+	} = {},
+) {
+	const testCommands = options.testCommands ?? [
+		accessCommand("implemented.txt"),
+	];
+	return [
+		"---",
+		"title: Fixture Plan",
+		"status: active",
+		"created_at: 2026-05-13",
+		"completed_at: null",
+		"summary: Fixture plan.",
+		"post_build_recap: null",
+		`program_id: ${options.programId ?? PROGRAM_ID}`,
+		"planning_brief: docs/programs/active/2026-05-13-autonomous-program-execution-loop/planning-brief-1.md",
+		"read_when:",
+		"  - Testing.",
+		"---",
+		"",
+		"# Fixture Plan",
+		"",
+		"Fixture plan.",
+		"",
+		...(options.includeHeadingDecoys
+			? ["```md", "## Artifacts and Notes", "Do not insert here.", "```", ""]
+			: []),
+		"## Validation and Acceptance",
+		"",
+		"### Test Commands",
+		"",
+		...testCommands.map((command) => `    ${command}`),
+		"",
+		"## Artifacts and Notes",
+		"",
+	].join("\n");
+}
+
+function accessCommand(repoRelativePath: string) {
+	return `node -e "require('node:fs').accessSync('${repoRelativePath}')"`;
+}
+
+function createFakeExecutor(params: {
+	onExecute?: () => Promise<void>;
+	onFix?: () => Promise<void>;
+	reviews: ProgramRunSliceReviewResult[];
+}): ProgramRunSliceExecutor {
+	let reviewIndex = 0;
+	return async (input) => {
+		if (input.purpose === "execute") {
+			await params.onExecute?.();
+			return {
+				finalMessage: "execute complete",
+				structuredOutput: null,
+				threadId: "thread-execute",
+			};
+		}
+		if (input.purpose === "fix") {
+			await params.onFix?.();
+			return {
+				finalMessage: "fix complete",
+				structuredOutput: null,
+				threadId: "thread-fix",
+			};
+		}
+		const review = params.reviews[reviewIndex] ?? {
+			findings: [],
+			openQuestions: [],
+			validationNotes: [],
+		};
+		reviewIndex += 1;
+		return {
+			finalMessage: JSON.stringify(review),
+			structuredOutput: review,
+			threadId: "thread-review",
+		};
+	};
+}
+
+function buildPersistentFindingReview(): ProgramRunSliceReviewResult {
+	return {
+		findings: [
+			{
+				impact: "The fixture keeps returning the same must-fix finding.",
+				minimalFix: "Resolve the fixture finding.",
+				mustFix: true,
+				severity: "high",
+				title: "Persistent finding",
+			},
+		],
+		openQuestions: [],
+		validationNotes: [],
+	};
+}
+
+async function writeRepoFile(
+	repositoryRoot: string,
+	repoPath: string,
+	content: string,
+) {
+	const absolutePath = path.join(repositoryRoot, repoPath);
+	await mkdir(path.dirname(absolutePath), { recursive: true });
+	await writeFile(absolutePath, content, "utf8");
+}

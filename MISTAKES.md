@@ -141,3 +141,9 @@
 - Mistake: I ran root `bun typecheck` while shepherding the release without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
   Impact: The command passed, but it created a PostHog release and uploaded source maps for the local branch commit from the credentialed environment.
   Corrective action: Run local app build/typecheck validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is explicitly under test.
+
+## 2026-05-13 Local Runner Node Cutover
+
+- Mistake: I used a one-off `perl -0pi` replacement while updating the Worker compatibility smoke file instead of `apply_patch`.
+  Impact: The edit was scoped to one test file and was reviewed afterward, but it violated the repository editing rule for manual code changes.
+  Corrective action: Use `apply_patch` for manual source edits, including broad string replacements, and reserve shell commands for inspection or formatter-driven changes.

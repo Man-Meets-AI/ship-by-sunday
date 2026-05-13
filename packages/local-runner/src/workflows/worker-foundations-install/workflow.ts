@@ -1,16 +1,12 @@
 import { spawnSync } from "node:child_process";
-import { createHash, verify } from "node:crypto";
+import { verify } from "node:crypto";
 import { existsSync } from "node:fs";
 import {
 	chmod,
-	copyFile,
 	lstat,
 	mkdir,
-	mkdtemp,
 	readFile,
 	readdir,
-	realpath,
-	rm,
 	unlink,
 	writeFile,
 } from "node:fs/promises";
@@ -38,8 +34,6 @@ import {
 } from "../../core/runner-events";
 import {
 	WORKER_CODEX_PROJECT_WRITE_PROFILE,
-	WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR,
-	WORKER_BUN_EXECUTABLE_ENV_VAR,
 	WORKER_FOUNDATIONS_BUNDLE_VERSION,
 	WORKER_FOUNDATIONS_COMMIT_MESSAGE,
 	WORKER_FOUNDATIONS_INSTALL_BRANCH,
@@ -47,7 +41,6 @@ import {
 	WORKER_FOUNDATIONS_INSTALL_WORKFLOW_VERSION,
 	WORKER_FOUNDATIONS_PROOF_SCRIPTS,
 	WORKER_FOUNDATIONS_ROOT_SCRIPTS,
-	WORKER_BUN_DOWNLOAD_URL_ENV_VAR,
 	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
 	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
 	WORKER_MACHINE_HOME_ENV_VAR,
@@ -102,24 +95,18 @@ type WorkerInstallPlan = {
 	workflowVersion: typeof WORKER_FOUNDATIONS_INSTALL_WORKFLOW_VERSION;
 	workerBundleVersion: string;
 	packageManager: RootPackageManager;
-	toolchain: WorkerBunToolchainPlan;
+	toolchain: WorkerNodeRuntimePlan;
 	operations: WorkerInstallOperation[];
 	blockers: WorkerInstallBlocker[];
 	proofCommands: string[];
 	privacyBoundary: WorkerPrivacyBoundary;
 };
 
-type WorkerBunToolchainPlan = {
-	runtime: "bun";
-	status: "available" | "managed" | "provisionable" | "blocked";
-	origin:
-		| "path"
-		| "worker-managed"
-		| "current-runtime"
-		| "explicit-env"
-		| "download"
-		| "missing";
-	targetRef: "worker-home/toolchains/bun/bin/bun";
+type WorkerNodeRuntimePlan = {
+	runtime: "node";
+	status: "available" | "blocked";
+	origin: "path" | "missing";
+	targetRef: "system-node";
 };
 
 type WorkerInstallOperation = {
@@ -190,7 +177,7 @@ type TargetRepoInspection = {
 	currentBranch: string | null;
 	installBranchExists: boolean;
 	licenseStatus: WorkerLicenseStatus;
-	bunToolchain: WorkerBunToolchainPlan;
+	nodeRuntime: WorkerNodeRuntimePlan;
 	codexStatus: "ready" | "blocked" | "skipped";
 	codexProfileStatus: "ready" | "planned" | "blocked" | "skipped";
 	blockers: WorkerInstallBlocker[];
@@ -234,7 +221,7 @@ type ApplyResult = {
 	changedRefs: string[];
 };
 
-type RootPackageManager = "bun" | "npm" | "pnpm" | "yarn";
+type RootPackageManager = "npm" | "pnpm" | "yarn";
 
 type ManagedFileTemplate = {
 	content: string;
@@ -256,8 +243,8 @@ const WORKER_MANIFEST_MANAGED_REFS = [
 	"scripts/run-worker.sh",
 	"apps/worker/package.json",
 	"apps/worker/worker-manifest.json",
-	"apps/worker/src/worker-cli.ts",
-	"apps/worker/tests/smoke.test.ts",
+	"apps/worker/src/worker-cli.mjs",
+	"apps/worker/tests/smoke.test.mjs",
 ] as const;
 const DEFAULT_WORKER_LICENSE_API_BASE_URL = "https://www.man-meets-ai.com";
 const WORKER_LICENSE_ACTIVATION_START_PATH = "/api/worker/license/device/start";
@@ -270,17 +257,7 @@ const WORKER_LICENSE_SIGNATURE_PUBLIC_KEY = [
 const MIN_ACTIVATION_POLL_INTERVAL_MS = 1_000;
 const MAX_ACTIVATION_POLL_INTERVAL_MS = 10_000;
 const DEFAULT_ACTIVATION_TIMEOUT_MS = 5 * 60_000;
-const WORKER_MANAGED_BUN_VERSION = "1.3.5";
-const WORKER_MANAGED_BUN_SHA256_BY_ASSET: Record<string, string> = {
-	"bun-darwin-aarch64.zip":
-		"db17588a4aea8804856825d4bead3f05e1f37276ca606f37e369b4f72f35d3fb",
-	"bun-darwin-x64.zip":
-		"f5ffc03030fe527a86295fb5852bb08c5e99b707560011d1d509ab028902bf29",
-	"bun-linux-aarch64.zip":
-		"ed01000f85bd97785228ad2845dc92a1860b8054856826d7317690ac8f8ee74b",
-	"bun-linux-x64.zip":
-		"7051d86a924aefea3e0b96213b5fd8f79c0793f9cae6534233e627e5c3db4669",
-};
+const WORKER_DEFAULT_NPM_VERSION = "11.12.1";
 const LEGACY_WORKER_BUN_LOCK_REF = "apps/worker/bun.lock";
 const LEGACY_WORKER_BUN_LOCK_CONTENT =
 	"# Worker package lockfile placeholder.\n";
@@ -466,29 +443,6 @@ export async function runWorkerFoundationsInstall({
 				kickoff: buildSkippedKickoff("cancelled"),
 			});
 		}
-	}
-
-	try {
-		await ensureWorkerBunToolchain(context, inspection.bunToolchain);
-	} catch (error) {
-		return await finishAndMaybeSyncResult({
-			outcome: "failed",
-			exitCode: 1,
-			summary:
-				error instanceof Error
-					? error.message
-					: "Worker-managed Bun toolchain could not be prepared.",
-			context,
-			plan,
-			proof: [],
-			createdRefs: [],
-			changedRefs: [],
-			branch: null,
-			commit: null,
-			localProofRef: null,
-			reportRef: null,
-			kickoff: buildSkippedKickoff("failed"),
-		});
 	}
 
 	const branchResult = await prepareInstallBranch(context);
@@ -784,12 +738,11 @@ async function inspectTargetRepository(
 		});
 	}
 
-	const bunToolchain = await inspectWorkerBunToolchain(context);
-	if (bunToolchain.status === "blocked") {
+	const nodeRuntime = await inspectWorkerNodeRuntime(context);
+	if (nodeRuntime.status === "blocked") {
 		blockers.push({
-			blockerId: "worker-bun-toolchain",
-			reason:
-				"Worker-managed Bun toolchain cannot be prepared on this machine.",
+			blockerId: "worker-node-runtime",
+			reason: "Node is required for Worker proof commands.",
 		});
 	}
 	const packageManagerCommandStatus = await inspectPackageManagerCommand({
@@ -850,7 +803,7 @@ async function inspectTargetRepository(
 		currentBranch: await readCurrentBranch(context.repositoryRoot),
 		installBranchExists: await gitBranchExists(context.repositoryRoot),
 		licenseStatus,
-		bunToolchain,
+		nodeRuntime,
 		codexStatus,
 		codexProfileStatus,
 		blockers,
@@ -1323,44 +1276,29 @@ async function delay(ms: number) {
 	await new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function inspectWorkerBunToolchain(
+async function inspectWorkerNodeRuntime(
 	context: WorkerInstallContext,
-): Promise<WorkerBunToolchainPlan> {
-	const managedBunPath = resolveManagedBunPath(context);
-	if (
-		existsSync(managedBunPath) &&
-		(await commandReportsExpectedBunVersion(managedBunPath, context.env))
-	) {
-		return {
-			runtime: "bun",
-			status: "managed",
-			origin: "worker-managed",
-			targetRef: "worker-home/toolchains/bun/bin/bun",
-		};
-	}
-	if (await commandReportsExpectedBunVersion("bun", context.env)) {
-		return {
-			runtime: "bun",
-			status: "available",
-			origin: "path",
-			targetRef: "worker-home/toolchains/bun/bin/bun",
-		};
-	}
-	const candidate = await resolveProvisionableBunCandidate(context);
-	if (candidate) {
-		return {
-			runtime: "bun",
-			status: "provisionable",
-			origin: candidate.origin,
-			targetRef: "worker-home/toolchains/bun/bin/bun",
-		};
-	}
-	return {
-		runtime: "bun",
-		status: "blocked",
-		origin: "missing",
-		targetRef: "worker-home/toolchains/bun/bin/bun",
-	};
+): Promise<WorkerNodeRuntimePlan> {
+	const result = await runBoundedProcess({
+		command: "node",
+		args: ["--version"],
+		cwd: context.repositoryRoot,
+		env: buildWorkerProcessEnv(context),
+		timeoutMs: 5_000,
+	});
+	return result.succeeded
+		? {
+				runtime: "node",
+				status: "available",
+				origin: "path",
+				targetRef: "system-node",
+			}
+		: {
+				runtime: "node",
+				status: "blocked",
+				origin: "missing",
+				targetRef: "system-node",
+			};
 }
 
 async function inspectPackageManagerCommand({
@@ -1370,9 +1308,6 @@ async function inspectPackageManagerCommand({
 	context: WorkerInstallContext;
 	packageManager: RootPackageManager;
 }) {
-	if (packageManager === "bun") {
-		return "ready" as const;
-	}
 	const result = await runBoundedProcess({
 		command: packageManager,
 		args: ["--version"],
@@ -1383,159 +1318,9 @@ async function inspectPackageManagerCommand({
 	return result.succeeded ? ("ready" as const) : ("blocked" as const);
 }
 
-type ProvisionableBunCandidate = {
-	origin: "current-runtime" | "download" | "explicit-env";
-} & (
-	| {
-			absolutePath: string;
-			origin: "current-runtime" | "explicit-env";
-	  }
-	| {
-			archiveAssetName: string;
-			downloadUrl: string;
-			expectedSha256: string;
-			origin: "download";
-	  }
-);
-
-async function resolveProvisionableBunCandidate(
-	context: WorkerInstallContext,
-): Promise<ProvisionableBunCandidate | null> {
-	const explicitBunPath = context.env[WORKER_BUN_EXECUTABLE_ENV_VAR];
-	if (
-		explicitBunPath &&
-		(await commandReportsExpectedBunVersion(explicitBunPath, context.env))
-	) {
-		return { absolutePath: explicitBunPath, origin: "explicit-env" };
-	}
-
-	const explicitDownloadUrl = resolveExplicitBunDownloadUrl(context.env);
-	if (explicitDownloadUrl) {
-		const integrity = resolveBunDownloadIntegrity({
-			env: context.env,
-			downloadUrl: explicitDownloadUrl,
-			source: "explicit",
-		});
-		if (integrity) {
-			return {
-				...integrity,
-				downloadUrl: explicitDownloadUrl,
-				origin: "download",
-			};
-		}
-		return null;
-	}
-
-	const processVersions = process.versions as NodeJS.ProcessVersions & {
-		bun?: string;
-	};
-	if (
-		processVersions.bun &&
-		(await commandReportsExpectedBunVersion(process.execPath, context.env))
-	) {
-		return { absolutePath: process.execPath, origin: "current-runtime" };
-	}
-	const defaultDownloadUrl = resolveDefaultBunDownloadUrl();
-	if (defaultDownloadUrl) {
-		const integrity = resolveBunDownloadIntegrity({
-			env: context.env,
-			downloadUrl: defaultDownloadUrl,
-			source: "default",
-		});
-		if (integrity) {
-			return {
-				...integrity,
-				downloadUrl: defaultDownloadUrl,
-				origin: "download",
-			};
-		}
-	}
-	return null;
-}
-
-function resolveExplicitBunDownloadUrl(env: NodeJS.ProcessEnv) {
-	const value = env[WORKER_BUN_DOWNLOAD_URL_ENV_VAR];
-	if (!value) {
-		return null;
-	}
-	try {
-		const url = new URL(value);
-		return url.protocol === "http:" || url.protocol === "https:"
-			? url.toString()
-			: null;
-	} catch {
-		return null;
-	}
-}
-
-function resolveBunDownloadIntegrity({
-	env,
-	downloadUrl,
-	source,
-}: {
-	env: NodeJS.ProcessEnv;
-	downloadUrl: string;
-	source: "default" | "explicit";
-}) {
-	const archiveAssetName = resolveBunReleaseAssetName();
-	if (!archiveAssetName) {
-		return null;
-	}
-	const overrideSha256 = normalizeSha256(
-		env[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR],
-	);
-	if (source === "explicit" && overrideSha256) {
-		return { archiveAssetName, expectedSha256: overrideSha256 };
-	}
-	const knownAssetName =
-		source === "default"
-			? archiveAssetName
-			: readBunAssetNameFromUrl(downloadUrl);
-	if (knownAssetName !== archiveAssetName) {
-		return null;
-	}
-	const expectedSha256 = WORKER_MANAGED_BUN_SHA256_BY_ASSET[archiveAssetName];
-	return expectedSha256 ? { archiveAssetName, expectedSha256 } : null;
-}
-
-function normalizeSha256(value: string | undefined) {
-	const normalized = value?.trim().toLowerCase();
-	return normalized && /^[a-f0-9]{64}$/.test(normalized) ? normalized : null;
-}
-
-function readBunAssetNameFromUrl(downloadUrl: string) {
-	try {
-		return path.posix.basename(new URL(downloadUrl).pathname);
-	} catch {
-		return null;
-	}
-}
-
-function resolveDefaultBunDownloadUrl() {
-	const assetName = resolveBunReleaseAssetName();
-	if (!assetName) {
-		return null;
-	}
-	return `https://github.com/oven-sh/bun/releases/download/bun-v${WORKER_MANAGED_BUN_VERSION}/${assetName}`;
-}
-
-function resolveBunReleaseAssetName() {
-	if (process.platform === "darwin") {
-		if (process.arch === "arm64") return "bun-darwin-aarch64.zip";
-		if (process.arch === "x64") return "bun-darwin-x64.zip";
-		return null;
-	}
-	if (process.platform === "linux") {
-		if (process.arch === "arm64") return "bun-linux-aarch64.zip";
-		if (process.arch === "x64") return "bun-linux-x64.zip";
-		return null;
-	}
-	return null;
-}
-
 function buildInstallPlan(inspection: TargetRepoInspection): WorkerInstallPlan {
 	const operations: WorkerInstallOperation[] = [];
-	operations.push(buildBunToolchainOperation(inspection.bunToolchain));
+	operations.push(buildNodeRuntimeOperation(inspection.nodeRuntime));
 	for (const scriptName of WORKER_FOUNDATIONS_ROOT_SCRIPTS) {
 		operations.push(
 			buildPackageScriptOperation({
@@ -1570,7 +1355,7 @@ function buildInstallPlan(inspection: TargetRepoInspection): WorkerInstallPlan {
 		workflowVersion: WORKER_FOUNDATIONS_INSTALL_WORKFLOW_VERSION,
 		workerBundleVersion: WORKER_FOUNDATIONS_BUNDLE_VERSION,
 		packageManager: inspection.packageManager,
-		toolchain: inspection.bunToolchain,
+		toolchain: inspection.nodeRuntime,
 		operations,
 		blockers: [
 			...inspection.blockers,
@@ -1616,37 +1401,24 @@ function addPlanBlocker(
 	};
 }
 
-function buildBunToolchainOperation(
-	toolchain: WorkerBunToolchainPlan,
+function buildNodeRuntimeOperation(
+	runtime: WorkerNodeRuntimePlan,
 ): WorkerInstallOperation {
-	if (toolchain.status === "available" || toolchain.status === "managed") {
+	if (runtime.status === "available") {
 		return {
-			operationId: "toolchain:bun",
+			operationId: "runtime:node",
 			surface: "toolchain",
-			targetRef: toolchain.targetRef,
+			targetRef: runtime.targetRef,
 			status: "keep",
-			reason:
-				toolchain.status === "managed"
-					? "Worker-managed Bun toolchain is already available."
-					: "Compatible Bun is available on PATH.",
-		};
-	}
-	if (toolchain.status === "provisionable") {
-		return {
-			operationId: "toolchain:bun",
-			surface: "toolchain",
-			targetRef: toolchain.targetRef,
-			status: "planned",
-			reason:
-				"Worker-managed Bun toolchain will be prepared before repo writes.",
+			reason: "Node is available on PATH.",
 		};
 	}
 	return {
-		operationId: "toolchain:bun",
+		operationId: "runtime:node",
 		surface: "toolchain",
-		targetRef: toolchain.targetRef,
+		targetRef: runtime.targetRef,
 		status: "blocked",
-		reason: "Worker-managed Bun toolchain cannot be prepared on this machine.",
+		reason: "Node is required for Worker commands.",
 	};
 }
 
@@ -1666,7 +1438,7 @@ function buildPackageScriptOperation({
 			targetRef: `package.json#scripts.${scriptName}`,
 			status: "add",
 			reason:
-				"Root package.json will be created with Bun defaults and this Worker command script.",
+				"Root package.json will be created with npm defaults and this Worker command script.",
 		};
 	}
 	const scripts = packageJson.scripts;
@@ -1787,294 +1559,12 @@ async function prepareInstallBranch(
 	return { status: "ready" };
 }
 
-async function ensureWorkerBunToolchain(
-	context: WorkerInstallContext,
-	toolchain: WorkerBunToolchainPlan,
-) {
-	if (toolchain.status !== "provisionable") {
-		return;
-	}
-	const candidate = await resolveProvisionableBunCandidate(context);
-	if (!candidate) {
-		throw new Error("Worker-managed Bun toolchain is no longer provisionable.");
-	}
-	const managedBunPath = resolveManagedBunPath(context);
-	await mkdir(path.dirname(managedBunPath), { recursive: true });
-	if (candidate.origin === "download") {
-		await installDownloadedBun({
-			archiveAssetName: candidate.archiveAssetName,
-			context,
-			downloadUrl: candidate.downloadUrl,
-			expectedSha256: candidate.expectedSha256,
-			managedBunPath,
-		});
-	} else {
-		await copyFile(candidate.absolutePath, managedBunPath);
-	}
-	await chmod(managedBunPath, 0o755);
-	await assertExpectedBunVersion(
-		managedBunPath,
-		buildWorkerProcessEnv(context),
-	);
-}
-
-async function installDownloadedBun({
-	archiveAssetName,
-	context,
-	downloadUrl,
-	expectedSha256,
-	managedBunPath,
-}: {
-	archiveAssetName: string;
-	context: WorkerInstallContext;
-	downloadUrl: string;
-	expectedSha256: string;
-	managedBunPath: string;
-}) {
-	const downloadDirectory = await mkdtemp(
-		path.join(os.tmpdir(), "shipbysunday-worker-bun-"),
-	);
-	try {
-		const response = await fetch(downloadUrl);
-		if (!response.ok) {
-			throw new Error(
-				`Worker-managed Bun download failed with HTTP ${response.status}.`,
-			);
-		}
-		const payload = Buffer.from(await response.arrayBuffer());
-		assertDownloadedBunIntegrity(payload, expectedSha256);
-		if (shouldTreatBunDownloadAsZip(downloadUrl, response)) {
-			await installBunFromZip({
-				archiveBytes: payload,
-				archiveAssetName,
-				context,
-				downloadDirectory,
-				managedBunPath,
-			});
-			return;
-		}
-		await writeFile(managedBunPath, payload, { mode: 0o755 });
-	} finally {
-		await rm(downloadDirectory, { force: true, recursive: true });
-	}
-}
-
-function shouldTreatBunDownloadAsZip(downloadUrl: string, response: Response) {
-	const contentType = response.headers.get("content-type") ?? "";
-	return downloadUrl.endsWith(".zip") || contentType.includes("zip");
-}
-
-function assertDownloadedBunIntegrity(payload: Buffer, expectedSha256: string) {
-	const actualSha256 = createHash("sha256").update(payload).digest("hex");
-	if (actualSha256 !== expectedSha256) {
-		throw new Error("Worker-managed Bun download failed integrity validation.");
-	}
-}
-
-async function installBunFromZip({
-	archiveBytes,
-	archiveAssetName,
-	context,
-	downloadDirectory,
-	managedBunPath,
-}: {
-	archiveBytes: Buffer;
-	archiveAssetName: string;
-	context: WorkerInstallContext;
-	downloadDirectory: string;
-	managedBunPath: string;
-}) {
-	const archivePath = path.join(downloadDirectory, "bun.zip");
-	const extractDirectory = path.join(downloadDirectory, "extract");
-	const expectedBinaryRef = expectedBunArchiveBinaryRef(archiveAssetName);
-	validateBunArchiveEntries({
-		archiveBytes,
-		expectedBinaryRef,
-	});
-	await mkdir(extractDirectory, { recursive: true });
-	await writeFile(archivePath, archiveBytes);
-	const unzipResult = await runBoundedProcess({
-		command: "unzip",
-		args: ["-q", archivePath, expectedBinaryRef, "-d", extractDirectory],
-		env: context.env,
-		timeoutMs: 30_000,
-	});
-	if (!unzipResult.succeeded) {
-		throw new Error("Worker-managed Bun archive could not be extracted.");
-	}
-	const extractedBunPath = path.join(extractDirectory, expectedBinaryRef);
-	if (!existsSync(extractedBunPath)) {
-		throw new Error("Worker-managed Bun archive did not contain bun.");
-	}
-	await assertExtractedBunPath({
-		extractDirectory,
-		extractedBunPath,
-	});
-	await copyFile(extractedBunPath, managedBunPath);
-}
-
-function expectedBunArchiveBinaryRef(archiveAssetName: string) {
-	const archiveRoot = archiveAssetName.replace(/\.zip$/u, "");
-	const executableName = process.platform === "win32" ? "bun.exe" : "bun";
-	return `${archiveRoot}/${executableName}`;
-}
-
-async function assertExtractedBunPath({
-	extractDirectory,
-	extractedBunPath,
-}: {
-	extractDirectory: string;
-	extractedBunPath: string;
-}) {
-	const extractRoot = await realpath(extractDirectory);
-	const extractedRealPath = await realpath(extractedBunPath);
-	if (!isPathInsideDirectory(extractedRealPath, extractRoot)) {
-		throw new Error("Worker-managed Bun archive escaped extraction root.");
-	}
-}
-
-function validateBunArchiveEntries({
-	archiveBytes,
-	expectedBinaryRef,
-}: {
-	archiveBytes: Buffer;
-	expectedBinaryRef: string;
-}) {
-	const expectedRootRef = `${expectedBinaryRef.split("/")[0]}/`;
-	const entries = readZipCentralDirectoryEntries(archiveBytes);
-	if (!entries.some((entry) => entry.name === expectedBinaryRef)) {
-		throw new Error("Worker-managed Bun archive did not contain bun.");
-	}
-	for (const entry of entries) {
-		const allowedEntry =
-			entry.name === expectedRootRef || entry.name === expectedBinaryRef;
-		if (
-			!allowedEntry ||
-			isUnsafeZipEntryName(entry.name) ||
-			isZipEntrySymlink(entry)
-		) {
-			throw new Error("Worker-managed Bun archive contained unsafe entries.");
-		}
-	}
-}
-
-type ZipCentralDirectoryEntry = {
-	externalAttributes: number;
-	name: string;
-	versionMadeBy: number;
-};
-
-function readZipCentralDirectoryEntries(
-	archiveBytes: Buffer,
-): ZipCentralDirectoryEntry[] {
-	const eocdOffset = findZipEndOfCentralDirectoryOffset(archiveBytes);
-	if (eocdOffset === null) {
-		throw new Error("Worker-managed Bun archive was not a valid zip.");
-	}
-	const entryCount = archiveBytes.readUInt16LE(eocdOffset + 10);
-	const centralDirectorySize = archiveBytes.readUInt32LE(eocdOffset + 12);
-	const centralDirectoryOffset = archiveBytes.readUInt32LE(eocdOffset + 16);
-	if (
-		entryCount === 0xffff ||
-		centralDirectorySize === 0xffffffff ||
-		centralDirectoryOffset === 0xffffffff
-	) {
-		throw new Error(
-			"Worker-managed Bun archive used unsupported zip64 metadata.",
-		);
-	}
-	if (
-		centralDirectoryOffset + centralDirectorySize > archiveBytes.length ||
-		centralDirectoryOffset < 0
-	) {
-		throw new Error("Worker-managed Bun archive had invalid zip metadata.");
-	}
-	const entries: ZipCentralDirectoryEntry[] = [];
-	let offset = centralDirectoryOffset;
-	for (let index = 0; index < entryCount; index += 1) {
-		if (
-			offset + 46 > archiveBytes.length ||
-			archiveBytes.readUInt32LE(offset) !== 0x02014b50
-		) {
-			throw new Error("Worker-managed Bun archive had invalid zip entries.");
-		}
-		const versionMadeBy = archiveBytes.readUInt16LE(offset + 4);
-		const nameLength = archiveBytes.readUInt16LE(offset + 28);
-		const extraLength = archiveBytes.readUInt16LE(offset + 30);
-		const commentLength = archiveBytes.readUInt16LE(offset + 32);
-		const externalAttributes = archiveBytes.readUInt32LE(offset + 38);
-		const nameStart = offset + 46;
-		const nameEnd = nameStart + nameLength;
-		if (nameEnd > archiveBytes.length) {
-			throw new Error(
-				"Worker-managed Bun archive had invalid zip entry names.",
-			);
-		}
-		entries.push({
-			externalAttributes,
-			name: archiveBytes.toString("utf8", nameStart, nameEnd),
-			versionMadeBy,
-		});
-		offset = nameEnd + extraLength + commentLength;
-	}
-	return entries;
-}
-
-function findZipEndOfCentralDirectoryOffset(archiveBytes: Buffer) {
-	const minimumOffset = Math.max(0, archiveBytes.length - 65_557);
-	for (
-		let offset = archiveBytes.length - 22;
-		offset >= minimumOffset;
-		offset -= 1
-	) {
-		if (archiveBytes.readUInt32LE(offset) === 0x06054b50) {
-			return offset;
-		}
-	}
-	return null;
-}
-
-function isUnsafeZipEntryName(name: string) {
-	if (
-		name.trim() === "" ||
-		name.includes("\0") ||
-		name.includes("\\") ||
-		name.startsWith("/") ||
-		/^[A-Za-z]:\//u.test(name)
-	) {
-		return true;
-	}
-	const normalized = path.posix.normalize(name);
-	return (
-		normalized === ".." ||
-		normalized.startsWith("../") ||
-		name.split("/").includes("..")
-	);
-}
-
-function isZipEntrySymlink(entry: ZipCentralDirectoryEntry) {
-	const sourceHost = entry.versionMadeBy >> 8;
-	if (sourceHost !== 3) {
-		return false;
-	}
-	const unixMode = (entry.externalAttributes >>> 16) & 0xffff;
-	return (unixMode & 0o170000) === 0o120000;
-}
-
-function isPathInsideDirectory(candidatePath: string, directoryPath: string) {
-	const relativePath = path.relative(directoryPath, candidatePath);
-	return (
-		relativePath === "" ||
-		(!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
-	);
-}
-
 async function applyWorkerFoundations(
 	context: WorkerInstallContext,
 	packageManager: RootPackageManager,
 ): Promise<ApplyResult> {
 	const applyResult: ApplyResult = { createdRefs: [], changedRefs: [] };
-	await writePackageJsonScripts(context, applyResult, packageManager);
+	await writePackageJsonScripts(context, applyResult);
 	await writeManagedFileSet(context, applyResult, packageManager);
 	await removeLegacyWorkerBunLock(context, applyResult, packageManager);
 	await appendGitInfoExclude(context);
@@ -2084,7 +1574,6 @@ async function applyWorkerFoundations(
 async function writePackageJsonScripts(
 	context: WorkerInstallContext,
 	applyResult: ApplyResult,
-	packageManager: RootPackageManager,
 ) {
 	const packageJsonPath = path.join(context.repositoryRoot, "package.json");
 	const packageJsonExists = existsSync(packageJsonPath);
@@ -2097,12 +1586,13 @@ async function writePackageJsonScripts(
 	if (!packageJson || !isJsonObject(packageJson)) {
 		throw new Error("Root package.json must parse before apply.");
 	}
-	if (
-		packageManager === "bun" &&
-		typeof packageJson.packageManager !== "string" &&
-		!hasRootPackageManagerLockfile(context.repositoryRoot)
-	) {
-		packageJson.packageManager = `bun@${WORKER_MANAGED_BUN_VERSION}`;
+	const packageManagerIdentity = packageJson.packageManager;
+	if (typeof packageManagerIdentity === "string") {
+		if (packageManagerIdentity.startsWith("bun@")) {
+			packageJson.packageManager = `npm@${WORKER_DEFAULT_NPM_VERSION}`;
+		}
+	} else if (!hasRootPackageManagerLockfile(context.repositoryRoot)) {
+		packageJson.packageManager = `npm@${WORKER_DEFAULT_NPM_VERSION}`;
 	}
 	const scripts = ensureJsonObjectProperty(packageJson, "scripts");
 	for (const scriptName of WORKER_FOUNDATIONS_ROOT_SCRIPTS) {
@@ -2542,10 +2032,8 @@ async function runPackageScript({
 	args: string[];
 }) {
 	const commandArgs = packageRunArgs({ packageManager, scriptName, args });
-	const command =
-		packageManager === "bun" ? resolveBunCommand(context) : packageManager;
 	const result = await runBoundedProcess({
-		command,
+		command: packageManager,
 		args: commandArgs,
 		cwd: context.repositoryRoot,
 		env: buildWorkerProcessEnv(context),
@@ -3052,10 +2540,10 @@ function buildBlockedPlan({
 		workerBundleVersion: WORKER_FOUNDATIONS_BUNDLE_VERSION,
 		packageManager,
 		toolchain: {
-			runtime: "bun",
+			runtime: "node",
 			status: "blocked",
 			origin: "missing",
-			targetRef: "worker-home/toolchains/bun/bin/bun",
+			targetRef: "system-node",
 		},
 		operations: [],
 		blockers,
@@ -3100,8 +2588,8 @@ function renderInteractiveInstallChecklist({
 	const managedFileOperations = plan.operations.filter(
 		(operation) => operation.surface === "file",
 	);
-	const toolchainOperation = plan.operations.find(
-		(operation) => operation.operationId === "toolchain:bun",
+	const runtimeOperation = plan.operations.find(
+		(operation) => operation.operationId === "runtime:node",
 	);
 	const lines = [
 		"Shipbysunday Worker Foundations install checklist",
@@ -3110,7 +2598,7 @@ function renderInteractiveInstallChecklist({
 		...renderPreflightChecklist(plan),
 		"",
 		"Install",
-		renderOperationChecklistItem("Worker Bun toolchain", [toolchainOperation]),
+		renderOperationChecklistItem("Worker Node runtime", [runtimeOperation]),
 		renderOperationChecklistItem(
 			"Root command scripts",
 			packageScriptOperations,
@@ -3205,9 +2693,9 @@ function buildManagedFiles(
 			targetRef: "apps/worker/worker-manifest.json",
 			content: workerManifestJson(),
 		},
-		{ targetRef: "apps/worker/src/worker-cli.ts", content: workerCliSource() },
+		{ targetRef: "apps/worker/src/worker-cli.mjs", content: workerCliSource() },
 		{
-			targetRef: "apps/worker/tests/smoke.test.ts",
+			targetRef: "apps/worker/tests/smoke.test.mjs",
 			content: workerSmokeTestSource(),
 		},
 		{
@@ -3348,32 +2836,25 @@ function runWorkerShellScript() {
 		'  SCRIPT_DIR="."',
 		"fi",
 		'REPO_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"',
-		'WORKER_HOME="${SHIPBYSUNDAY_WORKER_HOME:-$HOME/.worker}"',
-		'if [ -n "${BUN:-}" ]; then',
-		'  BUN_BIN="$BUN"',
-		'elif [ -x "$WORKER_HOME/toolchains/bun/bin/bun" ] && [ "$("$WORKER_HOME/toolchains/bun/bin/bun" --version 2>/dev/null || true)" = "1.3.5" ]; then',
-		'  BUN_BIN="$WORKER_HOME/toolchains/bun/bin/bun"',
-		"else",
-		'  BUN_BIN="bun"',
-		"fi",
-		'if ! command -v "$BUN_BIN" >/dev/null 2>&1; then',
-		'  echo "Shipbysunday Worker requires Bun. Re-run shipbysunday install to prepare the Worker-managed Bun toolchain, or install Bun and try again." >&2',
+		'NODE_BIN="${NODE:-node}"',
+		'if ! command -v "$NODE_BIN" >/dev/null 2>&1; then',
+		'  echo "Shipbysunday Worker requires Node on PATH." >&2',
 		"  exit 127",
 		"fi",
-		'case "$BUN_BIN" in',
-		'  */*) PATH="${BUN_BIN%/*}:$PATH"; export PATH ;;',
+		'case "$NODE_BIN" in',
+		'  */*) PATH="${NODE_BIN%/*}:$PATH"; export PATH ;;',
 		"esac",
 		'cd "$REPO_ROOT/apps/worker"',
 		'case "${1:-}" in',
 		'  ""|--help|-h)',
-		'    exec "$BUN_BIN" src/worker-cli.ts --help',
+		'    exec "$NODE_BIN" src/worker-cli.mjs --help',
 		"    ;;",
 		"esac",
-		'if [ "${1:-}" = "worker:test" ]; then',
+		'if [ "${1:-}" = "worker:test" ] || [ "${1:-}" = "test" ]; then',
 		"  shift",
-		'  set -- test "$@"',
+		'  exec "$NODE_BIN" --test tests/*.mjs "$@"',
 		"fi",
-		'exec "$BUN_BIN" run "$@"',
+		'exec "$NODE_BIN" src/worker-cli.mjs "$@"',
 		"",
 	].join("\n");
 }
@@ -3386,18 +2867,18 @@ function workerPackageJson() {
 			private: true,
 			type: "module",
 			scripts: {
-				"programs:lint": "bun src/worker-cli.ts programs:lint",
-				"plans:lint": "bun src/worker-cli.ts plans:lint",
-				"markdown:lint": "bun src/worker-cli.ts markdown:lint",
-				"docs:validate": "bun src/worker-cli.ts docs:validate",
+				"programs:lint": "node src/worker-cli.mjs programs:lint",
+				"plans:lint": "node src/worker-cli.mjs plans:lint",
+				"markdown:lint": "node src/worker-cli.mjs markdown:lint",
+				"docs:validate": "node src/worker-cli.mjs docs:validate",
 				"program:write-child-plan":
-					"bun src/worker-cli.ts program:write-child-plan",
-				"execplan:write": "bun src/worker-cli.ts execplan:write",
-				"execplan:grill": "bun src/worker-cli.ts execplan:grill",
-				"execplan:build": "bun src/worker-cli.ts execplan:build",
-				"execplan:validate": "bun src/worker-cli.ts execplan:validate",
-				"worker:test": "bun test tests",
-				test: "bun test tests",
+					"node src/worker-cli.mjs program:write-child-plan",
+				"execplan:write": "node src/worker-cli.mjs execplan:write",
+				"execplan:grill": "node src/worker-cli.mjs execplan:grill",
+				"execplan:build": "node src/worker-cli.mjs execplan:build",
+				"execplan:validate": "node src/worker-cli.mjs execplan:validate",
+				"worker:test": "node --test tests/*.mjs",
+				test: "node --test tests/*.mjs",
 			},
 		},
 		null,
@@ -3423,8 +2904,6 @@ function workerCliSource() {
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-type LintReport = { ref: string; issues: string[] };
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const command = process.argv[2];
@@ -3475,13 +2954,13 @@ function renderWorkerHelp() {
 	].join("\n");
 }
 
-async function lintPrograms(): Promise<LintReport[]> {
-	const reports: LintReport[] = [];
+async function lintPrograms() {
+	const reports = [];
 	for (const root of ["docs/programs/active", "docs/programs/completed"]) {
 		for (const dir of await listDirs(root)) {
 			if (!/^\d{4}-\d{2}-\d{2}-.+/.test(path.basename(dir))) continue;
 			const ref = toRef(dir);
-			const issues: string[] = [];
+			const issues = [];
 			for (const required of [
 				"program.md",
 				"converged-decision-packet.md",
@@ -3517,14 +2996,14 @@ async function lintPrograms(): Promise<LintReport[]> {
 	return reports;
 }
 
-async function lintExecPlans(args: string[]): Promise<LintReport[]> {
+async function lintExecPlans(args) {
 	const requestedPlan = readArg(args, "--plan");
 	const refs = requestedPlan ? [requestedPlan] : await listMarkdownRefs(["docs/exec-plans/active", "docs/exec-plans/completed"]);
-	const reports: LintReport[] = [];
+	const reports = [];
 	for (const ref of refs) {
 		if (ref.endsWith("/index.md")) continue;
 		const absolutePath = path.join(repoRoot, ref);
-		const issues: string[] = [];
+		const issues = [];
 		if (!existsSync(absolutePath)) {
 			issues.push("ExecPlan does not exist.");
 			reports.push({ ref, issues });
@@ -3553,14 +3032,14 @@ async function lintExecPlans(args: string[]): Promise<LintReport[]> {
 	return reports;
 }
 
-async function lintMarkdown(args: string[]): Promise<LintReport[]> {
+async function lintMarkdown(args) {
 	const requestedPaths = readPathArgs(args);
 	const roots = requestedPaths.length > 0 ? requestedPaths : ["docs/programs", "docs/exec-plans", "docs/prompts", "docs/worker"];
 	const refs = await listMarkdownRefs(roots);
-	const reports: LintReport[] = [];
+	const reports = [];
 	for (const ref of refs) {
 		const text = await readFile(path.join(repoRoot, ref), "utf8");
-		const issues: string[] = [];
+		const issues = [];
 		if (text.includes("\r\n")) issues.push("File must use LF line endings.");
 		if (!parseFrontmatter(text)) issues.push("Missing YAML frontmatter block.");
 		reports.push({ ref, issues });
@@ -3568,7 +3047,7 @@ async function lintMarkdown(args: string[]): Promise<LintReport[]> {
 	return reports;
 }
 
-async function writeChildPlan(args: string[]) {
+async function writeChildPlan(args) {
 	const programId = requireArg(args, "--program-id");
 	const planRef = requireArg(args, "--plan");
 	const title = requireArg(args, "--title");
@@ -3588,7 +3067,7 @@ async function writeChildPlan(args: string[]) {
 	console.log("Created " + planRef);
 }
 
-function renderChildPlan(input: { title: string; summary: string; programId: string; briefRef: string }) {
+function renderChildPlan(input) {
 	return [
 		"---",
 		"title: " + input.title,
@@ -3678,7 +3157,7 @@ function renderChildPlan(input: { title: string; summary: string; programId: str
 	].join("\n");
 }
 
-function exitFromReports(reports: LintReport[]) {
+function exitFromReports(reports) {
 	for (const report of reports) {
 		if (report.issues.length === 0) console.log(report.ref + ": ok");
 		else console.log(report.ref + ":\n" + report.issues.map((issue) => "  - " + issue).join("\n"));
@@ -3686,19 +3165,19 @@ function exitFromReports(reports: LintReport[]) {
 	if (reports.some((report) => report.issues.length > 0)) process.exitCode = 1;
 }
 
-async function listDirs(rootRef: string) {
+async function listDirs(rootRef) {
 	const absoluteRoot = path.join(repoRoot, rootRef);
 	const entries = await safeReaddirWithTypes(absoluteRoot);
 	return entries.filter((entry) => entry.isDirectory()).map((entry) => path.join(absoluteRoot, entry.name));
 }
 
-async function listMarkdownRefs(rootRefs: string[]) {
-	const refs: string[] = [];
+async function listMarkdownRefs(rootRefs) {
+	const refs = [];
 	for (const rootRef of rootRefs) await collectMarkdownRefs(path.join(repoRoot, rootRef), refs);
 	return refs.sort();
 }
 
-async function collectMarkdownRefs(absolutePath: string, refs: string[]) {
+async function collectMarkdownRefs(absolutePath, refs) {
 	const entries = await safeReaddirWithTypes(absolutePath);
 	for (const entry of entries) {
 		const childPath = path.join(absolutePath, entry.name);
@@ -3707,7 +3186,7 @@ async function collectMarkdownRefs(absolutePath: string, refs: string[]) {
 	}
 }
 
-async function safeReaddir(absolutePath: string) {
+async function safeReaddir(absolutePath) {
 	try {
 		return await readdir(absolutePath);
 	} catch {
@@ -3715,7 +3194,7 @@ async function safeReaddir(absolutePath: string) {
 	}
 }
 
-async function safeReaddirWithTypes(absolutePath: string) {
+async function safeReaddirWithTypes(absolutePath) {
 	try {
 		return await readdir(absolutePath, { withFileTypes: true });
 	} catch {
@@ -3723,12 +3202,12 @@ async function safeReaddirWithTypes(absolutePath: string) {
 	}
 }
 
-function parseFrontmatter(text: string) {
+function parseFrontmatter(text) {
 	const normalized = text.replaceAll("\r\n", "\n");
 	if (!normalized.startsWith("---\n")) return null;
 	const end = normalized.indexOf("\n---\n", 4);
 	if (end === -1) return null;
-	const metadata = new Map<string, string>();
+	const metadata = new Map();
 	for (const line of normalized.slice(4, end).split("\n")) {
 		const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
 		if (match) metadata.set(match[1], match[2].replace(/^['"]|['"]$/g, ""));
@@ -3736,7 +3215,7 @@ function parseFrontmatter(text: string) {
 	return { metadata, body: normalized.slice(end + 5) };
 }
 
-async function findProgramDir(programId: string) {
+async function findProgramDir(programId) {
 	for (const root of ["docs/programs/active", "docs/programs/completed"]) {
 		for (const dir of await listDirs(root)) {
 			if (path.basename(dir).endsWith("-" + programId)) return toRef(dir);
@@ -3745,19 +3224,19 @@ async function findProgramDir(programId: string) {
 	throw new Error("No Program packet found for program_id: " + programId);
 }
 
-function readArg(args: string[], name: string) {
+function readArg(args, name) {
 	const index = args.indexOf(name);
 	return index === -1 ? null : args[index + 1] ?? null;
 }
 
-function requireArg(args: string[], name: string) {
+function requireArg(args, name) {
 	const value = readArg(args, name);
 	if (!value || value.startsWith("--")) throw new Error("Missing value for " + name);
 	return value;
 }
 
-function readPathArgs(args: string[]) {
-	const paths: string[] = [];
+function readPathArgs(args) {
+	const paths = [];
 	const index = args.indexOf("--paths");
 	if (index === -1) return paths;
 	for (const value of args.slice(index + 1)) {
@@ -3767,7 +3246,7 @@ function readPathArgs(args: string[]) {
 	return paths;
 }
 
-function toRef(absolutePath: string) {
+function toRef(absolutePath) {
 	return path.relative(repoRoot, absolutePath).replace(/\\/g, "/");
 }
 `;
@@ -3775,16 +3254,16 @@ function toRef(absolutePath: string) {
 
 function workerSmokeTestSource() {
 	return [
+		'import assert from "node:assert/strict";',
 		'import { existsSync } from "node:fs";',
 		'import path from "node:path";',
+		'import { test } from "node:test";',
 		'import { fileURLToPath } from "node:url";',
 		"",
 		'const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");',
 		"",
-		'describe("Worker Foundations install", () => {',
-		'\tit("includes the Worker manifest", () => {',
-		'\t\texpect(existsSync(path.join(repoRoot, "apps/worker/worker-manifest.json"))).toBe(true);',
-		"\t});",
+		'test("Worker Foundations install includes the Worker manifest", () => {',
+		'\tassert.equal(existsSync(path.join(repoRoot, "apps/worker/worker-manifest.json")), true);',
 		"});",
 		"",
 	].join("\n");
@@ -4164,7 +3643,7 @@ function defaultRootPackageJson(): JsonObject {
 	return {
 		name: "shipbysunday-worker-project",
 		private: true,
-		packageManager: `bun@${WORKER_MANAGED_BUN_VERSION}`,
+		packageManager: `npm@${WORKER_DEFAULT_NPM_VERSION}`,
 		scripts: {},
 	};
 }
@@ -4199,25 +3678,21 @@ function detectRootPackageManager({
 }): RootPackageManager {
 	const packageManager = packageJson.packageManager;
 	if (typeof packageManager === "string") {
-		if (packageManager.startsWith("bun@")) return "bun";
+		if (packageManager.startsWith("bun@")) return "npm";
 		if (packageManager.startsWith("pnpm@")) return "pnpm";
 		if (packageManager.startsWith("yarn@")) return "yarn";
 		if (packageManager.startsWith("npm@")) return "npm";
 	}
-	if (existsSync(path.join(repositoryRoot, "bun.lock"))) return "bun";
-	if (existsSync(path.join(repositoryRoot, "bun.lockb"))) return "bun";
 	if (existsSync(path.join(repositoryRoot, "pnpm-lock.yaml"))) return "pnpm";
 	if (existsSync(path.join(repositoryRoot, "yarn.lock"))) return "yarn";
 	if (existsSync(path.join(repositoryRoot, "npm-shrinkwrap.json")))
 		return "npm";
 	if (existsSync(path.join(repositoryRoot, "package-lock.json"))) return "npm";
-	return "bun";
+	return "npm";
 }
 
 function hasRootPackageManagerLockfile(repositoryRoot: string) {
 	return (
-		existsSync(path.join(repositoryRoot, "bun.lock")) ||
-		existsSync(path.join(repositoryRoot, "bun.lockb")) ||
 		existsSync(path.join(repositoryRoot, "pnpm-lock.yaml")) ||
 		existsSync(path.join(repositoryRoot, "yarn.lock")) ||
 		existsSync(path.join(repositoryRoot, "npm-shrinkwrap.json")) ||
@@ -4262,63 +3737,6 @@ async function runGit(repositoryRoot: string, args: string[]) {
 		cwd: repositoryRoot,
 		timeoutMs: 30_000,
 	});
-}
-
-async function commandReportsExpectedBunVersion(
-	command: string,
-	env: NodeJS.ProcessEnv = process.env,
-) {
-	const result = await runBoundedProcess({
-		command,
-		args: ["--version"],
-		env,
-		timeoutMs: 5_000,
-	});
-	return (
-		result.succeeded && result.stdout.trim() === WORKER_MANAGED_BUN_VERSION
-	);
-}
-
-async function assertExpectedBunVersion(
-	command: string,
-	env: NodeJS.ProcessEnv = process.env,
-) {
-	if (!(await commandReportsExpectedBunVersion(command, env))) {
-		throw new Error(
-			`Prepared Worker-managed Bun toolchain must report version ${WORKER_MANAGED_BUN_VERSION}.`,
-		);
-	}
-}
-
-function resolveBunCommand(context: WorkerInstallContext) {
-	const managedBunPath = resolveManagedBunPath(context);
-	return existsSync(managedBunPath) &&
-		commandReportsExpectedBunVersionSync(
-			managedBunPath,
-			buildWorkerProcessEnv(context),
-		)
-		? managedBunPath
-		: "bun";
-}
-
-function resolveManagedBunPath(context: WorkerInstallContext) {
-	return path.join(context.workerHome, "toolchains", "bun", "bin", "bun");
-}
-
-function commandReportsExpectedBunVersionSync(
-	command: string,
-	env: NodeJS.ProcessEnv = process.env,
-) {
-	const result = spawnSync(command, ["--version"], {
-		env,
-		encoding: "utf8",
-		stdio: ["ignore", "pipe", "ignore"],
-	});
-	return (
-		result.status === 0 &&
-		typeof result.stdout === "string" &&
-		result.stdout.trim() === WORKER_MANAGED_BUN_VERSION
-	);
 }
 
 function buildWorkerProcessEnv(
