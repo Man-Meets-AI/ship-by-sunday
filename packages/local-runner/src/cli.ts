@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { runDaemonCommand } from "./commands/daemon";
 import { runDocsOperatingSystemCommand } from "./commands/docs-operating-system";
 import { runDoctorPassCommand } from "./commands/doctor-pass";
+import { runExecPlanCommand } from "./commands/execplan";
 import { runInstallCommand } from "./commands/install";
 import { runOneShotCommand } from "./commands/one-shot";
 import { runProgramCommand } from "./commands/program";
@@ -18,6 +19,8 @@ Ship by Sunday local runner
 Usage:
   shipbysunday install [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
   shipbysunday i [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
+  ship-by-sunday execplan build --program-id <id> [--repo <path>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday execplan build --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday program run --program-id <id> [--repo <path>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday program run-slice --program-id <id> --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday setup pair <token> [--repo <path>] [--api-url <url>] [--repair] [--json]
@@ -68,6 +71,9 @@ export async function runCli(argv = process.argv.slice(2)) {
 		}
 		if (command === "program") {
 			return await runProgramCommand([subcommand, ...rest].filter(Boolean));
+		}
+		if (command === "execplan") {
+			return await runExecPlanCommand([subcommand, ...rest].filter(Boolean));
 		}
 		if (command === "doctor-pass") {
 			return await runDoctorPassCommand([subcommand, ...rest].filter(Boolean));

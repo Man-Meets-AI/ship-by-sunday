@@ -28,19 +28,19 @@ The immediate focus is the post-ExecPlan automation loop. The broader SDLC goal 
 
 ## Program Inputs
 
-The current manual SOP and repository research are recorded in `research-pass-current-manual-loop-and-runner-state.md`. The v1 scope boundary is normalized in `normalized-pass-manual-sdlc-and-runner-boundary.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo boundaries are recorded in `cross-repo-review.md`. Completed child slices used `planning-brief-1.md` and `planning-brief-2.md`; `current-planning-brief.txt` now points at `planning-brief-3.md`.
+The current manual SOP and repository research are recorded in `research-pass-current-manual-loop-and-runner-state.md`. The v1 scope boundary is normalized in `normalized-pass-manual-sdlc-and-runner-boundary.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo boundaries are recorded in `cross-repo-review.md`. Completed child slices used `planning-brief-1.md` through `planning-brief-4.md`; `current-planning-brief.txt` now points at `planning-brief-5.md` for the runner extraction boundary decision.
 
 This Program depends on the existing Program and ExecPlan contracts in `docs/programs/PROGRAMS.md` and `docs/exec-plans/PLANS.md`, the prompt assets in `docs/prompts/`, the local runner's Codex execution wrapper, and the sibling Worker repo's headless ExecPlan workflow patterns.
 
 ## Current State
 
-Ship by Sunday already has durable Program and ExecPlan docs, prompt assets, markdown/frontmatter linting, Program linting, ExecPlan linting, and local runner docs-operating-system commands. The local runner now exposes `program:run-slice` for one child ExecPlan lifecycle and `program:run` for Program-level sequencing across active child ExecPlans.
+Ship by Sunday already has durable Program and ExecPlan docs, prompt assets, markdown/frontmatter linting, Program linting, ExecPlan linting, and local runner docs-operating-system commands. The local runner now exposes `program:run-slice` for one child ExecPlan lifecycle, `program:run` for Program-level sequencing across active child ExecPlans, and `execplan:build` for the user-facing autonomous ExecPlan command.
 
-The local runner already wraps `codex exec --json` and can install planning-oriented scripts into other repos. The Worker Foundations installer exposes useful script names, but the installed `execplan:*` commands are not yet wired to the new autonomous Program runner.
+The local runner already wraps `codex exec --json` and can install planning-oriented scripts into other repos. The Worker Foundations installer now wires installed `execplan:build` to the packaged Ship by Sunday autonomous runner while keeping the implementation in one runner code path.
 
 The sibling Worker repo already contains useful headless execution patterns: Codex runners, proof-command extraction, grill loops, validation repair loops, and runtime receipts. Those patterns should inform the implementation without making Ship by Sunday depend on Worker runtime internals.
 
-There is no command today that executes an ExecPlan, generates a fresh review prompt from live context, runs a fresh review pass, fixes real findings, re-runs proof, updates Program and ExecPlan docs, checkpoints state, and then proceeds safely.
+The core command path now exists in the local runner: `program run-slice` executes one child ExecPlan through proof, fresh review, bounded repair, reproof, docs sync, and checkpointing, while `program run` sequences active child ExecPlans until it completes, blocks, or reaches a safety limit. The user-facing command path now also exists: `execplan build` and the root `execplan:build` script forward into the same runner, and installed Worker Foundations `execplan:build` forwards to the packaged Ship by Sunday local runner instead of printing a placeholder.
 
 ## Progress
 
@@ -52,6 +52,10 @@ There is no command today that executes an ExecPlan, generates a fresh review pr
 - [x] 2026-05-13: Refreshed the Program with planning brief 2 for `Build Program Run Loop`.
 - [x] 2026-05-13: Completed `Build Program Run Loop`; the local runner now exposes `program run`, root/package scripts expose `program:run`, and tests prove Program child plan selection, sequencing, safety-limit stops, no-plan blocking, slice failure blocking, and clean-start safety.
 - [x] 2026-05-13: Refreshed the Program with planning brief 3 for `Harden Program Review And Repair`.
+- [x] 2026-05-13: Completed `Harden Program Review And Repair`; review findings now carry category and disposition, severity policy is enforced before repair decisions, review prompts include staged and untracked changes, repair prompts include attempt budgets, and only missing-test findings can be intentionally deferred with rationale and follow-up.
+- [x] 2026-05-13: Refreshed the Program with planning brief 4 for `Package Runner Through Local Runner Install`.
+- [x] 2026-05-13: Completed `Package Runner Through Local Runner Install`; maintainers can now run `bun run execplan:build -- --program-id <id>` or `bun run execplan:build -- --plan <path>`, and installed Worker Foundations `execplan:build` forwards to `ship-by-sunday execplan build`.
+- [x] 2026-05-13: Refreshed the Program with planning brief 5 for `Decide Runner Extraction Boundary`.
 
 ## Decision Log
 
@@ -103,18 +107,18 @@ Active child ExecPlans:
 
 Planned child ExecPlans:
 
-- `Harden Program Review And Repair` should improve structured review schemas, severity thresholds, repair caps, and review-swarm integration where available.
-- `Package Runner Through Local Runner Install` should replace placeholder installed `execplan:*` commands with real behavior and add compatibility smoke tests.
 - `Decide Runner Extraction Boundary` should revisit whether the docs operating system and Program runner deserve a separate repo after multiple consumers prove the command contract.
 
 Completed child ExecPlans:
 
 - [Build Program Run Slice V1](../../../exec-plans/completed/2026-05-13-build-program-run-slice-v1.md) added the explicit one-slice runner command, fakeable Codex/review/proof boundaries, local run artifacts, structured review classification, bounded fix attempts, docs sync, and regression coverage.
 - [Build Program Run Loop](../../../exec-plans/completed/2026-05-13-build-program-run-loop.md) added Program-level sequencing over the slice runner, active child ExecPlan selection by frontmatter, loop state artifacts, explicit stop reasons, safety-limit checkpoints, and regression coverage.
+- [Harden Program Review And Repair](../../../exec-plans/completed/2026-05-13-harden-program-review-and-repair.md) tightened review schemas, severity thresholds, staged and untracked review context, repair cap messaging, review policy artifacts, and intentionally deferred finding handling.
+- [Package Runner Through Local Runner Install](../../../exec-plans/completed/2026-05-13-package-runner-through-local-runner-install.md) added the `execplan build` CLI and root/package `execplan:build` scripts, forwarded installed Worker `execplan:build` into the packaged runner, updated installed command guidance, and added command, install, compatibility, and package smoke coverage.
 
 ## Next Slice
 
-The next recommended slice is `Harden Program Review And Repair`. It should improve structured review schemas, severity thresholds, repair caps, and review-swarm integration where available while preserving the shipped `program:run-slice` and `program:run` command boundaries.
+The next recommended slice is `Decide Runner Extraction Boundary`. It should revisit whether the docs operating system and Program runner belong in this repo, the local-runner package, or a separate package/repo now that the command contract works locally and through the installed Worker command surface.
 
 ## Risks and Watchpoints
 
@@ -175,6 +179,13 @@ Completed Program loop command surface:
 
     bun run program:run -- --program-id <id>
     ship-by-sunday program run --program-id <id>
+
+Completed ExecPlan command surface:
+
+    bun run execplan:build -- --program-id <id>
+    bun run execplan:build -- --plan <path>
+    ship-by-sunday execplan build --program-id <id>
+    ship-by-sunday execplan build --plan <path>
 
 Focused proof from `Build Program Run Slice V1`:
 

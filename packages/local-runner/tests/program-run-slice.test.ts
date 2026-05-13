@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
@@ -7,6 +7,7 @@ import {
 	extractProgramRunSliceProofCommands,
 	runProgramRunSlice,
 	type ProgramRunSliceExecutor,
+	type ProgramRunSliceExecutorInput,
 	type ProgramRunSliceReviewResult,
 } from "../src/core/program-run-slice";
 import {
@@ -22,6 +23,10 @@ describe("program run slice", () => {
 		const executor = createFakeExecutor({
 			onExecute: async () => {
 				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+				await writeRepoFile(repositoryRoot, "staged.txt", "staged\n");
+				await execFileAsync("git", ["add", "staged.txt"], {
+					cwd: repositoryRoot,
+				});
 			},
 			reviews: [
 				{
@@ -45,15 +50,20 @@ describe("program run slice", () => {
 		expect(result.fixAttempts).toBe(0);
 		expect(result.proofResults).toHaveLength(1);
 		expect(result.reviewFindings).toHaveLength(0);
-		await expect(
-			readFile(
-				path.join(
-					repositoryRoot,
-					".sbs/program-runs/autonomous-program-execution-loop/run-happy/review-prompt.md",
-				),
-				"utf8",
+		const reviewPrompt = await readFile(
+			path.join(
+				repositoryRoot,
+				".sbs/program-runs/autonomous-program-execution-loop/run-happy/review-prompt.md",
 			),
-		).resolves.toContain("Review this completed ExecPlan slice");
+			"utf8",
+		);
+		expect(reviewPrompt).toContain("Review this completed ExecPlan slice");
+		expect(reviewPrompt).toContain("<TRACKED_DIFF_AGAINST_HEAD>");
+		expect(reviewPrompt).toContain("staged.txt");
+		expect(reviewPrompt).toContain("+staged");
+		expect(reviewPrompt).toContain("<UNTRACKED_FILE_SNAPSHOTS>");
+		expect(reviewPrompt).toContain("--- implemented.txt");
+		expect(reviewPrompt).toContain("done");
 		await expect(
 			readFile(
 				path.join(
@@ -63,6 +73,18 @@ describe("program run slice", () => {
 				"utf8",
 			),
 		).resolves.toContain("Review this completed ExecPlan slice");
+		const reviewSchema = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-happy/review-output-schema.json",
+				),
+				"utf8",
+			),
+		) as { properties: { findings: { items: { required: string[] } } } };
+		expect(reviewSchema.properties.findings.items.required).toEqual(
+			expect.arrayContaining(["category", "disposition"]),
+		);
 		await expect(
 			readFile(path.join(repositoryRoot, PLAN_PATH), "utf8"),
 		).resolves.toContain("Autonomous Run run-happy");
@@ -88,11 +110,13 @@ describe("program run slice", () => {
 
 	it("fixes must-fix review findings and reruns proof and review", async () => {
 		const repositoryRoot = await createProgramRunFixture();
+		let fixPrompt = "";
 		const executor = createFakeExecutor({
 			onExecute: async () => {
 				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
 			},
-			onFix: async () => {
+			onFix: async (input) => {
+				fixPrompt = input.prompt;
 				await writeRepoFile(repositoryRoot, "fixed.txt", "fixed\n");
 				await writeRepoFile(
 					repositoryRoot,
@@ -109,6 +133,8 @@ describe("program run slice", () => {
 				{
 					findings: [
 						{
+							category: "bug",
+							disposition: "must_fix",
 							impact: "The fixture still lacks the reviewed fix marker.",
 							minimalFix: "Write fixed.txt.",
 							mustFix: true,
@@ -145,6 +171,8 @@ describe("program run slice", () => {
 		await expect(
 			readFile(path.join(repositoryRoot, "fixed.txt"), "utf8"),
 		).resolves.toBe("fixed\n");
+		expect(fixPrompt).toContain("Fix attempt: 1 of 2.");
+		expect(fixPrompt).toContain("disposition is must_fix");
 	});
 
 	it("rejects unsafe program ids before creating run artifacts", async () => {
@@ -370,6 +398,8 @@ describe("program run slice", () => {
 				structuredOutput: {
 					findings: [
 						{
+							category: "bug",
+							disposition: "must_fix",
 							impact: "The schema value is not boolean.",
 							minimalFix: "Return a boolean mustFix value.",
 							mustFix: "true",
@@ -394,6 +424,229 @@ describe("program run slice", () => {
 				timeoutMs: 15_000,
 			}),
 		).rejects.toThrow("Review finding mustFix must be a boolean");
+	});
+
+	it("rejects high severity review findings that are not marked must-fix", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			reviews: [
+				{
+					findings: [
+						{
+							category: "regression",
+							deferRationale: "The regression can wait.",
+							disposition: "intentional_defer",
+							followUp: "Open a follow-up slice.",
+							impact: "A high severity regression would ship.",
+							minimalFix: "Fix it before completing.",
+							mustFix: false,
+							severity: "high",
+							title: "High severity deferred",
+						},
+					],
+					openQuestions: [],
+					validationNotes: [],
+				},
+			],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-high-deferred",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow(
+			"Critical and high review findings must be marked must_fix",
+		);
+	});
+
+	it("rejects intentionally deferred findings without rationale and follow-up", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			reviews: [
+				{
+					findings: [
+						{
+							category: "missing_test",
+							disposition: "intentional_defer",
+							impact: "A meaningful follow-up test is still missing.",
+							minimalFix: "Add the missing coverage in a later slice.",
+							mustFix: false,
+							severity: "medium",
+							title: "Deferred without follow-up",
+						},
+					],
+					openQuestions: [],
+					validationNotes: [],
+				},
+			],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-deferred-without-rationale",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow(
+			"Intentionally deferred review findings require deferRationale and followUp",
+		);
+	});
+
+	it("rejects intentionally deferred medium shipped-risk findings", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			reviews: [
+				{
+					findings: [
+						{
+							category: "security",
+							deferRationale: "The security issue can wait.",
+							disposition: "intentional_defer",
+							followUp: "Open a follow-up slice.",
+							impact: "A medium security bug would ship.",
+							minimalFix: "Fix it before completing.",
+							mustFix: false,
+							severity: "medium",
+							title: "Medium security deferred",
+						},
+					],
+					openQuestions: [],
+					validationNotes: [],
+				},
+			],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-medium-security-deferred",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow(
+			"Only missing_test review findings can be intentionally deferred",
+		);
+	});
+
+	it("records intentionally deferred findings without entering repair", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
+			onFix: async () => {
+				throw new Error("Deferred findings should not trigger repair.");
+			},
+			reviews: [
+				{
+					findings: [
+						{
+							category: "missing_test",
+							deferRationale:
+								"The behavior is covered by package smoke; a narrower unit test belongs in the next hardening slice.",
+							disposition: "intentional_defer",
+							followUp: "Create a follow-up ExecPlan for narrow unit coverage.",
+							impact:
+								"The reviewed slice has less focused coverage than ideal.",
+							minimalFix: "Add a narrower unit test in a follow-up slice.",
+							mustFix: false,
+							severity: "medium",
+							title: "Deferred focused coverage",
+						},
+					],
+					openQuestions: [],
+					validationNotes: ["Proof passed."],
+				},
+			],
+		});
+
+		const result = await runProgramRunSlice({
+			executor,
+			planPath: PLAN_PATH,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "run-deferred",
+			timeoutMs: 15_000,
+		});
+
+		expect(result.finalStatus).toBe("complete");
+		expect(result.fixAttempts).toBe(0);
+		expect(result.reviewFindings).toHaveLength(1);
+		const policySummary = JSON.parse(
+			await readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-deferred/review-policy-summary-1.json",
+				),
+				"utf8",
+			),
+		) as {
+			intentionallyDeferredFindings: number;
+			mustFixFindings: number;
+		};
+		expect(policySummary.mustFixFindings).toBe(0);
+		expect(policySummary.intentionallyDeferredFindings).toBe(1);
+		await expect(
+			readFile(path.join(repositoryRoot, PLAN_PATH), "utf8"),
+		).resolves.toContain("Intentionally deferred findings: 1");
+	});
+
+	it("omits untracked symlink targets from review snapshots", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const outsideDirectory = await createTemporaryDirectory(
+			"sbs-program-run-outside-",
+		);
+		const outsideSecretPath = path.join(outsideDirectory, "secret.txt");
+		await writeFile(outsideSecretPath, "SECRET_DO_NOT_LEAK\n", "utf8");
+		let reviewPrompt = "";
+		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+				await symlink(outsideSecretPath, path.join(repositoryRoot, "leak.txt"));
+			},
+			reviews: [
+				{
+					findings: [],
+					openQuestions: [],
+					validationNotes: [],
+				},
+			],
+			onReview: async (input) => {
+				reviewPrompt = input.prompt;
+			},
+		});
+
+		await runProgramRunSlice({
+			executor,
+			planPath: PLAN_PATH,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "run-symlink-omitted",
+			timeoutMs: 15_000,
+		});
+
+		expect(reviewPrompt).toContain("--- leak.txt");
+		expect(reviewPrompt).toContain("(symlink omitted)");
+		expect(reviewPrompt).not.toContain("SECRET_DO_NOT_LEAK");
 	});
 
 	it("syncs docs into real markdown headings instead of fenced decoys", async () => {
@@ -590,7 +843,8 @@ function accessCommand(repoRelativePath: string) {
 
 function createFakeExecutor(params: {
 	onExecute?: () => Promise<void>;
-	onFix?: () => Promise<void>;
+	onFix?: (input: ProgramRunSliceExecutorInput) => Promise<void>;
+	onReview?: (input: ProgramRunSliceExecutorInput) => Promise<void>;
 	reviews: ProgramRunSliceReviewResult[];
 }): ProgramRunSliceExecutor {
 	let reviewIndex = 0;
@@ -604,13 +858,14 @@ function createFakeExecutor(params: {
 			};
 		}
 		if (input.purpose === "fix") {
-			await params.onFix?.();
+			await params.onFix?.(input);
 			return {
 				finalMessage: "fix complete",
 				structuredOutput: null,
 				threadId: "thread-fix",
 			};
 		}
+		await params.onReview?.(input);
 		const review = params.reviews[reviewIndex] ?? {
 			findings: [],
 			openQuestions: [],
@@ -629,6 +884,8 @@ function buildPersistentFindingReview(): ProgramRunSliceReviewResult {
 	return {
 		findings: [
 			{
+				category: "bug",
+				disposition: "must_fix",
 				impact: "The fixture keeps returning the same must-fix finding.",
 				minimalFix: "Resolve the fixture finding.",
 				mustFix: true,

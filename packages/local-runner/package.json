@@ -3,6 +3,9 @@
 	"version": "0.1.0",
 	"private": false,
 	"type": "module",
+	"engines": {
+		"node": ">=20"
+	},
 	"bin": {
 		"ship-by-sunday": "./dist/cli.js",
 		"shipbysunday": "./dist/cli.js"
@@ -12,6 +15,7 @@
 	],
 	"scripts": {
 		"ship-by-sunday": "jiti src/cli.ts",
+		"execplan:build": "jiti src/cli.ts execplan build",
 		"program:run": "jiti src/cli.ts program run",
 		"program:run-slice": "jiti src/cli.ts program run-slice",
 		"build": "esbuild ./src/cli.ts --bundle --platform=node --format=esm --target=node20 --banner:js='import { createRequire } from \"node:module\"; const require = createRequire(import.meta.url);' --outfile=dist/cli.js && chmod +x dist/cli.js",

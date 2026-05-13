@@ -1,6 +1,14 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	mkdtemp,
+	readFile,
+	realpath,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
 import { createServer } from "node:http";
 import os from "node:os";
 import path from "node:path";
@@ -133,6 +141,7 @@ try {
 		packageTarballPath,
 		repositoryRoot: docsCommandRepositoryRoot,
 	});
+	await runBuiltExecPlanHelpSmoke();
 	await runPackedWorkerInstallCommandSmoke({
 		packageTarballPath,
 		repositoryRoot: installCommandRepositoryRoot,
@@ -337,6 +346,29 @@ async function runInstalledDocsCommandSmoke({
 	}
 }
 
+async function runBuiltExecPlanHelpSmoke() {
+	const helpResult = await runProcess("node", [
+		builtCliPath,
+		"execplan",
+		"--help",
+	]);
+	if (helpResult.exitCode !== 0) {
+		throw new Error(
+			`built package execplan help smoke failed with ${helpResult.exitCode}\nSTDOUT:\n${helpResult.stdout}\nSTDERR:\n${helpResult.stderr}`,
+		);
+	}
+	for (const expectedLine of [
+		"ship-by-sunday execplan build --program-id <id>",
+		"ship-by-sunday execplan build --plan <path>",
+	]) {
+		if (!helpResult.stdout.includes(expectedLine)) {
+			throw new Error(
+				`built package execplan help smoke did not include ${expectedLine}\nSTDOUT:\n${helpResult.stdout}\nSTDERR:\n${helpResult.stderr}`,
+			);
+		}
+	}
+}
+
 async function runPackedWorkerInstallCommandSmoke({
 	packageTarballPath,
 	repositoryRoot,
@@ -439,6 +471,54 @@ async function runPackedWorkerInstallCommandSmoke({
 	if (installStatus.exitCode !== 0 || installStatus.stdout.trim() !== "") {
 		throw new Error(
 			`packed package mutating install left dirty worktree\nSTDOUT:\n${installStatus.stdout}\nSTDERR:\n${installStatus.stderr}`,
+		);
+	}
+	const fakePackageRunnerBin = await createFakePackageRunnerBin();
+	const execPlanBuildResult = await runProcess(
+		path.join(fakePackageRunnerBin.binDirectory, "npm"),
+		[
+			"run",
+			"execplan:build",
+			"--",
+			"--program-id",
+			"worker-foundations-adoption",
+			"--max-slices",
+			"1",
+		],
+		{
+			cwd: repositoryRoot,
+			env: {
+				NODE: "node",
+				PATH: fakePackageRunnerBin.binDirectory,
+				SHIPBYSUNDAY_PACKAGE_SPEC: packageTarballPath,
+			},
+		},
+	);
+	if (execPlanBuildResult.exitCode !== 0) {
+		throw new Error(
+			`packed package installed execplan:build fallback failed with ${execPlanBuildResult.exitCode}\nSTDOUT:\n${execPlanBuildResult.stdout}\nSTDERR:\n${execPlanBuildResult.stderr}`,
+		);
+	}
+	const forwardedRepositoryRoot = await realpath(repositoryRoot);
+	const npxArgs = await readFile(fakePackageRunnerBin.npxArgsPath, "utf8");
+	const expectedNpxArgs = [
+		"--yes",
+		"--package",
+		packageTarballPath,
+		"ship-by-sunday",
+		"execplan",
+		"build",
+		"--repo",
+		forwardedRepositoryRoot,
+		"--program-id",
+		"worker-foundations-adoption",
+		"--max-slices",
+		"1",
+		"",
+	].join("\n");
+	if (npxArgs !== expectedNpxArgs) {
+		throw new Error(
+			`packed package installed execplan:build forwarded unexpected args\nExpected:\n${expectedNpxArgs}\nActual:\n${npxArgs}`,
 		);
 	}
 }
@@ -583,6 +663,40 @@ async function createPackageManagerBinDirectory() {
 	return binDirectory;
 }
 
+async function createFakePackageRunnerBin() {
+	const binDirectory = await mkdtemp(
+		path.join(os.tmpdir(), "sbs-smoke-worker-runner-bin-"),
+	);
+	const npxArgsPath = path.join(binDirectory, "npx-args.txt");
+	await symlink(process.execPath, path.join(binDirectory, "node"));
+	await writeFile(
+		path.join(binDirectory, "npm"),
+		[
+			"#!/bin/sh",
+			'if [ "$1" = "run" ] && [ "$2" = "execplan:build" ]; then',
+			"  shift 2",
+			'  if [ "${1:-}" = "--" ]; then shift; fi',
+			'  exec ./scripts/run-worker.sh execplan:build "$@"',
+			"fi",
+			'echo "unexpected npm args: $*" >&2',
+			"exit 1",
+			"",
+		].join("\n"),
+	);
+	await writeFile(
+		path.join(binDirectory, "npx"),
+		[
+			"#!/bin/sh",
+			`printf '%s\\n' "$@" > ${shellQuote(npxArgsPath)}`,
+			"exit 0",
+			"",
+		].join("\n"),
+	);
+	await chmod(path.join(binDirectory, "npm"), 0o755);
+	await chmod(path.join(binDirectory, "npx"), 0o755);
+	return { binDirectory, npxArgsPath };
+}
+
 async function writePnpmVersionShim(binDirectory: string) {
 	const pnpmPath = path.join(binDirectory, "pnpm");
 	await writeFile(
@@ -607,6 +721,10 @@ function packageManagerSmokePath() {
 		binDirectory,
 		process.env.PATH ?? "",
 	].join(path.delimiter);
+}
+
+function shellQuote(value: string) {
+	return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
 async function runProcess(

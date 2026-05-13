@@ -963,6 +963,11 @@ async function assertInstalledRepository({
 		`${label} help usage`,
 	);
 	assertTextIncludes(help.stdout, "docs:validate", `${label} help command`);
+	assertTextIncludes(
+		help.stdout,
+		"execplan:build",
+		`${label} autonomous ExecPlan command`,
+	);
 
 	await runRequiredProcess("./scripts/run-worker.sh", ["docs:validate"], {
 		cwd: repositoryRoot,
@@ -998,6 +1003,11 @@ async function assertInstalledRepository({
 		"./scripts/run-worker.sh test",
 		`${label} root Worker test script`,
 	);
+	assertEqual(
+		packageJson.scripts?.["execplan:build"],
+		"./scripts/run-worker.sh execplan:build",
+		`${label} root ExecPlan build script`,
+	);
 
 	const readme = await readFile(path.join(repositoryRoot, "README.md"), "utf8");
 	assertTextIncludes(readme, "# Shipbysunday Worker", `${label} README title`);
@@ -1010,6 +1020,11 @@ async function assertInstalledRepository({
 		readme,
 		`${expectedPackageManager} run docs:validate`,
 		`${label} README docs command`,
+	);
+	assertTextIncludes(
+		readme,
+		`${expectedPackageManager} run execplan:build`,
+		`${label} README autonomous ExecPlan command`,
 	);
 	assertTextIncludes(
 		readme,

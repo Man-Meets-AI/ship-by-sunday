@@ -1,6 +1,13 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	readFile,
+	realpath,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -327,6 +334,9 @@ describe("Worker Foundations install command", () => {
 		expect(packageJson.scripts["docs:validate"]).toBe(
 			"./scripts/run-worker.sh docs:validate",
 		);
+		expect(packageJson.scripts["execplan:build"]).toBe(
+			"./scripts/run-worker.sh execplan:build",
+		);
 		expect(packageJson.scripts["worker:test"]).toBe(
 			"./scripts/run-worker.sh test",
 		);
@@ -336,6 +346,23 @@ describe("Worker Foundations install command", () => {
 				"utf8",
 			),
 		).toContain("program:write-child-plan");
+		const workerCliSource = await readFile(
+			path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs"),
+			"utf8",
+		);
+		expect(workerCliSource).toContain("ship-by-sunday@0.1.0");
+		expect(workerCliSource).toContain("cmd.exe");
+		expect(workerCliSource).toContain("isWindowsCommandScript");
+		const runWorkerShell = await readFile(
+			path.join(repositoryRoot, "scripts/run-worker.sh"),
+			"utf8",
+		);
+		expect(runWorkerShell).toContain(
+			'PATH="${PATH:+$PATH:}$NODE_DIR"; export PATH',
+		);
+		await expect(
+			readFile(path.join(repositoryRoot, "README.md"), "utf8"),
+		).resolves.toContain("SHIPBYSUNDAY_PACKAGE_SPEC");
 		const activeChildPlan = await readFile(
 			path.join(
 				repositoryRoot,
@@ -368,6 +395,126 @@ describe("Worker Foundations install command", () => {
 				"utf8",
 			),
 		).toContain("Outcome: `installed`");
+	});
+
+	it("forwards installed execplan:build to the autonomous runner", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const fakeRunnerBin = await createFakeShipBySundayRunnerBin();
+		await expect(
+			execFileAsync(
+				"./scripts/run-worker.sh",
+				[
+					"execplan:build",
+					"--program-id",
+					"worker-foundations-adoption",
+					"--max-slices",
+					"1",
+				],
+				{
+					cwd: repositoryRoot,
+					env: {
+						...process.env,
+						PATH: `${fakeRunnerBin.binDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
+					},
+				},
+			),
+		).resolves.toMatchObject({ stderr: "", stdout: "" });
+
+		const forwardedRepositoryRoot = await realpath(repositoryRoot);
+		await expect(readFile(fakeRunnerBin.argsPath, "utf8")).resolves.toBe(
+			[
+				"execplan",
+				"build",
+				"--repo",
+				forwardedRepositoryRoot,
+				"--program-id",
+				"worker-foundations-adoption",
+				"--max-slices",
+				"1",
+				"",
+			].join("\n"),
+		);
+	});
+
+	it("falls back to package execution after npx-style installs", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const fakePackageRunnerBin = await createFakePackageRunnerBin();
+		await expect(
+			execFileAsync(
+				"npm",
+				[
+					"run",
+					"execplan:build",
+					"--",
+					"--program-id",
+					"worker-foundations-adoption",
+					"--max-slices",
+					"1",
+				],
+				{
+					cwd: repositoryRoot,
+					env: {
+						...process.env,
+						PATH: fakePackageRunnerBin.binDirectory,
+					},
+				},
+			),
+		).resolves.toMatchObject({ stderr: "", stdout: "" });
+
+		const forwardedRepositoryRoot = await realpath(repositoryRoot);
+		await expect(
+			readFile(fakePackageRunnerBin.npxArgsPath, "utf8"),
+		).resolves.toBe(
+			[
+				"--yes",
+				"--package",
+				"ship-by-sunday@0.1.0",
+				"ship-by-sunday",
+				"execplan",
+				"build",
+				"--repo",
+				forwardedRepositoryRoot,
+				"--program-id",
+				"worker-foundations-adoption",
+				"--max-slices",
+				"1",
+				"",
+			].join("\n"),
+		);
 	});
 
 	it("auto-commits tracked install files without staging ignored Worker state", async () => {
@@ -1597,6 +1744,57 @@ async function commitFixtureFiles(repositoryRoot: string, refs: string[]) {
 	await execFileAsync("git", ["commit", "-m", "fixture update"], {
 		cwd: repositoryRoot,
 	});
+}
+
+async function createFakeShipBySundayRunnerBin() {
+	const binDirectory = await createTemporaryDirectory("worker-runner-bin-");
+	const argsPath = path.join(binDirectory, "runner-args.txt");
+	const runnerPath = path.join(binDirectory, "ship-by-sunday");
+	await writeFile(
+		runnerPath,
+		[
+			"#!/bin/sh",
+			`printf '%s\\n' "$@" > ${shellQuote(argsPath)}`,
+			"exit 0",
+			"",
+		].join("\n"),
+	);
+	await chmod(runnerPath, 0o755);
+	return { argsPath, binDirectory };
+}
+
+async function createFakePackageRunnerBin() {
+	const binDirectory = await createTemporaryDirectory(
+		"worker-package-runner-bin-",
+	);
+	const npxArgsPath = path.join(binDirectory, "npx-args.txt");
+	await symlink(process.execPath, path.join(binDirectory, "node"));
+	await writeFile(
+		path.join(binDirectory, "npm"),
+		[
+			"#!/bin/sh",
+			'if [ "$1" = "run" ] && [ "$2" = "execplan:build" ]; then',
+			"  shift 2",
+			'  if [ "${1:-}" = "--" ]; then shift; fi',
+			'  exec ./scripts/run-worker.sh execplan:build "$@"',
+			"fi",
+			'echo "unexpected npm args: $*" >&2',
+			"exit 1",
+			"",
+		].join("\n"),
+	);
+	await writeFile(
+		path.join(binDirectory, "npx"),
+		[
+			"#!/bin/sh",
+			`printf '%s\\n' "$@" > ${shellQuote(npxArgsPath)}`,
+			"exit 0",
+			"",
+		].join("\n"),
+	);
+	await chmod(path.join(binDirectory, "npm"), 0o755);
+	await chmod(path.join(binDirectory, "npx"), 0o755);
+	return { binDirectory, npxArgsPath };
 }
 
 async function createSuccessfulCodexBin({

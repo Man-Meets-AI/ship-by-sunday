@@ -258,6 +258,7 @@ const MIN_ACTIVATION_POLL_INTERVAL_MS = 1_000;
 const MAX_ACTIVATION_POLL_INTERVAL_MS = 10_000;
 const DEFAULT_ACTIVATION_TIMEOUT_MS = 5 * 60_000;
 const WORKER_DEFAULT_NPM_VERSION = "11.12.1";
+const SHIP_BY_SUNDAY_RUNNER_PACKAGE_SPEC = `ship-by-sunday@${WORKER_FOUNDATIONS_BUNDLE_VERSION}`;
 const LEGACY_WORKER_BUN_LOCK_REF = "apps/worker/bun.lock";
 const LEGACY_WORKER_BUN_LOCK_CONTENT =
 	"# Worker package lockfile placeholder.\n";
@@ -2842,7 +2843,7 @@ function runWorkerShellScript() {
 		"  exit 127",
 		"fi",
 		'case "$NODE_BIN" in',
-		'  */*) PATH="${NODE_BIN%/*}:$PATH"; export PATH ;;',
+		'  */*) NODE_DIR="${NODE_BIN%/*}"; PATH="${PATH:+$PATH:}$NODE_DIR"; export PATH ;;',
 		"esac",
 		'cd "$REPO_ROOT/apps/worker"',
 		'case "${1:-}" in',
@@ -2900,7 +2901,8 @@ function workerManifestJson(): string {
 }
 
 function workerCliSource() {
-	return String.raw`import { existsSync } from "node:fs";
+	return String.raw`import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -2908,6 +2910,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const command = process.argv[2];
 const commandArgs = process.argv.slice(3);
+const shipBySundayPackageSpec = process.env.SHIPBYSUNDAY_PACKAGE_SPEC || ${JSON.stringify(SHIP_BY_SUNDAY_RUNNER_PACKAGE_SPEC)};
 
 if (!command || command === "--help" || command === "-h") {
 	console.log(renderWorkerHelp());
@@ -2928,10 +2931,104 @@ if (command === "programs:lint") {
 	]);
 } else if (command === "program:write-child-plan") {
 	await writeChildPlan(commandArgs);
-} else if (command === "execplan:write" || command === "execplan:grill" || command === "execplan:build") {
+} else if (command === "execplan:build") {
+	await runExecPlanBuild(commandArgs);
+} else if (command === "execplan:write" || command === "execplan:grill") {
 	console.log(command + " is installed. Use Program-linked ExecPlans as the source of truth.");
 } else {
 	throw new Error("Unknown Worker command: " + command);
+}
+
+async function runExecPlanBuild(args) {
+	const runner = resolveShipBySundayRunner();
+	if (!runner) {
+		throw new Error("execplan:build requires the Ship by Sunday local runner CLI. Install or expose ship-by-sunday, set SHIPBYSUNDAY_CLI, or make npx/npm available so the Worker can run " + shipBySundayPackageSpec + ".");
+	}
+	const forwardedArgs = [...runner.args, "execplan", "build", ...withRepoArg(args)];
+	const exitCode = await runInheritedProcess(runner.command, forwardedArgs);
+	if (exitCode !== 0) process.exitCode = exitCode;
+}
+
+function withRepoArg(args) {
+	return args.includes("--repo") ? args : ["--repo", repoRoot, ...args];
+}
+
+function resolveShipBySundayRunner() {
+	if (process.env.SHIPBYSUNDAY_CLI) {
+		return { command: process.env.SHIPBYSUNDAY_CLI, args: [] };
+	}
+	for (const candidate of ["ship-by-sunday", "shipbysunday"]) {
+		const found = findExecutableOnPath(candidate);
+		if (found) return { command: found, args: [] };
+	}
+	const npx = findExecutableOnPath("npx");
+	if (npx) {
+		return {
+			command: npx,
+			args: ["--yes", "--package", shipBySundayPackageSpec, "ship-by-sunday"],
+		};
+	}
+	const npm = findExecutableOnPath("npm");
+	if (npm) {
+		return {
+			command: npm,
+			args: ["exec", "--yes", "--package", shipBySundayPackageSpec, "--", "ship-by-sunday"],
+		};
+	}
+	return null;
+}
+
+function findExecutableOnPath(commandName) {
+	const pathValue = process.env.PATH || "";
+	const suffixes = process.platform === "win32" ? ["", ".cmd", ".exe"] : [""];
+	for (const dir of pathValue.split(path.delimiter)) {
+		if (!dir) continue;
+		for (const suffix of suffixes) {
+			const candidate = path.join(dir, commandName + suffix);
+			if (existsSync(candidate)) return candidate;
+		}
+	}
+	return null;
+}
+
+async function runInheritedProcess(commandName, args) {
+	const invocation = buildProcessInvocation(commandName, args);
+	const child = spawn(invocation.command, invocation.args, {
+		cwd: repoRoot,
+		env: process.env,
+		stdio: "inherit",
+	});
+	return await new Promise((resolve, reject) => {
+		child.once("error", reject);
+		child.once("close", (exitCode) => resolve(exitCode ?? 1));
+	});
+}
+
+function buildProcessInvocation(commandName, args) {
+	if (process.platform === "win32" && isWindowsCommandScript(commandName)) {
+		return {
+			command: "cmd.exe",
+			args: ["/d", "/s", "/c", quoteWindowsCommandLine([commandName, ...args])],
+		};
+	}
+	return { command: commandName, args };
+}
+
+function isWindowsCommandScript(commandName) {
+	const extension = path.extname(commandName).toLowerCase();
+	return extension === ".cmd" || extension === ".bat";
+}
+
+function quoteWindowsCommandLine(args) {
+	return args.map(quoteWindowsCommandArgument).join(" ");
+}
+
+function quoteWindowsCommandArgument(value) {
+	if (value === "") return "\"\"";
+	const escaped = value
+		.replace(/(\\*)"/g, "$1$1\\\"")
+		.replace(/(\\+)$/g, "$1$1");
+	return /[\s"&|<>^()%!]/.test(value) ? "\"" + escaped + "\"" : escaped;
 }
 
 function renderWorkerHelp() {
@@ -2946,6 +3043,7 @@ function renderWorkerHelp() {
 		"  markdown:lint              Validate Worker markdown metadata.",
 		"  docs:validate              Run markdown, Program, and ExecPlan validation.",
 		"  program:write-child-plan   Create a Program-linked child ExecPlan.",
+		"  execplan:build             Run Program-linked ExecPlans through the Ship by Sunday autonomous runner.",
 		"  execplan:validate          Validate one ExecPlan with --plan <path>.",
 		"  worker:test                Run the installed Worker tests through the root package script.",
 		"  test                       Run the installed Worker tests directly.",
@@ -3280,6 +3378,10 @@ function rootReadmeMd(packageManager: RootPackageManager) {
 		"programs:lint",
 	);
 	const plansLintCommand = packageRunCommand(packageManager, "plans:lint");
+	const execPlanBuildCommand = packageRunCommand(
+		packageManager,
+		"execplan:build",
+	);
 	return [
 		"# Shipbysunday Worker",
 		"",
@@ -3291,6 +3393,7 @@ function rootReadmeMd(packageManager: RootPackageManager) {
 		"### Quick Start",
 		"",
 		`- Validate Worker docs and plans: \`${docsValidateCommand}\``,
+		`- Run the autonomous ExecPlan loop: \`${execPlanBuildCommand} -- --program-id worker-foundations-adoption\``,
 		`- Run Worker tests: \`${workerTestCommand}\``,
 		"- Show direct Worker commands: `./scripts/run-worker.sh --help`",
 		"- Direct fallback for any Worker command: `./scripts/run-worker.sh <command>`",
@@ -3299,6 +3402,9 @@ function rootReadmeMd(packageManager: RootPackageManager) {
 		"",
 		`- Programs: \`${programsLintCommand}\``,
 		`- ExecPlans: \`${plansLintCommand}\``,
+		`- Autonomous ExecPlan build: \`${execPlanBuildCommand} -- --program-id <program-id>\``,
+		"- Runner resolution: `execplan:build` uses `SHIPBYSUNDAY_CLI`, a local `ship-by-sunday`/`shipbysunday` binary, or an `npx`/`npm exec` package fallback.",
+		"- Package override: set `SHIPBYSUNDAY_PACKAGE_SPEC` to a tarball, folder, or package spec when the default `ship-by-sunday` package source is unavailable.",
 		`- Full Worker validation: \`${docsValidateCommand}\``,
 		`- Worker tests: \`${workerTestCommand}\``,
 		"",
@@ -3322,7 +3428,7 @@ function rootAgentsMd(packageManager: RootPackageManager) {
 		"- Stay inside this repository unless the user explicitly names another path.",
 		"- Read `README.md`, `docs/worker/install-report.md`, the active Program, and the active ExecPlan before continuing Worker work.",
 		"- Use `docs/worker/install-report.md` as the current Worker install handoff.",
-		`- Prefer repo-native Worker commands such as \`${packageRunCommand(packageManager, "docs:validate")}\` and \`${packageRunCommand(packageManager, "worker:test")}\`.`,
+		`- Prefer repo-native Worker commands such as \`${packageRunCommand(packageManager, "execplan:build")} -- --program-id <program-id>\`, \`${packageRunCommand(packageManager, "docs:validate")}\`, and \`${packageRunCommand(packageManager, "worker:test")}\`.`,
 		"- Use `./scripts/run-worker.sh <command>` as the direct fallback when package-manager context is unclear.",
 		"- Run `./scripts/run-worker.sh --help` to inspect the installed Worker command surface.",
 		"- Use Program packets in `docs/programs/active/` for multi-slice initiatives.",
