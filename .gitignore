@@ -22,6 +22,7 @@ playwright-report
 apps/web/playwright-report
 test-results
 apps/web/test-results
+.screenshots/
 .codex-user-state
 codex-scripts/
 output/video-pipeline
