@@ -201,3 +201,9 @@
 - Mistake: I accidentally let `apps/web/next-env.d.ts` stage into a local-runner Effect docs commit while making grouped conventional commits.
   Impact: The first commit shape was misleading until amended; the generated file deletion belongs to the web source-tree/generated-file cleanup.
   Corrective action: Inspect `git diff --cached --name-status` before every commit and amend immediately when a staged file crosses the intended commit boundary.
+
+## 2026-05-13 Source Move Staging Command
+
+- Mistake: I chained Git staging commands and included a missing pathspec while repairing the web `src` move review findings.
+  Impact: The command failed noisily after partial staging; no source files were corrupted, and I verified the final index state with focused Git checks.
+  Corrective action: Use separate Git commands for path-sensitive staging and verify each scoped state change before continuing.
