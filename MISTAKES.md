@@ -147,3 +147,9 @@
 - Mistake: I used a one-off `perl -0pi` replacement while updating the Worker compatibility smoke file instead of `apply_patch`.
   Impact: The edit was scoped to one test file and was reviewed afterward, but it violated the repository editing rule for manual code changes.
   Corrective action: Use `apply_patch` for manual source edits, including broad string replacements, and reserve shell commands for inspection or formatter-driven changes.
+
+## 2026-05-13 Effect Scaffold Whitespace Check
+
+- Mistake: I used `status` as a zsh loop variable while adding an extra no-index whitespace check for new files.
+  Impact: zsh treats `status` as read-only, so the first check command failed before doing useful work; no files changed.
+  Corrective action: Avoid reserved shell variable names in validation snippets and rerun the check with a domain-specific variable name.

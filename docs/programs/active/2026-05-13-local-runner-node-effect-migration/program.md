@@ -28,7 +28,7 @@ When this Program is complete, `ship-by-sunday` and `shipbysunday` should run wi
 
 ## Program Inputs
 
-The current local-runner runtime shape is recorded in `research-pass-current-local-runner-runtime.md`. The Node and Effect boundary model is normalized in `normalized-pass-node-effect-boundary.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo and vendored-reference boundaries are recorded in `cross-repo-review.md`. The first child slice should use `planning-brief-1.md`; `current-planning-brief.txt` points at that brief.
+The current local-runner runtime shape is recorded in `research-pass-current-local-runner-runtime.md`. The Node and Effect boundary model is normalized in `normalized-pass-node-effect-boundary.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo and vendored-reference boundaries are recorded in `cross-repo-review.md`. The first child slice used `planning-brief-1.md`; the active Effect scaffold slice uses `planning-brief-2.md`, and `current-planning-brief.txt` points at that brief.
 
 This Program depends on the read-only Effect reference subtree at `repos/effect/`, root guidance in `AGENTS.md`, the local-runner package under `packages/local-runner/`, Worker Foundations install templates in `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts`, and validation commands documented in `packages/local-runner/README.md`.
 
@@ -40,7 +40,9 @@ The Effect reference repository has already been vendored under `repos/effect/` 
 
 Worker Foundations install now generates Node/npm Worker output. Blank and Bun-shaped target repos cut over to `packageManager: npm@11.12.1`; generated `scripts/run-worker.sh` runs `node src/worker-cli.mjs` and `node --test tests/*.mjs`; generated `apps/worker/package.json` scripts use Node commands; tests assert the Node/npm proof command labels. The installer still recognizes a managed legacy `apps/worker/bun.lock` only so reruns can delete it cleanly.
 
-No Effect dependency is currently installed in `packages/local-runner`. The current code uses ordinary promises, `try` / `catch`, `fetch`, `child_process`, `fs/promises`, and ad hoc timeout/cancellation code.
+Effect dependencies are now installed in `packages/local-runner`: `effect@3.21.2`, `@effect/platform@0.96.1`, and `@effect/platform-node@0.106.0`. The first scaffold is intentionally small. `packages/local-runner/src/effect/runtime.ts` runs fully provided effects, `packages/local-runner/src/effect/node-platform-runtime.ts` exposes the Node platform layer with per-run managed-runtime disposal, and `packages/local-runner/src/core/bounded-process.ts` now routes process execution through an injectable `BoundedProcessService` while preserving the public promise-returning API.
+
+The active child ExecPlan for the next slice is `docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md`. It has implemented the published Effect dependency scaffold and bounded process proof without rewriting Worker install.
 
 ## Progress
 
@@ -50,6 +52,8 @@ No Effect dependency is currently installed in `packages/local-runner`. The curr
 - [x] 2026-05-13: Mapped the local-runner Bun surfaces and Worker install Bun defaults that must be handled before the Effect migration.
 - [x] 2026-05-13: Created this Program packet and planning brief 1 for the Node runtime and distribution cutover.
 - [x] 2026-05-13: Completed the Node/npm cutover child ExecPlan. The local-runner package builds and smokes as a Node CLI, generated Worker installs use Node/npm, and compatibility smoke now cuts legacy Bun-shaped inputs over to npm.
+- [x] 2026-05-13: Created planning brief 2 and the active `Effect Dependency And Boundary Scaffold` ExecPlan for the first Effect dependency and process-boundary slice.
+- [x] 2026-05-13: Added the first Effect scaffold in `packages/local-runner`, routed bounded process execution through an injectable Effect service with interruption cleanup, and passed focused bounded-process tests plus local-runner format, lint, typecheck, and build checks.
 
 ## Decision Log
 
@@ -85,15 +89,26 @@ Decision: Split the Worker install workflow before deep Effect conversion.
 Rationale: `worker-foundations-install/workflow.ts` is large enough that converting it wholesale would hide behavior changes. The better sequence is inspect/plan/apply/proof module boundaries first, then migrate those boundaries to Effect.
 Date: 2026-05-13.
 
+Decision: Prove the first Effect scaffold at the bounded process boundary.
+Rationale: `bounded-process.ts` is a small external I/O boundary already used by higher-level workflows. It can demonstrate service injection and behavior preservation before larger Codex, event, workflow API, or Worker install migrations.
+Date: 2026-05-13.
+
+Decision: Keep the Node platform runtime scaffold separate from the bounded process implementation for now.
+Rationale: The bounded process helper can preserve its existing `execFile` behavior behind an Effect service without pulling broader Node platform modules into the CLI bundle. The Node platform layer is still present and tested for later filesystem, terminal, HTTP, and process migrations. Its managed runtime is created and disposed per run until a future slice has a reason to own a longer-lived lifecycle explicitly.
+Date: 2026-05-13.
+
+Decision: Make process cancellation part of the first Effect boundary.
+Rationale: Future Effect callers will compose process execution with timeouts and races. Passing Effect interruption through to Node `execFile` prevents the new boundary from returning early while child process work continues.
+Date: 2026-05-13.
+
 ## Slice Ledger
 
 Active child ExecPlans:
 
-- None at this checkpoint.
+- `docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md`: added published Effect dependencies, created the minimal runtime/service scaffold, and proved the bounded process boundary without broad behavior changes. The implementation and required validation are complete; the file remains active as the current child slice record.
 
 Planned child ExecPlans:
 
-- `Effect Dependency And Boundary Scaffold` should add `effect`, `@effect/platform`, and `@effect/platform-node`, then create the minimal runtime entry and service boundaries without changing broad behavior.
 - `Effect Process Codex And Event Boundaries` should migrate bounded process execution, Codex exec, runner events, and workflow API calls to Effect with focused regression coverage.
 - `Worker Workflow Module Split And Effect Migration` should split the Worker Foundations workflow into inspect/plan/apply/proof modules before migrating those modules to Effect.
 
@@ -103,7 +118,7 @@ Completed child ExecPlans:
 
 ## Next Slice
 
-The next recommended slice is `Effect Dependency And Boundary Scaffold`. It should add the published Effect dependencies to `packages/local-runner`, establish the smallest Node platform/runtime boundary, and prove the CLI still builds, typechecks, and smokes before any broad workflow conversion starts.
+The active child slice is `docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md`. Its implementation and validation are complete. The next recommended implementation slice after archiving this child plan is `Effect Process Codex And Event Boundaries`.
 
 ## Risks and Watchpoints
 
@@ -114,6 +129,8 @@ Do not spend implementation effort preserving Bun Worker compatibility. This cut
 Do not import from `repos/effect/`. It is reference material only.
 
 Do not introduce Effect as a wrapper around every line of code. Use it where typed dependencies, failure modes, retries, concurrency, cancellation, or test injection improve the local-runner.
+
+Do not introduce a long-lived `ManagedRuntime` for broad Node platform services without documenting and owning its disposal lifecycle.
 
 Do not rewrite Worker Foundations install in one pass. It is a high-blast-radius path with package smoke and customer setup consequences.
 
@@ -157,6 +174,38 @@ Candidate first Effect boundaries:
     packages/local-runner/src/core/codex-exec-runner.ts
     packages/local-runner/src/core/runner-events.ts
     packages/local-runner/src/core/workflow-run-api.ts
+
+Effect scaffold surfaces:
+
+    packages/local-runner/src/effect/runtime.ts
+    packages/local-runner/src/effect/node-platform-runtime.ts
+    packages/local-runner/src/core/bounded-process.ts
+    packages/local-runner/tests/bounded-process.test.ts
+
+Effect scaffold validation evidence from 2026-05-13:
+
+    bun run --cwd packages/local-runner test -- bounded-process
+    Test Files  1 passed (1)
+    Tests  7 passed (7)
+
+    bun run --cwd packages/local-runner format:check
+    All matched files use the correct format.
+
+    bun run --cwd packages/local-runner lint
+    Found 0 warnings and 0 errors.
+
+    bun run --cwd packages/local-runner typecheck
+    exited with code 0
+
+    bun run --cwd packages/local-runner build
+    dist/cli.js  1.6mb
+    Done
+
+    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/active/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
+    exited with code 0
+
+    no-index whitespace checks for new slice files
+    exited with code 0
 
 ## Interfaces and Dependencies
 

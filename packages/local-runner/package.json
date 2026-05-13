@@ -24,6 +24,11 @@
 		"worker:compatibility-smoke": "jiti tests/worker-install-compatibility-smoke.ts",
 		"package:smoke": "jiti tests/package-smoke.ts"
 	},
+	"dependencies": {
+		"@effect/platform": "^0.96.1",
+		"@effect/platform-node": "^0.106.0",
+		"effect": "^3.21.2"
+	},
 	"devDependencies": {
 		"@types/node": "25.5.0",
 		"esbuild": "0.27.0",
