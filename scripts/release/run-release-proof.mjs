@@ -64,6 +64,7 @@ const proofDefinitions = {
 		steps: (options) =>
 			buildBillingIntegrationSteps({
 				authenticatedBrowserEnv: options.authenticatedBrowserEnv,
+				billingProofOfferId: options.billingProofOfferId,
 				isLocalBillingTarget: options.isLocalBillingTarget,
 				personaPrepareEnv: options.personaPrepareEnv,
 				targetUrl: options.sandboxBaseUrl,
@@ -74,12 +75,28 @@ const proofDefinitions = {
 function parseArgs(argv) {
 	const options = {};
 
-	for (const argument of argv) {
+	for (let index = 0; index < argv.length; index += 1) {
+		const argument = argv[index];
 		if (!argument.startsWith("--")) {
 			continue;
 		}
 
-		const [key, value = "1"] = argument.slice(2).split("=");
+		const rawOption = argument.slice(2);
+		if (rawOption.includes("=")) {
+			const [key, value = "1"] = rawOption.split("=");
+			options[key] = value;
+			continue;
+		}
+
+		const nextArgument = argv[index + 1];
+		if (nextArgument && !nextArgument.startsWith("--")) {
+			options[rawOption] = nextArgument;
+			index += 1;
+			continue;
+		}
+
+		const key = rawOption;
+		const value = "1";
 		options[key] = value;
 	}
 
@@ -207,6 +224,7 @@ async function main() {
 	const options = parseArgs(process.argv.slice(2));
 	const proof = options.proof ?? "default_ship";
 	const dryRun = options["dry-run"] === "1";
+	const billingProofOfferId = options.offer ?? "starter";
 	const definition = getProofDefinition(proof, { dryRun });
 	const usesLocalServer =
 		process.env.PLAYWRIGHT_USE_LOCAL_SERVER === "1" ||
@@ -235,6 +253,7 @@ async function main() {
 		personaPrepareEnv,
 		authenticatedBrowserEnv,
 		authenticatedDefaultShipCommand,
+		billingProofOfferId,
 		isLocalBillingTarget,
 		sandboxBaseUrl,
 	})) {
@@ -246,6 +265,7 @@ async function main() {
 			{
 				status: "ok",
 				proof,
+				billingProofOfferId,
 				dryRun,
 				note: definition.note,
 				steps: results,

@@ -80,6 +80,13 @@ When resuming local billing proof, start from the green historical rerun in `doc
 
 For local targets, `bun run release:proof -- --proof=billing_integration` adds a warning-only `stripe:dev:doctor` preflight and a hard `stripe:dev:verify` follow-through after the sandbox billing flow. A pinned-profile warning should not override a passing billing handoff, but the warning should still be fixed.
 
+Hosted billing proof defaults to Starter and accepts `--offer=starter|workers` when you need to prove a specific paid lane. Starter expects 29700 cents, `STRIPE_STARTER_PRICE_ID` or legacy `STRIPE_PRICE_ID`, `/starter/home`, and generated-codebase/tutorial access. Workers expects 60000 cents, `STRIPE_WORKERS_PRICE_ID`, `/workers/setup`, and the `worker` capability.
+
+```bash
+bun run --cwd apps/web stripe:hosted:verify:dev-card -- --base-url=https://dev.man-meets-ai.com --offer=workers
+QA_ALLOW_BILLING_INTEGRATION=1 PLAYWRIGHT_BASE_URL=https://www.man-meets-ai.com QA_ENV_FILE=apps/web/.env.production bun run release:proof -- --proof=billing_integration --offer=workers
+```
+
 Current QA state:
 
 - `default_ship` is green on local `dev`.

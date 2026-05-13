@@ -23,6 +23,7 @@ Use release-owned hosted proof when the change touches auth, entitlement, checko
 
 - `bun run release:proof -- --proof=default_ship`
 - `QA_ALLOW_BILLING_INTEGRATION=1 bun run release:proof -- --proof=billing_integration`
+- `QA_ALLOW_BILLING_INTEGRATION=1 bun run release:proof -- --proof=billing_integration --offer=workers` for Workers-specific billing proof
 - dry-run variants are acceptable for local planning and PR description evidence
 
 Use release identity proof before publishing or validating a tag:

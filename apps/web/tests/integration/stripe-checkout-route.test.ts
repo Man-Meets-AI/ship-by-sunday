@@ -183,6 +183,74 @@ describe("POST /api/stripe/checkout", () => {
 		);
 	});
 
+	it("creates a Workers guest checkout session with Workers metadata", async () => {
+		authMock.mockResolvedValue(createAuthState(null));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		getStripeLineItemMock.mockReturnValue({
+			price_data: {
+				currency: "usd",
+				product_data: { name: "Ship by Sunday Workers" },
+				unit_amount: 60000,
+			},
+			quantity: 1,
+		});
+		assertManagedStripePriceMatchesProductConfigMock.mockResolvedValue(
+			undefined,
+		);
+		getStripeMock.mockReturnValue({
+			checkout: {
+				sessions: {
+					create: createSessionMock,
+				},
+			},
+		});
+		createSessionMock.mockResolvedValue({
+			id: "cs_workers_guest_123",
+			url: "https://checkout.stripe.com/pay/cs_workers_guest_123",
+		});
+
+		const { POST } = await import("../../app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest({ offerId: "workers" }));
+		const workersMetadata = {
+			...hostedCheckoutMetadata,
+			offerId: "workers",
+		};
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({
+			sessionId: "cs_workers_guest_123",
+			url: "https://checkout.stripe.com/pay/cs_workers_guest_123",
+		});
+		expect(createSessionMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				client_reference_id: undefined,
+				customer_email: undefined,
+				metadata: workersMetadata,
+				line_items: [
+					{
+						price_data: {
+							currency: "usd",
+							product_data: { name: "Ship by Sunday Workers" },
+							unit_amount: 60000,
+						},
+						quantity: 1,
+					},
+				],
+				payment_intent_data: {
+					metadata: workersMetadata,
+				},
+			}),
+		);
+		expect(getStripeLineItemMock).toHaveBeenCalledWith("workers");
+		expect(
+			assertManagedStripePriceMatchesProductConfigMock,
+		).toHaveBeenCalledWith(expect.anything(), "workers");
+		expect(response.headers.get("set-cookie")).toContain(
+			"sbs_pending_checkout_session=cs_workers_guest_123",
+		);
+	});
+
 	it("creates a checkout session with account metadata and ignores request intent", async () => {
 		authMock.mockResolvedValue(createAuthState("user_123"));
 		currentUserMock.mockResolvedValue({

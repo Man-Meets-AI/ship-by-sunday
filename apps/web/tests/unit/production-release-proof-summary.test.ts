@@ -19,6 +19,7 @@ const validSummary = {
 		convexSensitive: true,
 		defaultShip: "success",
 		billingIntegration: "success",
+		billingProofOfferId: "workers",
 	},
 	generatedAt: "2026-05-10T00:00:00.000Z",
 };
@@ -48,6 +49,8 @@ describe("Production release proof summary verification", () => {
 					url: validSummary.runUrl,
 				},
 				billing: {
+					notes:
+						"Production proof classified the release as billing-sensitive and billing_integration passed for workers.",
 					runId: "456",
 					status: "passed",
 					url: validSummary.runUrl,
@@ -76,6 +79,7 @@ describe("Production release proof summary verification", () => {
 						...validSummary.proof,
 						billingSensitive: false,
 						billingIntegration: "skipped",
+						billingProofOfferId: null,
 					},
 				},
 				"main-sha",
@@ -99,6 +103,7 @@ describe("Production release proof summary verification", () => {
 						...validSummary.proof,
 						billingSensitive: true,
 						billingIntegration: "skipped",
+						billingProofOfferId: null,
 					},
 				},
 				"main-sha",
@@ -123,6 +128,26 @@ describe("Production release proof summary verification", () => {
 			ok: false,
 			issues: expect.arrayContaining([
 				"Summary commit main-sha does not match other-sha.",
+			]),
+		});
+	});
+
+	it("rejects successful billing proof summaries that omit the selected offer", () => {
+		expect(
+			validateProductionReleaseProofSummary(
+				{
+					...validSummary,
+					proof: {
+						...validSummary.proof,
+						billingProofOfferId: null,
+					},
+				},
+				"main-sha",
+			),
+		).toMatchObject({
+			ok: false,
+			issues: expect.arrayContaining([
+				"Production release proof summary proof.billingProofOfferId must be one of starter, workers when billingIntegration is success.",
 			]),
 		});
 	});

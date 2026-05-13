@@ -5,8 +5,12 @@ import { chromium } from "@playwright/test";
 import Stripe from "stripe";
 
 import {
-	HOMEPAGE_CHECKOUT_PROOF_PATH,
+	buildHostedBillingProofCheckoutButtonSelector,
+	buildHostedBillingProofOfferSelectorHelp,
+	getHostedBillingProofOffer,
 	isExpressCheckoutRouteUrl,
+	metadataMatchesHostedProofCheckoutSession,
+	parseHostedBillingProofOfferId,
 } from "./lib/hosted-stripe-checkout-proof.mjs";
 
 const stripeSecretKey = normalizeStripeSecretKey(
@@ -17,14 +21,6 @@ const testCardNumber = "4242 4242 4242 4242";
 const testCardExpiry = "12 / 34";
 const testCardCvc = "123";
 const checkoutEmail = `dev-checkout-${Date.now()}@example.com`;
-const expectedCheckoutMetadata = {
-	accessProduct: "paid_app_access",
-	app: "man_meets_ai",
-	checkoutSurface: "hosted_checkout",
-	metadataSchema: "mma_checkout_v1",
-	offerId: "starter",
-};
-const expectedStarterAmountCents = 29_700;
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -32,6 +28,9 @@ function normalizeStripeSecretKey(secretKey) {
 
 function parseArgs(argv) {
 	let baseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim() ?? "";
+	let offerId = parseHostedBillingProofOfferId(
+		process.env.QA_BILLING_PROOF_OFFER?.trim() || undefined,
+	);
 	let vercelShareUrl = process.env.VERCEL_PROTECTION_SHARE_URL?.trim() ?? "";
 	let timeoutMs = 120_000;
 
@@ -45,6 +44,19 @@ function parseArgs(argv) {
 
 		if (current === "--base-url") {
 			baseUrl = argv[index + 1] ?? baseUrl;
+			index += 1;
+			continue;
+		}
+
+		if (current?.startsWith("--offer=")) {
+			offerId = parseHostedBillingProofOfferId(
+				current.slice("--offer=".length),
+			);
+			continue;
+		}
+
+		if (current === "--offer") {
+			offerId = parseHostedBillingProofOfferId(argv[index + 1]);
 			index += 1;
 			continue;
 		}
@@ -78,6 +90,7 @@ function parseArgs(argv) {
 
 	return {
 		baseUrl,
+		offerId,
 		timeoutMs,
 		vercelShareUrl,
 	};
@@ -85,33 +98,6 @@ function parseArgs(argv) {
 
 function getCheckoutSessionIdFromUrl(urlString) {
 	return urlString.match(/cs_(?:live|test)_[A-Za-z0-9]+/)?.[0] ?? null;
-}
-
-function isExpectedCheckoutMetadata(metadata) {
-	return (
-		metadata?.metadataSchema === expectedCheckoutMetadata.metadataSchema &&
-		metadata?.app === expectedCheckoutMetadata.app &&
-		metadata?.accessProduct === expectedCheckoutMetadata.accessProduct &&
-		metadata?.checkoutSurface === expectedCheckoutMetadata.checkoutSurface &&
-		metadata?.offerId === expectedCheckoutMetadata.offerId &&
-		typeof metadata?.purchaseIntentId === "string" &&
-		metadata.purchaseIntentId.length > 0 &&
-		metadata.courseSlug === undefined &&
-		metadata.buyerStartingPoint === undefined &&
-		metadata.checkoutCtaId === undefined &&
-		metadata.fulfillmentTrack === undefined
-	);
-}
-
-function metadataMatchesCheckoutSession(
-	sessionMetadata,
-	paymentIntentMetadata,
-) {
-	return (
-		isExpectedCheckoutMetadata(sessionMetadata) &&
-		isExpectedCheckoutMetadata(paymentIntentMetadata) &&
-		paymentIntentMetadata.purchaseIntentId === sessionMetadata.purchaseIntentId
-	);
 }
 
 async function primeVercelAccessCookie(page, { baseUrl, vercelShareUrl }) {
@@ -304,7 +290,13 @@ async function waitForPasswordlessCheckoutHandoff(
 	};
 }
 
-const { baseUrl, timeoutMs, vercelShareUrl } = parseArgs(process.argv.slice(2));
+const { baseUrl, offerId, timeoutMs, vercelShareUrl } = parseArgs(
+	process.argv.slice(2),
+);
+const proofOffer = getHostedBillingProofOffer(offerId);
+const checkoutButtonSelector = buildHostedBillingProofCheckoutButtonSelector(
+	proofOffer.id,
+);
 
 if (!baseUrl) {
 	throw new Error(
@@ -367,23 +359,18 @@ page.on("response", (response) => {
 });
 
 try {
+	console.log(
+		`Preparing hosted dev-card ${proofOffer.label} billing proof for ${baseUrl}. Offer selector: --offer=${proofOffer.id} (${buildHostedBillingProofOfferSelectorHelp()})`,
+	);
 	const vercelAccess = await primeVercelAccessCookie(page, {
 		baseUrl,
 		vercelShareUrl,
 	});
-	await page.goto(new URL(HOMEPAGE_CHECKOUT_PROOF_PATH, baseUrl).toString(), {
+	await page.goto(new URL(proofOffer.publicPath, baseUrl).toString(), {
 		waitUntil: "domcontentloaded",
 	});
 
-	const checkoutButtons = page.locator(
-		[
-			"[data-testid='hero-primary-cta']",
-			"[data-testid='starter-checkout-cta']",
-			"[data-testid='codebase-demo-checkout-cta']",
-			"[data-testid='codebase-demo-existing-checkout-cta']",
-			"[data-testid='pricing-primary-cta']",
-		].join(", "),
-	);
+	const checkoutButtons = page.locator(checkoutButtonSelector);
 
 	await checkoutButtons.first().waitFor({
 		state: "visible",
@@ -394,9 +381,11 @@ try {
 		.catch(() => null);
 
 	const visibleCheckoutButtonCount = await checkoutButtons.count();
-	const starterCheckoutButton = page.getByTestId("starter-checkout-cta");
-	await starterCheckoutButton.scrollIntoViewIfNeeded();
-	await starterCheckoutButton.click();
+	const selectedCheckoutButton = page.getByTestId(
+		proofOffer.checkoutButtonTestIds[0],
+	);
+	await selectedCheckoutButton.scrollIntoViewIfNeeded();
+	await selectedCheckoutButton.click();
 	await page.waitForURL(/checkout\.stripe\.com/, {
 		timeout: 30_000,
 	});
@@ -426,10 +415,12 @@ try {
 	const checkoutSuccessPath = finalSession.success_url
 		? new URL(finalSession.success_url).pathname
 		: null;
-	const checkoutMetadataMatches = metadataMatchesCheckoutSession(
-		finalSession.metadata,
-		paymentIntent?.metadata,
-	);
+	const checkoutMetadataMatches = metadataMatchesHostedProofCheckoutSession({
+		offerId: proofOffer.id,
+		paymentIntentMetadata: paymentIntent?.metadata,
+		sessionMetadata: finalSession.metadata,
+	});
+	const expectedHandoffRedirectUrl = `${proofOffer.successPath}?welcome=checkout`;
 
 	printCheck(
 		"Dev staging uses Stripe test mode",
@@ -468,32 +459,33 @@ try {
 		`success_url=${finalSession.success_url ?? "missing"}`,
 	);
 	printCheck(
-		"Stripe Checkout session paid",
+		`${proofOffer.label} Stripe Checkout session paid`,
 		finalSession.status === "complete" &&
 			finalSession.payment_status === "paid" &&
-			finalSession.amount_total === expectedStarterAmountCents,
-		`status=${finalSession.status}, payment_status=${finalSession.payment_status}, amount_total=${finalSession.amount_total}`,
+			finalSession.amount_total === proofOffer.expectedAmountCents,
+		`status=${finalSession.status}, payment_status=${finalSession.payment_status}, amount_total=${finalSession.amount_total}, expected=${proofOffer.expectedAmountCents}`,
 	);
 	printCheck(
-		"Stripe PaymentIntent succeeded",
+		`${proofOffer.label} Stripe PaymentIntent succeeded`,
 		paymentIntent?.status === "succeeded" &&
-			paymentIntent.amount === expectedStarterAmountCents,
-		`status=${paymentIntent?.status ?? "missing"}, amount=${paymentIntent?.amount ?? "missing"}`,
+			paymentIntent.amount === proofOffer.expectedAmountCents,
+		`status=${paymentIntent?.status ?? "missing"}, amount=${paymentIntent?.amount ?? "missing"}, expected=${proofOffer.expectedAmountCents}`,
 	);
 	printCheck(
-		"Checkout reached passwordless workspace handoff",
-		checkoutHandoff.redirectUrl === "/starter/home?welcome=checkout" &&
+		`Checkout reached ${proofOffer.label} passwordless workspace handoff`,
+		checkoutHandoff.redirectUrl === expectedHandoffRedirectUrl &&
 			checkoutHandoff.emailValue === checkoutEmail &&
 			checkoutHandoff.emailLocked &&
 			!checkoutHandoff.passwordVisible &&
 			!checkoutHandoff.claimPageVisible,
-		`url=${checkoutHandoff.finalUrl}, redirect_url=${checkoutHandoff.redirectUrl}, email=${checkoutHandoff.emailValue}, email_locked=${checkoutHandoff.emailLocked}, password_visible=${checkoutHandoff.passwordVisible}, claim_page_visible=${checkoutHandoff.claimPageVisible}`,
+		`url=${checkoutHandoff.finalUrl}, redirect_url=${checkoutHandoff.redirectUrl}, expected_redirect_url=${expectedHandoffRedirectUrl}, email=${checkoutHandoff.emailValue}, email_locked=${checkoutHandoff.emailLocked}, password_visible=${checkoutHandoff.passwordVisible}, claim_page_visible=${checkoutHandoff.claimPageVisible}`,
 	);
 
 	console.log(
 		JSON.stringify(
 			{
 				baseUrl,
+				offer: proofOffer,
 				vercelAccess,
 				checkoutRouteResponses,
 				checkoutSession: {
@@ -543,10 +535,10 @@ try {
 		checkoutSuccessPath !== "/checkout/success" ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
-		finalSession.amount_total !== expectedStarterAmountCents ||
+		finalSession.amount_total !== proofOffer.expectedAmountCents ||
 		paymentIntent?.status !== "succeeded" ||
-		paymentIntent.amount !== expectedStarterAmountCents ||
-		checkoutHandoff.redirectUrl !== "/starter/home?welcome=checkout" ||
+		paymentIntent.amount !== proofOffer.expectedAmountCents ||
+		checkoutHandoff.redirectUrl !== expectedHandoffRedirectUrl ||
 		checkoutHandoff.emailValue !== checkoutEmail ||
 		!checkoutHandoff.emailLocked ||
 		checkoutHandoff.passwordVisible ||
