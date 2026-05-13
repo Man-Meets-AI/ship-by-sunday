@@ -2,7 +2,7 @@
 title: Existing Customer Migration Notes Planning Brief 5
 program_id: public-product-split-starter-workers
 brief_version: 5
-status: current
+status: superseded
 summary: Create a durable operator note for manually migrating the three existing paid customers after the Starter and Workers split.
 read_when:
   - Writing or resuming existing-customer migration documentation for the public product split.

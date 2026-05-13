@@ -51,7 +51,7 @@ vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: reportClientErrorMock,
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(protected)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -68,7 +68,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceDoctorPassPage } from "@/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page";
+import { WorkspaceDoctorPassPage } from "@/app/(protected)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page";
 
 function createSyncPreviewState() {
 	return {

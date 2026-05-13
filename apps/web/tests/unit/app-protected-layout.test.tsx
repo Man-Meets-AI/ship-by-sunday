@@ -8,14 +8,14 @@ vi.mock("@/platform/access/product-access", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/access-required/access-required-page",
+	"@/app/(protected)/_components/access-required/access-required-page",
 	() => ({
 		AccessRequiredPage: () => <div>Access recovery</div>,
 	}),
 );
 
 vi.mock(
-	"@/app/(workspace)/_components/workspace-support/workspace-support-widget",
+	"@/app/(protected)/_components/workspace-support/workspace-support-widget",
 	() => ({
 		WorkspaceSupportWidget: () => <div>Support widget</div>,
 	}),
@@ -32,7 +32,7 @@ describe("protected app layout", () => {
 	});
 
 	it("checks product access once before rendering protected children", async () => {
-		const { default: AppLayout } = await import("@/app/(workspace)/layout");
+		const { default: AppLayout } = await import("@/app/(protected)/layout");
 
 		const markup = renderToStaticMarkup(
 			await AppLayout({

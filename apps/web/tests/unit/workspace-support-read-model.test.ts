@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import type { WorkspaceFindingDocument } from "@/app/(protected)/_lib/workspace-findings-read-model";
 import {
 	buildWorkspaceLoopsModel,
 	buildWorkspacePrivacyModel,
@@ -8,7 +8,7 @@ import {
 	type WorkspaceDoctorPassRunDocument,
 	type WorkspacePrivacySetupState,
 	type WorkspaceWorkflowRunDocument,
-} from "@/app/(workspace)/_lib/workspace-support-read-model";
+} from "@/app/(protected)/_lib/workspace-support-read-model";
 
 const now = Date.UTC(2026, 4, 4, 21, 30);
 

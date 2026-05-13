@@ -6,7 +6,7 @@ import {
 	type SetupCheckScope,
 	type SetupReadinessCheck,
 	type WorkspaceSetupState,
-} from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
+} from "@/app/(protected)/_lib/workspace-setup-readiness-model";
 import { routeConfig } from "@/config/product";
 
 const now = 1_000_000;

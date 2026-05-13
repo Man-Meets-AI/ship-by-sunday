@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { WorkspaceSupportWidget } from "@/app/(workspace)/_components/workspace-support/workspace-support-widget";
+import { WorkspaceSupportWidget } from "@/app/(protected)/_components/workspace-support/workspace-support-widget";
 
 const capturePostHogProductEventMock = vi.hoisted(() => vi.fn());
 

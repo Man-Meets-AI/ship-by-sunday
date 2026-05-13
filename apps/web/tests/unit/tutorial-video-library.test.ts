@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildTutorialVideoLibrary } from "@/app/(workspace)/tutorials/_lib/tutorial-video-library";
+import { buildTutorialVideoLibrary } from "@/app/(protected)/tutorials/_lib/tutorial-video-library";
 
 describe("tutorial video library model", () => {
 	it("groups all student-facing lessons by curriculum block without lock state", () => {

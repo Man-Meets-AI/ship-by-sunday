@@ -22,8 +22,8 @@ This starter is opinionated in one specific way: it gives you the full public-to
 - `config/product.ts`: starter contract, branding defaults, route constants, and module flags
 - `config/starter-selectors.ts`: starter module selectors plus display config helpers
 - `app/docs/_components/`: docs route disabled-state fallback UI
-- `app/(workspace)/_components/workspace-home/`: neutral protected workspace home for starter mode
-- `app/(workspace)/_lib/workspace-home-model.ts`: workspace home model builder
+- `app/(protected)/_components/workspace-home/`: neutral protected workspace home for starter mode
+- `app/(protected)/_lib/workspace-home-model.ts`: workspace home model builder
 - `shared/`: config, env helpers, shared providers
 - `platform/`: environment parsing and integration adapters
 - `convex/`: backend functions grouped by domain
@@ -42,7 +42,7 @@ The runtime splits into clear surfaces:
 
 That split matters because checkout and access recovery live between those worlds.
 
-`app/(workspace)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
+`app/(protected)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
 
 The auth bridge between public and protected surfaces uses three route-group screens:
 

@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import type { WorkspaceFindingDocument } from "@/app/(protected)/_lib/workspace-findings-read-model";
 
 const { requestWorkflowRunMock, routerPushMock, toastSuccessMock } = vi.hoisted(
 	() => ({
@@ -44,7 +44,7 @@ vi.mock("sonner", () => ({
 	},
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(protected)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -61,7 +61,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceFindingDetailPage } from "@/app/(workspace)/_components/existing-codebase-findings/workspace-finding-detail-page";
+import { WorkspaceFindingDetailPage } from "@/app/(protected)/_components/existing-codebase-findings/workspace-finding-detail-page";
 
 function createFinding(
 	overrides: Partial<WorkspaceFindingDocument> = {},

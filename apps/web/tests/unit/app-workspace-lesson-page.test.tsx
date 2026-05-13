@@ -41,7 +41,7 @@ vi.mock("next/navigation", () => ({
 	notFound: () => notFoundMock(),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(protected)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -61,7 +61,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/execute-ship/bonus-lesson-view-tracker",
+	"@/app/(protected)/_components/execute-ship/bonus-lesson-view-tracker",
 	() => ({
 		BonusLessonViewTracker: () => null,
 	}),
@@ -76,7 +76,7 @@ vi.mock("@/platform/access/product-access", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/access-required/access-required-page",
+	"@/app/(protected)/_components/access-required/access-required-page",
 	() => ({
 		AccessRequiredPage: () => <div>Access recovery</div>,
 	}),
@@ -194,7 +194,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(protected)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -218,7 +218,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(protected)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -266,7 +266,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(protected)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -318,7 +318,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(protected)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -371,7 +371,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(protected)/lesson/[lessonKey]/page");
 
 		await expect(
 			LessonRoutePage({

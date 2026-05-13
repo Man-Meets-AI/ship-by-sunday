@@ -7,7 +7,7 @@ import {
 	getCodebaseStageDefinition,
 } from "@shipbysunday/codebase-compiler";
 
-import { CodebaseStageStepField } from "@/app/(workspace)/_components/codebase-flow/codebase-stage-step-field";
+import { CodebaseStageStepField } from "@/app/(protected)/_components/codebase-flow/codebase-stage-step-field";
 
 describe("CodebaseStageStepField", () => {
 	it("renders field controls without field-level AI actions", () => {

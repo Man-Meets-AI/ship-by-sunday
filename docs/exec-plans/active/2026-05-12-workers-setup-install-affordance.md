@@ -39,7 +39,7 @@ After this change, a customer pairing a local runner on `/workers/setup` can see
 
 The active Program's `Next Slice` still names broad Worker runtime and generated-output naming cleanup, but this request narrows the next child slice to Worker setup install affordance and install event sync. The Program should be updated after this child plan is created or advanced so later workers do not assume the broader runtime rename slice is still the immediate next step.
 
-The current setup page already has a package-runner switcher in `apps/web/app/(workspace)/_components/existing-codebase-setup/setup-pairing-panel.tsx`, but it is local to the pairing component. The install panel should extract that command rendering rather than duplicate it.
+The current setup page already has a package-runner switcher in `apps/web/app/(protected)/_components/existing-codebase-setup/setup-pairing-panel.tsx`, but it is local to the pairing component. The install panel should extract that command rendering rather than duplicate it.
 
 The Worker install workflow already returns a sync-safe report with `createdRefs`, `changedRefs`, `reportRef`, `localProofRef`, branch, commit, proof command statuses, and blockers. That report is the right source for the new event payload, but event delivery must remain best-effort and cannot change the install exit code.
 
@@ -101,7 +101,7 @@ Local runner credentials are stored by `packages/local-runner/src/core/local-run
 
 The app ingests runner events through `apps/web/app/api/workspace/runner/events/route.ts`, which delegates to `apps/web/app/api/workspace/runner/_server/runner-bridge.ts` and then to Convex `ingestWorkspaceRunnerEventByCredential`. Convex event types, payload types, validators, sync-safety checks, and setup state projection live in `apps/web/convex/workspace/types.ts`, `apps/web/convex/workspace/validators.ts`, `apps/web/convex/workspace/events.ts`, and `apps/web/convex/workspace/model.ts`.
 
-The setup page is `/workers/setup`, implemented by `apps/web/app/(workspace)/workers/setup/page.tsx` and rendered by `apps/web/app/(workspace)/_components/existing-codebase-setup/existing-codebase-setup-page.tsx`. Its client model lives in `apps/web/app/(workspace)/_lib/workspace-setup-readiness-model.ts`. The pairing command UI currently lives inside `setup-pairing-panel.tsx` and should be extracted into a feature-local reusable command component near the other setup components.
+The setup page is `/workers/setup`, implemented by `apps/web/app/(protected)/workers/setup/page.tsx` and rendered by `apps/web/app/(protected)/_components/existing-codebase-setup/existing-codebase-setup-page.tsx`. Its client model lives in `apps/web/app/(protected)/_lib/workspace-setup-readiness-model.ts`. The pairing command UI currently lives inside `setup-pairing-panel.tsx` and should be extracted into a feature-local reusable command component near the other setup components.
 
 ### In Scope
 
@@ -123,9 +123,9 @@ Next, update `packages/local-runner/src/workflows/worker-foundations-install/wor
 
 Next, teach Convex about the new event types. Add type and validator cases in `apps/web/convex/workspace/types.ts` and `apps/web/convex/workspace/validators.ts`. Add allowed payload fields in `apps/web/convex/workspace/events.ts`. In `apps/web/convex/workspace/model.ts`, include the latest Worker install events in setup state and patch the runner's `lastEventAt` when those events arrive. The UI can derive install status from the returned event documents without adding a new table.
 
-Next, update `apps/web/app/(workspace)/_lib/workspace-setup-readiness-model.ts`. Add a `workerInstall` model that derives `waiting`, `ready`, `previewed`, `installed`, or `blocked` from pairing state and the latest Worker install event. It should preserve full sync-safe `createdRefs` and `changedRefs` arrays in the model while leaving display capping to the component.
+Next, update `apps/web/app/(protected)/_lib/workspace-setup-readiness-model.ts`. Add a `workerInstall` model that derives `waiting`, `ready`, `previewed`, `installed`, or `blocked` from pairing state and the latest Worker install event. It should preserve full sync-safe `createdRefs` and `changedRefs` arrays in the model while leaving display capping to the component.
 
-Next, extract the package-runner command switcher from `setup-pairing-panel.tsx` into a new reusable component under `apps/web/app/(workspace)/_components/existing-codebase-setup/`. Refactor the pairing panel to use it, then add a new `setup-worker-install-panel.tsx` that renders the gated install commands, generated summary, collapsible advanced details, and installed handoff.
+Next, extract the package-runner command switcher from `setup-pairing-panel.tsx` into a new reusable component under `apps/web/app/(protected)/_components/existing-codebase-setup/`. Refactor the pairing panel to use it, then add a new `setup-worker-install-panel.tsx` that renders the gated install commands, generated summary, collapsible advanced details, and installed handoff.
 
 Finally, update tests and Program progress. Add local-runner tests for paired dry-run, installed, blocked, unpaired no-op, and flush failure behavior. Add Convex tests for ingesting the new event types, rejecting unsafe payload fields, and returning install events in setup state. Add readiness-model tests for waiting, ready, previewed, installed, and blocked statuses. Add integration UI tests proving the install panel renders after pairing, keeps command actions gated before pairing, uses the package-runner toggle, says commits happen by default on `shipbysunday/install`, and shows capped refs with `and N more`.
 
@@ -242,6 +242,6 @@ Installed handoff actions:
 
 `apps/web/convex/workspace/events.ts` is the sync-safety boundary for runner event payloads. Add only explicit allowed fields for Worker install events.
 
-`apps/web/app/(workspace)/_lib/workspace-setup-readiness-model.ts` is the client model boundary for `/workers/setup`. The new setup panel should consume this model rather than re-deriving event state in JSX.
+`apps/web/app/(protected)/_lib/workspace-setup-readiness-model.ts` is the client model boundary for `/workers/setup`. The new setup panel should consume this model rather than re-deriving event state in JSX.
 
-`apps/web/app/(workspace)/_components/existing-codebase-setup/` owns the feature-local setup components. New command UI and install panel components belong there, not in shared `components/ui`, because they are specific to Worker setup.
+`apps/web/app/(protected)/_components/existing-codebase-setup/` owns the feature-local setup components. New command UI and install panel components belong there, not in shared `components/ui`, because they are specific to Worker setup.

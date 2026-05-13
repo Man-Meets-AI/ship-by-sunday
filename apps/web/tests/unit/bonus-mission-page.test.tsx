@@ -19,7 +19,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(protected)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
 	),
@@ -58,7 +58,7 @@ vi.mock("@/components/ui/progress", () => ({
 	}) => <div className={className} data-slot="progress" data-value={value} />,
 }));
 
-import { BonusMissionPage } from "@/app/(workspace)/_components/execute-ship/bonus-mission-page";
+import { BonusMissionPage } from "@/app/(protected)/_components/execute-ship/bonus-mission-page";
 import { buildBonusShellMission } from "@/lib/execute-ship/bonus-library-presentation";
 
 const missionState: BonusMissionState = {

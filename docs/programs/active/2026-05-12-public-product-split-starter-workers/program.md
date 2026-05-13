@@ -85,6 +85,8 @@ There are three existing paid customers. They should not be mass-migrated by ass
 - [x] 2026-05-13: Created planning brief 5 and the active child ExecPlan for existing-customer migration notes at `docs/exec-plans/active/2026-05-13-document-existing-customer-product-split-migration.md`.
 - [x] 2026-05-13: Completed the existing-customer migration notes slice. `docs/internal/existing-customer-product-split-migration.md` now documents one-customer-at-a-time decisions, grant targets, verification, and private-data boundaries.
 - [x] 2026-05-13: Recorded the protected-route-group cleanup: the paid app folder should move from `apps/web/app/(workspace)/` to `apps/web/app/(protected)/` so the codebase names the pay-guarded area directly.
+- [x] 2026-05-13: Created planning brief 6 and completed the child ExecPlan for the protected route group rename at `docs/exec-plans/completed/2026-05-13-rename-workspace-route-group-to-protected.md`.
+- [x] 2026-05-13: Completed the protected route group rename. The paid app route tree now lives under `apps/web/app/(protected)/`, and validation proved public `/starter` and `/workers` still exist while protected app subroutes remain in the same URL positions.
 
 ## Decision Log
 
@@ -225,12 +227,11 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-13-extract-explicit-generated-template-app.md` owns the completed generated template app extraction: broad core app routes are no longer copied, generated app runtime files are rendered from intake facts, and the clean-room generated repo test proves the app typechecks.
 - `docs/exec-plans/completed/2026-05-13-clean-up-docs-promotion-and-blog-content.md` owns the completed docs/blog cleanup: docs are reachable but unpromoted, and the blog now carries the Starter / Workers split thesis.
 - `docs/exec-plans/completed/2026-05-13-document-existing-customer-product-split-migration.md` owns the completed private-data-safe operator runbook for manually mapping legacy paid customers into Starter, Workers, both, or a bespoke path.
+- `docs/exec-plans/completed/2026-05-13-rename-workspace-route-group-to-protected.md` owns the completed protected route group rename from `apps/web/app/(workspace)/` to `apps/web/app/(protected)/`.
 
 ## Next Slice
 
-Next repo cleanup slice: rename the app route group from `apps/web/app/(workspace)/` to `apps/web/app/(protected)/`, update feature-local imports, tests, route references, and docs, and verify that public product routes stay public while paid app routes stay guarded. This is a path-only Next route-group rename, not a URL change.
-
-The acceptance probe for that slice should prove `/starter` and `/workers` are public, `/starter/home` and `/workers/setup` are protected, and route protection in `apps/web/proxy.ts` still guards the paid app surfaces after the folder move. External operator execution also remains: review the three real legacy paid customers using `docs/internal/existing-customer-product-split-migration.md`, apply grants outside git, verify access, and record customer-specific outcomes in the operator-owned system.
+No required repo child slice remains inside this Program. External operator execution still remains: review the three real legacy paid customers using `docs/internal/existing-customer-product-split-migration.md`, apply grants outside git, verify access, and record customer-specific outcomes in the operator-owned system.
 
 ## Risks and Watchpoints
 
@@ -250,7 +251,7 @@ Do not silently break the three current paid customers. The code can support the
 
 ## Outcomes & Retrospective
 
-This Program remains active from the repo perspective because the protected route group still uses the old `(workspace)` name even though it now represents the pay-guarded app boundary. Public IA and checkout, generated Starter snapshot purity, explicit generated template app extraction, docs/blog cleanup, and private-data-safe existing-customer migration notes have all landed.
+This Program is active only because real customer-specific migrations happen outside git. Repo-side work is complete: public IA and checkout, generated Starter snapshot purity, explicit generated template app extraction, docs/blog cleanup, private-data-safe existing-customer migration notes, and protected route group naming have all landed.
 
 ## Validation and Acceptance
 
@@ -266,4 +267,4 @@ The older Worker Generate Tutorials IA Program should not be used as the current
 
 ## Interfaces and Dependencies
 
-This Program depends on public routes under `apps/web/app/`, currently protected paid-app routes under `apps/web/app/(workspace)/`, the target protected route group `apps/web/app/(protected)/`, route protection in `apps/web/proxy.ts`, route and price constants in `apps/web/config/product.ts`, homepage content and render models under `apps/web/app/_content/` and `apps/web/app/_lib/`, paid-home models under the protected route group, checkout code under `apps/web/platform/billing/checkout/`, managed Stripe config under `apps/web/platform/billing/`, access code under `apps/web/platform/access/`, Convex access code under `apps/web/convex/access/`, Starter lesson library code under the protected route group, blog content loading under `apps/web/app/blog/` and `apps/web/content/blog/`, docs content under `apps/web/content/docs/`, and generated repo code under `packages/codebase-compiler/src/repo-generation/`.
+This Program depends on public routes under `apps/web/app/`, protected paid-app routes under `apps/web/app/(protected)/`, route protection in `apps/web/proxy.ts`, route and price constants in `apps/web/config/product.ts`, homepage content and render models under `apps/web/app/_content/` and `apps/web/app/_lib/`, paid-home models under the protected route group, checkout code under `apps/web/platform/billing/checkout/`, managed Stripe config under `apps/web/platform/billing/`, access code under `apps/web/platform/access/`, Convex access code under `apps/web/convex/access/`, Starter lesson library code under the protected route group, blog content loading under `apps/web/app/blog/` and `apps/web/content/blog/`, docs content under `apps/web/content/docs/`, and generated repo code under `packages/codebase-compiler/src/repo-generation/`.

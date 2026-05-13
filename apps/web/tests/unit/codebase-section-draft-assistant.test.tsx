@@ -4,7 +4,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CodebaseSectionDraftAssistant } from "@/app/(workspace)/_components/codebase-flow/codebase-section-draft-assistant";
+import { CodebaseSectionDraftAssistant } from "@/app/(protected)/_components/codebase-flow/codebase-section-draft-assistant";
 import {
 	buildCodebaseSectionDraftRequest,
 	isCodebaseSectionDraftable,

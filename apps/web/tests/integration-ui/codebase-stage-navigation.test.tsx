@@ -26,7 +26,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-import { CodebaseStageNav } from "@/app/(workspace)/_components/codebase-flow/codebase-stage-nav";
+import { CodebaseStageNav } from "@/app/(protected)/_components/codebase-flow/codebase-stage-nav";
 
 function createWorkspaceState(
 	factOverrides: Record<string, unknown> = {},

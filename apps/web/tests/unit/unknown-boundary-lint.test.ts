@@ -45,7 +45,7 @@ describe("unknown boundary lint", () => {
 			"export type DbPayload = unknown;\n",
 		);
 		writeFixture(
-			"apps/web/app/(workspace)/_lib/workspace-support-read-model.ts",
+			"apps/web/app/(protected)/_lib/workspace-support-read-model.ts",
 			"export type ReadModelPayload = unknown;\n",
 		);
 
@@ -107,7 +107,7 @@ describe("unknown boundary lint", () => {
 		expect(allowsUnknownBoundaryType("apps/web/convex/model.ts")).toBe(true);
 		expect(
 			allowsUnknownBoundaryType(
-				"apps/web/app/(workspace)/_lib/workspace-support-read-model.ts",
+				"apps/web/app/(protected)/_lib/workspace-support-read-model.ts",
 			),
 		).toBe(true);
 		expect(

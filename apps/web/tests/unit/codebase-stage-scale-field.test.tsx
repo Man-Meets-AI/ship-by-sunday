@@ -3,7 +3,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { CodebaseStageScaleField } from "@/app/(workspace)/_components/codebase-flow/codebase-stage-scale-field";
+import { CodebaseStageScaleField } from "@/app/(protected)/_components/codebase-flow/codebase-stage-scale-field";
 
 describe("CodebaseStageScaleField", () => {
 	it("renders the severity scale and commits a numeric pain score", async () => {

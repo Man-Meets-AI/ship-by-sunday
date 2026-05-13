@@ -73,11 +73,11 @@ This plan is active and has not been implemented yet. Fill this section when the
 
 ## Context and Orientation
 
-This work belongs to the existing-codebase Doctor Pass workspace in `apps/web`. The protected list route is `apps/web/app/(workspace)/workspace/findings/page.tsx`, and the detail route is `apps/web/app/(workspace)/workspace/findings/[findingId]/page.tsx`. Both routes gate access through `loadWorkspacePageAccess`, redirect non-existing-codebase buyers, and preload Convex data through `fetchAuthenticatedQuery`.
+This work belongs to the existing-codebase Doctor Pass workspace in `apps/web`. The protected list route is `apps/web/app/(protected)/workspace/findings/page.tsx`, and the detail route is `apps/web/app/(protected)/workspace/findings/[findingId]/page.tsx`. Both routes gate access through `loadWorkspacePageAccess`, redirect non-existing-codebase buyers, and preload Convex data through `fetchAuthenticatedQuery`.
 
-The current findings UI lives under `apps/web/app/(workspace)/_components/existing-codebase-findings/`. The main page component is `workspace-findings-page.tsx`; it currently titles the surface `Top 9 ledger`, shows a summary with uploaded and visible counts, and renders `WorkspaceFindingsFilters` plus `WorkspaceFindingsLedger`. The ledger rows currently show rank, title, category, severity, confidence, buyer impact, proof, permission, workflow, and status. The current filters only support category and status.
+The current findings UI lives under `apps/web/app/(protected)/_components/existing-codebase-findings/`. The main page component is `workspace-findings-page.tsx`; it currently titles the surface `Top 9 ledger`, shows a summary with uploaded and visible counts, and renders `WorkspaceFindingsFilters` plus `WorkspaceFindingsLedger`. The ledger rows currently show rank, title, category, severity, confidence, buyer impact, proof, permission, workflow, and status. The current filters only support category and status.
 
-The current read model is `apps/web/app/(workspace)/_lib/workspace-findings-read-model.ts`. It defines the browser-facing `WorkspaceFindingDocument`, row models, filters, labels, detail model, and workflow approval placeholder. It currently hides deleted findings, sorts by `rank`, and marks the first sorted row as recommended first.
+The current read model is `apps/web/app/(protected)/_lib/workspace-findings-read-model.ts`. It defines the browser-facing `WorkspaceFindingDocument`, row models, filters, labels, detail model, and workflow approval placeholder. It currently hides deleted findings, sorts by `rank`, and marks the first sorted row as recommended first.
 
 The Convex schema is defined from validators in `apps/web/convex/workspace/validators.ts` and registered in `apps/web/convex/schema.ts`. Doctor Pass runs live in `doctorPassRuns`; uploaded structured findings live in `codebaseFindings`. Each finding already stores `projectId`, `doctorPassRunId`, optional `repositoryBindingId`, `findingId`, `rank`, `status`, `title`, `category`, `severity`, `confidence`, `buyerImpact`, `blastRadius`, `proofPath`, `proofability`, `permissionRequired`, `recommendedWorkflowId`, `whyThisNow`, `evidenceRefs`, optional `blockedReason`, `syncSensitivity`, `localReportRef`, `createdAt`, `updatedAt`, and optional `deletedAt`.
 
@@ -132,8 +132,8 @@ The fourth milestone is end-to-end smoke proof and documentation. At the end of 
 From the repository root, confirm the current files and failure before editing:
 
     rg -n "Top 9 ledger|buildWorkspaceFindingsLedgerModel|listWorkspaceFindings|syncFindingsForApprovedDoctorPassRun" apps/web RUNNER_SMOKE_CHECKLIST.md
-    sed -n '55,120p' 'apps/web/app/(workspace)/_components/existing-codebase-findings/workspace-findings-page.tsx'
-    sed -n '260,325p' 'apps/web/app/(workspace)/_lib/workspace-findings-read-model.ts'
+    sed -n '55,120p' 'apps/web/app/(protected)/_components/existing-codebase-findings/workspace-findings-page.tsx'
+    sed -n '260,325p' 'apps/web/app/(protected)/_lib/workspace-findings-read-model.ts'
     sed -n '3176,3282p' apps/web/convex/workspace/model.ts
 
 Expected observation: the page title is `Top 9 ledger`, the read model sorts all rows by `rank`, the upload path patches only matching `findingId`, and the list query slices the first nine project findings by rank.
@@ -144,12 +144,12 @@ For the first implementation slice, edit these files:
     apps/web/convex/schema.ts
     apps/web/convex/workspace/model.ts
     apps/web/convex/workspace.ts
-    apps/web/app/(workspace)/workspace/findings/page.tsx
-    apps/web/app/(workspace)/workspace/findings/[findingId]/page.tsx
-    apps/web/app/(workspace)/_lib/workspace-findings-read-model.ts
-    apps/web/app/(workspace)/_components/existing-codebase-findings/workspace-findings-page.tsx
-    apps/web/app/(workspace)/_components/existing-codebase-findings/workspace-findings-filters.tsx
-    apps/web/app/(workspace)/_components/existing-codebase-findings/workspace-findings-ledger.tsx
+    apps/web/app/(protected)/workspace/findings/page.tsx
+    apps/web/app/(protected)/workspace/findings/[findingId]/page.tsx
+    apps/web/app/(protected)/_lib/workspace-findings-read-model.ts
+    apps/web/app/(protected)/_components/existing-codebase-findings/workspace-findings-page.tsx
+    apps/web/app/(protected)/_components/existing-codebase-findings/workspace-findings-filters.tsx
+    apps/web/app/(protected)/_components/existing-codebase-findings/workspace-findings-ledger.tsx
 
 Add tests or update existing tests here:
 
@@ -245,8 +245,8 @@ If a broad validation command fails because of unrelated dirty worktree changes,
 Current evidence for the bug:
 
     RUNNER_SMOKE_CHECKLIST.md says repeated Doctor Pass uploads should not leave mixed old and new findings in the same Top 9 ledger with repeated ranks and duplicate-looking titles.
-    apps/web/app/(workspace)/_components/existing-codebase-findings/workspace-findings-page.tsx currently renders the H1 Top 9 ledger.
-    apps/web/app/(workspace)/_lib/workspace-findings-read-model.ts currently sorts rows by rank without run scope.
+    apps/web/app/(protected)/_components/existing-codebase-findings/workspace-findings-page.tsx currently renders the H1 Top 9 ledger.
+    apps/web/app/(protected)/_lib/workspace-findings-read-model.ts currently sorts rows by rank without run scope.
     apps/web/convex/workspace/model.ts currently lists project findings by rank and slices to MAX_SYNCED_FINDINGS_PER_RUN.
 
 Expected final smoke evidence should look like this in prose, not as a raw transcript:
@@ -261,7 +261,7 @@ Expected final smoke evidence should look like this in prose, not as a raw trans
 
 ## Interfaces and Dependencies
 
-Use existing Next App Router route patterns in `apps/web/app/(workspace)/workspace/findings/page.tsx` and `apps/web/app/(workspace)/workspace/findings/[findingId]/page.tsx`. Keep `loadWorkspacePageAccess`, `AccessRequiredPage`, existing-codebase fulfillment-track gating, and `fetchAuthenticatedQuery`.
+Use existing Next App Router route patterns in `apps/web/app/(protected)/workspace/findings/page.tsx` and `apps/web/app/(protected)/workspace/findings/[findingId]/page.tsx`. Keep `loadWorkspacePageAccess`, `AccessRequiredPage`, existing-codebase fulfillment-track gating, and `fetchAuthenticatedQuery`.
 
 Use Convex validators in `apps/web/convex/workspace/validators.ts` for every new query or mutation argument and return value. Export public queries and mutations through `apps/web/convex/workspace.ts`. Keep sensitive internal helpers private inside `apps/web/convex/workspace/model.ts` unless the browser needs a narrow authenticated API.
 

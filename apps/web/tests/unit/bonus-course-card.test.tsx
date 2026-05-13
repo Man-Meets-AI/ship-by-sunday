@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 globalThis.React = React;
 
-import { BonusCourseCard } from "@/app/(workspace)/_components/course/mission/components/bonus-course-card";
+import { BonusCourseCard } from "@/app/(protected)/_components/course/mission/components/bonus-course-card";
 
 describe("BonusCourseCard", () => {
 	it("surfaces the included FULL TURBO bonus with the playlist link and usage guidance", () => {

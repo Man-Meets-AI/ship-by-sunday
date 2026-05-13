@@ -9,7 +9,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 
 import type { BonusMissionState } from "@/lib/execute-ship/bonus-mission-types";
-import { LessonMapSurface } from "@/app/(workspace)/_components/execute-ship/lesson-map-surface";
+import { LessonMapSurface } from "@/app/(protected)/_components/execute-ship/lesson-map-surface";
 
 vi.mock("next/link", () => ({
 	default: ({

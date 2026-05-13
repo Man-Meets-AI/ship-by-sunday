@@ -2,7 +2,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { CodebaseStageSaveFeedback } from "@/app/(workspace)/_components/codebase-flow/codebase-stage-save-feedback";
+import { CodebaseStageSaveFeedback } from "@/app/(protected)/_components/codebase-flow/codebase-stage-save-feedback";
 
 describe("CodebaseStageSaveFeedback", () => {
 	it("renders warning feedback as a compact status row with the warning icon", () => {

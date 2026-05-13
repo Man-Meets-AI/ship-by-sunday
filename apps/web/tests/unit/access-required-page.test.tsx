@@ -53,7 +53,7 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 
 globalThis.React = React;
 
-import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
+import { AccessRequiredPage } from "@/app/(protected)/_components/access-required/access-required-page";
 
 describe("AccessRequiredPage", () => {
 	beforeEach(() => {

@@ -45,7 +45,7 @@ vi.mock("@clerk/nextjs", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/app-shell/app-shell-theme-toggle",
+	"@/app/(protected)/_components/app-shell/app-shell-theme-toggle",
 	() => ({
 		AppShellThemeToggle: () => (
 			<button type="button" aria-label="Toggle theme" />
@@ -53,7 +53,7 @@ vi.mock(
 	}),
 );
 
-vi.mock("@/app/(workspace)/_components/app-shell/app-shell-user-menu", () => ({
+vi.mock("@/app/(protected)/_components/app-shell/app-shell-user-menu", () => ({
 	AppShellUserMenu: () => (
 		<button type="button" aria-label="Open account menu" />
 	),
@@ -104,11 +104,11 @@ vi.mock("@/components/ui/navigation-menu", () => ({
 
 globalThis.React = React;
 
-import { AppShell } from "@/app/(workspace)/_components/app-shell";
+import { AppShell } from "@/app/(protected)/_components/app-shell";
 import type {
 	AppShellLocalNav,
 	AppShellPrimaryNav,
-} from "@/app/(workspace)/_components/app-shell/app-shell-props";
+} from "@/app/(protected)/_components/app-shell/app-shell-props";
 
 const codebaseStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
