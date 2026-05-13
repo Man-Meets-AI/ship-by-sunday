@@ -1,10 +1,10 @@
 ---
 title: Effect Dependency And Boundary Scaffold
-status: active
+status: complete
 created_at: 2026-05-13
-completed_at: null
+completed_at: 2026-05-13
 summary: Add published Effect dependencies and prove one small local-runner external I/O boundary through an injectable Effect service without changing behavior.
-post_build_recap: null
+post_build_recap: Published Effect dependencies, a tiny runtime scaffold, and the bounded-process Effect service boundary landed with behavior-preserving tests and validation.
 program_id: local-runner-node-effect-migration
 planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md
 read_when:
@@ -76,7 +76,7 @@ Date: 2026-05-13.
 
 ## Outcomes & Retrospective
 
-This plan is active. The first scaffold has landed: local-runner now depends on published Effect packages, has a small Effect runtime and Node platform runtime scaffold, and proves the bounded process boundary through an injectable Effect service. The bounded process proof covers existing promise behavior plus Effect interruption cleanup. The larger Codex, event outbox, workflow API, and Worker install migrations remain intentionally outside this slice.
+This plan is complete. Local-runner now depends on published Effect packages, has a small Effect runtime and Node platform runtime scaffold, and proves the bounded process boundary through an injectable Effect service. The bounded process proof covers existing promise behavior plus Effect interruption cleanup. The larger Codex, event outbox, workflow API, and Worker install migrations remain intentionally outside this slice and are now tracked by the next Program planning brief.
 
 ## Context and Orientation
 
