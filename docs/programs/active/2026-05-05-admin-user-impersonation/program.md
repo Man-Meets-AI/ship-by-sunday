@@ -176,9 +176,9 @@ Important repo anchors:
 - `apps/web/convex/impersonation/model.ts`
 - `apps/web/convex/impersonation/validators.ts`
 - `apps/web/convex/schema.ts`
-- `apps/web/app/(workspace)/_components/app-shell.tsx`
-- `apps/web/app/(workspace)/_components/app-shell-header-trailing.tsx`
-- `apps/web/app/(workspace)/_components/app-shell-user-menu.tsx`
+- `apps/web/app/(protected)/_components/app-shell.tsx`
+- `apps/web/app/(protected)/_components/app-shell-header-trailing.tsx`
+- `apps/web/app/(protected)/_components/app-shell-user-menu.tsx`
 - `docs/internal/admin-impersonation.md`
 
 Locked decision anchor:

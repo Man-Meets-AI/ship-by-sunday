@@ -86,8 +86,8 @@ describe("review download zip", () => {
 		);
 		expect(entries).not.toEqual(
 			expect.arrayContaining([
-				"ship-by-sunday-os/apps/web/app/(workspace)/layout.tsx",
-				"ship-by-sunday-os/apps/web/app/(workspace)/settings/_components/settings-page.tsx",
+				"ship-by-sunday-os/apps/web/app/(protected)/layout.tsx",
+				"ship-by-sunday-os/apps/web/app/(protected)/settings/_components/settings-page.tsx",
 				"ship-by-sunday-os/apps/web/app/blog/page.tsx",
 				"ship-by-sunday-os/docs/PLANS.md",
 				"ship-by-sunday-os/docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",

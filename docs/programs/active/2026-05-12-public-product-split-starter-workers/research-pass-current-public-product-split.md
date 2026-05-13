@@ -23,13 +23,13 @@ There is no `/starter` route today.
 
 ## Workers Route Conflict
 
-`/workers` is currently part of the protected paid app. The page lives at `apps/web/app/(workspace)/workers/page.tsx`, and `apps/web/proxy.ts` protects the whole Worker route family by matching `/workers(.*)`.
+Historical pre-split note: `/workers` was part of the protected paid app and lived at `apps/web/app/(workspace)/workers/page.tsx`; the current protected route group is `apps/web/app/(protected)/`, while public `/workers` lives outside it.
 
 That means `/workers` cannot be made public by copy work alone. The protected Worker application surface must live below explicit subroutes such as `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/loops`, `/workers/runs`, and `/workers/privacy`.
 
 ## Starter And Tutorials
 
-The paid app currently presents Generate Codebase, Tutorials, and Worker as separate top-level product cards on `/home`. Generate Codebase lives at `/generate-codebase` and `/generate-codebase/review`. Tutorials live at `/tutorials` and `/tutorials/[lessonKey]`, with library data under `apps/web/app/(workspace)/tutorials/_lib/`.
+The paid app currently presents Starter and Workers as top-level product cards on `/home`. Starter owns generated-codebase and lesson work under `/starter/*`, with lesson compatibility data under `apps/web/app/(protected)/tutorials/_lib/`.
 
 The current direction changes that hierarchy. Starter owns the generator and videos. Protected Starter work should move under `/starter/home`, `/starter/lessons`, and `/starter/generate-codebase`, while `/starter` remains the public marketing page. Tutorials may remain as an internal implementation route during migration, but they should stop being marketed or presented as a separate top-level product.
 

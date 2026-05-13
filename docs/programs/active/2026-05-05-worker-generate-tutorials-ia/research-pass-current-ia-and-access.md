@@ -10,13 +10,13 @@ read_when:
 
 # Current IA And Access Research
 
-This research pass records the current repository facts behind the Worker IA migration. It is a read-only synthesis of local repository inspection and three 5.5 high explorer passes.
+This research pass is a historical snapshot of the repository facts behind the Worker IA migration before the public product split and protected route-group rename. Current live paid-app files are under `apps/web/app/(protected)/`; any `apps/web/app/(workspace)/` paths below describe the pre-rename repository state only.
 
 ## Current Surface Families
 
-The current generated-codebase lane is the product area that will become `Generate Codebase` and `Tutorials`. Its main routes are `apps/web/app/(workspace)/codebase/page.tsx`, `apps/web/app/(workspace)/review/page.tsx`, `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`, and `apps/web/app/(workspace)/execute/page.tsx`. The route config source is `apps/web/config/product.ts`, where `routeConfig.codebase` is `/codebase` and `routeConfig.review` is `/review`.
+At the time of this research, the generated-codebase lane was the product area that would become `Generate Codebase` and `Tutorials`. Its main routes were `apps/web/app/(workspace)/codebase/page.tsx`, `apps/web/app/(workspace)/review/page.tsx`, `apps/web/app/(workspace)/lesson/[lessonKey]/page.tsx`, and `apps/web/app/(workspace)/execute/page.tsx`. The route config source was `apps/web/config/product.ts`, where `routeConfig.codebase` was `/codebase` and `routeConfig.review` was `/review`.
 
-The current existing-repo lane is the product area that will become `Worker`. Its main routes are under `apps/web/app/(workspace)/workspace/`: `choose`, `setup`, `doctor-pass`, `findings`, `loops`, `runs`, and `privacy`. The current route config keys are `workspaceChoice`, `workspaceSetup`, `workspaceDoctorPass`, `workspaceFindings`, `workspaceLoops`, `workspaceRuns`, and `workspacePrivacy` in `apps/web/config/product.ts`.
+At the time of this research, the existing-repo lane was the product area that would become `Worker`. Its main routes were under `apps/web/app/(workspace)/workspace/`: `choose`, `setup`, `doctor-pass`, `findings`, `loops`, `runs`, and `privacy`. The route config keys were `workspaceChoice`, `workspaceSetup`, `workspaceDoctorPass`, `workspaceFindings`, `workspaceLoops`, `workspaceRuns`, and `workspacePrivacy` in `apps/web/config/product.ts`.
 
 There is no current `/tutorials` namespace. Tutorial/watch behavior is split between codebase-stage videos in `apps/web/lib/codebase-flow/codebase-stage-videos.ts` and post-review lessons under `/lesson/[lessonKey]`.
 
@@ -24,7 +24,7 @@ There is no current `/tutorials` namespace. Tutorial/watch behavior is split bet
 
 Current access is not capability-based. The persisted access model uses one scalar lane, `fulfillmentTrack`, with values `generated_codebase`, `existing_codebase_doctor`, or `unspecified`. The checkout input and normalization live in `apps/web/platform/billing/checkout/checkout-intent.ts`. The Convex access grant model lives in `apps/web/convex/access/model.ts`.
 
-This scalar blocks traversal. Generated-codebase routes redirect existing-repo customers away, and current worker routes redirect generated-codebase customers away. The hard route guards are in `apps/web/app/(workspace)/codebase/page.tsx`, `apps/web/app/(workspace)/review/page.tsx`, and the route files under `apps/web/app/(workspace)/workspace/`.
+At the time of this research, this scalar blocked traversal. Generated-codebase routes redirected existing-repo customers away, and worker routes redirected generated-codebase customers away. The hard route guards were in `apps/web/app/(workspace)/codebase/page.tsx`, `apps/web/app/(workspace)/review/page.tsx`, and the route files under `apps/web/app/(workspace)/workspace/`.
 
 Convex guards are also mutually exclusive today. `requireGeneratedCodebaseProductAccess` and `requireExistingCodebaseProductAccess` in `apps/web/convex/access/model.ts` check the same scalar `fulfillmentTrack`. Generated-codebase data and worker data can coexist physically because they use separate tables, but the entitlement layer currently prevents one user from using both.
 
@@ -36,9 +36,9 @@ The current `codebase` noun is also overloaded. It means the generation route an
 
 ## Navigation Seams
 
-Command-K is implemented in `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu.tsx` and `app-shell-command-menu-items.tsx`. It currently groups commands as Codebase stages, Lessons, Workspace, Theme, and Account. The narrow helper `workspaceMenuLinks` in `app-shell-user-menu-helpers.ts` currently returns links to `/codebase`, `/review`, and `/settings`.
+At the time of this research, Command-K was implemented in `apps/web/app/(workspace)/_components/app-shell/app-shell-command-menu.tsx` and `app-shell-command-menu-items.tsx`. It grouped commands as Codebase stages, Lessons, Workspace, Theme, and Account. The narrow helper `workspaceMenuLinks` in `app-shell-user-menu-helpers.ts` returned links to `/codebase`, `/review`, and `/settings`.
 
-The shared shell is in `apps/web/app/(workspace)/_components/app-shell.tsx` and sibling files. Current Worker pages pass local nav only, while generated-codebase pages pass combined primary nav. A future top-level switcher should be separate from the surface-specific local nav.
+At the time of this research, the shared shell was in `apps/web/app/(workspace)/_components/app-shell.tsx` and sibling files. Worker pages passed local nav only, while generated-codebase pages passed combined primary nav. A future top-level switcher should be separate from the surface-specific local nav.
 
 ## Research Conclusions
 

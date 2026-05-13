@@ -410,6 +410,10 @@ async function assertPasswordlessOtpCanSend(page, { email, signInUrl }) {
 async function createAppCheckoutSession(page) {
 	return await page.evaluate(async () => {
 		const response = await fetch("/api/stripe/checkout", {
+			body: JSON.stringify({ offerId: "starter" }),
+			headers: {
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 		});
 		const body = await response.json();

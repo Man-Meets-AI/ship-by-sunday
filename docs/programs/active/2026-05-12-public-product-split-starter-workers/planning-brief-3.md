@@ -18,7 +18,7 @@ The second generated-repo slice blocked Worker, runner, Codex bridge, and local-
 
 The current generation path is `materializeRepoSnapshot(...)` in `packages/codebase-compiler/src/repo-generation/materialize-repo-snapshot.ts`. It copies manifest paths from `repo-download-source-contract.ts`, then applies generated overrides from `renderTemplateOverrides(...)`, `renderGeneratedDesignSystemFiles(...)`, `renderGeneralizedStarterFiles(...)`, and `renderFullCodebaseTree(...)`.
 
-The immediate failure was reproduced by materializing `createCompleteProjectDefinition()`, running `bun ci`, and then running `bun run --cwd apps/web typecheck` in the generated repo. `bun ci` passed. The app typecheck failed during Next build because copied workspace routes imported `apps/web/app/(workspace)/_components/codex-connection-card/codex-connection-card` and `apps/web/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-toast-watcher`, which are Worker-owned files now excluded from Starter snapshots.
+The immediate failure was reproduced by materializing `createCompleteProjectDefinition()`, running `bun ci`, and then running `bun run --cwd apps/web typecheck` in the generated repo. `bun ci` passed. The app typecheck failed during Next build because copied protected app routes imported `apps/web/app/(protected)/_components/codex-connection-card/codex-connection-card` and `apps/web/app/(protected)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-toast-watcher`, which are Worker-owned files now excluded from Starter snapshots.
 
 ## Next Plan Recommendation
 

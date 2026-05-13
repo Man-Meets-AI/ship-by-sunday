@@ -36,43 +36,48 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Exclude the public Workers marketing page from generated Starter repos; Workers is a separate existing-repo product.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/workers/**",
+			pathPattern: "apps/web/app/(protected)/workers/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude protected Worker install, doctor-pass, finding, loop, run, and privacy surfaces from generated Starter repos.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-setup/**",
+			pathPattern:
+				"apps/web/app/(protected)/_components/existing-codebase-setup/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude existing-codebase setup components because they teach local runner pairing for the Workers product.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-doctor-pass/**",
+			pathPattern:
+				"apps/web/app/(protected)/_components/existing-codebase-doctor-pass/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude Worker doctor-pass components from generated Starter repos.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-findings/**",
+			pathPattern:
+				"apps/web/app/(protected)/_components/existing-codebase-findings/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude Worker findings and approval components from generated Starter repos.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-support/**",
+			pathPattern:
+				"apps/web/app/(protected)/_components/existing-codebase-support/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude Worker loop, run, and privacy support components from generated Starter repos.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/_lib/workspace-*",
+			pathPattern: "apps/web/app/(protected)/_lib/workspace-*",
 			shippingMode: "exclude",
 			reason:
 				"Exclude Worker workspace read models and runner readiness models from generated Starter repos.",
 		},
 		{
-			pathPattern: "apps/web/app/(workspace)/_components/codex-connection-card/**",
+			pathPattern:
+				"apps/web/app/(protected)/_components/codex-connection-card/**",
 			shippingMode: "exclude",
 			reason:
 				"Exclude core-app Codex account connection UI from generated Starter repos; generated repos should keep AI setup guidance in docs and skills.",

@@ -347,8 +347,8 @@ describe("repo generation", () => {
 		expect(uniqueSnapshotPathCount).toBe(snapshotPaths.length);
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
-				"apps/web/app/(workspace)/layout.tsx",
-				"apps/web/app/(workspace)/settings/_components/settings-page.tsx",
+				"apps/web/app/(protected)/layout.tsx",
+				"apps/web/app/(protected)/settings/_components/settings-page.tsx",
 				"apps/web/app/blog/page.tsx",
 				"docs/PLANS.md",
 				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
@@ -435,10 +435,10 @@ describe("repo generation", () => {
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
 				"apps/web/app/workers/page.tsx",
-				"apps/web/app/(workspace)/layout.tsx",
-				"apps/web/app/(workspace)/settings/_components/settings-page.tsx",
+				"apps/web/app/(protected)/layout.tsx",
+				"apps/web/app/(protected)/settings/_components/settings-page.tsx",
 				"apps/web/app/blog/page.tsx",
-				"apps/web/app/(workspace)/workers/setup/page.tsx",
+				"apps/web/app/(protected)/workers/setup/page.tsx",
 				"apps/web/app/api/workspace/runner/events/route.ts",
 				"apps/web/app/api/codex/generate/route.ts",
 				"apps/web/convex/workspace.ts",
