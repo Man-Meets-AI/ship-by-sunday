@@ -4,6 +4,15 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.oxc": "always"
 	},
+	"files.watcherExclude": {
+		"**/repos/**": true
+	},
 	"oxc.unusedDisableDirectives": "warn",
+	"search.exclude": {
+		"**/repos/**": true
+	},
+	"typescript.preferences.autoImportFileExcludePatterns": [
+		"repos/effect/**"
+	],
 	"typescript.tsdk": "node_modules/typescript/lib"
 }
