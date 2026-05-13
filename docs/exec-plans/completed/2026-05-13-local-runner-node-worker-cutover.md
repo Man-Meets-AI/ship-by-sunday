@@ -63,7 +63,7 @@ Date: 2026-05-13.
 
 ## Outcomes & Retrospective
 
-This slice cut `packages/local-runner` and generated Worker installs over to Node/npm. The package now uses a Node shebang, an esbuild Node bundle, `jiti` for source-mode local scripts, and npm-compatible package smoke. Worker Foundations install no longer models or provisions a managed Bun toolchain, defaults blank and Bun-shaped target repos to npm, generates `.mjs` Worker files, runs Worker proof with `node` and `node --test`, and keeps legacy managed `apps/worker/bun.lock` cleanup only as a recognized-rerun removal path. The next Program slice can start from a stable Node/npm runtime and add Effect deliberately.
+This slice cut `packages/local-runner` and generated Worker installs over to Node/npm. The package now uses a Node shebang, an esbuild Node bundle, an explicit `node >=20` engine floor, `jiti` for source-mode local scripts, and npm-compatible package smoke. Worker Foundations install no longer models or provisions a managed Bun toolchain, defaults blank and Bun-shaped target repos to npm, generates `.mjs` Worker files, runs Worker proof with `node` and `node --test`, and keeps legacy managed `apps/worker/bun.lock` cleanup only as a recognized-rerun removal path. The next Program slice can start from a stable Node/npm runtime and add Effect deliberately.
 
 ## Context and Orientation
 
@@ -173,4 +173,4 @@ Final evidence captured on 2026-05-13:
 
 ## Interfaces and Dependencies
 
-The published package interface remains the `ship-by-sunday` and `shipbysunday` bins pointing at `dist/cli.js`. The Worker install interface remains `shipbysunday install --repo <target>` and the root target-repo scripts listed in `WORKER_FOUNDATIONS_ROOT_SCRIPTS`. The runtime dependency for generated Worker files is Node on `PATH`; the package-manager default for blank target repos is npm. Production code must not import from `repos/effect/`; later Effect work must depend on published packages through `packages/local-runner/package.json`.
+The published package interface remains the `ship-by-sunday` and `shipbysunday` bins pointing at `dist/cli.js`, with `packages/local-runner/package.json` declaring `engines.node: >=20` to match the bundled Node target. The Worker install interface remains `shipbysunday install --repo <target>` and the root target-repo scripts listed in `WORKER_FOUNDATIONS_ROOT_SCRIPTS`. The runtime dependency for generated Worker files is Node on `PATH`; the package-manager default for blank target repos is npm. Production code must not import from `repos/effect/`; later Effect work must depend on published packages through `packages/local-runner/package.json`.
