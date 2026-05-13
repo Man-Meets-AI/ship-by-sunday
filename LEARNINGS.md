@@ -1,5 +1,10 @@
 # Learnings
 
+## 2026-05-13 Next Env Generation
+
+- Fact: Next.js generates `apps/web/next-env.d.ts`; `next dev` writes the route import through `.next/dev/types/routes.d.ts`, while `next build` writes it through `.next/types/routes.d.ts`.
+  Verified by: The installed Next.js TypeScript docs say `next-env.d.ts` is generated and should be ignored, and `node_modules/next/dist/lib/typescript/writeAppTypeDeclarations.js.map` shows the import is derived from the active `.next` dist directory.
+
 ## 2026-05-08 Root Typecheck
 
 - Fact: `bun typecheck` at the repo root runs the web production build path and the PostHog sourcemap upload hook when the local PostHog token is present.

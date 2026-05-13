@@ -1,5 +1,10 @@
 # Desires
 
+## 2026-05-13 Mobbin Flow Access
+
+- Missing context/tool: Authenticated Mobbin MCP access for shared flow URLs.
+  Why it would help: The Mobbin MCP currently requires auth in this session, so shared flow analysis had to fall back to the public Mobbin page instead of fetching the exact flow through MCP.
+
 ## 2026-05-07 Passwordless Checkout Account Handoff
 
 - Missing context/tool: A Clerk configuration audit that checks dev and production for buyer-auth invariants: email sign-in enabled, email verification code enabled, password not required for buyer sign-in, MFA optional, and Client Trust not required.

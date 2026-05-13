@@ -1,5 +1,17 @@
 # Mistakes
 
+## 2026-05-13 Generated Next Env Churn
+
+- Mistake: I patched `apps/web/next-env.d.ts` as if it were source when Next.js owns and rewrites that file.
+  Impact: `next dev` and `next build` kept flipping the route type import between `.next/dev/types` and `.next/types`, creating repeated dirty diffs.
+  Corrective action: Keep `apps/web/next-env.d.ts` ignored and untracked, and let the app lint guard reject it if it is re-added.
+
+## 2026-05-13 Template-First Interview Drift
+
+- Mistake: I kept asking Parker to reconfirm template-copy decisions after he had already made the template-first rule explicit.
+  Impact: The interview wasted attention on settled choices and forced repeated steering.
+  Corrective action: Treat `~/Developer/next-js-convex-clerk-stripe-template` as the default for this Program; ask only about product-specific expansions, customer-experience tradeoffs, or deliberate deviations from the template.
+
 ## 2026-05-12 App Typecheck Side Effect
 
 - Mistake: I ran `bun run --cwd apps/web typecheck` without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
@@ -138,9 +150,33 @@
   Impact: The command updated the unit test file, then failed before touching the intended integration test; no source code was changed by the failed path.
   Corrective action: Re-run the mechanical update with the exact `workspace-setup-page.test.tsx` path and verify with `rg` before continuing.
 
+## 2026-05-13 App Src Migration Typecheck
+
+- Mistake: I ran `bun run --cwd apps/web typecheck` without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` in a credentialed local environment.
+  Impact: The build/typecheck passed, but the PostHog compile hook created a release and uploaded source maps for the local commit.
+  Corrective action: Prefix future local app build/typecheck commands with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is the thing being tested.
+
 - Mistake: I ran root `bun typecheck` while shepherding the release without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
   Impact: The command passed, but it created a PostHog release and uploaded source maps for the local branch commit from the credentialed environment.
   Corrective action: Run local app build/typecheck validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is explicitly under test.
+
+## 2026-05-13 Worker Seal Team 6 Booking Scope
+
+- Mistake: I incorrectly turned a Cal.com paid meeting booking into post-payment Clerk/workspace onboarding.
+  Impact: The Program briefly implied that a service-call booker should receive an app workspace invitation, which adds customer friction and misrepresents Worker Seal Team 6 as an app purchase instead of a meeting.
+  Corrective action: Keep Worker Seal Team 6 as a Cal.com-managed paid meeting; mirror booking state for support/fulfillment/proof only, and create app accounts/workspaces only through Starter or Workers purchase paths.
+
+## 2026-05-13 Stripe Skill Reference Path
+
+- Mistake: I tried to read the Stripe billing reference from the skill directory instead of the `stripe-best-practices/references/` subdirectory.
+  Impact: The first read failed, but no docs or code were changed from the bad path.
+  Corrective action: Resolve plugin reference paths with `find` when the skill body points to a relative reference file, then read the actual reference before making billing decisions.
+
+## 2026-05-13 Template Billing Search Glob Order
+
+- Mistake: I put `rg --glob` flags after the search paths while inspecting the sibling template billing UI.
+  Impact: `rg` treated the flags as file paths, returned partial useful output, and exited with an error before the corrected search.
+  Corrective action: Put `rg` flags before patterns and paths, especially when searching outside the repo with excluded globs.
 
 ## 2026-05-13 Local Runner Node Cutover
 
@@ -153,3 +189,15 @@
 - Mistake: I used `status` as a zsh loop variable while adding an extra no-index whitespace check for new files.
   Impact: zsh treats `status` as read-only, so the first check command failed before doing useful work; no files changed.
   Corrective action: Avoid reserved shell variable names in validation snippets and rerun the check with a domain-specific variable name.
+
+## 2026-05-13 Convex Skill Path
+
+- Mistake: I tried to read the Convex routing skill from `/Users/bazelrex/.codex/skills/convex/SKILL.md` even though this repo's Convex skill is installed under `.agents/skills/convex/SKILL.md`.
+  Impact: The first read failed before any source edits; the correct skill path was read immediately afterward.
+  Corrective action: Resolve repo-local skill roots from the skill inventory before assuming every skill lives under the global Codex skill directory.
+
+## 2026-05-13 Scoped Commit Staging
+
+- Mistake: I accidentally let `apps/web/next-env.d.ts` stage into a local-runner Effect docs commit while making grouped conventional commits.
+  Impact: The first commit shape was misleading until amended; the generated file deletion belongs to the web source-tree/generated-file cleanup.
+  Corrective action: Inspect `git diff --cached --name-status` before every commit and amend immediately when a staged file crosses the intended commit boundary.
