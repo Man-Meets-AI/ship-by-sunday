@@ -78,41 +78,5 @@ export function renderTemplateOverrides(
 				2,
 			)}\n`,
 		},
-		{
-			path: "apps/web/config/product.ts",
-			content: `export const generatedProductConfig = ${JSON.stringify(
-				{
-					name: facts.product_name,
-					promise: facts.outcome_statement,
-					priceDisplay: facts.price_display,
-					priceUsdCents: facts.price_usd_cents,
-					currency: facts.currency,
-					primaryCta: facts.primary_cta,
-					modules: {
-						docs: true,
-						course: false,
-						observability: true,
-						codex: true,
-					},
-				},
-				null,
-				2,
-			)} as const;\n`,
-		},
-		{
-			path: "apps/web/app/_content/home-page.ts",
-			content: `export const generatedHomePageContent = ${JSON.stringify(
-				{
-					productName: facts.product_name,
-					headline: facts.outcome_statement,
-					subheadline: facts.product_summary,
-					primaryCta: facts.primary_cta,
-					proofStrategy: facts.proof_strategy,
-					sectionNarrative: facts.section_narrative,
-				},
-				null,
-				2,
-			)} as const;\n`,
-		},
 	];
 }

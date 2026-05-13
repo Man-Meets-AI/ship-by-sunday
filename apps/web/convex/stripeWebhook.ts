@@ -323,6 +323,10 @@ function getCheckoutPurchaseIntentId(session: Stripe.Checkout.Session) {
 	return checkoutMetadata.purchaseIntentId as Id<"checkoutPurchaseIntents">;
 }
 
+function getCheckoutOfferId(session: Stripe.Checkout.Session) {
+	return readCheckoutPurchaseMetadata(session.metadata)?.offerId;
+}
+
 async function fulfillStripeCheckoutSessionEvent({
 	ctx,
 	eventId,
@@ -441,6 +445,7 @@ async function fulfillStripeCheckoutSessionEvent({
 						? session.payment_intent
 						: undefined,
 				checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
+				offerId: getCheckoutOfferId(session),
 				...readCheckoutIntentFromMetadata(session.metadata),
 			},
 		)) as StripeWebhookGrantResult;

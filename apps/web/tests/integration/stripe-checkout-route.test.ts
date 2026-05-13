@@ -46,6 +46,7 @@ const hostedCheckoutMetadata = {
 	app: "man_meets_ai",
 	accessProduct: "paid_app_access",
 	purchaseIntentId: "purchase_intent_123",
+	offerId: "starter",
 	checkoutSurface: "hosted_checkout",
 } as const;
 
@@ -61,17 +62,13 @@ function createAuthState(userId: string | null) {
 	};
 }
 
-function createRequest(body?: unknown) {
+function createRequest(body: unknown = { offerId: "starter" }) {
 	return new Request("https://example.com/api/stripe/checkout", {
 		method: "POST",
-		...(body
-			? {
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(body),
-				}
-			: {}),
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
 	});
 }
 
@@ -115,11 +112,7 @@ describe("POST /api/stripe/checkout", () => {
 			"https://dashboard.stripe.com/test/products",
 		);
 		getStripePublishableKeyMock.mockReturnValue("pk_test_publishable");
-		getStripeCheckoutDiscountsMock.mockReturnValue([
-			{
-				promotion_code: "promo_50_off",
-			},
-		]);
+		getStripeCheckoutDiscountsMock.mockReturnValue(undefined);
 		vi.resetModules();
 	});
 
@@ -164,6 +157,7 @@ describe("POST /api/stripe/checkout", () => {
 			expect.objectContaining({
 				client_reference_id: undefined,
 				customer_email: undefined,
+				allow_promotion_codes: true,
 				metadata: hostedCheckoutMetadata,
 				line_items: [
 					{
@@ -175,15 +169,15 @@ describe("POST /api/stripe/checkout", () => {
 						quantity: 1,
 					},
 				],
-				discounts: [{ promotion_code: "promo_50_off" }],
 				payment_intent_data: {
 					metadata: hostedCheckoutMetadata,
 				},
 			}),
 		);
+		expect(getStripeLineItemMock).toHaveBeenCalledWith("starter");
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 		expect(response.headers.get("set-cookie")).toContain(
 			"sbs_pending_checkout_session=cs_guest_123",
 		);
@@ -237,7 +231,7 @@ describe("POST /api/stripe/checkout", () => {
 				cancel_url: "https://app.example.com/checkout/cancel",
 				client_reference_id: "user_123",
 				customer_email: "buyer@example.com",
-				discounts: [{ promotion_code: "promo_50_off" }],
+				allow_promotion_codes: true,
 				line_items: [
 					{
 						price_data: {
@@ -264,11 +258,12 @@ describe("POST /api/stripe/checkout", () => {
 			}),
 		);
 		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
-			"allow_promotion_codes",
+			"discounts",
 		);
+		expect(getStripeLineItemMock).toHaveBeenCalledWith("starter");
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 	});
 
 	it("returns a server error when Stripe does not return a checkout URL", async () => {
@@ -308,7 +303,7 @@ describe("POST /api/stripe/checkout", () => {
 		expect(body.requestId).toBeTruthy();
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 	});
 
 	it("returns a server error when the managed Stripe price fails validation", async () => {
@@ -348,7 +343,7 @@ describe("POST /api/stripe/checkout", () => {
 		);
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 	});
 
 	it("creates an express checkout session with a client secret", async () => {
@@ -401,7 +396,7 @@ describe("POST /api/stripe/checkout", () => {
 				client_reference_id: "user_123",
 				customer_creation: "always",
 				customer_email: "buyer@example.com",
-				discounts: [{ promotion_code: "promo_50_off" }],
+				allow_promotion_codes: true,
 				mode: "payment",
 				metadata: expect.objectContaining({
 					...expressCheckoutMetadata,

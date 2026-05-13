@@ -9,6 +9,7 @@ import {
 	type RepoGenerationManifest,
 } from "./build-repo-generation-manifest";
 import { renderGeneratedDesignSystemFiles } from "./render-generated-design-system-files";
+import { renderGeneratedTemplateAppFiles } from "./render-generated-template-app-files";
 import { renderGeneralizedStarterFiles } from "./render-generalized-starter-files";
 import { renderStarterBunLock } from "./render-starter-bun-lock";
 import { isExcludedSnapshotPath } from "./repo-download-source-contract";
@@ -120,6 +121,7 @@ export async function materializeRepoSnapshot(
 	const codebaseFiles = await renderFullCodebaseTree(projectDefinition);
 	const overrides = [
 		...renderTemplateOverrides(projectDefinition),
+		...renderGeneratedTemplateAppFiles(projectDefinition),
 		...renderGeneratedDesignSystemFiles(projectDefinition),
 		...renderGeneralizedStarterFiles(projectDefinition),
 	];

@@ -1,10 +1,7 @@
 import Link from "next/link";
 
 import { routeConfig } from "@/config/product";
-import {
-	docsDisplayConfig,
-	marketingDisplayConfig,
-} from "@/config/starter-selectors";
+import { docsDisplayConfig } from "@/config/starter-selectors";
 
 const footerLinkClassName =
 	"inline-flex min-h-11 min-w-11 items-center text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground";
@@ -22,13 +19,7 @@ export function DocsFooter() {
 			</div>
 			<div className="flex flex-wrap items-center gap-4">
 				<Link href={routeConfig.home} className={footerLinkClassName}>
-					Home
-				</Link>
-				<Link
-					href={docsDisplayConfig.pricingHref}
-					className={footerLinkClassName}
-				>
-					{marketingDisplayConfig.primaryCtaLabel}
+					Man Meets AI
 				</Link>
 				<Link href={routeConfig.signIn} className={footerLinkClassName}>
 					Sign in

@@ -6,7 +6,6 @@ import {
 } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
 import { DocsThemeToggle } from "@/app/docs/_components/docs-theme-toggle";
-import { docsDisplayConfig } from "@/config/starter-selectors";
 
 const navLinkClassName =
 	"inline-flex h-9 items-center justify-center rounded-full px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60";
@@ -26,10 +25,13 @@ export function DocsNavbar() {
 			</div>
 			<nav className="flex w-full flex-wrap items-center justify-start gap-1 sm:w-auto sm:justify-end sm:gap-1.5">
 				<Link href={routeConfig.home} className={navLinkClassName}>
-					Home
+					Man Meets AI
 				</Link>
-				<Link href={docsDisplayConfig.pricingHref} className={navLinkClassName}>
-					Pricing
+				<Link href={routeConfig.starter} className={navLinkClassName}>
+					Starter
+				</Link>
+				<Link href={routeConfig.workers} className={navLinkClassName}>
+					Workers
 				</Link>
 				<Link href={routeConfig.signIn} className={signInLinkClassName}>
 					Sign in

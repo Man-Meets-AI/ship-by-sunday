@@ -13,12 +13,12 @@ describe("sign-up route", () => {
 		redirectMock.mockReset();
 	});
 
-	it("redirects direct visits without a checkout session back to pricing", async () => {
+	it("redirects direct visits without a checkout session back to Starter", async () => {
 		await Page({
 			searchParams: Promise.resolve({}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith("/#pricing");
+		expect(redirectMock).toHaveBeenCalledWith("/starter");
 	});
 
 	it("redirects checkout sessions back to checkout success", async () => {

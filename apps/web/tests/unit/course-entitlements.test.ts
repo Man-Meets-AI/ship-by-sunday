@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const clerkUserId = "user_product_access_123";
 const convexTokenIdentifier =
 	"https://clerk.example.com|user_product_access_123";
-const allProductCapabilities = ["generate_codebase", "tutorials", "worker"];
 
 function createProductAccessGrant(
 	status: "granted" | "pending" | "revoked" | "refunded",
@@ -98,7 +97,7 @@ describe("convex/access/model", () => {
 		});
 	});
 
-	it("marks a granted viewer as active", async () => {
+	it("does not infer product capabilities from a granted row without product fields", async () => {
 		const ctx = createAccessCtx({
 			productAccessGrant: createProductAccessGrant("granted"),
 		});
@@ -113,14 +112,38 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
-			capabilities: allProductCapabilities,
+			capabilities: [],
 			buyerStartingPoint: "unspecified",
 			checkoutCtaId: "unspecified",
 			fulfillmentTrack: "unspecified",
 		});
 	});
 
-	it("returns stored fulfillment intent for a granted viewer", async () => {
+	it("derives Starter capabilities from stored checkout offer fields", async () => {
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				lastCheckoutOfferId: "starter",
+			}),
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toEqual({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
+			buyerStartingPoint: "unspecified",
+			checkoutCtaId: "unspecified",
+			fulfillmentTrack: "unspecified",
+		});
+	});
+
+	it("returns stored fulfillment intent and legacy Worker capabilities for a granted viewer", async () => {
 		const ctx = createAccessCtx({
 			productAccessGrant: createProductAccessGrant("granted", {
 				buyerStartingPoint: "existing_codebase",
@@ -139,7 +162,7 @@ describe("convex/access/model", () => {
 			clerkUserId,
 			hasAccess: true,
 			status: "granted",
-			capabilities: allProductCapabilities,
+			capabilities: ["worker"],
 			buyerStartingPoint: "existing_codebase",
 			checkoutCtaId: "codebase_demo_existing",
 			fulfillmentTrack: "existing_codebase_doctor",
@@ -158,6 +181,7 @@ describe("convex/access/model", () => {
 			moduleUnderTest.grantProductAccessHandler(ctx as never, {
 				clerkUserId,
 				source: "manual",
+				capabilities: ["generate_codebase", "tutorials"],
 			}),
 		).resolves.toEqual({
 			granted: "inserted",
@@ -168,6 +192,7 @@ describe("convex/access/model", () => {
 				clerkUserId,
 				status: "granted",
 				source: "manual",
+				capabilities: ["generate_codebase", "tutorials"],
 				grantedAt: 200,
 				updatedAt: 200,
 			}),
@@ -194,6 +219,7 @@ describe("convex/access/model", () => {
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
+				checkoutOfferId: "workers",
 			}),
 		).resolves.toEqual({
 			granted: "patched",
@@ -206,6 +232,7 @@ describe("convex/access/model", () => {
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
+				capabilities: ["worker"],
 				updatedAt: 300,
 				revokedAt: undefined,
 			}),
@@ -233,6 +260,7 @@ describe("convex/access/model", () => {
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
+				checkoutOfferId: "starter",
 			}),
 		).resolves.toEqual({
 			granted: "patched",
@@ -245,6 +273,7 @@ describe("convex/access/model", () => {
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
+				capabilities: ["generate_codebase", "tutorials"],
 				updatedAt: 360,
 				revokedAt: undefined,
 			}),
@@ -265,6 +294,7 @@ describe("convex/access/model", () => {
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
+				checkoutOfferId: "starter",
 			}),
 		).resolves.toEqual({
 			granted: "inserted",
@@ -278,6 +308,10 @@ describe("convex/access/model", () => {
 				stripeCustomerId: "cus_123",
 				stripeCheckoutSessionId: "cs_123",
 				stripePaymentIntentId: "pi_123",
+				capabilities: ["generate_codebase", "tutorials"],
+				offerIds: ["starter"],
+				lastCheckoutOfferId: "starter",
+				fulfillmentTrack: "generated_codebase",
 				grantedAt: 400,
 				updatedAt: 400,
 			}),

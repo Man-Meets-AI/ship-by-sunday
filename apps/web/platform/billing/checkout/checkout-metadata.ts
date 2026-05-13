@@ -1,4 +1,5 @@
 import { productConfig } from "../../../config/product";
+import { isCheckoutOfferId, type CheckoutOfferId } from "./checkout-offers";
 
 export const checkoutMetadataSchema = "mma_checkout_v1";
 export const checkoutMetadataApp = "man_meets_ai";
@@ -16,6 +17,7 @@ export type CheckoutPurchaseMetadata = {
 	app: typeof checkoutMetadataApp;
 	accessProduct: typeof checkoutAccessProduct;
 	purchaseIntentId: string;
+	offerId?: CheckoutOfferId;
 	checkoutSurface: CheckoutSurface;
 	clerkUserId?: string;
 };
@@ -29,10 +31,12 @@ export function isCheckoutSurface(value: string): value is CheckoutSurface {
 export function buildCheckoutPurchaseMetadata({
 	checkoutSurface,
 	clerkUserId,
+	offerId,
 	purchaseIntentId,
 }: {
 	checkoutSurface: CheckoutSurface;
 	clerkUserId: string | null;
+	offerId: CheckoutOfferId;
 	purchaseIntentId: string;
 }): CheckoutPurchaseMetadata {
 	return {
@@ -40,6 +44,7 @@ export function buildCheckoutPurchaseMetadata({
 		app: checkoutMetadataApp,
 		accessProduct: checkoutAccessProduct,
 		purchaseIntentId,
+		offerId,
 		checkoutSurface,
 		...(clerkUserId ? { clerkUserId } : {}),
 	};
@@ -63,6 +68,9 @@ export function readCheckoutPurchaseMetadata(
 		app: checkoutMetadataApp,
 		accessProduct: checkoutAccessProduct,
 		purchaseIntentId: metadata.purchaseIntentId,
+		...(isCheckoutOfferId(metadata.offerId)
+			? { offerId: metadata.offerId }
+			: {}),
 		checkoutSurface: metadata.checkoutSurface,
 		...(metadata.clerkUserId ? { clerkUserId: metadata.clerkUserId } : {}),
 	};

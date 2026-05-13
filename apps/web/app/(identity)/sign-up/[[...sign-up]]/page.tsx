@@ -19,7 +19,7 @@ export default async function Page({
 	const { redirect_url: redirectUrl, session_id: sessionId } =
 		await searchParams;
 	if (!sessionId) {
-		return redirect(`${routeConfig.home}${routeConfig.pricingHash}`);
+		return redirect(routeConfig.starter);
 	}
 
 	return redirect(

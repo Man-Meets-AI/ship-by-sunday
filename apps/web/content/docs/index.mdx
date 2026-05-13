@@ -5,20 +5,21 @@ description: Get the starter running, understand the real handoff, and choose th
 
 # Start Here
 
-Ship by Sunday Docs is the shortest path to running, customizing, and shipping this repo without guessing. Start with local setup, then wire auth, payments, and the `/home -> /generate-codebase -> /generate-codebase/review` handoff before you touch the rest of the surface.
+Ship by Sunday Docs is the shortest path to running, customizing, and shipping this repo without guessing. Start with local setup, then wire auth, payments, and the Starter `/starter/home -> /starter/generate-codebase -> /starter/generate-codebase/review` handoff before you touch the rest of the surface.
 
 If you are new to this stack, do not start by rewriting auth, payments, or access logic. Get the repo running cleanly, confirm the paid handoff works, and then change the obvious product surfaces first.
 
 ## What the starter already gives you
 
 - a public marketing surface on `/`
+- public sales surfaces on `/starter` and `/workers`
 - a docs surface on `/docs`
-- a protected paid app Home on `/home`, Generate Codebase on `/generate-codebase`, Worker on `/workers`, Tutorials on `/tutorials`, compatibility redirects at `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` handoff on `/generate-codebase/review`, optional `/execute` after review unlock, and `/settings`
+- a protected Starter Home on `/starter/home`, Generate Codebase on `/starter/generate-codebase`, Starter Lessons on `/starter/lessons`, Worker setup on `/workers/setup`, compatibility redirects at `/generate-codebase`, `/tutorials`, `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` handoff on `/starter/generate-codebase/review`, optional `/execute` after review unlock, `/home` as a paid recovery hub, and `/settings`
 - a custom Clerk passwordless sign-in surface on `/sign-in`
 - Stripe-hosted checkout plus success and cancel flows
 - Convex-backed product-access and resume state
 - a starter contract and module flags in `config/product.ts`
-- optional post-review bonus routes on `/execute`, `/mission`, and `/lesson/[lessonKey]`, plus the legacy `/artifacts` forward into `/generate-codebase/review`
+- optional post-review bonus routes on `/execute`, `/mission`, and `/lesson/[lessonKey]`, plus the legacy `/artifacts` forward into `/starter/generate-codebase/review`
 
 ## The fastest path
 
@@ -72,6 +73,6 @@ You are in a good place to customize once you can say all of this is true:
 - the app boots locally
 - you can sign in
 - a user without access sees the right locked state
-- a newly paid user reaches `/home`, and a returning generated-codebase user reaches `/generate-codebase`
+- a newly paid Starter user reaches `/starter/home`, a newly paid Workers user reaches `/workers/setup`, and a returning generated-codebase user reaches `/starter/generate-codebase`
 - the `Review` handoff behaves like the final delivery surface, not a manual download dashboard
 - checkout and webhook wiring are understood, even if you have not changed them yet

@@ -10,26 +10,47 @@ const stripe = new Stripe(stripeSecretKey, {
 	apiVersion: "2026-02-25.clover",
 });
 
-const product = await stripe.products.create({
-	name: "Ship by Sunday",
-	description: "Go from idea to v1 this weekend.",
-	metadata: {
-		accessProduct: "paid_app_access",
-		app: "man_meets_ai",
+const stripeOffers = [
+	{
+		envPrefix: "STARTER",
+		name: "Ship Your Idea by Sunday",
+		description: "Starter codebase generator, template app, and guided videos.",
+		offerId: "starter",
+		unitAmount: 29700,
 	},
-	default_price_data: {
-		currency: "usd",
-		unit_amount: 25000,
+	{
+		envPrefix: "WORKERS",
+		name: "Ship by Sunday Workers",
+		description:
+			"Existing-repo Worker install, doctor pass, approved loop, and proof.",
+		offerId: "workers",
+		unitAmount: 60000,
 	},
-});
+];
 
-const defaultPriceId =
-	typeof product.default_price === "string"
-		? product.default_price
-		: product.default_price?.id;
+for (const offer of stripeOffers) {
+	const product = await stripe.products.create({
+		name: offer.name,
+		description: offer.description,
+		metadata: {
+			accessProduct: "paid_app_access",
+			app: "man_meets_ai",
+			offerId: offer.offerId,
+		},
+		default_price_data: {
+			currency: "usd",
+			unit_amount: offer.unitAmount,
+		},
+	});
 
-console.log("Created Stripe product:");
-console.log(`STRIPE_PRODUCT_ID=${product.id}`);
-if (defaultPriceId) {
-	console.log(`STRIPE_PRICE_ID=${defaultPriceId}`);
+	const defaultPriceId =
+		typeof product.default_price === "string"
+			? product.default_price
+			: product.default_price?.id;
+
+	console.log(`Created Stripe ${offer.offerId} product:`);
+	console.log(`STRIPE_${offer.envPrefix}_PRODUCT_ID=${product.id}`);
+	if (defaultPriceId) {
+		console.log(`STRIPE_${offer.envPrefix}_PRICE_ID=${defaultPriceId}`);
+	}
 }

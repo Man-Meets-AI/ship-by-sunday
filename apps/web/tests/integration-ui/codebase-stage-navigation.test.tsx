@@ -82,7 +82,9 @@ describe("CodebaseStageNav", () => {
 		expect(screen.queryByRole("button", { name: "Review" })).toBeNull();
 
 		await user.click(screen.getByRole("link", { name: "Review" }));
-		expect(onNavigate).toHaveBeenCalledWith("/generate-codebase/review");
+		expect(onNavigate).toHaveBeenCalledWith(
+			"/starter/generate-codebase/review",
+		);
 	});
 
 	it("keeps review as a plain active stage link", async () => {
@@ -105,6 +107,6 @@ describe("CodebaseStageNav", () => {
 		expect(screen.queryByRole("button", { name: "Codebase" })).toBeNull();
 
 		await user.click(screen.getByRole("link", { name: "Codebase" }));
-		expect(onNavigate).toHaveBeenCalledWith("/generate-codebase");
+		expect(onNavigate).toHaveBeenCalledWith("/starter/generate-codebase");
 	});
 });

@@ -16,6 +16,7 @@ import {
 } from "@/platform/billing/checkout/checkout-session-recovery";
 import type { PaidCheckoutRecovery, ProductAccess } from "@/lib/product-access";
 import { getConvexServerSession } from "@/platform/auth/convex-auth";
+import { resolveProductSurfaceCapabilities } from "@/platform/access/product-surface-capabilities";
 
 type ExistingCodebaseResumeDestination = {
 	destination: string;
@@ -153,6 +154,28 @@ export async function getServerResumeDestination(): Promise<ServerResumeDestinat
 	const access = await getServerProductAccess();
 	if (!access.hasAccess) {
 		return null;
+	}
+
+	const capabilities = resolveProductSurfaceCapabilities(access.capabilities);
+	const hasStarterAccess =
+		capabilities.includes("generate_codebase") ||
+		capabilities.includes("tutorials");
+	const hasWorkerAccess = capabilities.includes("worker");
+	if (hasStarterAccess && !hasWorkerAccess) {
+		return {
+			destination: routeConfig.starterHome,
+			kind: "fulfillment_choice",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		};
+	}
+	if (hasWorkerAccess && !hasStarterAccess) {
+		return {
+			destination: routeConfig.workspaceSetup,
+			kind: "existing_codebase_setup",
+			codebaseStageId: null,
+			postReviewTargets: null,
+		};
 	}
 
 	return {

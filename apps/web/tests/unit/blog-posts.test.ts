@@ -26,10 +26,16 @@ describe("blog post loading", () => {
 	it("builds published summaries from the app-owned inventory", async () => {
 		const summaries = await getPublishedBlogPostSummaries();
 
-		expect(summaries).toHaveLength(1);
+		expect(summaries).toHaveLength(2);
 		expect(summaries[0]).toMatchObject({
 			title: "What Ship by Sunday does",
 			href: "/blog/the-operating-system-beats-the-prompt",
+			heroMediaKind: "image",
+			heroMediaSrc: "/blog/editorial-surface.svg",
+		});
+		expect(summaries[1]).toMatchObject({
+			title: "Starter and Workers are different jobs",
+			href: "/blog/starter-and-workers-are-different-jobs",
 			heroMediaKind: "image",
 			heroMediaSrc: "/blog/editorial-surface.svg",
 		});

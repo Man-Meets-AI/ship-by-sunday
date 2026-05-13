@@ -39,10 +39,10 @@ export function CodebaseDemoTopBar({
 				aria-label="Homepage navigation"
 			>
 				<Link
-					href={routeConfig.docs}
+					href={routeConfig.blog}
 					className={cn("hidden sm:inline", navLinkClassName)}
 				>
-					Docs
+					Blog
 				</Link>
 				<Link href={routeConfig.signIn} className={navLinkClassName}>
 					Sign in

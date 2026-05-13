@@ -5,6 +5,7 @@ import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { getRateLimitedResponse } from "@/app/api/_lib/request-rate-limit";
 import { api } from "@/convex/_generated/api";
 import { buildStripeExpressCheckoutSessionCreateParams } from "@/platform/billing/checkout/checkout-session-params";
+import { isCheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 import { createPendingCheckoutSessionCookieOptions } from "@/platform/billing/checkout/pending-checkout-session-cookie";
 import {
 	assertManagedStripePriceMatchesProductConfig,
@@ -22,9 +23,20 @@ import { getAppBaseUrl } from "@/platform/next/app-url";
 import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 import { requireServerEnv } from "@/platform/env/server";
 
+async function readCheckoutOfferId(request: Request) {
+	const body = (await request.json().catch(() => null)) as {
+		offerId?: unknown;
+	} | null;
+
+	return typeof body?.offerId === "string" && isCheckoutOfferId(body.offerId)
+		? body.offerId
+		: null;
+}
+
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
 	const { userId } = await auth();
+	const offerId = await readCheckoutOfferId(request);
 
 	const appBaseUrl = getAppBaseUrl(request);
 	const stripeFailureContext = buildStripeCheckoutFailureContext({
@@ -33,6 +45,17 @@ export async function POST(request: Request) {
 	});
 
 	try {
+		if (!offerId) {
+			return jsonWithRequestId(
+				{
+					error: "A valid checkout offer is required.",
+					requestId,
+				},
+				{ status: 400 },
+				requestId,
+			);
+		}
+
 		const rateLimitedResponse = getRateLimitedResponse({
 			bucket: "stripe.checkout.createExpressSession",
 			identity: userId,
@@ -61,7 +84,7 @@ export async function POST(request: Request) {
 		}
 
 		const stripe = getStripe();
-		await assertManagedStripePriceMatchesProductConfig(stripe);
+		await assertManagedStripePriceMatchesProductConfig(stripe, offerId);
 		const user = userId ? await currentUser() : null;
 		const checkoutEmail = user?.primaryEmailAddress?.emailAddress ?? null;
 		const checkoutServerToken = requireServerEnv(
@@ -71,6 +94,7 @@ export async function POST(request: Request) {
 			api.checkoutClaims.createCheckoutPurchaseIntent,
 			{
 				checkoutServerToken,
+				offerId,
 				checkoutSurface: "express_checkout",
 				...(userId ? { clerkUserId: userId } : {}),
 				...(checkoutEmail ? { checkoutEmail } : {}),
@@ -81,6 +105,7 @@ export async function POST(request: Request) {
 				appBaseUrl,
 				clerkUserId: userId,
 				customerEmail: checkoutEmail,
+				offerId,
 				purchaseIntentId: purchaseIntent.purchaseIntentId,
 			}),
 		);

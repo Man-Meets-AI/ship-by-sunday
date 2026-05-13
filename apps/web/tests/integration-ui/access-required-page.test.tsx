@@ -147,8 +147,8 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Signed in as test-entitled@test.com");
 		expect(markup).toContain('data-testid="access-required-buy-access"');
 		expect(markup).toContain("Buy access now");
-		expect(markup).toContain("Review pricing");
-		expect(markup).toContain('href="/#pricing"');
+		expect(markup).toContain("Review offer");
+		expect(markup).toContain('href="/starter"');
 	});
 
 	it("renders paid checkout recovery before purchase actions when a pending claim is known", () => {

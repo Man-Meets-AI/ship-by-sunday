@@ -15,6 +15,10 @@ export const CONVEX_BIN_PATH = path.join(
 	"bin/main.js",
 );
 export const MANUAL_PRODUCT_ACCESS_SOURCE = "manual";
+export const MANUAL_STARTER_PRODUCT_ACCESS_CAPABILITIES = [
+	"generate_codebase",
+	"tutorials",
+];
 
 function spawnCommand(command, args, options) {
 	return new Promise((resolve) => {
@@ -45,6 +49,7 @@ function spawnCommand(command, args, options) {
 export function buildGrantProductAccessCommand({
 	clerkUserId,
 	source = MANUAL_PRODUCT_ACCESS_SOURCE,
+	capabilities = MANUAL_STARTER_PRODUCT_ACCESS_CAPABILITIES,
 }) {
 	return {
 		command: process.execPath,
@@ -55,6 +60,7 @@ export function buildGrantProductAccessCommand({
 			JSON.stringify({
 				clerkUserId,
 				source,
+				capabilities,
 			}),
 		],
 	};
@@ -77,10 +83,14 @@ export function buildResetProductAccessCommand({ clerkUserId }) {
 export async function grantConvexProductAccess({
 	clerkUserId,
 	courseSlug,
+	capabilities = MANUAL_STARTER_PRODUCT_ACCESS_CAPABILITIES,
 	env = process.env,
 	runCommand = spawnCommand,
 }) {
-	const { command, args } = buildGrantProductAccessCommand({ clerkUserId });
+	const { command, args } = buildGrantProductAccessCommand({
+		clerkUserId,
+		capabilities,
+	});
 	return runCommand(command, args, {
 		cwd: APPS_WEB_DIRECTORY,
 		env: courseSlug ? { ...env, QA_COURSE_SLUG: courseSlug } : env,

@@ -57,6 +57,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 				checkoutSurface: "hosted_checkout",
 				clerkUserId: "user_123",
 				metadataSchema: "mma_checkout_v1",
+				offerId: "starter",
 				purchaseIntentId: "j123purchaseintent",
 			},
 			mode: "payment",
@@ -67,6 +68,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 					checkoutSurface: "hosted_checkout",
 					clerkUserId: "user_123",
 					metadataSchema: "mma_checkout_v1",
+					offerId: "starter",
 					purchaseIntentId: "j123purchaseintent",
 				},
 			},
@@ -77,7 +79,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 
 	it("builds the hosted proof sign-in path", () => {
 		expect(buildHostedProofSignInPath({})).toBe(
-			"/sign-in?redirect_url=%2Fhome",
+			"/sign-in?redirect_url=%2Fstarter%2Fhome",
 		);
 	});
 
@@ -94,7 +96,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 	});
 
 	it("identifies homepage Express Checkout route requests", () => {
-		expect(HOMEPAGE_CHECKOUT_PROOF_PATH).toBe("/?marketing=1");
+		expect(HOMEPAGE_CHECKOUT_PROOF_PATH).toBe("/starter");
 		expect(EXPRESS_CHECKOUT_ROUTE_PATH).toBe("/api/stripe/checkout/express");
 		expect(
 			isExpressCheckoutRouteUrl(

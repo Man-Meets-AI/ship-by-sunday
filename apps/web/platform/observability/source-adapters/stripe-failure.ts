@@ -37,6 +37,8 @@ export function buildStripeCheckoutFailureContext({
 			stripeMode: getStripeModeLabel(),
 			stripePriceId: serverEnv.STRIPE_PRICE_ID ?? null,
 			stripeProductId: serverEnv.STRIPE_PRODUCT_ID ?? null,
+			stripeStarterPriceId: serverEnv.STRIPE_STARTER_PRICE_ID ?? null,
+			stripeWorkersPriceId: serverEnv.STRIPE_WORKERS_PRICE_ID ?? null,
 		},
 		nativeUrl: getStripeProductDashboardUrl(),
 		logsUrl: getStripeDashboardUrl("events"),

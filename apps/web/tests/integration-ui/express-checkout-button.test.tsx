@@ -98,7 +98,7 @@ describe("ExpressCheckoutButton", () => {
 		);
 		checkoutElementsResultMock.mockReturnValue({ type: "loading" });
 
-		render(<ExpressCheckoutButton />);
+		render(<ExpressCheckoutButton offerId="starter" />);
 
 		await screen.findByTestId("checkout-elements-provider");
 
@@ -110,12 +110,12 @@ describe("ExpressCheckoutButton", () => {
 		const fetchMock = vi
 			.spyOn(globalThis, "fetch")
 			.mockResolvedValue(createExpressCheckoutResponse("cs_express_123"));
-		const { rerender } = render(<ExpressCheckoutButton />);
+		const { rerender } = render(<ExpressCheckoutButton offerId="starter" />);
 
 		await screen.findByTestId("express-checkout-link");
 		expect(screen.getByText("Total US$250.00")).toBeTruthy();
 
-		rerender(<ExpressCheckoutButton />);
+		rerender(<ExpressCheckoutButton offerId="starter" />);
 
 		await act(async () => {});
 
@@ -125,6 +125,7 @@ describe("ExpressCheckoutButton", () => {
 				"Content-Type": "application/json",
 			},
 			method: "POST",
+			body: JSON.stringify({ offerId: "starter" }),
 		});
 	});
 
@@ -139,6 +140,7 @@ describe("ExpressCheckoutButton", () => {
 			return (
 				<div data-saved-at={savedAt}>
 					<ExpressCheckoutButton
+						offerId="starter"
 						onBeforeCheckout={() => {
 							setSavedAt(Date.now());
 						}}
@@ -161,6 +163,7 @@ describe("ExpressCheckoutButton", () => {
 		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({
 			event: "checkout_started",
 			properties: {
+				offer_id: "starter",
 				surface: "express_checkout",
 			},
 		});

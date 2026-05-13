@@ -7,7 +7,6 @@ import {
 	Compass,
 	Code2,
 	House,
-	ListVideo,
 	LogOut,
 	Map,
 	Moon,
@@ -40,9 +39,8 @@ type AppShellCommandMenuItemsProps = {
 
 const workspaceLinkIcons = {
 	[routeConfig.appHome]: House,
-	[routeConfig.codebase]: Code2,
-	[routeConfig.tutorials]: ListVideo,
-	[routeConfig.workers]: Bot,
+	[routeConfig.starterHome]: Code2,
+	[routeConfig.workspaceSetup]: Bot,
 	[routeConfig.settings]: Settings,
 } as const;
 

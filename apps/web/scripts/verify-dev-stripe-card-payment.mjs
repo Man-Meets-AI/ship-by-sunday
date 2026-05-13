@@ -22,7 +22,9 @@ const expectedCheckoutMetadata = {
 	app: "man_meets_ai",
 	checkoutSurface: "hosted_checkout",
 	metadataSchema: "mma_checkout_v1",
+	offerId: "starter",
 };
+const expectedStarterAmountCents = 29_700;
 
 function normalizeStripeSecretKey(secretKey) {
 	return secretKey.replaceAll("\\n", "").replaceAll("\n", "").trim();
@@ -91,6 +93,7 @@ function isExpectedCheckoutMetadata(metadata) {
 		metadata?.app === expectedCheckoutMetadata.app &&
 		metadata?.accessProduct === expectedCheckoutMetadata.accessProduct &&
 		metadata?.checkoutSurface === expectedCheckoutMetadata.checkoutSurface &&
+		metadata?.offerId === expectedCheckoutMetadata.offerId &&
 		typeof metadata?.purchaseIntentId === "string" &&
 		metadata.purchaseIntentId.length > 0 &&
 		metadata.courseSlug === undefined &&
@@ -375,6 +378,7 @@ try {
 	const checkoutButtons = page.locator(
 		[
 			"[data-testid='hero-primary-cta']",
+			"[data-testid='starter-checkout-cta']",
 			"[data-testid='codebase-demo-checkout-cta']",
 			"[data-testid='codebase-demo-existing-checkout-cta']",
 			"[data-testid='pricing-primary-cta']",
@@ -390,11 +394,9 @@ try {
 		.catch(() => null);
 
 	const visibleCheckoutButtonCount = await checkoutButtons.count();
-	const codebaseDemoCheckoutButton = page.getByTestId(
-		"codebase-demo-checkout-cta",
-	);
-	await codebaseDemoCheckoutButton.scrollIntoViewIfNeeded();
-	await codebaseDemoCheckoutButton.click();
+	const starterCheckoutButton = page.getByTestId("starter-checkout-cta");
+	await starterCheckoutButton.scrollIntoViewIfNeeded();
+	await starterCheckoutButton.click();
 	await page.waitForURL(/checkout\.stripe\.com/, {
 		timeout: 30_000,
 	});
@@ -469,17 +471,18 @@ try {
 		"Stripe Checkout session paid",
 		finalSession.status === "complete" &&
 			finalSession.payment_status === "paid" &&
-			finalSession.amount_total === 25_000,
+			finalSession.amount_total === expectedStarterAmountCents,
 		`status=${finalSession.status}, payment_status=${finalSession.payment_status}, amount_total=${finalSession.amount_total}`,
 	);
 	printCheck(
 		"Stripe PaymentIntent succeeded",
-		paymentIntent?.status === "succeeded" && paymentIntent.amount === 25_000,
+		paymentIntent?.status === "succeeded" &&
+			paymentIntent.amount === expectedStarterAmountCents,
 		`status=${paymentIntent?.status ?? "missing"}, amount=${paymentIntent?.amount ?? "missing"}`,
 	);
 	printCheck(
 		"Checkout reached passwordless workspace handoff",
-		checkoutHandoff.redirectUrl === "/home?welcome=checkout" &&
+		checkoutHandoff.redirectUrl === "/starter/home?welcome=checkout" &&
 			checkoutHandoff.emailValue === checkoutEmail &&
 			checkoutHandoff.emailLocked &&
 			!checkoutHandoff.passwordVisible &&
@@ -540,10 +543,10 @@ try {
 		checkoutSuccessPath !== "/checkout/success" ||
 		finalSession.status !== "complete" ||
 		finalSession.payment_status !== "paid" ||
-		finalSession.amount_total !== 25_000 ||
+		finalSession.amount_total !== expectedStarterAmountCents ||
 		paymentIntent?.status !== "succeeded" ||
-		paymentIntent.amount !== 25_000 ||
-		checkoutHandoff.redirectUrl !== "/home?welcome=checkout" ||
+		paymentIntent.amount !== expectedStarterAmountCents ||
+		checkoutHandoff.redirectUrl !== "/starter/home?welcome=checkout" ||
 		checkoutHandoff.emailValue !== checkoutEmail ||
 		!checkoutHandoff.emailLocked ||
 		checkoutHandoff.passwordVisible ||

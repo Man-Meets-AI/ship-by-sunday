@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useStripeCheckout } from "@/app/checkout/_hooks/use-stripe-checkout";
+import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 
 export type CheckoutButtonLoadingLabels = {
 	saving?: string;
@@ -15,6 +16,7 @@ export type CheckoutButtonLoadingLabels = {
 const DEFAULT_REDIRECTING_LABEL = "Redirecting...";
 
 export function CheckoutButton({
+	offerId,
 	label,
 	className,
 	testId,
@@ -22,6 +24,7 @@ export function CheckoutButton({
 	onError,
 	loadingLabels,
 }: {
+	offerId: CheckoutOfferId;
 	label: string;
 	className?: string;
 	testId?: string;
@@ -30,6 +33,7 @@ export function CheckoutButton({
 	loadingLabels?: CheckoutButtonLoadingLabels;
 }) {
 	const { startCheckout, phase, isLoading, error } = useStripeCheckout({
+		offerId,
 		onBeforeCheckout,
 	});
 

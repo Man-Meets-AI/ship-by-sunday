@@ -178,7 +178,7 @@ describe("useCodebasePageState", () => {
 
 		expect(unlockExecuteShipSpy).toHaveBeenCalledWith({});
 		expect(navigateToHref).toHaveBeenCalledWith(
-			"/generate-codebase/review?download=1",
+			"/starter/generate-codebase/review?download=1",
 		);
 	});
 

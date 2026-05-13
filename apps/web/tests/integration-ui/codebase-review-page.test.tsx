@@ -253,7 +253,7 @@ describe("CodebaseReviewPage", () => {
 			render(
 				<CodebaseReviewPage initialWorkspaceState={lockedWorkspaceState} />,
 			),
-		).toThrowError("NEXT_REDIRECT:/generate-codebase");
-		expect(redirectMock).toHaveBeenCalledWith("/generate-codebase");
+		).toThrowError("NEXT_REDIRECT:/starter/generate-codebase");
+		expect(redirectMock).toHaveBeenCalledWith("/starter/generate-codebase");
 	});
 });

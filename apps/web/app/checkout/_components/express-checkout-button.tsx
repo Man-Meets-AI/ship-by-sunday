@@ -13,6 +13,7 @@ import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
 import { cn } from "@/lib/utils";
+import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 
 const STRIPE_EXPRESS_CHECKOUT_MIN_BUTTON_HEIGHT = 40;
 const STRIPE_EXPRESS_CHECKOUT_MAX_BUTTON_HEIGHT = 55;
@@ -39,6 +40,7 @@ type ExpressCheckoutButtonState =
 	  };
 
 type ExpressCheckoutButtonProps = {
+	readonly offerId: CheckoutOfferId;
 	readonly className?: string;
 	readonly testId?: string;
 	readonly buttonHeight?: number;
@@ -48,6 +50,7 @@ type ExpressCheckoutButtonProps = {
 };
 
 export function ExpressCheckoutButton({
+	offerId,
 	className,
 	testId,
 	buttonHeight = 44,
@@ -69,6 +72,7 @@ export function ExpressCheckoutButton({
 					headers: {
 						"Content-Type": "application/json",
 					},
+					body: JSON.stringify({ offerId }),
 				});
 
 				if (!response.ok) {
@@ -104,7 +108,7 @@ export function ExpressCheckoutButton({
 		return () => {
 			isMounted = false;
 		};
-	}, []);
+	}, [offerId]);
 
 	useEffect(() => {
 		if (state.kind !== "unavailable") {
@@ -134,6 +138,7 @@ export function ExpressCheckoutButton({
 				}}
 			>
 				<ExpressCheckoutElementController
+					offerId={offerId}
 					buttonHeight={buttonHeight}
 					returnUrl={state.returnUrl}
 					onBeforeCheckout={onBeforeCheckout}
@@ -146,12 +151,14 @@ export function ExpressCheckoutButton({
 }
 
 function ExpressCheckoutElementController({
+	offerId,
 	buttonHeight,
 	returnUrl,
 	onBeforeCheckout,
 	onAvailableChange,
 	onError,
 }: {
+	readonly offerId: CheckoutOfferId;
 	readonly buttonHeight: number;
 	readonly returnUrl: string;
 	readonly onBeforeCheckout?: () => void | Promise<void>;
@@ -216,6 +223,7 @@ function ExpressCheckoutElementController({
 				event: "checkout_started",
 				properties: {
 					surface: "express_checkout",
+					offer_id: offerId,
 				},
 			});
 
@@ -246,7 +254,7 @@ function ExpressCheckoutElementController({
 				onError?.(result.error.message);
 			}
 		},
-		[checkoutResult, onBeforeCheckout, onError, returnUrl],
+		[checkoutResult, offerId, onBeforeCheckout, onError, returnUrl],
 	);
 
 	if (checkoutResult.type !== "success") {

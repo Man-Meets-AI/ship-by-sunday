@@ -33,6 +33,9 @@ describe("blog page paths", () => {
 			{
 				slug: ["the-operating-system-beats-the-prompt"],
 			},
+			{
+				slug: ["starter-and-workers-are-different-jobs"],
+			},
 		]);
 	});
 
@@ -41,6 +44,9 @@ describe("blog page paths", () => {
 
 		expect(params).toContainEqual({
 			slug: ["the-operating-system-beats-the-prompt"],
+		});
+		expect(params).toContainEqual({
+			slug: ["starter-and-workers-are-different-jobs"],
 		});
 		expect(params).not.toContainEqual({ slug: [] });
 	});

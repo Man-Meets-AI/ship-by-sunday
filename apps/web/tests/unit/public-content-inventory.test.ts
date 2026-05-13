@@ -87,8 +87,8 @@ describe("public content inventory", () => {
 		const allEntries = await getAllBlogContentEntries();
 		const publishedEntries = await getPublishedBlogContentEntries();
 
-		expect(allEntries).toHaveLength(1);
-		expect(publishedEntries).toHaveLength(1);
+		expect(allEntries).toHaveLength(2);
+		expect(publishedEntries).toHaveLength(2);
 		expect(publishedEntries[0]).toMatchObject({
 			kind: "blog",
 			slug: ["the-operating-system-beats-the-prompt"],
@@ -108,6 +108,22 @@ describe("public content inventory", () => {
 			id: "it-starts-by-locking-the-product-truth",
 			depth: 2,
 			text: "It starts by locking the product truth",
+		});
+		expect(publishedEntries[1]).toMatchObject({
+			kind: "blog",
+			slug: ["starter-and-workers-are-different-jobs"],
+			pathname: "/blog/starter-and-workers-are-different-jobs",
+			title: "Starter and Workers are different jobs",
+			publishedAt: "2026-05-13",
+			authorName: "Parker Rex",
+			featured: false,
+			heroMediaKind: "image",
+			heroMediaSrc: "/blog/editorial-surface.svg",
+		});
+		expect(publishedEntries[1]?.headings).toContainEqual({
+			id: "starter-starts-before-the-repo-is-real",
+			depth: 2,
+			text: "Starter starts before the repo is real",
 		});
 	});
 });

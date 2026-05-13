@@ -156,7 +156,7 @@ const primaryNav: AppShellPrimaryNav = {
 					kind: "link",
 					id: "bonus-lesson-map",
 					label: "Lesson Map",
-					href: "/generate-codebase/review?showLessonMap=1",
+					href: "/starter/generate-codebase/review?showLessonMap=1",
 					state: "available",
 				},
 			],
@@ -187,7 +187,7 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/generate-codebase/review"');
+		expect(markup).toContain('href="/starter/generate-codebase/review"');
 		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
 		expect(markup).toContain("Launch Lessons");
 		expect(markup).toContain("Bonus");
@@ -206,14 +206,15 @@ describe("AppShell", () => {
 		expect(markup).not.toContain("Open CEO");
 	});
 
-	it("links the header brand to the codebase page and keeps account chrome visible", () => {
+	it("keeps product route links and account chrome visible", () => {
 		const markup = renderAppShell(
 			<AppShell showSkillRail={false} primaryNav={primaryNav}>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/generate-codebase"');
+		expect(markup).toContain('href="/home"');
+		expect(markup).toContain('href="/starter/generate-codebase"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
 	});

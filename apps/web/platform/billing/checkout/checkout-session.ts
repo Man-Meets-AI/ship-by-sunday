@@ -14,7 +14,14 @@ import {
 	readCheckoutIntentFromMetadata,
 	type FulfillmentTrack,
 } from "@/platform/billing/checkout/checkout-intent";
-import { readCheckoutMetadataClerkUserId } from "@/platform/billing/checkout/checkout-metadata";
+import {
+	readCheckoutMetadataClerkUserId,
+	readCheckoutPurchaseMetadata,
+} from "@/platform/billing/checkout/checkout-metadata";
+import {
+	getCheckoutOfferIdForLegacyFulfillmentTrack,
+	type CheckoutOfferId,
+} from "@/platform/billing/checkout/checkout-offers";
 
 export type CheckoutSessionState =
 	| {
@@ -27,35 +34,41 @@ export type CheckoutSessionState =
 	| {
 			kind: "sign_in_required";
 			sessionId: string;
+			offerId?: CheckoutOfferId;
 			checkoutEmail?: string;
 			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "fulfillment_failed";
 			sessionId: string;
+			offerId?: CheckoutOfferId;
 			checkoutEmail?: string;
 			message: string;
 	  }
 	| {
 			kind: "wrong_account";
 			sessionId: string;
+			offerId?: CheckoutOfferId;
 			checkoutEmail?: string;
 			currentAccountEmail?: string;
 	  }
 	| {
 			kind: "payment_pending";
 			sessionId: string;
+			offerId?: CheckoutOfferId;
 			paymentStatus: Stripe.Checkout.Session.PaymentStatus;
 	  }
 	| {
 			kind: "validated";
 			sessionId: string;
+			offerId?: CheckoutOfferId;
 			fulfillmentTrack: FulfillmentTrack;
 	  };
 
 function getCheckoutStateFromClaimResult(
 	claimResult: Awaited<ReturnType<typeof claimCheckoutSessionForViewer>>,
 	sessionId: string,
+	offerId: CheckoutOfferId | undefined,
 	fulfillmentTrack: FulfillmentTrack,
 	safeCheckoutEmail: string | undefined,
 	currentAccountEmail: string | undefined,
@@ -65,12 +78,14 @@ function getCheckoutStateFromClaimResult(
 			return {
 				kind: "validated",
 				sessionId,
+				offerId,
 				fulfillmentTrack,
 			};
 		case "wrong_account":
 			return {
 				kind: "wrong_account",
 				sessionId,
+				offerId,
 				checkoutEmail: claimResult.checkoutEmail ?? safeCheckoutEmail,
 				currentAccountEmail:
 					claimResult.currentAccountEmail ?? currentAccountEmail,
@@ -79,12 +94,14 @@ function getCheckoutStateFromClaimResult(
 			return {
 				kind: "payment_pending",
 				sessionId,
+				offerId,
 				paymentStatus: claimResult.paymentStatus,
 			};
 		case "sign_in_required":
 			return {
 				kind: "sign_in_required",
 				sessionId,
+				offerId,
 				checkoutEmail: claimResult.checkoutEmail ?? safeCheckoutEmail,
 				currentAccountEmail:
 					claimResult.currentAccountEmail ?? currentAccountEmail,
@@ -109,11 +126,13 @@ async function getCurrentAccountEmail() {
 async function getCheckoutStateFromEmailFulfillment({
 	authUserId,
 	currentAccountEmail,
+	offerId,
 	fulfillmentTrack,
 	sessionId,
 }: {
 	authUserId: string | null;
 	currentAccountEmail: string | undefined;
+	offerId: CheckoutOfferId | undefined;
 	fulfillmentTrack: FulfillmentTrack;
 	sessionId: string;
 }): Promise<CheckoutSessionState> {
@@ -126,6 +145,7 @@ async function getCheckoutStateFromEmailFulfillment({
 				return {
 					kind: "sign_in_required",
 					sessionId,
+					offerId,
 					checkoutEmail: fulfillmentResult.checkoutEmail,
 					currentAccountEmail,
 				};
@@ -135,6 +155,7 @@ async function getCheckoutStateFromEmailFulfillment({
 				return {
 					kind: "wrong_account",
 					sessionId,
+					offerId,
 					checkoutEmail: fulfillmentResult.checkoutEmail,
 					currentAccountEmail,
 				};
@@ -143,12 +164,14 @@ async function getCheckoutStateFromEmailFulfillment({
 			return {
 				kind: "validated",
 				sessionId,
+				offerId,
 				fulfillmentTrack,
 			};
 		case "payment_pending":
 			return {
 				kind: "payment_pending",
 				sessionId,
+				offerId,
 				paymentStatus: fulfillmentResult.paymentStatus,
 			};
 		case "invalid_session":
@@ -164,6 +187,7 @@ async function getCheckoutStateFromEmailFulfillment({
 			return {
 				kind: "fulfillment_failed",
 				sessionId,
+				offerId,
 				checkoutEmail: fulfillmentResult.checkoutEmail,
 				message:
 					fulfillmentResult.kind === "clerk_user_conflict"
@@ -207,12 +231,16 @@ export async function getCheckoutSessionState(
 	const fulfillmentTrack = readCheckoutIntentFromMetadata(
 		session.metadata,
 	).fulfillmentTrack;
+	const offerId =
+		readCheckoutPurchaseMetadata(session.metadata)?.offerId ??
+		getCheckoutOfferIdForLegacyFulfillmentTrack(fulfillmentTrack);
 
 	if (!clerkUserId) {
 		if (!isStripeCheckoutSessionPaid(session)) {
 			return {
 				kind: "payment_pending",
 				sessionId,
+				offerId,
 				paymentStatus: session.payment_status,
 			};
 		}
@@ -224,6 +252,7 @@ export async function getCheckoutSessionState(
 		return await getCheckoutStateFromEmailFulfillment({
 			authUserId: authState.userId,
 			currentAccountEmail,
+			offerId,
 			fulfillmentTrack,
 			sessionId,
 		});
@@ -234,6 +263,7 @@ export async function getCheckoutSessionState(
 		return {
 			kind: "sign_in_required",
 			sessionId,
+			offerId,
 			checkoutEmail: safeCheckoutEmail,
 		};
 	}
@@ -242,6 +272,7 @@ export async function getCheckoutSessionState(
 		return {
 			kind: "wrong_account",
 			sessionId,
+			offerId,
 			checkoutEmail: safeCheckoutEmail,
 			currentAccountEmail: await getCurrentAccountEmail(),
 		};
@@ -252,6 +283,7 @@ export async function getCheckoutSessionState(
 		return getCheckoutStateFromClaimResult(
 			claimResult,
 			sessionId,
+			offerId,
 			fulfillmentTrack,
 			safeCheckoutEmail,
 			await getCurrentAccountEmail(),
@@ -261,6 +293,7 @@ export async function getCheckoutSessionState(
 	return {
 		kind: "payment_pending",
 		sessionId,
+		offerId,
 		paymentStatus: session.payment_status,
 	};
 }

@@ -47,6 +47,7 @@ import {
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 } from "./checkoutIntentValidators";
+import { checkoutOfferIdValidator } from "./checkoutOfferValidators";
 import { productAccessCapabilityValidator } from "./access/validators";
 import {
 	impersonationAuditEventTypeValidator,
@@ -82,6 +83,8 @@ export default defineSchema({
 		stripeCheckoutSessionId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		capabilities: v.optional(v.array(productAccessCapabilityValidator)),
+		offerIds: v.optional(v.array(checkoutOfferIdValidator)),
+		lastCheckoutOfferId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -100,6 +103,7 @@ export default defineSchema({
 			v.literal("hosted_checkout"),
 			v.literal("express_checkout"),
 		),
+		offerId: v.optional(checkoutOfferIdValidator),
 		stripeCheckoutSessionId: v.optional(v.string()),
 		status: v.union(
 			v.literal("created"),
@@ -121,6 +125,7 @@ export default defineSchema({
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),

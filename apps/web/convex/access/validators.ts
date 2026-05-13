@@ -5,6 +5,7 @@ import {
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 } from "../checkoutIntentValidators";
+import { checkoutOfferIdValidator } from "../checkoutOfferValidators";
 
 export const productAccessGrantStatusValidator = v.union(
 	v.literal("granted"),
@@ -68,6 +69,8 @@ export const productAccessGrantDocumentValidator = v.object({
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
 	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
+	offerIds: v.optional(v.array(checkoutOfferIdValidator)),
+	lastCheckoutOfferId: v.optional(checkoutOfferIdValidator),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),

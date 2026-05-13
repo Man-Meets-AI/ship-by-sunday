@@ -403,7 +403,7 @@ describe("CodebasePage", () => {
 			expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
 		});
 		expect(pushMock).toHaveBeenCalledWith(
-			"/generate-codebase/review?download=1",
+			"/starter/generate-codebase/review?download=1",
 		);
 		expect(replaceMock).not.toHaveBeenCalled();
 	});

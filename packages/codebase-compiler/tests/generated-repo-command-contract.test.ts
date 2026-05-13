@@ -75,6 +75,7 @@ function runCleanRoomCommand(repoRoot: string, args: readonly string[]) {
 		env: {
 			...process.env,
 			CI: "1",
+			DISABLE_POSTHOG_SOURCE_MAP_UPLOAD: "1",
 		},
 	});
 
@@ -107,6 +108,20 @@ describe("generated repo command contract", () => {
 			runCleanRoomCommand(generatedRepoRoot, ["run", "plans:lint"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "codebase:contract"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "agentic:check"]);
+			runCleanRoomCommand(generatedRepoRoot, [
+				"run",
+				"--cwd",
+				"apps/web",
+				"typecheck",
+			]);
+			runCleanRoomCommand(generatedRepoRoot, [
+				"run",
+				"--cwd",
+				"apps/web",
+				"dev",
+				"--",
+				"--help",
+			]);
 
 			const testedRunCommands = new Set([
 				"bun ci",
@@ -114,6 +129,8 @@ describe("generated repo command contract", () => {
 				"bun run plans:lint",
 				"bun run codebase:contract",
 				"bun run agentic:check",
+				"bun run --cwd apps/web typecheck",
+				"bun run --cwd apps/web dev -- --help",
 			]);
 			const packageJson = JSON.parse(
 				await readFile(path.join(generatedRepoRoot, "package.json"), "utf8"),
@@ -179,5 +196,5 @@ describe("generated repo command contract", () => {
 		} finally {
 			await rm(tempRoot, { force: true, recursive: true });
 		}
-	}, 60_000);
+	}, 120_000);
 });

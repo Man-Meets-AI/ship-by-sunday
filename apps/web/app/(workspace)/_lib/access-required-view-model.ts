@@ -112,7 +112,7 @@ export function getAccessViewModel({
 	};
 	const seeOffer = {
 		kind: "link" as const,
-		label: "Review pricing",
+		label: "Review offer",
 		href: pricingHref,
 		variant: "outline" as const,
 	};

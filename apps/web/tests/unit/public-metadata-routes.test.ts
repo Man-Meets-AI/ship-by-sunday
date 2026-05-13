@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { buildDocsMetadata } from "@/app/docs/_lib/docs-metadata";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 
@@ -13,7 +14,7 @@ describe("public metadata routes", () => {
 
 		expect(sitemapUrl).toContain("/sitemap.xml");
 		expect(publicRules?.userAgent).toBe("*");
-		expect(publicRules?.allow).toEqual(["/", "/docs", "/blog"]);
+		expect(publicRules?.allow).toEqual(["/", "/starter", "/workers", "/blog"]);
 		expect(publicRules?.disallow).toEqual(
 			expect.arrayContaining([
 				"/sign-in",
@@ -21,16 +22,17 @@ describe("public metadata routes", () => {
 				"/session-tasks",
 				"/access-required",
 				"/home",
-				"/generate-codebase",
-				"/generate-codebase/review",
-				"/tutorials",
-				"/workers",
+				"/starter/home",
+				"/starter/generate-codebase",
+				"/starter/lessons",
+				"/workers/setup",
 				"/settings",
 				"/workspace",
 				"/checkout/",
 				"/api/",
 			]),
 		);
+		expect(publicRules?.disallow).not.toContain("/docs");
 	});
 
 	it("builds sitemap entries from lightweight public content metadata", async () => {
@@ -41,14 +43,32 @@ describe("public metadata routes", () => {
 		).origin;
 
 		expect(urls).toContain(`${metadataBase}/`);
+		expect(urls).toContain(`${metadataBase}/starter`);
+		expect(urls).toContain(`${metadataBase}/workers`);
 		expect(urls).toContain(`${metadataBase}/blog`);
-		expect(urls).toContain(`${metadataBase}/docs/local-setup`);
+		expect(urls).not.toContain(`${metadataBase}/docs`);
+		expect(urls).not.toContain(`${metadataBase}/docs/local-setup`);
 		expect(urls).toContain(
 			`${metadataBase}/blog/the-operating-system-beats-the-prompt`,
 		);
-		expect(
-			entries.find((entry) => entry.url === `${metadataBase}/docs/local-setup`)
-				?.lastModified,
-		).toBeInstanceOf(Date);
+		expect(urls).toContain(
+			`${metadataBase}/blog/starter-and-workers-are-different-jobs`,
+		);
+	});
+
+	it("marks direct-link docs metadata as unindexed support material", () => {
+		const metadata = buildDocsMetadata({
+			mdxPath: ["local-setup"],
+			metadata: {
+				title: "Local Setup",
+				description: "Support docs for generated-codebase setup.",
+			},
+		});
+
+		expect(metadata.alternates?.canonical).toBe("/docs/local-setup");
+		expect(metadata.robots).toMatchObject({
+			index: false,
+			follow: false,
+		});
 	});
 });

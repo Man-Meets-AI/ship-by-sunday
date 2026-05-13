@@ -296,12 +296,12 @@ export function buildSupportOperatorActionEffect(
 		case "send_pricing_link":
 			return buildCustomerVisibleEffect(
 				"Sent pricing link.",
-				`Pricing is here: ${SUPPORT_PUBLIC_BASE_URL}/#pricing\n\nIf you're not sure which path fits, send a note here and I'll help.`,
+				`Starter is here: ${SUPPORT_PUBLIC_BASE_URL}/starter\nWorkers is here: ${SUPPORT_PUBLIC_BASE_URL}/workers\n\nIf you're not sure which path fits, send a note here and I'll help.`,
 			);
 		case "send_checkout_link":
 			return buildCustomerVisibleEffect(
 				"Sent checkout link.",
-				`Checkout starts from the pricing section: ${SUPPORT_PUBLIC_BASE_URL}/#pricing\n\nUse Start my AI build when you're ready.`,
+				`Checkout starts from the right offer page: ${SUPPORT_PUBLIC_BASE_URL}/starter or ${SUPPORT_PUBLIC_BASE_URL}/workers.`,
 			);
 		case "draft_reply":
 			return buildOperatorOnlyEffect(

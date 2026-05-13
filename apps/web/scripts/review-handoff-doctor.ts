@@ -18,7 +18,7 @@ type Check = {
 	detail: string;
 };
 
-const expectedReviewRoute = "/generate-codebase/review";
+const expectedReviewRoute = "/starter/generate-codebase/review";
 const expectedAutoDownloadHref = `${expectedReviewRoute}?download=1`;
 
 function check(label: string, ok: boolean, detail: string): Check {
@@ -100,7 +100,7 @@ const hasFailure = checks.some((result) => !result.ok);
 if (hasFailure) {
 	console.error("");
 	console.error(
-		"Fix the failed review-handoff contract above before treating the /generate-codebase -> /generate-codebase/review flow as validated.",
+		"Fix the failed review-handoff contract above before treating the /starter/generate-codebase -> /starter/generate-codebase/review flow as validated.",
 	);
 	process.exit(1);
 }

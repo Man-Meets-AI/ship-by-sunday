@@ -5,15 +5,17 @@ import { useCallback, useState } from "react";
 import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { assert } from "@/lib/assert";
 import { capturePostHogProductEvent } from "@/lib/observability/posthog-client";
+import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 
 export type StripeCheckoutPhase = "idle" | "saving" | "redirecting";
 
 export type StripeCheckoutOptions = {
+	offerId: CheckoutOfferId;
 	onBeforeCheckout?: () => void | Promise<void>;
 };
 
-export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
-	const { onBeforeCheckout } = options;
+export function useStripeCheckout(options: StripeCheckoutOptions) {
+	const { offerId, onBeforeCheckout } = options;
 	const [phase, setPhase] = useState<StripeCheckoutPhase>("idle");
 	const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +31,7 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 			event: "checkout_started",
 			properties: {
 				surface: "checkout_button",
+				offer_id: offerId,
 			},
 		});
 
@@ -55,6 +58,7 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				body: JSON.stringify({ offerId }),
 			});
 
 			if (!response.ok) {
@@ -85,7 +89,7 @@ export function useStripeCheckout(options: StripeCheckoutOptions = {}) {
 			);
 			setPhase("idle");
 		}
-	}, [onBeforeCheckout]);
+	}, [offerId, onBeforeCheckout]);
 
 	return { startCheckout, phase, isLoading, error, clearError };
 }

@@ -19,10 +19,12 @@ export const brandColorConfig = {
 export const routeConfig = {
 	home: "/",
 	appHome: "/home",
-	codebase: "/generate-codebase",
-	review: "/generate-codebase/review",
+	starter: "/starter",
+	starterHome: "/starter/home",
+	codebase: "/starter/generate-codebase",
+	review: "/starter/generate-codebase/review",
 	execute: "/execute",
-	tutorials: "/tutorials",
+	tutorials: "/starter/lessons",
 	workers: "/workers",
 	docs: "/docs",
 	blog: "/blog",
@@ -42,6 +44,9 @@ export const routeConfig = {
 	workspaceLoops: "/workers/loops",
 	workspaceRuns: "/workers/runs",
 	workspacePrivacy: "/workers/privacy",
+	legacyCodebase: "/generate-codebase",
+	legacyReview: "/generate-codebase/review",
+	legacyTutorials: "/tutorials",
 	pricingHash: "#pricing",
 } as const;
 
@@ -64,6 +69,7 @@ export type HomePageSectionName = (typeof homePageSectionOrder)[number];
 export type HomePageCtaTarget =
 	| {
 			readonly kind: "checkout";
+			readonly offerId?: "starter" | "workers";
 	  }
 	| {
 			readonly kind: "link";
@@ -141,12 +147,9 @@ export const starterConfig = {
 		},
 	},
 	pricing: {
-		basePriceUsdCents: 50000,
+		basePriceUsdCents: 29700,
 		currency: "usd",
-		activeOffer: {
-			label: "Pilot Member",
-			percentOff: 50,
-		} as const satisfies StarterPricingOfferConfig,
+		activeOffer: null as StarterPricingOfferConfig | null,
 	},
 	bonus: {
 		name: "FULL TURBO",
@@ -179,7 +182,7 @@ export const starterConfig = {
 			"Public editorials from Ship by Sunday on durable product context, agent-ready packs, and shipping real software with AI without losing the thread.",
 		promoCtaTarget: {
 			kind: "link",
-			href: "/#pricing",
+			href: routeConfig.starter,
 		} satisfies HomePageCtaTarget,
 	},
 	modules: {

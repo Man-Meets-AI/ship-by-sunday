@@ -1,4 +1,4 @@
-import { Bot, Code2, ListVideo } from "lucide-react";
+import { Bot, Code2 } from "lucide-react";
 import Link from "next/link";
 
 import { AppShell } from "@/app/(workspace)/_components/app-shell";
@@ -14,9 +14,8 @@ import {
 } from "@/components/ui/card";
 
 const pathIcons = {
-	"generate-codebase": Code2,
-	tutorials: ListVideo,
-	worker: Bot,
+	starter: Code2,
+	workers: Bot,
 } as const;
 
 export function PaidAppHomePage({
@@ -61,7 +60,7 @@ export function PaidAppHomePage({
 				</section>
 				<section
 					aria-label="Product paths"
-					className="grid gap-4 md:grid-cols-3"
+					className="grid gap-4 md:grid-cols-2"
 					data-testid="paid-app-home-paths"
 				>
 					{model.paths.map((path) => {

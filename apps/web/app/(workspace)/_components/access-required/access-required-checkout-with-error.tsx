@@ -1,9 +1,11 @@
 "use client";
 
 import { OctagonAlert, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 
 import { CheckoutButton } from "@/app/checkout/_components/checkout-button";
+import { getCheckoutOfferIdForProtectedPath } from "@/platform/billing/checkout/checkout-offers";
 
 const CHECKOUT_LOADING_LABELS = {
 	saving: "Securing checkout…",
@@ -18,6 +20,8 @@ export function AccessRequiredCheckoutWithError({
 	readonly className?: string;
 }) {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const pathname = usePathname();
+	const offerId = getCheckoutOfferIdForProtectedPath(pathname ?? "/");
 
 	const handleError = useCallback((message: string | null) => {
 		setErrorMessage(message);
@@ -53,6 +57,7 @@ export function AccessRequiredCheckoutWithError({
 				</div>
 			) : null}
 			<CheckoutButton
+				offerId={offerId}
 				label={label}
 				testId="access-required-buy-access"
 				className={className}

@@ -36,10 +36,13 @@ describe("proxy protected routes", () => {
 
 		expect(createRouteMatcherMock).toHaveBeenCalledWith(
 			expect.arrayContaining([
+				"/starter/generate-codebase(.*)",
+				"/starter/generate-codebase/review(.*)",
 				"/generate-codebase(.*)",
 				"/generate-codebase/review(.*)",
 				"/home(.*)",
-				"/workers(.*)",
+				"/starter/home(.*)",
+				"/starter/lessons(.*)",
 				"/settings(.*)",
 				"/workers/setup(.*)",
 				"/workers/doctor-pass(.*)",
@@ -47,10 +50,11 @@ describe("proxy protected routes", () => {
 				"/workers/loops(.*)",
 				"/workers/runs(.*)",
 				"/workers/privacy(.*)",
+				"/tutorials(.*)",
 				"/execute(.*)",
 				"/mission(.*)",
 				"/artifacts(.*)",
-				"/start(.*)",
+				"/start",
 				"/product(.*)",
 				"/design(.*)",
 				"/marketing(.*)",

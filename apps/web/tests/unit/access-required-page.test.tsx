@@ -115,7 +115,7 @@ describe("AccessRequiredPage", () => {
 		expect(markup).not.toContain("Recover access");
 		expect(markup).toContain('data-testid="access-required-buy-access"');
 		expect(markup).toContain("Buy access now");
-		expect(markup).toContain("Review pricing");
+		expect(markup).toContain("Review offer");
 	});
 
 	it("renders the session refresh state when the Clerk token is missing", () => {

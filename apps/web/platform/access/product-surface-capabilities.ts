@@ -19,7 +19,7 @@ export function resolveProductSurfaceCapabilities(
 	capabilities: readonly string[] | null | undefined,
 ): ProductSurfaceCapability[] {
 	if (!capabilities) {
-		return [...productSurfaceCapabilities];
+		return [];
 	}
 
 	return productSurfaceCapabilities.filter((capability) =>

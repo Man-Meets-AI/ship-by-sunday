@@ -51,6 +51,10 @@ export function buildDocsMetadata({
 			...metadata?.alternates,
 			canonical: canonicalPath,
 		},
+		robots: {
+			index: false,
+			follow: false,
+		},
 		openGraph: {
 			...metadata?.openGraph,
 			type: "article",

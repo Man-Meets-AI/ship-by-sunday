@@ -7,6 +7,7 @@ import { startTransition, useEffect, useRef, useState } from "react";
 import { routeConfig, timingConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import { buildSignInHref } from "@/platform/auth/auth-route-utils";
+import { getCheckoutOfferPublicPathForProtectedPath } from "@/platform/billing/checkout/checkout-offers";
 import type { ProductAccess } from "@/lib/product-access";
 import {
 	formatRefreshTime,
@@ -44,7 +45,7 @@ export function useAccessRequiredController(initialAccess?: ProductAccess) {
 	const [lastRefreshAt, setLastRefreshAt] = useState<number | null>(null);
 	const currentPath = getCurrentPath(pathname, searchParams);
 	const signInHref = buildSignInHref({ redirectPath: currentPath });
-	const pricingHref = `${routeConfig.home}${routeConfig.pricingHash}`;
+	const pricingHref = getCheckoutOfferPublicPathForProtectedPath(pathname);
 	const access =
 		liveAccess &&
 		!liveAccess.hasAccess &&

@@ -29,7 +29,7 @@ describe("tutorial video library model", () => {
 		expect(library.blocks.flatMap((block) => block.lessons)).toHaveLength(29);
 
 		for (const lesson of library.blocks.flatMap((block) => block.lessons)) {
-			expect(lesson.href).toBe(`/tutorials/${lesson.routeSegment}`);
+			expect(lesson.href).toBe(`/starter/lessons/${lesson.routeSegment}`);
 			expect(lesson.durationLabel).toMatch(/m|s/);
 			expect(lesson.thumbnailUrl).toMatch(/^\/api\/video\/thumbnails\//);
 			expect("status" in lesson).toBe(false);

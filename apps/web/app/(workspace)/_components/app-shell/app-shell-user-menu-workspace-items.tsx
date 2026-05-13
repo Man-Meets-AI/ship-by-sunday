@@ -1,11 +1,4 @@
-import {
-	Bot,
-	Code2,
-	House,
-	ListVideo,
-	Settings,
-	ShieldCheck,
-} from "lucide-react";
+import { Bot, Code2, House, Settings, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 
@@ -21,9 +14,8 @@ import { workspaceMenuLinks } from "./app-shell-user-menu-helpers";
 
 const workspaceLinkIcons = {
 	[routeConfig.appHome]: House,
-	[routeConfig.codebase]: Code2,
-	[routeConfig.tutorials]: ListVideo,
-	[routeConfig.workers]: Bot,
+	[routeConfig.starterHome]: Code2,
+	[routeConfig.workspaceSetup]: Bot,
 	[routeConfig.settings]: Settings,
 } as const;
 

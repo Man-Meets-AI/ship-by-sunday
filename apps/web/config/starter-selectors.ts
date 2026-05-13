@@ -31,7 +31,7 @@ export const docsDisplayConfig = {
 	siteName: `${productConfig.name} ${starterConfig.docs.badgeLabel}`,
 	badgeLabel: starterConfig.docs.badgeLabel,
 	description: starterConfig.docs.description,
-	pricingHref: `${routeConfig.home}${routeConfig.pricingHash}`,
+	starterHref: routeConfig.starter,
 } as const;
 
 export const blogDisplayConfig = {

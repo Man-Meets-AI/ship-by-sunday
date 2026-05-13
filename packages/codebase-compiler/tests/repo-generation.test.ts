@@ -1,5 +1,9 @@
 import { createCompleteProjectDefinition } from "../src";
-import { isExcludedSnapshotPath } from "../src/repo-generation/repo-download-source-contract";
+import {
+	isExcludedSnapshotPath,
+	starterSnapshotForbiddenFilePaths,
+	starterSnapshotForbiddenPathPrefixes,
+} from "../src/repo-generation/repo-download-source-contract";
 import {
 	buildRepoGenerationManifest,
 	materializeRepoSnapshot,
@@ -85,6 +89,20 @@ function generatedOperatingPackPathSet(
 	]);
 }
 
+function expectNoForbiddenStarterSnapshotPaths(snapshotPaths: string[]) {
+	const forbiddenPaths = snapshotPaths.filter(
+		(path) =>
+			starterSnapshotForbiddenFilePaths.includes(
+				path as (typeof starterSnapshotForbiddenFilePaths)[number],
+			) ||
+			starterSnapshotForbiddenPathPrefixes.some((prefix) =>
+				path.startsWith(prefix),
+			),
+	);
+
+	expect(forbiddenPaths).toEqual([]);
+}
+
 describe("repo generation", () => {
 	it("builds a repo manifest from the project definition", () => {
 		const manifest = buildRepoGenerationManifest(
@@ -96,14 +114,16 @@ describe("repo generation", () => {
 			expect.arrayContaining([".next", ".vercel", "coverage", "test-results"]),
 		);
 		expect(manifest.includedDirectories).toEqual(
-			expect.arrayContaining([
-				"apps/web/app",
-				"packages/codebase-compiler/src",
-			]),
+			expect.arrayContaining(["packages/codebase-compiler/src"]),
 		);
+		expect(manifest.includedDirectories).not.toContain("apps/web/app");
 		expect(manifest.includedDirectories).not.toContain("apps/web/tests");
 		expect(manifest.includedFiles).toEqual(
-			expect.arrayContaining(["bunfig.toml", "apps/web/.env.local.example"]),
+			expect.arrayContaining([
+				"bunfig.toml",
+				"apps/web/.env.local.example",
+				"apps/web/scripts/run-next-build-serialized.mjs",
+			]),
 		);
 	});
 
@@ -176,8 +196,6 @@ describe("repo generation", () => {
 				"apps/web/content/docs/index.mdx",
 				"README.md",
 				"package.json",
-				"apps/web/config/product.ts",
-				"apps/web/app/_content/home-page.ts",
 			]),
 		);
 
@@ -269,6 +287,7 @@ describe("repo generation", () => {
 		const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
 		const snapshotFiles = await materializeRepoSnapshot(projectDefinition);
 		const snapshotPaths = snapshotFiles.map((file) => file.path);
+		const uniqueSnapshotPathCount = new Set(snapshotPaths).size;
 
 		expect(snapshotPaths).toEqual(
 			expect.arrayContaining([
@@ -289,9 +308,16 @@ describe("repo generation", () => {
 				".agents/skills/starter-docs-and-testing/SKILL.md",
 				".agents/skills/external-skills.json",
 				"apps/web/content/docs/index.mdx",
+				"apps/web/app/globals.css",
+				"apps/web/app/layout.tsx",
+				"apps/web/app/page.tsx",
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
 				"apps/web/app/_content/home-page.ts",
+				"apps/web/next.config.ts",
+				"apps/web/package.json",
+				"apps/web/.env.local.example",
+				"apps/web/scripts/run-next-build-serialized.mjs",
 				"packages/codebase-presentation/package.json",
 				"packages/codebase-presentation/src/index.ts",
 				"packages/telegram-chat-widget/package.json",
@@ -318,8 +344,12 @@ describe("repo generation", () => {
 				operatingPackPaths.activeExecPlanPath,
 			]),
 		);
+		expect(uniqueSnapshotPathCount).toBe(snapshotPaths.length);
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
+				"apps/web/app/(workspace)/layout.tsx",
+				"apps/web/app/(workspace)/settings/_components/settings-page.tsx",
+				"apps/web/app/blog/page.tsx",
 				"docs/PLANS.md",
 				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
@@ -347,6 +377,24 @@ describe("repo generation", () => {
 					file.path === ".github/workflows/examples/basic-ci.example.yml",
 			),
 		);
+		const appPackageJson = JSON.parse(
+			snapshotText(
+				snapshotFiles.find((file) => file.path === "apps/web/package.json"),
+			) || "{}",
+		) as {
+			scripts?: Record<string, string>;
+		};
+		const appScriptBody = Object.values(appPackageJson.scripts ?? {}).join(
+			"\n",
+		);
+		const appLocalEnvExample = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/.env.local.example"),
+		);
+		const appProductionEnvExample = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "apps/web/.env.production.example",
+			),
+		);
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
 		expect(rootAgentGuide?.content).toContain("bun run agentic:check");
@@ -371,7 +419,33 @@ describe("repo generation", () => {
 		expect(basicCiWorkflow).not.toContain("bun install");
 		expect(basicCiWorkflow).not.toContain("bun run build");
 		expect(basicCiWorkflow).not.toContain("bun run lint");
+		expect(appPackageJson.scripts?.dev).toBe("next dev");
+		expect(appPackageJson.scripts?.typecheck).toBe(
+			"node scripts/run-next-build-serialized.mjs",
+		);
+		expect(appScriptBody).not.toContain("scripts/dev-stripe-listen-ready.mjs");
+		expect(appScriptBody).not.toContain("CODEX_APP_SERVER");
+		expect(appLocalEnvExample).toContain("STRIPE_STARTER_PRICE_ID=");
+		expect(appLocalEnvExample).not.toContain("STRIPE_WORKERS");
+		expect(appLocalEnvExample).not.toContain("CODEX_");
+		expect(appProductionEnvExample).not.toContain("STRIPE_WORKERS");
+		expect(appProductionEnvExample).not.toContain("CODEX_");
 		expect(forbiddenPaths).toEqual([]);
+		expectNoForbiddenStarterSnapshotPaths(snapshotPaths);
+		expect(snapshotPaths).not.toEqual(
+			expect.arrayContaining([
+				"apps/web/app/workers/page.tsx",
+				"apps/web/app/(workspace)/layout.tsx",
+				"apps/web/app/(workspace)/settings/_components/settings-page.tsx",
+				"apps/web/app/blog/page.tsx",
+				"apps/web/app/(workspace)/workers/setup/page.tsx",
+				"apps/web/app/api/workspace/runner/events/route.ts",
+				"apps/web/app/api/codex/generate/route.ts",
+				"apps/web/convex/workspace.ts",
+				"apps/web/platform/codex/app-server.ts",
+				"packages/local-runner/src/index.ts",
+			]),
+		);
 	});
 
 	it("materializes an explicit generated operating pack with runnable script wiring", async () => {

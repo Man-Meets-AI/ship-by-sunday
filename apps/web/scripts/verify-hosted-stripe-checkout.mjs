@@ -32,7 +32,7 @@ const stripeSecretKey = normalizeStripeSecretKey(
 	process.env.STRIPE_SECRET_KEY ?? "",
 );
 const stripePriceId = normalizeStripeSecretKey(
-	process.env.STRIPE_PRICE_ID ?? "",
+	process.env.STRIPE_STARTER_PRICE_ID ?? process.env.STRIPE_PRICE_ID ?? "",
 );
 const releasePersonaLocalPath = path.resolve(
 	import.meta.dirname,
@@ -40,7 +40,7 @@ const releasePersonaLocalPath = path.resolve(
 	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
 const expectedWebhookAccessSource = "stripe_webhook";
-const hostedCheckoutAppPathPattern = /\/home(\?|$)/;
+const hostedCheckoutAppPathPattern = /\/starter\/home(\?|$)/;
 const hostedCheckoutProofIdentity = JSON.stringify({
 	tokenIdentifier: "release-proof:hosted-checkout-billing",
 	subject: "release-proof",
@@ -199,6 +199,7 @@ async function createHostedProofCheckoutPurchaseIntent({
 			JSON.stringify({
 				checkoutEmail,
 				checkoutSurface: "hosted_checkout",
+				offerId: "starter",
 				...(clerkUserId ? { clerkUserId } : {}),
 			}),
 		],
@@ -464,6 +465,7 @@ async function verifyHomepageCheckoutContract(page, { baseUrl }) {
 			.locator(
 				[
 					"[data-testid='hero-primary-cta']",
+					"[data-testid='starter-checkout-cta']",
 					"[data-testid='codebase-demo-checkout-cta']",
 					"[data-testid='codebase-demo-existing-checkout-cta']",
 					"[data-testid='pricing-primary-cta']",
@@ -488,6 +490,7 @@ async function verifyHomepageCheckoutContract(page, { baseUrl }) {
 			.locator(
 				[
 					"[data-testid='hero-primary-cta']",
+					"[data-testid='starter-checkout-cta']",
 					"[data-testid='codebase-demo-checkout-cta']",
 					"[data-testid='codebase-demo-existing-checkout-cta']",
 					"[data-testid='pricing-primary-cta']",
@@ -572,7 +575,7 @@ async function verifyAuthorizedAppAccess(page, { baseUrl, timeoutMs }) {
 		const deadline = Date.now() + timeoutMs;
 
 		while (Date.now() < deadline) {
-			await verificationPage.goto(`${baseUrl}/generate-codebase`, {
+			await verificationPage.goto(`${baseUrl}/starter/generate-codebase`, {
 				waitUntil: "networkidle",
 			});
 
@@ -644,7 +647,9 @@ const isLiveStripeMode = isLiveStripeSecretKey(stripeSecretKey);
 const allowCardEntry = shouldAllowHostedProofCardEntry(isLiveStripeMode);
 
 if (!stripePriceId) {
-	throw new Error("Missing STRIPE_PRICE_ID in environment.");
+	throw new Error(
+		"Missing STRIPE_STARTER_PRICE_ID in environment. Hosted Starter billing proof needs a managed Starter price.",
+	);
 }
 
 const buyerCredentials = await loadQaBuyerCredentials();

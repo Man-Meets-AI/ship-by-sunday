@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 
 import { getCheckoutSuccessHref, routeConfig } from "@/config/product";
 import { buildCheckoutPurchaseMetadata } from "@/platform/billing/checkout/checkout-metadata";
+import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 import {
 	getStripeCheckoutDiscounts,
 	getStripeLineItem,
@@ -13,6 +14,7 @@ type BuildStripeCheckoutSessionCreateParamsInput = {
 	readonly appBaseUrl: string;
 	readonly clerkUserId: string | null;
 	readonly customerEmail: string | null;
+	readonly offerId: CheckoutOfferId;
 	readonly purchaseIntentId: string;
 };
 
@@ -31,12 +33,14 @@ export function buildStripeCheckoutSessionCreateParams({
 	appBaseUrl,
 	clerkUserId,
 	customerEmail,
+	offerId,
 	purchaseIntentId,
 }: BuildStripeCheckoutSessionCreateParamsInput): Stripe.Checkout.SessionCreateParams {
-	const checkoutDiscounts = getStripeCheckoutDiscounts();
+	const checkoutDiscounts = getStripeCheckoutDiscounts(offerId);
 	const checkoutMetadata = buildCheckoutPurchaseMetadata({
 		checkoutSurface: "hosted_checkout",
 		clerkUserId,
+		offerId,
 		purchaseIntentId: requirePurchaseIntentId(purchaseIntentId),
 	});
 
@@ -50,7 +54,7 @@ export function buildStripeCheckoutSessionCreateParams({
 		client_reference_id: clerkUserId ?? undefined,
 		customer_email: customerEmail ?? undefined,
 		...(checkoutDiscounts ? { discounts: checkoutDiscounts } : {}),
-		line_items: [getStripeLineItem()],
+		line_items: [getStripeLineItem(offerId)],
 		metadata: checkoutMetadata,
 		payment_intent_data: {
 			metadata: checkoutMetadata,
@@ -62,12 +66,14 @@ export function buildStripeExpressCheckoutSessionCreateParams({
 	appBaseUrl,
 	clerkUserId,
 	customerEmail,
+	offerId,
 	purchaseIntentId,
 }: BuildStripeCheckoutSessionCreateParamsInput): Stripe.Checkout.SessionCreateParams {
-	const checkoutDiscounts = getStripeCheckoutDiscounts();
+	const checkoutDiscounts = getStripeCheckoutDiscounts(offerId);
 	const checkoutMetadata = buildCheckoutPurchaseMetadata({
 		checkoutSurface: "express_checkout",
 		clerkUserId,
+		offerId,
 		purchaseIntentId: requirePurchaseIntentId(purchaseIntentId),
 	});
 
@@ -81,7 +87,7 @@ export function buildStripeExpressCheckoutSessionCreateParams({
 		client_reference_id: clerkUserId ?? undefined,
 		customer_email: customerEmail ?? undefined,
 		...(checkoutDiscounts ? { discounts: checkoutDiscounts } : {}),
-		line_items: [getStripeLineItem()],
+		line_items: [getStripeLineItem(offerId)],
 		metadata: checkoutMetadata,
 		payment_intent_data: {
 			metadata: checkoutMetadata,

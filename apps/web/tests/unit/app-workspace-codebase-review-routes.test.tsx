@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const fetchAuthenticatedQueryMock = vi.fn();
 const fetchAuthenticatedMutationMock = vi.fn();
 const getServerProductAccessMock = vi.fn();
+const loadWorkspacePageAccessMock = vi.fn();
 const currentUserMock = vi.fn();
 const redirectMock = vi.fn();
 
@@ -21,6 +22,10 @@ vi.mock("@/platform/convex/server-preload", () => ({
 
 vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
+}));
+
+vi.mock("@/app/(workspace)/_server/load-workspace-page-access", () => ({
+	loadWorkspacePageAccess: loadWorkspacePageAccessMock,
 }));
 
 vi.mock("next/navigation", () => ({
@@ -79,30 +84,37 @@ describe("workspace codebase, review, and setup routes", () => {
 		fetchAuthenticatedMutationMock.mockReset();
 		fetchAuthenticatedQueryMock.mockReset();
 		getServerProductAccessMock.mockReset();
+		loadWorkspacePageAccessMock.mockReset();
 		currentUserMock.mockReset();
 		redirectMock.mockReset();
 		redirectMock.mockImplementation((destination: string) => {
 			throw new Error(`redirect:${destination}`);
 		});
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: true,
-			status: "granted",
-			capabilities: ["generate_codebase", "tutorials", "worker"],
-			fulfillmentTrack: "generated_codebase",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				fulfillmentTrack: "generated_codebase",
+			},
 		});
 		vi.resetModules();
 	});
 
 	it("renders codebase access recovery without protected queries when access is missing", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: false,
-			status: "no_access",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "access_required",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: false,
+				status: "no_access",
+			},
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(workspace)/generate-codebase/page");
+			await import("@/app/(workspace)/starter/generate-codebase/page");
 
 		const markup = renderToStaticMarkup(await CodebaseRoutePage());
 
@@ -111,14 +123,17 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("renders review access recovery without protected queries when access is missing", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: false,
-			status: "no_access",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "access_required",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: false,
+				status: "no_access",
+			},
 		});
 
 		const { default: ReviewRoutePage } =
-			await import("@/app/(workspace)/generate-codebase/review/page");
+			await import("@/app/(workspace)/starter/generate-codebase/review/page");
 
 		const markup = renderToStaticMarkup(
 			await ReviewRoutePage({
@@ -131,10 +146,13 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("renders setup access recovery without preparing pairing state when access is missing", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: false,
-			status: "no_access",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "access_required",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: false,
+				status: "no_access",
+			},
 		});
 
 		const { default: SetupRoutePage } =
@@ -158,7 +176,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(workspace)/generate-codebase/page");
+			await import("@/app/(workspace)/starter/generate-codebase/page");
 
 		const markup = renderToStaticMarkup(await CodebaseRoutePage());
 
@@ -187,7 +205,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: ReviewRoutePage } =
-			await import("@/app/(workspace)/generate-codebase/review/page");
+			await import("@/app/(workspace)/starter/generate-codebase/review/page");
 
 		const markup = renderToStaticMarkup(
 			await ReviewRoutePage({
@@ -204,12 +222,15 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("prepares pairing state for setup after access is granted", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: true,
-			status: "granted",
-			capabilities: ["generate_codebase", "tutorials", "worker"],
-			fulfillmentTrack: "existing_codebase_doctor",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				fulfillmentTrack: "existing_codebase_doctor",
+			},
 		});
 		fetchAuthenticatedMutationMock.mockResolvedValue({
 			project: null,
@@ -237,12 +258,15 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("renders paid app home for granted access", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: true,
-			status: "granted",
-			capabilities: ["generate_codebase", "tutorials", "worker"],
-			fulfillmentTrack: "unspecified",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				fulfillmentTrack: "unspecified",
+			},
 		});
 
 		const { default: HomeRoutePage } =
@@ -258,11 +282,14 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("renders paid app home access recovery without paid access", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: false,
-			status: "no_access",
-			capabilities: [],
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "access_required",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: false,
+				status: "no_access",
+				capabilities: [],
+			},
 		});
 
 		const { default: HomeRoutePage } =
@@ -278,12 +305,15 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("redirects viewers without worker capability away from worker setup", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: true,
-			status: "granted",
-			capabilities: ["generate_codebase", "tutorials"],
-			fulfillmentTrack: "generated_codebase",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials"],
+				fulfillmentTrack: "generated_codebase",
+			},
 		});
 
 		const { default: SetupRoutePage } =
@@ -295,19 +325,36 @@ describe("workspace codebase, review, and setup routes", () => {
 	});
 
 	it("redirects viewers without generate-codebase capability away from generate-codebase", async () => {
-		getServerProductAccessMock.mockResolvedValue({
-			clerkUserId: "user_123",
-			hasAccess: true,
-			status: "granted",
-			capabilities: ["tutorials", "worker"],
-			fulfillmentTrack: "existing_codebase_doctor",
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["tutorials", "worker"],
+				fulfillmentTrack: "existing_codebase_doctor",
+			},
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(workspace)/generate-codebase/page");
+			await import("@/app/(workspace)/starter/generate-codebase/page");
 
 		await expect(CodebaseRoutePage()).rejects.toThrow("redirect:/home");
 		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
 		expect(redirectMock).toHaveBeenCalledWith("/home");
+	});
+
+	it("redirects legacy codebase routes to Starter codebase routes", async () => {
+		const { default: LegacyCodebasePage } =
+			await import("@/app/(workspace)/generate-codebase/page");
+		const { default: LegacyReviewPage } =
+			await import("@/app/(workspace)/generate-codebase/review/page");
+
+		expect(() => LegacyCodebasePage()).toThrow(
+			"redirect:/starter/generate-codebase",
+		);
+		expect(() => LegacyReviewPage()).toThrow(
+			"redirect:/starter/generate-codebase/review",
+		);
 	});
 });

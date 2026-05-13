@@ -17,6 +17,7 @@ import {
 	type ManagedStripeWebhookEndpointPreflightResult,
 	type StripeModeLabel,
 } from "@/platform/billing/managed-stripe-config";
+import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 import { requireServerEnv, serverEnv } from "@/platform/env/server";
 
 export const STRIPE_API_VERSION = apiConfig.stripeApiVersion;
@@ -48,20 +49,22 @@ export function getStripePublishableKey() {
 	return requireServerEnv("STRIPE_PUBLISHABLE_KEY");
 }
 
-export function getStripeLineItem() {
-	return getStripeConfigLineItem(getManagedStripeConfig());
+export function getStripeLineItem(offerId: CheckoutOfferId) {
+	return getStripeConfigLineItem(getManagedStripeConfig(), offerId);
 }
 
-export function getStripeCheckoutDiscounts() {
-	return getStripeConfigCheckoutDiscounts(getManagedStripeConfig());
+export function getStripeCheckoutDiscounts(offerId: CheckoutOfferId) {
+	return getStripeConfigCheckoutDiscounts(getManagedStripeConfig(), offerId);
 }
 
 export async function assertManagedStripePriceMatchesProductConfig(
 	stripe: Stripe,
+	offerId?: CheckoutOfferId,
 ) {
 	await assertManagedStripeConfigPriceMatchesProductConfig(
 		stripe,
 		getManagedStripeConfig(),
+		offerId,
 	);
 }
 
@@ -138,8 +141,12 @@ export function getStripeWebhookDashboardUrl() {
 
 export function getStripeProductDashboardUrl() {
 	const config = getManagedStripeConfig();
-	if (config.productId) {
-		return getStripeDashboardUrl(`products/${config.productId}`);
+	const productId =
+		config.offerProductIds.starter ??
+		config.offerProductIds.workers ??
+		config.productId;
+	if (productId) {
+		return getStripeDashboardUrl(`products/${productId}`);
 	}
 
 	return getStripeDashboardUrl("products");

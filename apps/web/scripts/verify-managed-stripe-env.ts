@@ -80,8 +80,10 @@ async function verifyHostedCheckoutRoute(appBaseUrl: string) {
 	if (vercelAutomationBypassSecret) {
 		headers.set("x-vercel-protection-bypass", vercelAutomationBypassSecret);
 	}
+	headers.set("content-type", "application/json");
 
 	const response = await fetch(checkoutRouteUrl, {
+		body: JSON.stringify({ offerId: "starter" }),
 		headers,
 		method: "POST",
 	});

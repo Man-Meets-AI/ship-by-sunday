@@ -6,12 +6,12 @@ import {
 	productWordmarkClassName,
 } from "@/components/product-brand";
 import { routeConfig } from "@/config/product";
-import { marketingDisplayConfig } from "@/config/starter-selectors";
 import { getBlogPagePath } from "@/app/blog/_server/page-paths";
 
 const blogNavigationLinks = [
-	{ href: routeConfig.home, label: "Home" },
-	{ href: routeConfig.docs, label: "Docs" },
+	{ href: routeConfig.home, label: "Man Meets AI" },
+	{ href: routeConfig.starter, label: "Starter" },
+	{ href: routeConfig.workers, label: "Workers" },
 	{ href: getBlogPagePath(), label: "Blog" },
 ] as const;
 
@@ -54,10 +54,10 @@ export function BlogSurfaceHeader({ activeHref }: BlogSurfaceHeaderProps) {
 				</nav>
 				<div className="flex shrink-0 items-center justify-end gap-2">
 					<Link
-						href={`${routeConfig.home}${routeConfig.pricingHash}`}
+						href={routeConfig.signIn}
 						className="hidden min-h-11 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-foreground/80 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:inline-flex"
 					>
-						{marketingDisplayConfig.primaryCtaLabel}
+						Sign in
 					</Link>
 					<ThemeToggleButton className="border-border/70 bg-background/70" />
 				</div>

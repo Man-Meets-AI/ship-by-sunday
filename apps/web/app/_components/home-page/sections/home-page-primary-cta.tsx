@@ -33,6 +33,7 @@ export function HomePagePrimaryCta({
 		case "checkout":
 			return (
 				<HomePageCheckoutCta
+					offerId={target.offerId ?? "starter"}
 					label={label}
 					className={mergedClassName}
 					testId={testId}

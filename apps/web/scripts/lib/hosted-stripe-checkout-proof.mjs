@@ -1,5 +1,5 @@
 export const DEFAULT_PROOF_COUPON_LIFETIME_SECONDS = 15 * 60;
-export const HOMEPAGE_CHECKOUT_PROOF_PATH = "/?marketing=1";
+export const HOMEPAGE_CHECKOUT_PROOF_PATH = "/starter";
 export const EXPRESS_CHECKOUT_ROUTE_PATH = "/api/stripe/checkout/express";
 export const hostedProofFulfillablePaymentStatuses = new Set([
 	"paid",
@@ -95,6 +95,7 @@ export function buildHostedProofCheckoutSessionParams({
 	checkoutEmail,
 	clerkUserId,
 	couponId,
+	offerId = "starter",
 	purchaseIntentId,
 	priceId,
 }) {
@@ -111,6 +112,7 @@ export function buildHostedProofCheckoutSessionParams({
 		checkoutSurface: "hosted_checkout",
 		...(clerkUserId ? { clerkUserId } : {}),
 		metadataSchema: "mma_checkout_v1",
+		offerId,
 		purchaseIntentId,
 	};
 
@@ -130,7 +132,7 @@ export function buildHostedProofCheckoutSessionParams({
 	};
 }
 
-export function buildHostedProofSignInPath({ redirectPath = "/home" }) {
+export function buildHostedProofSignInPath({ redirectPath = "/starter/home" }) {
 	return `/sign-in?redirect_url=${encodeURIComponent(redirectPath)}`;
 }
 

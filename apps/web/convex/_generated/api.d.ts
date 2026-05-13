@@ -15,6 +15,7 @@ import type * as access_validators from "../access/validators.js";
 import type * as checkoutClaims from "../checkoutClaims.js";
 import type * as checkoutClaimsActions from "../checkoutClaimsActions.js";
 import type * as checkoutIntentValidators from "../checkoutIntentValidators.js";
+import type * as checkoutOfferValidators from "../checkoutOfferValidators.js";
 import type * as codebase from "../codebase.js";
 import type * as codebase_projectDefinition from "../codebase/projectDefinition.js";
 import type * as codebase_stageReadiness from "../codebase/stageReadiness.js";
@@ -75,6 +76,7 @@ declare const fullApi: ApiFromModules<{
   checkoutClaims: typeof checkoutClaims;
   checkoutClaimsActions: typeof checkoutClaimsActions;
   checkoutIntentValidators: typeof checkoutIntentValidators;
+  checkoutOfferValidators: typeof checkoutOfferValidators;
   codebase: typeof codebase;
   "codebase/projectDefinition": typeof codebase_projectDefinition;
   "codebase/stageReadiness": typeof codebase_stageReadiness;

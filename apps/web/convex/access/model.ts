@@ -13,11 +13,19 @@ import {
 	type ProductSurfaceCapability,
 } from "../../platform/access/product-surface-capabilities";
 import {
+	getCheckoutOffer,
+	getCheckoutOfferCapabilities,
+	getCheckoutOfferIdForLegacyFulfillmentTrack,
+	readCheckoutOfferId,
+	type CheckoutOfferId,
+} from "../../platform/billing/checkout/checkout-offers";
+import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 	checkoutResolvedFulfillmentTrackValidator,
 } from "../checkoutIntentValidators";
+import { checkoutOfferIdValidator } from "../checkoutOfferValidators";
 import type {
 	AccessMutationCtx,
 	AccessQueryCtx,
@@ -43,6 +51,7 @@ type ProductAccessGrantUpsertInput = {
 	stripeCheckoutSessionId?: string;
 	stripePaymentIntentId?: string;
 	capabilities?: ProductSurfaceCapability[];
+	checkoutOfferId?: CheckoutOfferId;
 	buyerStartingPoint?: BuyerStartingPoint;
 	checkoutCtaId?: CheckoutCtaId;
 	fulfillmentTrack?: FulfillmentTrack;
@@ -84,17 +93,150 @@ function getStoredCheckoutIntentFields(
 	return normalizeCheckoutIntent(intent);
 }
 
+function getIncomingCheckoutIntentFields(
+	input: Pick<
+		ProductAccessGrantUpsertInput,
+		| "buyerStartingPoint"
+		| "checkoutCtaId"
+		| "checkoutOfferId"
+		| "fulfillmentTrack"
+	>,
+) {
+	return {
+		buyerStartingPoint: input.buyerStartingPoint,
+		checkoutCtaId: input.checkoutCtaId,
+		fulfillmentTrack:
+			input.fulfillmentTrack ??
+			(input.checkoutOfferId
+				? getCheckoutOffer(input.checkoutOfferId).fulfillmentTrack
+				: undefined),
+	};
+}
+
 function getStoredProductSurfaceCapabilities(
 	accessGrant: {
 		status?: string;
 		capabilities?: string[];
+		offerIds?: string[];
+		lastCheckoutOfferId?: CheckoutOfferId;
+		fulfillmentTrack?: FulfillmentTrack;
 	} | null,
 ): ProductSurfaceCapability[] {
 	if (!accessGrant || accessGrant.status !== "granted") {
 		return [];
 	}
 
-	return resolveProductSurfaceCapabilities(accessGrant.capabilities);
+	return getProductSurfaceCapabilitiesFromGrantFields(accessGrant);
+}
+
+function getUniqueProductSurfaceCapabilities(
+	capabilities: readonly ProductSurfaceCapability[],
+) {
+	return productSurfaceCapabilities.filter((capability) =>
+		capabilities.includes(capability),
+	);
+}
+
+function getProductSurfaceCapabilitiesForOfferIds(
+	offerIds: readonly string[] | undefined,
+) {
+	return getUniqueProductSurfaceCapabilities(
+		(offerIds ?? []).flatMap(
+			(offerId) =>
+				getCheckoutOfferCapabilities(readCheckoutOfferId(offerId)) ?? [],
+		),
+	);
+}
+
+function getProductSurfaceCapabilitiesForFulfillmentTrack(
+	fulfillmentTrack: FulfillmentTrack | undefined,
+) {
+	if (!fulfillmentTrack) {
+		return [];
+	}
+
+	const offerId = getCheckoutOfferIdForLegacyFulfillmentTrack(fulfillmentTrack);
+	return getCheckoutOfferCapabilities(offerId) ?? [];
+}
+
+function getProductSurfaceCapabilitiesFromGrantFields(grant: {
+	capabilities?: string[];
+	offerIds?: string[];
+	lastCheckoutOfferId?: CheckoutOfferId;
+	fulfillmentTrack?: FulfillmentTrack;
+}): ProductSurfaceCapability[] {
+	if (grant.capabilities) {
+		return resolveProductSurfaceCapabilities(grant.capabilities);
+	}
+
+	return getUniqueProductSurfaceCapabilities([
+		...getProductSurfaceCapabilitiesForOfferIds(grant.offerIds),
+		...(getCheckoutOfferCapabilities(grant.lastCheckoutOfferId) ?? []),
+		...getProductSurfaceCapabilitiesForFulfillmentTrack(grant.fulfillmentTrack),
+	]);
+}
+
+function getIncomingProductSurfaceCapabilities(
+	input: Pick<
+		ProductAccessGrantUpsertInput,
+		"capabilities" | "checkoutOfferId" | "fulfillmentTrack"
+	>,
+): ProductSurfaceCapability[] | undefined {
+	if (input.capabilities) {
+		return resolveProductSurfaceCapabilities(input.capabilities);
+	}
+
+	if (input.checkoutOfferId) {
+		return getCheckoutOfferCapabilities(input.checkoutOfferId) ?? [];
+	}
+
+	const fulfillmentTrackCapabilities =
+		getProductSurfaceCapabilitiesForFulfillmentTrack(input.fulfillmentTrack);
+	return fulfillmentTrackCapabilities.length > 0
+		? fulfillmentTrackCapabilities
+		: undefined;
+}
+
+function getMergedProductSurfaceCapabilities({
+	existingGrant,
+	incomingCapabilities,
+}: {
+	existingGrant: {
+		capabilities?: string[];
+		offerIds?: string[];
+		lastCheckoutOfferId?: CheckoutOfferId;
+		fulfillmentTrack?: FulfillmentTrack;
+	};
+	incomingCapabilities?: ProductSurfaceCapability[];
+}): ProductSurfaceCapability[] {
+	return getUniqueProductSurfaceCapabilities([
+		...getProductSurfaceCapabilitiesFromGrantFields(existingGrant),
+		...(incomingCapabilities ?? []),
+	]);
+}
+
+function getMergedCheckoutOfferIds({
+	existingOfferIds,
+	incomingOfferId,
+}: {
+	existingOfferIds?: string[];
+	incomingOfferId?: CheckoutOfferId;
+}): CheckoutOfferId[] | undefined {
+	if (!incomingOfferId && !existingOfferIds) {
+		return undefined;
+	}
+
+	const mergedOfferIds = new Set<CheckoutOfferId>();
+	for (const offerId of existingOfferIds ?? []) {
+		if (offerId === "starter" || offerId === "workers") {
+			mergedOfferIds.add(offerId);
+		}
+	}
+	if (incomingOfferId) {
+		mergedOfferIds.add(incomingOfferId);
+	}
+
+	return [...mergedOfferIds];
 }
 
 export async function getProductAccessGrantByClerkUserId(
@@ -198,10 +340,20 @@ export async function upsertProductAccessGrant(
 	);
 
 	const grantToPatch = existingStripeGrant ?? existingGrant;
+	const incomingCapabilities = getIncomingProductSurfaceCapabilities(input);
 	if (grantToPatch) {
-		const checkoutIntent = getResolvedCheckoutIntentFields(grantToPatch, input);
-		const capabilities = input.capabilities ??
-			grantToPatch.capabilities ?? [...productSurfaceCapabilities];
+		const checkoutIntent = getResolvedCheckoutIntentFields(
+			grantToPatch,
+			getIncomingCheckoutIntentFields(input),
+		);
+		const capabilities = getMergedProductSurfaceCapabilities({
+			existingGrant: grantToPatch,
+			incomingCapabilities,
+		});
+		const offerIds = getMergedCheckoutOfferIds({
+			existingOfferIds: grantToPatch.offerIds,
+			incomingOfferId: input.checkoutOfferId,
+		});
 		await ctx.db.patch(grantToPatch._id, {
 			status: "granted",
 			source: getNextProductAccessGrantSource({
@@ -212,6 +364,9 @@ export async function upsertProductAccessGrant(
 			stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 			stripePaymentIntentId: input.stripePaymentIntentId,
 			capabilities,
+			offerIds,
+			lastCheckoutOfferId:
+				input.checkoutOfferId ?? grantToPatch.lastCheckoutOfferId,
 			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			updatedAt: now,
 			revokedAt: undefined,
@@ -220,7 +375,9 @@ export async function upsertProductAccessGrant(
 		return { granted: "patched" as const };
 	}
 
-	const checkoutIntent = getStoredCheckoutIntentFields(input);
+	const checkoutIntent = getStoredCheckoutIntentFields(
+		getIncomingCheckoutIntentFields(input),
+	);
 	await ctx.db.insert("productAccessGrants", {
 		clerkUserId: input.clerkUserId,
 		status: "granted",
@@ -228,7 +385,9 @@ export async function upsertProductAccessGrant(
 		stripeCustomerId: input.stripeCustomerId,
 		stripeCheckoutSessionId: input.stripeCheckoutSessionId,
 		stripePaymentIntentId: input.stripePaymentIntentId,
-		capabilities: input.capabilities ?? [...productSurfaceCapabilities],
+		capabilities: incomingCapabilities ?? [],
+		offerIds: input.checkoutOfferId ? [input.checkoutOfferId] : undefined,
+		lastCheckoutOfferId: input.checkoutOfferId,
 		fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 		grantedAt: now,
 		updatedAt: now,
@@ -269,6 +428,7 @@ export const grantProductAccessArgs = {
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
 	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
+	checkoutOfferId: v.optional(checkoutOfferIdValidator),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -284,6 +444,7 @@ export async function grantProductAccessHandler(
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
 		capabilities?: ProductSurfaceCapability[];
+		checkoutOfferId?: CheckoutOfferId;
 		buyerStartingPoint?: BuyerStartingPoint;
 		checkoutCtaId?: CheckoutCtaId;
 		fulfillmentTrack?: FulfillmentTrack;
@@ -301,6 +462,7 @@ export const grantProductAccessFromStripeArgs = {
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
 	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
+	checkoutOfferId: v.optional(checkoutOfferIdValidator),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 	checkoutCtaId: v.optional(checkoutCtaIdValidator),
 	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -316,6 +478,7 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCheckoutSessionId?: string;
 		stripePaymentIntentId?: string;
 		capabilities?: ProductSurfaceCapability[];
+		checkoutOfferId?: CheckoutOfferId;
 		buyerStartingPoint?: BuyerStartingPoint;
 		checkoutCtaId?: CheckoutCtaId;
 		fulfillmentTrack?: FulfillmentTrack;
@@ -328,6 +491,7 @@ export async function grantProductAccessFromStripeHandler(
 		stripeCheckoutSessionId: args.stripeCheckoutSessionId,
 		stripePaymentIntentId: args.stripePaymentIntentId,
 		capabilities: args.capabilities,
+		checkoutOfferId: args.checkoutOfferId,
 		buyerStartingPoint: args.buyerStartingPoint,
 		checkoutCtaId: args.checkoutCtaId,
 		fulfillmentTrack: args.fulfillmentTrack,

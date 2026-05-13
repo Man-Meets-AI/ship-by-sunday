@@ -1,6 +1,10 @@
 import JSZip from "jszip";
 import { createCompleteProjectDefinition } from "../src";
-import { isExcludedSnapshotPath } from "../src/repo-generation/repo-download-source-contract";
+import {
+	isExcludedSnapshotPath,
+	starterSnapshotForbiddenFilePaths,
+	starterSnapshotForbiddenPathPrefixes,
+} from "../src/repo-generation/repo-download-source-contract";
 import { buildOperatingPackPaths } from "../src/repo-generation/render-starter-operating-pack";
 import { buildReviewDownloadZip } from "../src/server";
 
@@ -30,6 +34,17 @@ describe("review download zip", () => {
 			const relativePath = entry.replace(/^ship-by-sunday-os\//, "");
 			return isExcludedSnapshotPath(relativePath, allowedGeneratedPaths);
 		});
+		const starterLeakageEntries = entries.filter((entry) => {
+			const relativePath = entry.replace(/^ship-by-sunday-os\//, "");
+			return (
+				starterSnapshotForbiddenFilePaths.includes(
+					relativePath as (typeof starterSnapshotForbiddenFilePaths)[number],
+				) ||
+				starterSnapshotForbiddenPathPrefixes.some((prefix) =>
+					relativePath.startsWith(prefix),
+				)
+			);
+		});
 
 		expect(entries).toEqual(
 			expect.arrayContaining([
@@ -46,7 +61,14 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/.agents/skills/starter-operating-pack/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/external-skills.json",
 				"ship-by-sunday-os/apps/web/content/docs/index.mdx",
+				"ship-by-sunday-os/apps/web/app/globals.css",
+				"ship-by-sunday-os/apps/web/app/layout.tsx",
+				"ship-by-sunday-os/apps/web/app/page.tsx",
+				"ship-by-sunday-os/apps/web/app/_content/home-page.ts",
+				"ship-by-sunday-os/apps/web/config/product.ts",
 				"ship-by-sunday-os/apps/web/config/generated-design-system.ts",
+				"ship-by-sunday-os/apps/web/next.config.ts",
+				"ship-by-sunday-os/apps/web/scripts/run-next-build-serialized.mjs",
 				"ship-by-sunday-os/packages/codebase-presentation/package.json",
 				"ship-by-sunday-os/packages/codebase-presentation/src/index.ts",
 				"ship-by-sunday-os/packages/telegram-chat-widget/package.json",
@@ -64,6 +86,9 @@ describe("review download zip", () => {
 		);
 		expect(entries).not.toEqual(
 			expect.arrayContaining([
+				"ship-by-sunday-os/apps/web/app/(workspace)/layout.tsx",
+				"ship-by-sunday-os/apps/web/app/(workspace)/settings/_components/settings-page.tsx",
+				"ship-by-sunday-os/apps/web/app/blog/page.tsx",
 				"ship-by-sunday-os/docs/PLANS.md",
 				"ship-by-sunday-os/docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"ship-by-sunday-os/docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
@@ -71,5 +96,6 @@ describe("review download zip", () => {
 			]),
 		);
 		expect(forbiddenEntries).toEqual([]);
+		expect(starterLeakageEntries).toEqual([]);
 	});
 });

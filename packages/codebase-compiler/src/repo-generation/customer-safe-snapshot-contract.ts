@@ -19,9 +19,99 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 	[
 		{
 			pathPattern: "apps/web/**",
-			shippingMode: "ship-unchanged",
+			shippingMode: "ship-generalized",
 			reason:
-				"Ship the tracked Codebase app by default, then narrow unsafe env, build-output, and machine-local files with explicit exceptions.",
+				"Ship an explicit generated template app instead of the tracked Man Meets AI core app route tree.",
+		},
+		{
+			pathPattern: "apps/web/app/**",
+			shippingMode: "ship-generalized",
+			reason:
+				"Render the generated Starter app shell from intake facts so the customer repo has a runnable app without core-app route dependencies.",
+		},
+		{
+			pathPattern: "apps/web/app/workers/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude the public Workers marketing page from generated Starter repos; Workers is a separate existing-repo product.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/workers/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude protected Worker install, doctor-pass, finding, loop, run, and privacy surfaces from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-setup/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude existing-codebase setup components because they teach local runner pairing for the Workers product.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-doctor-pass/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker doctor-pass components from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-findings/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker findings and approval components from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-support/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker loop, run, and privacy support components from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/_lib/workspace-*",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker workspace read models and runner readiness models from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/app/(workspace)/_components/codex-connection-card/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude core-app Codex account connection UI from generated Starter repos; generated repos should keep AI setup guidance in docs and skills.",
+		},
+		{
+			pathPattern: "apps/web/app/api/workspace/runner/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude workspace runner API routes because local runner pairing and workflow claims belong to Workers, not Starter output.",
+		},
+		{
+			pathPattern: "apps/web/app/api/codex/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude core-app Codex bridge endpoints from generated Starter repos; they are not part of the clean template app contract.",
+		},
+		{
+			pathPattern: "apps/web/convex/workspace.ts",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker workspace Convex state from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/convex/workspace/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker workspace Convex models, validators, and runner state from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/platform/codex/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude core-app Codex server bridge code from generated Starter repos.",
+		},
+		{
+			pathPattern: "packages/local-runner/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude the Worker local runner package from generated Starter repos.",
 		},
 		{
 			pathPattern: "packages/codebase-compiler/**",

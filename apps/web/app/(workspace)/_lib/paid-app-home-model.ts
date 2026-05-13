@@ -1,7 +1,7 @@
 import { routeConfig } from "@/config/product";
 
 export type PaidAppHomePath = {
-	id: "generate-codebase" | "tutorials" | "worker";
+	id: "starter" | "workers";
 	title: string;
 	description: string;
 	href: string;
@@ -9,7 +9,7 @@ export type PaidAppHomePath = {
 };
 
 export type PaidAppHomeSecondaryLink = {
-	id: "settings" | "docs" | "worker-runs";
+	id: "settings" | "worker-runs";
 	label: string;
 	href: string;
 };
@@ -25,31 +25,23 @@ export function buildPaidAppHomeModel(): PaidAppHomeModel {
 	return {
 		title: "Home",
 		description:
-			"Pick the surface you need next. Your purchase unlocks the app hub, codebase generation, tutorials, and Worker setup.",
+			"Pick the product path you need next. Starter owns the generator and lessons. Workers owns existing-repo setup and runs.",
 		paths: [
 			{
-				id: "generate-codebase",
-				title: "Generate Codebase",
+				id: "starter",
+				title: "Starter",
 				description:
-					"Start from a new idea and build the product brief into a repo package.",
-				href: routeConfig.codebase,
-				actionLabel: "Start a new idea",
+					"Start from a new idea, generate the repo package, or use the guided lessons.",
+				href: routeConfig.starterHome,
+				actionLabel: "Open Starter",
 			},
 			{
-				id: "tutorials",
-				title: "Tutorials",
-				description:
-					"Watch the implementation lessons and jump back into the current video library.",
-				href: routeConfig.tutorials,
-				actionLabel: "Watch tutorials",
-			},
-			{
-				id: "worker",
-				title: "Worker",
+				id: "workers",
+				title: "Workers",
 				description:
 					"Install the local Worker and connect an existing repo for doctor passes and runs.",
 				href: routeConfig.workspaceSetup,
-				actionLabel: "Install Worker",
+				actionLabel: "Open Workers",
 			},
 		],
 		secondaryLinks: [
@@ -62,11 +54,6 @@ export function buildPaidAppHomeModel(): PaidAppHomeModel {
 				id: "settings",
 				label: "Settings",
 				href: routeConfig.settings,
-			},
-			{
-				id: "docs",
-				label: "Docs",
-				href: routeConfig.docs,
 			},
 		],
 	};

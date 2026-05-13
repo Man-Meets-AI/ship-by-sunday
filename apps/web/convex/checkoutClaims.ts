@@ -7,6 +7,10 @@ import {
 	type CheckoutCtaId,
 	type FulfillmentTrack,
 } from "../platform/billing/checkout/checkout-intent";
+import {
+	getCheckoutOffer,
+	type CheckoutOfferId,
+} from "../platform/billing/checkout/checkout-offers";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation, internalQuery } from "./_generated/server";
@@ -18,6 +22,7 @@ import {
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 } from "./checkoutIntentValidators";
+import { checkoutOfferIdValidator } from "./checkoutOfferValidators";
 import { requireConvexEnv } from "./env";
 
 const pendingCheckoutClaimStatusValidator = v.union(
@@ -62,6 +67,7 @@ const pendingCheckoutClaimReturnValidator = v.union(
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -142,6 +148,26 @@ export function normalizeCheckoutEmail(email: string) {
 	return email.trim().toLowerCase();
 }
 
+function getCheckoutOfferGrantFields(
+	offerId: CheckoutOfferId | undefined,
+	fallbackFulfillmentTrack?: FulfillmentTrack,
+) {
+	if (!offerId) {
+		return {
+			...(fallbackFulfillmentTrack
+				? { fulfillmentTrack: fallbackFulfillmentTrack }
+				: {}),
+		};
+	}
+
+	const offer = getCheckoutOffer(offerId);
+	return {
+		checkoutOfferId: offerId,
+		capabilities: [...offer.capabilities],
+		fulfillmentTrack: offer.fulfillmentTrack,
+	};
+}
+
 const hostedCheckoutProofTokenIdentifier =
 	"release-proof:hosted-checkout-billing";
 
@@ -169,6 +195,7 @@ export const createCheckoutPurchaseIntent = action({
 		clerkUserId: v.optional(v.string()),
 		checkoutEmail: v.optional(v.string()),
 		checkoutSurface: checkoutSurfaceValidator,
+		offerId: checkoutOfferIdValidator,
 	},
 	returns: checkoutPurchaseIntentCreateResultValidator,
 	handler: async (ctx, args): Promise<CheckoutPurchaseIntentCreateResult> => {
@@ -182,6 +209,7 @@ export const createCheckoutPurchaseIntent = action({
 				clerkUserId: args.clerkUserId,
 				checkoutEmail: args.checkoutEmail,
 				checkoutSurface: args.checkoutSurface,
+				offerId: args.offerId,
 			},
 		);
 	},
@@ -192,6 +220,7 @@ export const createCheckoutPurchaseIntentRecord = internalMutation({
 		clerkUserId: v.optional(v.string()),
 		checkoutEmail: v.optional(v.string()),
 		checkoutSurface: checkoutSurfaceValidator,
+		offerId: checkoutOfferIdValidator,
 	},
 	returns: checkoutPurchaseIntentCreateResultValidator,
 	handler: async (ctx, args) => {
@@ -204,6 +233,7 @@ export const createCheckoutPurchaseIntentRecord = internalMutation({
 				? normalizeCheckoutEmail(checkoutEmail)
 				: undefined,
 			checkoutSurface: args.checkoutSurface,
+			offerId: args.offerId,
 			status: "created",
 			createdAt: now,
 			updatedAt: now,
@@ -328,6 +358,7 @@ export const grantProductAccessForCheckoutSession = internalMutation({
 		stripeCheckoutSessionId: v.string(),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -342,7 +373,7 @@ export const grantProductAccessForCheckoutSession = internalMutation({
 			stripePaymentIntentId: args.stripePaymentIntentId,
 			buyerStartingPoint: args.buyerStartingPoint,
 			checkoutCtaId: args.checkoutCtaId,
-			fulfillmentTrack: args.fulfillmentTrack,
+			...getCheckoutOfferGrantFields(args.offerId, args.fulfillmentTrack),
 		});
 		assertPurchaseIntentFulfilled(
 			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
@@ -484,6 +515,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -513,6 +545,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 				checkoutPurchaseIntentId:
 					args.checkoutPurchaseIntentId ??
 					existingClaim.checkoutPurchaseIntentId,
+				offerId: args.offerId ?? existingClaim.offerId,
 				fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 				stripeEventId: args.stripeEventId,
 				stripeEventType: args.stripeEventType,
@@ -533,6 +566,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 			stripeCustomerId: args.stripeCustomerId,
 			stripePaymentIntentId: args.stripePaymentIntentId,
 			checkoutPurchaseIntentId: args.checkoutPurchaseIntentId,
+			offerId: args.offerId,
 			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			stripeEventId: args.stripeEventId,
 			stripeEventType: args.stripeEventType,
@@ -588,13 +622,19 @@ export const claimPendingCheckoutClaim = internalMutation({
 			};
 		}
 
+		const checkoutIntent = getPendingCheckoutClaimIntentFields(existingClaim);
 		const grantResult = await upsertProductAccessGrant(ctx, {
 			clerkUserId: viewerIdentity.clerkUserId,
 			source: "stripe_checkout",
 			stripeCustomerId: existingClaim.stripeCustomerId,
 			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
-			...getPendingCheckoutClaimIntentFields(existingClaim),
+			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+			checkoutCtaId: checkoutIntent.checkoutCtaId,
+			...getCheckoutOfferGrantFields(
+				existingClaim.offerId,
+				checkoutIntent.fulfillmentTrack,
+			),
 		});
 		assertPurchaseIntentFulfilled(
 			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
@@ -690,13 +730,19 @@ export const repairPaidCheckoutClaim = internalMutation({
 		}
 
 		const now = Date.now();
+		const checkoutIntent = getPendingCheckoutClaimIntentFields(existingClaim);
 		const grantResult = await upsertProductAccessGrant(ctx, {
 			clerkUserId,
 			source: "stripe_checkout",
 			stripeCustomerId: existingClaim.stripeCustomerId,
 			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
-			...getPendingCheckoutClaimIntentFields(existingClaim),
+			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+			checkoutCtaId: checkoutIntent.checkoutCtaId,
+			...getCheckoutOfferGrantFields(
+				existingClaim.offerId,
+				checkoutIntent.fulfillmentTrack,
+			),
 		});
 		assertPurchaseIntentFulfilled(
 			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {

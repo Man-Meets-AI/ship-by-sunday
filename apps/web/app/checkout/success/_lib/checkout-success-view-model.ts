@@ -1,6 +1,11 @@
 import { getSignInRedirectHref, routeConfig } from "@/config/product";
 import { assertNever } from "@/lib/assert";
 import type { CheckoutSessionState } from "@/platform/billing/checkout/checkout-session";
+import {
+	getCheckoutOffer,
+	getCheckoutOfferSuccessPath,
+	type CheckoutOfferId,
+} from "@/platform/billing/checkout/checkout-offers";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";
 
 export type CheckoutProgressState = "complete" | "active" | "pending";
@@ -33,7 +38,6 @@ export type CheckoutViewModel = {
 const homeOpenLabel = workspaceDisplayConfig.openHomeActionLabel;
 const homeNoun = workspaceDisplayConfig.homeNoun;
 const homeRouteStepLabel = workspaceDisplayConfig.firstStepLabel;
-const checkoutWelcomePath = `${routeConfig.appHome}?welcome=checkout`;
 
 type ValidatedFulfillmentRouteModel = {
 	actionHref: string;
@@ -42,9 +46,30 @@ type ValidatedFulfillmentRouteModel = {
 	stepLabel: string;
 };
 
-function getValidatedFulfillmentRouteModel(): ValidatedFulfillmentRouteModel {
+function appendCheckoutWelcome(pathname: string) {
+	return `${pathname}?welcome=checkout`;
+}
+
+function getCheckoutWelcomePath(offerId?: CheckoutOfferId) {
+	return appendCheckoutWelcome(getCheckoutOfferSuccessPath(offerId));
+}
+
+function getValidatedFulfillmentRouteModel(
+	offerId?: CheckoutOfferId,
+): ValidatedFulfillmentRouteModel {
+	if (offerId) {
+		const offer = getCheckoutOffer(offerId);
+		const isWorkers = offerId === "workers";
+		return {
+			actionHref: appendCheckoutWelcome(offer.successPath),
+			openLabel: isWorkers ? "Open Workers setup" : "Open Starter",
+			noun: isWorkers ? "Workers setup" : "Starter home",
+			stepLabel: isWorkers ? "Worker setup" : "Starter home",
+		};
+	}
+
 	return {
-		actionHref: checkoutWelcomePath,
+		actionHref: getCheckoutWelcomePath(),
 		openLabel: homeOpenLabel,
 		noun: homeNoun,
 		stepLabel: homeRouteStepLabel,
@@ -72,7 +97,9 @@ export function getCheckoutViewModel(
 ): CheckoutViewModel {
 	switch (checkoutSessionState.kind) {
 		case "validated": {
-			const fulfillmentRoute = getValidatedFulfillmentRouteModel();
+			const fulfillmentRoute = getValidatedFulfillmentRouteModel(
+				checkoutSessionState.offerId,
+			);
 			return {
 				shellTitle: "Payment received",
 				shellSubtitle: "We’re unlocking your access now.",
@@ -128,6 +155,9 @@ export function getCheckoutViewModel(
 			};
 		}
 		case "sign_in_required": {
+			const checkoutWelcomePath = getCheckoutWelcomePath(
+				checkoutSessionState.offerId,
+			);
 			const signInCheckoutEmail = getCheckoutEmailLabel(
 				checkoutSessionState.checkoutEmail,
 			);
@@ -184,6 +214,9 @@ export function getCheckoutViewModel(
 			};
 		}
 		case "fulfillment_failed": {
+			const checkoutWelcomePath = getCheckoutWelcomePath(
+				checkoutSessionState.offerId,
+			);
 			const checkoutEmail = getCheckoutEmailLabel(
 				checkoutSessionState.checkoutEmail,
 			);
@@ -228,6 +261,9 @@ export function getCheckoutViewModel(
 			};
 		}
 		case "wrong_account": {
+			const checkoutWelcomePath = getCheckoutWelcomePath(
+				checkoutSessionState.offerId,
+			);
 			const wrongAccountCheckoutEmail = getCheckoutEmailLabel(
 				checkoutSessionState.checkoutEmail,
 			);
@@ -277,7 +313,10 @@ export function getCheckoutViewModel(
 				secondaryActionBody: `After switching accounts, return here or use ${homeOpenLabel} to retry the ${homeNoun} gate.`,
 			};
 		}
-		case "payment_pending":
+		case "payment_pending": {
+			const paymentPendingPath = getCheckoutWelcomePath(
+				checkoutSessionState.offerId,
+			);
 			return {
 				shellTitle: "Payment still processing",
 				shellSubtitle:
@@ -311,10 +350,11 @@ export function getCheckoutViewModel(
 					"Do not retry checkout unless Stripe shows the payment failed.",
 				],
 				primaryActionLabel: homeOpenLabel,
-				primaryActionHref: routeConfig.appHome,
+				primaryActionHref: paymentPendingPath,
 				primaryActionBody: `If the handoff already finished in the background, this will take you into the ${homeNoun}. Otherwise it will re-run the ${homeNoun} gate.`,
 				secondaryActionBody: `Use ${homeOpenLabel} once payment settles to retry the ${homeNoun} gate.`,
 			};
+		}
 		case "invalid_session":
 			return {
 				shellTitle: "Checkout session not found",

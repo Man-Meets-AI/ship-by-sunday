@@ -26,8 +26,10 @@ Add these to `.env.local`:
 ```bash
 STRIPE_SECRET_KEY=
 STRIPE_PUBLISHABLE_KEY=
-STRIPE_PRODUCT_ID=
-STRIPE_PRICE_ID=
+STRIPE_STARTER_PRODUCT_ID=
+STRIPE_STARTER_PRICE_ID=
+STRIPE_WORKERS_PRODUCT_ID=
+STRIPE_WORKERS_PRICE_ID=
 STRIPE_WEBHOOK_SECRET=
 CHECKOUT_FULFILLMENT_RETRY_SECRET=
 APP_BASE_URL=
@@ -39,11 +41,13 @@ CLERK_SECRET_KEY=
 
 ## Create the product and price
 
-If you do not already have them, create the Stripe product and default price from the repo:
+If you do not already have them, create the Starter and Workers products and default prices from the repo:
 
 ```bash
 bun run stripe:create-product
 ```
+
+The script prints `STRIPE_STARTER_PRODUCT_ID`, `STRIPE_STARTER_PRICE_ID`, `STRIPE_WORKERS_PRODUCT_ID`, and `STRIPE_WORKERS_PRICE_ID`. Put the test-mode values in `.env.local` and the live-mode values in production Vercel env. Hosted preview and production billing proof require both managed prices. Local checkout can run without them because the app falls back to inline price data for whichever offer is missing a managed price ID.
 
 ## Start dev webhook forwarding
 
@@ -78,7 +82,7 @@ If the listener writes a fresh secret while the app is already running, restart 
 
 Subscribe the Stripe webhook endpoint only to `checkout.session.completed` and `checkout.session.async_payment_succeeded`. Do not use wildcard event subscriptions. The endpoint URL must be exactly `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`; do not add a trailing slash. Use webhook endpoint API version `2023-08-16` or later, or leave the endpoint on an account default that is at least that new, so no-cost Checkout events render correctly. The Convex webhook accepts an unpaid `checkout.session.completed` event without granting access, then waits for the later async success event before fulfilling delayed-payment checkouts.
 
-Before production billing proof, `bun run release:billing:doctor -- --env=production` verifies that the configured Stripe mode, product, price, promotion code, app checkout route, and Stripe Dashboard webhook endpoint all match this contract. Stripe only returns a webhook endpoint signing secret when the endpoint is created, so the doctor verifies that `STRIPE_WEBHOOK_SECRET` is present and shaped like a Stripe signing secret; it cannot compare the saved secret back to Stripe.
+Before production billing proof, `bun run release:billing:doctor -- --env=production` verifies that the configured Stripe mode, Starter price, Workers price, app checkout route, and Stripe Dashboard webhook endpoint all match this contract. Stripe only returns a webhook endpoint signing secret when the endpoint is created, so the doctor verifies that `STRIPE_WEBHOOK_SECRET` is present and shaped like a Stripe signing secret; it cannot compare the saved secret back to Stripe.
 
 ## Use test mode first
 
@@ -88,18 +92,18 @@ Start in a safe sandbox or test-mode environment, get the full handoff working t
 
 ## The handoff architecture
 
-The starter uses this sequence:
+The starter and worker offers use this sequence:
 
-1. buyer calls `POST /api/stripe/checkout` from the public CTA, whether they are signed in or signed out
+1. buyer calls `POST /api/stripe/checkout` from `/starter` or `/workers`, whether they are signed in or signed out
 2. eligible homepage visitors can instead initialize `POST /api/stripe/checkout/express` and pay through Stripe's Express Checkout Element
 3. Stripe hosts checkout or confirms the Express Checkout Session
 4. Stripe returns to `/checkout/success`
 5. Stripe webhook hits Convex HTTP at `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`
 6. Convex verifies the signature, records the Stripe event, queues fulfillment, retries failed or stale queued fulfillment internally, and grants access to the Clerk user that owns the Stripe checkout email
-7. `/checkout/success` retries the same paid-session fulfillment if the webhook is delayed, then sends signed-out buyers to `/sign-in?redirect_url=/home?welcome=checkout`
-8. after Clerk verifies the checkout email with email-code OTP, the buyer lands on `/home?welcome=checkout` and chooses the product path
+7. `/checkout/success` retries the same paid-session fulfillment if the webhook is delayed, then sends signed-out buyers to `/sign-in` with an offer-specific redirect
+8. after Clerk verifies the checkout email with email-code OTP, Starter buyers land on `/starter/home` and Workers buyers land on `/workers/setup`
 
-New Checkout Sessions write the compact `mma_checkout_v1` metadata packet to both Checkout Session metadata and PaymentIntent metadata. The packet carries `app`, `accessProduct`, `checkoutSurface`, `purchaseIntentId`, and the optional `clerkUserId`; do not add `courseSlug`, `buyerStartingPoint`, `checkoutCtaId`, or pre-purchase path intent to new public checkout metadata. Pending checkout claims and legacy checkout intent fields still exist as fallback and audit records. They are not the happy-path customer journey. Checkout purchase intent writes are protected by the server-only fulfillment retry secret and are reconciled when product access is granted from either the webhook worker or the checkout-success recovery path.
+New Checkout Sessions write the compact `mma_checkout_v1` metadata packet to both Checkout Session metadata and PaymentIntent metadata. The packet carries `app`, `accessProduct`, `checkoutSurface`, `purchaseIntentId`, `offerId`, and the optional `clerkUserId`; do not add `courseSlug`, `buyerStartingPoint`, `checkoutCtaId`, or pre-purchase path intent to new public checkout metadata. Pending checkout claims and legacy checkout intent fields still exist as fallback and audit records. They are not the happy-path customer journey. Checkout purchase intent writes are protected by the server-only fulfillment retry secret and are reconciled when product access is granted from either the webhook worker or the checkout-success recovery path.
 
 ## Express Checkout setup
 
@@ -133,7 +137,7 @@ The happy path is:
 3. the webhook grants product access only after Stripe reports the Checkout Session as paid or no-payment-required
 4. signed-out buyers sign in through Clerk email code with the Stripe checkout email locked
 5. `/checkout/success` stops waiting or redirects immediately
-6. the buyer reaches `/home` and then chooses `/generate-codebase`, `/workers/setup`, or `/tutorials`
+6. Starter buyers reach `/starter/home`; Workers buyers reach `/workers/setup`; legacy broad-access buyers can still use `/home` as a recovery hub
 
 ## If this breaks
 

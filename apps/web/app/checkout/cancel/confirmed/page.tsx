@@ -29,14 +29,13 @@ export default function Page() {
 				</CardHeader>
 				<CardContent className="space-y-6">
 					<p className="text-sm text-muted-foreground">
-						You can return to the offer, review the pricing, and restart
-						checkout whenever you are ready. Nothing was charged from this
-						canceled flow.
+						You can return to the offer page and restart checkout whenever you
+						are ready. Nothing was charged from this canceled flow.
 					</p>
 					<div className="rounded-lg border bg-muted/30 p-4">
 						<p className="text-sm font-medium">Next step</p>
 						<p className="mt-2 text-sm text-muted-foreground">
-							Go back to pricing if you still want {productConfig.name}, or
+							Go back to Starter if you still want {productConfig.name}, or
 							return home if you were just checking the offer.
 						</p>
 					</div>
@@ -47,9 +46,7 @@ export default function Page() {
 						variant="secondary"
 						className="min-w-[12rem] justify-center"
 					>
-						<Link href={`${routeConfig.home}${routeConfig.pricingHash}`}>
-							Back to pricing
-						</Link>
+						<Link href={routeConfig.starter}>Back to Starter</Link>
 					</Button>
 					<Button
 						asChild

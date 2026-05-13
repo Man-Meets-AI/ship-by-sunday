@@ -19,6 +19,8 @@ export type BlogContentPageModel = {
 };
 
 const blogMdxModuleLoaders: Record<string, BlogMdxModuleLoader> = {
+	"starter-and-workers-are-different-jobs": () =>
+		import("@/content/blog/starter-and-workers-are-different-jobs.mdx") as Promise<BlogMdxModule>,
 	"the-operating-system-beats-the-prompt": () =>
 		import("@/content/blog/the-operating-system-beats-the-prompt.mdx") as Promise<BlogMdxModule>,
 };

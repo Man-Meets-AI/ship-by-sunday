@@ -6,6 +6,8 @@ import {
 import {
 	buildRepoDownloadTraceIncludes,
 	isExcludedSnapshotPath,
+	starterSnapshotForbiddenFilePaths,
+	starterSnapshotForbiddenPathPrefixes,
 } from "../src/repo-generation/repo-download-source-contract";
 
 describe("customer-safe snapshot contract", () => {
@@ -77,6 +79,54 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
+					pathPattern: "apps/web/app/workers/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/(workspace)/workers/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-doctor-pass/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-findings/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/(workspace)/_components/existing-codebase-support/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/(workspace)/_lib/workspace-*",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/api/workspace/runner/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/app/api/codex/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/convex/workspace.ts",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/convex/workspace/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "apps/web/platform/codex/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
+					pathPattern: "packages/local-runner/**",
+					shippingMode: "exclude",
+				}),
+				expect.objectContaining({
 					pathPattern: "tmp-blog-article.png",
 					shippingMode: "exclude",
 				}),
@@ -86,6 +136,49 @@ describe("customer-safe snapshot contract", () => {
 				}),
 			]),
 		);
+	});
+
+	it("excludes Worker, runner, and Codex bridge paths from generated Starter snapshots", () => {
+		const representativeForbiddenPaths = [
+			"apps/web/app/workers/page.tsx",
+			"apps/web/app/(workspace)/workers/setup/page.tsx",
+			"apps/web/app/(workspace)/_components/existing-codebase-setup/setup-package-runner-command.tsx",
+			"apps/web/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page.tsx",
+			"apps/web/app/(workspace)/_components/existing-codebase-findings/workspace-findings-page.tsx",
+			"apps/web/app/(workspace)/_components/existing-codebase-support/workspace-loops-catalog.tsx",
+			"apps/web/app/(workspace)/_components/codex-connection-card/codex-connection-card.tsx",
+			"apps/web/app/(workspace)/_lib/workspace-setup-readiness-model.ts",
+			"apps/web/app/api/workspace/runner/events/route.ts",
+			"apps/web/app/api/codex/generate/route.ts",
+			"apps/web/convex/workspace.ts",
+			"apps/web/convex/workspace/model.ts",
+			"apps/web/platform/codex/app-server.ts",
+			"packages/local-runner/src/index.ts",
+		];
+
+		expect(starterSnapshotForbiddenPathPrefixes).toEqual(
+			expect.arrayContaining([
+				"apps/web/app/workers/",
+				"apps/web/app/(workspace)/workers/",
+				"apps/web/app/api/workspace/runner/",
+				"apps/web/app/api/codex/",
+				"apps/web/app/(workspace)/_components/existing-codebase-doctor-pass/",
+				"apps/web/app/(workspace)/_components/existing-codebase-findings/",
+				"apps/web/app/(workspace)/_components/existing-codebase-support/",
+				"apps/web/convex/workspace/",
+				"apps/web/platform/codex/",
+				"packages/local-runner/",
+			]),
+		);
+		expect(starterSnapshotForbiddenFilePaths).toEqual(
+			expect.arrayContaining([
+				"apps/web/app/(workspace)/_lib/workspace-setup-readiness-model.ts",
+				"apps/web/convex/workspace.ts",
+			]),
+		);
+		for (const forbiddenPath of representativeForbiddenPaths) {
+			expect(isExcludedSnapshotPath(forbiddenPath)).toBe(true);
+		}
 	});
 
 	it("keeps the shared trace contract aligned with the shipped source files", () => {

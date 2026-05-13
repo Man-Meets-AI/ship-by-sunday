@@ -58,7 +58,7 @@ export function getSafeRedirectPath(rawPath?: string | string[] | null) {
 }
 
 export function getPricingHref() {
-	return `${routeConfig.home}${routeConfig.pricingHash}`;
+	return routeConfig.starter;
 }
 
 export function buildSignInHref({

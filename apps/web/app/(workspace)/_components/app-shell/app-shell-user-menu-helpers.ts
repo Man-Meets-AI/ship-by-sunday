@@ -13,18 +13,16 @@ export function workspaceMenuLinks(pathname: string) {
 			active: isPathPrefixActive(pathname, routeConfig.appHome),
 		},
 		{
-			href: routeConfig.codebase,
-			label: "Generate Codebase",
-			active: isPathPrefixActive(pathname, routeConfig.codebase),
+			href: routeConfig.starterHome,
+			label: "Starter",
+			active:
+				isPathPrefixActive(pathname, routeConfig.starterHome) ||
+				isPathPrefixActive(pathname, routeConfig.codebase) ||
+				isPathPrefixActive(pathname, routeConfig.tutorials),
 		},
 		{
-			href: routeConfig.tutorials,
-			label: "Tutorials",
-			active: isPathPrefixActive(pathname, routeConfig.tutorials),
-		},
-		{
-			href: routeConfig.workers,
-			label: "Worker",
+			href: routeConfig.workspaceSetup,
+			label: "Workers",
 			active: isPathPrefixActive(pathname, routeConfig.workers),
 		},
 		{

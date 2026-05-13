@@ -44,7 +44,7 @@ The starter-owned auth routes are:
 - `/sign-in`: the branded Ship by Sunday passwordless sign-in surface
 - `/session-tasks/reset-password`: the Clerk reset-password task inside the same identity shell
 
-`/sign-up` is not a custom starter sign-up UI in this repo. Direct visits redirect to pricing, and legacy checkout links such as `/sign-up?session_id=...` redirect back to `/checkout/success?session_id=...`.
+`/sign-up` is not a custom starter sign-up UI in this repo. Direct visits redirect to Starter, and legacy checkout links such as `/sign-up?session_id=...` redirect back to `/checkout/success?session_id=...`.
 
 ## Checkout email-code setup
 
@@ -52,7 +52,7 @@ Passwordless sign-in depends on Clerk Dashboard settings, not a new repo env var
 
 - Where: Clerk Dashboard for local, preview, and production Clerk applications.
 - What: enable email address sign-in and turn on **Email verification code**. Leave email verification link off unless you intentionally add a magic-link flow in code. Turn off password sign-up and adding passwords to accounts for the shipped passwordless buyer path. Do not require MFA or Client Trust on buyer sign-in unless you also add the matching second-factor UI.
-- Callback routes: keep the app-owned sign-in URL at `/sign-in`. Immediate post-checkout sign-in uses `/sign-in?redirect_url=/home?welcome=checkout`; the server validates the pending checkout session cookie before locking the email field.
+- Callback routes: keep the app-owned sign-in URL at `/sign-in`. Immediate post-checkout sign-in uses an offer-specific redirect such as `/sign-in?redirect_url=/starter/home?welcome=checkout` or `/sign-in?redirect_url=/workers/setup?welcome=checkout`; the server validates the pending checkout session cookie before locking the email field.
 - Verify: open `/sign-in`, enter a paid-user email, and confirm Clerk sends a one-time code. Then complete a paid test checkout while signed out and confirm checkout success forwards to sign-in with the Stripe checkout email prefilled and locked.
 - Release proof: release personas use email-code Clerk accounts. Browser proof first sends the real email-code challenge through `/sign-in`, then the Playwright Clerk testing helper signs the persona in by email with a short-lived sign-in token so storage state is deterministic; no release proof should fill or require a password field.
 - Missing setup looks like: `/sign-in` cannot send or verify an email code, Clerk returns `factor_not_found` for the email code strategy, or Clerk returns an unsupported second factor/task after OTP verification. The buyer should never be asked for a password in the shipped buyer flow.

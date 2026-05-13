@@ -461,6 +461,7 @@ async function syncProductAccessState({
 					args: {
 						clerkUserId,
 						source: "manual",
+						capabilities: ["generate_codebase", "tutorials"],
 						...(fulfillmentTrack ? { fulfillmentTrack } : {}),
 					},
 					env: {
@@ -530,7 +531,7 @@ function runConvexInternalCommand({
 	env,
 }: {
 	functionName: string;
-	args: Record<string, string>;
+	args: Record<string, unknown>;
 	env: NodeJS.ProcessEnv;
 }) {
 	const convexEnv = withConvexDeploymentEnv(env);

@@ -32,6 +32,10 @@ const serverEnvSchema = z.object({
 	CHECKOUT_FULFILLMENT_RETRY_SECRET: z.string().min(32).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
 	STRIPE_PRODUCT_ID: z.string().min(1).optional(),
+	STRIPE_STARTER_PRICE_ID: z.string().min(1).optional(),
+	STRIPE_STARTER_PRODUCT_ID: z.string().min(1).optional(),
+	STRIPE_WORKERS_PRICE_ID: z.string().min(1).optional(),
+	STRIPE_WORKERS_PRODUCT_ID: z.string().min(1).optional(),
 	STRIPE_PROMOTION_CODE_ID: z.string().min(1).optional(),
 	CODEX_BINARY: z.string().min(1).optional(),
 	CODEX_APP_SERVER_ENABLED: z.string().min(1).optional(),
@@ -87,6 +91,18 @@ export function loadServerEnv() {
 		),
 		STRIPE_PRICE_ID: normalizeEnvValue(process.env.STRIPE_PRICE_ID),
 		STRIPE_PRODUCT_ID: normalizeEnvValue(process.env.STRIPE_PRODUCT_ID),
+		STRIPE_STARTER_PRICE_ID: normalizeEnvValue(
+			process.env.STRIPE_STARTER_PRICE_ID,
+		),
+		STRIPE_STARTER_PRODUCT_ID: normalizeEnvValue(
+			process.env.STRIPE_STARTER_PRODUCT_ID,
+		),
+		STRIPE_WORKERS_PRICE_ID: normalizeEnvValue(
+			process.env.STRIPE_WORKERS_PRICE_ID,
+		),
+		STRIPE_WORKERS_PRODUCT_ID: normalizeEnvValue(
+			process.env.STRIPE_WORKERS_PRODUCT_ID,
+		),
 		STRIPE_PROMOTION_CODE_ID: normalizeEnvValue(
 			process.env.STRIPE_PROMOTION_CODE_ID,
 		),

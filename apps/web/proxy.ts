@@ -13,7 +13,8 @@ const canonicalWorkspaceRoutes = [
 	routeConfig.codebase,
 	routeConfig.review,
 	routeConfig.appHome,
-	routeConfig.workers,
+	routeConfig.starterHome,
+	routeConfig.tutorials,
 	routeConfig.settings,
 	routeConfig.workspaceSetup,
 	routeConfig.workspaceDoctorPass,
@@ -24,10 +25,12 @@ const canonicalWorkspaceRoutes = [
 ] as const;
 
 const compatibilityWorkspaceRoutes = [
+	routeConfig.legacyCodebase,
+	routeConfig.legacyReview,
+	routeConfig.legacyTutorials,
 	routeConfig.execute,
 	routeConfig.mission,
 	routeConfig.artifacts,
-	"/start",
 	"/product",
 	"/design",
 	"/marketing",
@@ -37,6 +40,7 @@ const compatibilityWorkspaceRoutes = [
 const isProtectedRoute = createRouteMatcher([
 	...canonicalWorkspaceRoutes.map((route) => `${route}(.*)`),
 	...compatibilityWorkspaceRoutes.map((route) => `${route}(.*)`),
+	"/start",
 	`${routeConfig.adminImpersonation}(.*)`,
 	"/lesson(.*)",
 ]);

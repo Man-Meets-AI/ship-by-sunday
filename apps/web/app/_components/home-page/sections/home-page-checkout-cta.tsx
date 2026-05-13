@@ -4,8 +4,10 @@ import {
 	CheckoutButton,
 	type CheckoutButtonLoadingLabels,
 } from "@/app/checkout/_components/checkout-button";
+import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 
 type HomePageCheckoutCtaProps = {
+	readonly offerId: CheckoutOfferId;
 	readonly label: string;
 	readonly className?: string;
 	readonly testId?: string;
@@ -15,6 +17,7 @@ type HomePageCheckoutCtaProps = {
 };
 
 export function HomePageCheckoutCta({
+	offerId,
 	label,
 	className,
 	testId,
@@ -24,6 +27,7 @@ export function HomePageCheckoutCta({
 }: HomePageCheckoutCtaProps) {
 	return (
 		<CheckoutButton
+			offerId={offerId}
 			label={label}
 			className={className}
 			testId={testId}
