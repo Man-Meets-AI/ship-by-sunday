@@ -44,16 +44,11 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
-vi.mock(
-	"@/app/(protected)/_components/app-shell/app-shell-theme-toggle",
-	() => ({
-		AppShellThemeToggle: () => (
-			<button type="button" aria-label="Toggle theme" />
-		),
-	}),
-);
+vi.mock("@/app/(app)/_components/app-shell/app-shell-theme-toggle", () => ({
+	AppShellThemeToggle: () => <button type="button" aria-label="Toggle theme" />,
+}));
 
-vi.mock("@/app/(protected)/_components/app-shell/app-shell-user-menu", () => ({
+vi.mock("@/app/(app)/_components/app-shell/app-shell-user-menu", () => ({
 	AppShellUserMenu: () => (
 		<button type="button" aria-label="Open account menu" />
 	),
@@ -104,11 +99,11 @@ vi.mock("@/components/ui/navigation-menu", () => ({
 
 globalThis.React = React;
 
-import { AppShell } from "@/app/(protected)/_components/app-shell";
+import { AppShell } from "@/app/(app)/_components/app-shell";
 import type {
 	AppShellLocalNav,
 	AppShellPrimaryNav,
-} from "@/app/(protected)/_components/app-shell/app-shell-props";
+} from "@/app/(app)/_components/app-shell/app-shell-props";
 
 const codebaseStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
@@ -196,6 +191,7 @@ describe("AppShell", () => {
 		expect(markup).toContain('data-shell-local-nav-kind="codebase"');
 		expect(markup).toContain("Compact codebase rail");
 		expect(markup).toContain("Desktop codebase rail");
+		expect(markup).not.toContain('aria-label="Billing attention"');
 		expect(markup).toContain(
 			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:pr-2",
 		);
@@ -217,6 +213,36 @@ describe("AppShell", () => {
 		expect(markup).toContain('href="/starter/generate-codebase"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
+	});
+
+	it("renders a non-dismissible billing attention banner when supplied", () => {
+		const markup = renderAppShell(
+			<AppShell
+				showSkillRail={false}
+				primaryNav={primaryNav}
+				billingAttention={{
+					title: "Payment needs attention",
+					message:
+						"Workers access stays active during the retry window. Update the payment method to keep the workspace current.",
+					statusLabel: "past_due",
+					action: {
+						label: "Manage billing",
+						href: "/billing",
+					},
+				}}
+			>
+				<div>Body</div>
+			</AppShell>,
+		);
+
+		expect(markup).toContain('aria-label="Billing attention"');
+		expect(markup).toContain("Payment needs attention");
+		expect(markup).toContain("Workers access stays active");
+		expect(markup).toContain("past_due");
+		expect(markup).toContain('href="/billing"');
+		expect(markup).toContain("Manage billing");
+		expect(markup).not.toContain("Dismiss");
+		expect(markup).not.toContain("Snooze");
 	});
 
 	it("lets app surfaces opt into page scrolling without the fixed viewport shell", () => {

@@ -1,20 +1,20 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div data-product-shell="true">{children}</div>
 	),
 }));
 
 vi.mock(
-	"@/app/(protected)/_components/codex-connection-card/codex-connection-card",
+	"@/app/(app)/_components/codex-connection-card/codex-connection-card",
 	() => ({
 		CodexConnectionCard: () => <div data-codex-card="true">Codex</div>,
 	}),
 );
 
-vi.mock("@/app/(protected)/_components/settings-account-card", () => ({
+vi.mock("@/app/(app)/_components/settings-account-card", () => ({
 	SettingsAccountCard: () => (
 		<div data-settings-account-card="true">Account</div>
 	),
@@ -22,7 +22,7 @@ vi.mock("@/app/(protected)/_components/settings-account-card", () => ({
 
 globalThis.React = React;
 
-import { SettingsPage } from "@/app/(protected)/settings/_components/settings-page";
+import { SettingsPage } from "@/app/(app)/settings/_components/settings-page";
 
 describe("SettingsPage", () => {
 	it("includes Codex and account cards", () => {

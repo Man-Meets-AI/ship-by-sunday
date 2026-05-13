@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import IdentityLayout from "@/app/(identity)/layout";
+import IdentityLayout from "@/app/(auth)/layout";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -32,7 +32,7 @@ vi.mock("@clerk/nextjs", () => ({
 		taskResetPasswordMock(props),
 }));
 
-import ResetPasswordPage from "@/app/(identity)/session-tasks/reset-password/page";
+import ResetPasswordPage from "@/app/(auth)/session-tasks/reset-password/page";
 
 describe("reset-password route", () => {
 	it("keeps the Clerk task inside the refreshed identity shell", async () => {

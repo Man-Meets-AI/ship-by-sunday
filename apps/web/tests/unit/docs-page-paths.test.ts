@@ -7,7 +7,7 @@ import {
 	getDocsPagePath,
 	getDocsPageSegments,
 	getDocsSourcePath,
-} from "@/app/docs/_lib/page-paths";
+} from "@/app/(marketing)/docs/_lib/page-paths";
 
 describe("docs page paths", () => {
 	it("builds public route segments and source paths for docs pages", () => {

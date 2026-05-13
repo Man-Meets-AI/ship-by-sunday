@@ -6,7 +6,7 @@ import {
 	incidentSourceValues,
 	incidentStatusValues,
 	incidentSurfaceValues,
-} from "../../lib/observability/incident";
+} from "../../src/lib/observability/incident";
 
 export const observabilitySourceValidator = v.union(
 	v.literal("next_server"),

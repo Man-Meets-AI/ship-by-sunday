@@ -71,5 +71,5 @@ Use local `bunx convex deploy --dry-run -y` for validation while preparing relea
 ## Safeguards
 
 - Treat product access and lesson progress as production state.
-- Prefer adding tests around pure domain helpers in `lib/course/lesson/model/` before refactoring Convex behavior.
+- Prefer adding tests around pure domain helpers in `src/lib/course/lesson/model/` before refactoring Convex behavior.
 - If a change affects auth, purchase, or access gating, run `bun run check` before closing it.

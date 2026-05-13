@@ -6,7 +6,7 @@ import {
 } from "../../../../packages/codebase-compiler/src";
 import { v } from "convex/values";
 
-import { PRODUCT_APP_ID } from "../../config/product";
+import { PRODUCT_APP_ID } from "../../src/config/product";
 import { requireGeneratedCodebaseProductAccess } from "../access/model";
 import type {
 	CodebaseMutationCtx,

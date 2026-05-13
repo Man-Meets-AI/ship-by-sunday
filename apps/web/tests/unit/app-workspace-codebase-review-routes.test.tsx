@@ -24,7 +24,7 @@ vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
-vi.mock("@/app/(protected)/_server/load-workspace-page-access", () => ({
+vi.mock("@/app/(app)/_server/load-workspace-page-access", () => ({
 	loadWorkspacePageAccess: loadWorkspacePageAccessMock,
 }));
 
@@ -32,37 +32,31 @@ vi.mock("next/navigation", () => ({
 	redirect: redirectMock,
 }));
 
-vi.mock(
-	"@/app/(protected)/_components/access-required/access-required-page",
-	() => ({
-		AccessRequiredPage: () => <div>Access recovery</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
+}));
 
-vi.mock("@/app/(protected)/_components/codebase-flow/codebase-page", () => ({
+vi.mock("@/app/(app)/_components/codebase-flow/codebase-page", () => ({
 	CodebasePage: () => <div>Codebase workspace</div>,
 }));
 
 vi.mock(
-	"@/app/(protected)/generate-codebase/review/_components/codebase-review-page",
+	"@/app/(app)/generate-codebase/review/_components/codebase-review-page",
 	() => ({
 		CodebaseReviewPage: () => <div>Review workspace</div>,
 	}),
 );
 
 vi.mock(
-	"@/app/(protected)/_components/existing-codebase-setup/existing-codebase-setup-page",
+	"@/app/(app)/_components/existing-codebase-setup/existing-codebase-setup-page",
 	() => ({
 		ExistingCodebaseSetupPage: () => <div>Existing codebase setup</div>,
 	}),
 );
 
-vi.mock(
-	"@/app/(protected)/_components/paid-app-home/paid-app-home-page",
-	() => ({
-		PaidAppHomePage: () => <div>Paid app home</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/paid-app-home/paid-app-home-page", () => ({
+	PaidAppHomePage: () => <div>Paid app home</div>,
+}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -114,7 +108,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(protected)/starter/generate-codebase/page");
+			await import("@/app/(app)/starter/generate-codebase/page");
 
 		const markup = renderToStaticMarkup(await CodebaseRoutePage());
 
@@ -133,7 +127,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: ReviewRoutePage } =
-			await import("@/app/(protected)/starter/generate-codebase/review/page");
+			await import("@/app/(app)/starter/generate-codebase/review/page");
 
 		const markup = renderToStaticMarkup(
 			await ReviewRoutePage({
@@ -156,7 +150,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: SetupRoutePage } =
-			await import("@/app/(protected)/workers/setup/page");
+			await import("@/app/(app)/workers/setup/page");
 
 		const markup = renderToStaticMarkup(await SetupRoutePage());
 
@@ -176,7 +170,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(protected)/starter/generate-codebase/page");
+			await import("@/app/(app)/starter/generate-codebase/page");
 
 		const markup = renderToStaticMarkup(await CodebaseRoutePage());
 
@@ -205,7 +199,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: ReviewRoutePage } =
-			await import("@/app/(protected)/starter/generate-codebase/review/page");
+			await import("@/app/(app)/starter/generate-codebase/review/page");
 
 		const markup = renderToStaticMarkup(
 			await ReviewRoutePage({
@@ -243,7 +237,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: SetupRoutePage } =
-			await import("@/app/(protected)/workers/setup/page");
+			await import("@/app/(app)/workers/setup/page");
 
 		const markup = renderToStaticMarkup(await SetupRoutePage());
 
@@ -269,8 +263,7 @@ describe("workspace codebase, review, and setup routes", () => {
 			},
 		});
 
-		const { default: HomeRoutePage } =
-			await import("@/app/(protected)/home/page");
+		const { default: HomeRoutePage } = await import("@/app/(app)/home/page");
 
 		const markup = renderToStaticMarkup(
 			await HomeRoutePage({
@@ -292,8 +285,7 @@ describe("workspace codebase, review, and setup routes", () => {
 			},
 		});
 
-		const { default: HomeRoutePage } =
-			await import("@/app/(protected)/home/page");
+		const { default: HomeRoutePage } = await import("@/app/(app)/home/page");
 
 		const markup = renderToStaticMarkup(
 			await HomeRoutePage({
@@ -317,7 +309,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: SetupRoutePage } =
-			await import("@/app/(protected)/workers/setup/page");
+			await import("@/app/(app)/workers/setup/page");
 
 		await expect(SetupRoutePage()).rejects.toThrow("redirect:/home");
 		expect(fetchAuthenticatedMutationMock).not.toHaveBeenCalled();
@@ -337,7 +329,7 @@ describe("workspace codebase, review, and setup routes", () => {
 		});
 
 		const { default: CodebaseRoutePage } =
-			await import("@/app/(protected)/starter/generate-codebase/page");
+			await import("@/app/(app)/starter/generate-codebase/page");
 
 		await expect(CodebaseRoutePage()).rejects.toThrow("redirect:/home");
 		expect(fetchAuthenticatedQueryMock).not.toHaveBeenCalled();
@@ -346,9 +338,9 @@ describe("workspace codebase, review, and setup routes", () => {
 
 	it("redirects legacy codebase routes to Starter codebase routes", async () => {
 		const { default: LegacyCodebasePage } =
-			await import("@/app/(protected)/generate-codebase/page");
+			await import("@/app/(app)/generate-codebase/page");
 		const { default: LegacyReviewPage } =
-			await import("@/app/(protected)/generate-codebase/review/page");
+			await import("@/app/(app)/generate-codebase/review/page");
 
 		expect(() => LegacyCodebasePage()).toThrow(
 			"redirect:/starter/generate-codebase",

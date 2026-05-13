@@ -2,8 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceFindingDocument } from "@/app/(protected)/_lib/workspace-findings-read-model";
-import type { WorkspaceRunHistoryState } from "@/app/(protected)/_lib/workspace-support-read-model";
+import type { WorkspaceFindingDocument } from "@/app/(app)/_lib/workspace-findings-read-model";
+import type { WorkspaceRunHistoryState } from "@/app/(app)/_lib/workspace-support-read-model";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -20,7 +20,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -35,7 +35,7 @@ vi.mock("@/app/(protected)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceLoopsPage } from "@/app/(protected)/_components/existing-codebase-support/workspace-loops-page";
+import { WorkspaceLoopsPage } from "@/app/(app)/_components/existing-codebase-support/workspace-loops-page";
 
 function createFinding(
 	overrides: Partial<WorkspaceFindingDocument> = {},

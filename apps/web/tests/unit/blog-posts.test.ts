@@ -4,9 +4,9 @@ import { getPublishedBlogContentEntries } from "@/app/_content/public-content-in
 import {
 	getBlogContentLoaderKeys,
 	getBlogContentEntry,
-} from "@/app/blog/_server/blog-content";
-import { normalizeBlogToc } from "@/app/blog/_lib/blog-toc";
-import { getPublishedBlogPostSummaries } from "@/app/blog/_server/blog-posts";
+} from "@/app/(marketing)/blog/_server/blog-content";
+import { normalizeBlogToc } from "@/app/(marketing)/blog/_lib/blog-toc";
+import { getPublishedBlogPostSummaries } from "@/app/(marketing)/blog/_server/blog-posts";
 
 vi.mock("server-only", () => ({}));
 

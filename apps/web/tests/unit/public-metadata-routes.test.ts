@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { buildDocsMetadata } from "@/app/docs/_lib/docs-metadata";
+import { buildDocsMetadata } from "@/app/(marketing)/docs/_lib/docs-metadata";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 

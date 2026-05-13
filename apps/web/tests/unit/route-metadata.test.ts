@@ -41,8 +41,8 @@ vi.mock("@/platform/convex/server-preload", () => ({
 }));
 
 import { metadata as checkoutSuccessMetadata } from "@/app/checkout/success/page";
-import { metadata as resetPasswordMetadata } from "@/app/(identity)/session-tasks/reset-password/page";
-import { metadata as signInMetadata } from "@/app/(identity)/sign-in/[[...sign-in]]/page";
+import { metadata as resetPasswordMetadata } from "@/app/(auth)/session-tasks/reset-password/page";
+import { metadata as signInMetadata } from "@/app/(auth)/sign-in/[[...sign-in]]/page";
 
 function expectNoindexRobots(metadata: { robots?: unknown }) {
 	expect(metadata.robots).toMatchObject({

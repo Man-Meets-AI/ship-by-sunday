@@ -51,7 +51,7 @@
 
 - Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
 - User-facing UI: read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation.
-- Public homepage: read `apps/web/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
+- Public homepage: read `apps/web/src/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Routes, auth, checkout, entitlement, browser proof, or release readiness: read `docs/release-workflow.md` before changing the surface or judging release confidence.
 - Codebase compiler output: read `packages/codebase-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.
@@ -99,11 +99,11 @@ Document all of this when it applies:
 
 The homepage contract is split deliberately:
 
-- `starterConfig.homePage` in `apps/web/config/product.ts` is the control plane.
-- `apps/web/app/_content/home-page.ts` owns copy and assets.
-- `apps/web/app/_lib/home-page-render-model.ts` owns section and CTA behavior.
-- `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx` is the CTA rendering boundary for hero and pricing.
-- `apps/web/app/_lib/home-page-structured-data.ts` must stay truthful to visible sections.
+- `starterConfig.homePage` in `apps/web/src/config/product.ts` is the control plane.
+- `apps/web/src/app/_content/home-page.ts` owns copy and assets.
+- `apps/web/src/app/_lib/home-page-render-model.ts` owns section and CTA behavior.
+- `apps/web/src/app/_components/home-page/sections/home-page-primary-cta.tsx` is the CTA rendering boundary for hero and pricing.
+- `apps/web/src/app/_lib/home-page-structured-data.ts` must stay truthful to visible sections.
 
 Do not re-hardwire checkout into hero or pricing, scatter section gating across multiple components, or leave `FAQPage` or `Product` schema behind when the visible homepage no longer supports them.
 

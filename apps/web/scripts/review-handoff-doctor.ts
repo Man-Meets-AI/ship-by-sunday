@@ -1,4 +1,4 @@
-import { routeConfig } from "../config/product";
+import { routeConfig } from "../src/config/product";
 import {
 	getReviewAutoDownloadHref,
 	REVIEW_ARTIFACT_LABEL,
@@ -10,7 +10,7 @@ import {
 	REVIEW_REDOWNLOAD_LINK_LABEL,
 	REVIEW_SURFACE_LABEL,
 	REVIEW_SURFACE_TITLE,
-} from "../lib/codebase-flow/review-download-handoff";
+} from "../src/lib/codebase-flow/review-download-handoff";
 
 type Check = {
 	label: string;

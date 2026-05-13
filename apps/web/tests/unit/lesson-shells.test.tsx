@@ -15,7 +15,7 @@ vi.mock("next/link", () => ({
 globalThis.React = React;
 
 import { getLessonById } from "@/lib/course/lesson/model";
-import { LessonShellWatch } from "@/app/(protected)/_components/course/lesson/shells";
+import { LessonShellWatch } from "@/app/(app)/_components/course/lesson/shells";
 
 describe("LessonShellWatch", () => {
 	it("renders lesson 2.1 video in the watch shell", () => {

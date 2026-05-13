@@ -6,7 +6,7 @@ Ship by Sunday should feel like a durable operating system for shipping, not a h
 
 The product has two visual modes that must stay aligned:
 
-- The shared app shell and component library use a neutral shadcn-based token system defined in [apps/web/app/globals.css](apps/web/app/globals.css).
+- The shared app shell and component library use a neutral shadcn-based token system defined in [apps/web/src/app/globals.css](apps/web/src/app/globals.css).
 - Marketing illustrations and the docs shell add a warmer Ship by Sunday brand expression on top of that neutral base.
 
 Future UI work should preserve that structure instead of inventing a second app-wide palette.
@@ -73,7 +73,7 @@ Usage rules:
 
 ### Docs theme roles
 
-The docs shell uses `product-*` roles such as `product-bg`, `product-surface`, `product-border`, `product-text`, `product-muted`, and `product-accent` inside [apps/web/app/docs/_styles/docs-theme.css](apps/web/app/docs/_styles/docs-theme.css). Those exact values are not defined in a single obvious source file today.
+The docs shell uses `product-*` roles such as `product-bg`, `product-surface`, `product-border`, `product-text`, `product-muted`, and `product-accent` inside [apps/web/src/app/(marketing)/docs/_styles/docs-theme.css](apps/web/src/app/(marketing)/docs/_styles/docs-theme.css). Those exact values are not defined in a single obvious source file today.
 
 Until those values are centralized, treat the docs palette as an established surface convention but a token-source gap. Future work should map those roles back to a documented source instead of inventing a third palette.
 
@@ -156,7 +156,7 @@ Depth rules:
 
 ### Buttons
 
-Canonical button behavior lives in [apps/web/components/ui/button.tsx](apps/web/components/ui/button.tsx).
+Canonical button behavior lives in [apps/web/src/components/ui/button.tsx](apps/web/src/components/ui/button.tsx).
 
 - Default button:
   - dark/ink fill in light mode
@@ -181,7 +181,7 @@ Canonical button behavior lives in [apps/web/components/ui/button.tsx](apps/web/
 
 ### Inputs and fields
 
-Canonical styling lives in [apps/web/components/ui/input.tsx](apps/web/components/ui/input.tsx), [apps/web/components/ui/textarea.tsx](apps/web/components/ui/textarea.tsx), and [apps/web/lib/clerk-auth-appearance.ts](apps/web/lib/clerk-auth-appearance.ts).
+Canonical styling lives in [apps/web/src/components/ui/input.tsx](apps/web/src/components/ui/input.tsx), [apps/web/src/components/ui/textarea.tsx](apps/web/src/components/ui/textarea.tsx), and [apps/web/src/lib/clerk-auth-appearance.ts](apps/web/src/lib/clerk-auth-appearance.ts).
 
 - Transparent or near-transparent fill
 - Thin border
@@ -191,7 +191,7 @@ Canonical styling lives in [apps/web/components/ui/input.tsx](apps/web/component
 
 ### Cards and panels
 
-Canonical shared card lives in [apps/web/components/ui/card.tsx](apps/web/components/ui/card.tsx).
+Canonical shared card lives in [apps/web/src/components/ui/card.tsx](apps/web/src/components/ui/card.tsx).
 
 - Flat card background
 - `rounded-xl`

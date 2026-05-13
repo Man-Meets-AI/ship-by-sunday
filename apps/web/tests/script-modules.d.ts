@@ -111,6 +111,7 @@ declare module "@/scripts/lib/lesson-video-pipeline.mjs" {
 	};
 
 	export function compareLessonIds(left: string, right: string): number;
+	export const MEDIA_FILE_PATH: string;
 	export function extractLessonDefinitions(source: string): LessonDefinition[];
 	export function extractLessonMediaMap(
 		source: string,

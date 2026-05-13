@@ -1,12 +1,12 @@
-import { getLessonByKey } from "../../lib/course/lesson/model/curriculum";
-import { getLessonHref } from "../../lib/course/lesson/routing/lesson-routes";
-import { getLessonMapHref } from "../../lib/workspace-navigation/lesson-map-href";
+import { getLessonByKey } from "../../src/lib/course/lesson/model/curriculum";
+import { getLessonHref } from "../../src/lib/course/lesson/routing/lesson-routes";
+import { getLessonMapHref } from "../../src/lib/workspace-navigation/lesson-map-href";
 import {
 	COURSE_SLUG,
 	getOrderedBlocks,
 	getStudentFacingLessons,
 	isLessonImplemented,
-} from "../../lib/course/lesson/model/registry";
+} from "../../src/lib/course/lesson/model/registry";
 import {
 	canAccessLesson,
 	isCompatibleLessonState,

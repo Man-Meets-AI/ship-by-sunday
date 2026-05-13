@@ -142,7 +142,7 @@ describe("POST /api/stripe/checkout", () => {
 			url: "https://checkout.stripe.com/pay/cs_guest_123",
 		});
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -209,7 +209,7 @@ describe("POST /api/stripe/checkout", () => {
 			url: "https://checkout.stripe.com/pay/cs_workers_guest_123",
 		});
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest({ offerId: "workers" }));
 		const workersMetadata = {
@@ -282,7 +282,7 @@ describe("POST /api/stripe/checkout", () => {
 			url: "https://checkout.stripe.com/pay/cs_test_123",
 		});
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -358,7 +358,7 @@ describe("POST /api/stripe/checkout", () => {
 		});
 		createSessionMock.mockResolvedValue({ url: null });
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -399,7 +399,7 @@ describe("POST /api/stripe/checkout", () => {
 			),
 		);
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -446,7 +446,7 @@ describe("POST /api/stripe/checkout", () => {
 		});
 
 		const { POST } =
-			await import("../../app/api/stripe/checkout/express/route");
+			await import("../../src/app/api/stripe/checkout/express/route");
 
 		const response = await POST(createRequest());
 

@@ -5,7 +5,7 @@ vi.mock("server-only", () => ({}));
 import {
 	getBlogIndexStructuredData,
 	getBlogPostStructuredData,
-} from "@/app/blog/_lib/blog-structured-data";
+} from "@/app/(marketing)/blog/_lib/blog-structured-data";
 
 const blogPostFixture = {
 	title: "What Ship by Sunday does",
@@ -22,7 +22,7 @@ const blogPostFixture = {
 	href: "/blog/the-operating-system-beats-the-prompt",
 	slug: ["the-operating-system-beats-the-prompt"],
 	sourcePath:
-		"/Users/parkerrex/Projects/ship-by-sunday/apps/web/content/blog/the-operating-system-beats-the-prompt.mdx",
+		"/Users/parkerrex/Projects/ship-by-sunday/apps/web/src/content/blog/the-operating-system-beats-the-prompt.mdx",
 	readingTimeText: "3 min read",
 };
 

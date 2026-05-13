@@ -307,7 +307,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock(
-	"@/app/(protected)/_components/course/mission/components/mission/mission-extras-row",
+	"@/app/(app)/_components/course/mission/components/mission/mission-extras-row",
 	() => ({
 		MissionExtrasRow: () => (
 			<div data-extras-row="true">
@@ -335,7 +335,7 @@ vi.mock("@/components/ui/progress", () => ({
 	}) => <div className={className} data-slot="progress" data-value={value} />,
 }));
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		viewportMode,
@@ -357,7 +357,7 @@ vi.mock("@/app/(protected)/_components/app-shell", () => ({
 
 globalThis.React = React;
 
-import { MissionPage } from "@/app/(protected)/_components/course/mission/components/mission-page";
+import { MissionPage } from "@/app/(app)/_components/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
 	beforeEach(() => {

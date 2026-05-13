@@ -1,0 +1,133 @@
+---
+title: How the Starter Works
+description: Understand the repo shape, starter module flags, the purchase-to-access handoff, and the protected workspace flow before you customize the starter.
+---
+
+# How the Starter Works
+
+This starter is opinionated in one specific way: it gives you the full public-to-paid-to-protected path instead of a landing page plus disconnected example code.
+
+## Locked stack
+
+- App shell: `Next.js`
+- Deployment target: `Vercel`
+- Checkout: `Stripe`
+- Auth: `Clerk`
+- App data and access state: `Convex`
+
+## Repo shape
+
+- `src/app/`: route entrypoints
+- app-private folders and `src/lib/`: product UI, route helpers, and shared domain contracts grouped by owner
+- `src/config/product.ts`: starter contract, branding defaults, route constants, and module flags
+- `src/config/starter-selectors.ts`: starter module selectors plus display config helpers
+- `src/app/(marketing)/docs/_components/`: docs route disabled-state fallback UI
+- `src/app/(app)/_components/workspace-home/`: neutral protected workspace home for starter mode
+- `src/app/(app)/_lib/workspace-home-model.ts`: workspace home model builder
+- `shared/`: config, env helpers, shared providers
+- `src/platform/`: temporary environment parsing and integration adapter compatibility boundary
+- `convex/`: backend functions grouped by domain
+- `src/content/docs/`: shipped public docs for builders
+- `docs/`: contributor docs and engineering references
+
+## Public and protected routes
+
+The runtime splits into clear surfaces:
+
+- public Man Meets AI brand surface on `/`
+- public Starter sales surface on `/starter`
+- public Workers sales surface on `/workers`
+- public docs surface on `/docs` when the docs module is enabled
+- protected Starter Home on `/starter/home`, Generate Codebase on `/starter/generate-codebase`, Starter Lessons on `/starter/lessons`, Worker setup on `/workers/setup`, legacy redirect surfaces at `/generate-codebase`, `/tutorials`, `/start`, `/product`, `/design`, `/marketing`, and `/build-plan`, the customer-facing `Review` surface on `/starter/generate-codebase/review`, optional `/execute` after review unlock, `/home` as a paid recovery hub, and `/settings`
+
+That split matters because checkout and access recovery live between those worlds.
+
+`src/app/(app)/layout.tsx` is the single server-side product-access gate for the protected app routes. Middleware only handles sign-in.
+
+The auth bridge between public and protected surfaces uses three route-group screens:
+
+- `/sign-in` for the branded passwordless sign-in UI
+- `/session-tasks/reset-password` for the Clerk reset-password task inside the same shell
+
+`/sign-up` is not a visible auth product surface in this repo. It redirects to Starter, except legacy checkout session links forward back to `/checkout/success`.
+
+## Starter config and module gating
+
+The starter control plane currently lives in `starterConfig` inside `src/config/product.ts`.
+
+Important module flags:
+
+- `docs`
+- `course`
+- `codex`
+- `observability`
+
+Current behavior:
+
+- if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
+- the canonical Starter buyer flow now uses `/starter/home` as the first paid landing surface and `/starter/generate-codebase/review` as the generated-codebase final handoff; `/generate-codebase`, `/tutorials`, `/start`, and the stage-entry routes stay as compatibility redirects
+- `/mission` and `/lesson/[lessonKey]` act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/starter/generate-codebase/review`
+- the legacy private starter repository invite module has been removed from the customer-visible protected app
+
+These module gates sit above the existing auth, checkout, and access model. They do not replace it.
+
+The public homepage has a second layer of starter configuration inside the same file:
+
+- `starterConfig.homePage.sections` controls the fixed public section order: `productPreview`, `hero`, `execLoop`, `starterSystem`, `durability`, `socialProof`, `programs`, `faq`, `plansMd`, `pricing`, and `footer`
+- `starterConfig.homePage.heroPrimaryCta` and `starterConfig.homePage.pricingPrimaryCta` decide whether those calls to action use checkout or a plain link target
+- `src/app/_lib/home-page-render-model.ts` is the adapter that turns those starter defaults plus `src/app/_content/home-page.ts` into the render contract that `src/app/_components/home-page/home-page.tsx` uses
+
+For the file-by-file operating guide, see [Configure the Homepage](/docs/configure-the-homepage).
+
+## Purchase-to-access flow
+
+1. A buyer starts from `/starter` or `/workers`.
+2. The buyer calls `POST /api/stripe/checkout` from the public CTA, whether they are already signed in or not.
+3. The app stores the pending Stripe Checkout Session ID in a first-party cookie so the handoff can recover if the Stripe return tab is lost.
+4. Stripe hosts the payment flow and returns to `/checkout/success`.
+5. `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
+6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
+7. `/checkout/success` retries the same idempotent fulfillment if the webhook is delayed. For a signed-out buyer, it then sends them to `/sign-in` with the offer-specific destination.
+8. `/sign-in` uses Clerk email-code OTP. When the redirect is the immediate checkout welcome path, it validates the pending Stripe session cookie server-side and locks the email field to the Stripe checkout email.
+9. Once Clerk verifies the email, Starter buyers land on `/starter/home`, Workers buyers land on `/workers/setup`, and legacy broad-access buyers can use `/home` as a recovery hub.
+10. `/starter/generate-codebase/review` is the final Starter handoff surface. It makes one auto-download attempt for the Ship by Sunday Codebase, then leaves the fallback download link visible if the browser blocks the download.
+11. `/mission` and `/lesson/[lessonKey]` now act as the optional post-review bonus library after review unlock, while `/artifacts` still forwards into `/starter/generate-codebase/review`.
+12. Returning users who hit `/` see the Man Meets AI brand page and choose Starter or Workers.
+
+Protected app routes also start from server-fetched codebase-workspace or access data before the client-side Convex subscriptions take over. That avoids a hydration-time auth race where the browser can briefly act signed out even though the server already proved access.
+
+## Review output contract
+
+`/starter/generate-codebase/review` is the customer-facing Review handoff for the codebase-first Starter flow. It is not a manual download dashboard.
+
+On first entry, the page makes one automatic attempt to download the Ship by Sunday Codebase. If the browser blocks that download, the fallback link stays visible so the buyer can fetch it manually.
+
+What the buyer gets:
+
+- one `Ship by Sunday Codebase` zip
+- one repo folder when the zip is unpacked
+- generated Design, Marketing, Build, facts, and prompt materials under repo-root `docs/`
+- generalized starter-safe operator surfaces such as `.agents/`, workflow examples, and `apps/web/.env.production.example`
+
+What the buyer does not get:
+
+- separate Design, Marketing, or Build pack zip downloads
+- raw internal docs like `docs/openai/*` or `docs/ship-by-sunday/*`
+- raw env files, local output, or machine-specific junk
+
+## Why the Clerk `convex` template matters
+
+The server-side Clerk-to-Convex read path is explicitly wired to the Clerk JWT template named `convex`.
+
+If that template is missing or the issuer is wrong, the app can look mostly fine while protected server reads still fail.
+
+## What success looks like
+
+You understand the starter when you can answer these questions without guessing:
+
+- Which route creates the Stripe Checkout Session?
+- Which route handles the Stripe webhook?
+- Which system is the source of truth for product-access grants?
+- Which protected route is the first landing surface, and which surface is the final handoff?
+
+If any of those are fuzzy, do not rewrite the purchase-to-access path yet. Fix your understanding first.

@@ -8,8 +8,8 @@ import {
 	getUploadMetadata,
 	getUploadMetadataList,
 	normalizeChecklistValue,
-} from "@/app/(protected)/_components/course/artifacts/preview/artifact-value-codecs";
-import { formatArtifactValue } from "@/app/(protected)/_components/course/artifacts/preview/artifact-value-format";
+} from "@/app/(app)/_components/course/artifacts/preview/artifact-value-codecs";
+import { formatArtifactValue } from "@/app/(app)/_components/course/artifacts/preview/artifact-value-format";
 
 describe("artifact preview formatting", () => {
 	it("coerces table rows to the declared column count", () => {

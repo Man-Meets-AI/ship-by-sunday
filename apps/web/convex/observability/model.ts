@@ -9,9 +9,9 @@ import type {
 	IncidentSeverity,
 	IncidentSource,
 	IncidentSurface,
-} from "../../lib/observability/incident";
-import { normalizeIncidentEvent as createNormalizedIncidentEvent } from "../../lib/observability/incident";
-import { renderIncidentMessage } from "../../lib/observability/telegram/render-incident-message";
+} from "../../src/lib/observability/incident";
+import { normalizeIncidentEvent as createNormalizedIncidentEvent } from "../../src/lib/observability/incident";
+import { renderIncidentMessage } from "../../src/lib/observability/telegram/render-incident-message";
 import { requireConvexEnv } from "../env";
 
 const DELIVERY_COOLDOWN_MS = 5 * 60 * 1_000;

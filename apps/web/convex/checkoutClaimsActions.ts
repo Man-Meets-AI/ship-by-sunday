@@ -3,13 +3,13 @@
 import Stripe from "stripe";
 import { v } from "convex/values";
 
-import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
-import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
+import { apiConfig, PRODUCT_COURSE_SLUG } from "../src/config/product";
+import { readCheckoutIntentFromMetadata } from "../src/platform/billing/checkout/checkout-intent";
 import {
 	isPaidAppCheckoutMetadata,
 	readCheckoutMetadataClerkUserId,
 	readCheckoutPurchaseMetadata,
-} from "../platform/billing/checkout/checkout-metadata";
+} from "../src/platform/billing/checkout/checkout-metadata";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalAction } from "./_generated/server";

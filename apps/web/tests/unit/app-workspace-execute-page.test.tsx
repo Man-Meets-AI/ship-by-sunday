@@ -47,12 +47,9 @@ vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
-vi.mock(
-	"@/app/(protected)/_components/access-required/access-required-page",
-	() => ({
-		AccessRequiredPage: () => <div>Access recovery</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
+}));
 
 describe("workspace execute route", () => {
 	beforeEach(() => {
@@ -75,7 +72,7 @@ describe("workspace execute route", () => {
 		});
 
 		const { default: ExecuteRoutePage } =
-			await import("@/app/(protected)/execute/page");
+			await import("@/app/(app)/execute/page");
 
 		const markup = renderToStaticMarkup(await ExecuteRoutePage());
 
@@ -99,7 +96,7 @@ describe("workspace execute route", () => {
 		});
 
 		const { default: ExecuteRoutePage } =
-			await import("@/app/(protected)/execute/page");
+			await import("@/app/(app)/execute/page");
 
 		await expect(ExecuteRoutePage()).rejects.toThrowError(
 			"NEXT_REDIRECT:/starter/generate-codebase/review",
@@ -135,7 +132,7 @@ describe("workspace execute route", () => {
 		});
 
 		const { default: ExecuteRoutePage } =
-			await import("@/app/(protected)/execute/page");
+			await import("@/app/(app)/execute/page");
 
 		await expect(ExecuteRoutePage()).rejects.toThrowError(
 			`NEXT_REDIRECT:${getLessonHref("iterate-the-product-with-ai")}`,

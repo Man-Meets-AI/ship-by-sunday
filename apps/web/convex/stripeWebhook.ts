@@ -3,18 +3,18 @@
 import Stripe from "stripe";
 import { v } from "convex/values";
 
-import { apiConfig } from "../config/product";
-import { normalizeIncidentEvent } from "../lib/observability/incident";
+import { apiConfig } from "../src/config/product";
+import { normalizeIncidentEvent } from "../src/lib/observability/incident";
 import {
 	buildStripeWebhookResultIncidentEvent,
 	getStripeModeLabelFromSecretKey,
-} from "../lib/observability/stripe-webhook-incident";
-import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
+} from "../src/lib/observability/stripe-webhook-incident";
+import { readCheckoutIntentFromMetadata } from "../src/platform/billing/checkout/checkout-intent";
 import {
 	isPaidAppCheckoutMetadata,
 	readCheckoutPurchaseMetadata,
 	readCheckoutMetadataClerkUserId,
-} from "../platform/billing/checkout/checkout-metadata";
+} from "../src/platform/billing/checkout/checkout-metadata";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";

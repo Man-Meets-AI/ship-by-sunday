@@ -19,16 +19,13 @@ vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: fetchAuthenticatedQueryMock,
 }));
 
-vi.mock("@/app/(protected)/_server/load-workspace-page-access", () => ({
+vi.mock("@/app/(app)/_server/load-workspace-page-access", () => ({
 	loadWorkspacePageAccess: loadWorkspacePageAccessMock,
 }));
 
-vi.mock(
-	"@/app/(protected)/_components/access-required/access-required-page",
-	() => ({
-		AccessRequiredPage: () => <div>Access recovery</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
+}));
 
 vi.mock("next/navigation", () => ({
 	notFound: () => notFoundMock(),
@@ -50,7 +47,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		showSkillRail,
@@ -61,7 +58,7 @@ vi.mock("@/app/(protected)/_components/app-shell", () => ({
 }));
 
 vi.mock(
-	"@/app/(protected)/_components/course/lesson/shells/lesson-shell-watch",
+	"@/app/(app)/_components/course/lesson/shells/lesson-shell-watch",
 	() => ({
 		LessonShellWatch: ({
 			lesson,
@@ -100,7 +97,7 @@ describe("workspace tutorial routes", () => {
 
 	it("renders the Tutorial Videos index without Convex server calls", async () => {
 		const { default: TutorialsPage } =
-			await import("@/app/(protected)/starter/lessons/page");
+			await import("@/app/(app)/starter/lessons/page");
 
 		const markup = renderToStaticMarkup(await TutorialsPage());
 
@@ -113,7 +110,7 @@ describe("workspace tutorial routes", () => {
 
 	it("renders tutorial detail pages without generated-codebase progress chrome", async () => {
 		const { default: TutorialVideoRoute } =
-			await import("@/app/(protected)/starter/lessons/[lessonKey]/page");
+			await import("@/app/(app)/starter/lessons/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await TutorialVideoRoute({
@@ -139,7 +136,7 @@ describe("workspace tutorial routes", () => {
 			kind: "access_required",
 		});
 		const { default: TutorialVideoRoute } =
-			await import("@/app/(protected)/starter/lessons/[lessonKey]/page");
+			await import("@/app/(app)/starter/lessons/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await TutorialVideoRoute({
@@ -155,7 +152,7 @@ describe("workspace tutorial routes", () => {
 
 	it("returns not found for unknown tutorial lesson segments", async () => {
 		const { default: TutorialVideoRoute } =
-			await import("@/app/(protected)/starter/lessons/[lessonKey]/page");
+			await import("@/app/(app)/starter/lessons/[lessonKey]/page");
 
 		await expect(
 			TutorialVideoRoute({
@@ -168,9 +165,9 @@ describe("workspace tutorial routes", () => {
 
 	it("redirects legacy tutorials routes to Starter lessons routes", async () => {
 		const { default: LegacyTutorialsPage } =
-			await import("@/app/(protected)/tutorials/page");
+			await import("@/app/(app)/tutorials/page");
 		const { default: LegacyTutorialVideoRoute } =
-			await import("@/app/(protected)/tutorials/[lessonKey]/page");
+			await import("@/app/(app)/tutorials/[lessonKey]/page");
 
 		expect(() => LegacyTutorialsPage()).toThrow("redirect:/starter/lessons");
 		await expect(

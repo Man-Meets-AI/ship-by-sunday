@@ -6,19 +6,19 @@ import {
 	type BuyerStartingPoint,
 	type CheckoutCtaId,
 	type FulfillmentTrack,
-} from "../../platform/billing/checkout/checkout-intent";
+} from "../../src/platform/billing/checkout/checkout-intent";
 import {
 	productSurfaceCapabilities,
 	resolveProductSurfaceCapabilities,
 	type ProductSurfaceCapability,
-} from "../../platform/access/product-surface-capabilities";
+} from "../../src/platform/access/product-surface-capabilities";
 import {
 	getCheckoutOffer,
 	getCheckoutOfferCapabilities,
 	getCheckoutOfferIdForLegacyFulfillmentTrack,
 	readCheckoutOfferId,
 	type CheckoutOfferId,
-} from "../../platform/billing/checkout/checkout-offers";
+} from "../../src/platform/billing/checkout/checkout-offers";
 import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,

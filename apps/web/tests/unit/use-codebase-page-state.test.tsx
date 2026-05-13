@@ -16,7 +16,7 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 import { api } from "@/convex/_generated/api";
-import { useCodebasePageState } from "@/app/(protected)/_hooks/codebase-flow/use-codebase-page-state";
+import { useCodebasePageState } from "@/app/(app)/_hooks/codebase-flow/use-codebase-page-state";
 
 type SaveProjectDefinitionFactsMock = ReactMutation<
 	typeof api.codebase.saveProjectDefinitionFacts

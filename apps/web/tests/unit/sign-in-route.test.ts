@@ -18,7 +18,7 @@ vi.mock("@/platform/auth/clerk-middleware-bypass", () => ({
 	shouldBypassClerkProtection: () => shouldBypassClerkProtectionMock(),
 }));
 
-vi.mock("@/app/(identity)/_components/sign-in-page", () => ({
+vi.mock("@/app/(auth)/_components/sign-in-page", () => ({
 	SignInPage: (props: unknown) => {
 		signInPageMock(props);
 		return null;
@@ -30,7 +30,7 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 		getValidatedPendingCheckoutEmailFromCookieMock(),
 }));
 
-import Page from "@/app/(identity)/sign-in/[[...sign-in]]/page";
+import Page from "@/app/(auth)/sign-in/[[...sign-in]]/page";
 
 describe("sign-in route", () => {
 	beforeEach(() => {

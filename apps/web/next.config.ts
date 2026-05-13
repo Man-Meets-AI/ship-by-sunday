@@ -2,7 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { withPostHogConfig } from "@posthog/nextjs-config";
-import { repoDownloadTraceIncludes } from "./config/vercel-output-tracing";
+import { repoDownloadTraceIncludes } from "./src/config/vercel-output-tracing";
 
 const withMDX = createMDX({
 	options: {
@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
 	turbopack: {
 		ignoreIssue: [
 			{
-				path: "**/platform/codex/app-server.ts",
+				path: "**/src/platform/codex/app-server.ts",
 			},
 		],
 	},

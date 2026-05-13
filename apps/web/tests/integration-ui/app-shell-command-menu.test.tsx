@@ -10,9 +10,9 @@ import {
 	type Mock,
 } from "vitest";
 
-import { AppShellCommandMenu } from "@/app/(protected)/_components/app-shell/app-shell-command-menu";
-import type { AppShellPrimaryNav } from "@/app/(protected)/_components/app-shell/app-shell-props";
-import { resetAppShellPreferencesForTests } from "@/app/(protected)/_components/app-shell/app-shell-preferences-store";
+import { AppShellCommandMenu } from "@/app/(app)/_components/app-shell/app-shell-command-menu";
+import type { AppShellPrimaryNav } from "@/app/(app)/_components/app-shell/app-shell-props";
+import { resetAppShellPreferencesForTests } from "@/app/(app)/_components/app-shell/app-shell-preferences-store";
 
 const pushMock = vi.fn();
 const setThemeMock = vi.fn();

@@ -16,7 +16,7 @@ import {
 	getCurrentAdminImpersonationAuthority,
 	resolveAdminImpersonationTarget,
 	searchAdminImpersonationCustomers,
-} from "@/app/admin/impersonation/_server/admin-impersonation-server";
+} from "@/app/(app)/admin/impersonation/_server/admin-impersonation-server";
 
 function createClerkUser(input: {
 	id: string;

@@ -16,7 +16,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-import { DocsModuleDisabledState } from "@/app/docs/_components/docs-module-disabled-state";
+import { DocsModuleDisabledState } from "@/app/(marketing)/docs/_components/docs-module-disabled-state";
 
 describe("DocsModuleDisabledState", () => {
 	it("renders the docs disabled fallback with a home action", () => {

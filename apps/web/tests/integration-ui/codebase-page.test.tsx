@@ -72,7 +72,7 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		title,
 		children,
@@ -282,7 +282,7 @@ vi.mock("@/components/ui/toggle-group", () => {
 });
 
 vi.mock(
-	"@/app/(protected)/_components/course/lesson/components/lesson-video-player",
+	"@/app/(app)/_components/course/lesson/components/lesson-video-player",
 	() => ({
 		LessonVideoPlayer: ({ title }: { title?: string }) => (
 			<div data-testid="codebase-page-video-player">
@@ -292,7 +292,7 @@ vi.mock(
 	}),
 );
 
-import { CodebasePage } from "@/app/(protected)/_components/codebase-flow/codebase-page";
+import { CodebasePage } from "@/app/(app)/_components/codebase-flow/codebase-page";
 
 describe("CodebasePage", () => {
 	beforeEach(() => {

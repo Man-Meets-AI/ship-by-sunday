@@ -39,8 +39,8 @@ vi.mock("sonner", () => ({
 	},
 }));
 
-import { doctorPassDetailsPanelId } from "@/app/(protected)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-panels";
-import { WorkspaceDoctorPassToastWatcher } from "@/app/(protected)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-toast-watcher";
+import { doctorPassDetailsPanelId } from "@/app/(app)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-panels";
+import { WorkspaceDoctorPassToastWatcher } from "@/app/(app)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-toast-watcher";
 
 function createDoctorPassRun(overrides: Record<string, unknown> = {}) {
 	return {

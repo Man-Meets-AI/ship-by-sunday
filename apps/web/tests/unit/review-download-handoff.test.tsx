@@ -13,7 +13,7 @@ import {
 	getReviewAutoDownloadHref,
 	isReviewAutoDownloadEnabled,
 } from "@/lib/codebase-flow/review-download-handoff";
-import { useReviewDownloadHandoff } from "@/app/(protected)/generate-codebase/review/_hooks/use-review-download-handoff";
+import { useReviewDownloadHandoff } from "@/app/(app)/generate-codebase/review/_hooks/use-review-download-handoff";
 
 describe("review download handoff", () => {
 	afterEach(() => {

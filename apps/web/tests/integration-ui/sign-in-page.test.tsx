@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import IdentityLayout from "@/app/(identity)/layout";
+import IdentityLayout from "@/app/(auth)/layout";
 
 const replaceMock = vi.fn();
 const pushMock = vi.fn();
@@ -73,7 +73,7 @@ vi.mock("@/components/ui/input-otp", () => ({
 	),
 }));
 
-import { SignInPage } from "@/app/(identity)/_components/sign-in-page";
+import { SignInPage } from "@/app/(auth)/_components/sign-in-page";
 
 type TestClerkError = { code?: string; message?: string } | null;
 

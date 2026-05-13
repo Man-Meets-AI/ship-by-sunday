@@ -50,7 +50,7 @@ Plain-English framing: this began as four landing pages, but each page points at
 
 The sibling template has the architecture this Program wants to adopt: `src/app/(marketing)`, `src/app/(auth)`, `src/app/(app)`, explicit `api/` integration routes, `src/components/app`, `src/components/layout`, `src/components/providers`, `src/lib/{analytics,app,auth,billing,convex,email,env,sentry}`, `src/emails`, and small Convex domain modules. Its docs define crisp ownership: Next.js owns routes and integration endpoints, Convex owns product data/domain/authorization, Clerk owns identity, Stripe owns checkout/portal/subscription lifecycle, Resend owns transactional email, PostHog owns product analytics, and Sentry owns errors/tracing.
 
-The current app has useful production logic, but its shape fights that model. It has no `src/` boundary, route groups such as `(identity)` and `(protected)` rather than the template's `(auth)` and `(app)`, a broad `platform/` layer, PostHog-only error handling, no first-class Resend integration, and Stripe fulfillment split across current checkout routes plus a Convex HTTP webhook contract. Billing is also entering a new product model, so preserving the current route and webhook structure by default would carry forward the exact area the team does not trust.
+The current app has moved its browser source into `apps/web/src` and now uses template-style `(marketing)`, `(auth)`, and `(app)` route groups. It still has useful production logic in temporary compatibility lanes such as `src/platform` and `src/config`, PostHog-only error handling, no first-class Resend integration, and Stripe fulfillment split across current checkout routes plus a Convex HTTP webhook contract. Billing is also entering a new product model, so preserving the current route and webhook structure by default would carry forward the exact area the team does not trust.
 
 ## Progress
 
@@ -94,6 +94,7 @@ The current app has useful production logic, but its shape fights that model. It
 - [x] 2026-05-13: Decided refunds are initiated in Stripe or Cal.com provider dashboards for this Program; the app mirrors provider truth into Convex and does not add in-app admin refund actions.
 - [x] 2026-05-13: Added `program-example-use-case.md` at the repo root and refreshed this Program's high-level framing.
 - [x] 2026-05-13: Completed child ExecPlan 1, `docs/exec-plans/completed/2026-05-13-web-convex-architecture-contract-and-inventory.md`, adding `apps/web/ARCHITECTURE.md`, `apps/web/CONVENTIONS.md`, an `apps/web/AGENTS.md` pointer, and `architecture-migration-inventory.md`.
+- [x] 2026-05-13: Completed child ExecPlan 2, `docs/exec-plans/completed/2026-05-13-app-src-tree-and-route-groups.md`, moving the app into `apps/web/src`, renaming route groups to `(marketing)`, `(auth)`, and `(app)`, preserving checkout/API endpoint names, adding the app-shell billing attention banner surface, and passing focused route/static validation.
 
 ## Decision Log
 
@@ -240,10 +241,14 @@ Rationale: Sentry, Resend, Stripe, Clerk, Convex, and Vercel env values are part
 Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-05-13-web-convex-architecture-contract-and-inventory.md` - completed the architecture contract and migration inventory slice by adding local app architecture/conventions docs, an app instruction pointer, and a Program-owned current-to-target map.
+- `docs/exec-plans/completed/2026-05-13-app-src-tree-and-route-groups.md` - completed the app source tree and route-group migration by moving source into `apps/web/src`, renaming source-only route groups, preserving route/provider endpoints, and adding the hidden-by-default billing attention banner surface.
+
+Active child ExecPlans:
+
+None.
 
 Remaining planned slices:
 
-- App tree and route group migration: introduce the `src/` structure, move route groups toward `(marketing)`, `(auth)`, `(app)`, add the app-shell billing attention surface, and keep public/protected behavior intact.
 - Convex module reshape: reorganize Convex files around domain modules and shared auth helpers matching the template's conventions.
 - Billing domain rebuild: model Workers subscription state, failed-payment retry/grace state, billing attention state, failed-payment customer recovery email state, recovered-payment customer confirmation email state, failed-payment internal billing ops alert state, recovered-payment internal billing ops resolved email state, terminal failed-recovery customer access-ended email state, terminal failed-recovery internal billing ops closeout email state, full/partial refund state, full-refund customer status email state, full-refund internal ops closeout email state, scheduled cancellation email state, Starter annual license state and authorized fresh-checkout renewal terms, Cal.com-mirrored Worker Seal Team 6 service booking state, and entitlements in Convex as product concepts rather than scattered route flags.
 - Stripe route and webhook migration: adopt template-style billing routes, webhook ingress, Starter checkout and authorized renewal checkout, success sync, Workers portal subscription-management, plan-change, period-end cancellation configuration, Smart Retries with 8 retries over 2 weeks and cancellation on failure, `invoice.payment_failed`, `invoice.paid`, and refund events as sync-first triggers, failed-payment retry/recovery status, terminal failed-recovery cancellation handling, refund handling, and route tests while preserving durable fulfillment.
@@ -253,11 +258,11 @@ Remaining planned slices:
 
 ## Next Slice
 
-The next slice is `App src tree and route group migration`.
+The next recommended slice is `Convex module reshape`.
 
-That slice should use `apps/web/ARCHITECTURE.md`, `apps/web/CONVENTIONS.md`, and `docs/programs/active/2026-05-13-template-first-web-convex-architecture/architecture-migration-inventory.md` as the starting contract. It should introduce the `src/` tree, move route groups toward `(marketing)`, `(auth)`, `(app)`, and `api/`, keep public and protected behavior intact, and avoid changing billing provider endpoints until the billing route/webhook slice is ready to update release docs and provider setup docs in the same change.
+That slice should use `apps/web/convex/_generated/ai/guidelines.md`, `apps/web/ARCHITECTURE.md`, `apps/web/CONVENTIONS.md`, and `docs/programs/active/2026-05-13-template-first-web-convex-architecture/architecture-migration-inventory.md` as the starting contract. It should reorganize Convex modules around named domain responsibilities and shared auth helpers without changing schema, public function names, billing provider endpoints, or webhook URLs unless its own ExecPlan explicitly proves and documents that risk.
 
-A new immutable planning brief should be written before the second child ExecPlan starts.
+A new immutable planning brief should be written before the next child ExecPlan starts.
 
 ## Risks and Watchpoints
 

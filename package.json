@@ -21,7 +21,7 @@
 		"typecheck:app": "bun run --cwd apps/web typecheck",
 		"typecheck:packages": "bun run --cwd packages/codebase-compiler typecheck && bun run --cwd packages/codebase-presentation typecheck && bun run --cwd packages/local-runner typecheck && bun run --cwd packages/telegram-chat-widget typecheck",
 		"lint": "bun run lint:app && bun run lint:packages",
-		"lint:app": "bun run scripts/static-analysis/unknown-boundary-lint.ts && bun run --cwd apps/web lint",
+		"lint:app": "bun run scripts/static-analysis/generated-file-tracking-lint.ts && bun run scripts/static-analysis/unknown-boundary-lint.ts && bun run --cwd apps/web lint",
 		"lint:packages": "bun run --cwd packages/codebase-compiler lint && bun run --cwd packages/codebase-presentation lint && bun run --cwd packages/local-runner lint && bun run --cwd packages/telegram-chat-widget lint",
 		"lint:fix": "bun run --cwd apps/web lint:fix",
 		"markdown:lint": "bun run scripts/markdown-metadata/run-lint.ts",

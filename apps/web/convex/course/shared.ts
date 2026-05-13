@@ -1,13 +1,13 @@
 import { ConvexError } from "convex/values";
-import type { LessonConfig } from "../../lib/course/lesson/model/contracts";
+import type { LessonConfig } from "../../src/lib/course/lesson/model/contracts";
 import {
 	CURRICULUM_VERSION,
 	getLessonByKey,
-} from "../../lib/course/lesson/model/curriculum";
+} from "../../src/lib/course/lesson/model/curriculum";
 import {
 	hydrateReferenceGalleryValue,
 	isReferenceGalleryValue,
-} from "../../lib/course/lesson/model/reference-gallery";
+} from "../../src/lib/course/lesson/model/reference-gallery";
 import {
 	type ArtifactPreview,
 	buildResolvedArtifactPreview,
@@ -21,7 +21,7 @@ import {
 	normalizeLessonFieldValues,
 	type PersistedFieldValues,
 	prepareFieldValuesForPersistence,
-} from "../../lib/course/lesson/model/registry";
+} from "../../src/lib/course/lesson/model/registry";
 import type { Id } from "../_generated/dataModel";
 import { requireTutorialsProductAccess } from "../access/model";
 import type {

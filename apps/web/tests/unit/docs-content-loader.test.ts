@@ -4,7 +4,7 @@ import { getDocsContentEntries } from "@/app/_content/public-content-inventory";
 import {
 	getDocsContentLoaderKeys,
 	getDocsContentMetadata,
-} from "@/app/docs/_server/docs-content";
+} from "@/app/(marketing)/docs/_server/docs-content";
 
 vi.mock("server-only", () => ({}));
 

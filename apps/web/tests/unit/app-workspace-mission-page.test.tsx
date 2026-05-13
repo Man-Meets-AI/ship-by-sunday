@@ -26,7 +26,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
 	),
@@ -40,12 +40,9 @@ vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
-vi.mock(
-	"@/app/(protected)/_components/access-required/access-required-page",
-	() => ({
-		AccessRequiredPage: () => <div>Access recovery</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
+}));
 
 vi.mock("next/navigation", () => ({
 	redirect: (href: string) => redirectMock(href),
@@ -80,7 +77,7 @@ describe("workspace mission route", () => {
 		});
 
 		const { default: MissionRoutePage } =
-			await import("@/app/(protected)/mission/page");
+			await import("@/app/(app)/mission/page");
 
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
@@ -104,7 +101,7 @@ describe("workspace mission route", () => {
 		});
 
 		const { default: MissionRoutePage } =
-			await import("@/app/(protected)/mission/page");
+			await import("@/app/(app)/mission/page");
 
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
@@ -134,7 +131,7 @@ describe("workspace mission route", () => {
 		});
 
 		const { default: MissionRoutePage } =
-			await import("@/app/(protected)/mission/page");
+			await import("@/app/(app)/mission/page");
 
 		await expect(MissionRoutePage()).rejects.toThrowError(
 			"NEXT_REDIRECT:/starter/generate-codebase/review?showLessonMap=1",

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getLegacyCodebaseRouteRedirectHref } from "@/app/(protected)/_lib/legacy-codebase-route-redirects";
+import { getLegacyCodebaseRouteRedirectHref } from "@/app/(app)/_lib/legacy-codebase-route-redirects";
 
 describe("legacy codebase route redirects", () => {
 	it("maps old stage roots into canonical Codebase destinations", () => {

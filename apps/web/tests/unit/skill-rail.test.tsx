@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
 
 globalThis.React = React;
 
-import { SkillRailShadcn as SkillRail } from "@/app/(protected)/_components/course/shared/components/skill-rail-shadcn";
+import { SkillRailShadcn as SkillRail } from "@/app/(app)/_components/course/shared/components/skill-rail-shadcn";
 
 function createRailLesson(
 	lessonKey: string,

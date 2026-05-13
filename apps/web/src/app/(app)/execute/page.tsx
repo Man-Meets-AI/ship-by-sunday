@@ -1,0 +1,24 @@
+import { redirect } from "next/navigation";
+import { api } from "@/convex/_generated/api";
+import { routeConfig } from "@/config/product";
+import { AccessRequiredPage } from "@/app/(app)/_components/access-required/access-required-page";
+import { loadWorkspacePageAccess } from "@/app/(app)/_server/load-workspace-page-access";
+import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
+
+export default async function Page() {
+	const workspaceAccess = await loadWorkspacePageAccess();
+	if (workspaceAccess.kind === "access_required") {
+		return <AccessRequiredPage initialAccess={workspaceAccess.access} />;
+	}
+
+	const resumeDestination = await fetchAuthenticatedQuery(
+		api.codebase.getCodebaseResumeDestination,
+		{},
+	);
+
+	if (!resumeDestination?.postReviewTargets) {
+		redirect(routeConfig.review);
+	}
+
+	redirect(resumeDestination.postReviewTargets.buildLessonsDestination);
+}

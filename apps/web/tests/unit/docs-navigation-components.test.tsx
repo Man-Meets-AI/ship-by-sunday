@@ -1,8 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import { DocsSidebar } from "@/app/docs/_components/docs-sidebar";
-import { DocsTableOfContents } from "@/app/docs/_components/docs-table-of-contents";
+import { DocsSidebar } from "@/app/(marketing)/docs/_components/docs-sidebar";
+import { DocsTableOfContents } from "@/app/(marketing)/docs/_components/docs-table-of-contents";
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => "/docs/local-setup",

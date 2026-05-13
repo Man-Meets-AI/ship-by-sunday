@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import {
 	buildCutOptionsFromArgv,
 	buildLessonMediaEntry,
@@ -5,12 +7,27 @@ import {
 	extractLessonDefinitions,
 	extractLessonMediaMap,
 	getVideoOutputCandidate,
+	MEDIA_FILE_PATH,
 	parseLessonFilename,
 	renderLessonMediaModule,
 	validateReadyVideoFiles,
 } from "@/scripts/lib/lesson-video-pipeline.mjs";
 
 describe("lesson video pipeline helpers", () => {
+	it("targets the source lesson media module by default", () => {
+		expect(MEDIA_FILE_PATH).toBe(
+			path.join(
+				process.cwd(),
+				"src",
+				"lib",
+				"course",
+				"lesson",
+				"model",
+				"media.ts",
+			),
+		);
+	});
+
 	it("sorts lesson ids numerically instead of lexically", () => {
 		expect(["3.10", "3.2", "0.2", "0.1"].sort(compareLessonIds)).toEqual([
 			"0.1",

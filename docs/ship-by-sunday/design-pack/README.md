@@ -71,4 +71,4 @@ Source basis:
 - `docs/openai/design-pack/documentation.md`
 - `DESIGN.md`
 - `apps/web/AGENTS.md`
-- `apps/web/content/docs/configure-the-homepage.mdx`
+- `apps/web/src/content/docs/configure-the-homepage.mdx`

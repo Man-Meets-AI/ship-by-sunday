@@ -89,14 +89,14 @@ export function resolveMarkdownMetadataFamily(
 
 	if (
 		repoPath.endsWith(".mdx") &&
-		repoPath.startsWith("apps/web/content/docs/")
+		repoPath.startsWith("apps/web/src/content/docs/")
 	) {
 		return "web_docs_page";
 	}
 
 	if (
 		repoPath.endsWith(".mdx") &&
-		repoPath.startsWith("apps/web/content/blog/")
+		repoPath.startsWith("apps/web/src/content/blog/")
 	) {
 		return "blog_post";
 	}

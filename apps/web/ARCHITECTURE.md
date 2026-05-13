@@ -166,4 +166,4 @@ Development-only debug tools require explicit environment opt-in, not just `NODE
 
 ## Migration Status
 
-This document describes the target architecture. The current app still has the pre-migration tree under `apps/web/app`, `apps/web/lib`, `apps/web/platform`, `apps/web/components`, and `apps/web/convex`. Use `docs/programs/active/2026-05-13-template-first-web-convex-architecture/architecture-migration-inventory.md` for the current-to-target map and deviation register.
+This document describes the target architecture. The current app now loads the App Router and shared browser source from `apps/web/src`, with `apps/web/src/app`, `apps/web/src/components`, `apps/web/src/lib`, `apps/web/src/platform`, and `apps/web/src/config` as the active source roots. `apps/web/src/platform` remains temporary compatibility debt until later Program slices move provider helpers into named `src/lib/*` lanes. `apps/web/convex` remains at the web root as the backend state and function boundary. Use `docs/programs/active/2026-05-13-template-first-web-convex-architecture/architecture-migration-inventory.md` for the current-to-target map and deviation register.

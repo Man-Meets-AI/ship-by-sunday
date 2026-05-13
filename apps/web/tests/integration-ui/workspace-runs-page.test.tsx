@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceRunHistoryState } from "@/app/(protected)/_lib/workspace-support-read-model";
+import type { WorkspaceRunHistoryState } from "@/app/(app)/_lib/workspace-support-read-model";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -20,7 +20,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(protected)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -35,7 +35,7 @@ vi.mock("@/app/(protected)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceRunsPage } from "@/app/(protected)/_components/existing-codebase-support/workspace-runs-page";
+import { WorkspaceRunsPage } from "@/app/(app)/_components/existing-codebase-support/workspace-runs-page";
 
 function createRunHistory(): WorkspaceRunHistoryState {
 	return {

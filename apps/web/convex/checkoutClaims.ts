@@ -6,11 +6,11 @@ import {
 	type BuyerStartingPoint,
 	type CheckoutCtaId,
 	type FulfillmentTrack,
-} from "../platform/billing/checkout/checkout-intent";
+} from "../src/platform/billing/checkout/checkout-intent";
 import {
 	getCheckoutOffer,
 	type CheckoutOfferId,
-} from "../platform/billing/checkout/checkout-offers";
+} from "../src/platform/billing/checkout/checkout-offers";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation, internalQuery } from "./_generated/server";
