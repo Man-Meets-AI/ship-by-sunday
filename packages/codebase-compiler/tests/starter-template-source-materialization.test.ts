@@ -67,6 +67,11 @@ describe("starter template source materialization", () => {
 		const appReadme = snapshotText(
 			snapshotFiles.find((file) => file.path === "apps/web/README.md"),
 		);
+		const billingPanel = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "apps/web/src/components/app/billing-panel.tsx",
+			),
+		);
 		const tsconfig = JSON.parse(
 			snapshotText(
 				snapshotFiles.find((file) => file.path === "apps/web/tsconfig.json"),
@@ -103,13 +108,18 @@ describe("starter template source materialization", () => {
 		expect(appReadme).toContain("config/product.ts");
 		expect(appReadme).not.toContain("_content");
 		expect(appReadme).not.toContain("api/stripe/webhook");
+		expect(billingPanel).toContain(
+			"generated starter until the billing setup slice materializes",
+		);
+		expect(billingPanel).not.toContain('action="/api/billing/checkout"');
+		expect(billingPanel).not.toContain('action="/api/billing/portal"');
 		expect(tsconfig.compilerOptions?.paths?.["@/*"]).toEqual([
 			"./*",
 			"./src/*",
 		]);
 	});
 
-	it("rejects generated overlays that replace template-source files outside manifest policy", async () => {
+	it("rejects generated overlays outside manifest policy", async () => {
 		const verification = await verifyStarterTemplateSourceSnapshot();
 
 		expect(() =>
@@ -120,19 +130,23 @@ describe("starter template source materialization", () => {
 						content: "unsafe replacement",
 					},
 					{
-						path: "apps/web/src/app/api/stripe/webhook/route.ts",
-						content: "provider-heavy replacement",
+						path: "apps/web/src/app/api/generated-unsafe/route.ts",
+						content: "unsafe generated addition",
 					},
 				],
 				verification,
 			),
-		).toThrow(/not allowed to replace/);
+		).toThrow(/not allowed by the pinned template source policy/);
 		expect(() =>
 			assertGeneratedTemplateSourceOverlaysAllowed(
 				[
 					{
 						path: "apps/web/src/app/layout.tsx",
 						content: "allowed replacement",
+					},
+					{
+						path: "apps/web/config/product.ts",
+						content: "allowed generated addition",
 					},
 				],
 				verification,

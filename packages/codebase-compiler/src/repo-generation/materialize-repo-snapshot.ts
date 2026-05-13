@@ -113,11 +113,10 @@ export function assertGeneratedTemplateSourceOverlaysAllowed(
 	generatedFiles: readonly RepoSnapshotFile[],
 	templateVerification: StarterTemplateSourceVerification,
 ) {
-	const templateSourcePaths = new Set(templateVerification.files);
 	const disallowedOverlayPaths = generatedFiles.flatMap((file) => {
 		const sourcePath = mapStarterTemplateOutputPathToSourcePath(file.path);
 
-		if (sourcePath === null || !templateSourcePaths.has(sourcePath)) {
+		if (sourcePath === null) {
 			return [];
 		}
 
@@ -139,9 +138,9 @@ export function assertGeneratedTemplateSourceOverlaysAllowed(
 
 	throw new Error(
 		[
-			"Generated Starter overlays are not allowed to replace these pinned template source files:",
+			"Generated Starter overlays are not allowed by the pinned template source policy:",
 			...disallowedOverlayPaths,
-			"Update templates/starter-app/template-source.json generatedOverlayPolicy before intentionally replacing template source.",
+			"Update templates/starter-app/template-source.json generatedOverlayPolicy before intentionally writing generated app overlays.",
 		].join("\n"),
 	);
 }

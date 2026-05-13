@@ -39,6 +39,9 @@ The visible proof is a generated repo snapshot that contains mapped template fil
 - [x] 2026-05-13 EDT: Validation passed: `bun run --cwd packages/codebase-compiler test`, `bun run --cwd packages/codebase-compiler typecheck`, `bun run --cwd packages/codebase-compiler lint`, and `bun run --cwd packages/codebase-compiler format:check`.
 - [x] 2026-05-13 EDT: Validation passed: `bun run lint`, `bun run format:check`, `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run typecheck`, and `bun run test:packages`.
 - [x] 2026-05-13 EDT: Validation passed: `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-migrate-generated-template-app-to-template-source.md`, `bun run programs:lint`, touched markdown lint, and `git diff --check`.
+- [x] 2026-05-13 EDT: Closed post-review hardening findings: generated env examples now match the pinned template env contract, every generated `apps/web` overlay path must be allowed by `template-source.json`, and generated billing UI no longer posts to checkout or portal route handlers that this no-provider subset intentionally excludes.
+- [x] 2026-05-13 EDT: Post-review validation passed: `bun run --cwd packages/codebase-compiler test -- tests/starter-template-source-contract.test.ts tests/starter-template-source-materialization.test.ts tests/repo-generation.test.ts tests/review-download-zip.test.ts`, `bun run --cwd packages/codebase-compiler typecheck`, `bun run --cwd packages/codebase-compiler lint`, `bun run --cwd packages/codebase-compiler format:check`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-migrate-generated-template-app-to-template-source.md`, `bun run programs:lint`, and `git diff --check`.
+- [x] 2026-05-13 EDT: Post-review clean-room command proof was attempted, but the current dirty checkout has unrelated root package/lockfile and `packages/local-runner` changes; generated `bun ci` failed before app commands with a frozen-lockfile mismatch. Do not treat that dirty-tree failure as a generated-template behavior result.
 - [x] 2026-05-13 EDT: Moved this ExecPlan to completed and updated the Program ledger.
 
 ## Surprises & Discoveries
@@ -47,6 +50,7 @@ The visible proof is a generated repo snapshot that contains mapped template fil
 - 2026-05-13 EDT: The template source contains provider-active Sentry and email files, route tests, and root package files that are not compatible with the current no-provider generated repo proof. This slice should keep the adapter explicit and conservative rather than silently shipping provider requirements before the setup ExecPlans are upgraded.
 - 2026-05-13 EDT: The clean-room generated repo proof caught two provider-context regressions after source migration: `convex/notifications.ts` needed no-provider email stubs, and the protected app group needed to avoid static prerender of Clerk-dependent client components before Clerk setup.
 - 2026-05-13 EDT: The template-derived Notes and billing screens can stay materialized before provider setup if the shared `ConvexReadyGate` renders a setup state before invoking Clerk or Convex hooks.
+- 2026-05-13 EDT: Review found that replacement-only overlay checks miss generated additions under `apps/web`, generated env examples can drift from the template env schema, and billing forms can become broken if provider-heavy API routes stay excluded. Those risks need direct generated-output tests, not only source-shape assertions.
 
 ## Decision Log
 
@@ -66,11 +70,19 @@ Decision: Keep the template source as the primary app UI and keep generated app 
 Rationale: The generated repo should feel like the sibling template, not a separately rendered fallback app. Questionnaire-derived product truth now enters through `apps/web/config/product.ts`; generated overlays only replace template files when needed for product labels, monorepo ownership, provenance, or no-provider setup gates.
 Date: 2026-05-13
 
+Decision: Enforce the template overlay policy for every generated app overlay under `apps/web`.
+Rationale: Generated additions can be just as unsafe as replacements. The manifest policy must allow both additions and replacements before materialization merges generated files over the pinned source.
+Date: 2026-05-13
+
+Decision: Disable generated billing actions until setup materializes the billing API routes.
+Rationale: This slice intentionally excludes provider-heavy checkout and portal route handlers to preserve no-provider proof. The generated app should not render forms that post to those absent routes.
+Date: 2026-05-13
+
 ## Outcomes & Retrospective
 
 This plan is complete. Generated repo materialization now validates `templates/starter-app/template-source.json`, maps a conservative no-provider-safe subset of `templates/starter-app/source` into `apps/web/`, and then applies generated overlays. The generated app overlays now target the template's `src/app` layout, generated output no longer emits the old root `apps/web/app` tree, and questionnaire-derived homepage/product content lives in `apps/web/config/product.ts` instead of a generated `_content` module.
 
-The migration intentionally keeps Sentry, Resend, source route tests, and provider-active API routes out of the first materialized subset. Generated stubs keep the existing Convex notification seam type-safe without requiring live email dependencies, and generated setup gates keep protected template screens buildable before Clerk and Convex are configured. The next slices should replace this conservative subset with richer setup-gated provider behavior through the generated operating-pack and template-app work, not by bypassing the no-provider proof.
+The migration intentionally keeps Sentry, Resend, source route tests, and provider-active API routes out of the first materialized subset. Generated stubs keep the existing Convex notification seam type-safe without requiring live email dependencies, and generated setup gates keep protected template screens buildable before Clerk and Convex are configured. Post-review hardening also makes generated env examples line up with the template env schema, requires manifest approval for every generated `apps/web` overlay, and removes checkout and portal forms from the generated billing panel while those route handlers remain excluded. The next slices should replace this conservative subset with richer setup-gated provider behavior through the generated operating-pack and template-app work, not by bypassing the no-provider proof.
 
 ## Context and Orientation
 

@@ -383,6 +383,61 @@ function renderGeneratedConvexReadyGate() {
 	return source;
 }
 
+function renderGeneratedBillingPanel() {
+	const sourcePath = "src/components/app/billing-panel.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { Button } from "@/components/ui/button";\n',
+		"",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"          ) : canManageBilling ? (",
+			"            <>",
+			'              {billingStatus === "unconfigured" ? (',
+			'                <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">',
+			"                  Billing actions stay disabled until Stripe is configured for this",
+			"                  environment.",
+			"                </p>",
+			"              ) : null}",
+			'              <form action="/api/billing/checkout" method="post">',
+			'                <Button className="w-full" type="submit">',
+			"                  Start checkout",
+			"                </Button>",
+			"              </form>",
+			'              <form action="/api/billing/portal" method="post">',
+			'                <Button className="w-full" type="submit" variant="outline">',
+			"                  Open billing portal",
+			"                </Button>",
+			"              </form>",
+			"            </>",
+		].join("\n"),
+		[
+			"          ) : canManageBilling ? (",
+			"            <>",
+			'              {billingStatus === "unconfigured" ? (',
+			'                <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">',
+			"                  Billing environment values are incomplete for this",
+			"                  environment.",
+			"                </p>",
+			"              ) : null}",
+			'              <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">',
+			"                Checkout and Customer Portal actions stay disabled in the",
+			"                generated starter until the billing setup slice materializes",
+			"                route handlers.",
+			"              </p>",
+			"            </>",
+		].join("\n"),
+		sourcePath,
+	);
+
+	return source;
+}
+
 function renderGeneratedClientEnv() {
 	const sourcePath = "src/lib/env/client.ts";
 	const source = readTemplateSourceFile(sourcePath);
@@ -931,6 +986,10 @@ export function renderGeneratedTemplateAppFiles(
 		{
 			path: "apps/web/src/components/app/convex-ready-gate.tsx",
 			content: renderGeneratedConvexReadyGate(),
+		},
+		{
+			path: "apps/web/src/components/app/billing-panel.tsx",
+			content: renderGeneratedBillingPanel(),
 		},
 		{
 			path: "apps/web/src/components/providers/app-providers.tsx",

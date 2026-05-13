@@ -468,9 +468,29 @@ describe("repo generation", () => {
 		);
 		expect(appScriptBody).not.toContain("scripts/dev-stripe-listen-ready.mjs");
 		expect(appScriptBody).not.toContain("CODEX_APP_SERVER");
-		expect(appLocalEnvExample).toContain("STRIPE_STARTER_PRICE_ID=");
+		expect(appLocalEnvExample).toContain(
+			"NEXT_PUBLIC_APP_URL=http://localhost:3000",
+		);
+		expect(appLocalEnvExample).toContain("CONVEX_WEBHOOK_MUTATION_SECRET=");
+		expect(appLocalEnvExample).toContain("STRIPE_PRICE_PRO_MONTHLY=");
+		expect(appLocalEnvExample).toContain("NEXT_PUBLIC_POSTHOG_KEY=");
+		expect(appLocalEnvExample).not.toContain("APP_BASE_URL=");
+		expect(appLocalEnvExample).not.toContain("STRIPE_STARTER_PRICE_ID=");
+		expect(appLocalEnvExample).not.toContain(
+			"CHECKOUT_FULFILLMENT_RETRY_SECRET=",
+		);
+		expect(appLocalEnvExample).not.toContain("NEXT_PUBLIC_POSTHOG_TOKEN=");
+		expect(appLocalEnvExample).not.toContain(
+			"NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com",
+		);
 		expect(appLocalEnvExample).not.toContain("STRIPE_WORKERS");
 		expect(appLocalEnvExample).not.toContain("CODEX_");
+		expect(appProductionEnvExample).toContain(
+			"NEXT_PUBLIC_APP_URL=https://your-domain.example",
+		);
+		expect(appProductionEnvExample).toContain("STRIPE_PRICE_PRO_MONTHLY=");
+		expect(appProductionEnvExample).not.toContain("APP_BASE_URL=");
+		expect(appProductionEnvExample).not.toContain("STRIPE_STARTER_PRICE_ID=");
 		expect(appProductionEnvExample).not.toContain("STRIPE_WORKERS");
 		expect(appProductionEnvExample).not.toContain("CODEX_");
 		expect(productConfigSource).toContain("export const productConfig");
@@ -486,6 +506,8 @@ describe("repo generation", () => {
 		expect(appSnapshotText).not.toContain(
 			"next-js-convex-clerk-stripe-template",
 		);
+		expect(appSnapshotText).not.toContain('action="/api/billing/checkout"');
+		expect(appSnapshotText).not.toContain('action="/api/billing/portal"');
 		expect(appReadme).toContain("No-Provider Contract");
 		expect(appReadme).toContain("config/product.ts");
 		expect(appReadme).not.toContain("_content");

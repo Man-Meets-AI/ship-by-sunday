@@ -74,6 +74,12 @@ describe("starter template source contract", () => {
 		).toBe(true);
 		expect(
 			isStarterTemplateGeneratedOverlayAllowed(
+				"src/components/app/billing-panel.tsx",
+				manifest,
+			),
+		).toBe(true);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed(
 				"src/components/layout/brand-lockup.tsx",
 				manifest,
 			),
@@ -87,6 +93,27 @@ describe("starter template source contract", () => {
 		expect(
 			isStarterTemplateGeneratedOverlayAllowed(
 				"src/components/providers/app-providers.tsx",
+				manifest,
+			),
+		).toBe(true);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed("config/product.ts", manifest),
+		).toBe(true);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed(
+				"config/generated-design-system.ts",
+				manifest,
+			),
+		).toBe(true);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed(
+				"content/docs/index.mdx",
+				manifest,
+			),
+		).toBe(true);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed(
+				".env.production.example",
 				manifest,
 			),
 		).toBe(true);
@@ -129,6 +156,18 @@ describe("starter template source contract", () => {
 		expect(
 			isStarterTemplateGeneratedOverlayAllowed(
 				"src/components/ui/button.tsx",
+				manifest,
+			),
+		).toBe(false);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed(
+				"src/app/api/billing/checkout/route.ts",
+				manifest,
+			),
+		).toBe(false);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed(
+				"src/app/api/stripe/webhook/route.ts",
 				manifest,
 			),
 		).toBe(false);
