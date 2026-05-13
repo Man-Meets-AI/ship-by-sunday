@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+      CLERK_SECRET_KEY: sk_test_placeholder
+      CLERK_JWT_ISSUER_DOMAIN: https://example.clerk.accounts.dev
+      CONVEX_DEPLOYMENT: local-dev-placeholder
+      NEXT_PUBLIC_CONVEX_URL: https://example.convex.cloud
+      NEXT_PUBLIC_POSTHOG_HOST: https://us.i.posthog.com
+      NEXT_PUBLIC_POSTHOG_KEY: phc_placeholder
+      NEXT_PUBLIC_SENTRY_DSN: https://public@example.ingest.sentry.io/123456
+      POSTHOG_API_KEY: phx_placeholder
+      RESEND_API_KEY: re_placeholder
+      RESEND_FROM_EMAIL: hello@example.com
+      SENTRY_AUTH_TOKEN: placeholder
+      SENTRY_ENVIRONMENT: ci
+      SENTRY_ORG: example-org
+      SENTRY_PROJECT: example-project
+      CONVEX_WEBHOOK_MUTATION_SECRET: convex_webhook_secret
+      STRIPE_PRICE_PRO_MONTHLY: price_placeholder
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Build
+        run: bun run build

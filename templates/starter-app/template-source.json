@@ -1,0 +1,88 @@
+{
+	"schemaVersion": "starter-template-source.v1",
+	"templateId": "starter-app",
+	"templateVersion": "2026-05-13-sibling-seed",
+	"sourceRoot": "templates/starter-app/source",
+	"sourceLayout": "single-next-app-root",
+	"fileCount": 131,
+	"contentDigest": "sha256-2050b63ecf39c24cfda55f1a3cb93c8d239b94bf701dd8435378be5d2492ee5c",
+	"provenance": {
+		"originKind": "local-directory-snapshot",
+		"originPathHint": "~/Developer/next-js-convex-clerk-stripe-template",
+		"originGitCommit": null,
+		"capturedAt": "2026-05-13",
+		"capturedByProgram": "starter-template-source-and-billing-proof",
+		"notes": "The source seed did not contain .git metadata at import time, so this manifest pins the committed source snapshot by content digest."
+	},
+	"requiredFiles": [
+		"package.json",
+		"README.md",
+		"AGENTS.md",
+		"ARCHITECTURE.md",
+		"CONVENTIONS.md",
+		".env.local.example",
+		"src/app/(marketing)/page.tsx",
+		"src/app/(app)/dashboard/page.tsx",
+		"src/app/(app)/notes/page.tsx",
+		"src/app/api/billing/checkout/route.ts",
+		"src/app/api/stripe/webhook/route.ts",
+		"src/components/layout/page-shell.tsx",
+		"src/components/providers/app-providers.tsx",
+		"src/lib/env/server.ts",
+		"src/lib/billing/stripe.ts",
+		"convex/schema.ts",
+		"convex/notes.ts",
+		"convex/billing.ts"
+	],
+	"excludedPathSegments": [
+		".git",
+		".next",
+		".vercel",
+		"coverage",
+		"node_modules",
+		"test-results"
+	],
+	"excludedFilePaths": [".env.local", ".env.preview", ".env.production"],
+	"generatedOverlayPolicy": {
+		"description": "Paths the generator may intentionally replace after materializing this template source. The compiler enforces this policy for generated overlays that target pinned template source files; generated overlays win only for listed paths.",
+		"allowedExactPaths": [
+			"AGENTS.md",
+			"CLAUDE.md",
+			"README.md",
+			".env.local.example",
+			"next.config.ts",
+			"package.json",
+			"tsconfig.json",
+			"bun.lock",
+			"src/app/(auth)/layout.tsx",
+			"src/app/(auth)/sign-in/[[...sign-in]]/page.tsx",
+			"src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
+			"src/app/global-error.tsx",
+			"src/app/layout.tsx",
+			"src/components/app/convex-ready-gate.tsx",
+			"src/components/layout/brand-lockup.tsx",
+			"src/components/layout/public-auth-controls.tsx",
+			"src/components/layout/public-footer.tsx",
+			"src/components/layout/user-menu-button.tsx",
+			"src/components/providers/app-providers.tsx",
+			"src/lib/app/links.ts",
+			"src/lib/billing/stripe.ts"
+		],
+		"allowedPathPrefixes": [
+			".github/workflows/",
+			"docs/",
+			"src/app/(marketing)/",
+			"src/lib/email/",
+			"src/lib/env/",
+			"convex/",
+			"skills/"
+		],
+		"blockedPathPrefixes": [
+			".git/",
+			".next/",
+			".vercel/",
+			"node_modules/",
+			"templates/starter-app/source/"
+		]
+	}
+}

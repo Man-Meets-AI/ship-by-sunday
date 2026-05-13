@@ -2,7 +2,7 @@
 title: Pinned Starter Template Source Planning Brief 2
 program_id: starter-template-source-and-billing-proof
 brief_version: 2
-status: current
+status: superseded
 summary: Create the next child ExecPlan for the pinned Starter template-source boundary without beginning ChatGPT template implementation.
 read_when:
   - "Writing the second child ExecPlan for this Program."

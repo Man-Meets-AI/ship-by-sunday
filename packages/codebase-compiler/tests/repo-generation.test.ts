@@ -225,6 +225,9 @@ describe("repo generation", () => {
 		expect(readmeOverride?.content).toContain(
 			"`apps/web/config/generated-design-system.ts` contains the generated runtime design system.",
 		);
+		expect(readmeOverride?.content).toContain(
+			"`apps/web/config/product.ts` contains the generated product config and questionnaire-derived homepage content.",
+		);
 		expect(onboardingOverride?.content).toContain(
 			"Set up Linear as your work tracker",
 		);
@@ -238,6 +241,8 @@ describe("repo generation", () => {
 		expect(onboardingOverride?.content).toContain("$starter-product-copy");
 		expect(onboardingOverride?.content).toContain("$starter-frontend-design");
 		expect(onboardingOverride?.content).toContain("$starter-docs-and-testing");
+		expect(onboardingOverride?.content).toContain("apps/web/config/product.ts");
+		expect(onboardingOverride?.content).not.toContain("_content");
 		expect(onboardingOverride?.content).toContain("Run core setup");
 		expect(onboardingOverride?.content).toContain("Run auth setup");
 		expect(onboardingOverride?.content).toContain("Run billing setup");
@@ -308,14 +313,17 @@ describe("repo generation", () => {
 				".agents/skills/starter-docs-and-testing/SKILL.md",
 				".agents/skills/external-skills.json",
 				"apps/web/content/docs/index.mdx",
-				"apps/web/app/globals.css",
-				"apps/web/app/layout.tsx",
-				"apps/web/app/page.tsx",
+				"apps/web/src/app/globals.css",
+				"apps/web/src/app/layout.tsx",
+				"apps/web/src/app/(marketing)/page.tsx",
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
-				"apps/web/app/_content/home-page.ts",
+				"apps/web/src/components/ui/button.tsx",
+				"apps/web/src/app/(app)/dashboard/page.tsx",
+				"apps/web/convex/schema.ts",
 				"apps/web/next.config.ts",
 				"apps/web/package.json",
+				"apps/web/README.md",
 				"apps/web/.env.local.example",
 				"apps/web/scripts/run-next-build-serialized.mjs",
 				"packages/codebase-presentation/package.json",
@@ -328,6 +336,7 @@ describe("repo generation", () => {
 				"docs/build/docs/review.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
+				"docs/facts/template-source.json",
 				"apps/web/.env.production.example",
 				"docs/testing/README.md",
 				".agents/README.md",
@@ -350,6 +359,10 @@ describe("repo generation", () => {
 				"apps/web/app/(protected)/layout.tsx",
 				"apps/web/app/(protected)/settings/_components/settings-page.tsx",
 				"apps/web/app/blog/page.tsx",
+				"apps/web/app/page.tsx",
+				"apps/web/app/layout.tsx",
+				"apps/web/src/app/_content/home-page.ts",
+				"apps/web/src/app/api/billing/checkout/route.ts",
 				"docs/PLANS.md",
 				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
@@ -395,6 +408,36 @@ describe("repo generation", () => {
 				(file) => file.path === "apps/web/.env.production.example",
 			),
 		);
+		const productConfigSource = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/config/product.ts"),
+		);
+		const marketingPage = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "apps/web/src/app/(marketing)/page.tsx",
+			),
+		);
+		const appReadme = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/README.md"),
+		);
+		const templateSourceProvenance = JSON.parse(
+			snapshotText(
+				snapshotFiles.find(
+					(file) => file.path === "docs/facts/template-source.json",
+				),
+			) || "{}",
+		) as {
+			schemaVersion?: string;
+			templateId?: string;
+			templateVersion?: string;
+			materializedOutputRoot?: string;
+			generatedOverlaysWin?: boolean;
+			contentDigest?: string;
+			provenance?: Record<string, unknown>;
+		};
+		const appSnapshotText = snapshotFiles
+			.filter((file) => file.path.startsWith("apps/web/"))
+			.map(snapshotText)
+			.join("\n");
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
 		expect(rootAgentGuide?.content).toContain("bun run agentic:check");
@@ -430,6 +473,35 @@ describe("repo generation", () => {
 		expect(appLocalEnvExample).not.toContain("CODEX_");
 		expect(appProductionEnvExample).not.toContain("STRIPE_WORKERS");
 		expect(appProductionEnvExample).not.toContain("CODEX_");
+		expect(productConfigSource).toContain("export const productConfig");
+		expect(productConfigSource).toContain("export const productContent");
+		expect(productConfigSource).toContain("coreFlow");
+		expect(productConfigSource).toContain("generatedProductContent");
+		expect(marketingPage).toContain(
+			'import { productConfig, productContent } from "@/config/product";',
+		);
+		expect(marketingPage).not.toContain("@/app/_content");
+		expect(appSnapshotText).not.toContain("Northstar");
+		expect(appSnapshotText).not.toContain("thienlnam");
+		expect(appSnapshotText).not.toContain(
+			"next-js-convex-clerk-stripe-template",
+		);
+		expect(appReadme).toContain("No-Provider Contract");
+		expect(appReadme).toContain("config/product.ts");
+		expect(appReadme).not.toContain("_content");
+		expect(appReadme).not.toContain("api/stripe/webhook");
+		expect(templateSourceProvenance).toMatchObject({
+			schemaVersion: "generated-starter-template-source-provenance.v1",
+			templateId: "starter-app",
+			templateVersion: "2026-05-13-sibling-seed",
+			materializedOutputRoot: "apps/web",
+			generatedOverlaysWin: true,
+			contentDigest:
+				"sha256-2050b63ecf39c24cfda55f1a3cb93c8d239b94bf701dd8435378be5d2492ee5c",
+		});
+		expect(
+			Object.keys(templateSourceProvenance.provenance ?? {}),
+		).not.toContain("originPathHint");
 		expect(forbiddenPaths).toEqual([]);
 		expectNoForbiddenStarterSnapshotPaths(snapshotPaths);
 		expect(snapshotPaths).not.toEqual(
@@ -438,9 +510,13 @@ describe("repo generation", () => {
 				"apps/web/app/(protected)/layout.tsx",
 				"apps/web/app/(protected)/settings/_components/settings-page.tsx",
 				"apps/web/app/blog/page.tsx",
+				"apps/web/app/page.tsx",
+				"apps/web/app/layout.tsx",
 				"apps/web/app/(protected)/workers/setup/page.tsx",
 				"apps/web/app/api/workspace/runner/events/route.ts",
 				"apps/web/app/api/codex/generate/route.ts",
+				"apps/web/src/app/_content/home-page.ts",
+				"apps/web/src/app/api/billing/checkout/route.ts",
 				"apps/web/convex/workspace.ts",
 				"apps/web/platform/codex/app-server.ts",
 				"packages/local-runner/src/index.ts",

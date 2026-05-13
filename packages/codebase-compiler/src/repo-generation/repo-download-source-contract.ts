@@ -22,7 +22,6 @@ export const customerSafeAppFilePaths = [
 	"apps/web/.env.local.example",
 	"apps/web/.gitignore",
 	"apps/web/components.json",
-	"apps/web/next-env.d.ts",
 	"apps/web/package.json",
 	"apps/web/postcss.config.mjs",
 	"apps/web/scripts/run-next-build-serialized.mjs",

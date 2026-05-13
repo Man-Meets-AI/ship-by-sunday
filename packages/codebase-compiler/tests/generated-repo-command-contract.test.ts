@@ -196,5 +196,5 @@ describe("generated repo command contract", () => {
 		} finally {
 			await rm(tempRoot, { force: true, recursive: true });
 		}
-	}, 120_000);
+	}, 240_000);
 });

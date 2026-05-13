@@ -3,7 +3,6 @@ import path from "node:path";
 
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
 import type { RenderedCodebaseFile } from "../codebases/render-types";
-import { buildGeneratedDesignSystem } from "../design-system/generated-design-system";
 import { resolveRepoRootPath } from "../repo-root";
 
 const generatedTemplateAppScripts = {
@@ -51,6 +50,32 @@ function readSourceAppPackageJson() {
 	};
 }
 
+function readTemplateSourceFile(relativePath: string) {
+	return readFileSync(
+		path.join(
+			resolveRepoRootPath(),
+			"templates/starter-app/source",
+			relativePath,
+		),
+		"utf8",
+	);
+}
+
+function replaceRequired(
+	source: string,
+	target: string,
+	replacement: string,
+	sourcePath: string,
+) {
+	if (!source.includes(target)) {
+		throw new Error(
+			`Template source drifted while generating ${sourcePath}: missing expected segment.`,
+		);
+	}
+
+	return source.replace(target, replacement);
+}
+
 function renderGeneratedAppPackageJson() {
 	const sourcePackageJson = readSourceAppPackageJson();
 	const appPackageJson = {
@@ -66,208 +91,37 @@ function renderGeneratedAppPackageJson() {
 	return `${JSON.stringify(appPackageJson, null, 2)}\n`;
 }
 
-function renderTokenDeclarations(tokens: Record<string, string>) {
-	return Object.entries(tokens)
-		.map(([name, value]) => `\t${name}: ${value};`)
-		.join("\n");
-}
-
-function renderGeneratedGlobalsCss(
+function renderGeneratedAppReadme(
 	projectDefinition: CanonicalProjectDefinition,
 ) {
-	const designSystem = buildGeneratedDesignSystem(projectDefinition.facts);
+	const { facts } = projectDefinition;
 
 	return [
-		'@import "tailwindcss";',
+		`# ${facts.product_name} Web App`,
 		"",
-		":root {",
-		`\t--radius: ${designSystem.preset.geometry.base};`,
-		`\t--font-sans: ${designSystem.preset.font.cssFamily};`,
-		renderTokenDeclarations(designSystem.preset.tokens.light),
-		"}",
+		"This is the generated Next.js app for the customer repo. It starts from the pinned Ship by Sunday Starter template source under `templates/starter-app/source`, mapped into `apps/web/`, with small generated overlays for product facts, monorepo scripts, and no-provider-safe setup.",
 		"",
-		".dark {",
-		renderTokenDeclarations(designSystem.preset.tokens.dark),
-		"}",
+		"## No-Provider Contract",
 		"",
-		"* {",
-		"\tbox-sizing: border-box;",
-		"}",
+		"The generated repo must install, lint, typecheck, and expose dev commands before Clerk, Convex, Stripe, Resend, Sentry, PostHog, or OpenAI are configured. Provider-specific route handlers and live webhook code are intentionally not active in this first materialized subset; generated setup ExecPlans should activate them deliberately.",
 		"",
-		"html {",
-		"\tmin-height: 100%;",
-		"\tbackground: var(--background);",
-		"\tcolor: var(--foreground);",
-		"}",
+		"## Main Edit Points",
 		"",
-		"body {",
-		"\tmin-height: 100vh;",
-		"\tmargin: 0;",
-		"\tfont-family: var(--font-sans);",
-		"\tbackground: var(--background);",
-		"\tcolor: var(--foreground);",
-		"}",
+		"- `config/product.ts`",
+		"- `config/generated-design-system.ts`",
+		"- `src/app/(marketing)/page.tsx`",
+		"- `src/app/(app)/dashboard/page.tsx`",
+		"- `convex/`",
 		"",
-		"a {",
-		"\tcolor: inherit;",
-		"\ttext-decoration: none;",
-		"}",
+		"## Commands",
 		"",
-		"button, input, textarea, select {",
-		"\tfont: inherit;",
-		"}",
+		"Run app commands from `apps/web/` or through the root workspace scripts.",
 		"",
-		".template-page {",
-		"\tmin-height: 100vh;",
-		"\tpadding: 2rem;",
-		"\tbackground: var(--background);",
-		"}",
+		"- `bun run dev` starts the generated Next.js app.",
+		"- `bun run check` runs lint, format check, and the generated app typecheck/build contract.",
+		"- `bun run dev:convex` and `bun run dev:stripe` are no-op placeholders until those providers are configured.",
 		"",
-		".template-shell {",
-		"\tdisplay: grid;",
-		"\tgap: 4rem;",
-		"\twidth: min(1120px, 100%);",
-		"\tmargin: 0 auto;",
-		"}",
-		"",
-		".template-hero {",
-		"\tdisplay: grid;",
-		"\tgrid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);",
-		"\tgap: 3rem;",
-		"\talign-items: end;",
-		"\tpadding-top: 4rem;",
-		"}",
-		"",
-		".template-kicker {",
-		"\tmargin: 0 0 1rem;",
-		"\tcolor: var(--muted-foreground);",
-		"\tfont-size: 0.82rem;",
-		"\tfont-weight: 700;",
-		"\tletter-spacing: 0;",
-		"\ttext-transform: uppercase;",
-		"}",
-		"",
-		".template-hero h1 {",
-		"\tmax-width: 12ch;",
-		"\tmargin: 0;",
-		"\tfont-size: 5rem;",
-		"\tline-height: 0.95;",
-		"\tletter-spacing: 0;",
-		"}",
-		"",
-		".template-summary {",
-		"\tmax-width: 64ch;",
-		"\tmargin: 1.5rem 0 0;",
-		"\tcolor: var(--muted-foreground);",
-		"\tfont-size: 1.125rem;",
-		"\tline-height: 1.65;",
-		"}",
-		"",
-		".template-actions {",
-		"\tdisplay: flex;",
-		"\tflex-wrap: wrap;",
-		"\tgap: 0.75rem;",
-		"\tmargin-top: 2rem;",
-		"}",
-		"",
-		".template-button, .template-button-secondary {",
-		"\tdisplay: inline-flex;",
-		"\tmin-height: 3rem;",
-		"\talign-items: center;",
-		"\tjustify-content: center;",
-		"\tborder-radius: var(--radius);",
-		"\tpadding: 0 1rem;",
-		"\tfont-weight: 700;",
-		"}",
-		"",
-		".template-button {",
-		"\tbackground: var(--primary);",
-		"\tcolor: var(--primary-foreground);",
-		"}",
-		"",
-		".template-button-secondary {",
-		"\tborder: 1px solid var(--border);",
-		"\tbackground: color-mix(in oklch, var(--card) 86%, transparent);",
-		"\tcolor: var(--foreground);",
-		"}",
-		"",
-		".template-proof {",
-		"\tdisplay: grid;",
-		"\tgap: 1rem;",
-		"\tborder: 1px solid var(--border);",
-		"\tborder-radius: calc(var(--radius) * 1.5);",
-		"\tpadding: 1rem;",
-		"\tbackground: color-mix(in oklch, var(--card) 92%, transparent);",
-		"\tbox-shadow: 0 20px 60px color-mix(in oklch, var(--foreground) 10%, transparent);",
-		"}",
-		"",
-		".template-proof p {",
-		"\tmargin: 0;",
-		"\tcolor: var(--muted-foreground);",
-		"\tline-height: 1.55;",
-		"}",
-		"",
-		".template-proof strong {",
-		"\tdisplay: block;",
-		"\tmargin-bottom: 0.25rem;",
-		"\tcolor: var(--foreground);",
-		"\tfont-size: 0.9rem;",
-		"}",
-		"",
-		".template-grid {",
-		"\tdisplay: grid;",
-		"\tgrid-template-columns: repeat(3, minmax(0, 1fr));",
-		"\tgap: 1rem;",
-		"}",
-		"",
-		".template-section {",
-		"\tborder: 1px solid var(--border);",
-		"\tborder-radius: calc(var(--radius) * 1.25);",
-		"\tpadding: 1rem;",
-		"\tbackground: var(--card);",
-		"}",
-		"",
-		".template-section h2 {",
-		"\tmargin: 0 0 0.75rem;",
-		"\tfont-size: 1rem;",
-		"\tletter-spacing: 0;",
-		"}",
-		"",
-		".template-section ul {",
-		"\tdisplay: grid;",
-		"\tgap: 0.5rem;",
-		"\tmargin: 0;",
-		"\tpadding-left: 1.1rem;",
-		"\tcolor: var(--muted-foreground);",
-		"\tline-height: 1.5;",
-		"}",
-		"",
-		".template-operating-note {",
-		"\tmax-width: 78ch;",
-		"\tborder-left: 4px solid var(--primary);",
-		"\tpadding: 0.25rem 0 0.25rem 1rem;",
-		"\tcolor: var(--muted-foreground);",
-		"\tline-height: 1.65;",
-		"}",
-		"",
-		".template-operating-note strong {",
-		"\tcolor: var(--foreground);",
-		"}",
-		"",
-		"@media (max-width: 760px) {",
-		"\t.template-page {",
-		"\t\tpadding: 1rem;",
-		"\t}",
-		"",
-		"\t.template-hero, .template-grid {",
-		"\t\tgrid-template-columns: 1fr;",
-		"\t}",
-		"",
-		"\t.template-hero h1 {",
-		"\t\tmax-width: 100%;",
-		"\t\tfont-size: 3rem;",
-		"\t}",
-		"}",
+		"Template provenance for this app is recorded at `docs/facts/template-source.json`.",
 		"",
 	].join("\n");
 }
@@ -285,18 +139,7 @@ function renderProductConfig(projectDefinition: CanonicalProjectDefinition) {
 		supportEmail: facts.support_email,
 		domain: facts.domain,
 	};
-
-	return [
-		`export const productConfig = ${JSON.stringify(productConfig, null, 2)} as const;`,
-		"",
-		"export const generatedProductConfig = productConfig;",
-		"",
-	].join("\n");
-}
-
-function renderHomePageContent(projectDefinition: CanonicalProjectDefinition) {
-	const { facts } = projectDefinition;
-	const homePageContent = {
+	const productContent = {
 		productName: facts.product_name,
 		headline: facts.outcome_statement,
 		subheadline: facts.product_summary,
@@ -313,140 +156,577 @@ function renderHomePageContent(projectDefinition: CanonicalProjectDefinition) {
 	};
 
 	return [
-		`export const homePageContent = ${JSON.stringify(homePageContent, null, 2)} as const;`,
+		`export const productConfig = ${JSON.stringify(productConfig, null, 2)} as const;`,
 		"",
-		"export const generatedHomePageContent = homePageContent;",
+		`export const productContent = ${JSON.stringify(productContent, null, 2)} as const;`,
+		"",
+		"export const generatedProductConfig = productConfig;",
+		"export const generatedProductContent = productContent;",
 		"",
 	].join("\n");
 }
 
-function renderRootLayout() {
+function renderGeneratedRootLayout() {
+	const sourcePath = "src/app/layout.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { clientEnv } from "@/lib/env/client";',
+		[
+			'import { productConfig } from "@/config/product";',
+			'import { productHomeUrl } from "@/lib/app/links";',
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"void clientEnv;",
+			"",
+			"export const metadata: Metadata = {",
+			"  metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),",
+			"  title: {",
+			'    default: "Northstar",',
+			'    template: "%s | Northstar",',
+			"  },",
+			"  description:",
+			'    "Northstar gives small teams one calm workspace for client work, billing, and updates.",',
+			"};",
+		].join("\n"),
+		[
+			"const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;",
+			"",
+			"export const metadata: Metadata = {",
+			"  metadataBase: new URL(productHomeUrl),",
+			"  title: {",
+			"    default: productConfig.name,",
+			"    template: `%s | ${productConfig.name}`,",
+			"  },",
+			"  description: productConfig.metadataDescription,",
+			"};",
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			'      <body className="min-h-screen bg-background font-sans text-foreground antialiased">',
+			'        <ClerkProvider afterSignOutUrl="/">',
+			"          <AppProviders>{children}</AppProviders>",
+			"        </ClerkProvider>",
+			"      </body>",
+		].join("\n"),
+		[
+			'      <body className="min-h-screen bg-background font-sans text-foreground antialiased">',
+			"        {clerkPublishableKey ? (",
+			"          <ClerkProvider",
+			'            afterSignOutUrl="/"',
+			"            publishableKey={clerkPublishableKey}",
+			"          >",
+			"            <AppProviders>{children}</AppProviders>",
+			"          </ClerkProvider>",
+			"        ) : (",
+			"          <AppProviders>{children}</AppProviders>",
+			"        )}",
+			"      </body>",
+		].join("\n"),
+		sourcePath,
+	);
+
+	return source;
+}
+
+function renderGeneratedAppProviders() {
+	const sourcePath = "src/components/providers/app-providers.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { ConvexProviderWithClerk } from "convex/react-clerk";',
+		[
+			'import { ConvexReactClient } from "convex/react";',
+			'import { ConvexProviderWithClerk } from "convex/react-clerk";',
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'import { convex } from "@/lib/convex/client";\n',
+		"",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'import { getClientAnalyticsEnv } from "@/lib/env/client";',
+		[
+			'import { getClientAnalyticsEnv } from "@/lib/env/client";',
+			"",
+			"const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;",
+			"const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;",
+			"const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;",
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"  return (",
+			"    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>",
+			"      <PostHogProvider client={posthog}>",
+			"        <UserBootstrapProvider>",
+			"          {children}",
+			'          <Toaster richColors position="top-right" />',
+			"        </UserBootstrapProvider>",
+			"      </PostHogProvider>",
+			"    </ConvexProviderWithClerk>",
+			"  );",
+		].join("\n"),
+		[
+			"  const app = (",
+			"    <PostHogProvider client={posthog}>",
+			"      {convex && clerkPublishableKey ? (",
+			"        <UserBootstrapProvider>{children}</UserBootstrapProvider>",
+			"      ) : (",
+			"        children",
+			"      )}",
+			'      <Toaster richColors position="top-right" />',
+			"    </PostHogProvider>",
+			"  );",
+			"",
+			"  if (!convex || !clerkPublishableKey) {",
+			"    return app;",
+			"  }",
+			"",
+			"  return (",
+			"    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>",
+			"      {app}",
+			"    </ConvexProviderWithClerk>",
+			"  );",
+		].join("\n"),
+		sourcePath,
+	);
+
+	return source;
+}
+
+function renderGeneratedConvexReadyGate() {
+	const sourcePath = "src/components/app/convex-ready-gate.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { Card, CardContent } from "@/components/ui/card";',
+		[
+			'import { Card, CardContent } from "@/components/ui/card";',
+			"",
+			"const providersConfigured = Boolean(",
+			"  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&",
+			"    process.env.NEXT_PUBLIC_CONVEX_URL,",
+			");",
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"export function ConvexReadyGate({",
+			"  children,",
+			'  loadingMessage = "Preparing your workspace...",',
+			"}: {",
+			"  children: ReactNode;",
+			"  loadingMessage?: string;",
+			"}) {",
+		].join("\n"),
+		[
+			"export function ConvexReadyGate({",
+			"  children,",
+			'  loadingMessage = "Preparing your workspace...",',
+			"}: {",
+			"  children: ReactNode;",
+			"  loadingMessage?: string;",
+			"}) {",
+			"  if (!providersConfigured) {",
+			"    return <ProviderSetupNotice />;",
+			"  }",
+			"",
+			"  return (",
+			"    <ProviderBackedConvexReadyGate loadingMessage={loadingMessage}>",
+			"      {children}",
+			"    </ProviderBackedConvexReadyGate>",
+			"  );",
+			"}",
+			"",
+			"function ProviderSetupNotice() {",
+			"  return (",
+			"    <Card>",
+			'      <CardContent className="py-10 text-sm leading-6 text-zinc-600 dark:text-zinc-400">',
+			"        Clerk and Convex are not configured for this environment yet. The",
+			"        template app can build and run without providers; add the public",
+			"        provider environment values before using protected workspace data.",
+			"      </CardContent>",
+			"    </Card>",
+			"  );",
+			"}",
+			"",
+			"function ProviderBackedConvexReadyGate({",
+			"  children,",
+			'  loadingMessage = "Preparing your workspace...",',
+			"}: {",
+			"  children: ReactNode;",
+			"  loadingMessage?: string;",
+			"}) {",
+		].join("\n"),
+		sourcePath,
+	);
+
+	return source;
+}
+
+function renderGeneratedClientEnv() {
+	const sourcePath = "src/lib/env/client.ts";
+	const source = readTemplateSourceFile(sourcePath);
+
+	return replaceRequired(
+		source,
+		[
+			"export const clientEnv = parseClientEnv({",
+			"  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,",
+			"  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:",
+			"    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,",
+			"  NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,",
+			"});",
+		].join("\n"),
+		[
+			"export const clientEnv = {",
+			"  NEXT_PUBLIC_APP_URL: resolveAppUrl(process.env.NEXT_PUBLIC_APP_URL),",
+			"  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:",
+			'    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "pk_test_provider_not_configured",',
+			"  NEXT_PUBLIC_CONVEX_URL:",
+			'    process.env.NEXT_PUBLIC_CONVEX_URL ?? "https://provider-not-configured.convex.cloud",',
+			"};",
+		].join("\n"),
+		sourcePath,
+	);
+}
+
+function renderGeneratedPublicAuthControls() {
 	return [
-		'import type { Metadata } from "next";',
-		'import type { ReactNode } from "react";',
+		'import Link from "next/link";',
 		"",
-		'import { productConfig } from "@/config/product";',
-		'import "./globals.css";',
+		'import { Button } from "@/components/ui/button";',
 		"",
-		"export const metadata: Metadata = {",
-		"\ttitle: productConfig.name,",
-		"\tdescription: productConfig.metadataDescription,",
-		"};",
-		"",
-		"export default function RootLayout({",
-		"\tchildren,",
-		"}: Readonly<{",
-		"\tchildren: ReactNode;",
-		"}>) {",
+		"export function PublicAuthControls() {",
 		"\treturn (",
-		'\t\t<html lang="en">',
-		"\t\t\t<body>{children}</body>",
-		"\t\t</html>",
+		'\t\t<div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:justify-end">',
+		'\t\t\t<Button asChild variant="ghost" className="h-9 px-3 sm:h-10 sm:px-4">',
+		'\t\t\t\t<Link href="/sign-in">Sign in</Link>',
+		"\t\t\t</Button>",
+		'\t\t\t<Button asChild className="h-9 px-3.5 sm:h-10 sm:px-4">',
+		'\t\t\t\t<Link href="/sign-up">Get started</Link>',
+		"\t\t\t</Button>",
+		"\t\t</div>",
 		"\t);",
 		"}",
 		"",
 	].join("\n");
 }
 
-function renderHomePage() {
+function renderGeneratedUserMenuButton() {
 	return [
-		'import { homePageContent } from "@/app/_content/home-page";',
-		'import { generatedDesignSystem } from "@/config/generated-design-system";',
+		'"use client";',
+		"",
+		"export function UserMenuButton() {",
+		"\treturn (",
+		'\t\t<div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-950 text-sm font-semibold text-white dark:bg-white dark:text-zinc-950">',
+		"\t\t\tA",
+		"\t\t</div>",
+		"\t);",
+		"}",
+		"",
+	].join("\n");
+}
+
+function renderGeneratedBrandLockup() {
+	const sourcePath = "src/components/layout/brand-lockup.tsx";
+	const source = readTemplateSourceFile(sourcePath);
+
+	return replaceRequired(
+		source,
+		'import { cn } from "@/lib/utils";',
+		[
+			'import { productConfig } from "@/config/product";',
+			'import { cn } from "@/lib/utils";',
+		].join("\n"),
+		sourcePath,
+	).replace('title = "Northstar"', "title = productConfig.name");
+}
+
+function renderGeneratedMarketingLayout() {
+	return readTemplateSourceFile("src/app/(marketing)/layout.tsx")
+		.replaceAll("Why Northstar", "Why it works")
+		.replaceAll("why-northstar", "why-product");
+}
+
+function renderGeneratedMarketingPage() {
+	const sourcePath = "src/app/(marketing)/page.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { Button } from "@/components/ui/button";',
+		[
+			'import { Button } from "@/components/ui/button";',
+			'import { productConfig, productContent } from "@/config/product";',
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'    question: "Who is Northstar for?",',
+		"    question: `Who is ${productConfig.name} for?`,",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'    answer:\n      "Northstar is designed for small teams that run ongoing client work and need one place for tasks, billing context, and updates.",',
+		"    answer: `${productConfig.name} is designed for ${productContent.primaryUser}.`,",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"                  Operations for small teams",
+		"                  {productContent.primaryUser}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"                  Run work, billing, and client updates from one calm workspace.",
+		"                  {productContent.headline}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"                  Northstar gives teams a single place to organize ongoing work,",
+			"                  stay on top of follow-ups, and keep billing context close to",
+			"                  the conversations that move accounts forward.",
+		].join("\n"),
+		"                  {productContent.subheadline}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"                      Northstar workspace",
+		"                      {productConfig.name} workspace",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"              Northstar brings the daily operational flow into one workspace so",
+			"              teams can move faster without building new habits around more",
+			"              tools.",
+		].join("\n"),
+		"              {productContent.sectionNarrative}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"              Northstar brings tasks, billing context, and customer updates into",
+			"              one workspace so everyone sees the same picture and can act on it",
+			"              quickly.",
+		].join("\n"),
+		"              {productContent.problemStatement}",
+		sourcePath,
+	);
+
+	return source
+		.replaceAll("Why Northstar", "Why it works")
+		.replaceAll("why-northstar", "why-product");
+}
+
+function renderGeneratedAuthLayout() {
+	return readTemplateSourceFile("src/app/(auth)/layout.tsx")
+		.replaceAll("Why Northstar", "Why it works")
+		.replaceAll("why-northstar", "why-product");
+}
+
+function renderMissingClerkSetupComponent(message: string) {
+	return [
+		"function MissingClerkSetup() {",
+		"  return (",
+		'    <div className="rounded-[2rem] border border-zinc-200 bg-white/90 p-6 text-sm leading-6 text-zinc-600 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.45)] dark:border-zinc-800 dark:bg-zinc-950/80 dark:text-zinc-300">',
+		`      ${message}`,
+		"    </div>",
+		"  );",
+		"}",
+	].join("\n");
+}
+
+function renderGeneratedSignInPage() {
+	const sourcePath = "src/app/(auth)/sign-in/[[...sign-in]]/page.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { AuthShell } from "@/components/layout/auth-shell";',
+		[
+			'import { AuthShell } from "@/components/layout/auth-shell";',
+			'import { productConfig } from "@/config/product";',
+			"",
+			renderMissingClerkSetupComponent(
+				"Clerk is not configured yet. Add the Clerk public key when this product is ready for live authentication.",
+			),
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"export default function SignInPage() {\n  return (",
+		[
+			"export default function SignInPage() {",
+			"  const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);",
+			"",
+			"  return (",
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'      eyebrow="Northstar access"',
+		"      eyebrow={`${productConfig.name} access`}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'      description="Sign in to reopen your workspace, check billing details, and keep your team working from the same current context."',
+		"      description={`Sign in to continue working on ${productConfig.name}.`}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"      <SignIn />",
+		"      {clerkConfigured ? <SignIn /> : <MissingClerkSetup />}",
+		sourcePath,
+	);
+
+	return source;
+}
+
+function renderGeneratedSignUpPage() {
+	const sourcePath = "src/app/(auth)/sign-up/[[...sign-up]]/page.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { AuthShell } from "@/components/layout/auth-shell";',
+		[
+			'import { AuthShell } from "@/components/layout/auth-shell";',
+			'import { productConfig, productContent } from "@/config/product";',
+			"",
+			renderMissingClerkSetupComponent(
+				"Clerk is not configured yet. Add the Clerk public key when this product is ready for live sign-up.",
+			),
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"export default function SignUpPage() {\n  return (",
+		[
+			"export default function SignUpPage() {",
+			"  const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);",
+			"",
+			"  return (",
+		].join("\n"),
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'      eyebrow="Set up Northstar"',
+		"      eyebrow={`Set up ${productConfig.name}`}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'      description="Start with a clean workspace for your team so work, customer updates, and billing visibility all live in one place from day one."',
+		"      description={productContent.subheadline}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		"      <SignUp />",
+		"      {clerkConfigured ? <SignUp /> : <MissingClerkSetup />}",
+		sourcePath,
+	);
+
+	return source;
+}
+
+function renderGeneratedPublicFooter() {
+	const sourcePath = "src/components/layout/public-footer.tsx";
+	let source = readTemplateSourceFile(sourcePath);
+
+	source = replaceRequired(
+		source,
+		'import { ArrowUpRight } from "lucide-react";\n',
+		"",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		'import { templateRepoUrl } from "@/lib/app/links";',
+		'import { productConfig, productContent } from "@/config/product";',
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			"            Northstar helps small teams keep work, billing visibility, and",
+			"            customer updates in one calm workspace.",
+		].join("\n"),
+		"            {productContent.subheadline}",
+		sourcePath,
+	);
+	source = replaceRequired(
+		source,
+		[
+			'            Built from the open-source starter.{" "}',
+			"            <a",
+			"              href={templateRepoUrl}",
+			'              rel="noreferrer"',
+			'              target="_blank"',
+			'              className="inline-flex items-center gap-1 font-medium text-zinc-700 transition-colors hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-50"',
+			"            >",
+			"              GitHub",
+			'              <ArrowUpRight className="h-4 w-4" />',
+			"            </a>",
+		].join("\n"),
+		"            Generated from your Ship by Sunday Codebase questionnaire for {productConfig.name}.",
+		sourcePath,
+	);
+
+	return source
+		.replaceAll("Why Northstar", "Why it works")
+		.replaceAll("why-northstar", "why-product");
+}
+
+function renderGeneratedAppLinks() {
+	return [
 		'import { productConfig } from "@/config/product";',
 		"",
-		"type TemplateSectionProps = {",
-		"\ttitle: string;",
-		"\titems: readonly string[];",
-		"};",
-		"",
-		"function TemplateSection({ title, items }: TemplateSectionProps) {",
-		"\tif (items.length === 0) {",
-		"\t\treturn null;",
+		"function normalizeProductUrl(domain: string) {",
+		'\tif (domain.startsWith("http://") || domain.startsWith("https://")) {',
+		"\t\treturn domain;",
 		"\t}",
 		"",
-		"\treturn (",
-		'\t\t<section className="template-section">',
-		"\t\t\t<h2>{title}</h2>",
-		"\t\t\t<ul>",
-		"\t\t\t\t{items.map((item) => (",
-		"\t\t\t\t\t<li key={item}>{item}</li>",
-		"\t\t\t\t))}",
-		"\t\t\t</ul>",
-		"\t\t</section>",
-		"\t);",
+		"\treturn `https://${domain}`;",
 		"}",
 		"",
-		"export default function HomePage() {",
-		"\tconst sections = [",
-		'\t\t{ title: "Core flow", items: homePageContent.coreFlow },',
-		'\t\t{ title: "In scope", items: homePageContent.scopeIn },',
-		'\t\t{ title: "Out of scope", items: homePageContent.scopeOut },',
-		"\t];",
-		"",
-		"\treturn (",
-		'\t\t<main className="template-page">',
-		'\t\t\t<div className="template-shell">',
-		'\t\t\t\t<section className="template-hero">',
-		"\t\t\t\t\t<div>",
-		'\t\t\t\t\t\t<p className="template-kicker">Generated Starter App</p>',
-		"\t\t\t\t\t\t<h1>{homePageContent.headline}</h1>",
-		'\t\t\t\t\t\t<p className="template-summary">',
-		"\t\t\t\t\t\t\t{homePageContent.subheadline}",
-		"\t\t\t\t\t\t</p>",
-		'\t\t\t\t\t\t<div className="template-actions">',
-		'\t\t\t\t\t\t\t<a className="template-button" href={`mailto:${productConfig.supportEmail}`}>',
-		"\t\t\t\t\t\t\t\t{homePageContent.primaryCta}",
-		"\t\t\t\t\t\t\t</a>",
-		'\t\t\t\t\t\t\t<a className="template-button-secondary" href="/docs">',
-		"\t\t\t\t\t\t\t\tOpen generated docs",
-		"\t\t\t\t\t\t\t</a>",
-		"\t\t\t\t\t\t</div>",
-		"\t\t\t\t\t</div>",
-		'\t\t\t\t\t<aside className="template-proof" aria-label="Generated product source truth">',
-		"\t\t\t\t\t\t<p>",
-		"\t\t\t\t\t\t\t<strong>Built for</strong>",
-		"\t\t\t\t\t\t\t{homePageContent.primaryUser}",
-		"\t\t\t\t\t\t</p>",
-		"\t\t\t\t\t\t<p>",
-		"\t\t\t\t\t\t\t<strong>Problem</strong>",
-		"\t\t\t\t\t\t\t{homePageContent.problemStatement}",
-		"\t\t\t\t\t\t</p>",
-		"\t\t\t\t\t\t<p>",
-		"\t\t\t\t\t\t\t<strong>Proof strategy</strong>",
-		"\t\t\t\t\t\t\t{homePageContent.proofStrategy}",
-		"\t\t\t\t\t\t</p>",
-		"\t\t\t\t\t\t<p>",
-		"\t\t\t\t\t\t\t<strong>Starting price</strong>",
-		"\t\t\t\t\t\t\t{productConfig.priceDisplay}",
-		"\t\t\t\t\t\t</p>",
-		"\t\t\t\t\t</aside>",
-		"\t\t\t\t</section>",
-		'\t\t\t\t<section className="template-grid" aria-label="Generated app plan">',
-		"\t\t\t\t\t{sections.map((section) => (",
-		"\t\t\t\t\t\t<TemplateSection",
-		"\t\t\t\t\t\t\tkey={section.title}",
-		"\t\t\t\t\t\t\ttitle={section.title}",
-		"\t\t\t\t\t\t\titems={section.items}",
-		"\t\t\t\t\t\t/>",
-		"\t\t\t\t\t))}",
-		"\t\t\t\t</section>",
-		'\t\t\t\t<p className="template-operating-note">',
-		"\t\t\t\t\t<strong>{homePageContent.productName}</strong> ships with source truth in",
-		'\t\t\t\t\t {" "}',
-		"\t\t\t\t\t<code>docs/facts/project-definition.json</code>, design truth in",
-		'\t\t\t\t\t {" "}',
-		"\t\t\t\t\t<code>DESIGN.md</code>, and the first Program and ExecPlan under",
-		'\t\t\t\t\t {" "}',
-		"\t\t\t\t\t<code>docs/programs</code> and <code>docs/exec-plans</code>. The selected visual system is",
-		'\t\t\t\t\t {" "}',
-		'\t\t\t\t\t{generatedDesignSystem.selection.presetLabel ?? "custom"}:',
-		'\t\t\t\t\t {" "}',
-		"\t\t\t\t\t{generatedDesignSystem.derivedFacts.visualThesis}",
-		"\t\t\t\t</p>",
-		"\t\t\t</div>",
-		"\t\t</main>",
-		"\t);",
-		"}",
+		"export const productHomeUrl = normalizeProductUrl(productConfig.domain);",
+		"export const templateRepoUrl = productHomeUrl;",
 		"",
 	].join("\n");
 }
@@ -462,37 +742,219 @@ function renderNextConfig() {
 	].join("\n");
 }
 
+function renderGlobalError() {
+	return [
+		'"use client";',
+		"",
+		"export default function GlobalError({",
+		"\terror,",
+		"}: {",
+		"\terror: Error & { digest?: string };",
+		"}) {",
+		"\treturn (",
+		'\t\t<html lang="en">',
+		"\t\t\t<body>",
+		'\t\t\t\t<main style={{ padding: "2rem", fontFamily: "system-ui, sans-serif" }}>',
+		"\t\t\t\t\t<h1>Something went wrong</h1>",
+		"\t\t\t\t\t<p>{error.message}</p>",
+		"\t\t\t\t</main>",
+		"\t\t\t</body>",
+		"\t\t</html>",
+		"\t);",
+		"}",
+		"",
+	].join("\n");
+}
+
+function renderGeneratedStripeClient() {
+	const sourcePath = "src/lib/billing/stripe.ts";
+	const source = readTemplateSourceFile(sourcePath);
+
+	return replaceRequired(
+		source,
+		'import { getBillingEnv } from "@/lib/env/server";',
+		[
+			'import { productConfig } from "@/config/product";',
+			'import { getBillingEnv } from "@/lib/env/server";',
+		].join("\n"),
+		sourcePath,
+	).replace(
+		'name: "next-js-convex-clerk-stripe-template"',
+		"name: productConfig.name",
+	);
+}
+
+function renderGeneratedAppTsConfig() {
+	return `${JSON.stringify(
+		{
+			compilerOptions: {
+				target: "ES2017",
+				lib: ["dom", "dom.iterable", "esnext"],
+				allowJs: true,
+				skipLibCheck: true,
+				strict: true,
+				noEmit: true,
+				esModuleInterop: true,
+				module: "esnext",
+				moduleResolution: "bundler",
+				resolveJsonModule: true,
+				isolatedModules: true,
+				jsx: "react-jsx",
+				incremental: true,
+				plugins: [{ name: "next" }],
+				baseUrl: ".",
+				paths: {
+					"@/*": ["./*", "./src/*"],
+					"@convex/*": ["./convex/*"],
+				},
+			},
+			include: [
+				"next-env.d.ts",
+				"src/**/*.ts",
+				"src/**/*.tsx",
+				"convex/**/*.ts",
+				"convex/**/*.tsx",
+				"**/*.mts",
+				"*.ts",
+				"*.tsx",
+				"config/**/*.ts",
+				".next/types/**/*.ts",
+				".next/dev/types/**/*.ts",
+			],
+			exclude: ["node_modules"],
+		},
+		null,
+		2,
+	)}\n`;
+}
+
+function renderEmailSendStub() {
+	return [
+		'import type { ReactElement } from "react";',
+		"",
+		"export async function sendTransactionalEmail(_args: {",
+		"\tto: string;",
+		"\tsubject: string;",
+		"\treact: ReactElement;",
+		"}) {",
+		"\treturn { skipped: true as const };",
+		"}",
+		"",
+	].join("\n");
+}
+
+function renderWelcomeEmailStub() {
+	return [
+		'import type { ReactElement } from "react";',
+		"",
+		"export function buildWelcomeEmail(args: {",
+		"\tname?: string | null;",
+		"\tworkspaceName: string;",
+		"}) {",
+		"\treturn {",
+		"\t\treact: null as unknown as ReactElement,",
+		"\t\tsubject: `Your workspace ${args.workspaceName} is ready`,",
+		"\t};",
+		"}",
+		"",
+	].join("\n");
+}
+
 export function renderGeneratedTemplateAppFiles(
 	projectDefinition: CanonicalProjectDefinition,
 ): RenderedCodebaseFile[] {
 	return [
 		{
-			path: "apps/web/app/globals.css",
-			content: renderGeneratedGlobalsCss(projectDefinition),
-		},
-		{
-			path: "apps/web/app/layout.tsx",
-			content: renderRootLayout(),
-		},
-		{
-			path: "apps/web/app/page.tsx",
-			content: renderHomePage(),
-		},
-		{
-			path: "apps/web/app/_content/home-page.ts",
-			content: renderHomePageContent(projectDefinition),
+			path: "apps/web/README.md",
+			content: renderGeneratedAppReadme(projectDefinition),
 		},
 		{
 			path: "apps/web/config/product.ts",
 			content: renderProductConfig(projectDefinition),
 		},
 		{
+			path: "apps/web/package.json",
+			content: renderGeneratedAppPackageJson(),
+		},
+		{
+			path: "apps/web/tsconfig.json",
+			content: renderGeneratedAppTsConfig(),
+		},
+		{
 			path: "apps/web/next.config.ts",
 			content: renderNextConfig(),
 		},
 		{
-			path: "apps/web/package.json",
-			content: renderGeneratedAppPackageJson(),
+			path: "apps/web/src/app/layout.tsx",
+			content: renderGeneratedRootLayout(),
+		},
+		{
+			path: "apps/web/src/app/global-error.tsx",
+			content: renderGlobalError(),
+		},
+		{
+			path: "apps/web/src/app/(marketing)/layout.tsx",
+			content: renderGeneratedMarketingLayout(),
+		},
+		{
+			path: "apps/web/src/app/(marketing)/page.tsx",
+			content: renderGeneratedMarketingPage(),
+		},
+		{
+			path: "apps/web/src/app/(auth)/layout.tsx",
+			content: renderGeneratedAuthLayout(),
+		},
+		{
+			path: "apps/web/src/app/(auth)/sign-in/[[...sign-in]]/page.tsx",
+			content: renderGeneratedSignInPage(),
+		},
+		{
+			path: "apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
+			content: renderGeneratedSignUpPage(),
+		},
+		{
+			path: "apps/web/src/components/layout/brand-lockup.tsx",
+			content: renderGeneratedBrandLockup(),
+		},
+		{
+			path: "apps/web/src/components/layout/public-auth-controls.tsx",
+			content: renderGeneratedPublicAuthControls(),
+		},
+		{
+			path: "apps/web/src/components/layout/public-footer.tsx",
+			content: renderGeneratedPublicFooter(),
+		},
+		{
+			path: "apps/web/src/components/layout/user-menu-button.tsx",
+			content: renderGeneratedUserMenuButton(),
+		},
+		{
+			path: "apps/web/src/components/app/convex-ready-gate.tsx",
+			content: renderGeneratedConvexReadyGate(),
+		},
+		{
+			path: "apps/web/src/components/providers/app-providers.tsx",
+			content: renderGeneratedAppProviders(),
+		},
+		{
+			path: "apps/web/src/lib/app/links.ts",
+			content: renderGeneratedAppLinks(),
+		},
+		{
+			path: "apps/web/src/lib/billing/stripe.ts",
+			content: renderGeneratedStripeClient(),
+		},
+		{
+			path: "apps/web/src/lib/email/send.ts",
+			content: renderEmailSendStub(),
+		},
+		{
+			path: "apps/web/src/lib/email/welcome.tsx",
+			content: renderWelcomeEmailStub(),
+		},
+		{
+			path: "apps/web/src/lib/env/client.ts",
+			content: renderGeneratedClientEnv(),
 		},
 	];
 }

@@ -89,7 +89,7 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use after the Codebase is stable and the buyer is ready to shape the real product. Start with identity, homepage, and the first real customer-visible slice.",
 		steps: [
 			"Read `START-HERE.md` and confirm core setup, auth setup, billing setup, and verification are done first.",
-			"Start by updating `apps/web/config/product.ts` and `apps/web/app/_content/home-page.ts`.",
+			"Start by updating `apps/web/config/product.ts`.",
 			"Prefer `$starter-product-copy`, `$starter-frontend-design`, and `$starter-docs-and-testing` as the first follow-on skills.",
 			"Keep auth and billing contracts stable until the product already feels like the buyer's product.",
 		],
@@ -100,7 +100,7 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		description:
 			"Use when replacing generated product identity, homepage copy, CTA language, pricing copy, or positioning in this Codebase.",
 		steps: [
-			"Read `DESIGN.md`, `docs/facts/project-definition.json`, `apps/web/config/product.ts`, and `apps/web/app/_content/home-page.ts` before editing copy.",
+			"Read `DESIGN.md`, `docs/facts/project-definition.json`, and `apps/web/config/product.ts` before editing copy.",
 			"Keep claims aligned with the generated product facts until the buyer explicitly changes the product promise.",
 			"Update visible copy and the nearby source of truth together when the product identity changes.",
 			"Avoid changing auth, billing, or protected access behavior while doing copy work.",

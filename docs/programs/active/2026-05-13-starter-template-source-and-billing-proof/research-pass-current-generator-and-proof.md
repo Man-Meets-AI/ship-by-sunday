@@ -33,16 +33,16 @@ The customer-safe manifest currently includes root tool files, selected `apps/we
 
 The generated app runtime is rendered by `packages/codebase-compiler/src/repo-generation/render-generated-template-app-files.ts`. It writes these key files:
 
-- `apps/web/app/globals.css`
-- `apps/web/app/layout.tsx`
-- `apps/web/app/page.tsx`
-- `apps/web/app/_content/home-page.ts`
+- `apps/web/src/app/globals.css`
+- `apps/web/src/app/layout.tsx`
+- `apps/web/src/app/(marketing)/page.tsx`
 - `apps/web/config/product.ts`
 - `apps/web/config/generated-design-system.ts`
 - `apps/web/next.config.ts`
 - `apps/web/package.json`
+- `docs/facts/template-source.json`
 
-The rendered app is intentionally simple. It creates a Next app with generated design tokens, product config, home-page content, and a single generated homepage that links to docs and uses the intake-derived product facts. The app package uses simplified scripts where Convex and Stripe commands print optional setup messages instead of requiring provider projects.
+The rendered app is intentionally simple. It creates a Next app with generated design tokens, a product config that carries questionnaire-derived homepage content, and a single generated homepage that links to docs and uses the intake-derived product facts. The app package uses simplified scripts where Convex and Stripe commands print optional setup messages instead of requiring provider projects.
 
 The generator also writes the operating pack through `render-template-overrides.ts`, `render-starter-operating-pack.ts`, `render-starter-project-onboarding.ts`, and `render-starter-skills.ts`. The output includes `README.md`, `START-HERE.md`, `DESIGN.md`, `docs/facts/project-definition.json`, `docs/facts/design-system.json`, generated Program material, generated ExecPlans, skills, bootstrap scripts, and validation scripts.
 

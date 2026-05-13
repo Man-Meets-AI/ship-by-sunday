@@ -8,12 +8,21 @@ import {
 	buildRepoGenerationManifest,
 	type RepoGenerationManifest,
 } from "./build-repo-generation-manifest";
+import {
+	mapStarterTemplateOutputPathToSourcePath,
+	materializeStarterTemplateSource,
+	STARTER_TEMPLATE_OUTPUT_ROOT,
+} from "./materialize-starter-template-source";
 import { renderGeneratedDesignSystemFiles } from "./render-generated-design-system-files";
 import { renderGeneratedTemplateAppFiles } from "./render-generated-template-app-files";
 import { renderGeneralizedStarterFiles } from "./render-generalized-starter-files";
 import { renderStarterBunLock } from "./render-starter-bun-lock";
 import { isExcludedSnapshotPath } from "./repo-download-source-contract";
 import { renderTemplateOverrides } from "./render-template-overrides";
+import {
+	isStarterTemplateGeneratedOverlayAllowed,
+	type StarterTemplateSourceVerification,
+} from "./starter-template-source-contract";
 
 export type RepoSnapshotFile = {
 	path: string;
@@ -90,6 +99,88 @@ function renderIncludedRepoFile(file: RepoSnapshotFile): RepoSnapshotFile {
 	};
 }
 
+function mergeSnapshotFiles(files: readonly RepoSnapshotFile[]) {
+	const filesByPath = new Map<string, RepoSnapshotFile>();
+
+	for (const file of files) {
+		filesByPath.set(file.path, file);
+	}
+
+	return Array.from(filesByPath.values());
+}
+
+export function assertGeneratedTemplateSourceOverlaysAllowed(
+	generatedFiles: readonly RepoSnapshotFile[],
+	templateVerification: StarterTemplateSourceVerification,
+) {
+	const templateSourcePaths = new Set(templateVerification.files);
+	const disallowedOverlayPaths = generatedFiles.flatMap((file) => {
+		const sourcePath = mapStarterTemplateOutputPathToSourcePath(file.path);
+
+		if (sourcePath === null || !templateSourcePaths.has(sourcePath)) {
+			return [];
+		}
+
+		if (
+			isStarterTemplateGeneratedOverlayAllowed(
+				sourcePath,
+				templateVerification.manifest,
+			)
+		) {
+			return [];
+		}
+
+		return [`${file.path} -> ${sourcePath}`];
+	});
+
+	if (disallowedOverlayPaths.length === 0) {
+		return;
+	}
+
+	throw new Error(
+		[
+			"Generated Starter overlays are not allowed to replace these pinned template source files:",
+			...disallowedOverlayPaths,
+			"Update templates/starter-app/template-source.json generatedOverlayPolicy before intentionally replacing template source.",
+		].join("\n"),
+	);
+}
+
+function renderStarterTemplateSourceProvenanceFile(
+	templateVerification: StarterTemplateSourceVerification,
+	materializedFileCount: number,
+): RepoSnapshotFile {
+	const { manifest } = templateVerification;
+
+	return {
+		path: "docs/facts/template-source.json",
+		content: `${JSON.stringify(
+			{
+				schemaVersion: "generated-starter-template-source-provenance.v1",
+				templateId: manifest.templateId,
+				templateVersion: manifest.templateVersion,
+				sourceRoot: manifest.sourceRoot,
+				sourceLayout: manifest.sourceLayout,
+				materializedOutputRoot: STARTER_TEMPLATE_OUTPUT_ROOT,
+				fileCount: templateVerification.fileCount,
+				materializedFileCount,
+				contentDigest: templateVerification.contentDigest,
+				generatedOverlaysWin: true,
+				manifestPath: "templates/starter-app/template-source.json",
+				provenance: {
+					originKind: manifest.provenance.originKind,
+					originGitCommit: manifest.provenance.originGitCommit,
+					capturedAt: manifest.provenance.capturedAt,
+					capturedByProgram: manifest.provenance.capturedByProgram,
+					notes: manifest.provenance.notes,
+				},
+			},
+			null,
+			2,
+		)}\n`,
+	};
+}
+
 export async function materializeRepoSnapshot(
 	projectDefinition: CanonicalProjectDefinition,
 ): Promise<RepoSnapshotFile[]> {
@@ -118,6 +209,9 @@ export async function materializeRepoSnapshot(
 			),
 		),
 	);
+	const starterTemplateSource =
+		await materializeStarterTemplateSource(rootPath);
+	const starterTemplateFiles = starterTemplateSource.files;
 	const codebaseFiles = await renderFullCodebaseTree(projectDefinition);
 	const overrides = [
 		...renderTemplateOverrides(projectDefinition),
@@ -125,14 +219,22 @@ export async function materializeRepoSnapshot(
 		...renderGeneratedDesignSystemFiles(projectDefinition),
 		...renderGeneralizedStarterFiles(projectDefinition),
 	];
-	const overrideMap = new Map(overrides.map((file) => [file.path, file]));
+	assertGeneratedTemplateSourceOverlaysAllowed(
+		overrides,
+		starterTemplateSource.verification,
+	);
+	const starterTemplateProvenanceFile =
+		renderStarterTemplateSourceProvenanceFile(
+			starterTemplateSource.verification,
+			starterTemplateFiles.length,
+		);
 
-	return [
-		...includedFiles
-			.map(renderIncludedRepoFile)
-			.filter((file) => !overrideMap.has(file.path)),
-		...includedDirectories.flat().filter((file) => !overrideMap.has(file.path)),
+	return mergeSnapshotFiles([
+		...includedFiles.map(renderIncludedRepoFile),
+		...includedDirectories.flat(),
+		...starterTemplateFiles,
 		...overrides,
+		starterTemplateProvenanceFile,
 		...(codebaseFiles as RenderedCodebaseFile[]),
-	];
+	]);
 }

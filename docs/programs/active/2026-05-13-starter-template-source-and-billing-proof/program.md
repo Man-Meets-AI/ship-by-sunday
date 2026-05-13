@@ -28,19 +28,21 @@ The high-level implementation strategy is settled: use `~/Developer/next-js-conv
 
 ## Program Inputs
 
-The current repository research is recorded in `research-pass-current-generator-and-proof.md`. Product decisions are normalized in `normalized-pass-product-decisions.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. The first completed slice used `planning-brief-1.md`; `current-planning-brief.txt` now points at `planning-brief-2.md`.
+The current repository research is recorded in `research-pass-current-generator-and-proof.md`. Product decisions are normalized in `normalized-pass-product-decisions.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. Completed slices used `planning-brief-1.md`, `planning-brief-2.md`, and `planning-brief-3.md`; `current-planning-brief.txt` now points at `planning-brief-4.md`.
 
 This Program follows `docs/programs/active/2026-05-12-public-product-split-starter-workers/`. That Program split Starter and Workers as products. This Program hardens the proof and generated Starter deliverable that now sit underneath that split.
 
 ## Current State
 
-Hosted checkout is app-owned and requires explicit purchase intent. The checkout route accepts `offerId` and routes Starter and Workers purchases through separate offer definitions. Current hosted proof scripts and helper tests still default to Starter and use Starter-specific expectations for route, metadata, and amount.
+Hosted checkout is app-owned and requires explicit purchase intent. The checkout route accepts `offerId` and routes Starter and Workers purchases through separate offer definitions. Hosted proof now accepts `--offer=starter|workers`, defaults to Starter, and carries offer-specific expectations for route, metadata, amount, and access.
 
-Generated repo downloads are built dynamically by `packages/codebase-compiler` and served by `apps/web/app/api/download/repo/route.ts`. The generated repo includes a runnable app, generated docs, source truth, design truth, Program material, ExecPlans, skills, bootstrap scripts, and validation scripts. The current generated app is rendered from TypeScript string builders in `render-generated-template-app-files.ts`.
+Generated repo downloads are built dynamically by `packages/codebase-compiler` and served by `apps/web/app/api/download/repo/route.ts`. The generated repo includes a runnable app, generated docs, source truth, design truth, Program material, ExecPlans, skills, bootstrap scripts, validation scripts, and `docs/facts/template-source.json` provenance. The generated app now starts from the pinned `templates/starter-app/source` snapshot through a tested adapter that maps the single-app source root into `apps/web/`, then applies manifest-allowed generated overlays.
 
-The generated output already has strong no-provider proof. The clean-room command contract installs the generated repo, lints Program and ExecPlan material, checks the Codebase contract, typechecks the generated app, and proves the dev command exists. The current template app is intentionally minimal and does not yet provide the fuller Starter experience buyers will expect: auth-ready shell, dashboard, settings, provider setup affordances, example workflow, and deeper generated design-system usage.
+The generated output already has strong no-provider proof. The clean-room command contract installs the generated repo, lints Program and ExecPlan material, checks the Codebase contract, typechecks the generated app, and proves the dev command exists. The current generated app is now intentionally close to the sibling template: it keeps the public marketing shell, auth routes, protected dashboard, Notes sample workflow, billing screen, provider package dependencies, and setup-gated missing-provider states. The later ChatGPT app slice still owns replacing the Notes domain with the final BYO OpenAI chat product.
 
-There is no static zip source of truth. That is good. There is also no ordinary source tree that acts as the template app source. That is the gap this Program should close.
+There is no static zip source of truth. That is good. The Program now has an ordinary source tree boundary and the generator consumes it without reading the sibling checkout.
+
+The first repo-local template-source boundary now exists at `templates/starter-app/source`. It is seeded from `~/Developer/next-js-convex-clerk-stripe-template`, pinned by `templates/starter-app/template-source.json`, validated by `packages/codebase-compiler/src/repo-generation/starter-template-source-contract.ts`, and materialized by `packages/codebase-compiler/src/repo-generation/materialize-starter-template-source.ts`. The current materialized subset is intentionally no-provider safe and excludes provider-heavy Sentry, email, API route, and source-test files until setup-focused slices make those seams customer-ready.
 
 ## Progress
 
@@ -51,6 +53,11 @@ There is no static zip source of truth. That is good. There is also no ordinary 
 - [x] 2026-05-13: Settled the template product shape: sibling template skeleton, ChatGPT-style BYO OpenAI chat use case, and Ship by Sunday Program/ExecPlan operating pack.
 - [x] 2026-05-13: Completed `Parameterize Hosted Billing Proof By Offer`; hosted billing proof now supports `--offer=starter|workers`, defaults to Starter, asserts selected-offer metadata, amount, destination, and access expectations, and passes focused proof/helper/release-planner validation.
 - [x] 2026-05-13: Advanced the current planning brief to `planning-brief-2.md` for the pinned Starter template-source boundary.
+- [x] 2026-05-13: Completed `Introduce Pinned Starter Template Source`; the sibling skeleton is imported under `templates/starter-app/source`, pinned by manifest digest, documented with ownership and overlay rules, and validated by compiler/package/root checks.
+- [x] 2026-05-13: Advanced the current planning brief to `planning-brief-3.md` for generated repo template-source migration.
+- [x] 2026-05-13: Completed `Migrate Generated Template App To Template Source`; generated repo materialization now validates and maps the pinned source into `apps/web/`, applies generated overlays afterward, avoids a competing root app tree, and preserves clean-room no-provider proof.
+- [x] 2026-05-13: Hardened the completed template-source slices after review; generated overlays that target pinned template source are now checked against `template-source.json`, questionnaire-derived content flows through `apps/web/config/product.ts` instead of `_content`, source-template README materialization is replaced by a no-provider-safe app README, generated provider gates keep the template app buildable without Clerk or Convex env, and generated repos emit template provenance at `docs/facts/template-source.json`.
+- [x] 2026-05-13: Advanced the current planning brief to `planning-brief-4.md` for generated Starter operating-pack upgrades.
 
 ## Decision Log
 
@@ -84,6 +91,34 @@ Date: 2026-05-13.
 
 Decision: Seed the Starter template source from `~/Developer/next-js-convex-clerk-stripe-template`.
 Rationale: That sibling repo already has the stronger Next.js, Convex, Clerk, Stripe, Tailwind, shadcn/ui, Resend, PostHog, and Sentry architecture we want: route groups, provider lanes, Convex-owned domain logic, Stripe-to-Convex billing sync, typed env boundaries, tests, and contributor conventions. The Program should import or copy a pinned, audited snapshot of that repo into `templates/starter-app/` rather than building the template from the current generated shell.
+Date: 2026-05-13.
+
+Decision: Pin the initial sibling template source by content digest instead of git commit.
+Rationale: The sibling seed directory did not contain `.git` metadata at import time. `templates/starter-app/template-source.json` records a deterministic digest and file count over the committed source snapshot so future changes must update provenance explicitly.
+Date: 2026-05-13.
+
+Decision: Keep the imported source snapshot in `templates/starter-app/source` with metadata beside it.
+Rationale: Keeping manifest and template docs outside `source/` prevents those Ship by Sunday ownership files from accidentally becoming customer template files when future generator code copies the source tree.
+Date: 2026-05-13.
+
+Decision: Record the source layout mismatch for the next slice instead of solving it implicitly.
+Rationale: The sibling seed is a single Next.js app root, while current generated output is a minimal monorepo. Generator migration should name and test the materialization mapping rather than hiding that choice in a broad copy operation.
+Date: 2026-05-13.
+
+Decision: Map the single-app template source into generated `apps/web/`.
+Rationale: Current generated repos need to keep their monorepo root scripts, workspace packages, docs, Program material, and validation commands. Mapping source paths into `apps/web/` lets the generator consume the pinned app source while preserving the generated repo contract customers already receive.
+Date: 2026-05-13.
+
+Decision: Keep the first materialized source subset no-provider safe.
+Rationale: The sibling source contains provider-heavy Sentry, Resend, API route, and source-test files that are valuable template material but would make clean-room generated repos require live provider setup too early. The adapter excludes those files explicitly, and generated stubs keep dependent Convex seams type-safe until provider setup and template app slices activate them deliberately.
+Date: 2026-05-13.
+
+Decision: Target generated app overlays at `apps/web/src/app`.
+Rationale: The pinned template uses Next.js `src/app`. Leaving generated overlays under root `apps/web/app` would create competing app trees. Retargeting overlays to `src/app` keeps the source layout coherent and preserves generated product/design truth.
+Date: 2026-05-13.
+
+Decision: Enforce generated overlay policy during repo snapshot materialization.
+Rationale: `templates/starter-app/template-source.json` is the source of truth for which generated files may replace pinned template source. Enforcing it before the final merge prevents accidental replacement of provider-heavy or unsafe template files while preserving the settled rule that allowed generated overlays win after materialization.
 Date: 2026-05-13.
 
 Decision: Keep the Starter template source under `templates/`, outside runtime app ownership.
@@ -218,8 +253,6 @@ Active child ExecPlans:
 
 Planned child ExecPlans:
 
-- `Introduce Pinned Starter Template Source` should create the template-source boundary and provenance model.
-- `Migrate Generated Template App To Template Source` should route the current generated app through the new boundary while preserving clean-room proof.
 - `Upgrade Generated Starter Operating Pack` should make the first generated customer Program include provider setup ExecPlans and a stronger Program/ExecPlan command surface.
 - `Beef Up Starter Template App` should build the real app starter experience.
 - `Add Direct Template Download Path` should use default facts to generate a no-questions Starter repo.
@@ -228,10 +261,12 @@ Planned child ExecPlans:
 Completed child ExecPlans:
 
 - [Parameterize Hosted Billing Proof By Offer](../../../exec-plans/completed/2026-05-13-parameterize-hosted-billing-proof-by-offer.md) shipped Starter/Workers hosted proof selection, release proof planner propagation, offer-specific assertions, docs, and focused validation.
+- [Introduce Pinned Starter Template Source](../../../exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md) imported the sibling skeleton into a repo-local pinned source snapshot, added provenance and overlay docs, and added compiler-side source validation.
+- [Migrate Generated Template App To Template Source](../../../exec-plans/completed/2026-05-13-migrate-generated-template-app-to-template-source.md) connected generated repo materialization to the pinned source snapshot, mapped source files into `apps/web/`, retargeted generated overlays, and preserved clean-room no-provider proof.
 
 ## Next Slice
 
-The next recommended slice is `Introduce Pinned Starter Template Source`. It should be written as a child ExecPlan from `planning-brief-2.md`. It is next because billing proof parity is complete and the template-source boundary must exist before generator migration or ChatGPT-style template implementation begins.
+The next recommended slice is `Upgrade Generated Starter Operating Pack`. It should be written as a child ExecPlan from `planning-brief-4.md`. It is next because generated customer downloads now consume the pinned app source, but provider setup is still represented more as instructions than as the first durable customer Program and ordered setup ExecPlans.
 
 ## Risks and Watchpoints
 
@@ -355,8 +390,15 @@ Current generated repo creation flows through:
     apps/web/app/api/download/repo/route.ts
     packages/codebase-compiler/src/bundle/build-review-download-zip.ts
     packages/codebase-compiler/src/repo-generation/materialize-repo-snapshot.ts
+    packages/codebase-compiler/src/repo-generation/materialize-starter-template-source.ts
     packages/codebase-compiler/src/repo-generation/render-generated-template-app-files.ts
+
+Current pinned template source boundary:
+
+    templates/starter-app/source
+    templates/starter-app/template-source.json
+    packages/codebase-compiler/src/repo-generation/starter-template-source-contract.ts
 
 ## Interfaces and Dependencies
 
-This Program depends on checkout proof code under `apps/web/scripts/`, release proof orchestration under `scripts/release/`, checkout route tests under `apps/web/tests/`, generated repo source under `packages/codebase-compiler/src/repo-generation/`, generated repo tests under `packages/codebase-compiler/tests/`, the protected Starter UI under `apps/web/app/(protected)/starter/`, and the public Starter page under `apps/web/app/starter/page.tsx`.
+This Program depends on checkout proof code under `apps/web/scripts/`, release proof orchestration under `scripts/release/`, checkout route tests under `apps/web/tests/`, pinned template source under `templates/starter-app/`, generated repo source under `packages/codebase-compiler/src/repo-generation/`, generated repo tests under `packages/codebase-compiler/tests/`, the protected Starter UI under `apps/web/app/(protected)/starter/`, and the public Starter page under `apps/web/app/starter/page.tsx`.
