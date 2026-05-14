@@ -1,5 +1,10 @@
 # Learnings
 
+## 2026-05-14 Webpack Dev Fallback For App Router Proof
+
+- Fact: In this checkout, `bun run --cwd apps/web dev:web:only -- -p 3100` can fail before rendering with a Turbopack `apps/web/proxy.ts` module parse error, while `bun run --cwd apps/web dev:web:webpack -- -p 3100` renders the same route successfully.
+  Verified by: Browser proof for `/worker-seal-team-6` on 2026-05-14. The default dev server returned the runtime overlay "Could not parse module '[project]/apps/web/proxy.ts', file not found"; the webpack dev server returned 200 responses for `/worker-seal-team-6` and `/`.
+
 ## 2026-05-13 Next Env Generation
 
 - Fact: Next.js generates `apps/web/next-env.d.ts`; `next dev` writes the route import through `.next/dev/types/routes.d.ts`, while `next build` writes it through `.next/types/routes.d.ts`.

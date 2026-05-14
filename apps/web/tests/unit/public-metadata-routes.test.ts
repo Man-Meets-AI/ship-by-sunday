@@ -14,7 +14,13 @@ describe("public metadata routes", () => {
 
 		expect(sitemapUrl).toContain("/sitemap.xml");
 		expect(publicRules?.userAgent).toBe("*");
-		expect(publicRules?.allow).toEqual(["/", "/starter", "/workers", "/blog"]);
+		expect(publicRules?.allow).toEqual([
+			"/",
+			"/starter",
+			"/workers",
+			"/worker-seal-team-6",
+			"/blog",
+		]);
 		expect(publicRules?.disallow).toEqual(
 			expect.arrayContaining([
 				"/sign-in",
@@ -45,6 +51,7 @@ describe("public metadata routes", () => {
 		expect(urls).toContain(`${metadataBase}/`);
 		expect(urls).toContain(`${metadataBase}/starter`);
 		expect(urls).toContain(`${metadataBase}/workers`);
+		expect(urls).toContain(`${metadataBase}/worker-seal-team-6`);
 		expect(urls).toContain(`${metadataBase}/blog`);
 		expect(urls).not.toContain(`${metadataBase}/docs`);
 		expect(urls).not.toContain(`${metadataBase}/docs/local-setup`);

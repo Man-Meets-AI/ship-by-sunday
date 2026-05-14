@@ -16,6 +16,10 @@ export const brandColorConfig = {
 	whiteHex: "#FDFDFD",
 } as const;
 
+export const supportContactConfig = {
+	telegramHref: "https://t.me/parkerrex",
+} as const;
+
 export const routeConfig = {
 	home: "/",
 	appHome: "/home",
@@ -26,6 +30,7 @@ export const routeConfig = {
 	execute: "/execute",
 	tutorials: "/starter/lessons",
 	workers: "/workers",
+	workerSealTeam6: "/worker-seal-team-6",
 	docs: "/docs",
 	blog: "/blog",
 	mission: "/mission",
@@ -107,7 +112,7 @@ export const starterHomePageConfig = {
 	},
 	supportWidget: {
 		enabled: true,
-		fallbackHref: "https://t.me/parkerrex",
+		fallbackHref: supportContactConfig.telegramHref,
 	},
 	heroPrimaryCta: {
 		kind: "checkout",

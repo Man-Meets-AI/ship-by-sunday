@@ -27,9 +27,9 @@ This inventory records the target map created by the first Program slice. It is 
 
 After the second slice, browser-facing source lives under `apps/web/src`. Browser routes live in `apps/web/src/app`, shared UI primitives live in `apps/web/src/components`, app utilities live in `apps/web/src/lib`, provider and boundary helpers temporarily live in `apps/web/src/platform`, product config lives in `apps/web/src/config`, content lives in `apps/web/src/content`, tests live in `apps/web/tests`, and Convex functions remain at `apps/web/convex`.
 
-The current route groups are `(marketing)`, `(auth)`, and `(app)`. Public product pages currently exist at `apps/web/src/app/(marketing)/page.tsx`, `apps/web/src/app/(marketing)/starter/page.tsx`, and `apps/web/src/app/(marketing)/workers/page.tsx`. The target still adds `/worker-seal-team-6`.
+The current route groups are `(marketing)`, `(auth)`, and `(app)`. Public product pages currently exist at `apps/web/src/app/(marketing)/page.tsx`, `apps/web/src/app/(marketing)/starter/page.tsx`, `apps/web/src/app/(marketing)/workers/page.tsx`, and `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx`. The Worker Seal Team 6 page is public and uses a direct scheduling handoff until the Cal.com embed, hosted fallback, and webhooks land.
 
-The current billing path is split between `apps/web/src/app/api/stripe/checkout/route.ts`, checkout UI routes under `apps/web/src/app/checkout`, helper modules under `apps/web/src/platform/billing`, and Convex HTTP webhook code in `apps/web/convex/http.ts` plus `apps/web/convex/stripeWebhook.ts`. The target copies the template's Next.js route-handler webhook and billing-route shape, while preserving Convex as the durable app-state owner.
+The current billing path is split between `apps/web/src/app/api/stripe/checkout/route.ts`, checkout UI routes under `apps/web/src/app/checkout`, helper modules under `apps/web/src/platform/billing`, and Convex HTTP webhook code in `apps/web/convex/http.ts` plus `apps/web/convex/stripeWebhook.ts`. The rebuilt Convex billing-domain foundation now exists in additive tables and `apps/web/convex/billing.ts`, with model helpers under `apps/web/convex/billing/`; current routes and webhooks have not yet been rewired to it. The target copies the template's Next.js route-handler webhook and billing-route shape, while preserving Convex as the durable app-state owner.
 
 ## Target Route Map
 
@@ -38,7 +38,7 @@ The current billing path is split between `apps/web/src/app/api/stripe/checkout/
 | `apps/web/src/app/(marketing)/page.tsx` | `apps/web/src/app/(marketing)/page.tsx` | Main public landing page; route group move completed. |
 | `apps/web/src/app/(marketing)/starter/page.tsx` | `apps/web/src/app/(marketing)/starter/page.tsx` | Public Starter sales page; route group move completed. |
 | `apps/web/src/app/(marketing)/workers/page.tsx` | `apps/web/src/app/(marketing)/workers/page.tsx` | Public Workers sales page; route group move completed. |
-| missing `/worker-seal-team-6` page | `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx` | Public Cal.com-backed service page. |
+| `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx` | `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx` | Public service page exists; Cal.com embed and provider wiring remain pending. |
 | `apps/web/src/app/(marketing)/blog/**` | `apps/web/src/app/(marketing)/blog/**` | Public content route, not protected app state; route group move completed. |
 | `apps/web/src/app/(marketing)/docs/**` | `apps/web/src/app/(marketing)/docs/**` | Public docs route unless a later slice intentionally protects specific docs; route group move completed. |
 | `apps/web/src/app/(auth)/**` | `apps/web/src/app/(auth)/**` | Clerk auth routes and auth shell. |
@@ -87,7 +87,7 @@ The current billing path is split between `apps/web/src/app/api/stripe/checkout/
 | `apps/web/convex/auth.config.ts` | `apps/web/convex/auth.config.ts` | Required for Clerk-backed Convex auth. |
 | `apps/web/convex/entitlements.ts` and `apps/web/convex/entitlements/**` | `apps/web/convex/entitlements.ts` plus `apps/web/convex/entitlements/**` | Product access implementation and public Convex function paths now use `entitlements`; the old `access` module has been removed. |
 | `apps/web/convex/checkoutClaims.ts` and `checkoutClaimsActions.ts` | Starter license, Workers subscription, and checkout intent modules | Replace claim-shaped state with product-shaped state as billing rebuild lands. |
-| `apps/web/convex/billing/validators.ts` | `apps/web/convex/billing/validators.ts` or product validators | Checkout validators now live under billing; root validator shim files have been removed. |
+| `apps/web/convex/billing.ts` and `apps/web/convex/billing/**` | Convex billing domain boundary | Rebuilt domain foundation exists with `api.billing.viewerBillingState`, internal sync mutations, validators, and model helpers for Starter licenses, Workers subscriptions, refunds, provider events, email deliveries, and Worker Seal Team 6 bookings. |
 | `apps/web/convex/migrations/legacyBillingReset.ts` | Temporary operator-run reset migration | Dry-run-first, confirm-gated cleanup for legacy product access and checkout handoff rows before the billing rebuild. |
 | `apps/web/convex/stripeWebhook.ts` and `stripeWebhookEvents.ts` | `apps/web/convex/billing/stripeSync.ts`, `processedStripeEvents`, and domain writers | Next.js verifies webhooks; Convex normalizes state and records idempotency. |
 | `apps/web/convex/http.ts` Stripe webhook route | Temporary compatibility only until route migration | Target webhook ingress is Next.js API route. |
@@ -97,11 +97,11 @@ The current billing path is split between `apps/web/src/app/api/stripe/checkout/
 | `apps/web/convex/codex.ts` and validators | Codex integration modules | Keep integration state separate from billing. |
 | `apps/web/convex/support.ts`, `supportAdmin.ts`, and `support/**` | Support domain modules | Keep support/admin state separate from billing. |
 | `apps/web/convex/observability.ts` and `observability/**` | Observability domain modules | Sentry/PostHog helpers belong in Next.js libs; durable incident state can stay in Convex. |
-| no current annual license module | `apps/web/convex/billing/licenses.ts` or `apps/web/convex/licenses.ts` | Starter annual license terms, renewal, expiration, refund voiding. |
-| no current subscription module | `apps/web/convex/billing/subscriptions.ts` or `apps/web/convex/subscriptions.ts` | Workers monthly/quarterly/annual subscription state. |
-| no current service booking module | `apps/web/convex/serviceBookings.ts` or `apps/web/convex/workerSealTeam6.ts` | Cal.com booking/payment/refund mirror and fulfillment state. |
-| no current Cal.com event ledger | `processedCalEvents` table and module | Required for idempotent booking webhooks. |
-| no current email delivery module | `emailDeliveries` table/module or product-specific email state | Required for exactly-once Resend workflows. |
+| `starterLicenseTerms` table and `apps/web/convex/billing/model.ts` | `apps/web/convex/billing/licenses.ts` or focused billing model files if later split | Starter annual license terms, renewal, expiration, and refund/voiding state now exist in the rebuilt billing domain. |
+| `workersSubscriptions` table and `apps/web/convex/billing/model.ts` | `apps/web/convex/billing/subscriptions.ts` or focused billing model files if later split | Workers monthly/quarterly/annual subscription state, failed-payment attention, cancellation, and refund state now exist in the rebuilt billing domain. |
+| `workerSealTeam6Bookings` table and `apps/web/convex/billing/model.ts` | `apps/web/convex/billing/serviceBookings.ts` or focused service module if later split | Cal.com booking/payment/refund mirror and fulfillment state now exist in the rebuilt billing domain; Cal.com webhook wiring is still pending. |
+| `processedCalEvents` table and `apps/web/convex/billing/model.ts` | Cal.com event ledger boundary | Required idempotency ledger now exists; webhook verification and event mapping remain pending. |
+| `billingEmailDeliveries` table and `apps/web/convex/billing/model.ts` | Email delivery state boundary | Required exactly-once email state now exists; Resend senders and templates remain pending. |
 
 ## Billing Target Summary
 
@@ -153,3 +153,11 @@ This inventory was created with the first child ExecPlan for the Program. The sl
 The second child ExecPlan moved the web app source tree into `apps/web/src`, removed the root `apps/web/app` router, renamed source-only route groups to `(marketing)`, `(auth)`, and `(app)`, and kept public/protected URLs plus checkout/API provider endpoint names unchanged. `apps/web/src/platform` and `apps/web/src/config` remain intentional temporary compatibility lanes until later provider/domain slices move them into final `src/lib/*` owners.
 
 The app-shell billing attention surface now exists as a typed prop and hidden-by-default banner. It does not read Convex billing state yet, does not add dismiss/snooze state, and does not change customer billing behavior; durable Workers billing attention still belongs to the later Convex and billing-domain slices.
+
+## Fifth Slice Completion Evidence
+
+The fifth child ExecPlan added the rebuilt Convex billing-domain foundation without changing live provider routes. New additive tables include `stripeCustomers`, `starterLicenseTerms`, `workersSubscriptions`, `productEntitlements`, `billingRefunds`, `processedStripeEvents`, `processedCalEvents`, `billingEmailDeliveries`, and `workerSealTeam6Bookings`. The public billing function module is `apps/web/convex/billing.ts`; it exposes `api.billing.viewerBillingState` plus internal sync/write functions for future trusted provider route slices. Focused tests live in `apps/web/tests/unit/convex-billing-domain.test.ts` and prove Starter renewal windows, Starter/Workers access derivation, Workers billing attention, provider event idempotency, email-delivery idempotency, and Worker Seal Team 6 paid-booking readiness.
+
+## Sixth Slice Completion Evidence
+
+The sixth child ExecPlan added the public Worker Seal Team 6 landing-page surface. The route now lives at `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx`, is linked from `PublicSiteHeader`, appears as a route card from `/`, and is included in `robots.ts`, `sitemap.ts`, and `apps/web/tests/unit/public-metadata-routes.test.ts`. It intentionally uses a direct scheduling handoff and does not add a Cal.com embed, hosted Cal.com fallback, app-owned checkout, auth gate, webhook, or email behavior.

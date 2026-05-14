@@ -225,3 +225,15 @@
 - Mistake: I ran `bun typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
   Impact: The Next build hook created a PostHog release and uploaded source maps while validation was running.
   Corrective action: Use `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for local validation unless an explicit release proof needs the upload.
+
+## 2026-05-13 Typecheck PostHog Upload Repeat
+
+- Mistake: I repeated the local validation mistake and ran root `bun typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The command completed successfully but created a PostHog release and uploaded source maps during a non-release validation run.
+  Corrective action: Run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for broad local typecheck proof and check recent mistakes before running production-build validation commands.
+
+## 2026-05-13 Backtick Rg Quoting
+
+- Mistake: I ran an `rg` command with backticks inside a double-quoted zsh argument.
+  Impact: zsh attempted command substitution and printed `command not found` errors; no files changed and validation commands were unaffected.
+  Corrective action: Single-quote search patterns that contain shell-special characters, especially backticks.

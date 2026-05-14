@@ -61,7 +61,7 @@ export default function Page() {
 							AI.
 						</h2>
 					</div>
-					<div className="grid gap-4 sm:grid-cols-2">
+					<div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
 						<div className="rounded-md border border-border/70 bg-background p-5">
 							<h3 className="font-semibold text-foreground">Starter</h3>
 							<p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -86,6 +86,21 @@ export default function Page() {
 								className="mt-4 inline-flex text-sm font-medium text-foreground underline underline-offset-4"
 							>
 								Open Workers
+							</Link>
+						</div>
+						<div className="rounded-md border border-border/70 bg-background p-5">
+							<h3 className="font-semibold text-foreground">
+								Worker Seal Team 6
+							</h3>
+							<p className="mt-2 text-sm leading-6 text-muted-foreground">
+								For teams with a live repo that need one hands-on hour to choose
+								and bound the first AI-worker loop.
+							</p>
+							<Link
+								href={routeConfig.workerSealTeam6}
+								className="mt-4 inline-flex text-sm font-medium text-foreground underline underline-offset-4"
+							>
+								Open Seal Team 6
 							</Link>
 						</div>
 					</div>

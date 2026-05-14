@@ -14,12 +14,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 		homeLastModified,
 		starterLastModified,
 		workersLastModified,
+		workerSealTeam6LastModified,
 		blogIndexLastModified,
 	] = await Promise.all([
 		getPublishedBlogSitemapRoutes(),
 		getPublicFileLastModified("app/(marketing)/page.tsx"),
 		getPublicFileLastModified("app/(marketing)/starter/page.tsx"),
 		getPublicFileLastModified("app/(marketing)/workers/page.tsx"),
+		getPublicFileLastModified("app/(marketing)/worker-seal-team-6/page.tsx"),
 		getPublicFileLastModified("app/(marketing)/blog/[[...slug]]/page.tsx"),
 	]);
 	const blogEntries = blogRoutes.map((route) => ({
@@ -47,6 +49,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			changeFrequency: "weekly",
 			priority: 0.9,
 			lastModified: workersLastModified,
+		},
+		{
+			url: new URL("/worker-seal-team-6", baseUrl).toString(),
+			changeFrequency: "weekly",
+			priority: 0.86,
+			lastModified: workerSealTeam6LastModified,
 		},
 		{
 			url: new URL("/blog", baseUrl).toString(),

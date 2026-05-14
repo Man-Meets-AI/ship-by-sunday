@@ -5,13 +5,14 @@ description: Change the current Man Meets AI public homepage without crossing th
 
 # Configure the Homepage
 
-The public homepage at `/` is now the Man Meets AI brand page. It is not the Starter sales page, not the Workers sales page, and not a checkout-first page.
+The public homepage at `/` is now the Man Meets AI brand page. It is not the Starter sales page, not the Workers sales page, not the Worker Seal Team 6 service page, and not a checkout-first page.
 
 ## Current public IA
 
 - `/`: Man Meets AI brand, media, founder, and routing page
 - `/starter`: public Starter offer page
 - `/workers`: public Workers offer page
+- `/worker-seal-team-6`: public Worker Seal Team 6 service page
 - `/blog`: public editorial index and posts
 - `/docs`: direct-link docs surface; do not promote it in primary public navigation
 
@@ -22,19 +23,21 @@ When you change the public homepage or public marketing navigation, inspect thes
 1. `src/app/(marketing)/page.tsx`
 2. `src/app/(marketing)/starter/page.tsx`
 3. `src/app/(marketing)/workers/page.tsx`
-4. `src/app/_components/public-site/public-site-header.tsx`
-5. `src/config/product.ts`
-6. `src/app/robots.ts`
-7. `src/app/sitemap.ts`
-8. `tests/unit/public-metadata-routes.test.ts`
+4. `src/app/(marketing)/worker-seal-team-6/page.tsx`
+5. `src/app/_components/public-site/public-site-header.tsx`
+6. `src/config/product.ts`
+7. `src/app/robots.ts`
+8. `src/app/sitemap.ts`
+9. `tests/unit/public-metadata-routes.test.ts`
 
 The old generated-codebase homepage system under `src/app/_components/home-page/` still exists for compatibility and tests, but it is no longer the public `/` route contract.
 
 ## Rules
 
-- Keep `/` informational. It should route visitors by intent: “I have an idea” goes to `/starter`; “I have a codebase” goes to `/workers`.
+- Keep `/` informational. It should route visitors by intent: “I have an idea” goes to `/starter`; “I have a codebase” goes to `/workers`; direct, high-touch service interest goes to `/worker-seal-team-6`.
 - Do not put docs, tutorials, or generated-codebase links in the primary public nav.
 - Put checkout buttons on `/starter` and `/workers`, not on the Man Meets AI index.
+- Do not put an app-owned checkout button on `/worker-seal-team-6`. Worker Seal Team 6 booking is Cal.com-owned once provider setup is live, with direct scheduling as the truthful interim handoff.
 - Starter checkout must use offer id `starter` and route successful buyers to `/starter/home`.
 - Workers checkout must use offer id `workers` and route successful buyers to `/workers/setup`.
 - Keep `/workers` public. Only Worker operational routes such as `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/loops`, `/workers/runs`, and `/workers/privacy` are protected.

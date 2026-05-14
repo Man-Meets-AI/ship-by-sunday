@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as billing from "../billing.js";
+import type * as billing_model from "../billing/model.js";
+import type * as billing_types from "../billing/types.js";
 import type * as billing_validators from "../billing/validators.js";
 import type * as checkoutClaims from "../checkoutClaims.js";
 import type * as checkoutClaimsActions from "../checkoutClaimsActions.js";
@@ -69,6 +72,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  billing: typeof billing;
+  "billing/model": typeof billing_model;
+  "billing/types": typeof billing_types;
   "billing/validators": typeof billing_validators;
   checkoutClaims: typeof checkoutClaims;
   checkoutClaimsActions: typeof checkoutClaimsActions;
