@@ -68,7 +68,8 @@ export function CodebaseStageTextField({
 				{inputKind === "textarea" ? (
 					<Textarea
 						id={inputId}
-						className="min-h-24 py-2.5 text-sm leading-relaxed"
+						className="min-h-24"
+						textareaClassName="min-h-24 py-2.5 text-sm leading-relaxed"
 						value={value}
 						placeholder={placeholder}
 						onChange={updateCodebaseTextField}
@@ -80,7 +81,8 @@ export function CodebaseStageTextField({
 					<Input
 						id={inputId}
 						type={inputKind === "number" ? "number" : "text"}
-						className={isShortField ? "h-10 max-w-48" : "h-10"}
+						className={isShortField ? "max-w-48" : undefined}
+						inputClassName="h-10 leading-10 sm:h-10 sm:leading-10"
 						value={value}
 						placeholder={placeholder}
 						onChange={updateCodebaseTextField}

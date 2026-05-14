@@ -140,7 +140,7 @@ export function CodebaseDemoPricingCard({
 								}
 							}}
 							aria-describedby={priceHelperId}
-							className="pl-7"
+							inputClassName="pl-7"
 						/>
 					</div>
 					<p

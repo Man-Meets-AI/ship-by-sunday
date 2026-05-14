@@ -6,7 +6,6 @@ import { ThemeProvider } from "next-themes";
 
 import { projectFontVariables } from "@/app/fonts";
 import { Toaster } from "@/components/ui/sonner";
-import { generatedDesignSystem } from "@/config/generated-design-system";
 import { manifestConfig, productConfig, routeConfig } from "@/config/product";
 import { sessionTaskUrls } from "@/platform/auth/auth-route-utils";
 import { clerkProviderAppearance } from "@/lib/clerk-auth-appearance";
@@ -14,13 +13,9 @@ import { ConvexClientProvider } from "@/platform/convex/convex-client-provider";
 import { publicEnv } from "@/platform/env/public";
 import { serverEnv } from "@/platform/env/server";
 import { getMetadataBase } from "@/platform/next/metadata-base";
-import { buildGeneratedDesignSystemCss } from "@/lib/generated-design-system-css";
 import "./globals.css";
 
 void publicEnv.NEXT_PUBLIC_CLERK_SIGN_IN_URL;
-const generatedDesignSystemCss = buildGeneratedDesignSystemCss(
-	generatedDesignSystem,
-);
 
 export const metadata: Metadata = {
 	metadataBase: getMetadataBase(),
@@ -70,9 +65,6 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className={projectFontVariables} suppressHydrationWarning>
-			<head>
-				<style id="generated-design-system">{generatedDesignSystemCss}</style>
-			</head>
 			<body>
 				<ClerkProvider
 					appearance={clerkProviderAppearance}

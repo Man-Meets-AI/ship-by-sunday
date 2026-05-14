@@ -105,7 +105,8 @@ export function CopyPromptResourceCard({
 							readOnly
 							value={prompt}
 							rows={14}
-							className="min-h-[200px] resize-y border-border/40 bg-background/50 font-mono text-[13px] leading-relaxed shadow-none focus-visible:ring-1"
+							className="min-h-[200px] border-border/40 bg-background/50 shadow-none has-focus-visible:ring-1"
+							textareaClassName="min-h-[200px] resize-y font-mono text-[13px] leading-relaxed"
 						/>
 					</div>
 				) : (

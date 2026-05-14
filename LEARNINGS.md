@@ -85,3 +85,8 @@
 
 - Fact: An unauthenticated in-app browser navigation to `/workers/setup` redirects to the custom sign-in screen.
   Verified by: Running `bun run --cwd apps/web dev:web:only` and opening `http://localhost:3000/workers/setup` in the in-app browser produced `/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fworkers%2Fsetup`.
+
+## 2026-05-14 T3 Code App Foundation
+
+- Fact: The default `apps/web` Turbopack dev server can panic during browser smoke with `Failed to write app endpoint /page` caused by `app_dir must be a directory`; the webpack dev script is stable for this proof path.
+  Verified by: `bun run --cwd apps/web dev:web:only -- --port 3000` repeatedly emitted the Turbopack panic while Playwright navigated public pages, then `bun run --cwd apps/web dev:web:webpack -- --port 3000` completed the desktop and mobile `/starter` token smoke.

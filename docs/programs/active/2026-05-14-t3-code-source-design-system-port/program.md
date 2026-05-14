@@ -41,6 +41,7 @@ The guiding rule is simple: when the current Ship by Sunday design docs, fronten
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-1.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-2.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-3.md`
+- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
 - T3 Code source app: `/Users/bazelrex/Developer/t3code/apps/web`
@@ -76,6 +77,11 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-14: Added `planning-brief-2.md` and `structure-map-t3-code-to-ship-by-sunday.md` to steer the next slice toward structure and doctrine retirement before token work.
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md`, moving Worker Seal Team 6 Cal booking from route-local underscore folders to `apps/web/src/components/workerSealTeam6` and aligning app structure docs.
 - [x] 2026-05-14: Added `planning-brief-3.md` for the app foundation slice and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md`, making DM Sans, T3 Code light/dark tokens, additive radii, and removal of tracked-app generated-design CSS injection the `apps/web` foundation.
+- [x] 2026-05-14: Added `planning-brief-4.md` for the shared primitive slice and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-button-badge-primitives.md`, moving Button and Badge to T3 Code class recipes while preserving current Radix `asChild` call-site compatibility.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md`, moving Card, Alert, Skeleton, and Kbd to T3 Code display primitive recipes while preserving current call-site aliases.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`, moving Input and Textarea to T3 Code form-control wrappers with native compatibility escape hatches.
 
 ## Decision Log
 
@@ -116,15 +122,18 @@ Rationale: Those screens carry P0/P1 product flows. Visual rewrites must preserv
 
 Active child ExecPlans:
 
-None.
+- `docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md`: port Field, Label, Separator, Checkbox, Switch, and RadioGroup to T3 Code recipes while preserving current Radix call-site compatibility.
 
 Completed child ExecPlans:
 
 - `docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md`: retired old doctrine routing as active guidance, added the structural source map, preserved Next route groups, and proved one underscore implementation-folder migration by moving Worker Seal Team 6 Cal booking into plain component modules.
+- `docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md`: installed the tracked app foundation by loading DM Sans, copying T3 Code-compatible light and dark tokens, additive radius semantics, no-transition/noise/scrollbar base styles, and removing generated-design CSS injection from the Next root layout.
+- `docs/exec-plans/completed/2026-05-14-t3-code-button-badge-primitives.md`: copied T3 Code Button and Badge class recipes into the shared primitives while keeping existing variants, sizes, and `asChild` behavior compatible.
+- `docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md`: copied T3 Code Card, Alert, Skeleton, and Kbd recipes into the shared primitives while keeping `CardContent`, `Alert variant="destructive"`, className passthrough, and `KbdGroup` compatibility.
+- `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`: copied T3 Code Input and Textarea wrapper/control recipes into native compatibility primitives while keeping native props, refs, and explicit native field class escape hatches.
 
 Planned child slices:
 
-- App foundation: update app font/theme/global token plumbing, dark/light behavior, radius/base styles, and remove old generated design-system overrides from the tracked app runtime.
 - Shared primitive migration: port or adapt T3 Code Base UI primitives into `apps/web/src/components/ui`, add dependencies, and preserve call-site compatibility deliberately.
 - App shell and operational dashboard migration: replace the current AppShell/header/local-rail feel with a T3 Code sidebar-first shell across protected app, codebase flow, workers, settings, support, and admin surfaces while moving implementation out of underscore folders.
 - Public surfaces migration: rebuild marketing pages, homepage sections, docs chrome, blog prose, starter/workers pages, and public support surfaces with the T3 Code system.
@@ -135,11 +144,11 @@ Planned child slices:
 
 ## Next Slice
 
-The next recommended slice is `App foundation`.
+The next recommended slice is `Form and selection primitive migration`.
 
-That slice should use `planning-brief-3.md` to install the first tracked-app runtime foundation: DM Sans, T3 Code light/dark tokens, additive radius semantics, `.dark` behavior, safe base styles, and removal or neutralization of the tracked app's old generated design-system style injection.
+That slice should continue using `planning-brief-4.md` and move the next form and selection primitive family toward T3 Code. Good candidates are Field, Label, Checkbox, Switch, RadioGroup, Select, Popover, Tooltip, and Separator. This is the point where Base UI dependency adoption should be decided deliberately, because T3 Code's heavier interactive primitives rely on Base UI APIs more than the primitive slices completed so far.
 
-That slice does not need to implement generated-codebase changes. Generated codebase implementation should wait for a later Program slice.
+That slice does not need to implement generated-codebase changes. Generated codebase implementation should wait until the tracked app primitive strategy is proven.
 
 ## Risks and Watchpoints
 

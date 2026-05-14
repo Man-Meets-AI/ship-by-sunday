@@ -1,5 +1,11 @@
 import localFont from "next/font/local";
-import { Bebas_Neue, Instrument_Serif, Inter } from "next/font/google";
+import { Bebas_Neue, DM_Sans, Instrument_Serif, Inter } from "next/font/google";
+
+export const dmSans = DM_Sans({
+	subsets: ["latin"],
+	display: "swap",
+	variable: "--font-dm-sans",
+});
 
 export const bebasNeue = Bebas_Neue({
 	subsets: ["latin"],
@@ -53,6 +59,7 @@ export const berkeleyMono = localFont({
 });
 
 export const projectFontVariables = [
+	dmSans.variable,
 	bebasNeue.variable,
 	instrumentSerif.variable,
 	inter.variable,

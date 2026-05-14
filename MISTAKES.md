@@ -285,3 +285,9 @@
 - Mistake: I again ran root `bun typecheck` without disabling PostHog source map upload during local validation.
   Impact: The Next build hook uploaded source maps while validating the Worker Seal Team 6 Cal.com slice.
   Corrective action: Run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for local validation unless the current task explicitly requires production source-map upload.
+
+## 2026-05-14 ExecPlan Lint Flag Mixup
+
+- Mistake: I passed multiple ExecPlan paths after a single `--plan` flag instead of using `--paths`.
+  Impact: The docs lint command failed before validating the files; no source files changed from the failed command.
+  Corrective action: Use repeated `--plan` flags or a single `--paths` list when linting multiple ExecPlans.
