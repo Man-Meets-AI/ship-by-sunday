@@ -324,12 +324,12 @@ export function runProgramRunSliceEffect(
 				repoRootDir: resolvedParams.repoRootDir,
 				timeoutMs: resolvedParams.timeoutMs,
 			});
-			yield* captureSyncError(() => assertProofSucceeded(proofResults));
 			yield* writeProofSummaryEffect({
 				proofResults,
 				repoRootDir: resolvedParams.repoRootDir,
 				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
 			});
+			yield* captureSyncError(() => assertProofSucceeded(proofResults));
 			yield* completePhaseEffect(
 				resolvedParams.repoRootDir,
 				resolvedParams.runDirectoryRelativePath,
@@ -410,12 +410,12 @@ export function runProgramRunSliceEffect(
 					repoRootDir: resolvedParams.repoRootDir,
 					timeoutMs: resolvedParams.timeoutMs,
 				});
-				yield* captureSyncError(() => assertProofSucceeded(proofResults));
 				yield* writeProofSummaryEffect({
 					proofResults,
 					repoRootDir: resolvedParams.repoRootDir,
 					runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
 				});
+				yield* captureSyncError(() => assertProofSucceeded(proofResults));
 				yield* completePhaseEffect(
 					resolvedParams.repoRootDir,
 					resolvedParams.runDirectoryRelativePath,
@@ -441,24 +441,6 @@ export function runProgramRunSliceEffect(
 					"review",
 				);
 			}
-
-			proofResults = yield* runProgramRunSliceProofCommandsEffect({
-				commands: proofCommands,
-				repoRootDir: resolvedParams.repoRootDir,
-				timeoutMs: resolvedParams.timeoutMs,
-			});
-			yield* captureSyncError(() => assertProofSucceeded(proofResults));
-			yield* writeProofSummaryEffect({
-				proofResults,
-				repoRootDir: resolvedParams.repoRootDir,
-				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
-			});
-			yield* completePhaseEffect(
-				resolvedParams.repoRootDir,
-				resolvedParams.runDirectoryRelativePath,
-				state,
-				"reproof",
-			);
 
 			yield* syncProgramRunSliceDocsEffect({
 				planPath: resolvedParams.planPath,
@@ -2000,23 +1982,8 @@ function isEnvironmentAssignmentToken(token: string) {
 }
 
 function buildProofCommandEnvironment(extraEnv: NodeJS.ProcessEnv) {
-	const env: NodeJS.ProcessEnv = {};
-	for (const key of [
-		"PATH",
-		"HOME",
-		"LANG",
-		"LC_ALL",
-		"TERM",
-		"TMPDIR",
-		"USER",
-	] as const) {
-		const value = process.env[key];
-		if (value) {
-			env[key] = value;
-		}
-	}
 	return {
-		...env,
+		...process.env,
 		...extraEnv,
 	};
 }

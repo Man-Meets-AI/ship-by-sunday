@@ -115,11 +115,15 @@ describe("program run slice", () => {
 	});
 
 	it("supports injecting the process service through the Effect run-slice path", async () => {
-		const repositoryRoot = await createProgramRunFixture();
+		const proofCommand = envAccessCommand("implemented.txt");
+		const repositoryRoot = await createProgramRunFixture({
+			planText: buildFixturePlan({ testCommands: [proofCommand] }),
+		});
 		const processRequests: Array<{
 			args: string[];
 			command: string;
 			cwd?: string;
+			env: NodeJS.ProcessEnv;
 			timeoutMs: number;
 		}> = [];
 		const stubBoundedProcessService = Layer.succeed(
@@ -130,6 +134,7 @@ describe("program run slice", () => {
 						args: request.args,
 						command: request.command,
 						cwd: request.cwd,
+						env: request.env,
 						timeoutMs: request.timeoutMs,
 					});
 					return Effect.succeed({
@@ -142,58 +147,76 @@ describe("program run slice", () => {
 			}),
 		);
 
-		const result = await Effect.runPromise(
-			runProgramRunSliceEffect({
-				executor: createFakeExecutor({
-					reviews: [
-						{
-							findings: [],
-							openQuestions: [],
-							validationNotes: ["Stubbed proof passed."],
-						},
-					],
-				}),
-				planPath: PLAN_PATH,
-				programId: PROGRAM_ID,
-				repoRootDir: repositoryRoot,
-				runId: "run-effect-injected-process",
-				timeoutMs: 15_000,
-			}).pipe(
-				Effect.provide(
-					Layer.mergeAll(
-						stubBoundedProcessService,
-						NodeCodexExecServiceLive,
-						NodeLocalProjectStateServiceLive,
-						NodeRepositoryBoundaryServiceLive,
+		const previousAmbientProofEnv = process.env.SBS_AMBIENT_PROOF_ENV;
+		process.env.SBS_AMBIENT_PROOF_ENV = "ambient";
+		try {
+			const result = await Effect.runPromise(
+				runProgramRunSliceEffect({
+					executor: createFakeExecutor({
+						reviews: [
+							{
+								findings: [],
+								openQuestions: [],
+								validationNotes: ["Stubbed proof passed."],
+							},
+						],
+					}),
+					planPath: PLAN_PATH,
+					programId: PROGRAM_ID,
+					repoRootDir: repositoryRoot,
+					runId: "run-effect-injected-process",
+					timeoutMs: 15_000,
+				}).pipe(
+					Effect.provide(
+						Layer.mergeAll(
+							stubBoundedProcessService,
+							NodeCodexExecServiceLive,
+							NodeLocalProjectStateServiceLive,
+							NodeRepositoryBoundaryServiceLive,
+						),
 					),
 				),
-			),
-		);
+			);
 
-		expect(result.finalStatus).toBe("complete");
-		expect(result.proofResults).toEqual([
-			expect.objectContaining({
-				command: accessCommand("implemented.txt"),
-				stdoutTail: "stubbed proof output",
-				succeeded: true,
-			}),
-		]);
-		expect(processRequests).toEqual(
-			expect.arrayContaining([
+			expect(result.finalStatus).toBe("complete");
+			expect(result.proofResults).toEqual([
+				expect.objectContaining({
+					command: proofCommand,
+					stdoutTail: "stubbed proof output",
+					succeeded: true,
+				}),
+			]);
+			const proofRequests = processRequests.filter(
+				(request) => request.command === "node",
+			);
+			expect(proofRequests).toHaveLength(1);
+			expect(proofRequests[0]).toEqual(
 				expect.objectContaining({
 					args: ["-e", "require('node:fs').accessSync('implemented.txt')"],
 					command: "node",
 					cwd: repositoryRoot,
 					timeoutMs: 15_000,
 				}),
-				expect.objectContaining({
-					args: ["status", "--short", "--untracked-files=all"],
-					command: "git",
-					cwd: repositoryRoot,
-					timeoutMs: 15_000,
-				}),
-			]),
-		);
+			);
+			expect(proofRequests[0]?.env.SBS_AMBIENT_PROOF_ENV).toBe("ambient");
+			expect(proofRequests[0]?.env.SBS_INLINE_PROOF_ENV).toBe("inline");
+			expect(processRequests).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						args: ["status", "--short", "--untracked-files=all"],
+						command: "git",
+						cwd: repositoryRoot,
+						timeoutMs: 15_000,
+					}),
+				]),
+			);
+		} finally {
+			if (previousAmbientProofEnv === undefined) {
+				delete process.env.SBS_AMBIENT_PROOF_ENV;
+			} else {
+				process.env.SBS_AMBIENT_PROOF_ENV = previousAmbientProofEnv;
+			}
+		}
 	});
 
 	it("fixes must-fix review findings and reruns proof and review", async () => {
@@ -334,6 +357,15 @@ describe("program run slice", () => {
 		) as { currentPhase: string; errorMessage: string };
 		expect(state.currentPhase).toBe("blocked");
 		expect(state.errorMessage).toContain("Program run slice proof failed.");
+		await expect(
+			readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-proof-fails/proof-summary.md",
+				),
+				"utf8",
+			),
+		).resolves.toContain("Status: failed");
 	});
 
 	it("blocks when review findings remain after capped fix attempts", async () => {
@@ -937,6 +969,10 @@ function buildFixturePlan(
 
 function accessCommand(repoRelativePath: string) {
 	return `node -e "require('node:fs').accessSync('${repoRelativePath}')"`;
+}
+
+function envAccessCommand(repoRelativePath: string) {
+	return `SBS_INLINE_PROOF_ENV=inline ${accessCommand(repoRelativePath)}`;
 }
 
 function createFakeExecutor(params: {

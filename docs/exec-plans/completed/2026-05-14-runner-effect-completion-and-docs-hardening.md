@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Finish local-runner Node and Effect migration docs, broad validation, and Program closeout.
 post_build_recap: The local-runner README now states the Node-first shipped runtime, npm Worker default, and migrated Effect service boundaries; broad local-runner tests, package static checks, build, Worker compatibility smoke, package smoke, plan lint, markdown lint, Program lint, scoped whitespace checks, and repo-level format, lint, and typecheck passed.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-9.md
+planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-9.md
 read_when:
   - Closing the local-runner Node and Effect migration Program.
   - Validating local-runner README/runtime docs.

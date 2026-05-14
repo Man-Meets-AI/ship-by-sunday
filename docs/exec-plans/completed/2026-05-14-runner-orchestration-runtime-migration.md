@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move the Program run-slice orchestration path onto Effect helpers while keeping the existing CLI promise API stable.
 post_build_recap: Program run-slice now has an Effect orchestration helper, the public promise API delegates through live Effect services, proof and git process execution use BoundedProcessService, Codex execution uses CodexExecService, and focused injection coverage proves the path without launching a real proof command.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-8.md
+planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-8.md
 read_when:
   - Resuming the local-runner Program run-slice Effect migration.
   - Validating planning brief 8 for local-runner orchestration.
