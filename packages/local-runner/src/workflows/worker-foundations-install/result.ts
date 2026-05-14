@@ -1,15 +1,25 @@
 import path from "node:path";
 
+import { Effect, Layer } from "effect";
+
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../../effect/runtime";
 import type { JsonValue } from "../../core/json-value";
 import {
-	readRunnerCredential,
+	type LocalRunnerHomeService,
+	NodeLocalRunnerHomeServiceLive,
+	readRunnerCredentialEffect,
 	resolveLocalRunnerHome,
 } from "../../core/local-runner-home";
 import { assertSyncSafeValue } from "../../core/redaction";
 import {
 	createRunnerEvent,
-	flushRunnerEvents,
-	queueRunnerEvent,
+	flushRunnerEventsEffect,
+	NodeRunnerEventServiceLive,
+	queueRunnerEventEffect,
+	type RunnerEventService,
 	type RunnerEventPayload,
 } from "../../core/runner-events";
 import { resolveWorkerHome } from "./env";
@@ -34,15 +44,42 @@ import type {
 export async function finishAndMaybeSyncResult(
 	input: FinishResultInput,
 ): Promise<WorkerInstallResult> {
-	const result = finishResult(input);
-	await emitWorkerInstallRunnerEvent({
-		context: input.context,
-		result,
-	}).catch(() => undefined);
-	return result;
+	return await runLocalRunnerEffect(
+		finishAndMaybeSyncResultEffect(input).pipe(
+			Effect.provide(
+				Layer.merge(NodeLocalRunnerHomeServiceLive, NodeRunnerEventServiceLive),
+			),
+		),
+	);
 }
 
-async function emitWorkerInstallRunnerEvent({
+export function finishAndMaybeSyncResultEffect(
+	input: FinishResultInput,
+): Effect.Effect<
+	WorkerInstallResult,
+	Error,
+	LocalRunnerHomeService | RunnerEventService
+> {
+	return Effect.flatMap(
+		Effect.try({
+			try: () => finishResult(input),
+			catch: normalizeLocalRunnerEffectError,
+		}),
+		(result) =>
+			Effect.flatMap(
+				Effect.catchAll(
+					emitWorkerInstallRunnerEventEffect({
+						context: input.context,
+						result,
+					}),
+					() => Effect.void,
+				),
+				() => Effect.succeed(result),
+			),
+	);
+}
+
+function emitWorkerInstallRunnerEventEffect({
 	context,
 	result,
 }: {
@@ -51,27 +88,36 @@ async function emitWorkerInstallRunnerEvent({
 }) {
 	const payload = buildWorkerInstallRunnerEventPayload(result);
 	if (!payload) {
-		return;
+		return Effect.void;
 	}
 
-	const credential = await readRunnerCredential({
-		repositoryRoot: context.repositoryRoot,
-		runnerHome: resolveLocalRunnerHome(context.env),
-	});
-	if (!credential) {
-		return;
-	}
+	return Effect.flatMap(
+		readRunnerCredentialEffect({
+			repositoryRoot: context.repositoryRoot,
+			runnerHome: resolveLocalRunnerHome(context.env),
+		}),
+		(credential) => {
+			if (!credential) {
+				return Effect.void;
+			}
 
-	const event = createRunnerEvent({
-		projectId: credential.projectId,
-		runnerId: credential.runnerId,
-		payload,
-	});
-	await queueRunnerEvent(context.repositoryRoot, event);
-	await flushRunnerEvents({
-		repositoryRoot: context.repositoryRoot,
-		credential,
-	});
+			const event = createRunnerEvent({
+				projectId: credential.projectId,
+				runnerId: credential.runnerId,
+				payload,
+			});
+			return Effect.flatMap(
+				queueRunnerEventEffect(context.repositoryRoot, event),
+				() =>
+					Effect.asVoid(
+						flushRunnerEventsEffect({
+							repositoryRoot: context.repositoryRoot,
+							credential,
+						}),
+					),
+			);
+		},
+	);
 }
 
 function buildWorkerInstallRunnerEventPayload(
