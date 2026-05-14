@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Give the hosted Stripe proof an explicit Starter or Workers offer selector while keeping Starter as the default proof path.
 post_build_recap: Added the shared hosted proof offer selector, wired production/dev-card proof scripts and release proof planning through it, documented Starter and Workers expectations, and validated helper, planner, checkout route, docs, lint, format, and typecheck surfaces.
 program_id: starter-template-source-and-billing-proof
-planning_brief: docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-1.md
 read_when:
   - Updating hosted Stripe billing proof scripts.
   - Changing Starter or Workers checkout metadata, pricing, or protected access proof.
@@ -140,7 +140,7 @@ Run planning and docs checks after edits:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-parameterize-hosted-billing-proof-by-offer.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-parameterize-hosted-billing-proof-by-offer.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md docs/release-workflow.md apps/web/content/docs/commands.mdx apps/web/content/docs/deploy-to-vercel.mdx apps/web/content/docs/ship-live.mdx .github/codex/release-policy.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-parameterize-hosted-billing-proof-by-offer.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md docs/release-workflow.md apps/web/content/docs/commands.mdx apps/web/content/docs/deploy-to-vercel.mdx apps/web/content/docs/ship-live.mdx .github/codex/release-policy.md
 
 Run broader relevant checks if the focused proof surface passes:
 
@@ -157,8 +157,8 @@ If the release planner emits the wrong command, fix the planner arguments rather
 
 ## Artifacts and Notes
 
-- Program packet: `docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/`
-- Child slice brief: `docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-1.md`
+- Program packet: `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/`
+- Child slice brief: `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-1.md`
 - No sibling repo writes are allowed in this slice.
 
 ## Interfaces and Dependencies

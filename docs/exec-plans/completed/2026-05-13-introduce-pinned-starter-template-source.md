@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Establish a repo-local pinned Starter template source boundary that future generator work can consume deterministically.
 post_build_recap: Imported the sibling Starter skeleton into a repo-local source snapshot, pinned it by manifest digest, documented ownership and overlay rules, and added compiler-side validation plus tests.
 program_id: starter-template-source-and-billing-proof
-planning_brief: docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-2.md
 read_when:
   - Resuming the pinned Starter template-source slice.
   - Updating the Starter template source snapshot.
@@ -131,7 +131,7 @@ Run planning and docs validation:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-2.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-3.md templates/AGENTS.md templates/starter-app/README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-2.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-3.md templates/AGENTS.md templates/starter-app/README.md
 
 Before completion, run:
 
@@ -163,7 +163,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
 	bun run test:packages
 	bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md
 	bun run programs:lint
-	bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-2.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-3.md templates/AGENTS.md templates/starter-app/README.md
+	bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-2.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-3.md templates/AGENTS.md templates/starter-app/README.md
 	git diff --check
 
 ## Idempotence and Recovery

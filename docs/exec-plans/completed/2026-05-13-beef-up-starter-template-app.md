@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Replace the Starter template's customer-facing Notes sample with a protected ChatGPT-style BYO OpenAI chat app while preserving no-provider generated repo proof.
 post_build_recap: The pinned Starter template source now ships a protected `/chat` app with Convex-owned conversations/messages, a ChatGPT-style sidebar/composer/model selector, server-only OpenAI Responses streaming, setup-gated `OPENAI_API_KEY`, and updated generator contracts that preserve clean-room no-provider proof.
 program_id: starter-template-source-and-billing-proof
-planning_brief: docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-5.md
+planning_brief: docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-5.md
 read_when:
   - Resuming the Starter template chat-app slice.
   - Changing generated Starter app routes, Convex chat state, or OpenAI setup behavior.
@@ -107,7 +107,7 @@ Run focused validation before completion:
     bun run --cwd packages/codebase-compiler format:check
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-beef-up-starter-template-app.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-beef-up-starter-template-app.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-beef-up-starter-template-app.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md
 
 ## Validation and Acceptance
 
@@ -123,7 +123,7 @@ Run these commands before completion:
     bun run --cwd packages/codebase-compiler format:check
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-beef-up-starter-template-app.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-beef-up-starter-template-app.md docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-beef-up-starter-template-app.md docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md
 
 ## Idempotence and Recovery
 
@@ -131,9 +131,9 @@ Keep edits scoped to the Starter template source, compiler generation contracts,
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md`.
+Owning Program: `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-5.md`.
+Planning brief: `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-5.md`.
 
 OpenAI docs checked for this slice: `https://developers.openai.com/api/docs/guides/latest-model`, `https://developers.openai.com/api/docs/guides/streaming-responses`, and `https://developers.openai.com/api/docs/guides/migrate-to-responses#additional-differences`.
 

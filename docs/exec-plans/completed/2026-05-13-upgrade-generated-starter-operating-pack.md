@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Make generated Starter repos ship a durable setup Program and ordered setup ExecPlans for core boot, Clerk, Convex, Stripe, and first product work.
 post_build_recap: Generated Starter repos now ship a first customer Program with active Core Boot, Clerk Setup, Convex Setup, Stripe Setup, and First Product Slice ExecPlans, plus stronger generated operating-pack validation and onboarding guidance.
 program_id: starter-template-source-and-billing-proof
-planning_brief: docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-4.md
 read_when:
   - Upgrading generated customer Program and ExecPlan material.
   - Changing generated repo operating-pack scripts or docs.
@@ -107,9 +107,9 @@ Keep edits scoped to generated operating-pack compiler code, focused tests, and 
 
 ## Artifacts and Notes
 
-Owning Program: `docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/program.md`.
+Owning Program: `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/program.md`.
 
-Planning brief: `docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-4.md`.
+Planning brief: `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-4.md`.
 
 ## Interfaces and Dependencies
 

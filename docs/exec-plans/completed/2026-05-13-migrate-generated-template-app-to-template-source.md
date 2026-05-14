@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Make generated Starter repo materialization consume the pinned Starter template source snapshot before generated overlays are applied.
 post_build_recap: Generated Starter repo materialization now validates and maps the pinned template source into apps/web before generated overlays, with clean-room no-provider proof still passing.
 program_id: starter-template-source-and-billing-proof
-planning_brief: docs/programs/active/2026-05-13-starter-template-source-and-billing-proof/planning-brief-3.md
+planning_brief: docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/planning-brief-3.md
 read_when:
   - Resuming generated template-source migration.
   - Changing how the generated Starter repo copies app source.
