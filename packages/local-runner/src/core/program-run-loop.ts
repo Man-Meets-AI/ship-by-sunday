@@ -6,8 +6,10 @@ import path from "node:path";
 import { parseMarkdownFrontmatter } from "../../../../scripts/markdown-metadata/frontmatter";
 import {
 	isProgramId,
+	resolveProgramPacketPath,
 	resolveCurrentPlanningBrief,
 } from "../../../../scripts/programs/briefs";
+import { runCodexExec } from "./codex-exec-runner";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
 import {
 	ensureRepositoryDirectory,
@@ -20,6 +22,7 @@ import {
 } from "./program-run-slice";
 
 const DEFAULT_MAX_SLICES = 3;
+const DEFAULT_MAX_PLANNING_STEPS = 6;
 const DEFAULT_COMMAND_TIMEOUT_MS = 30 * 60 * 1000;
 const PROGRAM_RUNS_ROOT = ".sbs/program-runs";
 
@@ -28,8 +31,28 @@ export type ProgramRunLoopFinalStatus = "blocked" | "complete" | "stopped";
 export type ProgramRunLoopStopReason =
 	| "max_slices_reached"
 	| "no_active_child_plan"
+	| "planning_blocked"
+	| "planning_step_limit_reached"
 	| "program_complete"
 	| "slice_blocked";
+
+export type ProgramRunLoopPlanningStepInput = {
+	loopRunDirectory: string;
+	loopRunId: string;
+	planningStepNumber: number;
+	programId: string;
+	repoRootDir: string;
+	runId: string;
+	timeoutMs?: number;
+};
+
+export type ProgramRunLoopPlanningStepResult = {
+	finalMessage: string;
+};
+
+export type ProgramRunLoopPlanningStepRunner = (
+	input: ProgramRunLoopPlanningStepInput,
+) => Promise<ProgramRunLoopPlanningStepResult>;
 
 export type ProgramRunLoopSliceRunnerInput = {
 	maxFixAttempts?: number;
@@ -53,11 +76,22 @@ export type ProgramRunLoopSliceReceipt = {
 	status: "blocked" | "complete";
 };
 
+export type ProgramRunLoopPlanningStepReceipt = {
+	completedAt: string;
+	errorMessage?: string;
+	finalMessage?: string;
+	planningStepNumber: number;
+	runId: string;
+	status: "blocked" | "complete";
+};
+
 export type ProgramRunLoopResult = {
 	finalStatus: ProgramRunLoopFinalStatus;
 	loopRunDirectory: string;
 	loopRunId: string;
+	maxPlanningSteps: number;
 	maxSlices: number;
+	planningSteps: ProgramRunLoopPlanningStepReceipt[];
 	programId: string;
 	slices: ProgramRunLoopSliceReceipt[];
 	stopReason: ProgramRunLoopStopReason;
@@ -67,7 +101,9 @@ type ProgramRunLoopState = {
 	currentStatus: "running" | ProgramRunLoopFinalStatus;
 	errorMessage?: string;
 	loopRunId: string;
+	maxPlanningSteps: number;
 	maxSlices: number;
+	planningSteps: ProgramRunLoopPlanningStepReceipt[];
 	programId: string;
 	repoRootDir: string;
 	slices: ProgramRunLoopSliceReceipt[];
@@ -82,7 +118,9 @@ type ActiveChildPlan = {
 
 export async function runProgramRunLoop(params: {
 	maxFixAttempts?: number;
+	maxPlanningSteps?: number;
 	maxSlices?: number;
+	planningStepRunner?: ProgramRunLoopPlanningStepRunner;
 	programId: string;
 	repoRootDir: string;
 	runId?: string;
@@ -92,11 +130,16 @@ export async function runProgramRunLoop(params: {
 	const repoRootDir = path.resolve(params.repoRootDir);
 	const programId = normalizeProgramId(params.programId);
 	const maxSlices = normalizeMaxSlices(params.maxSlices ?? DEFAULT_MAX_SLICES);
+	const maxPlanningSteps = normalizeMaxPlanningSteps(
+		params.maxPlanningSteps ?? DEFAULT_MAX_PLANNING_STEPS,
+	);
 	const timeoutMs = params.timeoutMs ?? DEFAULT_COMMAND_TIMEOUT_MS;
 	const loopRunId = normalizeProgramRunLoopId(
 		params.runId ?? buildProgramRunLoopId(programId),
 	);
 	const sliceRunner = params.sliceRunner ?? runProgramRunSlice;
+	const planningStepRunner =
+		params.planningStepRunner ?? runProgramPlanningStep;
 	const loopRunDirectoryRelativePath = path.posix.join(
 		PROGRAM_RUNS_ROOT,
 		programId,
@@ -110,7 +153,9 @@ export async function runProgramRunLoop(params: {
 	const state: ProgramRunLoopState = {
 		currentStatus: "running",
 		loopRunId,
+		maxPlanningSteps,
 		maxSlices,
+		planningSteps: [],
 		programId,
 		repoRootDir,
 		slices: [],
@@ -153,14 +198,74 @@ export async function runProgramRunLoop(params: {
 			repoRootDir,
 		});
 		if (!nextPlan) {
-			return await finishProgramRunLoop({
-				finalStatus: "blocked",
-				loopRunDirectory,
-				loopRunDirectoryRelativePath,
-				programId,
-				state,
-				stopReason: "no_active_child_plan",
+			if (maxPlanningSteps === 0) {
+				return await finishProgramRunLoop({
+					finalStatus: "blocked",
+					loopRunDirectory,
+					loopRunDirectoryRelativePath,
+					programId,
+					state,
+					stopReason: "no_active_child_plan",
+				});
+			}
+
+			if (state.planningSteps.length >= maxPlanningSteps) {
+				return await finishProgramRunLoop({
+					finalStatus: "blocked",
+					loopRunDirectory,
+					loopRunDirectoryRelativePath,
+					programId,
+					state,
+					stopReason: "planning_step_limit_reached",
+				});
+			}
+
+			const planningStepNumber = state.planningSteps.length + 1;
+			const planningRunId = buildPlanningStepRunId({
+				loopRunId,
+				planningStepNumber,
 			});
+			try {
+				const planningResult = await planningStepRunner({
+					loopRunDirectory: loopRunDirectoryRelativePath,
+					loopRunId,
+					planningStepNumber,
+					programId,
+					repoRootDir,
+					runId: planningRunId,
+					timeoutMs,
+				});
+				state.planningSteps.push({
+					completedAt: new Date().toISOString(),
+					finalMessage: planningResult.finalMessage,
+					planningStepNumber,
+					runId: planningRunId,
+					status: "complete",
+				});
+				await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+				continue;
+			} catch (error) {
+				const errorMessage =
+					error instanceof Error ? error.message : String(error);
+				state.errorMessage = errorMessage;
+				state.planningSteps.push({
+					completedAt: new Date().toISOString(),
+					errorMessage,
+					planningStepNumber,
+					runId: planningRunId,
+					status: "blocked",
+				});
+				await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+				return await finishProgramRunLoop({
+					errorMessage,
+					finalStatus: "blocked",
+					loopRunDirectory,
+					loopRunDirectoryRelativePath,
+					programId,
+					state,
+					stopReason: "planning_blocked",
+				});
+			}
 		}
 
 		const sliceRunId = buildSliceRunId({
@@ -243,7 +348,9 @@ async function finishProgramRunLoop(params: {
 		finalStatus: params.finalStatus,
 		loopRunDirectory: params.loopRunDirectory,
 		loopRunId: params.state.loopRunId,
+		maxPlanningSteps: params.state.maxPlanningSteps,
 		maxSlices: params.state.maxSlices,
+		planningSteps: params.state.planningSteps,
 		programId: params.programId,
 		slices: params.state.slices,
 		stopReason: params.stopReason,
@@ -258,7 +365,10 @@ async function selectNextActiveChildPlan(params: {
 	const currentPlanningBrief = await resolveCurrentPlanningBrief({
 		programId: params.programId,
 		repoRootDir: params.repoRootDir,
-	});
+	}).catch(() => null);
+	if (!currentPlanningBrief) {
+		return null;
+	}
 	const plans = await listActiveChildPlans({
 		planningBriefPath: currentPlanningBrief.planningBriefPath,
 		programId: params.programId,
@@ -314,18 +424,12 @@ async function readProgramStatus(params: {
 	programId: string;
 	repoRootDir: string;
 }) {
-	const currentPlanningBrief = await resolveCurrentPlanningBrief({
+	const programPacketPath = await resolveProgramPacketPath({
 		programId: params.programId,
 		repoRootDir: params.repoRootDir,
 	});
-	const programPath = path.posix.join(
-		path.posix.dirname(currentPlanningBrief.planningBriefPath),
-		"program.md",
-	);
-	const programText = await readFile(
-		resolveRepositoryPath(params.repoRootDir, programPath),
-		"utf8",
-	);
+	const programPath = path.join(programPacketPath, "program.md");
+	const programText = await readFile(programPath, "utf8");
 	const parsed = parseMarkdownFrontmatter(programText);
 	if ("issue" in parsed) {
 		throw new Error(`Program frontmatter is invalid: ${parsed.issue}`);
@@ -349,6 +453,111 @@ async function writeLoopState(
 	);
 }
 
+async function runProgramPlanningStep(
+	input: ProgramRunLoopPlanningStepInput,
+): Promise<ProgramRunLoopPlanningStepResult> {
+	const result = await runCodexExec({
+		allowNonGitSmoke: false,
+		profileName: "sbs-workspace-write",
+		prompt: await buildProgramPlanningStepPrompt(input),
+		repositoryRoot: input.repoRootDir,
+		sandboxMode: "workspace-write",
+		timeoutMs: input.timeoutMs,
+	});
+
+	if (result.exitCode !== 0 || result.timedOut) {
+		throw new Error(
+			[
+				`codex planning step failed with exit code ${result.exitCode}`,
+				result.timedOut ? "Timed out: true" : "",
+				result.stderr.trim() === "" ? "" : `STDERR:\n${result.stderr}`,
+				result.finalAgentMessage?.trim()
+					? `LAST MESSAGE:\n${result.finalAgentMessage}`
+					: "",
+			]
+				.filter(Boolean)
+				.join("\n\n"),
+		);
+	}
+
+	return {
+		finalMessage: result.finalAgentMessage ?? "",
+	};
+}
+
+async function buildProgramPlanningStepPrompt(
+	input: ProgramRunLoopPlanningStepInput,
+) {
+	const programPacketPath = await resolveProgramPacketPath({
+		programId: input.programId,
+		repoRootDir: input.repoRootDir,
+	});
+	const programRoot = path
+		.relative(input.repoRootDir, programPacketPath)
+		.replaceAll(path.sep, "/");
+	const agentsText = await readOptionalRepositoryFile(
+		input.repoRootDir,
+		"AGENTS.md",
+	);
+
+	return [
+		"Advance this active Program by exactly one planning/control step so `program run` can continue autonomously.",
+		"",
+		"Do not implement product code in this planning step. Do not execute a child ExecPlan. Do not broaden the Program scope.",
+		"If a real child ExecPlan is missing and the Program packet is ready, write the child ExecPlan now.",
+		"If earlier Program packet artifacts are missing or stale, create or repair the earliest missing artifact instead, then stop.",
+		"",
+		`Program id: ${input.programId}`,
+		`Program root: ${programRoot}/`,
+		`Program loop id: ${input.loopRunId}`,
+		`Program loop artifacts: ${input.loopRunDirectory}/`,
+		`Planning step: ${input.planningStepNumber}`,
+		`Runner planning id: ${input.runId}`,
+		"",
+		"<AGENTS.md>",
+		agentsText.trim() || "(missing)",
+		"</AGENTS.md>",
+		"",
+		"Required reading:",
+		"- repo root `AGENTS.md`",
+		"- `docs/programs/PROGRAMS.md`",
+		"- `docs/programs/README.md`",
+		"- `docs/exec-plans/PLANS.md`",
+		"- `docs/prompts/README.md`",
+		"- the Program packet under the Program root",
+		"",
+		"State routing contract:",
+		"- Use `docs/prompts/program-orchestrator.md` to classify the Program state from checked-in artifacts.",
+		"- If the state is initialize, research, normalize, converge, order, split, review, brief, or program-doc, run the corresponding Program prompt for that one state and stop after writing its artifact(s).",
+		"- If the state is write-plan, use `docs/prompts/exec-plan-writer.md` to write one complete, self-contained child ExecPlan under `docs/exec-plans/active/`.",
+		"- The child ExecPlan must include matching `program_id` and immutable `planning_brief` frontmatter. The planning brief must be the current versioned `planning-brief-<N>.md`, never `current-planning-brief.txt`.",
+		"- Do not leave a skeleton child plan as the final result. The plan must have concrete context, scope, milestones, steps, and runnable test commands before the runner executes it.",
+		"- If the Program cannot responsibly advance, record the blocker in the Program and return a concise final message explaining the blocker.",
+		"",
+		"Validation:",
+		"- Run `bun run programs:lint` when Program artifacts are touched.",
+		"- Run `bun run plans:lint -- --plan <child-plan>` when an ExecPlan is created or changed.",
+		"- Run `bun run markdown:lint -- --paths <changed markdown paths>` when practical.",
+		"",
+		"Return a concise final message with:",
+		"- state classification",
+		"- files created or changed",
+		"- validation commands and results",
+		"- blocker, if any",
+	].join("\n");
+}
+
+async function readOptionalRepositoryFile(
+	repoRootDir: string,
+	repoRelativePath: string,
+) {
+	const filePath = resolveRepositoryPath(repoRootDir, repoRelativePath);
+	if (!existsSync(filePath)) {
+		return "";
+	}
+	return await readFile(filePath, "utf8");
+}
+
 function normalizeProgramId(programId: string) {
 	if (!isProgramId(programId)) {
 		throw new Error(`Invalid Program id: ${programId}`);
@@ -359,6 +568,13 @@ function normalizeProgramId(programId: string) {
 function normalizeMaxSlices(value: number) {
 	if (!Number.isInteger(value) || value < 1) {
 		throw new Error("--max-slices must be a positive integer.");
+	}
+	return value;
+}
+
+function normalizeMaxPlanningSteps(value: number) {
+	if (!Number.isInteger(value) || value < 0) {
+		throw new Error("--max-planning-steps must be a non-negative integer.");
 	}
 	return value;
 }
@@ -381,4 +597,13 @@ function buildSliceRunId(params: { loopRunId: string; sliceNumber: number }) {
 		3,
 		"0",
 	)}`;
+}
+
+function buildPlanningStepRunId(params: {
+	loopRunId: string;
+	planningStepNumber: number;
+}) {
+	return `${params.loopRunId}-planning-${String(
+		params.planningStepNumber,
+	).padStart(3, "0")}`;
 }

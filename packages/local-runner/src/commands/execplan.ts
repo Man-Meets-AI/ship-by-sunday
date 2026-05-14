@@ -19,13 +19,14 @@ const HELP_TEXT = `
 Ship by Sunday ExecPlan commands
 
 Usage:
-  ship-by-sunday execplan build --program-id <id> [--repo <path>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday execplan build --program-id <id> [--repo <path>] [--max-planning-steps <count>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday execplan build --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
 `;
 
 type ParsedBuildArgs = {
 	json: boolean;
 	maxFixAttempts?: number;
+	maxPlanningSteps?: number;
 	maxSlices?: number;
 	planPath?: string;
 	programId?: string;
@@ -108,6 +109,7 @@ export async function runExecPlanCommand(
 
 	const result: ProgramRunLoopResult = await dependencies.runProgramRunLoop({
 		maxFixAttempts: parseResult.maxFixAttempts,
+		maxPlanningSteps: parseResult.maxPlanningSteps,
 		maxSlices: parseResult.maxSlices,
 		programId: parseResult.programId,
 		repoRootDir: repositoryRoot,
@@ -119,6 +121,7 @@ export async function runExecPlanCommand(
 		console.log(`ExecPlan build ${result.finalStatus}: ${result.loopRunId}`);
 		console.log(`Stop reason: ${result.stopReason}`);
 		console.log(`Run artifacts: ${result.loopRunDirectory}`);
+		console.log(`Planning steps run: ${result.planningSteps.length}`);
 		console.log(`Slices run: ${result.slices.length}`);
 	}
 	return result.finalStatus === "blocked" ? 1 : 0;
@@ -127,6 +130,7 @@ export async function runExecPlanCommand(
 function parseBuildArgs(argv: string[]): ParsedBuildArgs | "help" {
 	let json = false;
 	let maxFixAttempts: number | undefined;
+	let maxPlanningSteps: number | undefined;
 	let maxSlices: number | undefined;
 	let planPath: string | undefined;
 	let programId: string | undefined;
@@ -167,6 +171,14 @@ function parseBuildArgs(argv: string[]): ParsedBuildArgs | "help" {
 			index += 1;
 			continue;
 		}
+		if (argument === "--max-planning-steps") {
+			maxPlanningSteps = parseNonNegativeIntegerFlag(
+				requireValue(argv, index, argument),
+				argument,
+			);
+			index += 1;
+			continue;
+		}
 		if (argument === "--max-fix-attempts") {
 			maxFixAttempts = parseNonNegativeIntegerFlag(
 				requireValue(argv, index, argument),
@@ -181,6 +193,7 @@ function parseBuildArgs(argv: string[]): ParsedBuildArgs | "help" {
 	return {
 		json,
 		maxFixAttempts,
+		maxPlanningSteps,
 		maxSlices,
 		planPath,
 		programId,

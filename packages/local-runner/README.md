@@ -12,7 +12,7 @@ The main external I/O boundaries are Effect-backed services with promise adapter
 
 ## Program Runner Commands
 
-The autonomous Program runner has two command layers. `program run-slice` executes one approved Program child ExecPlan through implementation, proof, fresh review, bounded fixes with reproof, docs sync, and checkpoint artifacts. `program run` sequences active child ExecPlans for a Program by reusing `program run-slice` until the Program is complete, blocked, or stopped by `--max-slices`.
+The autonomous Program runner has two command layers. `program run-slice` executes one approved Program child ExecPlan through implementation, proof, fresh review, bounded fixes with reproof, docs sync, and checkpoint artifacts. `program run` advances the Program itself: if no runnable child ExecPlan exists, it spends a bounded planning budget to create or repair the next missing Program artifact, including writing the next full child ExecPlan when the packet is ready, then sequences child slices until the Program is complete, blocked, or stopped by `--max-slices`.
 
 Run the full Program loop from the repository root:
 
@@ -34,6 +34,8 @@ ship-by-sunday program run-slice --program-id <program-id> --plan <docs/exec-pla
 ```
 
 Both commands write local artifacts under ignored `.sbs/program-runs/`. They include pre-existing dirty worktree state in the review prompt instead of blocking at startup, so keep unrelated edits reviewable and scoped.
+
+`program run` defaults to a small planning budget before it declares the Program blocked. Use `--max-planning-steps 0` for the older strict behavior where a missing active child ExecPlan stops immediately with `no_active_child_plan`.
 
 ## Worker Install Command Map
 

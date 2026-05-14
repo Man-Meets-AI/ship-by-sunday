@@ -44,7 +44,9 @@ describe("execplan command", () => {
 			finalStatus: "complete" as const,
 			loopRunDirectory: ".sbs/program-runs/test/run-loop",
 			loopRunId: "run-loop",
+			maxPlanningSteps: 6,
 			maxSlices: 2,
+			planningSteps: [],
 			programId: "autonomous-program-execution-loop",
 			slices: [],
 			stopReason: "program_complete" as const,
@@ -74,6 +76,7 @@ describe("execplan command", () => {
 
 		expect(runProgramRunLoop).toHaveBeenCalledWith({
 			maxFixAttempts: 1,
+			maxPlanningSteps: undefined,
 			maxSlices: 2,
 			programId: "autonomous-program-execution-loop",
 			repoRootDir: repositoryRoot,

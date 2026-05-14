@@ -5,6 +5,7 @@ import { promisify } from "node:util";
 
 import {
 	runProgramRunLoop,
+	type ProgramRunLoopPlanningStepRunner,
 	type ProgramRunLoopSliceRunner,
 } from "../src/core/program-run-loop";
 import type { ProgramRunSliceResult } from "../src/core/program-run-slice";
@@ -92,6 +93,7 @@ describe("program run loop", () => {
 			planPaths: [],
 		});
 		const result = await runProgramRunLoop({
+			maxPlanningSteps: 0,
 			maxSlices: 2,
 			programId: PROGRAM_ID,
 			repoRootDir: repositoryRoot,
@@ -102,6 +104,66 @@ describe("program run loop", () => {
 
 		expect(result.finalStatus).toBe("blocked");
 		expect(result.stopReason).toBe("no_active_child_plan");
+		expect(result.slices).toHaveLength(0);
+	});
+
+	it("runs a planning step when an active Program has no runnable child plan", async () => {
+		const repositoryRoot = await createProgramLoopFixture({
+			planPaths: [],
+		});
+		const calls: string[] = [];
+		const result = await runProgramRunLoop({
+			maxPlanningSteps: 1,
+			maxSlices: 1,
+			planningStepRunner: createFakePlanningStepRunner(repositoryRoot, {
+				onRun: async () => {
+					await writeRepoFile(
+						repositoryRoot,
+						PLAN_A_PATH,
+						buildFixturePlan(PLAN_A_PATH),
+					);
+				},
+			}),
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "loop-plans-child",
+			sliceRunner: createFakeSliceRunner(repositoryRoot, {
+				onRun: async (input) => {
+					calls.push(input.planPath);
+				},
+			}),
+			timeoutMs: 15_000,
+		});
+
+		expect(result.finalStatus).toBe("stopped");
+		expect(result.stopReason).toBe("max_slices_reached");
+		expect(result.planningSteps).toEqual([
+			expect.objectContaining({
+				planningStepNumber: 1,
+				status: "complete",
+			}),
+		]);
+		expect(calls).toEqual([PLAN_A_PATH]);
+	});
+
+	it("blocks when planning cannot produce a runnable child plan before the limit", async () => {
+		const repositoryRoot = await createProgramLoopFixture({
+			planPaths: [],
+		});
+		const result = await runProgramRunLoop({
+			maxPlanningSteps: 1,
+			maxSlices: 2,
+			planningStepRunner: createFakePlanningStepRunner(repositoryRoot),
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "loop-planning-limit",
+			sliceRunner: createFakeSliceRunner(repositoryRoot),
+			timeoutMs: 15_000,
+		});
+
+		expect(result.finalStatus).toBe("blocked");
+		expect(result.stopReason).toBe("planning_step_limit_reached");
+		expect(result.planningSteps).toHaveLength(1);
 		expect(result.slices).toHaveLength(0);
 	});
 
@@ -246,6 +308,22 @@ function createFakeSliceRunner(
 			repositoryRoot,
 			runId: input.runId,
 		});
+	};
+}
+
+function createFakePlanningStepRunner(
+	repositoryRoot: string,
+	options: {
+		onRun?: (
+			input: Parameters<ProgramRunLoopPlanningStepRunner>[0],
+		) => Promise<void>;
+	} = {},
+): ProgramRunLoopPlanningStepRunner {
+	return async (input) => {
+		await options.onRun?.(input);
+		return {
+			finalMessage: `planned in ${repositoryRoot}`,
+		};
 	};
 }
 

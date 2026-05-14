@@ -19,9 +19,9 @@ Ship by Sunday local runner
 Usage:
   shipbysunday install [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
   shipbysunday i [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
-  ship-by-sunday execplan build --program-id <id> [--repo <path>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday execplan build --program-id <id> [--repo <path>] [--max-planning-steps <count>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday execplan build --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
-  ship-by-sunday program run --program-id <id> [--repo <path>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday program run --program-id <id> [--repo <path>] [--max-planning-steps <count>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday program run-slice --program-id <id> --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday setup pair <token> [--repo <path>] [--api-url <url>] [--repair] [--json]
   ship-by-sunday setup check [--repo <path>] [--json]
