@@ -1,10 +1,10 @@
 ---
 title: T3 Code Form Scaffold Controls
-status: active
+status: complete
 created_at: 2026-05-14
-completed_at: null
+completed_at: 2026-05-14
 summary: Move Field, Label, Separator, Checkbox, Switch, and RadioGroup toward T3 Code recipes while preserving current Radix call-site compatibility.
-post_build_recap: null
+post_build_recap: Field, Label, Separator, Checkbox, Switch, and RadioGroup now use T3 Code recipes on the current Radix compatibility surface with focused render and public sign-in browser proof.
 program_id: t3-code-source-design-system-port
 planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
@@ -26,9 +26,9 @@ Ship by Sunday's forms currently mix old shadcn-neutral field wrappers, Radix la
 ## Progress
 
 - [x] 2026-05-14: Read planning brief 4, Program state, current and T3 Code Field, Label, Separator, Checkbox, Switch, RadioGroup, and Select sources, plus current call-site usage.
-- [ ] Port Field, Label, Separator, Checkbox, Switch, and RadioGroup class recipes with compatibility exports.
-- [ ] Add focused render tests that prove T3 Code class tokens, current export names, checked/disabled states, and field error rendering.
-- [ ] Run focused tests, app lint/typecheck, Program/plan/docs checks, whitespace checks, and representative browser proof.
+- [x] 2026-05-14: Port Field, Label, Separator, Checkbox, Switch, and RadioGroup class recipes with compatibility exports.
+- [x] 2026-05-14: Add focused render tests that prove T3 Code class tokens, current export names, checked/disabled states, and field error rendering.
+- [x] 2026-05-14: Run focused tests, app lint/typecheck, Program/plan/docs checks, whitespace checks, and representative browser proof.
 
 ## Surprises & Discoveries
 
@@ -37,6 +37,8 @@ T3 Code's Field, Label, Separator, Checkbox, Switch, and RadioGroup source uses 
 `Select` is intentionally excluded from this slice. Current codebase-flow routes use Radix Select trigger/content/item APIs and T3 Code's Select source has a different Base UI popup/positioner surface. Select should get its own child ExecPlan so trigger/content behavior and browser interactions can be proven directly.
 
 Current usage of Checkbox is small and course-local, while Switch and RadioGroup currently have no app call sites. Preserving their exports still matters because they are shared primitives future slices may compose.
+
+Public browser proof can exercise Field and Label through `/sign-in`. Public routes currently do not expose Separator, Checkbox, Switch, or RadioGroup without authentication or route gating, so those primitives are covered by focused render tests and the production build for this slice.
 
 ## Decision Log
 
@@ -50,7 +52,9 @@ Date: 2026-05-14
 
 ## Outcomes & Retrospective
 
-This section will be completed after validation. Expected outcome: `apps/web/src/components/ui/field.tsx`, `label.tsx`, `separator.tsx`, `checkbox.tsx`, `switch.tsx`, and `radio-group.tsx` use T3 Code class recipes while current call sites still compile and focused render tests prove the compatibility surface.
+This slice moved `apps/web/src/components/ui/field.tsx`, `label.tsx`, `separator.tsx`, `checkbox.tsx`, `switch.tsx`, and `radio-group.tsx` toward T3 Code recipes while keeping the existing Radix implementation and current export names. Label and Field label typography now use the T3 compact `text-base/4.5` and `sm:text-sm/4` treatment. Field descriptions and errors use the smaller T3 text scale, with `FieldError` still rendering `role="alert"`. Separator now uses explicit orientation selectors. Checkbox, Switch, and Radio now use T3-style before-shadow surfaces, focus-ring offset treatment, checked/disabled state classes, and compact indicator recipes. `Radio` is now exported as a T3-compatible name while `RadioGroupItem` remains an alias.
+
+Focused render tests prove the T3 class tokens and compatibility exports. Browser proof on `/sign-in` proved Field, Label, and Input still render together without horizontal overflow on desktop and mobile.
 
 ## Context and Orientation
 
@@ -113,7 +117,7 @@ Work from the repository root:
 
 Validate this plan before implementation:
 
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md
 
 Edit:
 
@@ -135,7 +139,7 @@ Run static validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is completed and moved, rerun plan lint against the completed path.
@@ -151,9 +155,9 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     bun run --cwd apps/web test:unit -- tests/unit/ui-form-scaffold-controls.test.tsx
     bun run --cwd apps/web lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
-    bun run plans:lint -- --plan docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery
@@ -162,9 +166,23 @@ The primitive edits are local and deterministic. If a T3 selector does not compi
 
 ## Artifacts and Notes
 
-No package or lockfile change is expected.
+No package or lockfile change was needed.
 
-Validation will be recorded here after completion.
+Validation completed on 2026-05-14:
+
+    bun run --cwd apps/web test:unit -- tests/unit/ui-form-scaffold-controls.test.tsx
+    1 file passed, 4 tests passed.
+
+    bun run --cwd apps/web lint
+    Found 0 warnings and 0 errors.
+
+    DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
+    Next.js production build compiled, typechecked, and generated 103 static pages.
+
+    Browser proof through the webpack dev server:
+    `/sign-in` at 1440x1000 and 390x844 rendered one shared Field, one shared FieldLabel, and one shared Input control with T3 form scaffold treatment and no horizontal overflow.
+
+Separator, Checkbox, Switch, and RadioGroup browser proof was not run because current public routes do not expose those primitives without authentication or route gating. They are covered by focused render tests and the production build in this slice.
 
 ## Interfaces and Dependencies
 

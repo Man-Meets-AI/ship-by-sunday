@@ -291,3 +291,9 @@
 - Mistake: I passed multiple ExecPlan paths after a single `--plan` flag instead of using `--paths`.
   Impact: The docs lint command failed before validating the files; no source files changed from the failed command.
   Corrective action: Use repeated `--plan` flags or a single `--paths` list when linting multiple ExecPlans.
+
+## 2026-05-14 Wrong Browser Proof Surface
+
+- Mistake: I tried to prove Separator rendering on `/checkout/cancel/confirmed` without first confirming that route still rendered a shared Separator.
+  Impact: The browser proof failed on a bad route assumption; source code was unaffected.
+  Corrective action: Probe candidate routes for the target `data-slot` before using them as proof surfaces.

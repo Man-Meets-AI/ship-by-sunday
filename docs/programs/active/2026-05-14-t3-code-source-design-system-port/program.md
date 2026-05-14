@@ -82,6 +82,8 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-button-badge-primitives.md`, moving Button and Badge to T3 Code class recipes while preserving current Radix `asChild` call-site compatibility.
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md`, moving Card, Alert, Skeleton, and Kbd to T3 Code display primitive recipes while preserving current call-site aliases.
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`, moving Input and Textarea to T3 Code form-control wrappers with native compatibility escape hatches.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md`, moving Field, Label, Separator, Checkbox, Switch, and RadioGroup to T3 Code recipes while preserving Radix compatibility exports.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`, moving Select trigger, content, item, separator, scroll affordance, and T3-compatible helper recipes onto the current Radix Select API.
 
 ## Decision Log
 
@@ -122,7 +124,7 @@ Rationale: Those screens carry P0/P1 product flows. Visual rewrites must preserv
 
 Active child ExecPlans:
 
-- `docs/exec-plans/active/2026-05-14-t3-code-form-scaffold-controls.md`: port Field, Label, Separator, Checkbox, Switch, and RadioGroup to T3 Code recipes while preserving current Radix call-site compatibility.
+None.
 
 Completed child ExecPlans:
 
@@ -131,6 +133,8 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-14-t3-code-button-badge-primitives.md`: copied T3 Code Button and Badge class recipes into the shared primitives while keeping existing variants, sizes, and `asChild` behavior compatible.
 - `docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md`: copied T3 Code Card, Alert, Skeleton, and Kbd recipes into the shared primitives while keeping `CardContent`, `Alert variant="destructive"`, className passthrough, and `KbdGroup` compatibility.
 - `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`: copied T3 Code Input and Textarea wrapper/control recipes into native compatibility primitives while keeping native props, refs, and explicit native field class escape hatches.
+- `docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md`: copied T3 Code Field, Label, Separator, Checkbox, Switch, and RadioGroup recipes onto the current Radix primitive surface while keeping existing export names and adding the T3-compatible `Radio` alias.
+- `docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`: copied T3 Code Select trigger, popup, item, separator, and scroll-arrow recipes onto the current Radix Select surface while keeping existing export names and adding `SelectButton`, `SelectGroupLabel`, and `selectTriggerVariants`.
 
 Planned child slices:
 
@@ -144,9 +148,9 @@ Planned child slices:
 
 ## Next Slice
 
-The next recommended slice is `Form and selection primitive migration`.
+The next recommended slice is `Popover and Tooltip primitive migration`.
 
-That slice should continue using `planning-brief-4.md` and move the next form and selection primitive family toward T3 Code. Good candidates are Field, Label, Checkbox, Switch, RadioGroup, Select, Popover, Tooltip, and Separator. This is the point where Base UI dependency adoption should be decided deliberately, because T3 Code's heavier interactive primitives rely on Base UI APIs more than the primitive slices completed so far.
+That slice should continue using `planning-brief-4.md` and decide whether the popup/positioner primitives are the first place to adopt Base UI or whether T3 Popover and Tooltip recipes should be adapted onto the current Radix APIs. Select stayed on Radix for compatibility, but its popup styling now depends on the same T3 surface, shadow, viewport, and positioning tokens that Popover and Tooltip expose directly.
 
 That slice does not need to implement generated-codebase changes. Generated codebase implementation should wait until the tracked app primitive strategy is proven.
 

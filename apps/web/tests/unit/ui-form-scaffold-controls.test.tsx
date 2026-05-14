@@ -65,7 +65,9 @@ describe("T3 Code form scaffold and control recipes", () => {
 		const checkboxMarkup = renderToStaticMarkup(
 			<Checkbox defaultChecked aria-invalid />,
 		);
-		const switchMarkup = renderToStaticMarkup(<Switch defaultChecked size="sm" />);
+		const switchMarkup = renderToStaticMarkup(
+			<Switch defaultChecked size="sm" />,
+		);
 
 		expect(checkboxMarkup).toContain('data-slot="checkbox"');
 		expect(checkboxMarkup).toContain("not-dark:bg-clip-padding");
