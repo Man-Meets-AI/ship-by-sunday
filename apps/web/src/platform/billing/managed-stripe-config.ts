@@ -57,7 +57,6 @@ export const managedStripeRequiredWebhookEventTypes = [
 	"customer.subscription.deleted",
 	"invoice.payment_failed",
 	"invoice.paid",
-	"charge.refunded",
 ] as const;
 
 export type ManagedStripeWebhookEndpointPreflightResult = {
@@ -178,8 +177,11 @@ function hasRequiredStripeWebhookEvents(
 		return false;
 	}
 
-	return requiredEvents.every((eventType) =>
-		endpoint.enabled_events.includes(eventType),
+	return (
+		endpoint.enabled_events.length === requiredEvents.length &&
+		requiredEvents.every((eventType) =>
+			endpoint.enabled_events.includes(eventType),
+		)
 	);
 }
 
@@ -189,6 +191,15 @@ function getMissingStripeWebhookEvents(
 ) {
 	return requiredEvents.filter(
 		(eventType) => !endpoint.enabled_events.includes(eventType),
+	);
+}
+
+function getUnexpectedStripeWebhookEvents(
+	endpoint: Pick<Stripe.WebhookEndpoint, "enabled_events">,
+	requiredEvents: readonly string[],
+) {
+	return endpoint.enabled_events.filter(
+		(eventType) => !requiredEvents.includes(eventType),
 	);
 }
 
@@ -461,6 +472,15 @@ export async function assertManagedStripeWebhookEndpointReadyForRelease(
 				modeMatchingEndpoints[0],
 				requiredEvents,
 			);
+			if (missingEvents.length === 0) {
+				const unexpectedEvents = getUnexpectedStripeWebhookEvents(
+					modeMatchingEndpoints[0],
+					requiredEvents,
+				);
+				throw new Error(
+					`Stripe webhook endpoint ${expectedUrl} has unexpected event subscription(s): ${unexpectedEvents.join(", ")}. Subscribe only to required event types: ${requiredEvents.join(", ")}.`,
+				);
+			}
 			throw new Error(
 				`Stripe webhook endpoint ${expectedUrl} is missing required event subscription(s): ${missingEvents.join(", ")}.`,
 			);

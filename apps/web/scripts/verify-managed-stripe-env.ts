@@ -5,6 +5,12 @@ import {
 	getNormalizedStripeSecretKey,
 	type StripeModeLabel,
 } from "@/platform/billing/managed-stripe-config";
+import { api } from "@/convex/_generated/api";
+import {
+	assertConvexBillingSyncBoundaryReady,
+	type ConvexBillingSyncBoundaryFetchQuery,
+} from "@/scripts/lib/convex-billing-sync-boundary";
+import { fetchQuery } from "convex/nextjs";
 import Stripe from "stripe";
 
 import { apiConfig } from "@/config/product";
@@ -13,6 +19,7 @@ function parseArgs(argv: string[]) {
 	let appBaseUrl: string | null = null;
 	let expectedMode: StripeModeLabel | undefined;
 	let expectedWebhookUrl: string | undefined;
+	let requireConvexSyncBoundary = false;
 	let requireWebhookEndpoint = false;
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -61,6 +68,11 @@ function parseArgs(argv: string[]) {
 
 		if (current === "--require-webhook-endpoint") {
 			requireWebhookEndpoint = true;
+			continue;
+		}
+
+		if (current === "--require-convex-sync-boundary") {
+			requireConvexSyncBoundary = true;
 		}
 	}
 
@@ -68,6 +80,7 @@ function parseArgs(argv: string[]) {
 		appBaseUrl,
 		expectedMode,
 		expectedWebhookUrl,
+		requireConvexSyncBoundary,
 		requireWebhookEndpoint,
 	};
 }
@@ -129,8 +142,13 @@ async function expireHostedCheckoutRouteSession(
 	};
 }
 
-const { appBaseUrl, expectedMode, expectedWebhookUrl, requireWebhookEndpoint } =
-	parseArgs(process.argv.slice(2));
+const {
+	appBaseUrl,
+	expectedMode,
+	expectedWebhookUrl,
+	requireConvexSyncBoundary,
+	requireWebhookEndpoint,
+} = parseArgs(process.argv.slice(2));
 const stripeConfig = getManagedStripeConfigFromEnv(process.env);
 const stripe = new Stripe(getNormalizedStripeSecretKey(stripeConfig), {
 	apiVersion: apiConfig.stripeApiVersion,
@@ -149,6 +167,12 @@ const webhookEndpoint = requireWebhookEndpoint
 			},
 		)
 	: null;
+const convexBillingSyncBoundary = requireConvexSyncBoundary
+	? await assertConvexBillingSyncBoundaryReady({
+			fetchQuery: fetchQuery as ConvexBillingSyncBoundaryFetchQuery,
+			functionReference: api.billing.lookupStripeCustomerOwnerFromServer,
+		})
+	: null;
 
 const checkoutRoute =
 	appBaseUrl && appBaseUrl.length > 0
@@ -164,6 +188,7 @@ console.log(
 			ok: true,
 			expectedMode: expectedMode ?? null,
 			appBaseUrl,
+			convexBillingSyncBoundary,
 			webhookEndpoint,
 			checkoutRoute,
 			checkoutRouteCleanup,

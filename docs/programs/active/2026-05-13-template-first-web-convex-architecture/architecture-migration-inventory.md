@@ -125,7 +125,7 @@ Refunds are initiated in Stripe or Cal.com provider dashboards. Full refunds upd
 | Public blog/docs remain part of marketing route group | Intentional | They are public content and do not own product state | Route tests and metadata tests must keep public access and SEO behavior intact. |
 | Worker Seal Team 6 uses Cal.com instead of app-owned scheduler | Intentional expansion | Cal.com owns scheduling, paid booking, timezone, invites, and rescheduling better than custom code | Cal.com paid booking, webhook, reschedule, refund, and Convex mirror tests. |
 | Failed-payment emails are added beyond the sibling template | Intentional expansion | Customer trust requires explicit recovery, resolved, and terminal communication | Resend idempotency tests and Stripe lifecycle tests. |
-| Refund issuance stays in provider dashboards | Intentional simplification | Avoids adding an app-owned P0 money mutation during architecture migration | Tests prove provider refund events sync and no in-app admin refund action route exists. |
+| Refund issuance stays in provider dashboards | Intentional simplification | Avoids adding an app-owned P0 money mutation during architecture migration | Later refund-reconciliation tests must prove provider refund events sync and no in-app admin refund action route exists. |
 | `platform/` is not preserved as a permanent boundary | Intentional target | Template has clearer named `src/lib/*` provider/domain folders | Inventory and file moves must route each helper into a named owner folder. |
 
 ## Test And Proof Inventory

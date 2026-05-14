@@ -18,7 +18,6 @@ describe("getStripeLineItem", () => {
 		"customer.subscription.deleted",
 		"invoice.payment_failed",
 		"invoice.paid",
-		"charge.refunded",
 	];
 
 	function setWebhookPreflightEnv({
@@ -358,7 +357,28 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook uses wildcard event subscriptions. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid, charge.refunded.",
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook uses wildcard event subscriptions. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid.",
+		);
+	});
+
+	it("rejects stale extra Stripe webhook event subscriptions", async () => {
+		setWebhookPreflightEnv();
+
+		const { assertManagedStripeWebhookEndpointReadyForRelease } =
+			await import("@/platform/billing/stripe");
+		const stripe = buildStripeWithWebhookEndpoints([
+			buildWebhookEndpoint({
+				enabled_events: [...requiredWebhookEvents, "charge.refunded"],
+				id: "we_extra_refund_event",
+			}),
+		]);
+
+		await expect(
+			assertManagedStripeWebhookEndpointReadyForRelease(stripe, {
+				expectedMode: "live",
+			}),
+		).rejects.toThrow(
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook has unexpected event subscription(s): charge.refunded. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid.",
 		);
 	});
 
@@ -440,7 +460,7 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook is missing required event subscription(s): checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid, charge.refunded.",
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook is missing required event subscription(s): checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid.",
 		);
 	});
 

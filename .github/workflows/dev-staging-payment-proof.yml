@@ -89,7 +89,8 @@ jobs:
           bun --env-file=.env.local scripts/verify-managed-stripe-env.ts \
             --expected-mode=test \
             --app-base-url=https://dev.man-meets-ai.com \
-            --require-webhook-endpoint
+            --require-webhook-endpoint \
+            --require-convex-sync-boundary
 
       - name: Run dev Stripe card payment proof
         env:

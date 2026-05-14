@@ -50,7 +50,7 @@ Rationale: The first durable migration step is webhook ingress plus billing-doma
 
 ## Outcomes & Retrospective
 
-The migrated route now verifies Stripe signatures at `POST /api/stripe/webhook` from the raw request body, classifies Checkout, subscription, invoice, refund, and unsupported events, and syncs fresh Stripe state into the rebuilt Convex billing domain through `CONVEX_WEBHOOK_MUTATION_SECRET`-gated wrappers. Starter Checkout sessions sync annual license terms; Workers Checkout and subscription/invoice events sync subscription state, cadence, invoice/recovery fields, and processed Stripe event receipts. Unsupported and out-of-scope refund events are recorded as skipped where the route can safely record them.
+The migrated route now verifies Stripe signatures at `POST /api/stripe/webhook` from the raw request body, classifies Checkout, subscription, invoice, and unsupported events, and syncs fresh Stripe state into the rebuilt Convex billing domain through `CONVEX_WEBHOOK_MUTATION_SECRET`-gated wrappers. Starter Checkout sessions sync annual license terms; Workers Checkout and subscription/invoice events sync subscription state, cadence, invoice/recovery fields, and processed Stripe event receipts. Refund events remain outside this first ingress slice until the dedicated refund reconciliation path can update product state instead of acknowledging a no-op.
 
 Workers Checkout now uses Stripe subscription mode. Managed Stripe preflight requires Workers prices to be recurring, expects the Stripe Dashboard endpoint at `{APP_BASE_URL}/api/stripe/webhook`, rejects wildcard event lists, and treats enabled Convex `.site` `/stripe/webhook` endpoints as stale.
 
@@ -88,7 +88,7 @@ This plan does not add Workers cadence selection UI, Stripe Customer Portal rout
 
 First, add Convex environment support for `CONVEX_WEBHOOK_MUTATION_SECRET` in `apps/web/convex/env.ts` and `apps/web/src/platform/env/server.ts`. Then extend `apps/web/convex/billing.ts` with public secret-gated wrappers for Starter license sync, Workers subscription sync, processed Stripe event recording, and Stripe customer owner lookup.
 
-Next, add template-style billing helpers under `apps/web/src/lib/billing/`. One helper should classify verified Stripe events into checkout-session, subscription, invoice, refund, ignored, or skipped targets. Another helper should fetch fresh Stripe state, call the legacy checkout fulfillment compatibility action when a paid Checkout Session needs an owner, map Starter sessions into annual license terms, map Workers subscription state into Convex fields, and record skipped provider events.
+Next, add template-style billing helpers under `apps/web/src/lib/billing/`. One helper should classify verified Stripe events into checkout-session, subscription, invoice, ignored, or skipped targets. Another helper should fetch fresh Stripe state, call the legacy checkout fulfillment compatibility action when a paid Checkout Session needs an owner, map Starter sessions into annual license terms, map Workers subscription state into Convex fields, and record skipped provider events.
 
 Then add `apps/web/src/app/api/stripe/webhook/route.ts`. The handler should read `request.text()`, require `stripe-signature`, construct the Stripe event with `STRIPE_WEBHOOK_SECRET`, call the sync helper, and return JSON. Invalid signatures return 400. Sync failures return a non-2xx response so Stripe can retry.
 

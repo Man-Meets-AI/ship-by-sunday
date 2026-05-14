@@ -8,7 +8,6 @@ export const trackedStripeBillingEventTypes = [
 	"customer.subscription.deleted",
 	"invoice.payment_failed",
 	"invoice.paid",
-	"charge.refunded",
 ] as const;
 
 export type TrackedStripeBillingEventType =
@@ -40,14 +39,6 @@ export type StripeBillingSyncTarget =
 			stripeSubscriptionId: string | null;
 	  }
 	| {
-			kind: "charge_refund";
-			eventCreatedAt: number;
-			eventId: string;
-			eventType: TrackedStripeBillingEventType;
-			stripeChargeId: string;
-			stripePaymentIntentId: string | null;
-	  }
-	| {
 			kind: "ignored";
 			eventCreatedAt: number;
 			eventId: string;
@@ -61,6 +52,15 @@ const trackedStripeBillingEventTypeSet = new Set<string>(
 );
 
 type StripeInvoiceWithSubscription = Stripe.Invoice & {
+	parent?:
+		| (Stripe.Invoice.Parent & {
+				subscription_details?:
+					| (Stripe.Invoice.Parent.SubscriptionDetails & {
+							subscription?: string | Stripe.Subscription | null;
+					  })
+					| null;
+		  })
+		| null;
 	subscription?: string | Stripe.Subscription | null;
 };
 
@@ -84,6 +84,13 @@ function isTrackedStripeBillingEventType(
 	eventType: string,
 ): eventType is TrackedStripeBillingEventType {
 	return trackedStripeBillingEventTypeSet.has(eventType);
+}
+
+function getInvoiceSubscriptionId(invoice: StripeInvoiceWithSubscription) {
+	return (
+		getStripeId(invoice.parent?.subscription_details?.subscription) ??
+		getStripeId(invoice.subscription)
+	);
 }
 
 export function getStripeBillingSyncTargetFromWebhookEvent(
@@ -142,19 +149,7 @@ export function getStripeBillingSyncTargetFromWebhookEvent(
 			eventType: event.type,
 			stripeCustomerId: getStripeId(invoice.customer),
 			stripeInvoiceId: invoice.id,
-			stripeSubscriptionId: getStripeId(invoice.subscription),
-		};
-	}
-
-	if (event.type === "charge.refunded") {
-		const charge = event.data.object as Stripe.Charge;
-		return {
-			kind: "charge_refund",
-			eventCreatedAt,
-			eventId: event.id,
-			eventType: event.type,
-			stripeChargeId: charge.id,
-			stripePaymentIntentId: getStripeId(charge.payment_intent),
+			stripeSubscriptionId: getInvoiceSubscriptionId(invoice),
 		};
 	}
 

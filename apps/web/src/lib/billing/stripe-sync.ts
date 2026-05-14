@@ -516,13 +516,6 @@ export async function syncStripeWebhookEventToConvex(event: Stripe.Event) {
 			return await syncSubscriptionTarget(target);
 		case "invoice_subscription":
 			return await syncInvoiceTarget(target);
-		case "charge_refund":
-			return await recordSkippedStripeEvent({
-				eventId: target.eventId,
-				eventType: target.eventType,
-				reason: "refund_state_change_not_in_this_slice",
-				stripeObjectId: target.stripeChargeId,
-			});
 		case "ignored":
 			return await recordSkippedStripeEvent({
 				eventId: target.eventId,

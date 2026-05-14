@@ -72,6 +72,36 @@ describe("getStripeBillingSyncTargetFromWebhookEvent", () => {
 		});
 	});
 
+	it("targets current-shape subscription invoices through parent details", () => {
+		expect(
+			getStripeBillingSyncTargetFromWebhookEvent({
+				created: 1_800_000_004,
+				id: "evt_invoice_parent",
+				type: "invoice.paid",
+				data: {
+					object: {
+						id: "in_parent_123",
+						customer: "cus_123",
+						parent: {
+							type: "subscription_details",
+							subscription_details: {
+								subscription: "sub_parent_123",
+							},
+						},
+					},
+				},
+			} as never),
+		).toEqual({
+			kind: "invoice_subscription",
+			eventCreatedAt: 1_800_000_004_000,
+			eventId: "evt_invoice_parent",
+			eventType: "invoice.paid",
+			stripeCustomerId: "cus_123",
+			stripeInvoiceId: "in_parent_123",
+			stripeSubscriptionId: "sub_parent_123",
+		});
+	});
+
 	it("records unsupported events as ignored targets", () => {
 		expect(
 			getStripeBillingSyncTargetFromWebhookEvent({
