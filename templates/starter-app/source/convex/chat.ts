@@ -21,6 +21,13 @@ import {
   titleFromPrompt,
 } from "../src/lib/chat/rules";
 import { getChatModelLabel } from "../src/lib/chat/models";
+import {
+  applyOpenAIStreamEvent,
+  createOpenAIStreamState,
+  extractOutputTextFromOpenAIResponse,
+  getCompletedOpenAIStreamResponse,
+  parseServerSentEventFrame,
+} from "../src/lib/chat/openai-stream";
 import { getOpenAIEnvIfConfigured } from "../src/lib/env/server";
 
 const chatModelKeyValidator = v.union(
@@ -52,19 +59,6 @@ function chatConversationId(value: string) {
 function chatMessageId(value: string) {
   return value as Id<"chatMessages">;
 }
-
-type OpenAIStreamEvent = {
-  type?: string;
-  delta?: string;
-  response?: {
-    id?: string;
-    output?: unknown;
-    output_text?: string;
-  };
-  error?: {
-    message?: string;
-  };
-};
 
 function requireConversation(
   conversation: ChatConversationDoc | null,
@@ -203,55 +197,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function extractOutputTextFromResponse(value: unknown): string {
-  if (!isRecord(value)) {
-    return "";
-  }
-
-  if (typeof value.output_text === "string") {
-    return value.output_text;
-  }
-
-  if (!Array.isArray(value.output)) {
-    return "";
-  }
-
-  return value.output
-    .flatMap((item) => {
-      if (!isRecord(item) || !Array.isArray(item.content)) {
-        return [];
-      }
-
-      return item.content.flatMap((contentPart) => {
-        if (!isRecord(contentPart)) {
-          return [];
-        }
-
-        if (typeof contentPart.text === "string") {
-          return [contentPart.text];
-        }
-
-        return [];
-      });
-    })
-    .join("");
-}
-
-function parseServerSentEventFrame(frame: string) {
-  const data = frame
-    .split("\n")
-    .filter((line) => line.startsWith("data:"))
-    .map((line) => line.slice("data:".length).trimStart())
-    .join("\n")
-    .trim();
-
-  if (!data || data === "[DONE]") {
-    return null;
-  }
-
-  return JSON.parse(data) as OpenAIStreamEvent;
-}
-
 async function readOpenAIError(response: Response) {
   const body = await response.text();
 
@@ -310,7 +255,7 @@ async function streamOpenAIResponse(args: {
 
   if (!response.body) {
     const parsedResponse = (await response.json()) as unknown;
-    const content = extractOutputTextFromResponse(parsedResponse);
+    const content = extractOutputTextFromOpenAIResponse(parsedResponse);
     const responseId = isRecord(parsedResponse)
       ? typeof parsedResponse.id === "string"
         ? parsedResponse.id
@@ -327,17 +272,18 @@ async function streamOpenAIResponse(args: {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  let emittedText = false;
-  let responseId: string | undefined;
+  const streamState = createOpenAIStreamState();
 
   for (;;) {
     const { done, value } = await reader.read();
 
     if (done) {
+      buffer += decoder.decode();
       break;
     }
 
     buffer += decoder.decode(value, { stream: true });
+    buffer = buffer.replace(/\r\n/g, "\n");
     const frames = buffer.split("\n\n");
     buffer = frames.pop() ?? "";
 
@@ -348,40 +294,29 @@ async function streamOpenAIResponse(args: {
         continue;
       }
 
-      if (event.type === "error") {
-        throw new Error(
-          event.error?.message ?? "OpenAI returned a streaming error.",
-        );
-      }
-
-      if (event.type === "response.output_text.delta" && event.delta) {
-        emittedText = true;
-        await args.onDelta(event.delta);
-      }
-
-      if (event.response?.id) {
-        responseId = event.response.id;
-      }
-
-      if (event.type === "response.completed" && event.response) {
-        const completedText = extractOutputTextFromResponse(event.response);
-
-        if (completedText && !emittedText) {
-          await args.onDelta(completedText);
-        }
-      }
+      await applyOpenAIStreamEvent({
+        event,
+        onDelta: args.onDelta,
+        state: streamState,
+      });
     }
   }
+
+  buffer = buffer.replace(/\r\n/g, "\n");
 
   if (buffer.trim()) {
     const event = parseServerSentEventFrame(buffer);
 
-    if (event?.response?.id) {
-      responseId = event.response.id;
+    if (event) {
+      await applyOpenAIStreamEvent({
+        event,
+        onDelta: args.onDelta,
+        state: streamState,
+      });
     }
   }
 
-  return { responseId };
+  return getCompletedOpenAIStreamResponse(streamState);
 }
 
 export const openAIStatus = query({

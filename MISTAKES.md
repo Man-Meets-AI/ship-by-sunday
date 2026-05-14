@@ -255,3 +255,9 @@
 - Mistake: I updated the Starter template manifest to a stale digest after a late source patch.
   Impact: The focused generated repo tests failed fast on the manifest mismatch before any customer output proof ran.
   Corrective action: Recompute the digest after the final source edit, then rerun the template-source contract and clean-room generated repo tests before finishing.
+
+## 2026-05-14 Typecheck PostHog Upload Repeat
+
+- Mistake: I ran root `bun typecheck` without disabling PostHog source map upload even though this mistake was already recorded.
+  Impact: The Next build hook created a PostHog release and uploaded source maps during local validation for a non-release fix.
+  Corrective action: Check `MISTAKES.md` before broad validation and run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` unless explicitly performing release proof.

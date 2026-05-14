@@ -10,8 +10,8 @@ describe("starter template source contract", () => {
 
 		expect(verification.manifest).toMatchObject({
 			contentDigest:
-				"sha256-69aa817c1510d24e103d19246589c7ebab0727ef82306f8938ea9a94e77adb52",
-			fileCount: 133,
+				"sha256-5a0c27830caa417749264f5968c28a44083b63b742260a11c4757702c2924755",
+			fileCount: 134,
 			sourceLayout: "single-next-app-root",
 			sourceRoot: STARTER_TEMPLATE_SOURCE_ROOT,
 			templateId: "starter-app",
@@ -36,7 +36,9 @@ describe("starter template source contract", () => {
 		expect(fileSet.has("src/app/api/billing/checkout/route.ts")).toBe(true);
 		expect(fileSet.has("src/lib/billing/stripe-sync.ts")).toBe(true);
 		expect(fileSet.has("src/lib/chat/models.ts")).toBe(true);
+		expect(fileSet.has("src/lib/chat/openai-stream.ts")).toBe(true);
 		expect(fileSet.has("src/lib/chat/rules.ts")).toBe(true);
+		expect(fileSet.has("src/proxy.ts")).toBe(true);
 		expect(fileSet.has("convex/schema.ts")).toBe(true);
 		expect(fileSet.has("convex/chat.ts")).toBe(true);
 		expect(fileSet.has("convex/notes.ts")).toBe(false);
@@ -62,6 +64,9 @@ describe("starter template source contract", () => {
 		).toBe(true);
 		expect(
 			isStarterTemplateGeneratedOverlayAllowed("src/app/layout.tsx", manifest),
+		).toBe(true);
+		expect(
+			isStarterTemplateGeneratedOverlayAllowed("src/proxy.ts", manifest),
 		).toBe(true);
 		expect(
 			isStarterTemplateGeneratedOverlayAllowed(

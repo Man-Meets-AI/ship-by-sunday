@@ -13,7 +13,7 @@ The initial snapshot is copied from `~/Developer/next-js-convex-clerk-stripe-tem
 
 The initial source seed is a single Next.js app repo with `src/`, `convex/`, provider boundaries, route groups, billing routes, auth routes, and tests. The generated Ship by Sunday customer repo remains a monorepo, and the generator maps this single-app source into `apps/web/` before applying generated overlays.
 
-The no-provider generated repo subset excludes provider-heavy routes and local-only files until setup ExecPlans activate them deliberately. This source still does not replace the Notes sample with the ChatGPT-style app.
+The no-provider generated repo subset excludes provider-heavy routes and local-only files until setup ExecPlans activate them deliberately. The source app uses a protected `/chat` sample with Convex-owned conversations/messages and server-side OpenAI streaming.
 
 ## Provenance
 

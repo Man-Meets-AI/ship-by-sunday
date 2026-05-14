@@ -31,7 +31,9 @@ describe("starter template source materialization", () => {
 				"apps/web/src/app/(app)/chat/page.tsx",
 				"apps/web/src/components/app/chat-workbench.tsx",
 				"apps/web/src/lib/chat/models.ts",
+				"apps/web/src/lib/chat/openai-stream.ts",
 				"apps/web/convex/chat.ts",
+				"apps/web/src/proxy.ts",
 				"apps/web/src/lib/billing/stripe-sync.ts",
 				"apps/web/convex/schema.ts",
 			]),
@@ -74,6 +76,9 @@ describe("starter template source materialization", () => {
 		const appReadme = snapshotText(
 			snapshotFiles.find((file) => file.path === "apps/web/README.md"),
 		);
+		const appProxy = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/src/proxy.ts"),
+		);
 		const billingPanel = snapshotText(
 			snapshotFiles.find(
 				(file) => file.path === "apps/web/src/components/app/billing-panel.tsx",
@@ -94,6 +99,9 @@ describe("starter template source materialization", () => {
 			true,
 		);
 		expect(snapshotPaths.has("apps/web/src/app/(app)/chat/page.tsx")).toBe(
+			true,
+		);
+		expect(snapshotPaths.has("apps/web/src/lib/chat/openai-stream.ts")).toBe(
 			true,
 		);
 		expect(snapshotPaths.has("apps/web/src/app/(app)/notes/page.tsx")).toBe(
@@ -124,6 +132,10 @@ describe("starter template source materialization", () => {
 		expect(appReadme).toContain("src/app/(app)/chat/page.tsx");
 		expect(appReadme).not.toContain("_content");
 		expect(appReadme).not.toContain("api/stripe/webhook");
+		expect(appProxy).toContain("const clerkProxyConfigured = Boolean(");
+		expect(appProxy).toContain("return NextResponse.next();");
+		expect(appProxy).toContain("return clerkProxy(request, event);");
+		expect(appProxy).not.toContain("export default clerkMiddleware");
 		expect(billingPanel).toContain(
 			"generated starter until the billing setup slice materializes",
 		);

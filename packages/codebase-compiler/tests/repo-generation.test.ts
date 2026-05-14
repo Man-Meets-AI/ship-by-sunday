@@ -345,6 +345,8 @@ describe("repo generation", () => {
 				"apps/web/src/app/(app)/chat/page.tsx",
 				"apps/web/src/components/app/chat-workbench.tsx",
 				"apps/web/src/lib/chat/models.ts",
+				"apps/web/src/lib/chat/openai-stream.ts",
+				"apps/web/src/proxy.ts",
 				"apps/web/convex/chat.ts",
 				"apps/web/convex/schema.ts",
 				"apps/web/next.config.ts",
@@ -451,6 +453,9 @@ describe("repo generation", () => {
 		);
 		const appReadme = snapshotText(
 			snapshotFiles.find((file) => file.path === "apps/web/README.md"),
+		);
+		const appProxy = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/src/proxy.ts"),
 		);
 		const templateSourceProvenance = JSON.parse(
 			snapshotText(
@@ -571,6 +576,11 @@ describe("repo generation", () => {
 		expect(appReadme).toContain("config/product.ts");
 		expect(appReadme).not.toContain("_content");
 		expect(appReadme).not.toContain("api/stripe/webhook");
+		expect(appProxy).toContain("const clerkProxyConfigured = Boolean(");
+		expect(appProxy).toContain("process.env.CLERK_SECRET_KEY");
+		expect(appProxy).toContain("return NextResponse.next();");
+		expect(appProxy).toContain("return clerkProxy(request, event);");
+		expect(appProxy).not.toContain("export default clerkMiddleware");
 		expect(templateSourceProvenance).toMatchObject({
 			schemaVersion: "generated-starter-template-source-provenance.v1",
 			templateId: "starter-app",
@@ -578,7 +588,7 @@ describe("repo generation", () => {
 			materializedOutputRoot: "apps/web",
 			generatedOverlaysWin: true,
 			contentDigest:
-				"sha256-69aa817c1510d24e103d19246589c7ebab0727ef82306f8938ea9a94e77adb52",
+				"sha256-5a0c27830caa417749264f5968c28a44083b63b742260a11c4757702c2924755",
 		});
 		expect(
 			Object.keys(templateSourceProvenance.provenance ?? {}),

@@ -237,6 +237,50 @@ function renderGeneratedRootLayout() {
 	return source;
 }
 
+function renderGeneratedProxy() {
+	return [
+		'import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";',
+		'import { NextResponse, type NextProxy } from "next/server";',
+		"",
+		"const clerkProxyConfigured = Boolean(",
+		"\tprocess.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY,",
+		");",
+		"",
+		"const isProtectedRoute = createRouteMatcher([",
+		'\t"/dashboard(.*)",',
+		'\t"/chat(.*)",',
+		'\t"/billing(.*)",',
+		'\t"/api/billing(.*)",',
+		'\t"/api/email/test(.*)",',
+		'\t"/api/debug/sentry(.*)",',
+		"]);",
+		"",
+		"const clerkProxy = clerkMiddleware(async (auth, request) => {",
+		"\tif (isProtectedRoute(request)) {",
+		"\t\tawait auth.protect();",
+		"\t}",
+		"});",
+		"",
+		"const generatedProxy: NextProxy = (request, event) => {",
+		"\tif (!clerkProxyConfigured) {",
+		"\t\treturn NextResponse.next();",
+		"\t}",
+		"",
+		"\treturn clerkProxy(request, event);",
+		"};",
+		"",
+		"export default generatedProxy;",
+		"",
+		"export const config = {",
+		"\tmatcher: [",
+		'\t\t"/((?!_next|[^?]*\\\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",',
+		'\t\t"/(api|trpc)(.*)",',
+		"\t],",
+		"};",
+		"",
+	].join("\n");
+}
+
 function renderGeneratedAppProviders() {
 	const sourcePath = "src/components/providers/app-providers.tsx";
 	let source = readTemplateSourceFile(sourcePath);
@@ -938,6 +982,10 @@ export function renderGeneratedTemplateAppFiles(
 		{
 			path: "apps/web/next.config.ts",
 			content: renderNextConfig(),
+		},
+		{
+			path: "apps/web/src/proxy.ts",
+			content: renderGeneratedProxy(),
 		},
 		{
 			path: "apps/web/src/app/layout.tsx",
