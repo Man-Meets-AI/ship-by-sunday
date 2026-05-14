@@ -67,12 +67,12 @@ export function finishAndMaybeSyncResultEffect(
 		}),
 		(result) =>
 			Effect.flatMap(
-				Effect.catchAll(
-					emitWorkerInstallRunnerEventEffect({
-						context: input.context,
-						result,
-					}),
-					() => Effect.void,
+				emitWorkerInstallRunnerEventEffect({
+					context: input.context,
+					result,
+				}).pipe(
+					Effect.catchAll(() => Effect.void),
+					Effect.catchAllDefect(() => Effect.void),
 				),
 				() => Effect.succeed(result),
 			),
@@ -86,38 +86,40 @@ function emitWorkerInstallRunnerEventEffect({
 	context: WorkerInstallContext;
 	result: WorkerInstallResult;
 }) {
-	const payload = buildWorkerInstallRunnerEventPayload(result);
-	if (!payload) {
-		return Effect.void;
-	}
+	return Effect.suspend(() => {
+		const payload = buildWorkerInstallRunnerEventPayload(result);
+		if (!payload) {
+			return Effect.void;
+		}
 
-	return Effect.flatMap(
-		readRunnerCredentialEffect({
-			repositoryRoot: context.repositoryRoot,
-			runnerHome: resolveLocalRunnerHome(context.env),
-		}),
-		(credential) => {
-			if (!credential) {
-				return Effect.void;
-			}
+		return Effect.flatMap(
+			readRunnerCredentialEffect({
+				repositoryRoot: context.repositoryRoot,
+				runnerHome: resolveLocalRunnerHome(context.env),
+			}),
+			(credential) => {
+				if (!credential) {
+					return Effect.void;
+				}
 
-			const event = createRunnerEvent({
-				projectId: credential.projectId,
-				runnerId: credential.runnerId,
-				payload,
-			});
-			return Effect.flatMap(
-				queueRunnerEventEffect(context.repositoryRoot, event),
-				() =>
-					Effect.asVoid(
-						flushRunnerEventsEffect({
-							repositoryRoot: context.repositoryRoot,
-							credential,
-						}),
-					),
-			);
-		},
-	);
+				const event = createRunnerEvent({
+					projectId: credential.projectId,
+					runnerId: credential.runnerId,
+					payload,
+				});
+				return Effect.flatMap(
+					queueRunnerEventEffect(context.repositoryRoot, event),
+					() =>
+						Effect.asVoid(
+							flushRunnerEventsEffect({
+								repositoryRoot: context.repositoryRoot,
+								credential,
+							}),
+						),
+				);
+			},
+		);
+	});
 }
 
 function buildWorkerInstallRunnerEventPayload(

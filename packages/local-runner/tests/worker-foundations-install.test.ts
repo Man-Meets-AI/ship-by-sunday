@@ -40,6 +40,7 @@ import {
 	buildBlockedPlan,
 	finishAndMaybeSyncResultEffect,
 } from "../src/workflows/worker-foundations-install/result";
+import type { FinishResultInput } from "../src/workflows/worker-foundations-install/types";
 import {
 	createTemporaryDirectory,
 	initializeGitRepository,
@@ -249,6 +250,130 @@ describe("Worker Foundations install command", () => {
 		expect(flushRequests).toEqual([
 			{ repositoryRoot, runnerToken: credential.runnerToken },
 		]);
+	});
+
+	it("swallows Worker install event construction defects from stale credentials", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const unsafeCredential: RunnerCredential = {
+			projectId: "/tmp/workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			runnerToken: "sbs_run_stale",
+			apiBaseUrl: "https://runner.example.test",
+			eventEndpoint: "/api/workspace/runner/events",
+			updatedAt: 1,
+		};
+		const queuedEvents: RunnerEvent[] = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: () => Effect.succeed(unsafeCredential),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: (request) =>
+					Effect.sync(() => {
+						queuedEvents.push(request.event);
+					}),
+				readQueued: () => Effect.succeed([]),
+				flush: () => Effect.succeed({ delivered: 0, remaining: 0 }),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect(
+				workerFinishResultInput({
+					context: workerFinishContext({ repositoryRoot, runnerHome }),
+				}),
+			).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+		expect(queuedEvents).toEqual([]);
+	});
+
+	it("swallows Worker install event queue failures after result construction", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const credential: RunnerCredential = {
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			runnerToken: "sbs_run_queue_failure",
+			apiBaseUrl: "https://runner.example.test",
+			eventEndpoint: "/api/workspace/runner/events",
+			updatedAt: 1,
+		};
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: () => Effect.succeed(credential),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: () => Effect.fail(new Error("Runner event queue unavailable.")),
+				readQueued: () => Effect.succeed([]),
+				flush: () => Effect.fail(new Error("Flush should not run.")),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect(
+				workerFinishResultInput({
+					context: workerFinishContext({ repositoryRoot, runnerHome }),
+				}),
+			).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+	});
+
+	it("surfaces Worker install result construction failures before event sync", async () => {
+		const credentialRequests: string[] = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: (request) =>
+					Effect.sync(() => {
+						credentialRequests.push(request.repositoryRoot);
+						return null;
+					}),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: () => Effect.void,
+				readQueued: () => Effect.succeed([]),
+				flush: () => Effect.succeed({ delivered: 0, remaining: 0 }),
+			}),
+		);
+
+		await expect(
+			Effect.runPromise(
+				finishAndMaybeSyncResultEffect(
+					workerFinishResultInput({
+						createdRefs: ["/tmp/unsafe-local-ref"],
+					}),
+				).pipe(
+					Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+				),
+			),
+		).rejects.toThrow("worker install result is not sync-safe");
+		expect(credentialRequests).toEqual([]);
 	});
 
 	it("does not sync Worker install events when runner credentials are absent", async () => {
@@ -1715,6 +1840,44 @@ function workerInstallOptions(
 		noKickoff: true,
 		yes: true,
 		...options,
+	};
+}
+
+function workerFinishContext({
+	repositoryRoot = "/virtual/repository",
+	runnerHome = "/virtual/runner-home",
+}: {
+	repositoryRoot?: string;
+	runnerHome?: string;
+} = {}): FinishResultInput["context"] {
+	return {
+		env: { [RUNNER_HOME_ENV_VAR]: runnerHome },
+		now: 123,
+		options: workerInstallOptions({ repoPath: repositoryRoot }),
+		repositoryRoot,
+		workerHome: "/virtual/worker-home",
+		runId: "worker-install-injected",
+	};
+}
+
+function workerFinishResultInput(
+	overrides: Partial<FinishResultInput> = {},
+): FinishResultInput {
+	return {
+		outcome: "installed",
+		exitCode: 0,
+		summary: "Worker Foundations installed.",
+		context: workerFinishContext(),
+		plan: buildBlockedPlan({ packageManager: "npm", blockers: [] }),
+		proof: [{ command: "npm run docs:validate", status: "passed" }],
+		createdRefs: ["apps/worker/package.json"],
+		changedRefs: [],
+		branch: "worker-foundations/install",
+		commit: "0123456789abcdef",
+		localProofRef: "docs/worker/local-proof.json",
+		reportRef: "docs/worker/install-report.md",
+		kickoff: buildSkippedKickoff("disabled"),
+		...overrides,
 	};
 }
 

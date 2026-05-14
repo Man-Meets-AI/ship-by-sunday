@@ -237,3 +237,15 @@
 - Mistake: I ran an `rg` command with backticks inside a double-quoted zsh argument.
   Impact: zsh attempted command substitution and printed `command not found` errors; no files changed and validation commands were unaffected.
   Corrective action: Single-quote search patterns that contain shell-special characters, especially backticks.
+
+## 2026-05-14 Corrupt Patch During Event Sync Fix
+
+- Mistake: I applied an oversized patch to `packages/local-runner/src/workflows/worker-foundations-install/result.ts` and left a duplicate helper plus invalid references in the file.
+  Impact: The source file was temporarily syntactically invalid before tests ran; I re-read the affected section and removed the duplicate block immediately.
+  Corrective action: Patch one function at a time and re-read the edited region before moving on to tests or additional edits.
+
+## 2026-05-14 Starter Template Digest Repin
+
+- Mistake: I updated the Starter template manifest to a stale digest after a late source patch.
+  Impact: The focused generated repo tests failed fast on the manifest mismatch before any customer output proof ran.
+  Corrective action: Recompute the digest after the final source edit, then rerun the template-source contract and clean-room generated repo tests before finishing.
