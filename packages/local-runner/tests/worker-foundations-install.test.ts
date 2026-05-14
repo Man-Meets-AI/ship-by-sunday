@@ -15,6 +15,7 @@ import { promisify } from "node:util";
 import { Effect, Layer } from "effect";
 
 import { runInstallCommand } from "../src/commands/install";
+import { BoundedProcessService } from "../src/core/bounded-process";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
 import {
 	LocalRunnerHomeService,
@@ -28,6 +29,10 @@ import {
 	type RunnerEvent,
 } from "../src/core/runner-events";
 import { buildSkippedKickoff } from "../src/workflows/worker-foundations-install/kickoff";
+import {
+	runDogfoodChildPlanEffect,
+	runProofCommandsEffect,
+} from "../src/workflows/worker-foundations-install/proof";
 import {
 	runWorkerFoundationsInstall,
 	type WorkerInstallOptions,
@@ -249,6 +254,133 @@ describe("Worker Foundations install command", () => {
 		});
 		expect(flushRequests).toEqual([
 			{ repositoryRoot, runnerToken: credential.runnerToken },
+		]);
+	});
+
+	it("runs Worker proof commands through an injected Effect process service", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const processRequests: Array<{
+			args: string[];
+			command: string;
+			cwd: string | undefined;
+			timeoutMs: number;
+			workerHome: string | undefined;
+		}> = [];
+		const boundedProcessLayer = Layer.succeed(
+			BoundedProcessService,
+			BoundedProcessService.of({
+				run: (request) =>
+					Effect.sync(() => {
+						processRequests.push({
+							args: request.args,
+							command: request.command,
+							cwd: request.cwd,
+							timeoutMs: request.timeoutMs,
+							workerHome: request.env.SHIPBYSUNDAY_WORKER_HOME,
+						});
+						const scriptName = request.args[1];
+						return {
+							succeeded: scriptName !== "plans:lint",
+							stdout: `ran ${scriptName}`,
+							stderr: "",
+							timedOut: false,
+							...(scriptName === "plans:lint" ? { exitCode: 7 } : {}),
+						};
+					}),
+			}),
+		);
+
+		const proof = await Effect.runPromise(
+			runProofCommandsEffect(
+				workerFinishContext({ repositoryRoot }),
+				"npm",
+			).pipe(Effect.provide(boundedProcessLayer)),
+		);
+
+		expect(proof).toEqual([
+			{ command: "npm run programs:lint", status: "passed" },
+			{ command: "npm run plans:lint", status: "failed" },
+		]);
+		expect(processRequests).toEqual([
+			{
+				command: "npm",
+				args: ["run", "programs:lint"],
+				cwd: repositoryRoot,
+				timeoutMs: 30_000,
+				workerHome: "/virtual/worker-home",
+			},
+			{
+				command: "npm",
+				args: ["run", "plans:lint"],
+				cwd: repositoryRoot,
+				timeoutMs: 30_000,
+				workerHome: "/virtual/worker-home",
+			},
+		]);
+	});
+
+	it("runs Worker dogfood child-plan proof through an injected Effect process service", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const processRequests: Array<{
+			args: string[];
+			command: string;
+			cwd: string | undefined;
+			timeoutMs: number;
+		}> = [];
+		const boundedProcessLayer = Layer.succeed(
+			BoundedProcessService,
+			BoundedProcessService.of({
+				run: (request) =>
+					Effect.sync(() => {
+						processRequests.push({
+							args: request.args,
+							command: request.command,
+							cwd: request.cwd,
+							timeoutMs: request.timeoutMs,
+						});
+						return {
+							succeeded: true,
+							stdout: "created child plan",
+							stderr: "",
+							timedOut: false,
+						};
+					}),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			runDogfoodChildPlanEffect(
+				workerFinishContext({ repositoryRoot }),
+				"npm",
+			).pipe(Effect.provide(boundedProcessLayer)),
+		);
+
+		expect(result).toMatchObject({
+			command:
+				"npm run program:write-child-plan -- --program-id worker-foundations-adoption --plan docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md --title Continue Worker Foundations Adoption --summary Continue from the installed Worker Foundations operating system.",
+			succeeded: true,
+			stdout: "created child plan",
+			timedOut: false,
+		});
+		expect(processRequests).toEqual([
+			{
+				command: "npm",
+				args: [
+					"run",
+					"program:write-child-plan",
+					"--",
+					"--program-id",
+					"worker-foundations-adoption",
+					"--plan",
+					"docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md",
+					"--title",
+					"Continue Worker Foundations Adoption",
+					"--summary",
+					"Continue from the installed Worker Foundations operating system.",
+				],
+				cwd: repositoryRoot,
+				timeoutMs: 30_000,
+			},
 		]);
 	});
 
