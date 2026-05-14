@@ -52,7 +52,7 @@ If the task is not user-facing UI work, follow the repo's normal instructions in
 - Default to no cards in the hero.
 - Headlines should stay readable in one glance on mobile.
 - Keep the text column narrow and anchored to a calm area of the image.
-- If the task touches the public homepage, read `apps/web/content/docs/configure-the-homepage.mdx` first and preserve the existing CTA, section-order, and structured-data contract.
+- If the task touches the public homepage, read `apps/web/src/content/docs/configure-the-homepage.mdx` first and preserve the existing CTA, section-order, and structured-data contract.
 
 ## Hard rules for app, dashboard, and workspace UI
 
@@ -99,4 +99,4 @@ A complete frontend task should usually leave behind:
 - `docs/ship-by-sunday/design-pack/surfaces/app-surface.md`
 - `docs/ship-by-sunday/design-pack/surfaces/dashboard.md`
 - `apps/web/AGENTS.md`
-- `apps/web/content/docs/configure-the-homepage.mdx`
+- `apps/web/src/content/docs/configure-the-homepage.mdx`

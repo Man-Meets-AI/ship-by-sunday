@@ -207,3 +207,9 @@
 - Mistake: I chained Git staging commands and included a missing pathspec while repairing the web `src` move review findings.
   Impact: The command failed noisily after partial staging; no source files were corrupted, and I verified the final index state with focused Git checks.
   Corrective action: Use separate Git commands for path-sensitive staging and verify each scoped state change before continuing.
+
+## 2026-05-13 Typecheck PostHog Upload
+
+- Mistake: I ran `bun typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The Next build hook created a PostHog release and uploaded source maps while validation was running.
+  Corrective action: Use `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for local validation unless an explicit release proof needs the upload.
