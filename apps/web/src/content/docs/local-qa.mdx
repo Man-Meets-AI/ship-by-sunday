@@ -65,7 +65,7 @@ Use this only in a safe local test environment.
 8. Confirm the webhook grants access.
 9. Confirm the app redirects through passwordless sign-in if needed and lands on `/starter/home` for Starter or `/workers/setup` for Workers.
 
-On a new machine or after switching deployments, run `bun run dev:convex` first so `apps/web/.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` values. In this repo, the Stripe listener must forward to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, not the `.convex.cloud` client origin.
+On a new machine or after switching deployments, run `bun run dev:convex` first so `apps/web/.env.local` contains the current `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CONVEX_SITE_URL`, and `CONVEX_DEPLOYMENT` values. In this repo, the Stripe listener must forward to `{APP_BASE_URL}/api/stripe/webhook`, and the app route must share `CONVEX_WEBHOOK_MUTATION_SECRET` with the active hosted Convex deployment.
 
 Before you trust a local billing run, check the pinned Stripe CLI guardrail once:
 

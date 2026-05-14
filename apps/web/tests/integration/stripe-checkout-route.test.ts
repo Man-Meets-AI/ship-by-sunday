@@ -226,21 +226,31 @@ describe("POST /api/stripe/checkout", () => {
 			expect.objectContaining({
 				client_reference_id: undefined,
 				customer_email: undefined,
+				mode: "subscription",
 				metadata: workersMetadata,
 				line_items: [
 					{
 						price_data: {
 							currency: "usd",
 							product_data: { name: "Ship by Sunday Workers" },
+							recurring: {
+								interval: "month",
+							},
 							unit_amount: 60000,
 						},
 						quantity: 1,
 					},
 				],
-				payment_intent_data: {
+				subscription_data: {
 					metadata: workersMetadata,
 				},
 			}),
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"customer_creation",
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"payment_intent_data",
 		);
 		expect(getStripeLineItemMock).toHaveBeenCalledWith("workers");
 		expect(

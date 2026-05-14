@@ -19,7 +19,8 @@ Prepare production values in your hosting dashboards and provider dashboards. Mi
 - Convex HTTP-actions URL (`NEXT_PUBLIC_CONVEX_SITE_URL`) when the deployment uses Convex HTTP actions
 - any deployment values your Convex environment writes
 - Stripe secret key, product id, price id
-- live `STRIPE_WEBHOOK_SECRET`
+- live `STRIPE_WEBHOOK_SECRET` in Vercel for `/api/stripe/webhook`
+- live `CONVEX_WEBHOOK_MUTATION_SECRET`, mirrored into Vercel and the production Convex deployment
 - live `CHECKOUT_FULFILLMENT_RETRY_SECRET`, mirrored into Vercel and the production Convex deployment
 - `APP_BASE_URL`
 - PostHog source-map upload values when error tracking is enabled:
@@ -54,7 +55,7 @@ Do not leave Convex pointed at:
 
 - an old Clerk instance
 - a dev Clerk instance
-- an outdated Stripe webhook secret
+- an outdated Convex webhook mutation secret
 - a mismatched Stripe secret key
 - a deployment that does not have the current `observability` functions pushed
 

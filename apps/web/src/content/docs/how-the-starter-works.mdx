@@ -85,8 +85,8 @@ For the file-by-file operating guide, see [Configure the Homepage](/docs/configu
 2. The buyer calls `POST /api/stripe/checkout` from the public CTA, whether they are already signed in or not.
 3. The app stores the pending Stripe Checkout Session ID in a first-party cookie so the handoff can recover if the Stripe return tab is lost.
 4. Stripe hosts the payment flow and returns to `/checkout/success`.
-5. `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` verifies the signature and handles completed checkout events.
-6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
+5. `POST {APP_BASE_URL}/api/stripe/webhook` verifies the signature and handles completed checkout events.
+6. If the checkout already belonged to a signed-in Clerk account, Convex can grant access directly through the app route's trusted sync boundary. Otherwise the webhook grants access to the Clerk user that owns the Stripe checkout email, creating that Clerk user when needed.
 7. `/checkout/success` retries the same idempotent fulfillment if the webhook is delayed. For a signed-out buyer, it then sends them to `/sign-in` with the offer-specific destination.
 8. `/sign-in` uses Clerk email-code OTP. When the redirect is the immediate checkout welcome path, it validates the pending Stripe session cookie server-side and locks the email field to the Stripe checkout email.
 9. Once Clerk verifies the email, Starter buyers land on `/starter/home`, Workers buyers land on `/workers/setup`, and legacy broad-access buyers can use `/home` as a recovery hub.

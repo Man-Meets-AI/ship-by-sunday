@@ -76,7 +76,7 @@ bun run dev
 PLAYWRIGHT_USE_LOCAL_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3000 bun run --cwd apps/web test:e2e:sandbox:default-ship
 ```
 
-When resuming local billing proof, start from the green historical rerun in `docs/archive/release-proof-runs/2026-03-25-dev-billing-integration-rerun.md`. If it regresses, check that `bun run dev:stripe` is forwarding to `{NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook` before treating it as an app-auth failure.
+When resuming local billing proof, start from the green historical rerun in `docs/archive/release-proof-runs/2026-03-25-dev-billing-integration-rerun.md`. If it regresses, check that `bun run dev:stripe` is forwarding to `{APP_BASE_URL}/api/stripe/webhook` before treating it as an app-auth failure.
 
 For local targets, `bun run release:proof -- --proof=billing_integration` adds a warning-only `stripe:dev:doctor` preflight and a hard `stripe:dev:verify` follow-through after the sandbox billing flow. A pinned-profile warning should not override a passing billing handoff, but the warning should still be fixed.
 

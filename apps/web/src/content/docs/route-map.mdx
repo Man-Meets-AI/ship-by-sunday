@@ -63,6 +63,14 @@ Repeat-routing note: `/execute` does not render a bridge page. Review owns the p
 
 These protected routes render behind `src/app/(app)/layout.tsx`, starting from server-fetched access or codebase-workspace data before the browser resumes live Convex subscriptions. The canonical paid intake is offer-specific now: Starter checkout lands in `/starter/home`, Workers checkout lands in `/workers/setup`, and `/home` remains the protected recovery hub.
 
+## Integration routes
+
+- `POST /api/stripe/checkout`: creates hosted Stripe Checkout Sessions for Starter and Workers
+- `POST /api/stripe/checkout/express`: creates custom-ui Checkout Sessions for Express Checkout
+- `POST /api/stripe/webhook`: verifies Stripe webhook signatures at the app origin and synchronizes Starter and Workers billing state into Convex through the trusted billing boundary
+- `POST /api/observability/clerk`: verifies Clerk webhooks for observability
+- `POST /api/observability/vercel`: verifies Vercel deployment webhooks for observability
+
 ## Why this matters
 
 If you use the wrong route language in prompts or docs, the agent can implement the right idea against the wrong surface.

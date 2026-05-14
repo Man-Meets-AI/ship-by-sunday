@@ -98,6 +98,46 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 		);
 	});
 
+	it("builds Workers checkout as a subscription session", async () => {
+		const { buildStripeCheckoutSessionCreateParams } =
+			await import("@/platform/billing/checkout/checkout-session-params");
+
+		const params = buildStripeCheckoutSessionCreateParams({
+			appBaseUrl: "https://app.example.com",
+			clerkUserId: "user_123",
+			customerEmail: "buyer@example.com",
+			offerId: "workers",
+			purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
+		});
+
+		const workersMetadata = {
+			...hostedCheckoutMetadata,
+			offerId: "workers",
+			clerkUserId: "user_123",
+		};
+		expect(params).toMatchObject({
+			mode: "subscription",
+			client_reference_id: "user_123",
+			customer_email: "buyer@example.com",
+			metadata: workersMetadata,
+			subscription_data: {
+				metadata: workersMetadata,
+			},
+			line_items: [
+				{
+					price_data: {
+						recurring: {
+							interval: "month",
+						},
+					},
+					quantity: 1,
+				},
+			],
+		});
+		expect(params).not.toHaveProperty("customer_creation");
+		expect(params).not.toHaveProperty("payment_intent_data");
+	});
+
 	it("builds an express checkout session for custom UI", async () => {
 		const { buildStripeExpressCheckoutSessionCreateParams } =
 			await import("@/platform/billing/checkout/checkout-session-params");

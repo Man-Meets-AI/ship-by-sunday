@@ -56,11 +56,11 @@ That verifies the part we actually care about in staging or production:
 
 It does **not** prove live card charging or decline behavior. Keep card-path confidence in sandbox or local Stripe testing.
 
-The live Stripe webhook must target the Convex HTTP-actions route, not the app origin:
+The live Stripe webhook must target the app-origin route:
 
-`https://<your-convex-production-deployment>.convex.site/stripe/webhook`
+`https://<your-app-domain>/api/stripe/webhook`
 
-Before trusting production billing, verify `STRIPE_WEBHOOK_SECRET`, `CHECKOUT_FULFILLMENT_RETRY_SECRET`, and `STRIPE_SECRET_KEY` on the production Convex deployment. Use the internal observability runbook for the incident-control drill and Telegram delivery checks.
+Before trusting production billing, verify `STRIPE_WEBHOOK_SECRET` in the Next.js production runtime and verify `CONVEX_WEBHOOK_MUTATION_SECRET`, `CHECKOUT_FULFILLMENT_RETRY_SECRET`, `STRIPE_SECRET_KEY`, and `CLERK_SECRET_KEY` on the production Convex deployment. Use the internal observability runbook for the incident-control drill and Telegram delivery checks.
 
 After those are correct, let the hosted `billing_integration` run prove one fresh live no-cost order and verify it auto-forwards through passwordless sign-in into the purchased product surface without replaying the Stripe event. The proof defaults to Starter; pass `--offer=workers` when the release needs Workers-specific metadata, 60000-cent amount, `/workers/setup`, and `worker` capability proof. On production, that proof should create the Checkout Session directly with a fresh one-time `100% off` coupon already attached instead of depending on manual promotion-code entry inside Stripe's hosted UI. The replay path is a valid repair tool, but the clean production proof is the automatic delivery path.
 

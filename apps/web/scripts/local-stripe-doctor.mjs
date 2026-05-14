@@ -12,6 +12,7 @@ import {
 
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
+const DEFAULT_LOCAL_APP_BASE_URL = "http://localhost:3000";
 
 function parseArgs(argv) {
 	let listenerSecret = null;
@@ -212,11 +213,21 @@ try {
 const { convexSiteUrl, deploymentName } = convexDevContext;
 
 const stripeAccount = await getStripeAccountSummary();
+const appBaseUrl =
+	process.env.APP_BASE_URL?.trim() || DEFAULT_LOCAL_APP_BASE_URL;
 const envWebhookSecret = await readEnvValue("STRIPE_WEBHOOK_SECRET");
 const envStripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim() ?? null;
+const envClerkSecretKey = process.env.CLERK_SECRET_KEY?.trim() ?? null;
+const envCheckoutFulfillmentSecret =
+	process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET?.trim() ?? null;
+const envConvexMutationSecret =
+	process.env.CONVEX_WEBHOOK_MUTATION_SECRET?.trim() ?? null;
 const convexEnv = await getConvexEnvList();
-const convexWebhookSecret = convexEnv.STRIPE_WEBHOOK_SECRET ?? null;
 const convexStripeSecretKey = convexEnv.STRIPE_SECRET_KEY ?? null;
+const convexClerkSecretKey = convexEnv.CLERK_SECRET_KEY ?? null;
+const convexCheckoutFulfillmentSecret =
+	convexEnv.CHECKOUT_FULFILLMENT_RETRY_SECRET ?? null;
+const convexMutationSecret = convexEnv.CONVEX_WEBHOOK_MUTATION_SECRET ?? null;
 const { stripeCliAvailable, projectConfig: stripeCliProjectConfig } =
 	await getStripeCliProjectConfig();
 const stripeCliProjectCheck = buildStripeCliProjectCheck({
@@ -225,6 +236,7 @@ const stripeCliProjectCheck = buildStripeCliProjectCheck({
 	stripeCliAvailable,
 });
 const webReachable = await canConnect("http://localhost:3000");
+const webhookAppOriginReachable = await canConnect(appBaseUrl);
 const convexReachable = await canConnect(convexSiteUrl);
 
 const checks = [
@@ -242,22 +254,23 @@ const checks = [
 	formatCheck(
 		".env.local webhook secret",
 		Boolean(envWebhookSecret),
-		envWebhookSecret ?? "missing",
+		envWebhookSecret ? "present" : "missing",
 	),
 	formatCheck(
-		"Convex webhook secret",
-		Boolean(convexWebhookSecret),
-		convexWebhookSecret ?? "missing",
+		"Convex mutation secret parity",
+		Boolean(envConvexMutationSecret) &&
+			Boolean(convexMutationSecret) &&
+			envConvexMutationSecret === convexMutationSecret,
+		envConvexMutationSecret === convexMutationSecret ? "matched" : "mismatch",
 	),
 	formatCheck(
-		"Convex Stripe secret key",
-		Boolean(convexStripeSecretKey),
-		convexStripeSecretKey ? "present" : "missing",
-	),
-	formatCheck(
-		"Webhook secret parity",
-		Boolean(envWebhookSecret) && envWebhookSecret === convexWebhookSecret,
-		envWebhookSecret === convexWebhookSecret ? "matched" : "mismatch",
+		"Checkout fulfillment secret parity",
+		Boolean(envCheckoutFulfillmentSecret) &&
+			Boolean(convexCheckoutFulfillmentSecret) &&
+			envCheckoutFulfillmentSecret === convexCheckoutFulfillmentSecret,
+		envCheckoutFulfillmentSecret === convexCheckoutFulfillmentSecret
+			? "matched"
+			: "mismatch",
 	),
 	formatCheck(
 		"Stripe secret key parity",
@@ -267,9 +280,23 @@ const checks = [
 		envStripeSecretKey === convexStripeSecretKey ? "matched" : "mismatch",
 	),
 	formatCheck(
+		"Clerk secret key parity",
+		Boolean(envClerkSecretKey) &&
+			Boolean(convexClerkSecretKey) &&
+			envClerkSecretKey === convexClerkSecretKey,
+		envClerkSecretKey === convexClerkSecretKey ? "matched" : "mismatch",
+	),
+	formatCheck(
 		"Web app",
 		webReachable,
 		webReachable ? "localhost:3000 reachable" : "localhost:3000 unreachable",
+	),
+	formatCheck(
+		"Stripe webhook app origin",
+		webhookAppOriginReachable,
+		webhookAppOriginReachable
+			? `${appBaseUrl}/api/stripe/webhook reachable`
+			: `${appBaseUrl}/api/stripe/webhook unreachable`,
 	),
 	formatCheck(
 		"Convex HTTP endpoint",
@@ -284,12 +311,10 @@ if (listenerSecret) {
 	checks.push(
 		formatCheck(
 			"Listener secret parity",
-			listenerSecret === envWebhookSecret &&
-				listenerSecret === convexWebhookSecret,
-			listenerSecret === envWebhookSecret &&
-				listenerSecret === convexWebhookSecret
+			listenerSecret === envWebhookSecret,
+			listenerSecret === envWebhookSecret
 				? "matched"
-				: "listener secret differs from app or Convex env",
+				: "listener secret differs from app env",
 		),
 	);
 }

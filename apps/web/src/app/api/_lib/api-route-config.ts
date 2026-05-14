@@ -1,6 +1,7 @@
 export const nextApiRouteConfig = {
 	stripeCheckout: "/api/stripe/checkout",
 	stripeExpressCheckout: "/api/stripe/checkout/express",
+	stripeWebhook: "/api/stripe/webhook",
 	observabilityClerk: "/api/observability/clerk",
 	observabilityVercel: "/api/observability/vercel",
 	observabilityIncidentStatus:
@@ -19,7 +20,7 @@ export const nextApiRouteConfig = {
 } as const;
 
 export const convexHttpRouteConfig = {
-	stripeWebhook: "/stripe/webhook",
+	legacyStripeWebhook: "/stripe/webhook",
 } as const;
 
 export const apiRouteConfig = {

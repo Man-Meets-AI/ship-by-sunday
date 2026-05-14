@@ -7,8 +7,19 @@ vi.mock("server-only", () => ({}));
 
 describe("getStripeLineItem", () => {
 	const originalEnv = { ...process.env };
-	const expectedConvexWebhookUrl = "https://convex-site.example/stripe/webhook";
-	const staleAppOriginWebhookUrl = "https://www.example.com/api/stripe/webhook";
+	const expectedWebhookUrl = "https://www.example.com/api/stripe/webhook";
+	const staleLegacyConvexWebhookUrl =
+		"https://convex-site.example/stripe/webhook";
+	const requiredWebhookEvents = [
+		"checkout.session.completed",
+		"checkout.session.async_payment_succeeded",
+		"customer.subscription.created",
+		"customer.subscription.updated",
+		"customer.subscription.deleted",
+		"invoice.payment_failed",
+		"invoice.paid",
+		"charge.refunded",
+	];
 
 	function setWebhookPreflightEnv({
 		secretKey = "sk_live_123",
@@ -29,16 +40,13 @@ describe("getStripeLineItem", () => {
 			application: null,
 			created: 1_700_000_000,
 			description: null,
-			enabled_events: [
-				"checkout.session.completed",
-				"checkout.session.async_payment_succeeded",
-			],
+			enabled_events: requiredWebhookEvents,
 			id: "we_ready",
 			livemode: true,
 			metadata: {},
 			object: "webhook_endpoint",
 			status: "enabled",
-			url: expectedConvexWebhookUrl,
+			url: expectedWebhookUrl,
 			...overrides,
 		};
 	}
@@ -181,6 +189,34 @@ describe("getStripeLineItem", () => {
 		).resolves.toBeUndefined();
 	});
 
+	it("rejects a one-time managed Stripe price for Workers subscription checkout", async () => {
+		process.env.STRIPE_WORKERS_PRICE_ID = "price_workers_once";
+		process.env.STRIPE_WORKERS_PRODUCT_ID = "prod_workers";
+
+		const { assertManagedStripePriceMatchesProductConfig } =
+			await import("@/platform/billing/stripe");
+		const stripe = {
+			prices: {
+				retrieve: vi.fn().mockResolvedValue({
+					id: "price_workers_once",
+					unit_amount: checkoutOffers.workers.priceUsdCents,
+					currency: checkoutOffers.workers.currency,
+					product: "prod_workers",
+					recurring: null,
+				} satisfies Pick<
+					Stripe.Price,
+					"id" | "unit_amount" | "currency" | "product" | "recurring"
+				>),
+			},
+		} as unknown as Stripe;
+
+		await expect(
+			assertManagedStripePriceMatchesProductConfig(stripe, "workers"),
+		).rejects.toThrow(
+			"Configured Stripe workers price price_workers_once must be recurring for subscription checkout.",
+		);
+	});
+
 	it("rejects a managed Stripe price when it belongs to the wrong product", async () => {
 		process.env.STRIPE_STARTER_PRICE_ID = "price_wrong_product";
 		process.env.STRIPE_STARTER_PRODUCT_ID = "prod_expected";
@@ -261,9 +297,16 @@ describe("getStripeLineItem", () => {
 						unit_amount: checkoutOffers.workers.priceUsdCents,
 						currency: checkoutOffers.workers.currency,
 						product: "prod_workers",
+						recurring: {
+							interval: "month",
+							interval_count: 1,
+							meter: null,
+							trial_period_days: null,
+							usage_type: "licensed",
+						},
 					} satisfies Pick<
 						Stripe.Price,
-						"id" | "unit_amount" | "currency" | "product"
+						"id" | "unit_amount" | "currency" | "product" | "recurring"
 					>;
 				}),
 			},
@@ -274,7 +317,7 @@ describe("getStripeLineItem", () => {
 		).resolves.toBeUndefined();
 	});
 
-	it("accepts an enabled Stripe webhook endpoint at the Convex HTTP-actions URL", async () => {
+	it("accepts an enabled Stripe webhook endpoint at the app-origin URL", async () => {
 		setWebhookPreflightEnv();
 
 		const { assertManagedStripeWebhookEndpointReadyForRelease } =
@@ -291,10 +334,10 @@ describe("getStripeLineItem", () => {
 			}),
 		).resolves.toMatchObject({
 			endpointId: "we_live_ready",
-			expectedUrl: expectedConvexWebhookUrl,
+			expectedUrl: expectedWebhookUrl,
 			livemode: true,
 			status: "enabled",
-			url: expectedConvexWebhookUrl,
+			url: expectedWebhookUrl,
 		});
 	});
 
@@ -315,11 +358,11 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe webhook endpoint https://convex-site.example/stripe/webhook uses wildcard event subscriptions. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded.",
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook uses wildcard event subscriptions. Subscribe only to required event types: checkout.session.completed, checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid, charge.refunded.",
 		);
 	});
 
-	it("rejects a still-enabled app-origin Stripe webhook endpoint", async () => {
+	it("rejects a still-enabled legacy Convex Stripe webhook endpoint", async () => {
 		setWebhookPreflightEnv();
 
 		const { assertManagedStripeWebhookEndpointReadyForRelease } =
@@ -327,8 +370,8 @@ describe("getStripeLineItem", () => {
 		const stripe = buildStripeWithWebhookEndpoints([
 			buildWebhookEndpoint(),
 			buildWebhookEndpoint({
-				id: "we_stale_app_origin",
-				url: staleAppOriginWebhookUrl,
+				id: "we_stale_convex_origin",
+				url: staleLegacyConvexWebhookUrl,
 			}),
 		]);
 
@@ -337,18 +380,18 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe has enabled app-origin webhook endpoint(s) at https://www.example.com/api/stripe/webhook.",
+			"Stripe has enabled legacy Convex webhook endpoint(s) at https://convex-site.example/stripe/webhook.",
 		);
 	});
 
-	it("rejects a trailing-slash Stripe webhook endpoint at the Convex URL", async () => {
+	it("rejects a trailing-slash Stripe webhook endpoint at the app-origin URL", async () => {
 		setWebhookPreflightEnv();
 
 		const { assertManagedStripeWebhookEndpointReadyForRelease } =
 			await import("@/platform/billing/stripe");
 		const stripe = buildStripeWithWebhookEndpoints([
 			buildWebhookEndpoint({
-				url: `${expectedConvexWebhookUrl}/`,
+				url: `${expectedWebhookUrl}/`,
 			}),
 		]);
 
@@ -357,11 +400,11 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Missing enabled Stripe webhook endpoint at https://convex-site.example/stripe/webhook.",
+			"Missing enabled Stripe webhook endpoint at https://www.example.com/api/stripe/webhook.",
 		);
 	});
 
-	it("rejects a disabled Stripe webhook endpoint at the Convex URL", async () => {
+	it("rejects a disabled Stripe webhook endpoint at the app-origin URL", async () => {
 		setWebhookPreflightEnv();
 
 		const { assertManagedStripeWebhookEndpointReadyForRelease } =
@@ -377,11 +420,11 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe webhook endpoint https://convex-site.example/stripe/webhook exists but is disabled.",
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook exists but is disabled.",
 		);
 	});
 
-	it("rejects a Stripe webhook endpoint missing async checkout success events", async () => {
+	it("rejects a Stripe webhook endpoint missing subscription lifecycle events", async () => {
 		setWebhookPreflightEnv();
 
 		const { assertManagedStripeWebhookEndpointReadyForRelease } =
@@ -397,7 +440,7 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe webhook endpoint https://convex-site.example/stripe/webhook is missing required event subscription(s): checkout.session.async_payment_succeeded.",
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook is missing required event subscription(s): checkout.session.async_payment_succeeded, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.payment_failed, invoice.paid, charge.refunded.",
 		);
 	});
 
@@ -417,7 +460,7 @@ describe("getStripeLineItem", () => {
 				expectedMode: "live",
 			}),
 		).rejects.toThrow(
-			"Stripe webhook endpoint https://convex-site.example/stripe/webhook is in test mode, expected live.",
+			"Stripe webhook endpoint https://www.example.com/api/stripe/webhook is in test mode, expected live.",
 		);
 	});
 

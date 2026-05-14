@@ -52,6 +52,12 @@ type ManagedStripeStringConfigKey =
 export const managedStripeRequiredWebhookEventTypes = [
 	"checkout.session.completed",
 	"checkout.session.async_payment_succeeded",
+	"customer.subscription.created",
+	"customer.subscription.updated",
+	"customer.subscription.deleted",
+	"invoice.payment_failed",
+	"invoice.paid",
+	"charge.refunded",
 ] as const;
 
 export type ManagedStripeWebhookEndpointPreflightResult = {
@@ -189,21 +195,21 @@ function getMissingStripeWebhookEvents(
 export function getManagedStripeWebhookEndpointUrl(
 	config: ManagedStripeConfig,
 ) {
-	const convexSiteUrl = requireManagedStripeConfigValue(
+	const appBaseUrl = requireManagedStripeConfigValue(
 		config,
-		"convexSiteUrl",
-		"NEXT_PUBLIC_CONVEX_SITE_URL",
+		"appBaseUrl",
+		"APP_BASE_URL",
 	);
 
-	return `${normalizeBaseUrl(convexSiteUrl, "NEXT_PUBLIC_CONVEX_SITE_URL")}/stripe/webhook`;
+	return `${normalizeBaseUrl(appBaseUrl, "APP_BASE_URL")}/api/stripe/webhook`;
 }
 
-function getManagedStripeAppOriginWebhookUrl(config: ManagedStripeConfig) {
-	if (!config.appBaseUrl) {
+function getManagedStripeLegacyConvexWebhookUrl(config: ManagedStripeConfig) {
+	if (!config.convexSiteUrl) {
 		return null;
 	}
 
-	return `${normalizeBaseUrl(config.appBaseUrl, "APP_BASE_URL")}/api/stripe/webhook`;
+	return `${normalizeBaseUrl(config.convexSiteUrl, "NEXT_PUBLIC_CONVEX_SITE_URL")}/stripe/webhook`;
 }
 
 export function assertManagedStripeWebhookSecretConfigured(
@@ -333,6 +339,12 @@ export async function assertManagedStripePriceMatchesProductConfig(
 			);
 		}
 
+		if (targetOfferId === "workers" && !configuredPrice.recurring) {
+			throw new Error(
+				`Configured Stripe workers price ${configuredPriceId} must be recurring for subscription checkout.`,
+			);
+		}
+
 		const configuredOfferProductId = config.offerProductIds[targetOfferId];
 		if (
 			configuredOfferProductId &&
@@ -371,26 +383,27 @@ export async function assertManagedStripeWebhookEndpointReadyForRelease(
 		expectedWebhookUrl ?? getManagedStripeWebhookEndpointUrl(config),
 		"Expected Stripe webhook endpoint URL",
 	);
-	const staleAppOriginWebhookUrl = getManagedStripeAppOriginWebhookUrl(config);
+	const staleLegacyConvexWebhookUrl =
+		getManagedStripeLegacyConvexWebhookUrl(config);
 	const expectedLivemode =
 		(expectedMode ?? getStripeModeLabel(config)) === "live";
 	const endpoints = await stripe.webhookEndpoints
 		.list({ limit: 100 })
 		.autoPagingToArray({ limit: 200 });
-	const enabledStaleAppOriginEndpoints = staleAppOriginWebhookUrl
+	const enabledLegacyConvexEndpoints = staleLegacyConvexWebhookUrl
 		? endpoints.filter(
 				(endpoint) =>
 					endpoint.status === "enabled" &&
 					normalizeStripeWebhookEndpointUrl(
 						endpoint.url,
 						`Stripe webhook endpoint ${endpoint.id} URL`,
-					) === staleAppOriginWebhookUrl,
+					) === staleLegacyConvexWebhookUrl,
 			)
 		: [];
 
-	if (enabledStaleAppOriginEndpoints.length > 0) {
+	if (enabledLegacyConvexEndpoints.length > 0) {
 		throw new Error(
-			`Stripe has enabled app-origin webhook endpoint(s) at ${staleAppOriginWebhookUrl}. Disable stale app-origin endpoints; this repo fulfills checkout through ${expectedUrl}.`,
+			`Stripe has enabled legacy Convex webhook endpoint(s) at ${staleLegacyConvexWebhookUrl}. Disable stale Convex endpoints; this repo fulfills billing sync through ${expectedUrl}.`,
 		);
 	}
 

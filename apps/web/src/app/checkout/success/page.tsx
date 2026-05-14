@@ -13,6 +13,7 @@ import { getPendingCheckoutSessionIdFromCookie } from "@/platform/billing/checko
 import { getCheckoutOfferSuccessPath } from "@/platform/billing/checkout/checkout-offers";
 import { fetchAuthenticatedQuery } from "@/platform/convex/server-preload";
 import { getSignInRedirectHref } from "@/config/product";
+import { syncStripeCheckoutSessionToConvex } from "@/lib/billing/stripe-sync";
 
 export const metadata: Metadata = {
 	robots: {
@@ -20,6 +21,35 @@ export const metadata: Metadata = {
 		follow: false,
 	},
 };
+
+async function syncBillingDomainForCheckoutSuccess({
+	checkoutSessionState,
+	sessionId,
+}: {
+	checkoutSessionState: Awaited<ReturnType<typeof getCheckoutSessionState>>;
+	sessionId: string | undefined;
+}) {
+	if (
+		!sessionId ||
+		(checkoutSessionState.kind !== "validated" &&
+			checkoutSessionState.kind !== "sign_in_required" &&
+			checkoutSessionState.kind !== "wrong_account")
+	) {
+		return;
+	}
+
+	try {
+		await syncStripeCheckoutSessionToConvex({
+			sessionId,
+			source: "checkout_success",
+		});
+	} catch (error) {
+		console.error("Checkout success billing-domain sync failed", {
+			sessionId,
+			error,
+		});
+	}
+}
 
 export default async function Page({
 	searchParams,
@@ -66,6 +96,10 @@ export default async function Page({
 	}
 
 	const checkoutSessionState = await getCheckoutSessionState(sessionId);
+	await syncBillingDomainForCheckoutSuccess({
+		checkoutSessionState,
+		sessionId,
+	});
 	if (checkoutSessionState.kind === "sign_in_required") {
 		redirect(
 			getSignInRedirectHref(

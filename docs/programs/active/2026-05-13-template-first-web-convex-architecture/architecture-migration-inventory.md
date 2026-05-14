@@ -29,7 +29,7 @@ After the second slice, browser-facing source lives under `apps/web/src`. Browse
 
 The current route groups are `(marketing)`, `(auth)`, and `(app)`. Public product pages currently exist at `apps/web/src/app/(marketing)/page.tsx`, `apps/web/src/app/(marketing)/starter/page.tsx`, `apps/web/src/app/(marketing)/workers/page.tsx`, and `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx`. The Worker Seal Team 6 page is public and uses a direct scheduling handoff until the Cal.com embed, hosted fallback, and webhooks land.
 
-The current billing path is split between `apps/web/src/app/api/stripe/checkout/route.ts`, checkout UI routes under `apps/web/src/app/checkout`, helper modules under `apps/web/src/platform/billing`, and Convex HTTP webhook code in `apps/web/convex/http.ts` plus `apps/web/convex/stripeWebhook.ts`. The rebuilt Convex billing-domain foundation now exists in additive tables and `apps/web/convex/billing.ts`, with model helpers under `apps/web/convex/billing/`; current routes and webhooks have not yet been rewired to it. The target copies the template's Next.js route-handler webhook and billing-route shape, while preserving Convex as the durable app-state owner.
+The current billing path is split between `apps/web/src/app/api/stripe/checkout/route.ts`, `apps/web/src/app/api/stripe/webhook/route.ts`, checkout UI routes under `apps/web/src/app/checkout`, helper modules under `apps/web/src/platform/billing`, new server-only sync helpers under `apps/web/src/lib/billing`, and compatibility Convex HTTP webhook code in `apps/web/convex/http.ts` plus `apps/web/convex/stripeWebhook.ts`. The rebuilt Convex billing-domain foundation now exists in additive tables and `apps/web/convex/billing.ts`, with model helpers under `apps/web/convex/billing/`; Stripe webhook ingress and Checkout success now write into it through secret-gated public Convex wrappers. The target copies the template's Next.js route-handler webhook and billing-route shape, while preserving Convex as the durable app-state owner.
 
 ## Target Route Map
 
@@ -51,7 +51,7 @@ The current billing path is split between `apps/web/src/app/api/stripe/checkout/
 | `apps/web/src/app/api/stripe/checkout/route.ts` | `apps/web/src/app/api/billing/checkout/route.ts` | App-owned Checkout creation. |
 | no current portal route | `apps/web/src/app/api/billing/portal/route.ts` | Workers Customer Portal session creation. |
 | no current billing success route | `apps/web/src/app/api/billing/success/route.ts` | Eager Stripe sync after Checkout success. |
-| Convex `.site` Stripe webhook | `apps/web/src/app/api/stripe/webhook/route.ts` target | The endpoint move requires release docs and provider dashboard docs updates. |
+| Convex `.site` Stripe webhook | `apps/web/src/app/api/stripe/webhook/route.ts` | App-origin webhook route added; Convex `.site` route remains compatibility-only until a later removal slice. |
 | no current Cal.com webhook | `apps/web/src/app/api/cal/webhook/route.ts` target | Used for Worker Seal Team 6 booking mirror state. |
 | no current debug Sentry route | `apps/web/src/app/api/debug/sentry/route.ts` | Must require explicit debug env opt-in. |
 | no current email test route | `apps/web/src/app/api/email/test/route.tsx` | Must require explicit debug env opt-in. |
@@ -120,7 +120,7 @@ Refunds are initiated in Stripe or Cal.com provider dashboards. Full refunds upd
 | Deviation | Status | Reason | Validation required |
 | --- | --- | --- | --- |
 | Current app keeps `src/platform/` and `src/config/` until provider/domain slices redistribute them | Temporary | The second slice moved the source tree without widening provider ownership changes | Future provider/file-move ExecPlans must run focused route tests and broad app checks. |
-| Current Stripe webhook still uses Convex HTTP `.site` endpoint | Temporary | Release workflow and provider dashboards currently depend on it | Stripe route migration must update release docs/provider docs and prove webhook handling with tests. |
+| Legacy Convex HTTP `.site` Stripe webhook remains present | Temporary compatibility | The app-origin route is now canonical, but the old endpoint is not deleted in the same slice | Later cleanup must prove no provider dashboard or release proof still depends on `/stripe/webhook` before removal. |
 | Ship by Sunday has codebase, tutorial, support, Codex, and admin surfaces that the sibling template does not have | Intentional | This app has a larger product than the starter notes template | Target modules must still follow template ownership and naming rules. |
 | Public blog/docs remain part of marketing route group | Intentional | They are public content and do not own product state | Route tests and metadata tests must keep public access and SEO behavior intact. |
 | Worker Seal Team 6 uses Cal.com instead of app-owned scheduler | Intentional expansion | Cal.com owns scheduling, paid booking, timezone, invites, and rescheduling better than custom code | Cal.com paid booking, webhook, reschedule, refund, and Convex mirror tests. |
@@ -161,3 +161,7 @@ The fifth child ExecPlan added the rebuilt Convex billing-domain foundation with
 ## Sixth Slice Completion Evidence
 
 The sixth child ExecPlan added the public Worker Seal Team 6 landing-page surface. The route now lives at `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx`, is linked from `PublicSiteHeader`, appears as a route card from `/`, and is included in `robots.ts`, `sitemap.ts`, and `apps/web/tests/unit/public-metadata-routes.test.ts`. It intentionally uses a direct scheduling handoff and does not add a Cal.com embed, hosted Cal.com fallback, app-owned checkout, auth gate, webhook, or email behavior.
+
+## Seventh Slice Completion Evidence
+
+The seventh child ExecPlan migrated Stripe billing ingress to the app-origin route at `apps/web/src/app/api/stripe/webhook/route.ts`. New server-only helpers under `apps/web/src/lib/billing/` classify Stripe webhook events, sync fresh Starter and Workers billing state, and record processed or skipped Stripe events through public Convex wrappers guarded by `CONVEX_WEBHOOK_MUTATION_SECRET`. Checkout success now retries the same billing-domain sync path, Workers Checkout uses Stripe subscription mode, release preflight expects `{APP_BASE_URL}/api/stripe/webhook`, and setup docs name the new endpoint plus the shared Convex sync secret. The legacy Convex `/stripe/webhook` route remains compatibility-only until a later cleanup slice proves it is unused.

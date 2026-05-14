@@ -1,5 +1,11 @@
 # Mistakes
 
+## 2026-05-14 Repeated Convex Skill Path Lookup
+
+- Mistake: I retried a stale global Convex skill path instead of using the repo-local `.agents/skills/convex/SKILL.md` path that the skill inventory already identified.
+  Impact: The read failed before source edits, but it repeated a known context error and wasted a step.
+  Corrective action: Resolve skills from the current turn's skill inventory and prefer repo-local `.agents/skills/` paths when listed there.
+
 ## 2026-05-14 Program Runner Validation Source Map Upload
 
 - Mistake: I ran root `bun run typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` while validating the Program runner dirty-worktree change.

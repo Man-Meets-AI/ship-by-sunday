@@ -32,12 +32,12 @@ If Clerk and Convex disagree on the issuer/domain, access checks can fail after 
 
 ### 3. Stripe secret drift
 
-These values must match in both places:
+These trusted Convex write values must match in both places:
 
 - `.env.local`
 - the active Convex env
 
-The dev helper syncs both values. If the listener rotated the webhook secret, restart the app.
+The dev helper syncs `CONVEX_WEBHOOK_MUTATION_SECRET`, `CHECKOUT_FULFILLMENT_RETRY_SECRET`, `STRIPE_SECRET_KEY`, and `CLERK_SECRET_KEY` into Convex. `STRIPE_WEBHOOK_SECRET` belongs in the Next.js runtime for `/api/stripe/webhook`; if the listener rotated it, restart the app.
 
 ### 4. Wrong Stripe account or wrong pinned CLI profile
 
@@ -53,16 +53,16 @@ If those differ, you can see real Stripe events without the starter ever receivi
 
 ### 5. Webhook endpoint not actually registered
 
-If Stripe does not reach `POST {NEXT_PUBLIC_CONVEX_SITE_URL}/stripe/webhook`, checkout can finish while access grant never happens.
+If Stripe does not reach `POST {APP_BASE_URL}/api/stripe/webhook`, checkout can finish while access grant never happens.
 
-If the app reaches Stripe and returns `202` or `200` but nothing shows up in Convex-side observability or access state, the usual fix is to align `NEXT_PUBLIC_CONVEX_SITE_URL` with the live Convex HTTP-actions host and recheck the Stripe and Convex secrets together.
+If the app reaches Stripe and returns `202` or `200` but nothing shows up in Convex-side observability or access state, the usual fix is to align `APP_BASE_URL` with the deployed app origin, confirm Stripe points at `{APP_BASE_URL}/api/stripe/webhook`, and recheck the app and Convex secrets together.
 
 ### 6. Payment succeeded but access still did not grant
 
 If the Stripe event exists and the buyer still cannot reach `/home`, check:
 
 - whether the webhook used the current signing secret
-- whether Convex accepted the same webhook secret and Stripe secret key
+- whether Convex accepted the same `CONVEX_WEBHOOK_MUTATION_SECRET`, checkout retry secret, and Stripe secret key
 - whether the browser still has the pending checkout session cookie if the buyer recovered from a lost Stripe return tab
 - whether `/sign-in` can send and verify the Clerk email code for the Stripe checkout email
 - whether the signed-in account matches the Clerk user that owns the Stripe checkout email
@@ -77,7 +77,7 @@ Use this sequence:
 4. confirm secret parity
 5. confirm the pinned Stripe CLI project `ship-by-sunday` matches the app account
 6. confirm Clerk `convex` template
-7. confirm the app and Convex agree on both `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL` when HTTP actions are involved
+7. confirm the app and Convex agree on `NEXT_PUBLIC_CONVEX_URL`, `CONVEX_WEBHOOK_MUTATION_SECRET`, and the checkout retry secret
 8. rerun a real local checkout against your hosted Convex dev deployment
 
 ## What success looks like
@@ -85,6 +85,6 @@ Use this sequence:
 Stripe and Convex are aligned when:
 
 - Stripe forwards `checkout.session.completed`
-- the webhook accepts the signature
+- `/api/stripe/webhook` accepts the signature
 - Convex writes or updates the access grant
 - the buyer leaves `/checkout/success`, signs in with email-code OTP if needed, and lands in `/home`
