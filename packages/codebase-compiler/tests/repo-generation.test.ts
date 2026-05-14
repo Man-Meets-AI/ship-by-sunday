@@ -113,6 +113,7 @@ describe("repo generation", () => {
 		expect(manifest.excludedPathSegments).toEqual(
 			expect.arrayContaining([".next", ".vercel", "coverage", "test-results"]),
 		);
+		expect(manifest.includedFiles).not.toContain("bun.lock");
 		expect(manifest.includedDirectories).toEqual(
 			expect.arrayContaining(["packages/codebase-compiler/src"]),
 		);
@@ -390,6 +391,9 @@ describe("repo generation", () => {
 					file.path === ".github/workflows/examples/basic-ci.example.yml",
 			),
 		);
+		const bunfig = snapshotText(
+			snapshotFiles.find((file) => file.path === "bunfig.toml"),
+		);
 		const appPackageJson = JSON.parse(
 			snapshotText(
 				snapshotFiles.find((file) => file.path === "apps/web/package.json"),
@@ -456,12 +460,14 @@ describe("repo generation", () => {
 		expect(linearWorkflowSkill?.content).toContain(
 			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
-		expect(basicCiWorkflow).toContain("      - run: bun ci");
+		expect(basicCiWorkflow).toContain("      - run: bun install");
 		expect(basicCiWorkflow).toContain("      - run: bun run codebase:contract");
 		expect(basicCiWorkflow).toContain("      - run: bun run agentic:check");
-		expect(basicCiWorkflow).not.toContain("bun install");
+		expect(basicCiWorkflow).not.toContain("bun ci");
 		expect(basicCiWorkflow).not.toContain("bun run build");
 		expect(basicCiWorkflow).not.toContain("bun run lint");
+		expect(bunfig).toContain('linker = "hoisted"');
+		expect(bunfig).not.toContain("minimumReleaseAge");
 		expect(appPackageJson.scripts?.dev).toBe("next dev");
 		expect(appPackageJson.scripts?.typecheck).toBe(
 			"node scripts/run-next-build-serialized.mjs",
@@ -528,6 +534,7 @@ describe("repo generation", () => {
 		expectNoForbiddenStarterSnapshotPaths(snapshotPaths);
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
+				"bun.lock",
 				"apps/web/app/workers/page.tsx",
 				"apps/web/app/(protected)/layout.tsx",
 				"apps/web/app/(protected)/settings/_components/settings-page.tsx",

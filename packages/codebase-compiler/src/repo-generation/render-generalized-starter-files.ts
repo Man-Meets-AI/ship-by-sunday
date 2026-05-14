@@ -223,7 +223,7 @@ export function renderGeneralizedStarterFiles(
 				"    steps:",
 				"      - uses: actions/checkout@v4",
 				"      - uses: oven-sh/setup-bun@v2",
-				"      - run: bun ci",
+				"      - run: bun install",
 				"      - run: bun run codebase:contract",
 				"      - run: bun run agentic:check",
 			].join("\n"),

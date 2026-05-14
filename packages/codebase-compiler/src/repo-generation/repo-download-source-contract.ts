@@ -13,7 +13,6 @@ export const customerSafeRepoRootFilePaths = [
 	".gitignore",
 	".oxfmtrc.json",
 	".oxlintrc.json",
-	"bun.lock",
 	"bunfig.toml",
 	"package.json",
 ] as const;

@@ -102,6 +102,7 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"ship-by-sunday-os/docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
 				"ship-by-sunday-os/docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md",
+				"ship-by-sunday-os/bun.lock",
 			]),
 		);
 		expect(forbiddenEntries).toEqual([]);

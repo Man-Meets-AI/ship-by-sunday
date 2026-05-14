@@ -57,6 +57,7 @@ The first repo-local template-source boundary now exists at `templates/starter-a
 - [x] 2026-05-13: Advanced the current planning brief to `planning-brief-3.md` for generated repo template-source migration.
 - [x] 2026-05-13: Completed `Migrate Generated Template App To Template Source`; generated repo materialization now validates and maps the pinned source into `apps/web/`, applies generated overlays afterward, avoids a competing root app tree, and preserves clean-room no-provider proof.
 - [x] 2026-05-13: Hardened the completed template-source slices after review; every generated `apps/web` overlay path is now checked against `template-source.json`, questionnaire-derived content flows through `apps/web/config/product.ts` instead of `_content`, source-template README materialization is replaced by a no-provider-safe app README, generated provider gates keep the template app buildable without Clerk or Convex env, generated env examples use the pinned template env contract, generated billing actions stay disabled while API routes remain excluded, and generated repos emit template provenance at `docs/facts/template-source.json`.
+- [x] 2026-05-13: Repaired generated clean-room install proof while staying on Bun; generated repos no longer inherit this repository's root `bun.lock`, generated CI uses `bun install`, and generated `bunfig.toml` keeps Bun's hoisted linker without the source repo's seven-day dependency age gate.
 - [x] 2026-05-13: Advanced the current planning brief to `planning-brief-4.md` for generated Starter operating-pack upgrades.
 
 ## Decision Log
@@ -123,6 +124,10 @@ Date: 2026-05-13.
 
 Decision: Keep generated billing actions disabled until billing routes are deliberately materialized.
 Rationale: The no-provider subset intentionally excludes provider-heavy API route handlers. The generated UI should not post forms to missing checkout or portal routes; setup-focused slices should activate those handlers with provider proof instead.
+Date: 2026-05-13.
+
+Decision: Do not ship the source repository `bun.lock` into generated Starter repos.
+Rationale: The generated repo has a smaller workspace graph than this source repository. Inheriting the source lockfile makes Bun prune unrelated workspace transitive packages during clean-room installs. Generated repos should still use Bun, but should create their own first lockfile with `bun install` from the generated package graph.
 Date: 2026-05-13.
 
 Decision: Keep the Starter template source under `templates/`, outside runtime app ownership.

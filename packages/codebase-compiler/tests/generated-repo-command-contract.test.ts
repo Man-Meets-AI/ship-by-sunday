@@ -103,7 +103,7 @@ describe("generated repo command contract", () => {
 		try {
 			await writeGeneratedRepoSnapshot(generatedRepoRoot);
 
-			runCleanRoomCommand(generatedRepoRoot, ["ci"]);
+			runCleanRoomCommand(generatedRepoRoot, ["install"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "programs:lint"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "plans:lint"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "codebase:contract"]);
@@ -124,7 +124,7 @@ describe("generated repo command contract", () => {
 			]);
 
 			const testedRunCommands = new Set([
-				"bun ci",
+				"bun install",
 				"bun run programs:lint",
 				"bun run plans:lint",
 				"bun run codebase:contract",
@@ -172,7 +172,7 @@ describe("generated repo command contract", () => {
 				]),
 			);
 			expect(workflowRunCommands).toEqual([
-				"bun ci",
+				"bun install",
 				"bun run codebase:contract",
 				"bun run agentic:check",
 			]);
@@ -187,7 +187,7 @@ describe("generated repo command contract", () => {
 
 			for (const command of workflowRunCommands) {
 				if (!command.startsWith("bun run ")) {
-					expect(command).toBe("bun ci");
+					expect(command).toBe("bun install");
 					continue;
 				}
 

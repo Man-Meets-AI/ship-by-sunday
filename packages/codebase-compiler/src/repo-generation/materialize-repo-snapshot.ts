@@ -16,7 +16,6 @@ import {
 import { renderGeneratedDesignSystemFiles } from "./render-generated-design-system-files";
 import { renderGeneratedTemplateAppFiles } from "./render-generated-template-app-files";
 import { renderGeneralizedStarterFiles } from "./render-generalized-starter-files";
-import { renderStarterBunLock } from "./render-starter-bun-lock";
 import { isExcludedSnapshotPath } from "./repo-download-source-contract";
 import { renderTemplateOverrides } from "./render-template-overrides";
 import {
@@ -86,17 +85,6 @@ function pathIsInsideRoot(rootPath: string, targetPath: string) {
 		relativePath === "" ||
 		(!relativePath.startsWith("..") && !path.isAbsolute(relativePath))
 	);
-}
-
-function renderIncludedRepoFile(file: RepoSnapshotFile): RepoSnapshotFile {
-	if (file.path !== "bun.lock") {
-		return file;
-	}
-
-	return {
-		...file,
-		content: renderStarterBunLock(file.content.toString()),
-	};
 }
 
 function mergeSnapshotFiles(files: readonly RepoSnapshotFile[]) {
@@ -229,7 +217,7 @@ export async function materializeRepoSnapshot(
 		);
 
 	return mergeSnapshotFiles([
-		...includedFiles.map(renderIncludedRepoFile),
+		...includedFiles,
 		...includedDirectories.flat(),
 		...starterTemplateFiles,
 		...overrides,

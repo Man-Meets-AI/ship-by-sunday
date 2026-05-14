@@ -71,6 +71,10 @@ export function renderTemplateOverrides(
 			].join("\n"),
 		},
 		{
+			path: "bunfig.toml",
+			content: ["[install]", 'linker = "hoisted"', ""].join("\n"),
+		},
+		{
 			path: "package.json",
 			content: `${JSON.stringify(
 				buildStarterRootPackageJson(projectDefinition),
