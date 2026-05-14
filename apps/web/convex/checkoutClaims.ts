@@ -15,14 +15,14 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation, internalQuery } from "./_generated/server";
 import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
-import { upsertProductAccessGrant } from "./access/model";
-import { productAccessGrantResultValidator } from "./access/validators";
+import { upsertProductAccessGrant } from "./entitlements/model";
+import { productAccessGrantResultValidator } from "./entitlements/validators";
 import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
-} from "./checkoutIntentValidators";
-import { checkoutOfferIdValidator } from "./checkoutOfferValidators";
+	checkoutOfferIdValidator,
+} from "./billing/validators";
 import { requireConvexEnv } from "./env";
 
 const pendingCheckoutClaimStatusValidator = v.union(

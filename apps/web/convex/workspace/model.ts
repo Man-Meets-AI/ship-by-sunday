@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 
-import { requireExistingCodebaseProductAccess } from "../access/model";
+import { requireExistingCodebaseProductAccess } from "../entitlements/model";
 import {
 	assertSyncSafeText,
 	assertSyncSafeValue,

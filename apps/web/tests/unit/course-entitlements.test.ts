@@ -48,8 +48,8 @@ function createAccessCtx({
 	};
 }
 
-describe("convex/access/model", () => {
-	let moduleUnderTest: typeof import("@/convex/access/model");
+describe("convex/entitlements/model", () => {
+	let moduleUnderTest: typeof import("@/convex/entitlements/model");
 	const originalEnv = { ...process.env };
 
 	beforeEach(async () => {
@@ -58,7 +58,7 @@ describe("convex/access/model", () => {
 			STRIPE_WEBHOOK_SECRET: "stripe_webhook_secret",
 		};
 		vi.resetModules();
-		moduleUnderTest = await import("@/convex/access/model");
+		moduleUnderTest = await import("@/convex/entitlements/model");
 	});
 
 	afterEach(() => {

@@ -15,7 +15,7 @@ import {
 	getCodebaseWorkflowStateByClerkUserId,
 	serializeCodebaseWorkflowState,
 } from "./workflowState";
-import { requireGeneratedCodebaseProductAccess } from "../access/model";
+import { requireGeneratedCodebaseProductAccess } from "../entitlements/model";
 import { loadViewerCourseState } from "../course/shared";
 
 export const getCodebaseWorkspaceStateArgs = {};

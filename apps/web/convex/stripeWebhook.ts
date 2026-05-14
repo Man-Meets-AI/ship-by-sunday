@@ -20,7 +20,7 @@ import type { Id } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
 import { requireConvexEnv } from "./env";
-import { productAccessGrantResultValidator } from "./access/validators";
+import { productAccessGrantResultValidator } from "./entitlements/validators";
 import {
 	getStripeWebhookFulfillmentRetryDelayMs,
 	STRIPE_WEBHOOK_FULFILLMENT_MAX_ATTEMPTS,

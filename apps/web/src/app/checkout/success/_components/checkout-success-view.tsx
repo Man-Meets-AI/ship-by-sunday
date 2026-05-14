@@ -47,7 +47,7 @@ function CheckoutSuccessLiveView({
 }) {
 	const { isAuthenticated } = useConvexAuth();
 	const liveAccess = useQuery(
-		api.access.viewerProductAccess,
+		api.entitlements.viewerProductAccess,
 		isAuthenticated ? {} : "skip",
 	) as ProductAccess | undefined;
 	const access = liveAccess ?? initialProductAccess ?? undefined;

@@ -1,5 +1,10 @@
 import { v } from "convex/values";
 
+export const checkoutOfferIdValidator = v.union(
+	v.literal("starter"),
+	v.literal("workers"),
+);
+
 export const checkoutBuyerStartingPointValidator = v.union(
 	v.literal("no_codebase"),
 	v.literal("existing_codebase"),

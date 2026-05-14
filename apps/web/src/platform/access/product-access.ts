@@ -30,7 +30,7 @@ export const stripeCheckoutSessionIdPattern =
 
 async function refreshViewerProductAccess(token: string) {
 	return (await fetchQuery(
-		api.access.viewerProductAccess,
+		api.entitlements.viewerProductAccess,
 		{},
 		{ token },
 	)) as ProductAccess;

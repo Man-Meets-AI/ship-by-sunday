@@ -76,7 +76,7 @@ export default async function Page({
 
 	const initialProductAccess =
 		checkoutSessionState.kind === "validated"
-			? await fetchAuthenticatedQuery(api.access.viewerProductAccess, {})
+			? await fetchAuthenticatedQuery(api.entitlements.viewerProductAccess, {})
 			: null;
 
 	return (

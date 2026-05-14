@@ -29,8 +29,8 @@ vi.mock("convex/nextjs", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		access: {
-			viewerProductAccess: "access.viewerProductAccess",
+		entitlements: {
+			viewerProductAccess: "entitlements.viewerProductAccess",
 		},
 		codex: {
 			upsertViewerConnection: "codex.upsertViewerConnection",
@@ -160,7 +160,7 @@ describe("codex route helpers", () => {
 			token: "token_123",
 		});
 		expect(fetchQueryMock).toHaveBeenCalledWith(
-			"access.viewerProductAccess",
+			"entitlements.viewerProductAccess",
 			{},
 			{ token: "token_123" },
 		);

@@ -170,8 +170,8 @@ Important repo anchors:
 - `apps/web/platform/admin-impersonation/status.ts`
 - `apps/web/platform/access/product-access.ts`
 - `apps/web/convex/auth.config.ts`
-- `apps/web/convex/access.ts`
-- `apps/web/convex/access/model.ts`
+- `apps/web/convex/entitlements.ts`
+- `apps/web/convex/entitlements/model.ts`
 - `apps/web/convex/impersonation.ts`
 - `apps/web/convex/impersonation/model.ts`
 - `apps/web/convex/impersonation/validators.ts`

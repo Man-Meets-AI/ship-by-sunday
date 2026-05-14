@@ -23,7 +23,7 @@ import {
 	prepareFieldValuesForPersistence,
 } from "../../src/lib/course/lesson/model/registry";
 import type { Id } from "../_generated/dataModel";
-import { requireTutorialsProductAccess } from "../access/model";
+import { requireTutorialsProductAccess } from "../entitlements/model";
 import type {
 	CourseMutationCtx,
 	CourseQueryCtx,

@@ -241,7 +241,7 @@ Implemented code surfaces:
 - `apps/web/convex/impersonation/model.ts`
 - `apps/web/convex/impersonation/validators.ts`
 - `apps/web/convex/schema.ts`
-- patched public mutations under `apps/web/convex/access.ts`, `codebase.ts`, `course.ts`, and `workspace.ts`
+- patched public mutations under `apps/web/convex/entitlements.ts`, `codebase.ts`, `course.ts`, and `workspace.ts`
 - patched side-effect routes under `apps/web/app/api/stripe`, `apps/web/app/api/codex`, and `apps/web/app/api/download/repo`
 - `docs/internal/admin-impersonation.md`
 

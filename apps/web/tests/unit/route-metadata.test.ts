@@ -14,8 +14,8 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		access: {
-			viewerProductAccess: "access.viewerProductAccess",
+		entitlements: {
+			viewerProductAccess: "entitlements.viewerProductAccess",
 		},
 	},
 }));

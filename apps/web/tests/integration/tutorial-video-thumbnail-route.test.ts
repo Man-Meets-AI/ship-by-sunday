@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchQuery } from "convex/nextjs";
 
 import { GET } from "@/app/api/video/thumbnails/[videoId]/route";
 
@@ -10,8 +11,10 @@ vi.mock("@clerk/nextjs/server", () => ({
 }));
 
 vi.mock("convex/nextjs", () => ({
-	fetchQuery: vi.fn(async () => ({ hasAccess: true })),
+	fetchQuery: vi.fn(),
 }));
+
+const fetchQueryMock = vi.mocked(fetchQuery);
 
 function createThumbnailRequest(videoId: string) {
 	return new Request(`https://example.test/api/video/thumbnails/${videoId}`);
@@ -20,6 +23,28 @@ function createThumbnailRequest(videoId: string) {
 describe("GET /api/video/thumbnails/[videoId]", () => {
 	beforeEach(() => {
 		vi.unstubAllGlobals();
+		fetchQueryMock.mockReset();
+		fetchQueryMock.mockResolvedValue({
+			hasAccess: true,
+			capabilities: ["tutorials"],
+		});
+	});
+
+	it("rejects paid users without tutorial access before fetching upstream", async () => {
+		fetchQueryMock.mockResolvedValueOnce({
+			hasAccess: true,
+			capabilities: ["generate_codebase"],
+		});
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		const videoId = "0df1d1d2-098a-425b-b6eb-3c465f0a32e1";
+		const response = await GET(createThumbnailRequest(videoId), {
+			params: Promise.resolve({ videoId }),
+		});
+
+		expect(response.status).toBe(403);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
 	it("rejects unknown Bunny video IDs without fetching upstream", async () => {
@@ -53,7 +78,9 @@ describe("GET /api/video/thumbnails/[videoId]", () => {
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("content-type")).toBe("image/jpeg");
-		expect(response.headers.get("cache-control")).toContain("s-maxage");
+		expect(response.headers.get("cache-control")).toBe(
+			"private, max-age=86400",
+		);
 		expect(new Uint8Array(await response.arrayBuffer())).toEqual(upstreamBody);
 		expect(fetchMock).toHaveBeenCalledWith(
 			`https://vz-fd54da20-4b1.b-cdn.net/${videoId}/thumbnail.jpg`,

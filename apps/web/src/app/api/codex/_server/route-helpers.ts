@@ -70,7 +70,7 @@ export async function requireApiSession(): Promise<ApiSession> {
 export async function requireProductAccessApiSession(): Promise<ApiSession> {
 	const session = await requireApiSession();
 	const access = (await fetchQuery(
-		api.access.viewerProductAccess,
+		api.entitlements.viewerProductAccess,
 		{},
 		{
 			token: session.token,

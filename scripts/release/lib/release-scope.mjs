@@ -1,7 +1,7 @@
 const exactBillingSensitivePaths = new Set([
 	".github/workflows/dev-staging-payment-proof.yml",
 	".github/workflows/production-release-proof.yml",
-	"apps/web/convex/access.ts",
+	"apps/web/convex/entitlements.ts",
 	"apps/web/convex/checkoutClaims.ts",
 	"apps/web/convex/checkoutClaimsActions.ts",
 	"apps/web/convex/stripeWebhook.ts",
@@ -70,7 +70,8 @@ const billingSensitivePrefixes = [
 	"apps/web/src/app/(auth)/_components/checkout-email-handoff/",
 	"apps/web/app/(identity)/sign-up/",
 	"apps/web/src/app/(auth)/sign-up/",
-	"apps/web/convex/access/",
+	"apps/web/convex/entitlements/",
+	"apps/web/convex/migrations/",
 	"apps/web/features/product-access/",
 	"apps/web/platform/billing/",
 	"apps/web/src/platform/billing/",

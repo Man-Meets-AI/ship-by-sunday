@@ -56,7 +56,7 @@ export function buildGrantProductAccessCommand({
 		args: [
 			CONVEX_BIN_PATH,
 			"run",
-			"access:grantProductAccess",
+			"entitlements:grantProductAccess",
 			JSON.stringify({
 				clerkUserId,
 				source,
@@ -72,7 +72,7 @@ export function buildResetProductAccessCommand({ clerkUserId }) {
 		args: [
 			CONVEX_BIN_PATH,
 			"run",
-			"access:resetProductAccess",
+			"entitlements:resetProductAccess",
 			JSON.stringify({
 				clerkUserId,
 			}),

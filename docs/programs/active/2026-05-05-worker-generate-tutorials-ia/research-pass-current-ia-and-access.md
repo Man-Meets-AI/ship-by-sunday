@@ -22,11 +22,11 @@ There is no current `/tutorials` namespace. Tutorial/watch behavior is split bet
 
 ## Access And Data Model
 
-Current access is not capability-based. The persisted access model uses one scalar lane, `fulfillmentTrack`, with values `generated_codebase`, `existing_codebase_doctor`, or `unspecified`. The checkout input and normalization live in `apps/web/platform/billing/checkout/checkout-intent.ts`. The Convex access grant model lives in `apps/web/convex/access/model.ts`.
+Current access is not capability-based. The persisted access model uses one scalar lane, `fulfillmentTrack`, with values `generated_codebase`, `existing_codebase_doctor`, or `unspecified`. The checkout input and normalization live in `apps/web/platform/billing/checkout/checkout-intent.ts`. The Convex access grant model lives in `apps/web/convex/entitlements/model.ts`.
 
 At the time of this research, this scalar blocked traversal. Generated-codebase routes redirected existing-repo customers away, and worker routes redirected generated-codebase customers away. The hard route guards were in `apps/web/app/(workspace)/codebase/page.tsx`, `apps/web/app/(workspace)/review/page.tsx`, and the route files under `apps/web/app/(workspace)/workspace/`.
 
-Convex guards are also mutually exclusive today. `requireGeneratedCodebaseProductAccess` and `requireExistingCodebaseProductAccess` in `apps/web/convex/access/model.ts` check the same scalar `fulfillmentTrack`. Generated-codebase data and worker data can coexist physically because they use separate tables, but the entitlement layer currently prevents one user from using both.
+Convex guards are also mutually exclusive today. `requireGeneratedCodebaseProductAccess` and `requireExistingCodebaseProductAccess` in `apps/web/convex/entitlements/model.ts` check the same scalar `fulfillmentTrack`. Generated-codebase data and worker data can coexist physically because they use separate tables, but the entitlement layer currently prevents one user from using both.
 
 ## Naming Blast Radius
 

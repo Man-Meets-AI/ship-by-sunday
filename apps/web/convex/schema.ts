@@ -46,9 +46,9 @@ import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
-} from "./checkoutIntentValidators";
-import { checkoutOfferIdValidator } from "./checkoutOfferValidators";
-import { productAccessCapabilityValidator } from "./access/validators";
+	checkoutOfferIdValidator,
+} from "./billing/validators";
+import { productAccessCapabilityValidator } from "./entitlements/validators";
 import {
 	impersonationAuditEventTypeValidator,
 	impersonationAuditResultValidator,

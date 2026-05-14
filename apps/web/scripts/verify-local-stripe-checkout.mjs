@@ -113,7 +113,7 @@ async function getProductAccessDebug(sessionId) {
 	const result = await runCommand(process.execPath, [
 		CONVEX_BIN_PATH,
 		"run",
-		"access:getProductAccessDebug",
+		"entitlements:getProductAccessDebug",
 		payload,
 	]);
 

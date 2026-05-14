@@ -253,7 +253,7 @@ export async function fetchViewerProductAccess() {
 	}
 
 	return await fetchQuery(
-		api.access.viewerProductAccess,
+		api.entitlements.viewerProductAccess,
 		{},
 		{ token: session.token },
 	);

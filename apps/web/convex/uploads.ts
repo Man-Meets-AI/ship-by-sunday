@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
-import { requireGrantedProductAccess } from "./access/model";
+import { requireGrantedProductAccess } from "./entitlements/model";
 
 export const generateUploadUrl = mutation({
 	args: {},

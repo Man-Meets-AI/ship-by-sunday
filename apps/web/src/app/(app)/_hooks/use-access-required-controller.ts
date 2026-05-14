@@ -34,7 +34,7 @@ export function useAccessRequiredController(initialAccess?: ProductAccess) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const hasRedirectedSignedOutRef = useRef(false);
-	const liveAccess = useQuery(api.access.viewerProductAccess) as
+	const liveAccess = useQuery(api.entitlements.viewerProductAccess) as
 		| ProductAccess
 		| undefined;
 	const [

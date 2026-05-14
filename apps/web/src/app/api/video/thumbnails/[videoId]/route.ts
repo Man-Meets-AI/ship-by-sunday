@@ -9,11 +9,11 @@ import {
 	getBunnyThumbnailSourceUrl,
 	getVideoAssetByBunnyVideoId,
 } from "@/lib/course/lesson/model/video";
+import { hasProductSurfaceCapability } from "@/platform/access/product-surface-capabilities";
 
 export const runtime = "nodejs";
 
-const THUMBNAIL_CACHE_CONTROL =
-	"public, max-age=86400, s-maxage=2592000, stale-while-revalidate=604800";
+const THUMBNAIL_CACHE_CONTROL = "private, max-age=86400";
 
 function imageResponse(body: BodyInit, upstreamResponse: Response) {
 	return new Response(body, {
@@ -38,11 +38,11 @@ export async function GET(
 		return new Response("Unauthorized", { status: 401 });
 	}
 	const access = await fetchQuery(
-		api.access.viewerProductAccess,
+		api.entitlements.viewerProductAccess,
 		{},
 		{ token },
 	);
-	if (!access.hasAccess) {
+	if (!hasProductSurfaceCapability(access, "tutorials")) {
 		return new Response("Forbidden", { status: 403 });
 	}
 

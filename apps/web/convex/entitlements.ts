@@ -32,7 +32,7 @@ import {
 	viewerProductAccessArgs,
 	viewerProductAccessHandler,
 	viewerProductAccessReturns,
-} from "./access/model";
+} from "./entitlements/model";
 
 export const viewerProductAccess = query({
 	args: viewerProductAccessArgs,
@@ -59,7 +59,7 @@ export const resolveViewerFulfillmentTrack = mutation({
 		supportModeBlockedMutationResultValidator,
 	),
 	handler: async (ctx, args) => {
-		const actionId = "access.fulfillmentTrack.resolve";
+		const actionId = "entitlements.fulfillmentTrack.resolve";
 		const supportModePolicy = await assertSupportModeWriteAllowedHandler(ctx, {
 			actionId,
 		});

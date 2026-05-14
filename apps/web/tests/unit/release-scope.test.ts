@@ -95,6 +95,11 @@ describe("release scope classifier", () => {
 		expect(
 			isBillingSensitivePath("apps/web/convex/stripeWebhookEvents.ts"),
 		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/convex/migrations/legacyBillingReset.ts",
+			),
+		).toBe(true);
 	});
 
 	it("marks convex files as convex sensitive", () => {

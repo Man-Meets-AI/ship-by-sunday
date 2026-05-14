@@ -14,7 +14,7 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
-import { productAccessGrantResultValidator } from "./access/validators";
+import { productAccessGrantResultValidator } from "./entitlements/validators";
 import { normalizeCheckoutEmail } from "./checkoutClaims";
 import { requireConvexEnv } from "./env";
 

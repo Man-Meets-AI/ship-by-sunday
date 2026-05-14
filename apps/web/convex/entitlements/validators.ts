@@ -4,8 +4,8 @@ import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
-} from "../checkoutIntentValidators";
-import { checkoutOfferIdValidator } from "../checkoutOfferValidators";
+	checkoutOfferIdValidator,
+} from "../billing/validators";
 
 export const productAccessGrantStatusValidator = v.union(
 	v.literal("granted"),

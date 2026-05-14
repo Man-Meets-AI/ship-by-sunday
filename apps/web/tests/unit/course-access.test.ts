@@ -45,7 +45,7 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		access: {
+		entitlements: {
 			viewerProductAccess: "viewerProductAccess",
 		},
 		codebase: {

@@ -24,12 +24,12 @@ import {
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
 	checkoutResolvedFulfillmentTrackValidator,
-} from "../checkoutIntentValidators";
-import { checkoutOfferIdValidator } from "../checkoutOfferValidators";
+	checkoutOfferIdValidator,
+} from "../billing/validators";
 import type {
-	AccessMutationCtx,
-	AccessQueryCtx,
-	AccessReadCtx,
+	EntitlementMutationCtx,
+	EntitlementQueryCtx,
+	EntitlementReadCtx,
 	ProductAccessGrantSource,
 } from "./types";
 import {
@@ -74,7 +74,7 @@ function getNextProductAccessGrantSource({
 	return incomingSource;
 }
 
-async function requireViewer(ctx: AccessReadCtx) {
+async function requireViewerClerkUserId(ctx: EntitlementReadCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 	if (!identity) {
 		throw new ConvexError("Unauthorized");
@@ -240,7 +240,7 @@ function getMergedCheckoutOfferIds({
 }
 
 export async function getProductAccessGrantByClerkUserId(
-	ctx: AccessReadCtx,
+	ctx: EntitlementReadCtx,
 	clerkUserId: string,
 ) {
 	return ctx.db
@@ -249,8 +249,8 @@ export async function getProductAccessGrantByClerkUserId(
 		.unique();
 }
 
-export async function requireGrantedProductAccess(ctx: AccessReadCtx) {
-	const clerkUserId = await requireViewer(ctx);
+export async function requireGrantedProductAccess(ctx: EntitlementReadCtx) {
+	const clerkUserId = await requireViewerClerkUserId(ctx);
 	const accessGrant = await getProductAccessGrantByClerkUserId(
 		ctx,
 		clerkUserId,
@@ -263,7 +263,9 @@ export async function requireGrantedProductAccess(ctx: AccessReadCtx) {
 	return clerkUserId;
 }
 
-export async function requireExistingCodebaseProductAccess(ctx: AccessReadCtx) {
+export async function requireExistingCodebaseProductAccess(
+	ctx: EntitlementReadCtx,
+) {
 	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const accessGrant = await getProductAccessGrantByClerkUserId(
 		ctx,
@@ -278,7 +280,7 @@ export async function requireExistingCodebaseProductAccess(ctx: AccessReadCtx) {
 }
 
 export async function requireGeneratedCodebaseProductAccess(
-	ctx: AccessReadCtx,
+	ctx: EntitlementReadCtx,
 ) {
 	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const accessGrant = await getProductAccessGrantByClerkUserId(
@@ -297,7 +299,7 @@ export async function requireGeneratedCodebaseProductAccess(
 	return clerkUserId;
 }
 
-export async function requireTutorialsProductAccess(ctx: AccessReadCtx) {
+export async function requireTutorialsProductAccess(ctx: EntitlementReadCtx) {
 	const clerkUserId = await requireGrantedProductAccess(ctx);
 	const accessGrant = await getProductAccessGrantByClerkUserId(
 		ctx,
@@ -312,7 +314,7 @@ export async function requireTutorialsProductAccess(ctx: AccessReadCtx) {
 }
 
 export async function upsertProductAccessGrant(
-	ctx: AccessMutationCtx,
+	ctx: EntitlementMutationCtx,
 	input: ProductAccessGrantUpsertInput,
 ) {
 	const now = Date.now();
@@ -396,7 +398,7 @@ export async function upsertProductAccessGrant(
 	return { granted: "inserted" as const };
 }
 
-export async function viewerProductAccessHandler(ctx: AccessQueryCtx) {
+export async function viewerProductAccessHandler(ctx: EntitlementQueryCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 	if (!identity) {
 		return {
@@ -436,7 +438,7 @@ export const grantProductAccessArgs = {
 export const grantProductAccessReturns = productAccessGrantResultValidator;
 
 export async function grantProductAccessHandler(
-	ctx: AccessMutationCtx,
+	ctx: EntitlementMutationCtx,
 	args: {
 		clerkUserId: string;
 		source?: ProductAccessGrantSource;
@@ -471,7 +473,7 @@ export const grantProductAccessFromStripeReturns =
 	productAccessGrantResultValidator;
 
 export async function grantProductAccessFromStripeHandler(
-	ctx: AccessMutationCtx,
+	ctx: EntitlementMutationCtx,
 	args: {
 		clerkUserId: string;
 		stripeCustomerId?: string;
@@ -506,7 +508,7 @@ export const resolveViewerFulfillmentTrackReturns = v.object({
 });
 
 export async function resolveViewerFulfillmentTrackHandler(
-	ctx: AccessMutationCtx,
+	ctx: EntitlementMutationCtx,
 	args: {
 		fulfillmentTrack: Exclude<FulfillmentTrack, "unspecified">;
 	},
@@ -541,7 +543,7 @@ export const resetProductAccessArgs = {
 export const resetProductAccessReturns = productAccessResetResultValidator;
 
 export async function resetProductAccessHandler(
-	ctx: AccessMutationCtx,
+	ctx: EntitlementMutationCtx,
 	args: {
 		clerkUserId: string;
 	},
@@ -571,7 +573,7 @@ export const getProductAccessDebugArgs = {
 export const getProductAccessDebugReturns = productAccessDebugReturnValidator;
 
 export async function getProductAccessDebugHandler(
-	ctx: AccessQueryCtx,
+	ctx: EntitlementQueryCtx,
 	args: {
 		clerkUserId?: string;
 		stripeCheckoutSessionId?: string;

@@ -85,9 +85,10 @@ The current billing path is split between `apps/web/src/app/api/stripe/checkout/
 | --- | --- | --- |
 | `apps/web/convex/schema.ts` | `apps/web/convex/schema.ts` | Keep canonical schema file; add domain tables by product. |
 | `apps/web/convex/auth.config.ts` | `apps/web/convex/auth.config.ts` | Required for Clerk-backed Convex auth. |
-| `apps/web/convex/access.ts` and `apps/web/convex/access/**` | `apps/web/convex/entitlements.ts` plus access helpers | Entitlements should be derived from product state. |
+| `apps/web/convex/entitlements.ts` and `apps/web/convex/entitlements/**` | `apps/web/convex/entitlements.ts` plus `apps/web/convex/entitlements/**` | Product access implementation and public Convex function paths now use `entitlements`; the old `access` module has been removed. |
 | `apps/web/convex/checkoutClaims.ts` and `checkoutClaimsActions.ts` | Starter license, Workers subscription, and checkout intent modules | Replace claim-shaped state with product-shaped state as billing rebuild lands. |
-| `apps/web/convex/checkoutIntentValidators.ts` and `checkoutOfferValidators.ts` | `apps/web/convex/billing/validators.ts` or product validators | Validators stay close to billing domain. |
+| `apps/web/convex/billing/validators.ts` | `apps/web/convex/billing/validators.ts` or product validators | Checkout validators now live under billing; root validator shim files have been removed. |
+| `apps/web/convex/migrations/legacyBillingReset.ts` | Temporary operator-run reset migration | Dry-run-first, confirm-gated cleanup for legacy product access and checkout handoff rows before the billing rebuild. |
 | `apps/web/convex/stripeWebhook.ts` and `stripeWebhookEvents.ts` | `apps/web/convex/billing/stripeSync.ts`, `processedStripeEvents`, and domain writers | Next.js verifies webhooks; Convex normalizes state and records idempotency. |
 | `apps/web/convex/http.ts` Stripe webhook route | Temporary compatibility only until route migration | Target webhook ingress is Next.js API route. |
 | `apps/web/convex/workspace.ts` and `workspace/**` | `workspaces`, `memberships`, and Workers product modules | Keep workspace and membership truth separate from product entitlement state. |

@@ -164,7 +164,7 @@ async function getProductAccessDebug({ clerkUserId, sessionId }) {
 			convexBinPath,
 			"run",
 			"--prod",
-			"access:getProductAccessDebug",
+			"entitlements:getProductAccessDebug",
 			JSON.stringify(
 				buildHostedProofAccessDebugArgs({
 					clerkUserId,

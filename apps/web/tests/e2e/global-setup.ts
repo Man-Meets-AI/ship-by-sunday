@@ -457,7 +457,7 @@ async function syncProductAccessState({
 	const result =
 		kind === "grant"
 			? await runConvexInternalCommand({
-					functionName: "access:grantProductAccess",
+					functionName: "entitlements:grantProductAccess",
 					args: {
 						clerkUserId,
 						source: "manual",
@@ -470,7 +470,7 @@ async function syncProductAccessState({
 					},
 				})
 			: await runConvexInternalCommand({
-					functionName: "access:resetProductAccess",
+					functionName: "entitlements:resetProductAccess",
 					args: {
 						clerkUserId,
 					},
