@@ -1,8 +1,16 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { Effect, Layer } from "effect";
+
 import {
 	createRunnerEvent,
 	flushRunnerEvents,
 	queueRunnerEvent,
+	queueRunnerEventEffect,
 	readQueuedRunnerEvents,
+	readQueuedRunnerEventsEffect,
+	RunnerEventService,
+	flushRunnerEventsEffect,
 } from "../src/core/runner-events";
 import { createTemporaryDirectory } from "./test-utils";
 
@@ -139,6 +147,102 @@ describe("runner events", () => {
 		await expect(readQueuedRunnerEvents(repositoryRoot)).resolves.toEqual([
 			event,
 		]);
+	});
+
+	it("restores stranded flushing outboxes before delivery", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-runner-events-");
+		const event = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "runner.heartbeat",
+				runnerMode: "daemon",
+				status: "online",
+				machineHealthStatus: "ready",
+				projectHealthStatus: "ready",
+			},
+		});
+		const eventDirectory = path.join(repositoryRoot, ".sbs", "events");
+		await mkdir(eventDirectory, { recursive: true });
+		await writeFile(
+			path.join(eventDirectory, "outbox.jsonl.123.flushing"),
+			`${JSON.stringify(event)}\n`,
+		);
+
+		const result = await flushRunnerEvents({
+			repositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_secret",
+				apiBaseUrl: "https://example.com/",
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
+			fetchRunnerEvent: async () => new Response(null, { status: 200 }),
+		});
+
+		expect(result).toEqual({ delivered: 1, remaining: 0 });
+		await expect(readQueuedRunnerEvents(repositoryRoot)).resolves.toEqual([]);
+	});
+
+	it("supports injecting the Effect runner event service", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-runner-events-");
+		const event = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "runner.paired",
+				pairingStatus: "paired",
+				runnerMode: "one_shot",
+			},
+		});
+		const queuedEvents = new Array<typeof event>();
+		const stubRunnerEventService = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: (request) =>
+					Effect.sync(() => {
+						expect(request.repositoryRoot).toBe(repositoryRoot);
+						expect(request.updateGitExclude).toBe(true);
+						queuedEvents.push(request.event);
+					}),
+				readQueued: () => Effect.succeed(queuedEvents),
+				flush: (request) =>
+					Effect.succeed({
+						delivered: request.deliveryTimeoutMs,
+						remaining: request.updateGitExclude ? 0 : 1,
+					}),
+			}),
+		);
+
+		await Effect.runPromise(
+			queueRunnerEventEffect(repositoryRoot, event).pipe(
+				Effect.provide(stubRunnerEventService),
+			),
+		);
+		const events = await Effect.runPromise(
+			readQueuedRunnerEventsEffect(repositoryRoot).pipe(
+				Effect.provide(stubRunnerEventService),
+			),
+		);
+		const flushResult = await Effect.runPromise(
+			flushRunnerEventsEffect({
+				repositoryRoot,
+				credential: {
+					projectId: "workspaceProjects_1",
+					runnerId: "workspaceRunnerBindings_1",
+					runnerToken: "sbs_run_secret",
+					apiBaseUrl: "https://example.com/",
+					eventEndpoint: "/api/workspace/runner/events",
+					updatedAt: 1,
+				},
+				deliveryTimeoutMs: 12,
+			}).pipe(Effect.provide(stubRunnerEventService)),
+		);
+
+		expect(events).toEqual([event]);
+		expect(flushResult).toEqual({ delivered: 12, remaining: 0 });
 	});
 
 	it("rejects unsafe payload fields before enqueue", () => {

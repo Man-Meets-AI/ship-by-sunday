@@ -1,5 +1,12 @@
-import { Effect } from "effect";
+import { Cause, Effect, Exit } from "effect";
 
-export function runLocalRunnerEffect<A, E>(effect: Effect.Effect<A, E, never>) {
-	return Effect.runPromise(effect);
+export async function runLocalRunnerEffect<A, E>(
+	effect: Effect.Effect<A, E, never>,
+) {
+	const exit = await Effect.runPromiseExit(effect);
+	if (Exit.isSuccess(exit)) {
+		return exit.value;
+	}
+
+	throw Cause.squash(exit.cause);
 }

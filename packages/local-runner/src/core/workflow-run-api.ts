@@ -1,5 +1,8 @@
+import { Context, Effect, Layer } from "effect";
+
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
+import { runLocalRunnerEffect } from "../effect/runtime";
 import {
 	DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
 	DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
@@ -134,6 +137,48 @@ export type ApprovedWorkflowRunPacket = {
 	localProofRef: string;
 };
 
+type ResolveApprovedWorkflowRunRequest = {
+	state: LocalProjectState;
+	credential: RunnerCredential;
+	workflowRunId: string;
+	fetchWorkflowRun: typeof fetch;
+};
+
+type ClaimApprovedWorkflowRunRequest = {
+	state: LocalProjectState;
+	credential: RunnerCredential;
+	fetchWorkflowRun: typeof fetch;
+};
+
+export interface WorkflowRunApiService {
+	readonly resolve: (
+		request: ResolveApprovedWorkflowRunRequest,
+	) => Effect.Effect<ApprovedWorkflowRunPacket, unknown>;
+	readonly claim: (
+		request: ClaimApprovedWorkflowRunRequest,
+	) => Effect.Effect<ApprovedWorkflowRunPacket | null, unknown>;
+}
+
+export const WorkflowRunApiService = Context.GenericTag<WorkflowRunApiService>(
+	"ship-by-sunday/WorkflowRunApiService",
+);
+
+export const NodeWorkflowRunApiServiceLive = Layer.succeed(
+	WorkflowRunApiService,
+	WorkflowRunApiService.of({
+		resolve: (request) =>
+			Effect.tryPromise({
+				try: () => resolveApprovedWorkflowRunNode(request),
+				catch: (error) => error,
+			}),
+		claim: (request) =>
+			Effect.tryPromise({
+				try: () => claimApprovedWorkflowRunNode(request),
+				catch: (error) => error,
+			}),
+	}),
+);
+
 export async function resolveApprovedWorkflowRun({
 	state,
 	credential,
@@ -145,6 +190,43 @@ export async function resolveApprovedWorkflowRun({
 	workflowRunId: string;
 	fetchWorkflowRun?: typeof fetch;
 }) {
+	return await runLocalRunnerEffect(
+		resolveApprovedWorkflowRunEffect({
+			state,
+			credential,
+			workflowRunId,
+			fetchWorkflowRun,
+		}).pipe(Effect.provide(NodeWorkflowRunApiServiceLive)),
+	);
+}
+
+export function resolveApprovedWorkflowRunEffect({
+	state,
+	credential,
+	workflowRunId,
+	fetchWorkflowRun = fetch,
+}: {
+	state: LocalProjectState;
+	credential: RunnerCredential;
+	workflowRunId: string;
+	fetchWorkflowRun?: typeof fetch;
+}): Effect.Effect<ApprovedWorkflowRunPacket, unknown, WorkflowRunApiService> {
+	return Effect.flatMap(WorkflowRunApiService, (service) =>
+		service.resolve({
+			state,
+			credential,
+			workflowRunId,
+			fetchWorkflowRun,
+		}),
+	);
+}
+
+async function resolveApprovedWorkflowRunNode({
+	state,
+	credential,
+	workflowRunId,
+	fetchWorkflowRun,
+}: ResolveApprovedWorkflowRunRequest) {
 	const response = await fetchWorkflowRun(
 		new URL(WORKFLOW_RUN_RESOLVE_ENDPOINT, credential.apiBaseUrl),
 		{
@@ -184,6 +266,42 @@ export async function claimApprovedWorkflowRun({
 	credential: RunnerCredential;
 	fetchWorkflowRun?: typeof fetch;
 }) {
+	return await runLocalRunnerEffect(
+		claimApprovedWorkflowRunEffect({
+			state,
+			credential,
+			fetchWorkflowRun,
+		}).pipe(Effect.provide(NodeWorkflowRunApiServiceLive)),
+	);
+}
+
+export function claimApprovedWorkflowRunEffect({
+	state,
+	credential,
+	fetchWorkflowRun = fetch,
+}: {
+	state: LocalProjectState;
+	credential: RunnerCredential;
+	fetchWorkflowRun?: typeof fetch;
+}): Effect.Effect<
+	ApprovedWorkflowRunPacket | null,
+	unknown,
+	WorkflowRunApiService
+> {
+	return Effect.flatMap(WorkflowRunApiService, (service) =>
+		service.claim({
+			state,
+			credential,
+			fetchWorkflowRun,
+		}),
+	);
+}
+
+async function claimApprovedWorkflowRunNode({
+	state,
+	credential,
+	fetchWorkflowRun,
+}: ClaimApprovedWorkflowRunRequest) {
 	const response = await fetchWorkflowRun(
 		new URL(WORKFLOW_RUN_CLAIM_ENDPOINT, credential.apiBaseUrl),
 		{

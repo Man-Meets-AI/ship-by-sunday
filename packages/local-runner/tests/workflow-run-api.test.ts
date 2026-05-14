@@ -1,6 +1,15 @@
+import { Effect, Layer } from "effect";
+
 import type { RunnerCredential } from "../src/core/local-runner-home";
 import type { LocalProjectState } from "../src/core/local-project-state";
-import { claimApprovedWorkflowRun } from "../src/core/workflow-run-api";
+import type { ApprovedWorkflowRunPacket } from "../src/core/workflow-run-api";
+import {
+	claimApprovedWorkflowRun,
+	claimApprovedWorkflowRunEffect,
+	resolveApprovedWorkflowRun,
+	resolveApprovedWorkflowRunEffect,
+	WorkflowRunApiService,
+} from "../src/core/workflow-run-api";
 import {
 	DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
 	DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
@@ -295,6 +304,46 @@ function createDocsOperatingSystemLockfileRefreshPacket(
 }
 
 describe("workflow run API", () => {
+	it("supports injecting the Effect workflow-run API service", async () => {
+		const claimedPacket =
+			createMatureRepoAdoptionPacket() as ApprovedWorkflowRunPacket;
+		const resolvedPacket = createDocsSpineAdoptionPacket({
+			workflowRunId: "workflowRuns_resolved",
+		}) as ApprovedWorkflowRunPacket;
+		const stubWorkflowRunApiService = Layer.succeed(
+			WorkflowRunApiService,
+			WorkflowRunApiService.of({
+				claim: (request) =>
+					Effect.succeed({
+						...claimedPacket,
+						branchName: `${request.state.runnerId}-branch`,
+					}),
+				resolve: (request) =>
+					Effect.succeed({
+						...resolvedPacket,
+						workflowRunId: request.workflowRunId,
+					}),
+			}),
+		);
+
+		const claimed = await Effect.runPromise(
+			claimApprovedWorkflowRunEffect({
+				state: createState(),
+				credential: createCredential(),
+			}).pipe(Effect.provide(stubWorkflowRunApiService)),
+		);
+		const resolved = await Effect.runPromise(
+			resolveApprovedWorkflowRunEffect({
+				state: createState(),
+				credential: createCredential(),
+				workflowRunId: "workflowRuns_resolved",
+			}).pipe(Effect.provide(stubWorkflowRunApiService)),
+		);
+
+		expect(claimed?.branchName).toBe("workspaceRunnerBindings_1-branch");
+		expect(resolved.workflowRunId).toBe("workflowRuns_resolved");
+	});
+
 	it("claims the next approved workflow packet from the worker queue", async () => {
 		const requests: unknown[] = [];
 		const workflowRun = await claimApprovedWorkflowRun({
@@ -345,6 +394,34 @@ describe("workflow run API", () => {
 		]);
 	});
 
+	it("resolves an approved workflow packet by id", async () => {
+		const requests: unknown[] = [];
+		const workflowRun = await resolveApprovedWorkflowRun({
+			state: createState(),
+			credential: createCredential(),
+			workflowRunId: "workflowRuns_mature",
+			fetchWorkflowRun: async (url, init) => {
+				requests.push({
+					url: String(url),
+					body: JSON.parse(String(init?.body)),
+				});
+				return Response.json(createMatureRepoAdoptionPacket());
+			},
+		});
+
+		expect(workflowRun.workflowRunId).toBe("workflowRuns_mature");
+		expect(requests).toEqual([
+			{
+				url: "https://example.com/api/workspace/runner/workflow-runs/resolve",
+				body: {
+					projectId: "workspaceProjects_1",
+					runnerId: "workspaceRunnerBindings_1",
+					workflowRunId: "workflowRuns_mature",
+				},
+			},
+		]);
+	});
+
 	it("returns null when the worker queue has no approved job", async () => {
 		const workflowRun = await claimApprovedWorkflowRun({
 			state: createState(),
@@ -353,6 +430,43 @@ describe("workflow run API", () => {
 		});
 
 		expect(workflowRun).toBeNull();
+	});
+
+	it("preserves non-JSON error body messages", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					new Response("unavailable", { status: 503 }),
+			}),
+		).rejects.toThrow("Unable to claim approved workflow run: HTTP 503");
+	});
+
+	it("rejects workflow API fetch failures", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () => {
+					throw new Error("network down");
+				},
+			}),
+		).rejects.toThrow("network down");
+	});
+
+	it("rejects malformed workflow API JSON", async () => {
+		await expect(
+			claimApprovedWorkflowRun({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: async () =>
+					new Response("{", {
+						status: 200,
+						headers: { "Content-Type": "application/json" },
+					}),
+			}),
+		).rejects.toBeDefined();
 	});
 
 	it("accepts observability workflow packets from the worker queue", async () => {

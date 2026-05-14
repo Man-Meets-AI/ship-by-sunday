@@ -190,6 +190,12 @@
   Impact: zsh treats `status` as read-only, so the first check command failed before doing useful work; no files changed.
   Corrective action: Avoid reserved shell variable names in validation snippets and rerun the check with a domain-specific variable name.
 
+## 2026-05-13 Effect Boundary Scoped Staging
+
+- Mistake: I staged the whole `docs/exec-plans/active` directory while preparing the Effect boundary commit, which picked up unrelated active ExecPlan files.
+  Impact: The unrelated files were staged briefly but were removed from the index before commit; no unrelated content was committed.
+  Corrective action: Stage moved plan files with exact old/new path handling or inspect and unstage immediately before committing.
+
 ## 2026-05-13 Convex Skill Path
 
 - Mistake: I tried to read the Convex routing skill from `/Users/bazelrex/.codex/skills/convex/SKILL.md` even though this repo's Convex skill is installed under `.agents/skills/convex/SKILL.md`.

@@ -9,6 +9,7 @@ import {
 	rm,
 	unlink,
 } from "node:fs/promises";
+import { Context, Effect, Layer } from "effect";
 
 import type { RunnerCredential } from "./local-runner-home";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
@@ -17,6 +18,7 @@ import {
 	resolveRepositoryPath,
 } from "./repository-boundary";
 import { assertSyncSafeValue } from "./redaction";
+import { runLocalRunnerEffect } from "../effect/runtime";
 
 export const RUNNER_EVENT_SCHEMA_VERSION = "workspace.runner-event.v1" as const;
 const DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS = 5_000;
@@ -197,6 +199,58 @@ export type RunnerEventFlushResult = {
 	remaining: number;
 };
 
+type QueueRunnerEventRequest = {
+	repositoryRoot: string;
+	event: RunnerEvent;
+	updateGitExclude: boolean;
+};
+
+type ReadQueuedRunnerEventsRequest = {
+	repositoryRoot: string;
+};
+
+type FlushRunnerEventsRequest = {
+	repositoryRoot: string;
+	credential: RunnerCredential;
+	fetchRunnerEvent: typeof fetch;
+	deliveryTimeoutMs: number;
+	updateGitExclude: boolean;
+};
+
+export interface RunnerEventService {
+	readonly queue: (
+		request: QueueRunnerEventRequest,
+	) => Effect.Effect<void, unknown>;
+	readonly readQueued: (
+		request: ReadQueuedRunnerEventsRequest,
+	) => Effect.Effect<RunnerEvent[], unknown>;
+	readonly flush: (
+		request: FlushRunnerEventsRequest,
+	) => Effect.Effect<RunnerEventFlushResult, unknown>;
+}
+
+export const RunnerEventService = Context.GenericTag<RunnerEventService>(
+	"ship-by-sunday/RunnerEventService",
+);
+
+export const NodeRunnerEventServiceLive = Layer.succeed(
+	RunnerEventService,
+	RunnerEventService.of({
+		queue: (request) =>
+			Effect.tryPromise({
+				try: () => queueRunnerEventNode(request),
+				catch: (error) => error,
+			}),
+		readQueued: (request) =>
+			Effect.tryPromise({
+				try: () => readQueuedRunnerEventsNode(request),
+				catch: (error) => error,
+			}),
+		flush: (request) =>
+			Effect.promise((signal) => flushRunnerEventsNode(request, signal)),
+	}),
+);
+
 function eventOutboxPath(repositoryRoot: string) {
 	return resolveRepositoryPath(repositoryRoot, ".sbs/events/outbox.jsonl");
 }
@@ -253,9 +307,35 @@ export async function queueRunnerEvent(
 	event: RunnerEvent,
 	options: { updateGitExclude?: boolean } = {},
 ) {
+	return await runLocalRunnerEffect(
+		queueRunnerEventEffect(repositoryRoot, event, options).pipe(
+			Effect.provide(NodeRunnerEventServiceLive),
+		),
+	);
+}
+
+export function queueRunnerEventEffect(
+	repositoryRoot: string,
+	event: RunnerEvent,
+	options: { updateGitExclude?: boolean } = {},
+): Effect.Effect<void, unknown, RunnerEventService> {
+	return Effect.flatMap(RunnerEventService, (service) =>
+		service.queue({
+			repositoryRoot,
+			event,
+			updateGitExclude: options.updateGitExclude ?? true,
+		}),
+	);
+}
+
+async function queueRunnerEventNode({
+	repositoryRoot,
+	event,
+	updateGitExclude,
+}: QueueRunnerEventRequest) {
 	assertSyncSafeRunnerEvent(event);
 	await ensureLocalProjectStateDirectory(repositoryRoot, {
-		updateGitExclude: options.updateGitExclude ?? true,
+		updateGitExclude,
 	});
 	await assertNoRepositorySymlinkPath(
 		repositoryRoot,
@@ -268,6 +348,24 @@ export async function queueRunnerEvent(
 }
 
 export async function readQueuedRunnerEvents(repositoryRoot: string) {
+	return await runLocalRunnerEffect(
+		readQueuedRunnerEventsEffect(repositoryRoot).pipe(
+			Effect.provide(NodeRunnerEventServiceLive),
+		),
+	);
+}
+
+export function readQueuedRunnerEventsEffect(
+	repositoryRoot: string,
+): Effect.Effect<RunnerEvent[], unknown, RunnerEventService> {
+	return Effect.flatMap(RunnerEventService, (service) =>
+		service.readQueued({ repositoryRoot }),
+	);
+}
+
+async function readQueuedRunnerEventsNode({
+	repositoryRoot,
+}: ReadQueuedRunnerEventsRequest) {
 	return await readQueuedRunnerEventsFromPath(eventOutboxPath(repositoryRoot));
 }
 
@@ -306,6 +404,51 @@ export async function flushRunnerEvents({
 	fetchRunnerEvent?: typeof fetch;
 	updateGitExclude?: boolean;
 }): Promise<RunnerEventFlushResult> {
+	return await runLocalRunnerEffect(
+		flushRunnerEventsEffect({
+			repositoryRoot,
+			credential,
+			fetchRunnerEvent,
+			deliveryTimeoutMs,
+			updateGitExclude,
+		}).pipe(Effect.provide(NodeRunnerEventServiceLive)),
+	);
+}
+
+export function flushRunnerEventsEffect({
+	repositoryRoot,
+	credential,
+	fetchRunnerEvent = fetch,
+	deliveryTimeoutMs = DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS,
+	updateGitExclude = true,
+}: {
+	repositoryRoot: string;
+	credential: RunnerCredential;
+	deliveryTimeoutMs?: number;
+	fetchRunnerEvent?: typeof fetch;
+	updateGitExclude?: boolean;
+}): Effect.Effect<RunnerEventFlushResult, unknown, RunnerEventService> {
+	return Effect.flatMap(RunnerEventService, (service) =>
+		service.flush({
+			repositoryRoot,
+			credential,
+			fetchRunnerEvent,
+			deliveryTimeoutMs,
+			updateGitExclude,
+		}),
+	);
+}
+
+async function flushRunnerEventsNode(
+	{
+		repositoryRoot,
+		credential,
+		fetchRunnerEvent,
+		deliveryTimeoutMs,
+		updateGitExclude,
+	}: FlushRunnerEventsRequest,
+	interruptionSignal: AbortSignal,
+): Promise<RunnerEventFlushResult> {
 	await ensureLocalProjectStateDirectory(repositoryRoot, { updateGitExclude });
 	await restoreStrandedFlushingOutboxes(repositoryRoot, { updateGitExclude });
 	const lockPath = eventOutboxLockPath(repositoryRoot);
@@ -321,7 +464,8 @@ export async function flushRunnerEvents({
 		if (code === "EEXIST") {
 			return {
 				delivered: 0,
-				remaining: (await readQueuedRunnerEvents(repositoryRoot)).length,
+				remaining: (await readQueuedRunnerEventsNode({ repositoryRoot }))
+					.length,
 			};
 		}
 		throw error;
@@ -362,6 +506,7 @@ export async function flushRunnerEvents({
 				},
 				body: JSON.stringify(event),
 			},
+			interruptionSignal,
 			url: new URL(credential.eventEndpoint, credential.apiBaseUrl),
 		});
 
@@ -413,19 +558,28 @@ async function fetchRunnerEventWithTimeout({
 	deliveryTimeoutMs,
 	fetchRunnerEvent,
 	request,
+	interruptionSignal,
 	url,
 }: {
 	deliveryTimeoutMs: number;
 	fetchRunnerEvent: typeof fetch;
 	request: RequestInit;
+	interruptionSignal: AbortSignal;
 	url: URL;
 }) {
 	if (deliveryTimeoutMs <= 0) {
-		return await fetchRunnerEvent(url, request).catch(() => null);
+		return await fetchRunnerEvent(url, {
+			...request,
+			signal: interruptionSignal,
+		}).catch(() => null);
 	}
 
 	const abortController = new AbortController();
 	let timeout: ReturnType<typeof setTimeout> | undefined;
+	const abortDelivery = () => {
+		abortController.abort();
+	};
+	interruptionSignal.addEventListener("abort", abortDelivery, { once: true });
 	const delivery = fetchRunnerEvent(url, {
 		...request,
 		signal: abortController.signal,
@@ -440,6 +594,7 @@ async function fetchRunnerEventWithTimeout({
 	try {
 		return await Promise.race([delivery, timeoutResult]);
 	} finally {
+		interruptionSignal.removeEventListener("abort", abortDelivery);
 		if (timeout) {
 			clearTimeout(timeout);
 		}

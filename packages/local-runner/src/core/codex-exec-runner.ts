@@ -1,7 +1,9 @@
 import { spawn } from "node:child_process";
+import { Context, Effect, Layer } from "effect";
 
 import type { JsonObject, JsonValue } from "./json-value";
 import { writeLocalCodexThreadState } from "./local-project-state";
+import { runLocalRunnerEffect } from "../effect/runtime";
 
 type JsonRecord = JsonObject;
 
@@ -15,16 +17,7 @@ export type CodexExecRunnerResult = {
 	timedOut: boolean;
 };
 
-export async function runCodexExec({
-	prompt,
-	repositoryRoot,
-	profileName = "sbs-doctor-readonly",
-	sandboxMode = "read-only",
-	outputSchemaPath,
-	timeoutMs = 120_000,
-	codexBinary = "codex",
-	allowNonGitSmoke = false,
-}: {
+export type CodexExecRequest = {
 	prompt: string;
 	repositoryRoot: string;
 	profileName?: string;
@@ -33,7 +26,133 @@ export async function runCodexExec({
 	timeoutMs?: number;
 	codexBinary?: string;
 	allowNonGitSmoke?: boolean;
-}): Promise<CodexExecRunnerResult> {
+};
+
+type ResolvedCodexExecRequest = {
+	prompt: string;
+	repositoryRoot: string;
+	profileName: string;
+	sandboxMode: "read-only" | "workspace-write";
+	outputSchemaPath?: string;
+	timeoutMs: number;
+	codexBinary: string;
+	allowNonGitSmoke: boolean;
+};
+
+type CodexExecProcessResult = {
+	exitCode: number | null;
+	stdout: string;
+	stderr: string;
+	timedOut: boolean;
+};
+
+export interface CodexExecService {
+	readonly run: (
+		request: ResolvedCodexExecRequest,
+	) => Effect.Effect<CodexExecRunnerResult, unknown>;
+}
+
+export const CodexExecService = Context.GenericTag<CodexExecService>(
+	"ship-by-sunday/CodexExecService",
+);
+
+export const NodeCodexExecServiceLive = Layer.succeed(
+	CodexExecService,
+	CodexExecService.of({
+		run: runNodeCodexExec,
+	}),
+);
+
+export function runCodexExecEffect(
+	request: CodexExecRequest,
+): Effect.Effect<CodexExecRunnerResult, unknown, CodexExecService> {
+	const resolvedRequest = resolveCodexExecRequest(request);
+
+	return Effect.flatMap(CodexExecService, (service) =>
+		service.run(resolvedRequest),
+	);
+}
+
+export async function runCodexExec(
+	request: CodexExecRequest,
+): Promise<CodexExecRunnerResult> {
+	return await runLocalRunnerEffect(
+		runCodexExecEffect(request).pipe(Effect.provide(NodeCodexExecServiceLive)),
+	);
+}
+
+function resolveCodexExecRequest({
+	prompt,
+	repositoryRoot,
+	profileName = "sbs-doctor-readonly",
+	sandboxMode = "read-only",
+	outputSchemaPath,
+	timeoutMs = 120_000,
+	codexBinary = "codex",
+	allowNonGitSmoke = false,
+}: CodexExecRequest): ResolvedCodexExecRequest {
+	return {
+		prompt,
+		repositoryRoot,
+		profileName,
+		sandboxMode,
+		outputSchemaPath,
+		timeoutMs,
+		codexBinary,
+		allowNonGitSmoke,
+	};
+}
+
+function runNodeCodexExec(
+	request: ResolvedCodexExecRequest,
+): Effect.Effect<CodexExecRunnerResult, unknown> {
+	return Effect.flatMap(spawnCodexExecProcess(request), (processResult) =>
+		Effect.tryPromise({
+			try: async () => {
+				const events = parseJsonlEvents(processResult.stdout);
+				const threadId = findThreadId(events);
+				const finalAgentMessage = findFinalAgentMessage(events);
+				const structuredOutput =
+					request.outputSchemaPath && finalAgentMessage
+						? JSON.parse(finalAgentMessage)
+						: null;
+
+				if (threadId) {
+					await writeLocalCodexThreadState(request.repositoryRoot, {
+						schemaVersion: 1,
+						threadId,
+						profileName: request.profileName,
+						sandboxMode: request.sandboxMode,
+						outputSchemaPath: request.outputSchemaPath,
+						updatedAt: Date.now(),
+					});
+				}
+
+				return {
+					exitCode: processResult.exitCode,
+					threadId,
+					events,
+					finalAgentMessage,
+					structuredOutput,
+					stderr: processResult.stderr,
+					timedOut: processResult.timedOut,
+				};
+			},
+			catch: (error) => error,
+		}),
+	);
+}
+
+function spawnCodexExecProcess({
+	prompt,
+	repositoryRoot,
+	profileName,
+	sandboxMode,
+	outputSchemaPath,
+	timeoutMs,
+	codexBinary,
+	allowNonGitSmoke,
+}: ResolvedCodexExecRequest): Effect.Effect<CodexExecProcessResult, unknown> {
 	const args = [
 		"exec",
 		"--json",
@@ -51,61 +170,68 @@ export async function runCodexExec({
 		args.push("--output-schema", outputSchemaPath);
 	}
 
-	const child = spawn(codexBinary, args, {
-		stdio: ["pipe", "pipe", "pipe"],
-		env: buildCodexExecEnvironment(),
-	});
-	child.stdin.write(prompt);
-	child.stdin.end();
+	return Effect.promise(
+		(signal) =>
+			new Promise((resolve, reject) => {
+				const child = spawn(codexBinary, args, {
+					stdio: ["pipe", "pipe", "pipe"],
+					env: buildCodexExecEnvironment(),
+				});
 
-	let stdout = "";
-	let stderr = "";
-	let timedOut = false;
-	const timeout = setTimeout(() => {
-		timedOut = true;
-		child.kill("SIGTERM");
-	}, timeoutMs);
+				let stdout = "";
+				let stderr = "";
+				let timedOut = false;
+				let settled = false;
 
-	child.stdout.on("data", (chunk: Buffer) => {
-		stdout += chunk.toString("utf8");
-	});
-	child.stderr.on("data", (chunk: Buffer) => {
-		stderr += chunk.toString("utf8");
-	});
+				const finish = (callback: () => void) => {
+					if (settled) {
+						return;
+					}
+					settled = true;
+					clearTimeout(timeout);
+					signal.removeEventListener("abort", interruptProcess);
+					callback();
+				};
+				const interruptProcess = () => {
+					child.kill("SIGTERM");
+				};
+				const timeout = setTimeout(() => {
+					timedOut = true;
+					child.kill("SIGTERM");
+				}, timeoutMs);
 
-	const exitCode = await new Promise<number | null>((resolve, reject) => {
-		child.once("error", reject);
-		child.once("close", resolve);
-	}).finally(() => clearTimeout(timeout));
+				signal.addEventListener("abort", interruptProcess, { once: true });
 
-	const events = parseJsonlEvents(stdout);
-	const threadId = findThreadId(events);
-	const finalAgentMessage = findFinalAgentMessage(events);
-	const structuredOutput =
-		outputSchemaPath && finalAgentMessage
-			? JSON.parse(finalAgentMessage)
-			: null;
+				child.stdout.on("data", (chunk: Buffer) => {
+					stdout += chunk.toString("utf8");
+				});
+				child.stderr.on("data", (chunk: Buffer) => {
+					stderr += chunk.toString("utf8");
+				});
+				child.once("error", (error) =>
+					finish(() => {
+						reject(error);
+					}),
+				);
+				child.once("close", (exitCode) =>
+					finish(() => {
+						resolve({
+							exitCode,
+							stdout,
+							stderr,
+							timedOut,
+						});
+					}),
+				);
 
-	if (threadId) {
-		await writeLocalCodexThreadState(repositoryRoot, {
-			schemaVersion: 1,
-			threadId,
-			profileName,
-			sandboxMode,
-			outputSchemaPath,
-			updatedAt: Date.now(),
-		});
-	}
+				child.stdin.write(prompt);
+				child.stdin.end();
 
-	return {
-		exitCode,
-		threadId,
-		events,
-		finalAgentMessage,
-		structuredOutput,
-		stderr,
-		timedOut,
-	};
+				if (signal.aborted) {
+					interruptProcess();
+				}
+			}),
+	);
 }
 
 function buildCodexExecEnvironment(): NodeJS.ProcessEnv {
