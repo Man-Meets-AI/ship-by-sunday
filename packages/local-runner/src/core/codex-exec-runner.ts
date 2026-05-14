@@ -170,9 +170,9 @@ function spawnCodexExecProcess({
 		args.push("--output-schema", outputSchemaPath);
 	}
 
-	return Effect.promise(
-		(signal) =>
-			new Promise((resolve, reject) => {
+	return Effect.tryPromise({
+		try: (signal) =>
+			new Promise<CodexExecProcessResult>((resolve, reject) => {
 				const child = spawn(codexBinary, args, {
 					stdio: ["pipe", "pipe", "pipe"],
 					env: buildCodexExecEnvironment(),
@@ -231,7 +231,8 @@ function spawnCodexExecProcess({
 					interruptProcess();
 				}
 			}),
-	);
+		catch: (error) => error,
+	});
 }
 
 function buildCodexExecEnvironment(): NodeJS.ProcessEnv {

@@ -4,6 +4,7 @@ import { Effect, Layer } from "effect";
 
 import {
 	CodexExecService,
+	NodeCodexExecServiceLive,
 	runCodexExec,
 	runCodexExecEffect,
 } from "../src/core/codex-exec-runner";
@@ -147,6 +148,24 @@ describe("codex exec runner", () => {
 				timeoutMs: 1_000,
 			}),
 		).rejects.toMatchObject({ code: "ENOENT" });
+	});
+
+	it("exposes missing Codex executable errors as catchable Effect failures", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-codex-exec-");
+
+		const caughtError = await Effect.runPromise(
+			runCodexExecEffect({
+				prompt: "Return JSON.",
+				repositoryRoot,
+				codexBinary: path.join(repositoryRoot, "missing-codex"),
+				timeoutMs: 1_000,
+			}).pipe(
+				Effect.provide(NodeCodexExecServiceLive),
+				Effect.catchAll((error) => Effect.succeed(error)),
+			),
+		);
+
+		expect(caughtError).toMatchObject({ code: "ENOENT" });
 	});
 
 	it("rejects malformed JSONL output", async () => {

@@ -168,12 +168,12 @@ export const NodeWorkflowRunApiServiceLive = Layer.succeed(
 	WorkflowRunApiService.of({
 		resolve: (request) =>
 			Effect.tryPromise({
-				try: () => resolveApprovedWorkflowRunNode(request),
+				try: (signal) => resolveApprovedWorkflowRunNode(request, signal),
 				catch: (error) => error,
 			}),
 		claim: (request) =>
 			Effect.tryPromise({
-				try: () => claimApprovedWorkflowRunNode(request),
+				try: (signal) => claimApprovedWorkflowRunNode(request, signal),
 				catch: (error) => error,
 			}),
 	}),
@@ -221,16 +221,20 @@ export function resolveApprovedWorkflowRunEffect({
 	);
 }
 
-async function resolveApprovedWorkflowRunNode({
-	state,
-	credential,
-	workflowRunId,
-	fetchWorkflowRun,
-}: ResolveApprovedWorkflowRunRequest) {
+async function resolveApprovedWorkflowRunNode(
+	{
+		state,
+		credential,
+		workflowRunId,
+		fetchWorkflowRun,
+	}: ResolveApprovedWorkflowRunRequest,
+	signal: AbortSignal,
+) {
 	const response = await fetchWorkflowRun(
 		new URL(WORKFLOW_RUN_RESOLVE_ENDPOINT, credential.apiBaseUrl),
 		{
 			method: "POST",
+			signal,
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${credential.runnerToken}`,
@@ -297,15 +301,15 @@ export function claimApprovedWorkflowRunEffect({
 	);
 }
 
-async function claimApprovedWorkflowRunNode({
-	state,
-	credential,
-	fetchWorkflowRun,
-}: ClaimApprovedWorkflowRunRequest) {
+async function claimApprovedWorkflowRunNode(
+	{ state, credential, fetchWorkflowRun }: ClaimApprovedWorkflowRunRequest,
+	signal: AbortSignal,
+) {
 	const response = await fetchWorkflowRun(
 		new URL(WORKFLOW_RUN_CLAIM_ENDPOINT, credential.apiBaseUrl),
 		{
 			method: "POST",
+			signal,
 			headers: {
 				"Content-Type": "application/json",
 				Authorization: `Bearer ${credential.runnerToken}`,

@@ -247,7 +247,10 @@ export const NodeRunnerEventServiceLive = Layer.succeed(
 				catch: (error) => error,
 			}),
 		flush: (request) =>
-			Effect.promise((signal) => flushRunnerEventsNode(request, signal)),
+			Effect.tryPromise({
+				try: (signal) => flushRunnerEventsNode(request, signal),
+				catch: (error) => error,
+			}),
 	}),
 );
 
@@ -494,8 +497,14 @@ async function flushRunnerEventsNode(
 	const remainingEvents: RunnerEvent[] = [];
 	let delivered = 0;
 
-	for (const event of queuedEvents) {
-		const response = await fetchRunnerEventWithTimeout({
+	for (let eventIndex = 0; eventIndex < queuedEvents.length; eventIndex += 1) {
+		const event = queuedEvents[eventIndex];
+		if (interruptionSignal.aborted) {
+			remainingEvents.push(...queuedEvents.slice(eventIndex));
+			break;
+		}
+
+		const deliveryResult = await fetchRunnerEventWithTimeout({
 			deliveryTimeoutMs,
 			fetchRunnerEvent,
 			request: {
@@ -510,9 +519,14 @@ async function flushRunnerEventsNode(
 			url: new URL(credential.eventEndpoint, credential.apiBaseUrl),
 		});
 
-		if (response?.ok) {
+		if (deliveryResult === "delivered") {
 			delivered += 1;
 			continue;
+		}
+
+		if (deliveryResult === "interrupted") {
+			remainingEvents.push(...queuedEvents.slice(eventIndex));
+			break;
 		}
 
 		remainingEvents.push(event);
@@ -566,33 +580,53 @@ async function fetchRunnerEventWithTimeout({
 	request: RequestInit;
 	interruptionSignal: AbortSignal;
 	url: URL;
-}) {
-	if (deliveryTimeoutMs <= 0) {
-		return await fetchRunnerEvent(url, {
-			...request,
-			signal: interruptionSignal,
-		}).catch(() => null);
+}): Promise<"delivered" | "interrupted" | "retry"> {
+	if (interruptionSignal.aborted) {
+		return "interrupted";
 	}
 
 	const abortController = new AbortController();
 	let timeout: ReturnType<typeof setTimeout> | undefined;
+	let resolveInterrupted: (() => void) | undefined;
+	const interruptionResult = new Promise<"interrupted">((resolve) => {
+		resolveInterrupted = () => resolve("interrupted");
+	});
 	const abortDelivery = () => {
 		abortController.abort();
+		resolveInterrupted?.();
 	};
 	interruptionSignal.addEventListener("abort", abortDelivery, { once: true });
-	const delivery = fetchRunnerEvent(url, {
-		...request,
-		signal: abortController.signal,
-	}).catch(() => null);
-	const timeoutResult = new Promise<null>((resolve) => {
-		timeout = setTimeout(() => {
-			abortController.abort();
-			resolve(null);
-		}, deliveryTimeoutMs);
-	});
+	if (interruptionSignal.aborted) {
+		abortDelivery();
+	}
+	const delivery = Promise.resolve()
+		.then(() =>
+			fetchRunnerEvent(url, {
+				...request,
+				signal: abortController.signal,
+			}),
+		)
+		.then((response) =>
+			response.ok ? ("delivered" as const) : ("retry" as const),
+		)
+		.catch(() => (interruptionSignal.aborted ? "interrupted" : "retry"));
+	const deliveries: Array<Promise<"delivered" | "interrupted" | "retry">> = [
+		delivery,
+		interruptionResult,
+	];
+	if (deliveryTimeoutMs > 0) {
+		deliveries.push(
+			new Promise<"retry">((resolve) => {
+				timeout = setTimeout(() => {
+					abortController.abort();
+					resolve("retry");
+				}, deliveryTimeoutMs);
+			}),
+		);
+	}
 
 	try {
-		return await Promise.race([delivery, timeoutResult]);
+		return await Promise.race(deliveries);
 	} finally {
 		interruptionSignal.removeEventListener("abort", abortDelivery);
 		if (timeout) {

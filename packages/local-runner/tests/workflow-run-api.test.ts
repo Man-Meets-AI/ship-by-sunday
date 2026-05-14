@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Effect, Exit, Layer } from "effect";
 
 import type { RunnerCredential } from "../src/core/local-runner-home";
 import type { LocalProjectState } from "../src/core/local-project-state";
@@ -6,6 +6,7 @@ import type { ApprovedWorkflowRunPacket } from "../src/core/workflow-run-api";
 import {
 	claimApprovedWorkflowRun,
 	claimApprovedWorkflowRunEffect,
+	NodeWorkflowRunApiServiceLive,
 	resolveApprovedWorkflowRun,
 	resolveApprovedWorkflowRunEffect,
 	WorkflowRunApiService,
@@ -303,6 +304,25 @@ function createDocsOperatingSystemLockfileRefreshPacket(
 	};
 }
 
+function createAbortableWorkflowFetch() {
+	let resolveAbort: (() => void) | undefined;
+	let resolveFetchStarted: (() => void) | undefined;
+	const aborted = new Promise<void>((resolve) => {
+		resolveAbort = resolve;
+	});
+	const fetchStarted = new Promise<void>((resolve) => {
+		resolveFetchStarted = resolve;
+	});
+	const fetchWorkflowRun: typeof fetch = (_url, init) => {
+		resolveFetchStarted?.();
+		init?.signal?.addEventListener("abort", () => resolveAbort?.(), {
+			once: true,
+		});
+		return new Promise<Response>(() => undefined);
+	};
+	return { aborted, fetchStarted, fetchWorkflowRun };
+}
+
 describe("workflow run API", () => {
 	it("supports injecting the Effect workflow-run API service", async () => {
 		const claimedPacket =
@@ -342,6 +362,43 @@ describe("workflow run API", () => {
 
 		expect(claimed?.branchName).toBe("workspaceRunnerBindings_1-branch");
 		expect(resolved.workflowRunId).toBe("workflowRuns_resolved");
+	});
+
+	it("aborts workflow API fetches when interrupted", async () => {
+		const claimFetch = createAbortableWorkflowFetch();
+		const resolveFetch = createAbortableWorkflowFetch();
+		const claimAbortController = new AbortController();
+		const resolveAbortController = new AbortController();
+
+		const claimExitPromise = Effect.runPromiseExit(
+			claimApprovedWorkflowRunEffect({
+				state: createState(),
+				credential: createCredential(),
+				fetchWorkflowRun: claimFetch.fetchWorkflowRun,
+			}).pipe(Effect.provide(NodeWorkflowRunApiServiceLive)),
+			{ signal: claimAbortController.signal },
+		);
+		const resolveExitPromise = Effect.runPromiseExit(
+			resolveApprovedWorkflowRunEffect({
+				state: createState(),
+				credential: createCredential(),
+				workflowRunId: "workflowRuns_1",
+				fetchWorkflowRun: resolveFetch.fetchWorkflowRun,
+			}).pipe(Effect.provide(NodeWorkflowRunApiServiceLive)),
+			{ signal: resolveAbortController.signal },
+		);
+
+		await Promise.all([claimFetch.fetchStarted, resolveFetch.fetchStarted]);
+		claimAbortController.abort();
+		resolveAbortController.abort();
+		const [claimExit, resolveExit] = await Promise.all([
+			claimExitPromise,
+			resolveExitPromise,
+		]);
+		expect(Exit.isFailure(claimExit)).toBe(true);
+		expect(Exit.isFailure(resolveExit)).toBe(true);
+		await expect(claimFetch.aborted).resolves.toBeUndefined();
+		await expect(resolveFetch.aborted).resolves.toBeUndefined();
 	});
 
 	it("claims the next approved workflow packet from the worker queue", async () => {
