@@ -187,8 +187,35 @@ Separator, Checkbox, Switch, and RadioGroup browser proof was not run because cu
 
 Review repair validation completed on 2026-05-14:
 
+    bun run format
+    Finished in 339ms on 1036 files using 12 threads.
+
     bun run --cwd apps/web test:unit -- tests/unit/ui-form-scaffold-controls.test.tsx
     1 file passed, 4 tests passed.
+
+    bun run --cwd apps/web test:unit -- tests/unit/ui-form-scaffold-controls.test.tsx tests/unit/ui-menu-command-primitives.test.tsx tests/unit/ui-popover-tooltip-primitives.test.tsx
+    3 files passed, 16 tests passed.
+
+    bun run --cwd apps/web lint
+    Found 0 warnings and 0 errors.
+
+    bun lint
+    App and package lint passed with 0 warnings and 0 errors.
+
+    DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
+    App production build, app typecheck, and package typechecks passed.
+
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md
+    docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md: ok
+
+    bun run programs:lint
+    Program docs, packets, and prompts passed.
+
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    Markdown metadata lint passed.
+
+    git diff --check
+    No whitespace errors.
 
 ## Interfaces and Dependencies
 
