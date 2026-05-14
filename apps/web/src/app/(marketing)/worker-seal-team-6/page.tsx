@@ -17,8 +17,8 @@ import {
 	routeConfig,
 	supportContactConfig,
 } from "@/config/product";
-import { WorkerSealTeam6CalBooking } from "./_components/worker-seal-team-6-cal-booking";
-import { createWorkerSealTeam6CalBookingConfig } from "./_lib/worker-seal-team-6-cal-config";
+import { WorkerSealTeam6CalBooking } from "@/components/workerSealTeam6/WorkerSealTeam6CalBooking";
+import { createWorkerSealTeam6CalBookingConfig } from "@/components/workerSealTeam6/WorkerSealTeam6CalBooking.logic";
 
 export const metadata: Metadata = {
 	title: "Worker Seal Team 6",

@@ -11,7 +11,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 - For any `apps/web` task, start with the repo root `AGENTS.md`.
 - Before changing app architecture, route groups, Convex module shape, billing boundaries, provider setup, Sentry, Resend, or debug tooling, read `apps/web/ARCHITECTURE.md` and `apps/web/CONVENTIONS.md`.
 - For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
-- For UI layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation, read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md`.
+- For UI layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or component/file structure while the T3 Code migration is active, read `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md` and its current planning brief. Do not use root `DESIGN.md`, `docs/FRONTEND.md`, or `docs/ship-by-sunday/design-pack/` as preserved doctrine for that work.
 - Before changing the public homepage, read `apps/web/src/content/docs/configure-the-homepage.mdx`.
 - Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Before changing Next.js App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries, read the relevant guide in the installed `next` package's `dist/docs/`. In this Bun workspace, Next.js is hoisted to `../../node_modules/next/dist/docs/` from `apps/web`.
@@ -40,11 +40,11 @@ This app is codebase-first, not course-first. The public customer outcome is one
 
 ## UI And Component Rules
 
-- Preserve the existing visual system unless the task explicitly calls for redesign.
+- The active T3 Code migration supersedes the old visual and frontend structure doctrine. Keep Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` when useful, but treat underscore implementation folders such as `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata` as migration targets.
 - Keep presentation in components and stateful or behavioral logic in hooks, helpers, or controller layers.
 - Split components above 150 lines when a clean feature-local boundary exists.
 - Use product language in UI copy. Do not leak planning, prompt, or implementation terminology into customer-facing surfaces.
-- For user-facing UI work, also follow `docs/ship-by-sunday/design-pack/`.
+- New or migrated implementation should move toward T3 Code-style plain modules under `src/components`, `src/hooks`, `src/lib`, route adapters, and colocated logic/tests instead of adding new underscore implementation folders.
 
 ## Route And Access Triggers
 

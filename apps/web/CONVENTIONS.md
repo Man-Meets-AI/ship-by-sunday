@@ -31,7 +31,7 @@ Do not add compatibility redirects for historical route names unless a slice doc
 
 Keep shared app components in `src/components/app`, shared page chrome and layout primitives in `src/components/layout`, providers in `src/components/providers`, and shadcn primitives in `src/components/ui`.
 
-Route-specific marketing or protected page pieces can live in route-local `_components/` folders when they are not reused. Prefer route-local components over inventing a broad generic component namespace.
+Route-specific marketing or protected page pieces should move toward plain feature modules under `src/components`, `src/hooks`, or `src/lib`, with route files acting as thin adapters. Existing route-local `_components/`, `_hooks/`, `_lib/`, `_server/`, `_styles/`, `_content/`, `_fonts/`, and `_metadata/` folders are migration inventory during the T3 Code source migration; do not add new ones in migrated areas.
 
 Keep rendering, orchestration, domain logic, and external I/O separate. Components should call typed helpers and Convex function refs; they should not know raw provider payload shapes.
 

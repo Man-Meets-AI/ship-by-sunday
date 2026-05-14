@@ -34,8 +34,7 @@ Root guidance starts at `AGENTS.md` and this docs index. More specific nested `A
 - Architecture and authority split: [docs/ARCHITECTURE.md](ARCHITECTURE.md)
 - Validation, worktree behavior, and review loops: [docs/RELIABILITY.md](RELIABILITY.md)
 - Secrets, approvals, and trust boundaries: [docs/SECURITY.md](SECURITY.md)
-- Frontend implementation rules: [docs/FRONTEND.md](FRONTEND.md)
-- Visual and interaction doctrine: [docs/DESIGN.md](DESIGN.md)
+- Active web UI and app-shape migration: [docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md](programs/active/2026-05-14-t3-code-source-design-system-port/program.md)
 - Product judgment and spec routing: [docs/PRODUCT_SENSE.md](PRODUCT_SENSE.md)
 - Quality-score landing surface: [docs/QUALITY_SCORE.md](QUALITY_SCORE.md)
 - Planning contract compatibility route: [docs/PLANS.md](PLANS.md)
@@ -45,7 +44,7 @@ Root guidance starts at `AGENTS.md` and this docs index. More specific nested `A
 - Generated mirror reference: [docs/generated/index.md](generated/index.md)
 - Stable prompt assets: [docs/prompts/README.md](prompts/README.md)
 - Reference landing zone: [docs/internal/README.md](internal/README.md)
-- Durable design notes: [docs/design-docs/index.md](design-docs/index.md)
+- Historical design notes: [docs/design-docs/index.md](design-docs/index.md)
 - Historical archives: [docs/archive/README.md](archive/README.md)
 
 ## Next

@@ -16,6 +16,7 @@ read_when:
 
 Active:
 
+- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/`: T3 Code source-of-truth visual-system migration for every current and generated Ship by Sunday web UI surface while keeping Ship by Sunday branding.
 - `docs/programs/active/2026-05-13-autonomous-program-execution-loop/`: autonomous Program and ExecPlan execution loop that runs approved child plans through execution, fresh review, fixes, proof, docs sync, and checkpoints.
 - `docs/programs/active/2026-05-13-template-first-web-convex-architecture/`: template-first migration of `apps/web` and Convex toward the sibling Next.js Convex Clerk Stripe architecture, including billing, Sentry, Resend, route groups, and provider conventions.
 - `docs/programs/active/2026-05-12-public-product-split-starter-workers/`: Man Meets AI brand homepage, public Starter and Workers sales paths, Starter-owned generator/videos, unpromoted support docs, and generated template-app boundaries.

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { WorkerSealTeam6CalBooking } from "@/app/(marketing)/worker-seal-team-6/_components/worker-seal-team-6-cal-booking";
+import { WorkerSealTeam6CalBooking } from "@/components/workerSealTeam6/WorkerSealTeam6CalBooking";
 
 describe("WorkerSealTeam6CalBooking", () => {
 	afterEach(() => {

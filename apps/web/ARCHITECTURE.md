@@ -43,7 +43,7 @@ apps/web/
   convex/
 ```
 
-Route-local components may live under route segment `_components/` folders when they are not shared. Shared product app components belong in `src/components/app`, shared chrome and shells belong in `src/components/layout`, client/server providers belong in `src/components/providers`, and shadcn primitives belong in `src/components/ui`.
+Historical route-local `_components/` folders are migration inventory during the T3 Code source migration. New or migrated route implementation should move toward plain source modules under `src/components`, `src/hooks`, and `src/lib`, with route files staying as thin Next.js adapters. Shared product app components belong in `src/components/app`, shared chrome and shells belong in `src/components/layout`, client/server providers belong in `src/components/providers`, and shadcn primitives belong in `src/components/ui`.
 
 ## Ownership
 
