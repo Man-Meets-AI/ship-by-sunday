@@ -167,6 +167,7 @@ describe("T3 Code Popover and Tooltip primitive recipes", () => {
 		const popupClassName = popup?.getAttribute("class") ?? "";
 
 		expect(popup?.getAttribute("data-side")).toBe("right");
+		expect(popup?.getAttribute("data-state")).toBe("instant-open");
 		expect(popup?.hasAttribute("hidden")).toBe(true);
 		expect(popupClassName).toContain("relative");
 		expect(popupClassName).toContain("bg-popover");
@@ -176,6 +177,8 @@ describe("T3 Code Popover and Tooltip primitive recipes", () => {
 			"before:shadow-[0_1px_--theme(--color-black/4%)]",
 		);
 		expect(popupClassName).toContain("data-[state=delayed-open]:animate-in");
+		expect(popupClassName).toContain("data-[state=instant-open]:animate-in");
+		expect(popupClassName).not.toContain("data-open:");
 		expect(popupClassName).toContain("custom-tooltip");
 		expect(popup?.textContent).toContain("Tooltip copy");
 	});

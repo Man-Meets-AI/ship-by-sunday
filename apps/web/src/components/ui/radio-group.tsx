@@ -26,14 +26,14 @@ function Radio({
 		<RadioGroupPrimitive.Item
 			data-slot="radio"
 			className={cn(
-				"relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 ring-ring transition-shadow outline-none not-dark:bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-full not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background focus-visible:aria-invalid:border-destructive/64 focus-visible:aria-invalid:ring-destructive/48 aria-invalid:border-destructive/36 data-disabled:opacity-64 data-disabled:shadow-none data-checked:shadow-none aria-invalid:shadow-none sm:size-4 dark:not-data-checked:bg-input/32 dark:aria-invalid:ring-destructive/24 dark:not-data-disabled:not-data-checked:not-aria-invalid:before:shadow-[0_-1px_--theme(--color-white/6%)]",
+				"relative inline-flex size-4.5 shrink-0 items-center justify-center rounded-full border border-input bg-background shadow-xs/5 ring-ring transition-shadow outline-none not-dark:bg-clip-padding before:pointer-events-none before:absolute before:inset-0 before:rounded-full not-data-disabled:not-data-[state=checked]:not-aria-invalid:before:shadow-[0_1px_--theme(--color-black/4%)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background focus-visible:aria-invalid:border-destructive/64 focus-visible:aria-invalid:ring-destructive/48 aria-invalid:border-destructive/36 data-disabled:opacity-64 data-disabled:shadow-none data-[state=checked]:shadow-none aria-invalid:shadow-none sm:size-4 dark:not-data-[state=checked]:bg-input/32 dark:aria-invalid:ring-destructive/24 dark:not-data-disabled:not-data-[state=checked]:not-aria-invalid:before:shadow-[0_-1px_--theme(--color-white/6%)]",
 				className,
 			)}
 			{...props}
 		>
 			<RadioGroupPrimitive.Indicator
 				data-slot="radio-indicator"
-				className="-inset-px absolute flex size-4.5 items-center justify-center rounded-full before:size-2 before:rounded-full before:bg-primary-foreground data-checked:bg-primary data-unchecked:hidden sm:size-4 sm:before:size-1.5"
+				className="-inset-px absolute flex size-4.5 items-center justify-center rounded-full before:size-2 before:rounded-full before:bg-primary-foreground data-[state=checked]:bg-primary data-[state=unchecked]:hidden sm:size-4 sm:before:size-1.5"
 			/>
 		</RadioGroupPrimitive.Item>
 	);

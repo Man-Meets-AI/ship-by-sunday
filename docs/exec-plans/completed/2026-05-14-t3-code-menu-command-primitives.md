@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-05-14
 completed_at: 2026-05-14
 summary: Move menu and command surfaces toward T3 Code recipes while preserving current Radix, cmdk, and navigation call-site compatibility.
-post_build_recap: DropdownMenu and NavigationMenu now use T3 Code menu surface recipes, a shared cmdk-backed Command primitive owns command-palette styling, app-shell command imports moved to that primitive, focused tests and desktop/mobile browser proof passed, and no package changes were needed.
+post_build_recap: DropdownMenu and NavigationMenu now use T3 Code menu surface recipes adapted to Radix state attributes, a shared cmdk-backed Command primitive owns command-palette styling, app-shell command imports moved to that primitive, focused tests and desktop/mobile browser proof passed, and no package changes were needed.
 program_id: t3-code-source-design-system-port
 planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
@@ -36,6 +36,7 @@ After this slice, existing call sites should keep importing `DropdownMenu*`, `Na
 - [x] 2026-05-14: Ran desktop/mobile browser proof through a temporary local route, then deleted the route before final validation.
 - [x] 2026-05-14: Ran final format, app lint/typecheck, focused tests, and browser proof; repo and docs gates are recorded below.
 - [x] 2026-05-14: Moved this ExecPlan to completed and updated the Program ledger with the next slice.
+- [x] 2026-05-14: Repaired NavigationMenu open-state selectors after review found copied Base UI `data-open`/`data-popup-open` selectors did not match Radix `data-state` output.
 
 ## Surprises & Discoveries
 
@@ -61,7 +62,7 @@ Date: 2026-05-14
 
 DropdownMenu now carries the T3 Code bordered `bg-popover` popup surface, before-shadow, dense item sizing, checkbox/radio/submenu layout, shortcut styling, and `menu-viewport` wrapper while keeping Radix `DropdownMenu*` exports and current call-site props. It also exports `Menu`, `MenuPopup`, `MenuItem`, `MenuShortcut`, and related aliases that map to real wrappers instead of pretending to expose Base UI-only APIs.
 
-NavigationMenu keeps the `viewport` prop and viewport-less absolute overlay behavior used by workspace primary navigation, but its trigger, content, viewport, and link recipes now use the same T3 menu surface and dense item rhythm.
+NavigationMenu keeps the `viewport` prop and viewport-less absolute overlay behavior used by workspace primary navigation, but its trigger, content, viewport, and link recipes now use the same T3 menu surface and dense item rhythm. The open/closed styling and chevron rotation are adapted to Radix `data-state="open"` / `"closed"` attributes rather than Base UI `data-open` or `data-popup-open` attributes.
 
 `apps/web/src/components/ui/command.tsx` is now the shared command primitive boundary. It stays on `cmdk` and Radix Dialog, exposes the T3-style command dialog, panel, footer, shortcut, input, list, group, item, separator, and empty-state wrappers, and removed app-shell command palette class strings from the route-local component.
 
@@ -204,6 +205,11 @@ Validation completed on 2026-05-14:
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
+
+Review repair validation completed on 2026-05-14:
+
+    bun run --cwd apps/web test:unit -- tests/unit/ui-menu-command-primitives.test.tsx
+    1 file passed, 6 tests passed.
 
 ## Interfaces and Dependencies
 

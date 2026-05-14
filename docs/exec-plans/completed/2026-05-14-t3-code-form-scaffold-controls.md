@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-05-14
 completed_at: 2026-05-14
 summary: Move Field, Label, Separator, Checkbox, Switch, and RadioGroup toward T3 Code recipes while preserving current Radix call-site compatibility.
-post_build_recap: Field, Label, Separator, Checkbox, Switch, and RadioGroup now use T3 Code recipes on the current Radix compatibility surface with focused render and public sign-in browser proof.
+post_build_recap: Field, Label, Separator, Checkbox, Switch, and RadioGroup now use T3 Code recipes on the current Radix compatibility surface; review repair mapped checked-state selectors to Radix `data-state` attributes and strengthened focused render coverage.
 program_id: t3-code-source-design-system-port
 planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
@@ -29,6 +29,7 @@ Ship by Sunday's forms currently mix old shadcn-neutral field wrappers, Radix la
 - [x] 2026-05-14: Port Field, Label, Separator, Checkbox, Switch, and RadioGroup class recipes with compatibility exports.
 - [x] 2026-05-14: Add focused render tests that prove T3 Code class tokens, current export names, checked/disabled states, and field error rendering.
 - [x] 2026-05-14: Run focused tests, app lint/typecheck, Program/plan/docs checks, whitespace checks, and representative browser proof.
+- [x] 2026-05-14: Repaired Radix adapter state selectors after review found copied Base UI `data-checked`/`data-unchecked` selectors were inert against Radix `data-state` output.
 
 ## Surprises & Discoveries
 
@@ -52,9 +53,9 @@ Date: 2026-05-14
 
 ## Outcomes & Retrospective
 
-This slice moved `apps/web/src/components/ui/field.tsx`, `label.tsx`, `separator.tsx`, `checkbox.tsx`, `switch.tsx`, and `radio-group.tsx` toward T3 Code recipes while keeping the existing Radix implementation and current export names. Label and Field label typography now use the T3 compact `text-base/4.5` and `sm:text-sm/4` treatment. Field descriptions and errors use the smaller T3 text scale, with `FieldError` still rendering `role="alert"`. Separator now uses explicit orientation selectors. Checkbox, Switch, and Radio now use T3-style before-shadow surfaces, focus-ring offset treatment, checked/disabled state classes, and compact indicator recipes. `Radio` is now exported as a T3-compatible name while `RadioGroupItem` remains an alias.
+This slice moved `apps/web/src/components/ui/field.tsx`, `label.tsx`, `separator.tsx`, `checkbox.tsx`, `switch.tsx`, and `radio-group.tsx` toward T3 Code recipes while keeping the existing Radix implementation and current export names. Label and Field label typography now use the T3 compact `text-base/4.5` and `sm:text-sm/4` treatment. Field descriptions and errors use the smaller T3 text scale, with `FieldError` still rendering `role="alert"`. Separator now uses explicit orientation selectors. Checkbox, Switch, Radio, and Field checked-state recipes are adapted to Radix `data-state="checked"` / `"unchecked"` attributes while preserving T3 before-shadow surfaces, focus-ring offset treatment, disabled state classes, and compact indicator recipes. `Radio` is now exported as a T3-compatible name while `RadioGroupItem` remains an alias.
 
-Focused render tests prove the T3 class tokens and compatibility exports. Browser proof on `/sign-in` proved Field, Label, and Input still render together without horizontal overflow on desktop and mobile.
+Focused render tests prove the T3 class tokens, compatibility exports, and Radix `data-state` checked-state selector contract. Browser proof on `/sign-in` proved Field, Label, and Input still render together without horizontal overflow on desktop and mobile.
 
 ## Context and Orientation
 
@@ -146,7 +147,7 @@ If the plan is completed and moved, rerun plan lint against the completed path.
 
 ## Validation and Acceptance
 
-Acceptance requires Field, Label, Separator, Checkbox, Switch, and RadioGroup to expose T3 Code class recipes while existing imports and props still typecheck. Focused tests must prove at least one T3-only class token on each primitive family, `FieldError` still renders a role alert, `RadioGroupItem` remains available, `Radio` is available as the T3-compatible alias, and no package dependency change is needed.
+Acceptance requires Field, Label, Separator, Checkbox, Switch, and RadioGroup to expose T3 Code class recipes while existing imports and props still typecheck. Focused tests must prove at least one T3-only class token on each primitive family, the checked controls target Radix `data-state` attributes rather than Base UI-only state attributes, `FieldError` still renders a role alert, `RadioGroupItem` remains available, `Radio` is available as the T3-compatible alias, and no package dependency change is needed.
 
 ### Test Commands
 
@@ -183,6 +184,11 @@ Validation completed on 2026-05-14:
     `/sign-in` at 1440x1000 and 390x844 rendered one shared Field, one shared FieldLabel, and one shared Input control with T3 form scaffold treatment and no horizontal overflow.
 
 Separator, Checkbox, Switch, and RadioGroup browser proof was not run because current public routes do not expose those primitives without authentication or route gating. They are covered by focused render tests and the production build in this slice.
+
+Review repair validation completed on 2026-05-14:
+
+    bun run --cwd apps/web test:unit -- tests/unit/ui-form-scaffold-controls.test.tsx
+    1 file passed, 4 tests passed.
 
 ## Interfaces and Dependencies
 

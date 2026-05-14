@@ -35,6 +35,7 @@ describe("T3 Code form scaffold and control recipes", () => {
 		expect(markup).toContain('data-slot="field-label"');
 		expect(markup).toContain("text-base/4.5");
 		expect(markup).toContain("sm:text-sm/4");
+		expect(markup).toContain("has-data-[state=checked]:border-primary/30");
 		expect(markup).toContain('data-slot="field-description"');
 		expect(markup).toContain("text-xs");
 		expect(markup).toContain('data-slot="field-error"');
@@ -75,20 +76,26 @@ describe("T3 Code form scaffold and control recipes", () => {
 		expect(checkboxMarkup).toContain('data-slot="checkbox"');
 		expect(checkboxMarkup).toContain("not-dark:bg-clip-padding");
 		expect(checkboxMarkup).toContain("focus-visible:ring-offset-background");
-		expect(checkboxMarkup).toContain("data-checked:shadow-none");
+		expect(checkboxMarkup).toContain('data-state="checked"');
+		expect(checkboxMarkup).toContain("data-[state=checked]:shadow-none");
+		expect(checkboxMarkup).toContain("data-[state=checked]:bg-primary");
+		expect(checkboxMarkup).not.toContain("data-checked:");
 		expect(checkboxMarkup).toContain('data-slot="checkbox-indicator"');
 		expect(checkboxMarkup).toContain('data-slot="checkbox-check-icon"');
 		expect(checkboxMarkup).toContain("M5.252 12.7 10.2 18.63 18.748 5.37");
 		expect(indeterminateCheckboxMarkup).toContain('aria-checked="mixed"');
+		expect(indeterminateCheckboxMarkup).toContain('data-state="indeterminate"');
 		expect(indeterminateCheckboxMarkup).toContain(
 			'data-slot="checkbox-indeterminate-icon"',
 		);
 		expect(indeterminateCheckboxMarkup).toContain("M5.252 12h13.496");
 		expect(switchMarkup).toContain('data-slot="switch"');
 		expect(switchMarkup).toContain('data-size="sm"');
+		expect(switchMarkup).toContain('data-state="checked"');
 		expect(switchMarkup).toContain("[--thumb-size:--spacing(5)]");
 		expect(switchMarkup).toContain('data-slot="switch-thumb"');
-		expect(switchMarkup).toContain("data-checked:translate-x");
+		expect(switchMarkup).toContain("data-[state=checked]:translate-x");
+		expect(switchMarkup).not.toContain("data-checked:");
 	});
 
 	it("renders Radio and RadioGroupItem compatibility aliases", () => {
@@ -103,7 +110,10 @@ describe("T3 Code form scaffold and control recipes", () => {
 		expect(radioMarkup).toContain("flex flex-col gap-3");
 		expect(radioMarkup).toContain('data-slot="radio"');
 		expect(radioMarkup).toContain("not-dark:bg-clip-padding");
-		expect(radioMarkup).toContain("data-checked:shadow-none");
+		expect(radioMarkup).toContain('data-state="checked"');
+		expect(radioMarkup).toContain("data-[state=checked]:shadow-none");
+		expect(radioMarkup).toContain("data-[state=checked]:bg-primary");
+		expect(radioMarkup).not.toContain("data-checked:");
 		expect(radioMarkup).toContain('data-slot="radio-indicator"');
 		expect(radioMarkup).toContain("before:bg-primary-foreground");
 	});

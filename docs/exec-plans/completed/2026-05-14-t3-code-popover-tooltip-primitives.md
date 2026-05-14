@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-05-14
 completed_at: 2026-05-14
 summary: Move Popover and Tooltip toward T3 Code popup recipes while preserving current Radix compatibility.
-post_build_recap: Popover now exists as a Radix-backed shared primitive with T3 popup aliases, Tooltip now uses the T3 popup surface while keeping current exports, and focused unit, app lint/typecheck, and desktop/mobile browser proof passed.
+post_build_recap: Popover now exists as a Radix-backed shared primitive with T3 popup aliases, Tooltip now uses the T3 popup surface while keeping current exports and Radix instant/delayed open states, and focused unit, app lint/typecheck, and desktop/mobile browser proof passed.
 program_id: t3-code-source-design-system-port
 planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
@@ -35,6 +35,7 @@ After this slice, existing tooltip call sites should keep compiling, future rout
 - [x] 2026-05-14: Run focused tests, app lint/typecheck, and desktop/mobile browser proof.
 - [x] 2026-05-14: Run final format, repo lint/typecheck, Program/plan/docs lint, markdown lint, and `git diff --check`.
 - [x] 2026-05-14: Move this ExecPlan to completed and update the Program ledger with the next slice.
+- [x] 2026-05-14: Repaired Tooltip open-state selectors after review found copied Base UI `data-open` selectors did not match Radix `data-state="instant-open"` output.
 
 ## Surprises & Discoveries
 
@@ -58,9 +59,9 @@ Date: 2026-05-14
 
 ## Outcomes & Retrospective
 
-This slice kept Popover and Tooltip Radix-backed while copying T3 Code's popup surface recipes into the shared UI layer. `apps/web/src/components/ui/popover.tsx` now exists and exports `Popover`, `PopoverTrigger`, `PopoverPortal`, `PopoverAnchor`, `PopoverClose`, `PopoverContent`, `PopoverPopup`, `PopoverTitle`, and `PopoverDescription`. `PopoverPopup` is the implementation, and `PopoverContent` is the compatibility alias. It forwards `forceMount` through both Radix portal and content, and it lets existing shadcn-style `className` padding control reach the inner viewport while also exposing `viewportClassName` for explicit viewport-only overrides. `apps/web/src/components/ui/tooltip.tsx` now uses a relative bordered `bg-popover` surface with T3 before-shadow tokens, no foreground-color arrow bubble, `sideOffset = 4`, and `TooltipPopup` as an alias for the existing `TooltipContent` export.
+This slice kept Popover and Tooltip Radix-backed while copying T3 Code's popup surface recipes into the shared UI layer. `apps/web/src/components/ui/popover.tsx` now exists and exports `Popover`, `PopoverTrigger`, `PopoverPortal`, `PopoverAnchor`, `PopoverClose`, `PopoverContent`, `PopoverPopup`, `PopoverTitle`, and `PopoverDescription`. `PopoverPopup` is the implementation, and `PopoverContent` is the compatibility alias. It forwards `forceMount` through both Radix portal and content, and it lets existing shadcn-style `className` padding control reach the inner viewport while also exposing `viewportClassName` for explicit viewport-only overrides. `apps/web/src/components/ui/tooltip.tsx` now uses a relative bordered `bg-popover` surface with T3 before-shadow tokens, no foreground-color arrow bubble, `sideOffset = 4`, Radix `data-state="delayed-open"` and `"instant-open"` animation selectors, and `TooltipPopup` as an alias for the existing `TooltipContent` export.
 
-The focused unit test proves export compatibility, Popover helper rendering, Popover `asChild` opening, side/align forwarding, closed `forceMount`, viewport className spacing control, Tooltip `asChild`, Tooltip `hidden`, and T3 popup surface tokens through rendered DOM. Browser proof used a temporary local route that rendered both primitives forced open on desktop and mobile, verified `data-slot="popover-popup"`, `data-slot="popover-viewport"`, `data-slot="tooltip-popup"`, and required class fragments, then captured screenshots under ignored `codex-scripts/artifacts/`. No dependency or lockfile change was needed. The heavier follow-up should migrate Dialog and Sheet or the menu family using the same Radix-adapter strategy unless a later slice deliberately adopts Base UI.
+The focused unit test proves export compatibility, Popover helper rendering, Popover `asChild` opening, side/align forwarding, closed `forceMount`, viewport className spacing control, Tooltip `asChild`, Tooltip `hidden`, Radix instant-open state compatibility, and T3 popup surface tokens through rendered DOM. Browser proof used a temporary local route that rendered both primitives forced open on desktop and mobile, verified `data-slot="popover-popup"`, `data-slot="popover-viewport"`, `data-slot="tooltip-popup"`, and required class fragments, then captured screenshots under ignored `codex-scripts/artifacts/`. No dependency or lockfile change was needed. The heavier follow-up should migrate Dialog and Sheet or the menu family using the same Radix-adapter strategy unless a later slice deliberately adopts Base UI.
 
 ## Context and Orientation
 
@@ -244,6 +245,11 @@ Review repair validation completed on 2026-05-14:
 
     git diff --check
     No whitespace errors.
+
+Radix open-state selector repair validation completed on 2026-05-14:
+
+    bun run --cwd apps/web test:unit -- tests/unit/ui-popover-tooltip-primitives.test.tsx
+    1 file passed, 6 tests passed.
 
 ## Interfaces and Dependencies
 

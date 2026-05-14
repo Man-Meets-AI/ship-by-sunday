@@ -162,18 +162,33 @@ describe("T3 Code Menu and Command primitive recipes", () => {
 		);
 
 		const root = document.querySelector('[data-slot="navigation-menu"]');
+		const trigger = screen.getByRole("button", { name: /Bonus/ });
 		const content = document.querySelector(
 			'[data-slot="navigation-menu-content"]',
 		);
 		const link = document.querySelector('[data-slot="navigation-menu-link"]');
+		const chevronClassName =
+			trigger.querySelector("svg")?.getAttribute("class") ?? "";
 
 		expect(root?.getAttribute("data-viewport")).toBe("false");
+		expect(trigger.getAttribute("data-state")).toBe("closed");
+		expect(trigger.className).toContain("data-[state=open]:bg-accent");
+		expect(trigger.className).not.toContain("data-open:");
+		expect(trigger.className).not.toContain("data-popup-open:");
+		expect(chevronClassName).toContain(
+			"group-data-[state=open]/navigation-menu-trigger:rotate-180",
+		);
 		expect(content?.className).toContain(
 			"group-data-[viewport=false]/navigation-menu:absolute",
 		);
 		expect(content?.className).toContain(
 			"group-data-[viewport=false]/navigation-menu:not-dark:bg-clip-padding",
 		);
+		expect(content?.className).toContain(
+			"group-data-[viewport=false]/navigation-menu:data-[state=open]:animate-in",
+		);
+		expect(content?.className).not.toContain("data-open:");
+		expect(content?.className).not.toContain("data-closed:");
 		expect(link?.className).toContain("min-h-8");
 	});
 
@@ -192,6 +207,8 @@ describe("T3 Code Menu and Command primitive recipes", () => {
 		expect(dropdownMenuSource).toContain('variant?: "default" | "switch"');
 		expect(navigationMenuSource).toContain("navigationMenuTriggerStyle");
 		expect(navigationMenuSource).toContain("data-viewport={viewport}");
+		expect(navigationMenuSource).toContain("data-[state=open]:bg-accent");
+		expect(navigationMenuSource).not.toContain("data-popup-open");
 
 		expect(commandSource).toContain('data-slot="command-dialog-popup"');
 		expect(commandSource).toContain('data-slot="command-panel"');
