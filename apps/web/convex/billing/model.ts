@@ -89,6 +89,9 @@ type WorkerSealTeam6PaidBookingInput = Pick<
 	"status" | "paymentStatus" | "refundState" | "paidAt"
 >;
 
+type WorkerSealTeam6FulfillmentStatus =
+	WorkerSealTeam6BookingDoc["fulfillmentStatus"];
+
 export type BillingAttentionState =
 	| {
 			kind: "none";
@@ -113,6 +116,24 @@ const currentWorkersSubscriptionStatuses = new Set<WorkersSubscriptionStatus>([
 	"trialing",
 	"past_due",
 ]);
+const billingRefundStateRank: Record<BillingRefundState, number> = {
+	none: 0,
+	partial_refunded: 1,
+	fully_refunded: 2,
+};
+const terminalBillingEmailDeliveryStatuses = new Set<
+	BillingEmailDeliveryDoc["status"]
+>(["sent", "skipped"]);
+const workerSealTeam6FulfillmentStatusRank: Record<
+	WorkerSealTeam6FulfillmentStatus,
+	number
+> = {
+	not_started: 0,
+	prep_sent: 1,
+	ops_notified: 2,
+	fulfilled: 3,
+	canceled: 3,
+};
 
 function getBillingDatabase(
 	ctx: BillingMutationCtx | BillingQueryCtx | unknown,
@@ -138,6 +159,58 @@ function queryByIndex(
 
 function normalizeBillingEmail(email: string) {
 	return email.trim().toLowerCase();
+}
+
+function assignDefinedBillingField(
+	fields: Record<string, unknown>,
+	fieldName: string,
+	value: unknown,
+) {
+	if (value !== undefined) {
+		fields[fieldName] = value;
+	}
+}
+
+function mergeBillingRefundState({
+	existingRefundState,
+	nextRefundState,
+}: {
+	existingRefundState?: BillingRefundState;
+	nextRefundState?: BillingRefundState;
+}) {
+	const currentRefundState = existingRefundState ?? "none";
+	if (!nextRefundState) {
+		return currentRefundState;
+	}
+
+	return billingRefundStateRank[nextRefundState] >=
+		billingRefundStateRank[currentRefundState]
+		? nextRefundState
+		: currentRefundState;
+}
+
+function mergeWorkerSealTeam6FulfillmentStatus({
+	existingFulfillmentStatus,
+	nextFulfillmentStatus,
+}: {
+	existingFulfillmentStatus?: WorkerSealTeam6FulfillmentStatus;
+	nextFulfillmentStatus?: WorkerSealTeam6FulfillmentStatus;
+}) {
+	const currentFulfillmentStatus = existingFulfillmentStatus ?? "not_started";
+	if (!nextFulfillmentStatus) {
+		return currentFulfillmentStatus;
+	}
+	if (
+		currentFulfillmentStatus === "fulfilled" ||
+		currentFulfillmentStatus === "canceled"
+	) {
+		return currentFulfillmentStatus;
+	}
+
+	return workerSealTeam6FulfillmentStatusRank[nextFulfillmentStatus] >=
+		workerSealTeam6FulfillmentStatusRank[currentFulfillmentStatus]
+		? nextFulfillmentStatus
+		: currentFulfillmentStatus;
 }
 
 function compareByUpdatedAtThenId(
@@ -585,6 +658,41 @@ export async function syncStarterLicenseTermHandler(
 		"by_stripe_checkout_session_id",
 		[["stripeCheckoutSessionId", args.stripeCheckoutSessionId]],
 	).unique()) as StarterLicenseTermDoc | null;
+
+	if (existingLicenseTerm) {
+		const licenseTermPatch: Record<string, unknown> = {
+			ownerClerkUserId: args.ownerClerkUserId,
+			purchasedAt: args.purchasedAt,
+			refundState: mergeBillingRefundState({
+				existingRefundState: existingLicenseTerm.refundState,
+				nextRefundState: args.refundState,
+			}),
+			updatedAt: now,
+		};
+		assignDefinedBillingField(
+			licenseTermPatch,
+			"stripeCustomerId",
+			args.stripeCustomerId,
+		);
+		assignDefinedBillingField(
+			licenseTermPatch,
+			"stripePaymentIntentId",
+			args.stripePaymentIntentId,
+		);
+		await db.patch(existingLicenseTerm._id, licenseTermPatch);
+
+		const existingTermWindow = {
+			termStartAt: existingLicenseTerm.termStartAt,
+			termEndAt: existingLicenseTerm.termEndAt,
+		};
+
+		return {
+			licenseTermId: existingLicenseTerm._id,
+			upserted: "patched" as const,
+			...existingTermWindow,
+		};
+	}
+
 	const activeLicenseTerm = selectCurrentStarterLicenseTerm(
 		await listStarterLicenseTermsForOwner(ctx, args.ownerClerkUserId),
 		args.purchasedAt,
@@ -593,40 +701,37 @@ export async function syncStarterLicenseTermHandler(
 		activeLicenseTerm,
 		paidAt: args.purchasedAt,
 	});
-
-	if (existingLicenseTerm) {
-		await db.patch(existingLicenseTerm._id, {
-			ownerClerkUserId: args.ownerClerkUserId,
-			stripeCustomerId: args.stripeCustomerId,
-			stripePaymentIntentId: args.stripePaymentIntentId,
-			purchasedAt: args.purchasedAt,
-			termStartAt: termWindow.termStartAt,
-			termEndAt: termWindow.termEndAt,
-			refundState: args.refundState ?? existingLicenseTerm.refundState,
-			updatedAt: now,
-		});
-
-		return {
-			licenseTermId: existingLicenseTerm._id,
-			upserted: "patched" as const,
-			...termWindow,
-		};
-	}
-
-	const licenseTermId = (await db.insert("starterLicenseTerms", {
+	const licenseTermFields: Record<string, unknown> = {
 		ownerClerkUserId: args.ownerClerkUserId,
 		status: "active",
-		stripeCustomerId: args.stripeCustomerId,
 		stripeCheckoutSessionId: args.stripeCheckoutSessionId,
-		stripePaymentIntentId: args.stripePaymentIntentId,
 		purchasedAt: args.purchasedAt,
 		termStartAt: termWindow.termStartAt,
 		termEndAt: termWindow.termEndAt,
-		renewalOfLicenseTermId: activeLicenseTerm?._id,
 		refundState: args.refundState ?? "none",
 		createdAt: now,
 		updatedAt: now,
-	})) as StarterLicenseTermId;
+	};
+	assignDefinedBillingField(
+		licenseTermFields,
+		"stripeCustomerId",
+		args.stripeCustomerId,
+	);
+	assignDefinedBillingField(
+		licenseTermFields,
+		"stripePaymentIntentId",
+		args.stripePaymentIntentId,
+	);
+	assignDefinedBillingField(
+		licenseTermFields,
+		"renewalOfLicenseTermId",
+		activeLicenseTerm?._id,
+	);
+
+	const licenseTermId = (await db.insert(
+		"starterLicenseTerms",
+		licenseTermFields,
+	)) as StarterLicenseTermId;
 
 	return {
 		licenseTermId,
@@ -705,29 +810,87 @@ export async function syncWorkersSubscriptionHandler(
 		[["stripeSubscriptionId", args.stripeSubscriptionId]],
 	).unique()) as WorkersSubscriptionDoc | null;
 
-	const subscriptionFields = {
+	const subscriptionFields: Record<string, unknown> = {
 		ownerClerkUserId: args.ownerClerkUserId,
 		stripeCustomerId: args.stripeCustomerId,
 		stripeSubscriptionId: args.stripeSubscriptionId,
-		stripePriceId: args.stripePriceId,
-		stripeProductId: args.stripeProductId,
 		cadence: args.cadence,
 		status: args.status,
-		cancelAtPeriodEnd: args.cancelAtPeriodEnd ?? false,
-		currentPeriodStartAt: args.currentPeriodStartAt,
-		currentPeriodEndAt: args.currentPeriodEndAt,
-		accessThroughAt: args.accessThroughAt,
-		latestInvoiceId: args.latestInvoiceId,
-		latestInvoiceHostedUrl: args.latestInvoiceHostedUrl,
-		paymentRecoveryUrl: args.paymentRecoveryUrl,
-		failedPaymentStartedAt: args.failedPaymentStartedAt,
-		failedPaymentAttemptCount: args.failedPaymentAttemptCount,
-		nextPaymentAttemptAt: args.nextPaymentAttemptAt,
-		recoveredFromPastDueAt: args.recoveredFromPastDueAt,
-		terminalFailureAt: args.terminalFailureAt,
-		refundState: args.refundState ?? "none",
+		cancelAtPeriodEnd:
+			args.cancelAtPeriodEnd ??
+			existingSubscription?.cancelAtPeriodEnd ??
+			false,
+		refundState: mergeBillingRefundState({
+			existingRefundState: existingSubscription?.refundState,
+			nextRefundState: args.refundState,
+		}),
 		updatedAt: now,
 	};
+	assignDefinedBillingField(
+		subscriptionFields,
+		"stripePriceId",
+		args.stripePriceId,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"stripeProductId",
+		args.stripeProductId,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"currentPeriodStartAt",
+		args.currentPeriodStartAt,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"currentPeriodEndAt",
+		args.currentPeriodEndAt,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"accessThroughAt",
+		args.accessThroughAt,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"latestInvoiceId",
+		args.latestInvoiceId,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"latestInvoiceHostedUrl",
+		args.latestInvoiceHostedUrl,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"paymentRecoveryUrl",
+		args.paymentRecoveryUrl,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"failedPaymentStartedAt",
+		args.failedPaymentStartedAt,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"failedPaymentAttemptCount",
+		args.failedPaymentAttemptCount,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"nextPaymentAttemptAt",
+		args.nextPaymentAttemptAt,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"recoveredFromPastDueAt",
+		args.recoveredFromPastDueAt,
+	);
+	assignDefinedBillingField(
+		subscriptionFields,
+		"terminalFailureAt",
+		args.terminalFailureAt,
+	);
 
 	if (existingSubscription) {
 		await db.patch(existingSubscription._id, subscriptionFields);
@@ -999,20 +1162,47 @@ export async function upsertBillingEmailDeliveryHandler(
 		[["idempotencyKey", args.idempotencyKey]],
 	).unique()) as BillingEmailDeliveryDoc | null;
 	const now = Date.now();
-	const deliveryFields = {
+
+	if (
+		existingDelivery &&
+		terminalBillingEmailDeliveryStatuses.has(existingDelivery.status)
+	) {
+		return {
+			deliveryId: existingDelivery._id,
+			upserted: "patched" as const,
+		};
+	}
+
+	const deliveryFields: Record<string, unknown> = {
 		idempotencyKey: args.idempotencyKey,
 		emailKind: args.emailKind,
 		productKey: args.productKey,
 		recipientKind: args.recipientKind,
-		recipientEmail: args.recipientEmail,
-		ownerClerkUserId: args.ownerClerkUserId,
-		providerMessageId: args.providerMessageId,
 		status: args.status,
-		skippedReason: args.skippedReason,
-		lastError: args.lastError,
 		updatedAt: now,
-		sentAt: args.sentAt,
 	};
+	assignDefinedBillingField(
+		deliveryFields,
+		"recipientEmail",
+		args.recipientEmail,
+	);
+	assignDefinedBillingField(
+		deliveryFields,
+		"ownerClerkUserId",
+		args.ownerClerkUserId,
+	);
+	assignDefinedBillingField(
+		deliveryFields,
+		"providerMessageId",
+		args.providerMessageId,
+	);
+	assignDefinedBillingField(
+		deliveryFields,
+		"skippedReason",
+		args.skippedReason,
+	);
+	assignDefinedBillingField(deliveryFields, "lastError", args.lastError);
+	assignDefinedBillingField(deliveryFields, "sentAt", args.sentAt);
 
 	if (existingDelivery) {
 		await db.patch(existingDelivery._id, deliveryFields);
@@ -1098,32 +1288,72 @@ export async function syncWorkerSealTeam6BookingHandler(
 		[["calBookingUid", args.calBookingUid]],
 	).unique()) as WorkerSealTeam6BookingDoc | null;
 	const now = Date.now();
-	const bookingFields = {
+	const refundState = mergeBillingRefundState({
+		existingRefundState: existingBooking?.refundState,
+		nextRefundState: args.refundState,
+	});
+	const fulfillmentStatus = mergeWorkerSealTeam6FulfillmentStatus({
+		existingFulfillmentStatus: existingBooking?.fulfillmentStatus,
+		nextFulfillmentStatus: args.fulfillmentStatus,
+	});
+	const bookingFields: Record<string, unknown> = {
 		calBookingUid: args.calBookingUid,
-		calEventTypeId: args.calEventTypeId,
-		stripeCustomerId: args.stripeCustomerId,
-		stripePaymentIntentId: args.stripePaymentIntentId,
 		status: args.status,
 		paymentStatus: args.paymentStatus,
-		refundState: args.refundState ?? "none",
-		fulfillmentStatus: args.fulfillmentStatus ?? "not_started",
+		refundState,
+		fulfillmentStatus,
 		attendeeEmail: args.attendeeEmail,
 		attendeeEmailNormalized: normalizeBillingEmail(args.attendeeEmail),
-		attendeeName: args.attendeeName,
-		attendeeTimeZone: args.attendeeTimeZone,
-		scheduledStartAt: args.scheduledStartAt,
-		scheduledEndAt: args.scheduledEndAt,
-		rescheduleUrl: args.rescheduleUrl,
-		cancelUrl: args.cancelUrl,
-		calBookingUrl: args.calBookingUrl,
-		intakeAnswers: args.intakeAnswers,
-		paidAt: args.paidAt,
-		canceledAt: args.canceledAt,
-		fulfilledAt: args.fulfilledAt,
-		customerPrepEmailDeliveryId: args.customerPrepEmailDeliveryId,
-		opsEmailDeliveryId: args.opsEmailDeliveryId,
 		updatedAt: now,
 	};
+	assignDefinedBillingField(
+		bookingFields,
+		"calEventTypeId",
+		args.calEventTypeId,
+	);
+	assignDefinedBillingField(
+		bookingFields,
+		"stripeCustomerId",
+		args.stripeCustomerId,
+	);
+	assignDefinedBillingField(
+		bookingFields,
+		"stripePaymentIntentId",
+		args.stripePaymentIntentId,
+	);
+	assignDefinedBillingField(bookingFields, "attendeeName", args.attendeeName);
+	assignDefinedBillingField(
+		bookingFields,
+		"attendeeTimeZone",
+		args.attendeeTimeZone,
+	);
+	assignDefinedBillingField(
+		bookingFields,
+		"scheduledStartAt",
+		args.scheduledStartAt,
+	);
+	assignDefinedBillingField(
+		bookingFields,
+		"scheduledEndAt",
+		args.scheduledEndAt,
+	);
+	assignDefinedBillingField(bookingFields, "rescheduleUrl", args.rescheduleUrl);
+	assignDefinedBillingField(bookingFields, "cancelUrl", args.cancelUrl);
+	assignDefinedBillingField(bookingFields, "calBookingUrl", args.calBookingUrl);
+	assignDefinedBillingField(bookingFields, "intakeAnswers", args.intakeAnswers);
+	assignDefinedBillingField(bookingFields, "paidAt", args.paidAt);
+	assignDefinedBillingField(bookingFields, "canceledAt", args.canceledAt);
+	assignDefinedBillingField(bookingFields, "fulfilledAt", args.fulfilledAt);
+	assignDefinedBillingField(
+		bookingFields,
+		"customerPrepEmailDeliveryId",
+		args.customerPrepEmailDeliveryId,
+	);
+	assignDefinedBillingField(
+		bookingFields,
+		"opsEmailDeliveryId",
+		args.opsEmailDeliveryId,
+	);
 
 	if (existingBooking) {
 		await db.patch(existingBooking._id, bookingFields);
@@ -1131,8 +1361,10 @@ export async function syncWorkerSealTeam6BookingHandler(
 			bookingId: existingBooking._id,
 			upserted: "patched" as const,
 			paidBookingReady: isWorkerSealTeam6PaidBookingReady({
-				...existingBooking,
-				...bookingFields,
+				status: args.status,
+				paymentStatus: args.paymentStatus,
+				refundState,
+				paidAt: args.paidAt ?? existingBooking.paidAt,
 			}),
 		};
 	}
@@ -1145,6 +1377,11 @@ export async function syncWorkerSealTeam6BookingHandler(
 	return {
 		bookingId,
 		upserted: "inserted" as const,
-		paidBookingReady: isWorkerSealTeam6PaidBookingReady(bookingFields),
+		paidBookingReady: isWorkerSealTeam6PaidBookingReady({
+			status: args.status,
+			paymentStatus: args.paymentStatus,
+			refundState,
+			paidAt: args.paidAt,
+		}),
 	};
 }

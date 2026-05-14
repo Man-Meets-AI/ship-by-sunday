@@ -6,6 +6,7 @@ import {
 	isWorkerSealTeam6PaidBookingReady,
 	recordProcessedStripeEventHandler,
 	syncStarterLicenseTermHandler,
+	syncWorkersSubscriptionHandler,
 	syncWorkerSealTeam6BookingHandler,
 	upsertBillingEmailDeliveryHandler,
 } from "@/convex/billing/model";
@@ -70,10 +71,14 @@ function createBillingMutationCtx(tables: Partial<BillingTables> = {}) {
 			tableName: BillingTableName,
 			value: Record<string, unknown>,
 		) => {
-			const record = {
+			const record: BillingRecord = {
 				_id: `${tableName}_${idCounter}`,
-				...value,
 			};
+			for (const [fieldName, fieldValue] of Object.entries(value)) {
+				if (fieldValue !== undefined) {
+					record[fieldName] = fieldValue;
+				}
+			}
 			idCounter += 1;
 			state[tableName].push(record);
 			return record._id;
@@ -82,7 +87,13 @@ function createBillingMutationCtx(tables: Partial<BillingTables> = {}) {
 			for (const tableRecords of Object.values(state)) {
 				const record = tableRecords.find((candidate) => candidate._id === id);
 				if (record) {
-					Object.assign(record, value);
+					for (const [fieldName, fieldValue] of Object.entries(value)) {
+						if (fieldValue === undefined) {
+							delete record[fieldName];
+						} else {
+							record[fieldName] = fieldValue;
+						}
+					}
 					return;
 				}
 			}
@@ -230,6 +241,51 @@ describe("convex billing domain model", () => {
 		expect(state.stripeCustomers).toHaveLength(1);
 	});
 
+	it("keeps duplicate Starter checkout syncs on the original license term window", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
+		const paidAt = Date.UTC(2026, 4, 13);
+		const originalTermEnd = Date.UTC(2027, 4, 13);
+		const { ctx, state } = createBillingMutationCtx({
+			starterLicenseTerms: [
+				{
+					_id: "starterLicenseTerms_existing",
+					ownerClerkUserId: "user_123",
+					status: "active",
+					stripeCustomerId: "cus_existing",
+					stripeCheckoutSessionId: "cs_duplicate",
+					stripePaymentIntentId: "pi_existing",
+					purchasedAt: paidAt,
+					termStartAt: paidAt,
+					termEndAt: originalTermEnd,
+					refundState: "none",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+
+		const result = await syncStarterLicenseTermHandler(ctx as never, {
+			ownerClerkUserId: "user_123",
+			stripeCheckoutSessionId: "cs_duplicate",
+			purchasedAt: paidAt,
+		});
+
+		expect(result).toEqual({
+			licenseTermId: "starterLicenseTerms_existing",
+			upserted: "patched",
+			termStartAt: paidAt,
+			termEndAt: originalTermEnd,
+		});
+		expect(state.starterLicenseTerms).toHaveLength(1);
+		expect(state.starterLicenseTerms[0]).toMatchObject({
+			stripeCustomerId: "cus_existing",
+			stripePaymentIntentId: "pi_existing",
+			termStartAt: paidAt,
+			termEndAt: originalTermEnd,
+		});
+	});
+
 	it("keeps Workers access and non-dismissible billing attention during past_due retry", () => {
 		const now = Date.UTC(2026, 4, 13);
 		const accessThroughAt = Date.UTC(2026, 4, 27);
@@ -289,6 +345,70 @@ describe("convex billing domain model", () => {
 				now,
 			),
 		).toEqual({ hasAccess: false });
+	});
+
+	it("preserves Workers subscription durable fields during partial provider syncs", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
+		const periodStartAt = Date.UTC(2026, 4, 1);
+		const periodEndAt = Date.UTC(2026, 5, 1);
+		const { ctx, state } = createBillingMutationCtx({
+			workersSubscriptions: [
+				{
+					_id: "workersSubscriptions_existing",
+					ownerClerkUserId: "user_123",
+					stripeCustomerId: "cus_existing",
+					stripeSubscriptionId: "sub_123",
+					stripePriceId: "price_existing",
+					stripeProductId: "prod_existing",
+					cadence: "monthly",
+					status: "past_due",
+					cancelAtPeriodEnd: true,
+					currentPeriodStartAt: periodStartAt,
+					currentPeriodEndAt: periodEndAt,
+					accessThroughAt: periodEndAt,
+					latestInvoiceId: "in_existing",
+					latestInvoiceHostedUrl: "https://billing.stripe.test/invoice",
+					paymentRecoveryUrl: "https://billing.stripe.test/recover",
+					failedPaymentStartedAt: Date.UTC(2026, 4, 10),
+					failedPaymentAttemptCount: 2,
+					nextPaymentAttemptAt: Date.UTC(2026, 4, 14),
+					refundState: "fully_refunded",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+
+		const result = await syncWorkersSubscriptionHandler(ctx as never, {
+			ownerClerkUserId: "user_123",
+			stripeCustomerId: "cus_existing",
+			stripeSubscriptionId: "sub_123",
+			cadence: "monthly",
+			status: "active",
+		});
+
+		expect(result).toEqual({
+			subscriptionId: "workersSubscriptions_existing",
+			upserted: "patched",
+		});
+		expect(state.workersSubscriptions[0]).toMatchObject({
+			stripePriceId: "price_existing",
+			stripeProductId: "prod_existing",
+			cancelAtPeriodEnd: true,
+			currentPeriodStartAt: periodStartAt,
+			currentPeriodEndAt: periodEndAt,
+			accessThroughAt: periodEndAt,
+			latestInvoiceId: "in_existing",
+			latestInvoiceHostedUrl: "https://billing.stripe.test/invoice",
+			paymentRecoveryUrl: "https://billing.stripe.test/recover",
+			failedPaymentStartedAt: Date.UTC(2026, 4, 10),
+			failedPaymentAttemptCount: 2,
+			nextPaymentAttemptAt: Date.UTC(2026, 4, 14),
+			refundState: "fully_refunded",
+			status: "active",
+		});
+		expect(state.stripeCustomers).toHaveLength(1);
 	});
 
 	it("records processed Stripe events idempotently by provider event id", async () => {
@@ -353,6 +473,51 @@ describe("convex billing domain model", () => {
 		});
 	});
 
+	it("does not downgrade sent billing email deliveries on duplicate retries", async () => {
+		const sentAt = Date.UTC(2026, 4, 13);
+		const { ctx, state } = createBillingMutationCtx({
+			billingEmailDeliveries: [
+				{
+					_id: "billingEmailDeliveries_existing",
+					idempotencyKey: "workers:failed-payment:in_123:customer",
+					emailKind: "workers_failed_payment_customer",
+					productKey: "workers",
+					recipientKind: "customer",
+					recipientEmail: "buyer@example.com",
+					ownerClerkUserId: "user_123",
+					providerMessageId: "email_123",
+					status: "sent",
+					sentAt,
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+
+		const result = await upsertBillingEmailDeliveryHandler(ctx as never, {
+			idempotencyKey: "workers:failed-payment:in_123:customer",
+			emailKind: "workers_failed_payment_customer",
+			productKey: "workers",
+			recipientKind: "customer",
+			recipientEmail: "buyer@example.com",
+			ownerClerkUserId: "user_123",
+			status: "failed",
+			lastError: "retry observed after provider success",
+		});
+
+		expect(result).toEqual({
+			deliveryId: "billingEmailDeliveries_existing",
+			upserted: "patched",
+		});
+		expect(state.billingEmailDeliveries[0]).toMatchObject({
+			providerMessageId: "email_123",
+			status: "sent",
+			sentAt,
+			updatedAt: 1,
+		});
+		expect(state.billingEmailDeliveries[0]).not.toHaveProperty("lastError");
+	});
+
 	it("requires paid Worker Seal Team 6 booking state before prep email readiness", async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
@@ -392,6 +557,79 @@ describe("convex billing domain model", () => {
 		expect(state.workerSealTeam6Bookings[0]).toMatchObject({
 			attendeeEmailNormalized: "buyer@example.com",
 			paymentStatus: "paid",
+		});
+	});
+
+	it("preserves Worker Seal Team 6 booking mirrors during partial syncs", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
+		const paidAt = Date.UTC(2026, 4, 13);
+		const scheduledStartAt = Date.UTC(2026, 4, 20, 17);
+		const scheduledEndAt = Date.UTC(2026, 4, 20, 18);
+		const { ctx, state } = createBillingMutationCtx({
+			workerSealTeam6Bookings: [
+				{
+					_id: "workerSealTeam6Bookings_existing",
+					calBookingUid: "booking_123",
+					calEventTypeId: "event_type_123",
+					stripeCustomerId: "cus_123",
+					stripePaymentIntentId: "pi_123",
+					status: "scheduled",
+					paymentStatus: "paid",
+					refundState: "partial_refunded",
+					fulfillmentStatus: "ops_notified",
+					attendeeEmail: "Buyer@Example.com",
+					attendeeEmailNormalized: "buyer@example.com",
+					attendeeName: "Buyer Example",
+					attendeeTimeZone: "America/New_York",
+					scheduledStartAt,
+					scheduledEndAt,
+					rescheduleUrl: "https://cal.test/reschedule",
+					cancelUrl: "https://cal.test/cancel",
+					calBookingUrl: "https://cal.test/booking",
+					intakeAnswers: [{ label: "Goal", value: "Ship it" }],
+					paidAt,
+					fulfilledAt: Date.UTC(2026, 4, 21),
+					customerPrepEmailDeliveryId: "billingEmailDeliveries_customer",
+					opsEmailDeliveryId: "billingEmailDeliveries_ops",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+
+		const result = await syncWorkerSealTeam6BookingHandler(ctx as never, {
+			calBookingUid: "booking_123",
+			status: "scheduled",
+			paymentStatus: "paid",
+			refundState: "none",
+			fulfillmentStatus: "not_started",
+			attendeeEmail: "Buyer@Example.com",
+		});
+
+		expect(result).toEqual({
+			bookingId: "workerSealTeam6Bookings_existing",
+			upserted: "patched",
+			paidBookingReady: true,
+		});
+		expect(state.workerSealTeam6Bookings[0]).toMatchObject({
+			calEventTypeId: "event_type_123",
+			stripeCustomerId: "cus_123",
+			stripePaymentIntentId: "pi_123",
+			refundState: "partial_refunded",
+			fulfillmentStatus: "ops_notified",
+			attendeeName: "Buyer Example",
+			attendeeTimeZone: "America/New_York",
+			scheduledStartAt,
+			scheduledEndAt,
+			rescheduleUrl: "https://cal.test/reschedule",
+			cancelUrl: "https://cal.test/cancel",
+			calBookingUrl: "https://cal.test/booking",
+			intakeAnswers: [{ label: "Goal", value: "Ship it" }],
+			paidAt,
+			fulfilledAt: Date.UTC(2026, 4, 21),
+			customerPrepEmailDeliveryId: "billingEmailDeliveries_customer",
+			opsEmailDeliveryId: "billingEmailDeliveries_ops",
 		});
 	});
 });
