@@ -102,13 +102,15 @@ const supportedCalTriggerEvents = new Set<string>([
 ]);
 
 const hmacSha256HexPattern = /^[a-f0-9]{64}$/i;
+const maxCalWebhookIntakeLabelLength = 120;
+const maxCalWebhookIntakeValueLength = 2_000;
 
 export function verifyCalWebhookSignature({
 	payload,
 	signature,
 	secret,
 }: {
-	payload: string;
+	payload: string | Uint8Array;
 	signature: string;
 	secret: string;
 }) {
@@ -117,9 +119,14 @@ export function verifyCalWebhookSignature({
 		return false;
 	}
 
-	const expectedSignature = createHmac("sha256", secret)
-		.update(payload, "utf8")
-		.digest("hex");
+	const hmac = createHmac("sha256", secret);
+	if (typeof payload === "string") {
+		hmac.update(payload, "utf8");
+	} else {
+		hmac.update(payload);
+	}
+
+	const expectedSignature = hmac.digest("hex");
 	const expectedBuffer = Buffer.from(expectedSignature, "hex");
 	const actualBuffer = Buffer.from(normalizedSignature, "hex");
 
@@ -209,13 +216,7 @@ export function getWorkerSealTeam6CalWebhookSyncTarget(
 		),
 		...optionalField(
 			"stripePaymentIntentId",
-			getProviderStringFromPaths(payload, [
-				["stripePaymentIntentId"],
-				["paymentIntentId"],
-				["payment", "stripePaymentIntentId"],
-				["payment", "paymentIntentId"],
-				["payments", "0", "paymentIntentId"],
-			]),
+			getCalStripePaymentIntentId(payload),
 		),
 		...optionalField(
 			"refundState",
@@ -495,7 +496,7 @@ function getCalBookingPaymentStatus(
 		return "payment_pending";
 	}
 
-	return "paid";
+	return triggerEvent === "BOOKING_PAID" ? "paid" : "payment_pending";
 }
 
 function getRefundStateFromPaymentStatus(
@@ -534,6 +535,19 @@ function getPaidTimestamp({
 	return triggerEvent === "BOOKING_PAID" ? eventCreatedAt : undefined;
 }
 
+function getCalStripePaymentIntentId(payload: MutableJsonObject) {
+	const paymentIntentId = getProviderStringFromPaths(payload, [
+		["stripePaymentIntentId"],
+		["paymentIntentId"],
+		["metadata", "externalId"],
+		["payment", "stripePaymentIntentId"],
+		["payment", "paymentIntentId"],
+		["payments", "0", "paymentIntentId"],
+	]);
+
+	return paymentIntentId?.startsWith("pi_") ? paymentIntentId : undefined;
+}
+
 function getCalIntakeAnswers(payload: MutableJsonObject) {
 	const source =
 		getRecordAtPath(payload, ["responses"]) ??
@@ -551,8 +565,11 @@ function getCalIntakeAnswers(payload: MutableJsonObject) {
 			}
 
 			return {
-				label: getIntakeAnswerLabel(key, value),
-				value: answer,
+				label: limitCalWebhookText(
+					getIntakeAnswerLabel(key, value),
+					maxCalWebhookIntakeLabelLength,
+				),
+				value: limitCalWebhookText(answer, maxCalWebhookIntakeValueLength),
 			};
 		})
 		.filter((answer): answer is { label: string; value: string } =>
@@ -660,6 +677,10 @@ function getProviderString(value: JsonValue | undefined) {
 function trimToOptionalString(value: string) {
 	const trimmedValue = value.trim();
 	return trimmedValue.length > 0 ? trimmedValue : undefined;
+}
+
+function limitCalWebhookText(value: string, maxLength: number) {
+	return value.length > maxLength ? value.slice(0, maxLength) : value;
 }
 
 function getFirstRecord(value: JsonValue | undefined) {

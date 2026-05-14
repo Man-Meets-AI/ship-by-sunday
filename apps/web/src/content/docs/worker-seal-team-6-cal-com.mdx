@@ -63,7 +63,7 @@ Subscribe only to these triggers:
 - `BOOKING_RESCHEDULED`
 - `BOOKING_CANCELLED`
 
-The app route requires `x-cal-signature-256` and verifies the HMAC-SHA256 digest over the raw request body before parsing JSON.
+The app route requires `x-cal-signature-256`, caps webhook bodies at `128 KB`, and verifies the HMAC-SHA256 digest over the raw request body before parsing JSON.
 
 ## Verification
 
@@ -91,5 +91,6 @@ A correctly signed request reaches the Convex sync path. Unsigned or incorrectly
 - Wrong public Cal link: the hosted fallback may fail or open the wrong page; fix `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK`.
 - Missing `CAL_WEBHOOK_SECRET`: the route returns `500` with `Cal.com webhook is not configured.`
 - Invalid `x-cal-signature-256`: the route returns `400` and does not parse the payload.
+- Oversized webhook body: the route returns `413` and does not sync to Convex.
 - Missing or mismatched `CONVEX_WEBHOOK_MUTATION_SECRET`: the route verifies Cal.com, then returns `500` before booking state is mirrored.
 - Unsupported trigger: the event is recorded as skipped when it has enough identity, and no booking state changes.

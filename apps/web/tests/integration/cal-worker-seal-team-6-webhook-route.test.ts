@@ -96,6 +96,35 @@ describe("POST /api/cal/worker-seal-team-6/webhook", () => {
 		expect(syncWorkerSealTeam6CalWebhookToConvexMock).not.toHaveBeenCalled();
 	});
 
+	it("fails closed when the Cal.com webhook secret is missing", async () => {
+		delete process.env.CAL_WEBHOOK_SECRET;
+		vi.resetModules();
+		const { POST } =
+			await import("../../src/app/api/cal/worker-seal-team-6/webhook/route");
+
+		const response = await POST(createCalWebhookRequest());
+
+		expect(response.status).toBe(500);
+		expect(await response.json()).toEqual({
+			error: "Cal.com webhook is not configured.",
+		});
+		expect(syncWorkerSealTeam6CalWebhookToConvexMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects oversized Cal.com webhook bodies before sync starts", async () => {
+		const body = "x".repeat(128 * 1024 + 1);
+		const { POST } =
+			await import("../../src/app/api/cal/worker-seal-team-6/webhook/route");
+
+		const response = await POST(createCalWebhookRequest({ body }));
+
+		expect(response.status).toBe(413);
+		expect(await response.json()).toEqual({
+			error: "Cal.com webhook body is too large.",
+		});
+		expect(syncWorkerSealTeam6CalWebhookToConvexMock).not.toHaveBeenCalled();
+	});
+
 	it("syncs verified Cal.com events to Convex", async () => {
 		const body = '{"triggerEvent":"BOOKING_PAID","id":"cal_event_123"}';
 		const { POST } =

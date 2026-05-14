@@ -560,6 +560,122 @@ describe("convex billing domain model", () => {
 		});
 	});
 
+	it("does not downgrade paid Worker Seal Team 6 bookings when delayed Cal.com creation events arrive", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
+		const paidAt = Date.UTC(2026, 4, 13);
+		const scheduledStartAt = Date.UTC(2026, 4, 20, 17);
+		const scheduledEndAt = Date.UTC(2026, 4, 20, 18);
+		const { ctx, state } = createBillingMutationCtx();
+
+		const paid = await syncWorkerSealTeam6BookingHandler(ctx as never, {
+			calBookingUid: "booking_123",
+			status: "scheduled",
+			paymentStatus: "paid",
+			attendeeEmail: "Buyer@Example.com",
+			paidAt,
+			scheduledStartAt,
+			scheduledEndAt,
+		});
+		const delayedCreated = await syncWorkerSealTeam6BookingHandler(
+			ctx as never,
+			{
+				calBookingUid: "booking_123",
+				status: "created",
+				paymentStatus: "payment_pending",
+				attendeeEmail: "Buyer@Example.com",
+			},
+		);
+
+		expect(delayedCreated).toEqual({
+			bookingId: paid.bookingId,
+			upserted: "patched",
+			paidBookingReady: true,
+		});
+		expect(state.workerSealTeam6Bookings[0]).toMatchObject({
+			status: "scheduled",
+			paymentStatus: "paid",
+			paidAt,
+			scheduledStartAt,
+			scheduledEndAt,
+		});
+	});
+
+	it("preserves paid payment state when Cal.com cancellation events omit payment fields", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
+		const paidAt = Date.UTC(2026, 4, 13);
+		const canceledAt = Date.UTC(2026, 4, 14);
+		const { ctx, state } = createBillingMutationCtx();
+
+		const paid = await syncWorkerSealTeam6BookingHandler(ctx as never, {
+			calBookingUid: "booking_123",
+			status: "scheduled",
+			paymentStatus: "paid",
+			attendeeEmail: "Buyer@Example.com",
+			paidAt,
+		});
+		const canceled = await syncWorkerSealTeam6BookingHandler(ctx as never, {
+			calBookingUid: "booking_123",
+			status: "canceled",
+			paymentStatus: "payment_pending",
+			fulfillmentStatus: "canceled",
+			attendeeEmail: "Buyer@Example.com",
+			canceledAt,
+		});
+
+		expect(canceled).toEqual({
+			bookingId: paid.bookingId,
+			upserted: "patched",
+			paidBookingReady: false,
+		});
+		expect(state.workerSealTeam6Bookings[0]).toMatchObject({
+			status: "canceled",
+			paymentStatus: "paid",
+			fulfillmentStatus: "canceled",
+			paidAt,
+			canceledAt,
+		});
+	});
+
+	it("does not reopen canceled Worker Seal Team 6 bookings when delayed Cal.com paid events arrive", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));
+		const paidAt = Date.UTC(2026, 4, 13);
+		const canceledAt = Date.UTC(2026, 4, 14);
+		const { ctx, state } = createBillingMutationCtx();
+
+		const canceled = await syncWorkerSealTeam6BookingHandler(ctx as never, {
+			calBookingUid: "booking_123",
+			status: "canceled",
+			paymentStatus: "payment_pending",
+			fulfillmentStatus: "canceled",
+			attendeeEmail: "Buyer@Example.com",
+			canceledAt,
+		});
+		const delayedPaid = await syncWorkerSealTeam6BookingHandler(ctx as never, {
+			calBookingUid: "booking_123",
+			status: "scheduled",
+			paymentStatus: "paid",
+			fulfillmentStatus: "not_started",
+			attendeeEmail: "Buyer@Example.com",
+			paidAt,
+		});
+
+		expect(delayedPaid).toEqual({
+			bookingId: canceled.bookingId,
+			upserted: "patched",
+			paidBookingReady: false,
+		});
+		expect(state.workerSealTeam6Bookings[0]).toMatchObject({
+			status: "canceled",
+			paymentStatus: "paid",
+			fulfillmentStatus: "canceled",
+			paidAt,
+			canceledAt,
+		});
+	});
+
 	it("preserves Worker Seal Team 6 booking mirrors during partial syncs", async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date("2026-05-13T12:00:00.000Z"));

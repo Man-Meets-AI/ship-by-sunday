@@ -9,8 +9,9 @@ import { requireServerEnv } from "@/platform/env/server";
 
 export const dynamic = "force-dynamic";
 
+const maxCalWebhookBodyBytes = 128 * 1024;
+
 export async function POST(request: Request) {
-	const payload = await request.text();
 	const signature = request.headers.get("x-cal-signature-256");
 	if (!signature) {
 		return NextResponse.json(
@@ -32,9 +33,18 @@ export async function POST(request: Request) {
 		);
 	}
 
+	const payloadResult = await readCalWebhookBody(request);
+	if (payloadResult.kind === "too_large") {
+		return NextResponse.json(
+			{ error: "Cal.com webhook body is too large." },
+			{ status: 413 },
+		);
+	}
+	const payload = payloadResult.body;
+
 	if (
 		!verifyCalWebhookSignature({
-			payload,
+			payload: payloadResult.bodyBytes,
 			signature,
 			secret: webhookSecret,
 		})
@@ -64,4 +74,60 @@ export async function POST(request: Request) {
 			{ status: 500 },
 		);
 	}
+}
+
+async function readCalWebhookBody(
+	request: Request,
+): Promise<
+	{ kind: "ok"; body: string; bodyBytes: Uint8Array } | { kind: "too_large" }
+> {
+	const contentLength = parseContentLength(
+		request.headers.get("content-length"),
+	);
+	if (contentLength !== null && contentLength > maxCalWebhookBodyBytes) {
+		return { kind: "too_large" };
+	}
+
+	if (!request.body) {
+		return { kind: "ok", body: "", bodyBytes: new Uint8Array() };
+	}
+
+	const reader = request.body.getReader();
+	const chunks: Uint8Array[] = [];
+	let bytesRead = 0;
+
+	while (true) {
+		const { done, value } = await reader.read();
+		if (done) {
+			break;
+		}
+
+		bytesRead += value.byteLength;
+		if (bytesRead > maxCalWebhookBodyBytes) {
+			await reader.cancel();
+			return { kind: "too_large" };
+		}
+
+		chunks.push(value);
+	}
+
+	const bodyBytes = new Uint8Array(bytesRead);
+	let offset = 0;
+	for (const chunk of chunks) {
+		bodyBytes.set(chunk, offset);
+		offset += chunk.byteLength;
+	}
+
+	return { kind: "ok", body: new TextDecoder().decode(bodyBytes), bodyBytes };
+}
+
+function parseContentLength(value: string | null) {
+	if (!value) {
+		return null;
+	}
+
+	const parsedValue = Number(value);
+	return Number.isSafeInteger(parsedValue) && parsedValue >= 0
+		? parsedValue
+		: null;
 }

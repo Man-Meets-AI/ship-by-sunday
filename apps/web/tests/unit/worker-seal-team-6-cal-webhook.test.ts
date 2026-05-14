@@ -26,6 +26,13 @@ describe("Worker Seal Team 6 Cal.com webhook mapping", () => {
 		).toBe(true);
 		expect(
 			verifyCalWebhookSignature({
+				payload: new TextEncoder().encode(payload),
+				signature: `sha256=${signature}`,
+				secret: "cal_secret",
+			}),
+		).toBe(true);
+		expect(
+			verifyCalWebhookSignature({
 				payload,
 				signature,
 				secret: "wrong_secret",
@@ -103,6 +110,97 @@ describe("Worker Seal Team 6 Cal.com webhook mapping", () => {
 				paidAt: Date.UTC(2026, 4, 14, 15),
 			},
 		});
+	});
+
+	it("maps Cal.com Stripe PaymentIntent metadata into the booking mirror", () => {
+		const target = getWorkerSealTeam6CalWebhookSyncTarget(
+			JSON.stringify({
+				id: "cal_event_metadata_payment",
+				triggerEvent: "BOOKING_PAID",
+				createdAt: "2026-05-14T15:00:00.000Z",
+				payload: {
+					uid: "booking_123",
+					metadata: {
+						externalId: "pi_metadata_123",
+					},
+					attendees: [
+						{
+							email: "buyer@example.com",
+						},
+					],
+				},
+			}),
+		);
+
+		expect(target).toMatchObject({
+			kind: "booking",
+			booking: {
+				stripePaymentIntentId: "pi_metadata_123",
+				paymentStatus: "paid",
+			},
+		});
+	});
+
+	it("does not infer paid payment state for Cal.com cancellation events without payment fields", () => {
+		const target = getWorkerSealTeam6CalWebhookSyncTarget(
+			JSON.stringify({
+				id: "cal_event_cancelled",
+				triggerEvent: "BOOKING_CANCELLED",
+				createdAt: "2026-05-14T15:00:00.000Z",
+				payload: {
+					uid: "booking_123",
+					attendees: [
+						{
+							email: "buyer@example.com",
+						},
+					],
+				},
+			}),
+		);
+
+		expect(target).toMatchObject({
+			kind: "booking",
+			booking: {
+				status: "canceled",
+				paymentStatus: "payment_pending",
+				refundState: "none",
+				fulfillmentStatus: "canceled",
+				canceledAt: Date.UTC(2026, 4, 14, 15),
+			},
+		});
+		if (target.kind !== "booking") {
+			throw new Error("Expected cancellation target to map to a booking");
+		}
+		expect(target.booking).not.toHaveProperty("paidAt");
+	});
+
+	it("caps Cal.com intake labels and values before syncing to Convex", () => {
+		const longLabel = "L".repeat(180);
+		const longValue = "V".repeat(2_500);
+		const target = getWorkerSealTeam6CalWebhookSyncTarget(
+			JSON.stringify({
+				id: "cal_event_long_intake",
+				triggerEvent: "BOOKING_CREATED",
+				payload: {
+					uid: "booking_123",
+					attendees: [
+						{
+							email: "buyer@example.com",
+						},
+					],
+					responses: {
+						[longLabel]: longValue,
+					},
+				},
+			}),
+		);
+
+		if (target.kind !== "booking") {
+			throw new Error("Expected long intake target to map to a booking");
+		}
+		expect(target.booking.intakeAnswers).toHaveLength(1);
+		expect(target.booking.intakeAnswers?.[0]?.label).toHaveLength(120);
+		expect(target.booking.intakeAnswers?.[0]?.value).toHaveLength(2_000);
 	});
 
 	it("records unsupported Cal.com trigger events as skipped", () => {

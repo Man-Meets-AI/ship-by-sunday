@@ -15,6 +15,8 @@ import type {
 	StarterLicenseTermId,
 	WorkerSealTeam6BookingDoc,
 	WorkerSealTeam6BookingId,
+	WorkerSealTeam6BookingStatus,
+	WorkerSealTeam6PaymentStatus,
 	WorkersBillingCadence,
 	WorkersSubscriptionDoc,
 	WorkersSubscriptionId,
@@ -121,6 +123,26 @@ const billingRefundStateRank: Record<BillingRefundState, number> = {
 	partial_refunded: 1,
 	fully_refunded: 2,
 };
+const workerSealTeam6BookingStatusRank: Record<
+	WorkerSealTeam6BookingStatus,
+	number
+> = {
+	created: 0,
+	scheduled: 1,
+	rescheduled: 2,
+	canceled: 3,
+	fulfilled: 4,
+};
+const workerSealTeam6PaymentStatusRank: Record<
+	WorkerSealTeam6PaymentStatus,
+	number
+> = {
+	unpaid: 0,
+	payment_pending: 1,
+	paid: 2,
+	partially_refunded: 3,
+	fully_refunded: 4,
+};
 const terminalBillingEmailDeliveryStatuses = new Set<
 	BillingEmailDeliveryDoc["status"]
 >(["sent", "skipped"]);
@@ -187,6 +209,50 @@ function mergeBillingRefundState({
 		billingRefundStateRank[currentRefundState]
 		? nextRefundState
 		: currentRefundState;
+}
+
+function mergeWorkerSealTeam6BookingStatus({
+	existingStatus,
+	nextStatus,
+}: {
+	existingStatus?: WorkerSealTeam6BookingStatus;
+	nextStatus: WorkerSealTeam6BookingStatus;
+}) {
+	const currentStatus = existingStatus ?? "created";
+	return workerSealTeam6BookingStatusRank[nextStatus] >=
+		workerSealTeam6BookingStatusRank[currentStatus]
+		? nextStatus
+		: currentStatus;
+}
+
+function mergeWorkerSealTeam6PaymentStatus({
+	existingPaymentStatus,
+	nextPaymentStatus,
+}: {
+	existingPaymentStatus?: WorkerSealTeam6PaymentStatus;
+	nextPaymentStatus: WorkerSealTeam6PaymentStatus;
+}) {
+	const currentPaymentStatus = existingPaymentStatus ?? "unpaid";
+	if (
+		!isWorkerSealTeam6SettledPaymentStatus(currentPaymentStatus) &&
+		!isWorkerSealTeam6SettledPaymentStatus(nextPaymentStatus)
+	) {
+		return nextPaymentStatus;
+	}
+
+	return workerSealTeam6PaymentStatusRank[nextPaymentStatus] >=
+		workerSealTeam6PaymentStatusRank[currentPaymentStatus]
+		? nextPaymentStatus
+		: currentPaymentStatus;
+}
+
+function isWorkerSealTeam6SettledPaymentStatus(
+	paymentStatus: WorkerSealTeam6PaymentStatus,
+) {
+	return (
+		workerSealTeam6PaymentStatusRank[paymentStatus] >=
+		workerSealTeam6PaymentStatusRank.paid
+	);
 }
 
 function mergeWorkerSealTeam6FulfillmentStatus({
@@ -1292,14 +1358,22 @@ export async function syncWorkerSealTeam6BookingHandler(
 		existingRefundState: existingBooking?.refundState,
 		nextRefundState: args.refundState,
 	});
+	const status = mergeWorkerSealTeam6BookingStatus({
+		existingStatus: existingBooking?.status,
+		nextStatus: args.status,
+	});
+	const paymentStatus = mergeWorkerSealTeam6PaymentStatus({
+		existingPaymentStatus: existingBooking?.paymentStatus,
+		nextPaymentStatus: args.paymentStatus,
+	});
 	const fulfillmentStatus = mergeWorkerSealTeam6FulfillmentStatus({
 		existingFulfillmentStatus: existingBooking?.fulfillmentStatus,
 		nextFulfillmentStatus: args.fulfillmentStatus,
 	});
 	const bookingFields: Record<string, unknown> = {
 		calBookingUid: args.calBookingUid,
-		status: args.status,
-		paymentStatus: args.paymentStatus,
+		status,
+		paymentStatus,
 		refundState,
 		fulfillmentStatus,
 		attendeeEmail: args.attendeeEmail,
@@ -1361,8 +1435,8 @@ export async function syncWorkerSealTeam6BookingHandler(
 			bookingId: existingBooking._id,
 			upserted: "patched" as const,
 			paidBookingReady: isWorkerSealTeam6PaidBookingReady({
-				status: args.status,
-				paymentStatus: args.paymentStatus,
+				status,
+				paymentStatus,
 				refundState,
 				paidAt: args.paidAt ?? existingBooking.paidAt,
 			}),
@@ -1378,8 +1452,8 @@ export async function syncWorkerSealTeam6BookingHandler(
 		bookingId,
 		upserted: "inserted" as const,
 		paidBookingReady: isWorkerSealTeam6PaidBookingReady({
-			status: args.status,
-			paymentStatus: args.paymentStatus,
+			status,
+			paymentStatus,
 			refundState,
 			paidAt: args.paidAt,
 		}),
