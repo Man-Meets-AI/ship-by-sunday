@@ -28,7 +28,7 @@ When this Program is complete, `ship-by-sunday` and `shipbysunday` should run wi
 
 ## Program Inputs
 
-The original local-runner runtime shape is recorded in `research-pass-current-local-runner-runtime.md`. The remaining Effect migration pass is recorded in `research-pass-remaining-effect-migration.md`. The Node and Effect boundary model is normalized in `normalized-pass-node-effect-boundary.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo and vendored-reference boundaries are recorded in `cross-repo-review.md`. The first child slice used `planning-brief-1.md`, the completed Effect scaffold slice used `planning-brief-2.md`, the completed process, Codex, event, and workflow API slice used `planning-brief-3.md`, and the next filesystem state slice should use `planning-brief-4.md`; `current-planning-brief.txt` points at that brief.
+The original local-runner runtime shape is recorded in `research-pass-current-local-runner-runtime.md`. The remaining Effect migration pass is recorded in `research-pass-remaining-effect-migration.md`. The Node and Effect boundary model is normalized in `normalized-pass-node-effect-boundary.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Cross-repo and vendored-reference boundaries are recorded in `cross-repo-review.md`. The first child slice used `planning-brief-1.md`, the completed Effect scaffold slice used `planning-brief-2.md`, the completed process, Codex, event, and workflow API slice used `planning-brief-3.md`, the completed filesystem state slice used `planning-brief-4.md`, and the next Worker workflow module split should use `planning-brief-5.md`; `current-planning-brief.txt` points at that brief.
 
 This Program depends on the read-only Effect reference subtree at `repos/effect/`, root guidance in `AGENTS.md`, the local-runner package under `packages/local-runner/`, Worker Foundations install templates in `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts`, and validation commands documented in `packages/local-runner/README.md`.
 
@@ -40,9 +40,9 @@ The Effect reference repository has already been vendored under `repos/effect/` 
 
 Worker Foundations install now generates Node/npm Worker output. Blank and Bun-shaped target repos cut over to `packageManager: npm@11.12.1`; generated `scripts/run-worker.sh` runs `node src/worker-cli.mjs` and `node --test tests/*.mjs`; generated `apps/worker/package.json` scripts use Node commands; tests assert the Node/npm proof command labels. The installer still recognizes a managed legacy `apps/worker/bun.lock` only so reruns can delete it cleanly.
 
-Effect dependencies are now installed in `packages/local-runner`: `effect@3.21.2`, `@effect/platform@0.96.1`, and `@effect/platform-node@0.106.0`. The first scaffold is intentionally small. `packages/local-runner/src/effect/runtime.ts` runs fully provided effects and unwraps failed exits so promise adapters preserve existing thrown errors. `packages/local-runner/src/effect/node-platform-runtime.ts` exposes the Node platform layer with per-run managed-runtime disposal. `packages/local-runner/src/core/bounded-process.ts`, `packages/local-runner/src/core/codex-exec-runner.ts`, `packages/local-runner/src/core/runner-events.ts`, and `packages/local-runner/src/core/workflow-run-api.ts` now route external I/O through injectable Effect services while preserving public promise-returning APIs.
+Effect dependencies are now installed in `packages/local-runner`: `effect@3.21.2`, `@effect/platform@0.96.1`, and `@effect/platform-node@0.106.0`. The first scaffold is intentionally small. `packages/local-runner/src/effect/runtime.ts` runs fully provided effects and unwraps failed exits so promise adapters preserve existing thrown errors. `packages/local-runner/src/effect/node-platform-runtime.ts` exposes the Node platform layer with per-run managed-runtime disposal. `packages/local-runner/src/core/bounded-process.ts`, `packages/local-runner/src/core/codex-exec-runner.ts`, `packages/local-runner/src/core/runner-events.ts`, `packages/local-runner/src/core/workflow-run-api.ts`, `packages/local-runner/src/core/repository-boundary.ts`, `packages/local-runner/src/core/local-project-state.ts`, `packages/local-runner/src/core/local-runner-home.ts`, `packages/local-runner/src/core/doctor-pass/artifacts.ts`, and `packages/local-runner/src/core/codex-config-manager.ts` now route external I/O or filesystem state through injectable Effect services while preserving public promise-returning APIs.
 
-The completed scaffold child ExecPlan is archived at `docs/exec-plans/completed/2026-05-13-effect-dependency-and-boundary-scaffold.md`. The completed process, Codex, event, and workflow API child ExecPlan is archived at `docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md`. No child ExecPlan is active for this Program at this checkpoint. The next recommended child slice is `Effect Filesystem State Boundaries`.
+The completed scaffold child ExecPlan is archived at `docs/exec-plans/completed/2026-05-13-effect-dependency-and-boundary-scaffold.md`. The completed process, Codex, event, and workflow API child ExecPlan is archived at `docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md`. The completed filesystem state child ExecPlan is archived at `docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md`. No child ExecPlan is active at this moment. The next slice should split the Worker Foundations workflow into behavior-preserving modules before migrating that workflow to Effect.
 
 ## Progress
 
@@ -57,6 +57,9 @@ The completed scaffold child ExecPlan is archived at `docs/exec-plans/completed/
 - [x] 2026-05-13: Archived the completed Effect scaffold ExecPlan, researched the remaining migration surfaces, created planning brief 3, and opened the process, Codex, event, and workflow API Effect boundary ExecPlan.
 - [x] 2026-05-13: Completed the process, Codex, event, and workflow API Effect boundary slice. Codex execution, runner event queue/read/flush, and workflow-run claim/resolve now have injectable Effect services with promise adapters preserved. Focused tests, local-runner format, lint, typecheck, and build passed.
 - [x] 2026-05-13: Created planning brief 4 for the next filesystem state boundary slice and moved `current-planning-brief.txt` to that brief.
+- [x] 2026-05-13: Opened the active `Effect Filesystem State Boundaries` ExecPlan from planning brief 4.
+- [x] 2026-05-13: Completed the filesystem state Effect boundary slice. Repository path safety, local `.sbs` state, runner-home credentials, doctor artifacts, and Codex config files now have injectable Effect services with promise adapters preserved. Focused tests, full local-runner tests, local-runner format, lint, typecheck, and build passed.
+- [x] 2026-05-13: Created planning brief 5 for the next Worker workflow module split and moved `current-planning-brief.txt` to that brief.
 
 ## Decision Log
 
@@ -120,12 +123,11 @@ Date: 2026-05-13.
 
 Active child ExecPlans:
 
-- None at this checkpoint.
+- None.
 
 Planned child ExecPlans:
 
-- `Effect Filesystem State Boundaries` should migrate local `.sbs` state, runner-home credentials, repository-boundary filesystem helpers, Codex config management, and doctor artifacts to repository-safe Effect services after process/event/API boundaries are stable. Use `planning-brief-4.md`.
-- `Worker Workflow Module Split` should split the Worker Foundations workflow into inspect, plan, apply, proof, report, generated-template, license, and kickoff modules without behavior changes.
+- `Worker Workflow Module Split` should use `docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-5.md` to split the Worker Foundations workflow into inspect, plan, apply, proof, report, generated-template, license, and kickoff modules without behavior changes.
 - `Worker Workflow Effect Migration` should migrate the split Worker install modules to Effect where dependency injection, failure modeling, cancellation, or resource cleanup is useful.
 - `Runner Orchestration Runtime Migration` should move Program run slice, Program run loop, daemon, one-shot, and command wrappers onto the Effect service layer after the lower-level I/O services exist.
 - `Runner Effect Completion And Docs Hardening` should finish Program docs, README/runtime docs, archived ExecPlans, and broad local-runner validation before marking the Program complete.
@@ -135,10 +137,11 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-13-local-runner-node-worker-cutover.md`: hard Node/npm cutover for the local-runner package and generated Worker runtime contract.
 - `docs/exec-plans/completed/2026-05-13-effect-dependency-and-boundary-scaffold.md`: published Effect dependencies, minimal runtime scaffold, and bounded-process Effect service proof.
 - `docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md`: Codex execution, runner event queue/read/flush, and workflow-run claim/resolve moved behind injectable Effect services with promise adapters preserved.
+- `docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md`: repository path safety, local `.sbs` state, runner-home credentials, doctor artifacts, and Codex config files moved behind injectable Effect services with promise adapters preserved.
 
 ## Next Slice
 
-No child ExecPlan is active at this checkpoint. The next recommended slice is `Effect Filesystem State Boundaries`, driven by `planning-brief-4.md`. It should migrate local `.sbs` state, runner-home credentials, repository path safety, Codex config files, and doctor artifact helpers to injectable Effect services while keeping promise adapters intact. It must not split the Worker installer, migrate command orchestration, change generated Worker output, or change the Node runtime plus Bun package-management contract.
+No child ExecPlan is active. The next recommended slice is `Worker Workflow Module Split`, driven by `docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-5.md`. It should split `packages/local-runner/src/workflows/worker-foundations-install/workflow.ts` into inspect, plan, apply, proof, report, generated-template, license, and kickoff modules without behavior changes. It must not migrate the Worker workflow to Effect yet, migrate command orchestration, change generated Worker output, or change the Node runtime plus Bun package-management contract.
 
 ## Risks and Watchpoints
 
@@ -236,11 +239,34 @@ Remaining Effect migration tracking table:
 | Step | Child ExecPlan | Primary Surfaces | Focused Validation |
 | --- | --- | --- | --- |
 | 2 | `docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md` | Codex execution, runner events, workflow-run API | `codex-exec-runner`, `runner-events`, `workflow-run-api`, `program-run-slice` |
-| 3 | `Effect Filesystem State Boundaries` | `.sbs` state, runner home, repository boundaries, Codex config, doctor artifacts | `local-state`, `codex-config-manager`, setup checks, doctor-pass artifacts |
+| 3 | `docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md` | `.sbs` state, runner home, repository boundaries, Codex config, doctor artifacts | `local-state`, `codex-config-manager`, setup checks, doctor-pass artifacts |
 | 4 | `Worker Workflow Module Split` | Worker install inspect, plan, apply, proof, report, templates, license, kickoff | `worker-foundations-install`, compatibility smoke, package smoke |
 | 5 | `Worker Workflow Effect Migration` | split Worker install modules | Worker install focused tests, compatibility smoke, package smoke, build |
 | 6 | `Runner Orchestration Runtime Migration` | Program run slice, Program loop, daemon, one-shot, command wrappers | `program-run-slice`, `program-run-loop`, daemon, cli help, package smoke |
 | 7 | `Runner Effect Completion And Docs Hardening` | Program packet, README, completed ExecPlans, full validation | full local-runner test, format, lint, typecheck, build, package smoke |
+
+Filesystem state validation evidence from 2026-05-13:
+
+    bun run --cwd packages/local-runner test -- local-state codex-config-manager doctor-pass setup-check bounded-process codex-exec-runner runner-events workflow-run-api
+    Test Files  8 passed (8)
+    Tests  62 passed (62)
+
+    bun run --cwd packages/local-runner test
+    Test Files  27 passed | 2 skipped (29)
+    Tests  239 passed | 7 skipped (246)
+
+    bun run --cwd packages/local-runner format:check
+    All matched files use the correct format.
+
+    bun run --cwd packages/local-runner lint
+    Found 0 warnings and 0 errors.
+
+    bun run --cwd packages/local-runner typecheck
+    exited with code 0
+
+    bun run --cwd packages/local-runner build
+    dist/cli.js  1.7mb
+    Done
 
 Process, Codex, event, and workflow API validation evidence from 2026-05-13:
 

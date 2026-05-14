@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { Context, Effect, Layer } from "effect";
 
 import {
 	createUnifiedDiffPreview,
@@ -9,6 +10,7 @@ import {
 	parseCodexConfigToml,
 	replaceManagedTomlBlock,
 } from "./codex-config-toml";
+import { runLocalRunnerEffect } from "../effect/runtime";
 
 export const CODEX_CONFIG_ENV_VAR = "CODEX_HOME";
 export const SBS_CODEX_BLOCK_START =
@@ -70,6 +72,103 @@ type CodexConfigPatchResult = CodexConfigPatchPreview & {
 	backupPath: string | null;
 };
 
+type InspectCodexConfigRequest = {
+	env: NodeJS.ProcessEnv;
+	repositoryRoot?: string;
+};
+
+type CodexConfigEnvRequest = {
+	env: NodeJS.ProcessEnv;
+};
+
+type RollbackCodexConfigPatchRequest = {
+	backupPath: string;
+	env: NodeJS.ProcessEnv;
+};
+
+export interface CodexConfigService {
+	readonly inspectSbs: (
+		request: InspectCodexConfigRequest,
+	) => Effect.Effect<CodexConfigInspection, unknown>;
+	readonly inspectShipbysundayWorker: (
+		request: InspectCodexConfigRequest,
+	) => Effect.Effect<ShipbysundayWorkerCodexConfigInspection, unknown>;
+	readonly previewSbsPatch: (
+		request: CodexConfigEnvRequest,
+	) => Effect.Effect<CodexConfigPatchPreview, unknown>;
+	readonly previewShipbysundayWorkerPatch: (
+		request: CodexConfigEnvRequest,
+	) => Effect.Effect<CodexConfigPatchPreview, unknown>;
+	readonly applySbsPatch: (
+		request: CodexConfigEnvRequest,
+	) => Effect.Effect<CodexConfigPatchResult, unknown>;
+	readonly applyShipbysundayWorkerPatch: (
+		request: CodexConfigEnvRequest,
+	) => Effect.Effect<CodexConfigPatchResult, unknown>;
+	readonly rollbackSbsPatch: (
+		request: RollbackCodexConfigPatchRequest,
+	) => Effect.Effect<
+		{ configPath: string; backupPath: string; rollbackBackupPath: string },
+		unknown
+	>;
+	readonly rollbackShipbysundayWorkerPatch: (
+		request: RollbackCodexConfigPatchRequest,
+	) => Effect.Effect<
+		{ configPath: string; backupPath: string; rollbackBackupPath: string },
+		unknown
+	>;
+}
+
+export const CodexConfigService = Context.GenericTag<CodexConfigService>(
+	"ship-by-sunday/CodexConfigService",
+);
+
+export const NodeCodexConfigServiceLive = Layer.succeed(
+	CodexConfigService,
+	CodexConfigService.of({
+		inspectSbs: (request) =>
+			Effect.tryPromise({
+				try: () => inspectCodexConfigNode(request),
+				catch: (error) => error,
+			}),
+		inspectShipbysundayWorker: (request) =>
+			Effect.tryPromise({
+				try: () => inspectShipbysundayWorkerCodexConfigNode(request),
+				catch: (error) => error,
+			}),
+		previewSbsPatch: (request) =>
+			Effect.tryPromise({
+				try: () => previewSbsCodexConfigPatchNode(request),
+				catch: (error) => error,
+			}),
+		previewShipbysundayWorkerPatch: (request) =>
+			Effect.tryPromise({
+				try: () => previewShipbysundayWorkerCodexConfigPatchNode(request),
+				catch: (error) => error,
+			}),
+		applySbsPatch: (request) =>
+			Effect.tryPromise({
+				try: () => applySbsCodexConfigPatchNode(request),
+				catch: (error) => error,
+			}),
+		applyShipbysundayWorkerPatch: (request) =>
+			Effect.tryPromise({
+				try: () => applyShipbysundayWorkerCodexConfigPatchNode(request),
+				catch: (error) => error,
+			}),
+		rollbackSbsPatch: (request) =>
+			Effect.tryPromise({
+				try: () => rollbackSbsCodexConfigPatchNode(request),
+				catch: (error) => error,
+			}),
+		rollbackShipbysundayWorkerPatch: (request) =>
+			Effect.tryPromise({
+				try: () => rollbackShipbysundayWorkerCodexConfigPatchNode(request),
+				catch: (error) => error,
+			}),
+	}),
+);
+
 export function resolveCodexHome(env: NodeJS.ProcessEnv = process.env) {
 	return path.resolve(
 		env[CODEX_CONFIG_ENV_VAR] ?? path.join(os.homedir(), ".codex"),
@@ -87,6 +186,29 @@ export async function inspectCodexConfig({
 	env?: NodeJS.ProcessEnv;
 	repositoryRoot?: string;
 } = {}): Promise<CodexConfigInspection> {
+	return await runLocalRunnerEffect(
+		inspectCodexConfigEffect({ env, repositoryRoot }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function inspectCodexConfigEffect({
+	env = process.env,
+	repositoryRoot,
+}: {
+	env?: NodeJS.ProcessEnv;
+	repositoryRoot?: string;
+} = {}): Effect.Effect<CodexConfigInspection, unknown, CodexConfigService> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.inspectSbs({ env, repositoryRoot }),
+	);
+}
+
+async function inspectCodexConfigNode({
+	env,
+	repositoryRoot,
+}: InspectCodexConfigRequest): Promise<CodexConfigInspection> {
 	const configPath = resolveCodexConfigPath(env);
 	if (!existsSync(configPath)) {
 		return {
@@ -129,6 +251,33 @@ export async function inspectShipbysundayWorkerCodexConfig({
 	env?: NodeJS.ProcessEnv;
 	repositoryRoot?: string;
 } = {}): Promise<ShipbysundayWorkerCodexConfigInspection> {
+	return await runLocalRunnerEffect(
+		inspectShipbysundayWorkerCodexConfigEffect({ env, repositoryRoot }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function inspectShipbysundayWorkerCodexConfigEffect({
+	env = process.env,
+	repositoryRoot,
+}: {
+	env?: NodeJS.ProcessEnv;
+	repositoryRoot?: string;
+} = {}): Effect.Effect<
+	ShipbysundayWorkerCodexConfigInspection,
+	unknown,
+	CodexConfigService
+> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.inspectShipbysundayWorker({ env, repositoryRoot }),
+	);
+}
+
+async function inspectShipbysundayWorkerCodexConfigNode({
+	env,
+	repositoryRoot,
+}: InspectCodexConfigRequest): Promise<ShipbysundayWorkerCodexConfigInspection> {
 	const configPath = resolveCodexConfigPath(env);
 	if (!existsSync(configPath)) {
 		return {
@@ -465,6 +614,26 @@ export async function previewSbsCodexConfigPatch({
 }: {
 	env?: NodeJS.ProcessEnv;
 } = {}): Promise<CodexConfigPatchPreview> {
+	return await runLocalRunnerEffect(
+		previewSbsCodexConfigPatchEffect({ env }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function previewSbsCodexConfigPatchEffect({
+	env = process.env,
+}: {
+	env?: NodeJS.ProcessEnv;
+} = {}): Effect.Effect<CodexConfigPatchPreview, unknown, CodexConfigService> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.previewSbsPatch({ env }),
+	);
+}
+
+async function previewSbsCodexConfigPatchNode({
+	env,
+}: CodexConfigEnvRequest): Promise<CodexConfigPatchPreview> {
 	return await previewManagedCodexConfigPatch({
 		env,
 		startMarker: SBS_CODEX_BLOCK_START,
@@ -479,6 +648,26 @@ export async function previewShipbysundayWorkerCodexConfigPatch({
 }: {
 	env?: NodeJS.ProcessEnv;
 } = {}): Promise<CodexConfigPatchPreview> {
+	return await runLocalRunnerEffect(
+		previewShipbysundayWorkerCodexConfigPatchEffect({ env }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function previewShipbysundayWorkerCodexConfigPatchEffect({
+	env = process.env,
+}: {
+	env?: NodeJS.ProcessEnv;
+} = {}): Effect.Effect<CodexConfigPatchPreview, unknown, CodexConfigService> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.previewShipbysundayWorkerPatch({ env }),
+	);
+}
+
+async function previewShipbysundayWorkerCodexConfigPatchNode({
+	env,
+}: CodexConfigEnvRequest): Promise<CodexConfigPatchPreview> {
 	return await previewManagedCodexConfigPatch({
 		env,
 		startMarker: SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START,
@@ -531,7 +720,27 @@ export async function applySbsCodexConfigPatch({
 }: {
 	env?: NodeJS.ProcessEnv;
 } = {}) {
-	const preview = await previewSbsCodexConfigPatch({ env });
+	return await runLocalRunnerEffect(
+		applySbsCodexConfigPatchEffect({ env }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function applySbsCodexConfigPatchEffect({
+	env = process.env,
+}: {
+	env?: NodeJS.ProcessEnv;
+} = {}): Effect.Effect<CodexConfigPatchResult, unknown, CodexConfigService> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.applySbsPatch({ env }),
+	);
+}
+
+async function applySbsCodexConfigPatchNode({
+	env,
+}: CodexConfigEnvRequest): Promise<CodexConfigPatchResult> {
+	const preview = await previewSbsCodexConfigPatchNode({ env });
 	return await applyCodexConfigPatchPreview({
 		preview,
 		backupFileLabel: "sbs",
@@ -543,7 +752,27 @@ export async function applyShipbysundayWorkerCodexConfigPatch({
 }: {
 	env?: NodeJS.ProcessEnv;
 } = {}) {
-	const preview = await previewShipbysundayWorkerCodexConfigPatch({ env });
+	return await runLocalRunnerEffect(
+		applyShipbysundayWorkerCodexConfigPatchEffect({ env }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function applyShipbysundayWorkerCodexConfigPatchEffect({
+	env = process.env,
+}: {
+	env?: NodeJS.ProcessEnv;
+} = {}): Effect.Effect<CodexConfigPatchResult, unknown, CodexConfigService> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.applyShipbysundayWorkerPatch({ env }),
+	);
+}
+
+async function applyShipbysundayWorkerCodexConfigPatchNode({
+	env,
+}: CodexConfigEnvRequest): Promise<CodexConfigPatchResult> {
+	const preview = await previewShipbysundayWorkerCodexConfigPatchNode({ env });
 	return await applyCodexConfigPatchPreview({
 		preview,
 		backupFileLabel: "shipbysunday-worker",
@@ -580,6 +809,33 @@ export async function rollbackSbsCodexConfigPatch({
 	backupPath: string;
 	env?: NodeJS.ProcessEnv;
 }) {
+	return await runLocalRunnerEffect(
+		rollbackSbsCodexConfigPatchEffect({ backupPath, env }).pipe(
+			Effect.provide(NodeCodexConfigServiceLive),
+		),
+	);
+}
+
+export function rollbackSbsCodexConfigPatchEffect({
+	backupPath,
+	env = process.env,
+}: {
+	backupPath: string;
+	env?: NodeJS.ProcessEnv;
+}): Effect.Effect<
+	{ configPath: string; backupPath: string; rollbackBackupPath: string },
+	unknown,
+	CodexConfigService
+> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.rollbackSbsPatch({ backupPath, env }),
+	);
+}
+
+async function rollbackSbsCodexConfigPatchNode({
+	backupPath,
+	env,
+}: RollbackCodexConfigPatchRequest) {
 	return await rollbackCodexConfigPatch({
 		backupPath,
 		env,
@@ -594,6 +850,34 @@ export async function rollbackShipbysundayWorkerCodexConfigPatch({
 	backupPath: string;
 	env?: NodeJS.ProcessEnv;
 }) {
+	return await runLocalRunnerEffect(
+		rollbackShipbysundayWorkerCodexConfigPatchEffect({
+			backupPath,
+			env,
+		}).pipe(Effect.provide(NodeCodexConfigServiceLive)),
+	);
+}
+
+export function rollbackShipbysundayWorkerCodexConfigPatchEffect({
+	backupPath,
+	env = process.env,
+}: {
+	backupPath: string;
+	env?: NodeJS.ProcessEnv;
+}): Effect.Effect<
+	{ configPath: string; backupPath: string; rollbackBackupPath: string },
+	unknown,
+	CodexConfigService
+> {
+	return Effect.flatMap(CodexConfigService, (service) =>
+		service.rollbackShipbysundayWorkerPatch({ backupPath, env }),
+	);
+}
+
+async function rollbackShipbysundayWorkerCodexConfigPatchNode({
+	backupPath,
+	env,
+}: RollbackCodexConfigPatchRequest) {
 	return await rollbackCodexConfigPatch({
 		backupPath,
 		env,
