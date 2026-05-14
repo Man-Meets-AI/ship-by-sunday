@@ -1,5 +1,6 @@
 import type { RenderedCodebaseFile } from "../codebases/render-types";
 import type { CanonicalProjectDefinition } from "../canonical-project-definition/project-definition";
+import { buildOperatingPackPaths } from "./render-starter-operating-pack";
 
 type OnboardingStep = {
 	id:
@@ -41,7 +42,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		customerAction: [
 			"Read `README.md` for the repo overview.",
 			"Read `DESIGN.md` for the generated visual system and product feel.",
-			"Skim `docs/index.md` so you know what Codebase materials and setup docs are already included.",
+			"Skim `docs/index.md` so you know where the Codebase materials and Program/ExecPlan setup packet live.",
 		],
 		agentPrompt:
 			"Summarize this generated Codebase before changing code. Tell me what is product-specific, what is setup scaffolding, and what I should leave alone until setup is stable.",
@@ -129,11 +130,11 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Run `bun run agentic:check` from the repo root.",
 			"Run `bun run codebase:contract` from the repo root.",
 			"Open `docs/programs/active/` to see the generated Program packet.",
-			"Open `docs/exec-plans/active/` to see the first active ExecPlan.",
-			"Use the Program for multi-slice product truth and the ExecPlan for the next bounded implementation slice.",
+			"Open `docs/exec-plans/active/` to see the ordered active ExecPlans, starting with Core Boot.",
+			"Use the Program for multi-slice product truth and the active ExecPlan for the next bounded setup or implementation slice.",
 		],
 		agentPrompt:
-			"Inspect this Codebase's generated Program and active ExecPlan. Confirm the operating pack passes validation before we start product implementation.",
+			"Inspect this Codebase's generated Program and active ExecPlans. Confirm the operating pack passes validation and identify the Core Boot plan before we start product implementation.",
 		skillTriggers: ["$starter-operating-pack", "$starter-docs-and-testing"],
 		references: [
 			{ label: "docs/programs/PROGRAMS.md", path: "docs/programs/PROGRAMS.md" },
@@ -146,21 +147,17 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		internalPhase: "core",
 		customerAction: [
 			"In Codex, run `$starter-core-setup`.",
-			"Follow the local setup guidance until the homepage, docs, and app shell boot cleanly.",
+			"Use the Core Boot ExecPlan under `docs/exec-plans/active/` as the source of truth for this step.",
+			"Follow `START-HERE.md` and the Core Boot plan until the homepage and app shell boot cleanly.",
 			"Do not change auth, checkout, or protected access code before the Codebase runs locally.",
 		],
 		agentPrompt:
 			"Run the core Codebase setup path for this repo. Keep auth and billing untouched until the basic local boot is stable.",
 		skillTriggers: ["$starter-core-setup", "$starter-nextjs-in-this-repo"],
 		references: [
-			{
-				label: "apps/web/content/docs/local-setup.mdx",
-				path: "apps/web/content/docs/local-setup.mdx",
-			},
-			{
-				label: "node_modules/next/dist/docs/",
-				path: "node_modules/next/dist/docs/",
-			},
+			{ label: "START-HERE.md", path: "START-HERE.md" },
+			{ label: "Core Boot ExecPlan", path: "docs/exec-plans/active/" },
+			{ label: "README.md", path: "README.md" },
 		],
 	},
 	{
@@ -169,6 +166,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		internalPhase: "auth",
 		customerAction: [
 			"In Codex, run `$starter-auth-setup`.",
+			"Use the Clerk Setup ExecPlan first, then the Convex Setup ExecPlan.",
 			"Set up Clerk first, then connect Convex, then run the auth doctor.",
 			"Keep this repo’s auth contract intact until sign-in and protected routes work end to end.",
 		],
@@ -181,14 +179,9 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"$convex-setup-auth",
 		],
 		references: [
-			{
-				label: "apps/web/content/docs/clerk-convex-auth.mdx",
-				path: "apps/web/content/docs/clerk-convex-auth.mdx",
-			},
-			{
-				label: "apps/web/convex/_generated/ai/guidelines.md",
-				path: "apps/web/convex/_generated/ai/guidelines.md",
-			},
+			{ label: "Clerk Setup ExecPlan", path: "docs/exec-plans/active/" },
+			{ label: "Convex Setup ExecPlan", path: "docs/exec-plans/active/" },
+			{ label: "README.md", path: "README.md" },
 		],
 	},
 	{
@@ -197,6 +190,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		internalPhase: "billing",
 		customerAction: [
 			"In Codex, run `$starter-billing-setup`.",
+			"Use the Stripe Setup ExecPlan under `docs/exec-plans/active/` as the source of truth for this step.",
 			"Set up Stripe after auth is stable, then run the billing doctor and webhook verification flow.",
 			"Do not rewrite checkout or webhook code until the Codebase's paid-access handoff works as shipped.",
 		],
@@ -204,10 +198,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Set up billing for this Codebase after auth is stable. Keep the checkout and webhook contract intact, then verify the billing handoff before changing product flows.",
 		skillTriggers: ["$starter-billing-setup", "$stripe-best-practices"],
 		references: [
-			{
-				label: "apps/web/content/docs/stripe-checkout-webhook.mdx",
-				path: "apps/web/content/docs/stripe-checkout-webhook.mdx",
-			},
+			{ label: "Stripe Setup ExecPlan", path: "docs/exec-plans/active/" },
+			{ label: "README.md", path: "README.md" },
 		],
 	},
 	{
@@ -223,10 +215,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 			"Verify the shipped Codebase before we customize it. Run the smallest relevant checks first and call out any real setup drift before we touch product code.",
 		skillTriggers: ["$starter-docs-and-testing", "$starter-billing-setup"],
 		references: [
-			{
-				label: "apps/web/content/docs/local-qa.mdx",
-				path: "apps/web/content/docs/local-qa.mdx",
-			},
+			{ label: "Program packet", path: "docs/programs/active/" },
+			{ label: "Active ExecPlans", path: "docs/exec-plans/active/" },
 		],
 	},
 	{
@@ -258,6 +248,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		internalPhase: "product",
 		customerAction: [
 			"In Codex, run `$starter-first-slice`.",
+			"Use the First Product Slice ExecPlan under `docs/exec-plans/active/` as the source of truth for this step.",
 			"Pick the first real customer-visible slice after the Codebase is stable.",
 			"Use the shipped docs and wrapper skills as guardrails while the product begins to diverge from setup scaffolding.",
 		],
@@ -266,8 +257,8 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
 		skillTriggers: ["$starter-first-slice", "$starter-docs-and-testing"],
 		references: [
 			{
-				label: "apps/web/content/docs/build-your-product.mdx",
-				path: "apps/web/content/docs/build-your-product.mdx",
+				label: "First Product Slice ExecPlan",
+				path: "docs/exec-plans/active/",
 			},
 		],
 	},
@@ -297,17 +288,6 @@ function renderMarkdownLink(label: string, path: string) {
 	return `\`${path}\``;
 }
 
-function renderDocsLink(label: string, path: string) {
-	const docPath = path.replace(/^apps\/web\/content\/docs\//, "");
-	const normalizedDocPath = docPath.replace(/\.mdx$/, "");
-
-	if (path.startsWith("apps/web/content/docs/")) {
-		return `[${label}](/docs/${normalizedDocPath})`;
-	}
-
-	return `\`${path}\``;
-}
-
 function renderOnboardingBody(
 	linkFormatter: (label: string, path: string) => string,
 ) {
@@ -331,7 +311,18 @@ function renderOnboardingBody(
 	).join("\n\n");
 }
 
-function renderSharedIntro(productName: string) {
+function renderOperatingPlanList(
+	operatingPackPaths: ReturnType<typeof buildOperatingPackPaths>,
+) {
+	return operatingPackPaths.activeExecPlans
+		.map((plan) => `- ${plan.title} ExecPlan: \`${plan.path}\``)
+		.join("\n");
+}
+
+function renderSharedIntro(
+	productName: string,
+	operatingPackPaths: ReturnType<typeof buildOperatingPackPaths>,
+) {
 	const safeProductName = renderMdxText(productName);
 	return [
 		`${safeProductName} should feel obvious on day one.`,
@@ -346,6 +337,11 @@ function renderSharedIntro(productName: string) {
 		"- `$starter-core-setup`",
 		"- `$starter-auth-setup`",
 		"- `$starter-billing-setup`",
+		"",
+		"Generated setup roadmap:",
+		renderOperatingPlanList(operatingPackPaths),
+		"",
+		"Start with the Core Boot ExecPlan. Do not move into Clerk, Convex, Stripe, or product work until the prior plan has validation evidence.",
 		"",
 		"In Codex, trigger a skill by typing `$` followed by the skill name. The local wrapper skills tell Codex how this Codebase wants work to be done. The Linear wrapper teaches agents how to treat issues as the backlog and status source. The installed external skills add deeper product knowledge for Clerk, Convex, and Stripe.",
 		"",
@@ -368,6 +364,7 @@ export function renderStarterProjectOnboardingFiles(
 	projectDefinition: CanonicalProjectDefinition,
 ): RenderedCodebaseFile[] {
 	const { product_name: productName } = projectDefinition.facts;
+	const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
 	const safeProductName = renderMdxText(productName);
 
 	return [
@@ -376,26 +373,9 @@ export function renderStarterProjectOnboardingFiles(
 			content: [
 				`# Start Here - ${safeProductName}`,
 				"",
-				renderSharedIntro(productName),
+				renderSharedIntro(productName, operatingPackPaths),
 				"",
 				renderOnboardingBody(renderMarkdownLink),
-			].join("\n"),
-		},
-		{
-			path: "apps/web/content/docs/index.mdx",
-			content: [
-				"---",
-				'title: "Start Here"',
-				`description: ${JSON.stringify(
-					`Boot ${safeProductName}, install the recommended Codex skills, and follow the Codebase setup in the right order before customizing the product.`,
-				)}`,
-				"---",
-				"",
-				"# Start Here",
-				"",
-				renderSharedIntro(productName),
-				"",
-				renderOnboardingBody(renderDocsLink),
 			].join("\n"),
 		},
 	];

@@ -28,7 +28,7 @@ The high-level implementation strategy is settled: use `~/Developer/next-js-conv
 
 ## Program Inputs
 
-The current repository research is recorded in `research-pass-current-generator-and-proof.md`. Product decisions are normalized in `normalized-pass-product-decisions.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. Completed slices used `planning-brief-1.md`, `planning-brief-2.md`, and `planning-brief-3.md`; `current-planning-brief.txt` now points at `planning-brief-4.md`.
+The current repository research is recorded in `research-pass-current-generator-and-proof.md`. Product decisions are normalized in `normalized-pass-product-decisions.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. Completed slices used `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, and `planning-brief-4.md`; `current-planning-brief.txt` now points at `planning-brief-5.md`.
 
 This Program follows `docs/programs/active/2026-05-12-public-product-split-starter-workers/`. That Program split Starter and Workers as products. This Program hardens the proof and generated Starter deliverable that now sit underneath that split.
 
@@ -38,7 +38,7 @@ Hosted checkout is app-owned and requires explicit purchase intent. The checkout
 
 Generated repo downloads are built dynamically by `packages/codebase-compiler` and served by `apps/web/app/api/download/repo/route.ts`. The generated repo includes a runnable app, generated docs, source truth, design truth, Program material, ExecPlans, skills, bootstrap scripts, validation scripts, and `docs/facts/template-source.json` provenance. The generated app now starts from the pinned `templates/starter-app/source` snapshot through a tested adapter that maps the single-app source root into `apps/web/`, then applies manifest-allowed generated overlays.
 
-The generated output already has strong no-provider proof. The clean-room command contract installs the generated repo, lints Program and ExecPlan material, checks the Codebase contract, typechecks the generated app, and proves the dev command exists. The current generated app is now intentionally close to the sibling template: it keeps the public marketing shell, auth routes, protected dashboard, Notes sample workflow, billing screen, provider package dependencies, and setup-gated missing-provider states. The later ChatGPT app slice still owns replacing the Notes domain with the final BYO OpenAI chat product.
+The generated output already has strong no-provider proof. The clean-room command contract installs the generated repo, lints Program and ExecPlan material, checks the Codebase contract, typechecks the generated app, and proves the dev command exists. Generated repos now ship a first customer Program with active setup ExecPlans for Core Boot, Clerk Setup, Convex Setup, Stripe Setup, and First Product Slice, and generated onboarding routes setup work through those plans. The current generated app is now intentionally close to the sibling template: it keeps the public marketing shell, auth routes, authenticated dashboard, Notes sample workflow, billing screen, provider package dependencies, and setup-gated missing-provider states. The later ChatGPT app slice still owns replacing the Notes domain with the final BYO OpenAI chat product.
 
 There is no static zip source of truth. That is good. The Program now has an ordinary source tree boundary and the generator consumes it without reading the sibling checkout.
 
@@ -59,6 +59,10 @@ The first repo-local template-source boundary now exists at `templates/starter-a
 - [x] 2026-05-13: Hardened the completed template-source slices after review; every generated `apps/web` overlay path is now checked against `template-source.json`, questionnaire-derived content flows through `apps/web/config/product.ts` instead of `_content`, source-template README materialization is replaced by a no-provider-safe app README, generated provider gates keep the template app buildable without Clerk or Convex env, generated env examples use the pinned template env contract, generated billing actions stay disabled while API routes remain excluded, and generated repos emit template provenance at `docs/facts/template-source.json`.
 - [x] 2026-05-13: Repaired generated clean-room install proof while staying on Bun; generated repos no longer inherit this repository's root `bun.lock`, generated CI uses `bun install`, and generated `bunfig.toml` keeps Bun's hoisted linker without the source repo's seven-day dependency age gate.
 - [x] 2026-05-13: Advanced the current planning brief to `planning-brief-4.md` for generated Starter operating-pack upgrades.
+- [x] 2026-05-13: Completed `Upgrade Generated Starter Operating Pack`; generated Starter repos now include a first customer Program, active setup ExecPlans for Core Boot, Clerk Setup, Convex Setup, Stripe Setup, and First Product Slice, stronger Program child-plan validation, and onboarding/skill guidance that routes setup through those plans while preserving clean-room no-provider proof.
+- [x] 2026-05-13: Hardened the generated operating pack after review; generated customer guidance no longer points at non-contract `apps/web/content/docs/*` setup docs or Convex `_generated` guidance, generated app-doc onboarding output was removed, and generated validators now check the exact first Program roadmap, active setup ExecPlans, planning brief pointer, and Codebase contract files.
+- [x] 2026-05-13: Hardened the generated route-shape contract after review; repo-generation contracts and tests now exclude the old root `apps/web/app/**` source tree as one class and assert the generated repo keeps the template's `apps/web/src/app` route groups for marketing, auth, and app surfaces.
+- [x] 2026-05-13: Advanced the current planning brief to `planning-brief-5.md` for the richer Starter template app slice.
 
 ## Decision Log
 
@@ -262,7 +266,6 @@ Active child ExecPlans:
 
 Planned child ExecPlans:
 
-- `Upgrade Generated Starter Operating Pack` should make the first generated customer Program include provider setup ExecPlans and a stronger Program/ExecPlan command surface.
 - `Beef Up Starter Template App` should build the real app starter experience.
 - `Add Direct Template Download Path` should use default facts to generate a no-questions Starter repo.
 - `Template Update And Release Proof Docs` should document template updates and product-specific billing proof operations.
@@ -272,10 +275,11 @@ Completed child ExecPlans:
 - [Parameterize Hosted Billing Proof By Offer](../../../exec-plans/completed/2026-05-13-parameterize-hosted-billing-proof-by-offer.md) shipped Starter/Workers hosted proof selection, release proof planner propagation, offer-specific assertions, docs, and focused validation.
 - [Introduce Pinned Starter Template Source](../../../exec-plans/completed/2026-05-13-introduce-pinned-starter-template-source.md) imported the sibling skeleton into a repo-local pinned source snapshot, added provenance and overlay docs, and added compiler-side source validation.
 - [Migrate Generated Template App To Template Source](../../../exec-plans/completed/2026-05-13-migrate-generated-template-app-to-template-source.md) connected generated repo materialization to the pinned source snapshot, mapped source files into `apps/web/`, retargeted generated overlays, and preserved clean-room no-provider proof.
+- [Upgrade Generated Starter Operating Pack](../../../exec-plans/completed/2026-05-13-upgrade-generated-starter-operating-pack.md) made generated customer downloads ship a first Program with ordered setup ExecPlans, active child-plan link validation, and onboarding/skill instructions that route provider setup through those plans.
 
 ## Next Slice
 
-The next recommended slice is `Upgrade Generated Starter Operating Pack`. It should be written as a child ExecPlan from `planning-brief-4.md`. It is next because generated customer downloads now consume the pinned app source, but provider setup is still represented more as instructions than as the first durable customer Program and ordered setup ExecPlans.
+The next recommended slice is `Beef Up Starter Template App`. It should be written as a child ExecPlan from `planning-brief-5.md`. It is next because generated customer downloads now consume the pinned app source and ship the generated operating roadmap, but the customer-facing app still needs to move from the sibling template's Notes sample toward the settled ChatGPT-style BYO OpenAI Starter product.
 
 ## Risks and Watchpoints
 
@@ -410,4 +414,4 @@ Current pinned template source boundary:
 
 ## Interfaces and Dependencies
 
-This Program depends on checkout proof code under `apps/web/scripts/`, release proof orchestration under `scripts/release/`, checkout route tests under `apps/web/tests/`, pinned template source under `templates/starter-app/`, generated repo source under `packages/codebase-compiler/src/repo-generation/`, generated repo tests under `packages/codebase-compiler/tests/`, the protected Starter UI under `apps/web/app/(protected)/starter/`, and the public Starter page under `apps/web/app/starter/page.tsx`.
+This Program depends on checkout proof code under `apps/web/scripts/`, release proof orchestration under `scripts/release/`, checkout route tests under `apps/web/tests/`, pinned template source under `templates/starter-app/`, generated repo source under `packages/codebase-compiler/src/repo-generation/`, generated repo tests under `packages/codebase-compiler/tests/`, the authenticated Starter UI source in the app route tree, and the public Starter page under `apps/web/app/starter/page.tsx`.

@@ -2,7 +2,7 @@
 title: Generated Starter Operating Pack Planning Brief 4
 program_id: starter-template-source-and-billing-proof
 brief_version: 4
-status: current
+status: superseded
 summary: Create the next child ExecPlan for upgrading the generated Starter operating pack now that generated app materialization consumes the pinned template source.
 read_when:
   - "Writing the fourth child ExecPlan for this Program."

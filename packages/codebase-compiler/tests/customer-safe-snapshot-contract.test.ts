@@ -79,38 +79,7 @@ describe("customer-safe snapshot contract", () => {
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
-					pathPattern: "apps/web/app/workers/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern: "apps/web/app/(protected)/workers/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern:
-						"apps/web/app/(protected)/_components/existing-codebase-doctor-pass/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern:
-						"apps/web/app/(protected)/_components/existing-codebase-findings/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern:
-						"apps/web/app/(protected)/_components/existing-codebase-support/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern: "apps/web/app/(protected)/_lib/workspace-*",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern: "apps/web/app/api/workspace/runner/**",
-					shippingMode: "exclude",
-				}),
-				expect.objectContaining({
-					pathPattern: "apps/web/app/api/codex/**",
+					pathPattern: "apps/web/app/**",
 					shippingMode: "exclude",
 				}),
 				expect.objectContaining({
@@ -141,16 +110,18 @@ describe("customer-safe snapshot contract", () => {
 		);
 	});
 
-	it("excludes Worker, runner, and Codex bridge paths from generated Starter snapshots", () => {
+	it("excludes the old source app tree, Worker, runner, and Codex bridge paths from generated Starter snapshots", () => {
 		const representativeForbiddenPaths = [
+			"apps/web/app/page.tsx",
+			"apps/web/app/layout.tsx",
 			"apps/web/app/workers/page.tsx",
-			"apps/web/app/(protected)/workers/setup/page.tsx",
-			"apps/web/app/(protected)/_components/existing-codebase-setup/setup-package-runner-command.tsx",
-			"apps/web/app/(protected)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page.tsx",
-			"apps/web/app/(protected)/_components/existing-codebase-findings/workspace-findings-page.tsx",
-			"apps/web/app/(protected)/_components/existing-codebase-support/workspace-loops-catalog.tsx",
-			"apps/web/app/(protected)/_components/codex-connection-card/codex-connection-card.tsx",
-			"apps/web/app/(protected)/_lib/workspace-setup-readiness-model.ts",
+			"apps/web/app/workers/setup/page.tsx",
+			"apps/web/app/_components/existing-codebase-setup/setup-package-runner-command.tsx",
+			"apps/web/app/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page.tsx",
+			"apps/web/app/_components/existing-codebase-findings/workspace-findings-page.tsx",
+			"apps/web/app/_components/existing-codebase-support/workspace-loops-catalog.tsx",
+			"apps/web/app/_components/codex-connection-card/codex-connection-card.tsx",
+			"apps/web/app/_lib/workspace-setup-readiness-model.ts",
 			"apps/web/app/api/workspace/runner/events/route.ts",
 			"apps/web/app/api/codex/generate/route.ts",
 			"apps/web/convex/workspace.ts",
@@ -161,23 +132,14 @@ describe("customer-safe snapshot contract", () => {
 
 		expect(starterSnapshotForbiddenPathPrefixes).toEqual(
 			expect.arrayContaining([
-				"apps/web/app/workers/",
-				"apps/web/app/(protected)/workers/",
-				"apps/web/app/api/workspace/runner/",
-				"apps/web/app/api/codex/",
-				"apps/web/app/(protected)/_components/existing-codebase-doctor-pass/",
-				"apps/web/app/(protected)/_components/existing-codebase-findings/",
-				"apps/web/app/(protected)/_components/existing-codebase-support/",
+				"apps/web/app/",
 				"apps/web/convex/workspace/",
 				"apps/web/platform/codex/",
 				"packages/local-runner/",
 			]),
 		);
 		expect(starterSnapshotForbiddenFilePaths).toEqual(
-			expect.arrayContaining([
-				"apps/web/app/(protected)/_lib/workspace-setup-readiness-model.ts",
-				"apps/web/convex/workspace.ts",
-			]),
+			expect.arrayContaining(["apps/web/convex/workspace.ts"]),
 		);
 		for (const forbiddenPath of representativeForbiddenPaths) {
 			expect(isExcludedSnapshotPath(forbiddenPath)).toBe(true);

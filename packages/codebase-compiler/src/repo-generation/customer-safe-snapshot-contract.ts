@@ -25,74 +25,9 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 		},
 		{
 			pathPattern: "apps/web/app/**",
-			shippingMode: "ship-generalized",
-			reason:
-				"Render the generated Starter app shell from intake facts so the customer repo has a runnable app without core-app route dependencies.",
-		},
-		{
-			pathPattern: "apps/web/app/workers/**",
 			shippingMode: "exclude",
 			reason:
-				"Exclude the public Workers marketing page from generated Starter repos; Workers is a separate existing-repo product.",
-		},
-		{
-			pathPattern: "apps/web/app/(protected)/workers/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude protected Worker install, doctor-pass, finding, loop, run, and privacy surfaces from generated Starter repos.",
-		},
-		{
-			pathPattern:
-				"apps/web/app/(protected)/_components/existing-codebase-setup/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude existing-codebase setup components because they teach local runner pairing for the Workers product.",
-		},
-		{
-			pathPattern:
-				"apps/web/app/(protected)/_components/existing-codebase-doctor-pass/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude Worker doctor-pass components from generated Starter repos.",
-		},
-		{
-			pathPattern:
-				"apps/web/app/(protected)/_components/existing-codebase-findings/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude Worker findings and approval components from generated Starter repos.",
-		},
-		{
-			pathPattern:
-				"apps/web/app/(protected)/_components/existing-codebase-support/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude Worker loop, run, and privacy support components from generated Starter repos.",
-		},
-		{
-			pathPattern: "apps/web/app/(protected)/_lib/workspace-*",
-			shippingMode: "exclude",
-			reason:
-				"Exclude Worker workspace read models and runner readiness models from generated Starter repos.",
-		},
-		{
-			pathPattern:
-				"apps/web/app/(protected)/_components/codex-connection-card/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude core-app Codex account connection UI from generated Starter repos; generated repos should keep AI setup guidance in docs and skills.",
-		},
-		{
-			pathPattern: "apps/web/app/api/workspace/runner/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude workspace runner API routes because local runner pairing and workflow claims belong to Workers, not Starter output.",
-		},
-		{
-			pathPattern: "apps/web/app/api/codex/**",
-			shippingMode: "exclude",
-			reason:
-				"Exclude core-app Codex bridge endpoints from generated Starter repos; they are not part of the clean template app contract.",
+				"Exclude the tracked root App Router tree; generated Starter repos use the pinned template materialized under apps/web/src/app with the marketing, auth, and app route groups.",
 		},
 		{
 			pathPattern: "apps/web/convex/workspace.ts",
@@ -191,10 +126,10 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship a customer-safe ExecPlan contract for generated product work.",
 		},
 		{
-			pathPattern: "docs/exec-plans/active/<generated-plan>.md",
+			pathPattern: "docs/exec-plans/active/<generated-plans>.md",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship only the generated customer's first active ExecPlan, not internal ExecPlan archives.",
+				"Ship only the generated customer's active setup and product ExecPlans, not internal ExecPlan archives.",
 		},
 		{
 			pathPattern: "apps/web/.env.local.example",

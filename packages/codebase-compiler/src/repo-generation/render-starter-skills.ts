@@ -22,8 +22,9 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use when the buyer needs to boot this Codebase locally and understand the safe setup order before changing auth or billing.",
 		steps: [
 			"Read `START-HERE.md` first and keep to the prescribed order.",
-			"Treat `bun run bootstrap` as the first step. Confirm dependencies, `.env.local`, and the local docs surface before changing product code.",
-			"Read `apps/web/content/docs/local-setup.mdx` before suggesting deeper changes.",
+			"Open the generated Core Boot ExecPlan under `docs/exec-plans/active/` and update it as the durable setup record.",
+			"Treat `bun run bootstrap` as the first step. Confirm dependencies, `.env.local`, the homepage, and the app shell before changing product code.",
+			"Use `README.md`, `START-HERE.md`, and the active Core Boot ExecPlan as the setup truth.",
 			"Before changing Next.js code, explicitly trigger `$starter-nextjs-in-this-repo`.",
 			"Keep auth and billing untouched until the Codebase boots cleanly.",
 		],
@@ -35,7 +36,8 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use when wiring Clerk and Convex auth for this Codebase. Follow the repo-local auth contract before touching billing or product code.",
 		steps: [
 			"Read `START-HERE.md` and the auth step before making changes.",
-			"Read `apps/web/content/docs/clerk-convex-auth.mdx` and `apps/web/convex/_generated/ai/guidelines.md`.",
+			"Open the generated Clerk Setup ExecPlan first, then the Convex Setup ExecPlan after Clerk proof is recorded.",
+			"Use the copied app template source, `README.md`, and the active setup ExecPlans as the auth setup truth.",
 			"Keep the supported order: Clerk first, then Convex, then verification.",
 			"If external skills are installed, use `$clerk`, `$clerk-nextjs-patterns`, and `$convex-setup-auth` when they are the best fit.",
 			"Do not rewrite billing or checkout while auth setup is still unstable.",
@@ -65,7 +67,8 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Read `docs/programs/PROGRAMS.md` and `docs/exec-plans/PLANS.md` before changing Program or ExecPlan files.",
 			"Run `bun run agentic:check` before product implementation begins and after changing operating-pack files.",
 			"Use the Program under `docs/programs/active/` for multi-slice product truth.",
-			"Use the active ExecPlan under `docs/exec-plans/active/` for the next bounded implementation slice.",
+			"Use the ordered active ExecPlans under `docs/exec-plans/active/` for Core Boot, Clerk Setup, Convex Setup, Stripe Setup, and First Product Slice.",
+			"Keep `Next Slice` pointed at the next unfinished plan and update completed plans with validation evidence before moving on.",
 			"Do not copy private planning archives from another repo into this Codebase.",
 		],
 	},
@@ -76,8 +79,9 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use when wiring Stripe for this Codebase after auth is stable. Preserve the shipped checkout and webhook contract until the paid handoff works end to end.",
 		steps: [
 			"Read `START-HERE.md` and do not start billing work before auth is stable.",
-			"Read `apps/web/content/docs/stripe-checkout-webhook.mdx` and `apps/web/content/docs/local-qa.mdx`.",
-			"Use the exact local billing contract for checkout, webhook forwarding, and verification.",
+			"Open the generated Stripe Setup ExecPlan and keep Stripe changes recorded there.",
+			"Use the copied app template source, `README.md`, and the active Stripe Setup ExecPlan as the billing setup truth.",
+			"Preserve the shipped billing contract for checkout, webhook forwarding, and verification.",
 			"If external skills are installed, prefer `$stripe-best-practices` for Stripe-specific decisions.",
 			"Do not rewrite checkout routes or webhook handlers until the shipped billing handoff passes verification.",
 		],
@@ -89,6 +93,7 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 			"Use after the Codebase is stable and the buyer is ready to shape the real product. Start with identity, homepage, and the first real customer-visible slice.",
 		steps: [
 			"Read `START-HERE.md` and confirm core setup, auth setup, billing setup, and verification are done first.",
+			"Open the generated First Product Slice ExecPlan and update it before changing product code.",
 			"Start by updating `apps/web/config/product.ts`.",
 			"Prefer `$starter-product-copy`, `$starter-frontend-design`, and `$starter-docs-and-testing` as the first follow-on skills.",
 			"Keep auth and billing contracts stable until the product already feels like the buyer's product.",
@@ -145,11 +150,11 @@ const STARTER_WRAPPER_SKILLS: StarterWrapperSkill[] = [
 		name: "starter-convex-in-this-repo",
 		path: ".agents/skills/starter-convex-in-this-repo/SKILL.md",
 		description:
-			"Use when editing Convex code in this Codebase. Read the generated Convex guidelines before changing functions, schema, or HTTP actions.",
+			"Use when editing Convex code in this Codebase. Keep Convex changes aligned with the copied app template source and active setup ExecPlans.",
 		steps: [
 			"Read `AGENTS.md` first.",
-			"Read `apps/web/convex/_generated/ai/guidelines.md` before changing Convex code.",
-			"Treat the generated Convex guidance as version-coupled to this Codebase's installed Convex setup.",
+			"Read the active Convex Setup ExecPlan under `docs/exec-plans/active/` before changing Convex code.",
+			"Treat the copied app template source and generated operating pack as the version-coupled Convex setup contract.",
 		],
 	},
 ];

@@ -85,8 +85,27 @@ function generatedOperatingPackPathSet(
 		"docs/exec-plans/PLANS.md",
 		"docs/exec-plans/active/index.md",
 		"docs/exec-plans/completed/index.md",
-		operatingPackPaths.activeExecPlanPath,
+		...operatingPackPaths.activeExecPlanPaths,
 	]);
+}
+
+type GeneratedOperatingPlanId = ReturnType<
+	typeof buildOperatingPackPaths
+>["activeExecPlans"][number]["id"];
+
+function getGeneratedOperatingPlan(
+	operatingPackPaths: ReturnType<typeof buildOperatingPackPaths>,
+	id: GeneratedOperatingPlanId,
+) {
+	const plan = operatingPackPaths.activeExecPlans.find(
+		(candidate) => candidate.id === id,
+	);
+
+	if (!plan) {
+		throw new Error(`Missing generated operating plan in test: ${id}`);
+	}
+
+	return plan;
 }
 
 function expectNoForbiddenStarterSnapshotPaths(snapshotPaths: string[]) {
@@ -151,8 +170,8 @@ describe("repo generation", () => {
 		const bootstrap = snapshotText(
 			overrides.find((file) => file.path === "bootstrap.sh"),
 		);
-		const docsIndex = snapshotText(
-			overrides.find((file) => file.path === "apps/web/content/docs/index.mdx"),
+		const startHere = snapshotText(
+			overrides.find((file) => file.path === "START-HERE.md"),
 		);
 
 		expect(bootstrap).toContain(
@@ -161,11 +180,11 @@ describe("repo generation", () => {
 		expect(bootstrap).toContain(
 			"Skipping shadcn preset apply because the generated preset code is invalid.",
 		);
-		expect(docsIndex).toContain(
+		expect(startHere).toContain(
 			"Bad $(touch owned) `&#123;mdx&#125;` &lt;script&gt;",
 		);
-		expect(docsIndex).not.toContain("{mdx}");
-		expect(docsIndex).not.toContain("<script>");
+		expect(startHere).not.toContain("{mdx}");
+		expect(startHere).not.toContain("<script>");
 	});
 
 	it("renders starter overrides for product config and home content", () => {
@@ -194,7 +213,6 @@ describe("repo generation", () => {
 				".agents/skills/starter-nextjs-in-this-repo/SKILL.md",
 				".agents/skills/starter-convex-in-this-repo/SKILL.md",
 				".agents/skills/external-skills.json",
-				"apps/web/content/docs/index.mdx",
 				"README.md",
 				"package.json",
 			]),
@@ -313,13 +331,16 @@ describe("repo generation", () => {
 				".agents/skills/starter-frontend-design/SKILL.md",
 				".agents/skills/starter-docs-and-testing/SKILL.md",
 				".agents/skills/external-skills.json",
-				"apps/web/content/docs/index.mdx",
 				"apps/web/src/app/globals.css",
 				"apps/web/src/app/layout.tsx",
 				"apps/web/src/app/(marketing)/page.tsx",
+				"apps/web/src/app/(auth)/layout.tsx",
+				"apps/web/src/app/(auth)/sign-in/[[...sign-in]]/page.tsx",
+				"apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
 				"apps/web/src/components/ui/button.tsx",
+				"apps/web/src/app/(app)/layout.tsx",
 				"apps/web/src/app/(app)/dashboard/page.tsx",
 				"apps/web/convex/schema.ts",
 				"apps/web/next.config.ts",
@@ -351,17 +372,18 @@ describe("repo generation", () => {
 				"docs/exec-plans/PLANS.md",
 				"docs/exec-plans/active/index.md",
 				"docs/exec-plans/completed/index.md",
-				operatingPackPaths.activeExecPlanPath,
+				...operatingPackPaths.activeExecPlanPaths,
 			]),
 		);
 		expect(uniqueSnapshotPathCount).toBe(snapshotPaths.length);
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
-				"apps/web/app/(protected)/layout.tsx",
-				"apps/web/app/(protected)/settings/_components/settings-page.tsx",
+				"apps/web/content/docs/index.mdx",
 				"apps/web/app/blog/page.tsx",
 				"apps/web/app/page.tsx",
 				"apps/web/app/layout.tsx",
+				"apps/web/app/api/codex/generate/route.ts",
+				"apps/web/app/api/workspace/runner/events/route.ts",
 				"apps/web/src/app/_content/home-page.ts",
 				"apps/web/src/app/api/billing/checkout/route.ts",
 				"docs/PLANS.md",
@@ -442,6 +464,15 @@ describe("repo generation", () => {
 			.filter((file) => file.path.startsWith("apps/web/"))
 			.map(snapshotText)
 			.join("\n");
+		const generatedGuidanceText = snapshotFiles
+			.filter(
+				(file) =>
+					file.path === "START-HERE.md" ||
+					file.path.startsWith(".agents/skills/") ||
+					file.path.startsWith("docs/exec-plans/active/"),
+			)
+			.map(snapshotText)
+			.join("\n");
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
 		expect(rootAgentGuide?.content).toContain("bun run agentic:check");
@@ -514,6 +545,10 @@ describe("repo generation", () => {
 		);
 		expect(appSnapshotText).not.toContain('action="/api/billing/checkout"');
 		expect(appSnapshotText).not.toContain('action="/api/billing/portal"');
+		expect(generatedGuidanceText).not.toContain("apps/web/content/docs/");
+		expect(generatedGuidanceText).not.toContain(
+			"apps/web/convex/_generated/ai/guidelines.md",
+		);
 		expect(appReadme).toContain("No-Provider Contract");
 		expect(appReadme).toContain("config/product.ts");
 		expect(appReadme).not.toContain("_content");
@@ -535,13 +570,11 @@ describe("repo generation", () => {
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
 				"bun.lock",
+				"apps/web/content/docs/index.mdx",
 				"apps/web/app/workers/page.tsx",
-				"apps/web/app/(protected)/layout.tsx",
-				"apps/web/app/(protected)/settings/_components/settings-page.tsx",
 				"apps/web/app/blog/page.tsx",
 				"apps/web/app/page.tsx",
 				"apps/web/app/layout.tsx",
-				"apps/web/app/(protected)/workers/setup/page.tsx",
 				"apps/web/app/api/workspace/runner/events/route.ts",
 				"apps/web/app/api/codex/generate/route.ts",
 				"apps/web/src/app/_content/home-page.ts",
@@ -556,6 +589,26 @@ describe("repo generation", () => {
 	it("materializes an explicit generated operating pack with runnable script wiring", async () => {
 		const projectDefinition = createCompleteProjectDefinition();
 		const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
+		const coreBootPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"core-boot",
+		);
+		const clerkPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"clerk-setup",
+		);
+		const convexPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"convex-setup",
+		);
+		const stripePlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"stripe-setup",
+		);
+		const firstProductPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"first-product-slice",
+		);
 		const snapshotFiles = await materializeRepoSnapshot(projectDefinition);
 		const packageJson = JSON.parse(
 			snapshotText(
@@ -570,9 +623,22 @@ describe("repo generation", () => {
 				(file) => file.path === operatingPackPaths.activeProgramPath,
 			),
 		);
-		const execPlan = snapshotText(
+		const coreBootExecPlan = snapshotText(
+			snapshotFiles.find((file) => file.path === coreBootPlan.path),
+		);
+		const programLintScript = snapshotText(
 			snapshotFiles.find(
-				(file) => file.path === operatingPackPaths.activeExecPlanPath,
+				(file) => file.path === "scripts/agentic/check-programs.mjs",
+			),
+		);
+		const execPlansLintScript = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "scripts/agentic/check-exec-plans.mjs",
+			),
+		);
+		const codebaseContractScript = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "scripts/agentic/check-codebase-contract.mjs",
 			),
 		);
 		const startHere = snapshotText(
@@ -602,10 +668,50 @@ describe("repo generation", () => {
 		}
 
 		expect(program).toContain("## Slice Ledger");
-		expect(program).toContain(operatingPackPaths.activeExecPlanPath);
-		expect(execPlan).toContain("### Test Commands");
-		expect(execPlan).toContain(operatingPackPaths.activeProgramPath);
+		expect(program).toContain(operatingPackPaths.nextExecPlanPath);
+		expect(program).toContain("Core Boot");
+		for (const plan of operatingPackPaths.activeExecPlans) {
+			expect(snapshotPaths.has(plan.path)).toBe(true);
+			expect(program).toContain(plan.path);
+			expect(programLintScript).toContain(plan.path);
+			expect(execPlansLintScript).toContain(plan.path);
+			expect(codebaseContractScript).toContain(plan.path);
+		}
+		expect(coreBootExecPlan).toContain("### Test Commands");
+		expect(coreBootExecPlan).toContain(operatingPackPaths.activeProgramPath);
+		expect(coreBootExecPlan).toContain("bun install");
+		expect(programLintScript).toContain("expectedActiveExecPlans");
+		expect(programLintScript).toContain("expectedNextExecPlanPath");
+		expect(programLintScript).toContain(operatingPackPaths.nextExecPlanPath);
+		expect(programLintScript).toContain(
+			operatingPackPaths.currentPlanningBriefPath,
+		);
+		expect(execPlansLintScript).toContain(
+			"planning_brief points at mutable current-planning-brief.txt",
+		);
+		expect(execPlansLintScript).toContain(operatingPackPaths.planningBriefPath);
+		expect(codebaseContractScript).toContain(
+			operatingPackPaths.activeProgramPath,
+		);
+		expect(codebaseContractScript).toContain(
+			operatingPackPaths.currentPlanningBriefPath,
+		);
+		expect(
+			snapshotText(snapshotFiles.find((file) => file.path === clerkPlan.path)),
+		).toContain(coreBootPlan.path);
+		expect(
+			snapshotText(snapshotFiles.find((file) => file.path === convexPlan.path)),
+		).toContain(clerkPlan.path);
+		expect(
+			snapshotText(snapshotFiles.find((file) => file.path === stripePlan.path)),
+		).toContain(convexPlan.path);
+		expect(
+			snapshotText(
+				snapshotFiles.find((file) => file.path === firstProductPlan.path),
+			),
+		).toContain(stripePlan.path);
 		expect(startHere).toContain("Check the generated operating pack");
+		expect(startHere).toContain("Core Boot ExecPlan");
 		expect(startHere).toContain("bun run agentic:check");
 	});
 

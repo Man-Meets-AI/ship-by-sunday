@@ -89,24 +89,13 @@ const excludedSnapshotPathFragments = [
 ] as const;
 
 export const starterSnapshotForbiddenPathPrefixes = [
-	"apps/web/app/workers/",
-	"apps/web/app/(protected)/workers/",
-	"apps/web/app/(protected)/_components/existing-codebase-setup/",
-	"apps/web/app/(protected)/_components/existing-codebase-doctor-pass/",
-	"apps/web/app/(protected)/_components/existing-codebase-findings/",
-	"apps/web/app/(protected)/_components/existing-codebase-support/",
-	"apps/web/app/(protected)/_components/codex-connection-card/",
-	"apps/web/app/api/workspace/runner/",
-	"apps/web/app/api/codex/",
+	"apps/web/app/",
 	"apps/web/convex/workspace/",
 	"apps/web/platform/codex/",
 	"packages/local-runner/",
 ] as const;
 
 export const starterSnapshotForbiddenFilePaths = [
-	"apps/web/app/(protected)/_lib/workspace-findings-read-model.ts",
-	"apps/web/app/(protected)/_lib/workspace-setup-readiness-model.ts",
-	"apps/web/app/(protected)/_lib/workspace-support-read-model.ts",
 	"apps/web/convex/workspace.ts",
 ] as const;
 

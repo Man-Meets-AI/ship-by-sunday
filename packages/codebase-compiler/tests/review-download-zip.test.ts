@@ -22,7 +22,7 @@ describe("review download zip", () => {
 			"docs/exec-plans/PLANS.md",
 			"docs/exec-plans/active/index.md",
 			"docs/exec-plans/completed/index.md",
-			operatingPackPaths.activeExecPlanPath,
+			...operatingPackPaths.activeExecPlanPaths,
 		]);
 		const buffer = await buildReviewDownloadZip(projectDefinition);
 		const zip = await JSZip.loadAsync(buffer);
@@ -60,11 +60,14 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/.agents/skills/starter-auth-setup/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/starter-operating-pack/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/external-skills.json",
-				"ship-by-sunday-os/apps/web/content/docs/index.mdx",
 				"ship-by-sunday-os/apps/web/src/app/globals.css",
 				"ship-by-sunday-os/apps/web/src/app/layout.tsx",
 				"ship-by-sunday-os/apps/web/src/app/(marketing)/page.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(auth)/layout.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(auth)/sign-in/[[...sign-in]]/page.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
 				"ship-by-sunday-os/apps/web/src/components/ui/button.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(app)/layout.tsx",
 				"ship-by-sunday-os/apps/web/src/app/(app)/dashboard/page.tsx",
 				"ship-by-sunday-os/apps/web/convex/schema.ts",
 				"ship-by-sunday-os/apps/web/config/product.ts",
@@ -86,16 +89,19 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/docs/programs/PROGRAMS.md",
 				`ship-by-sunday-os/${operatingPackPaths.activeProgramPath}`,
 				"ship-by-sunday-os/docs/exec-plans/PLANS.md",
-				`ship-by-sunday-os/${operatingPackPaths.activeExecPlanPath}`,
+				...operatingPackPaths.activeExecPlanPaths.map(
+					(planPath) => `ship-by-sunday-os/${planPath}`,
+				),
 			]),
 		);
 		expect(entries).not.toEqual(
 			expect.arrayContaining([
-				"ship-by-sunday-os/apps/web/app/(protected)/layout.tsx",
-				"ship-by-sunday-os/apps/web/app/(protected)/settings/_components/settings-page.tsx",
+				"ship-by-sunday-os/apps/web/content/docs/index.mdx",
 				"ship-by-sunday-os/apps/web/app/blog/page.tsx",
 				"ship-by-sunday-os/apps/web/app/page.tsx",
 				"ship-by-sunday-os/apps/web/app/layout.tsx",
+				"ship-by-sunday-os/apps/web/app/api/codex/generate/route.ts",
+				"ship-by-sunday-os/apps/web/app/api/workspace/runner/events/route.ts",
 				"ship-by-sunday-os/apps/web/src/app/_content/home-page.ts",
 				"ship-by-sunday-os/apps/web/src/app/api/billing/checkout/route.ts",
 				"ship-by-sunday-os/docs/PLANS.md",
