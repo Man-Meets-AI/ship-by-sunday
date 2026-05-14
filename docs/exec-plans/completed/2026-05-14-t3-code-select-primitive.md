@@ -32,6 +32,7 @@ Ship by Sunday's codebase-flow screens use the shared `Select` primitive for des
 - [x] 2026-05-14: Add focused Select render tests and run codebase-flow integration proof.
 - [x] 2026-05-14: Run app lint/typecheck, plan/program/docs lint, markdown lint, `git diff --check`, and browser proof or record the exact blocker.
 - [x] 2026-05-14: Move this ExecPlan to completed and update the Program ledger with the next slice.
+- [x] 2026-05-14: Repaired review findings by mapping Radix `data-state="open"` to the T3 pressed/open visual recipe, defaulting Select content to Radix popper positioning, rendering real open content in the focused unit test, and correcting the browser-proof notes so mobile coverage is not overstated.
 
 ## Surprises & Discoveries
 
@@ -40,6 +41,8 @@ The current worktree already includes unrelated prior-slice changes: `MISTAKES.m
 T3 Code's Select source uses `@base-ui/react/select`, `mergeProps`, `useRender`, a `SelectPopup` plus `SelectContent` alias, `SelectButton`, `selectTriggerVariants`, `SelectGroupLabel`, and CSS variables such as `--anchor-width` and `--available-height`. Ship by Sunday currently has no `@base-ui/react` dependency and live codebase-flow call sites use the Radix Select API from the bundled `radix-ui` package.
 
 The real Select route, `http://localhost:3000/starter/generate-codebase`, is protected by authentication and entitlement. The connected Gmail account could send to `ea@parkerrex.com` but only exposed the sent copy, not an EA inbox-delivered verification email. The ignored release-persona file was therefore pointed at `ea@parkerrex.com`, `bun run release:personas:prepare -- --proof=default_ship --persona=member_with_access --base-url=http://localhost:3000` confirmed that the Clerk user exists and is entitled, and a one-off ignored Playwright proof used Clerk testing sign-in for the browser session.
+
+Post-completion review found two Radix-adapter gaps. First, T3 Code's recipe uses `data-pressed`, but Radix Select exposes the open trigger state as `data-state="open"`, so the adapter now includes `data-[state=open]` equivalents while preserving `data-pressed` for the helper button. Second, Radix only exposes `--radix-select-trigger-width` in `position="popper"`, so `SelectContent` now defaults to popper positioning with `align="start"` and `sideOffset={4}` to match T3's anchor-based popup behavior.
 
 ## Decision Log
 
@@ -55,11 +58,19 @@ Decision: Use the repo's release-persona auth path for browser proof when the re
 Rationale: The user requested a real login for `ea@parkerrex.com`. Manual Gmail-code retrieval for EA was unavailable through the connected mailbox, but the repo's release proof path supports real Clerk personas and deterministic testing sign-in after the passwordless challenge surface is verified. This keeps proof on the live protected route without changing product code or committing local auth state.
 Date: 2026-05-14
 
+Decision: Treat Radix `data-state="open"` as the adapter equivalent of T3/Base UI pressed state.
+Rationale: T3 Code's Select trigger recipe uses `data-pressed`, but the current implementation intentionally stays Radix-backed. Without explicit `data-[state=open]` classes, the open-state shadow and ghost-trigger background branches are inert on real Select triggers.
+Date: 2026-05-14
+
+Decision: Default Radix `SelectContent` to popper positioning for this T3 adapter.
+Rationale: T3 Code positions the popup against an anchor and sizes it from anchor variables. Radix's `--radix-select-trigger-width` and `--radix-select-trigger-height` variables are only available on the popper path, and the design-preset call site relies on those variables for its content width.
+Date: 2026-05-14
+
 ## Outcomes & Retrospective
 
-This slice kept Select Radix-backed and copied the T3 Code Select visual recipes onto the existing shared primitive. `apps/web/src/components/ui/select.tsx` now exports `selectTriggerVariants`, `SelectButton`, and `SelectGroupLabel` in addition to the existing Radix-compatible Select exports. The trigger supports `xs`, `sm`, `default`, and `lg` sizes plus `default` and `ghost` variants. Content, viewport, item, separator, and scroll controls now carry T3 popup/list/item surface tokens while preserving `SelectContent`, `SelectGroup`, `SelectItem`, `SelectTrigger`, and `SelectValue` behavior for current codebase-flow call sites.
+This slice kept Select Radix-backed and copied the T3 Code Select visual recipes onto the existing shared primitive. `apps/web/src/components/ui/select.tsx` now exports `selectTriggerVariants`, `SelectButton`, and `SelectGroupLabel` in addition to the existing Radix-compatible Select exports. The trigger supports `xs`, `sm`, `default`, and `lg` sizes plus `default` and `ghost` variants, with Radix `data-state="open"` mapped to the T3 open/pressed visual branches. Content defaults to Radix popper positioning so trigger-width variables are available for the T3 anchor-width popup treatment. Content, viewport, item, separator, and scroll controls now carry T3 popup/list/item surface tokens while preserving `SelectContent`, `SelectGroup`, `SelectItem`, `SelectTrigger`, and `SelectValue` behavior for current codebase-flow call sites.
 
-The focused unit test proves export compatibility, trigger size/className behavior, T3-only class tokens, and content/item slot availability. The existing codebase-page integration-ui test still proves codebase-flow value-change behavior through the shared Select export shape. The authenticated browser proof signs in as `ea@parkerrex.com`, opens the protected Starter codebase route, opens the design-preset Select, verifies trigger/content/item slots, verifies 8 rendered items, checks the migrated T3 class fragments, and captures desktop and mobile screenshots. No package or lockfile change was needed. The next heavier primitive slice should handle Popover and Tooltip together because T3 Select's popup treatment depends on the same Base UI positioner pattern those primitives expose directly.
+The focused unit test proves export compatibility, trigger size/className behavior, Radix open-state styling, default popper positioning, trigger-width class behavior, invalid trigger styling, disabled item styling, T3-only class tokens, and rendered content/item slot availability. The existing codebase-page integration-ui test still proves codebase-flow value-change behavior through the shared Select export shape. The original authenticated browser proof signed in as `ea@parkerrex.com`, opened the protected Starter codebase route, opened the design-preset Select on desktop, verified trigger/content/item slots, verified 8 rendered desktop items, checked migrated T3 class fragments, and captured desktop and mobile screenshots. The mobile screenshot proved the protected route and trigger presence, but did not open mobile Select content. No package or lockfile change was needed. The next heavier primitive slice should handle Popover and Tooltip together because T3 Select's popup treatment depends on the same Base UI positioner pattern those primitives expose directly.
 
 ## Context and Orientation
 
@@ -79,11 +90,11 @@ This plan does not add `@base-ui/react`, migrate Popover, Tooltip, Dialog, Sheet
 
 First, validate this plan with `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`.
 
-Second, update `apps/web/src/components/ui/select.tsx`. Keep Radix as the implementation. Import `cva` and `VariantProps`, copy T3 Code's trigger variant recipe where it compiles in this Tailwind setup, and expose `selectTriggerVariants`. Update `SelectTrigger` to accept `size?: "xs" | "sm" | "default" | "lg"` and `variant?: "default" | "ghost"`, keep `data-slot="select-trigger"`, keep `data-size`, keep children rendering, and use Radix `SelectPrimitive.Icon` for the chevron. Add `SelectButton` as a plain button helper using the same recipe, because T3 exports it and future T3-style route code may expect it.
+Second, update `apps/web/src/components/ui/select.tsx`. Keep Radix as the implementation. Import `cva` and `VariantProps`, copy T3 Code's trigger variant recipe where it compiles in this Tailwind setup, and expose `selectTriggerVariants`. Update `SelectTrigger` to accept `size?: "xs" | "sm" | "default" | "lg"` and `variant?: "default" | "ghost"`, keep `data-slot="select-trigger"`, keep `data-size`, keep children rendering, map Radix `data-state="open"` to the T3 pressed/open visual branches, and use Radix `SelectPrimitive.Icon` for the chevron. Add `SelectButton` as a plain button helper using the same recipe, because T3 exports it and future T3-style route code may expect it.
 
-Third, update Radix `SelectContent`, `SelectItem`, `SelectSeparator`, scroll buttons, `SelectGroup`, `SelectLabel`, and a new `SelectGroupLabel` alias to use T3 popup/list/item/separator recipes while preserving current Radix props. The Radix content wrapper should retain `--radix-select-trigger-width` support and may also expose equivalent T3-style slot names such as `select-popup`, `select-list`, and `select-positioner` where safe.
+Third, update Radix `SelectContent`, `SelectItem`, `SelectSeparator`, scroll buttons, `SelectGroup`, `SelectLabel`, and a new `SelectGroupLabel` alias to use T3 popup/list/item/separator recipes while preserving current Radix props. The Radix content wrapper should default to popper positioning to retain `--radix-select-trigger-width` support and may also expose equivalent T3-style slot names such as `select-popup`, `select-list`, and `select-positioner` where safe.
 
-Fourth, add `apps/web/tests/unit/ui-select-primitive.test.tsx`. Server-render tests should prove existing exports compile, `SelectTrigger` preserves `className`, `size`, and current Radix-friendly data attributes, `SelectContent` and `SelectItem` expose usable data slots, and T3-only class tokens such as `not-dark:bg-clip-padding`, `before:shadow-[0_1px_--theme(--color-black/4%)]`, `min-w-(--radix-select-trigger-width)`, `data-highlighted:bg-accent`, and `select-item-indicator` are present.
+Fourth, add `apps/web/tests/unit/ui-select-primitive.test.tsx`. Tests should prove existing exports compile, `SelectTrigger` preserves `className`, `size`, current Radix-friendly data attributes, invalid styling, and Radix open-state styling; the real rendered `SelectContent` defaults to popper positioning and exposes `--radix-select-trigger-width` classes; disabled `SelectItem` rendering stays non-interactive; and T3-only class tokens such as `not-dark:bg-clip-padding`, `before:shadow-[0_1px_--theme(--color-black/4%)]`, `min-w-(--radix-select-trigger-width)`, `data-highlighted:bg-accent`, and `select-item-indicator` are present.
 
 Fifth, run focused validation. The meaningful feature is codebase-flow selection, with P1 core-product risk because these controls affect the generated codebase configuration path. The source of truth is the selected value passed through `onValueChange` and visible trigger/content UI state. Must work: current design-preset and font/theme dropdown usage, current className sizing, item rendering, and current export names. Must fail safely: disabled items stay non-interactive, invalid triggers keep destructive styling, and missing Base UI does not break imports. Tests are focused render tests, the existing codebase-page integration-ui test, static lint/typecheck, and browser proof or a recorded auth limitation. CI gate is app baseline plus integration-ui coverage.
 
@@ -136,7 +147,7 @@ If the plan is completed and moved, rerun plan lint against the completed path:
 
 ## Validation and Acceptance
 
-Acceptance requires `Select` to remain Radix-backed and current-call-site compatible while carrying T3 Code class recipes for trigger, content, item, separator, and scroll affordances. Existing imports must keep compiling, `SelectTrigger className="w-full"` must still affect the trigger, `SelectTrigger size="sm"` must preserve small sizing, and `SelectContent` plus `SelectItem` must retain usable `data-slot` attributes. The focused test must prove T3-only class tokens are present. The codebase-flow integration-ui test must continue proving value changes through the mocked export shape. Browser proof should run against a route that renders Select; if authentication blocks live browser proof, the exact route and blocker must be recorded here.
+Acceptance requires `Select` to remain Radix-backed and current-call-site compatible while carrying T3 Code class recipes for trigger, content, item, separator, and scroll affordances. Existing imports must keep compiling, `SelectTrigger className="w-full"` must still affect the trigger, `SelectTrigger size="sm"` must preserve small sizing, Radix `data-state="open"` must drive the open visual state, default `SelectContent` positioning must expose trigger-width variables, and `SelectContent` plus `SelectItem` must retain usable `data-slot` attributes. The focused test must prove T3-only class tokens are present and render real open content/items. The codebase-flow integration-ui test must continue proving value changes through the mocked export shape. Browser proof should run against a route that renders Select; if authentication blocks live browser proof, the exact route and blocker must be recorded here.
 
 ### Test Commands
 
@@ -205,7 +216,36 @@ Validation completed on 2026-05-14:
     git diff --check
     No whitespace errors.
 
-Browser proof on the webpack dev server:
+Review repair validation completed on 2026-05-14:
+
+    bun run --cwd apps/web test:unit -- tests/unit/ui-select-primitive.test.tsx
+    1 file passed, 4 tests passed.
+
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx
+    1 file passed, 4 tests passed.
+
+    bun run format
+    Finished in 420ms on 1032 files using 12 threads.
+
+    bun lint
+    App and package lint passed with 0 warnings and 0 errors.
+
+    DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
+    App production build, app typecheck, and package typechecks passed.
+
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md
+    docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md: ok
+
+    bun run programs:lint
+    Program docs, packets, and prompts passed.
+
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    Markdown metadata lint passed for the completed plan and Program.
+
+    git diff --check
+    No whitespace errors.
+
+Browser proof on the webpack dev server, rerun after the review repair:
 
     PLAYWRIGHT_BASE_URL=http://localhost:3000 E2E_ENTITLED_EMAIL=ea@parkerrex.com node codex-scripts/prove-select-browser.mjs
     status: ok
@@ -215,9 +255,10 @@ Browser proof on the webpack dev server:
     Desktop Select item count: 8.
     First rendered item: Vercel Hosting Black-and-white precision with Geist typography.
     Verified slots: select-trigger, select-content, select-item.
-    Verified class fragments: not-dark:bg-clip-padding, data-[state=open]:animate-in, data-[side=bottom]:slide-in-from-top-2, data-highlighted:bg-accent, in-data-[side=none]:min-w-[calc(var(--radix-select-trigger-width)+1.25rem)].
+    Verified class fragments: not-dark:bg-clip-padding, data-[state=open]:animate-in, data-[state=open]:shadow-none, data-[side=bottom]:slide-in-from-top-2, data-highlighted:bg-accent, min-w-(--radix-select-trigger-width), in-data-[side=none]:min-w-[calc(var(--radix-select-trigger-width)+1.25rem)].
     Desktop screenshot: codex-scripts/artifacts/select-desktop.png.
     Mobile screenshot: codex-scripts/artifacts/select-mobile.png.
+    Mobile limitation: the script confirmed the protected route and Select trigger count on mobile but did not open mobile Select content.
 
 ## Interfaces and Dependencies
 
