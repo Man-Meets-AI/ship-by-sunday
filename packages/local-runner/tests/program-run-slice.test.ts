@@ -2,14 +2,20 @@ import { execFile } from "node:child_process";
 import { mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
+import { Effect, Layer } from "effect";
 
+import { BoundedProcessService } from "../src/core/bounded-process";
+import { NodeCodexExecServiceLive } from "../src/core/codex-exec-runner";
+import { NodeLocalProjectStateServiceLive } from "../src/core/local-project-state";
 import {
 	extractProgramRunSliceProofCommands,
 	runProgramRunSlice,
+	runProgramRunSliceEffect,
 	type ProgramRunSliceExecutor,
 	type ProgramRunSliceExecutorInput,
 	type ProgramRunSliceReviewResult,
 } from "../src/core/program-run-slice";
+import { NodeRepositoryBoundaryServiceLive } from "../src/core/repository-boundary";
 import {
 	createTemporaryDirectory,
 	initializeGitRepository,
@@ -106,6 +112,88 @@ describe("program run slice", () => {
 			{ cwd: repositoryRoot },
 		);
 		expect(gitStatus.stdout).not.toContain(".sbs/");
+	});
+
+	it("supports injecting the process service through the Effect run-slice path", async () => {
+		const repositoryRoot = await createProgramRunFixture();
+		const processRequests: Array<{
+			args: string[];
+			command: string;
+			cwd?: string;
+			timeoutMs: number;
+		}> = [];
+		const stubBoundedProcessService = Layer.succeed(
+			BoundedProcessService,
+			BoundedProcessService.of({
+				run: (request) => {
+					processRequests.push({
+						args: request.args,
+						command: request.command,
+						cwd: request.cwd,
+						timeoutMs: request.timeoutMs,
+					});
+					return Effect.succeed({
+						succeeded: true,
+						stdout: request.command === "git" ? "" : "stubbed proof output\n",
+						stderr: "",
+						timedOut: false,
+					});
+				},
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			runProgramRunSliceEffect({
+				executor: createFakeExecutor({
+					reviews: [
+						{
+							findings: [],
+							openQuestions: [],
+							validationNotes: ["Stubbed proof passed."],
+						},
+					],
+				}),
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-effect-injected-process",
+				timeoutMs: 15_000,
+			}).pipe(
+				Effect.provide(
+					Layer.mergeAll(
+						stubBoundedProcessService,
+						NodeCodexExecServiceLive,
+						NodeLocalProjectStateServiceLive,
+						NodeRepositoryBoundaryServiceLive,
+					),
+				),
+			),
+		);
+
+		expect(result.finalStatus).toBe("complete");
+		expect(result.proofResults).toEqual([
+			expect.objectContaining({
+				command: accessCommand("implemented.txt"),
+				stdoutTail: "stubbed proof output",
+				succeeded: true,
+			}),
+		]);
+		expect(processRequests).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					args: ["-e", "require('node:fs').accessSync('implemented.txt')"],
+					command: "node",
+					cwd: repositoryRoot,
+					timeoutMs: 15_000,
+				}),
+				expect.objectContaining({
+					args: ["status", "--short", "--untracked-files=all"],
+					command: "git",
+					cwd: repositoryRoot,
+					timeoutMs: 15_000,
+				}),
+			]),
+		);
 	});
 
 	it("fixes must-fix review findings and reruns proof and review", async () => {

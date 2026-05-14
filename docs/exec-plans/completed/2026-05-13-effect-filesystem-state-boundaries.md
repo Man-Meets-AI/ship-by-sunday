@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Move local-runner filesystem state helpers behind injectable Effect services while preserving current promise APIs and repository safety behavior.
 post_build_recap: Local project state, runner-home credentials, repository path safety, Codex config files, and doctor artifacts now expose injectable Effect services while existing promise APIs and focused behavior tests remain green.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-4.md
 read_when:
   - Resuming the local-runner filesystem state Effect migration slice.
   - Validating local .sbs state, runner-home credentials, repository boundaries, Codex config, or doctor artifacts.
@@ -132,8 +132,8 @@ Validate this plan and Program packet:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/core/local-project-state.ts packages/local-runner/src/core/local-runner-home.ts packages/local-runner/src/core/repository-boundary.ts packages/local-runner/src/core/codex-config-manager.ts packages/local-runner/src/core/doctor-pass/artifacts.ts packages/local-runner/tests/local-state.test.ts packages/local-runner/tests/codex-config-manager.test.ts packages/local-runner/tests/doctor-pass.test.ts packages/local-runner/tests/setup-check.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/core/local-project-state.ts packages/local-runner/src/core/local-runner-home.ts packages/local-runner/src/core/repository-boundary.ts packages/local-runner/src/core/codex-config-manager.ts packages/local-runner/src/core/doctor-pass/artifacts.ts packages/local-runner/tests/local-state.test.ts packages/local-runner/tests/codex-config-manager.test.ts packages/local-runner/tests/doctor-pass.test.ts packages/local-runner/tests/setup-check.test.ts
 
 ## Validation and Acceptance
 
@@ -162,8 +162,8 @@ Run these commands before completing this plan:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/core/local-project-state.ts packages/local-runner/src/core/local-runner-home.ts packages/local-runner/src/core/repository-boundary.ts packages/local-runner/src/core/codex-config-manager.ts packages/local-runner/src/core/doctor-pass/artifacts.ts packages/local-runner/tests/local-state.test.ts packages/local-runner/tests/codex-config-manager.test.ts packages/local-runner/tests/doctor-pass.test.ts packages/local-runner/tests/setup-check.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/core/local-project-state.ts packages/local-runner/src/core/local-runner-home.ts packages/local-runner/src/core/repository-boundary.ts packages/local-runner/src/core/codex-config-manager.ts packages/local-runner/src/core/doctor-pass/artifacts.ts packages/local-runner/tests/local-state.test.ts packages/local-runner/tests/codex-config-manager.test.ts packages/local-runner/tests/doctor-pass.test.ts packages/local-runner/tests/setup-check.test.ts
 
 ## Idempotence and Recovery
 
@@ -177,8 +177,8 @@ Research sources read before implementation:
 
     docs/exec-plans/PLANS.md
     docs/programs/PROGRAMS.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-4.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-4.md
     packages/local-runner/src/core/local-project-state.ts
     packages/local-runner/src/core/local-runner-home.ts
     packages/local-runner/src/core/repository-boundary.ts
@@ -214,11 +214,11 @@ Validation evidence from 2026-05-13:
     bun run programs:lint
     local-runner-node-effect-migration: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
     docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md: ok
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md: ok
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md: ok
 
-    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/core/local-project-state.ts packages/local-runner/src/core/local-runner-home.ts packages/local-runner/src/core/repository-boundary.ts packages/local-runner/src/core/codex-config-manager.ts packages/local-runner/src/core/doctor-pass/artifacts.ts packages/local-runner/tests/local-state.test.ts packages/local-runner/tests/codex-config-manager.test.ts
+    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-filesystem-state-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/core/local-project-state.ts packages/local-runner/src/core/local-runner-home.ts packages/local-runner/src/core/repository-boundary.ts packages/local-runner/src/core/codex-config-manager.ts packages/local-runner/src/core/doctor-pass/artifacts.ts packages/local-runner/tests/local-state.test.ts packages/local-runner/tests/codex-config-manager.test.ts
     exited with code 0
 
 ## Interfaces and Dependencies

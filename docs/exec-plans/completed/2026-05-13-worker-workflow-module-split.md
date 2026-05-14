@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Split the Worker Foundations installer into behavior-preserving modules so the later Effect migration has narrow ownership boundaries.
 post_build_recap: The Worker Foundations install workflow now has feature-local modules for inspect, plan, apply, proof, report, generated templates, license, kickoff, confirmation, environment, result, constants, types, and utilities. `workflow.ts` remains the stable orchestration entry point.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-5.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-5.md
 read_when:
   - Resuming the Worker Foundations workflow module split.
   - Refactoring the local-runner Worker installer before its Effect migration.
@@ -123,8 +123,8 @@ Before completing this plan, run:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts packages/local-runner/tests/worker-install-compatibility-smoke.ts packages/local-runner/tests/package-smoke.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts packages/local-runner/tests/worker-install-compatibility-smoke.ts packages/local-runner/tests/package-smoke.ts
 
 ## Validation and Acceptance
 
@@ -155,8 +155,8 @@ Run these commands before completing this plan:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts packages/local-runner/tests/worker-install-compatibility-smoke.ts packages/local-runner/tests/package-smoke.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts packages/local-runner/tests/worker-install-compatibility-smoke.ts packages/local-runner/tests/package-smoke.ts
 
 ## Idempotence and Recovery
 
@@ -168,8 +168,8 @@ Research sources read before implementation:
 
     docs/exec-plans/PLANS.md
     docs/programs/PROGRAMS.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-5.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-5.md
     packages/local-runner/src/workflows/worker-foundations-install/workflow.ts
     packages/local-runner/src/workflows/worker-foundations-install/manifest.ts
     packages/local-runner/tests/worker-foundations-install.test.ts
@@ -216,9 +216,9 @@ Baseline validation evidence from 2026-05-13:
     bun run programs:lint
     local-runner-node-effect-migration: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-worker-workflow-module-split.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-worker-workflow-module-split.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
     docs/exec-plans/active/2026-05-13-worker-workflow-module-split.md: ok
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md: ok
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md: ok
 
 Final validation evidence from 2026-05-13:
 
@@ -252,9 +252,9 @@ Final validation evidence from 2026-05-13:
     bun run programs:lint
     local-runner-node-effect-migration: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
     docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md: ok
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md: ok
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md: ok
 
     git diff --cached --check
     exited with code 0

@@ -2,6 +2,14 @@
 
 This package owns the `shipbysunday` local CLI, including the Worker Foundations installer. Most development checks should run from the Ship by Sunday repository root. The installer itself targets another Git repository that you pass with `--repo`.
 
+## Runtime Contract
+
+The shipped `ship-by-sunday` and `shipbysunday` bins are Node-first. The package builds a Node 20 `dist/cli.js` bundle, and package smoke proves the installed CLI without requiring Bun at runtime. Source-mode development in this monorepo still uses the repo's Bun scripts, such as `bun run --cwd packages/local-runner test`.
+
+Worker Foundations install also defaults unclaimed target repositories to Node/npm. Blank Git repositories receive `packageManager: npm@11.12.1`, generated Worker scripts run through `node`, and installed Worker proof uses the target repository package manager commands such as `npm run docs:validate` and `npm run worker:test`.
+
+The main external I/O boundaries are Effect-backed services with promise adapters preserved for command callers. Process execution, Codex execution, runner event outbox delivery, workflow-run API calls, repository-safe file writes, local `.sbs` state, runner-home credentials, doctor artifacts, Codex config files, Worker install result sync, Worker proof commands, and Program run-slice orchestration can be tested through injected services.
+
 ## Program Runner Commands
 
 The autonomous Program runner has two command layers. `program run-slice` executes one approved Program child ExecPlan through implementation, proof, fresh review, bounded fixes, reproof, docs sync, and checkpoint artifacts. `program run` sequences active child ExecPlans for a Program by reusing `program run-slice` until the Program is complete, blocked, or stopped by `--max-slices`.

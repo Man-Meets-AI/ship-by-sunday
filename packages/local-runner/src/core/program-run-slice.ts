@@ -1,17 +1,36 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { lstat, readFile, realpath, writeFile } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
+import { Effect, Layer } from "effect";
 
-import { runBoundedProcess } from "./bounded-process";
-import type { JsonObject, JsonValue } from "./json-value";
-import { ensureLocalProjectStateDirectory } from "./local-project-state";
 import {
-	ensureRepositoryDirectory,
+	BoundedProcessService,
+	NodeBoundedProcessServiceLive,
+	runBoundedProcessEffect,
+} from "./bounded-process";
+import type { JsonObject, JsonValue } from "./json-value";
+import {
+	ensureLocalProjectStateDirectoryEffect,
+	LocalProjectStateService,
+	NodeLocalProjectStateServiceLive,
+} from "./local-project-state";
+import {
+	ensureRepositoryDirectoryEffect,
+	NodeRepositoryBoundaryServiceLive,
+	RepositoryBoundaryService,
 	resolveRepositoryPath,
-	writeRepositoryTextFile,
+	writeRepositoryTextFileEffect,
 } from "./repository-boundary";
-import { runCodexExec } from "./codex-exec-runner";
+import {
+	CodexExecService,
+	NodeCodexExecServiceLive,
+	runCodexExecEffect,
+} from "./codex-exec-runner";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 import {
 	isProgramId,
 	resolveCurrentPlanningBrief,
@@ -177,7 +196,7 @@ type GitSnapshot = {
 	statusShort: string;
 };
 
-export async function runProgramRunSlice(params: {
+export type ProgramRunSliceParams = {
 	executor?: ProgramRunSliceExecutor;
 	maxFixAttempts?: number;
 	planPath: string;
@@ -185,7 +204,321 @@ export async function runProgramRunSlice(params: {
 	repoRootDir: string;
 	runId?: string;
 	timeoutMs?: number;
-}): Promise<ProgramRunSliceResult> {
+};
+
+type ProgramRunSliceResolvedParams = {
+	executor: ProgramRunSliceEffectExecutor;
+	maxFixAttempts: number;
+	planPath: string;
+	programId: string;
+	repoRootDir: string;
+	runDirectory: string;
+	runDirectoryRelativePath: string;
+	runId: string;
+	timeoutMs: number;
+};
+
+type ProgramRunSliceEffectExecutor = (
+	input: ProgramRunSliceExecutorInput,
+) => Effect.Effect<ProgramRunSliceExecutorOutput, Error, CodexExecService>;
+
+type ProgramRunSliceServices =
+	| BoundedProcessService
+	| CodexExecService
+	| LocalProjectStateService
+	| RepositoryBoundaryService;
+
+export const NodeProgramRunSliceServicesLive = Layer.mergeAll(
+	NodeBoundedProcessServiceLive,
+	NodeCodexExecServiceLive,
+	NodeLocalProjectStateServiceLive,
+	NodeRepositoryBoundaryServiceLive,
+);
+
+export async function runProgramRunSlice(
+	params: ProgramRunSliceParams,
+): Promise<ProgramRunSliceResult> {
+	return await runLocalRunnerEffect(
+		runProgramRunSliceEffect(params).pipe(
+			Effect.provide(NodeProgramRunSliceServicesLive),
+		),
+	);
+}
+
+export function runProgramRunSliceEffect(
+	params: ProgramRunSliceParams,
+): Effect.Effect<ProgramRunSliceResult, Error, ProgramRunSliceServices> {
+	return Effect.gen(function* () {
+		const resolvedParams = yield* captureSyncError(() =>
+			resolveProgramRunSliceParams(params),
+		);
+		const startedAt = new Date().toISOString();
+		const state: ProgramRunSliceState = {
+			currentPhase: "hydrate_context",
+			fixAttempts: 0,
+			phases: [],
+			planPath: resolvedParams.planPath,
+			programId: resolvedParams.programId,
+			repoRootDir: resolvedParams.repoRootDir,
+			runId: resolvedParams.runId,
+			startedAt,
+			updatedAt: startedAt,
+		};
+
+		yield* ensureLocalProjectStateDirectoryEffect(resolvedParams.repoRootDir);
+
+		const runSlice = Effect.gen(function* () {
+			yield* ensureRepositoryDirectoryEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+			);
+			yield* writeStateEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+			);
+			let context = yield* capturePromiseError(() =>
+				hydrateProgramRunSliceContext({
+					planPath: resolvedParams.planPath,
+					programId: resolvedParams.programId,
+					repoRootDir: resolvedParams.repoRootDir,
+				}),
+			);
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"hydrate_context",
+			);
+
+			yield* runExecutorOrThrowEffect(resolvedParams.executor, {
+				prompt: buildExecutePrompt(context),
+				purpose: "execute",
+				repositoryRoot: resolvedParams.repoRootDir,
+				profileName: "sbs-workspace-write",
+				sandboxMode: "workspace-write",
+				timeoutMs: resolvedParams.timeoutMs,
+			});
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"execute",
+			);
+
+			context = yield* capturePromiseError(() =>
+				hydrateProgramRunSliceContext({
+					planPath: resolvedParams.planPath,
+					programId: resolvedParams.programId,
+					repoRootDir: resolvedParams.repoRootDir,
+				}),
+			);
+			let proofCommands = yield* capturePromiseError(() =>
+				extractProgramRunSliceProofCommands({
+					planPath: resolvedParams.planPath,
+					repoRootDir: resolvedParams.repoRootDir,
+				}),
+			);
+			let proofResults = yield* runProgramRunSliceProofCommandsEffect({
+				commands: proofCommands,
+				repoRootDir: resolvedParams.repoRootDir,
+				timeoutMs: resolvedParams.timeoutMs,
+			});
+			yield* captureSyncError(() => assertProofSucceeded(proofResults));
+			yield* writeProofSummaryEffect({
+				proofResults,
+				repoRootDir: resolvedParams.repoRootDir,
+				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+			});
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"proof",
+			);
+
+			let gitSnapshot = yield* readGitSnapshotEffect(
+				resolvedParams.repoRootDir,
+			);
+			let reviewResult = yield* runReviewPassEffect({
+				context,
+				executor: resolvedParams.executor,
+				gitSnapshot,
+				repoRootDir: resolvedParams.repoRootDir,
+				reviewAttempt: 1,
+				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+				timeoutMs: resolvedParams.timeoutMs,
+			});
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"review",
+			);
+
+			let mustFixFindings = getMustFixFindings(reviewResult);
+			while (mustFixFindings.length > 0) {
+				if (state.fixAttempts >= resolvedParams.maxFixAttempts) {
+					return yield* Effect.fail(
+						new Error(
+							`Review still has ${mustFixFindings.length} must-fix finding(s) after ${state.fixAttempts}/${resolvedParams.maxFixAttempts} fix attempt(s).`,
+						),
+					);
+				}
+
+				state.fixAttempts += 1;
+				yield* writeStateEffect(
+					resolvedParams.repoRootDir,
+					resolvedParams.runDirectoryRelativePath,
+					state,
+				);
+				yield* runExecutorOrThrowEffect(resolvedParams.executor, {
+					prompt: buildFixPrompt({
+						context,
+						findings: mustFixFindings,
+						fixAttempt: state.fixAttempts,
+						maxFixAttempts: resolvedParams.maxFixAttempts,
+					}),
+					purpose: "fix",
+					repositoryRoot: resolvedParams.repoRootDir,
+					profileName: "sbs-workspace-write",
+					sandboxMode: "workspace-write",
+					timeoutMs: resolvedParams.timeoutMs,
+				});
+				yield* completePhaseEffect(
+					resolvedParams.repoRootDir,
+					resolvedParams.runDirectoryRelativePath,
+					state,
+					"fix_findings",
+				);
+
+				context = yield* capturePromiseError(() =>
+					hydrateProgramRunSliceContext({
+						planPath: resolvedParams.planPath,
+						programId: resolvedParams.programId,
+						repoRootDir: resolvedParams.repoRootDir,
+					}),
+				);
+				proofCommands = yield* capturePromiseError(() =>
+					extractProgramRunSliceProofCommands({
+						planPath: resolvedParams.planPath,
+						repoRootDir: resolvedParams.repoRootDir,
+					}),
+				);
+				proofResults = yield* runProgramRunSliceProofCommandsEffect({
+					commands: proofCommands,
+					repoRootDir: resolvedParams.repoRootDir,
+					timeoutMs: resolvedParams.timeoutMs,
+				});
+				yield* captureSyncError(() => assertProofSucceeded(proofResults));
+				yield* writeProofSummaryEffect({
+					proofResults,
+					repoRootDir: resolvedParams.repoRootDir,
+					runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+				});
+				yield* completePhaseEffect(
+					resolvedParams.repoRootDir,
+					resolvedParams.runDirectoryRelativePath,
+					state,
+					"reproof",
+				);
+
+				gitSnapshot = yield* readGitSnapshotEffect(resolvedParams.repoRootDir);
+				reviewResult = yield* runReviewPassEffect({
+					context,
+					executor: resolvedParams.executor,
+					gitSnapshot,
+					repoRootDir: resolvedParams.repoRootDir,
+					reviewAttempt: state.fixAttempts + 1,
+					runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+					timeoutMs: resolvedParams.timeoutMs,
+				});
+				mustFixFindings = getMustFixFindings(reviewResult);
+				yield* completePhaseEffect(
+					resolvedParams.repoRootDir,
+					resolvedParams.runDirectoryRelativePath,
+					state,
+					"review",
+				);
+			}
+
+			proofResults = yield* runProgramRunSliceProofCommandsEffect({
+				commands: proofCommands,
+				repoRootDir: resolvedParams.repoRootDir,
+				timeoutMs: resolvedParams.timeoutMs,
+			});
+			yield* captureSyncError(() => assertProofSucceeded(proofResults));
+			yield* writeProofSummaryEffect({
+				proofResults,
+				repoRootDir: resolvedParams.repoRootDir,
+				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+			});
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"reproof",
+			);
+
+			yield* syncProgramRunSliceDocsEffect({
+				planPath: resolvedParams.planPath,
+				programId: resolvedParams.programId,
+				proofResults,
+				repoRootDir: resolvedParams.repoRootDir,
+				reviewResult,
+				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+				runId: resolvedParams.runId,
+			});
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"sync_docs",
+			);
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"checkpoint",
+			);
+			yield* completePhaseEffect(
+				resolvedParams.repoRootDir,
+				resolvedParams.runDirectoryRelativePath,
+				state,
+				"complete",
+			);
+
+			return {
+				finalStatus: "complete" as const,
+				fixAttempts: state.fixAttempts,
+				planPath: resolvedParams.planPath,
+				programId: resolvedParams.programId,
+				proofResults,
+				reviewFindings: reviewResult.findings,
+				runDirectory: resolvedParams.runDirectory,
+				runId: resolvedParams.runId,
+			};
+		});
+
+		return yield* Effect.catchAll(runSlice, (error) =>
+			Effect.gen(function* () {
+				state.errorMessage = error.message;
+				yield* completePhaseEffect(
+					resolvedParams.repoRootDir,
+					resolvedParams.runDirectoryRelativePath,
+					state,
+					"blocked",
+					"failed",
+				).pipe(Effect.catchAll(() => Effect.void));
+				return yield* Effect.fail(error);
+			}),
+		);
+	});
+}
+
+function resolveProgramRunSliceParams(
+	params: ProgramRunSliceParams,
+): ProgramRunSliceResolvedParams {
 	const repoRootDir = path.resolve(params.repoRootDir);
 	const planPath = normalizeRepoRelativePath(params.planPath);
 	const programId = normalizeProgramId(params.programId);
@@ -193,8 +526,6 @@ export async function runProgramRunSlice(params: {
 		params.maxFixAttempts ?? DEFAULT_FIX_ATTEMPTS,
 	);
 	const timeoutMs = params.timeoutMs ?? DEFAULT_COMMAND_TIMEOUT_MS;
-	const executor = params.executor ?? defaultProgramRunSliceExecutor;
-	const startedAt = new Date().toISOString();
 	const runId = normalizeProgramRunId(
 		params.runId ?? buildProgramRunSliceId(programId),
 	);
@@ -207,262 +538,82 @@ export async function runProgramRunSlice(params: {
 		repoRootDir,
 		runDirectoryRelativePath,
 	);
-	const state: ProgramRunSliceState = {
-		currentPhase: "hydrate_context",
-		fixAttempts: 0,
-		phases: [],
+
+	return {
+		executor: params.executor
+			? wrapPromiseProgramRunSliceExecutor(params.executor)
+			: defaultProgramRunSliceExecutorEffect,
+		maxFixAttempts,
 		planPath,
 		programId,
 		repoRootDir,
+		runDirectory,
+		runDirectoryRelativePath,
 		runId,
-		startedAt,
-		updatedAt: startedAt,
+		timeoutMs,
 	};
+}
 
-	await ensureLocalProjectStateDirectory(repoRootDir);
-	try {
-		await ensureRepositoryDirectory(repoRootDir, runDirectoryRelativePath);
-		await writeState(repoRootDir, runDirectoryRelativePath, state);
-		let context = await hydrateProgramRunSliceContext({
-			planPath,
-			programId,
-			repoRootDir,
+function wrapPromiseProgramRunSliceExecutor(
+	executor: ProgramRunSliceExecutor,
+): ProgramRunSliceEffectExecutor {
+	return (input) =>
+		capturePromiseError(() => runExecutorOrThrow(executor, input));
+}
+
+function captureSyncError<T>(operation: () => T): Effect.Effect<T, Error> {
+	return Effect.try({
+		try: operation,
+		catch: normalizeLocalRunnerEffectError,
+	});
+}
+
+function capturePromiseError<T>(
+	operation: () => Promise<T>,
+): Effect.Effect<T, Error> {
+	return Effect.tryPromise({
+		try: operation,
+		catch: normalizeLocalRunnerEffectError,
+	});
+}
+
+function defaultProgramRunSliceExecutorEffect(
+	input: ProgramRunSliceExecutorInput,
+): Effect.Effect<ProgramRunSliceExecutorOutput, Error, CodexExecService> {
+	return Effect.gen(function* () {
+		const result = yield* runCodexExecEffect({
+			allowNonGitSmoke: false,
+			outputSchemaPath: input.outputSchemaPath,
+			profileName: input.profileName,
+			prompt: input.prompt,
+			repositoryRoot: input.repositoryRoot,
+			sandboxMode: input.sandboxMode,
+			timeoutMs: input.timeoutMs,
 		});
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"hydrate_context",
-		);
 
-		await runExecutorOrThrow(executor, {
-			prompt: buildExecutePrompt(context),
-			purpose: "execute",
-			repositoryRoot: repoRootDir,
-			profileName: "sbs-workspace-write",
-			sandboxMode: "workspace-write",
-			timeoutMs,
-		});
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"execute",
-		);
-
-		context = await hydrateProgramRunSliceContext({
-			planPath,
-			programId,
-			repoRootDir,
-		});
-		let proofCommands = await extractProgramRunSliceProofCommands({
-			planPath,
-			repoRootDir,
-		});
-		let proofResults = await runProofCommands({
-			commands: proofCommands,
-			repoRootDir,
-			timeoutMs,
-		});
-		assertProofSucceeded(proofResults);
-		await writeProofSummary({
-			proofResults,
-			repoRootDir,
-			runDirectoryRelativePath,
-		});
-		await completePhase(repoRootDir, runDirectoryRelativePath, state, "proof");
-
-		let gitSnapshot = await readGitSnapshot(repoRootDir);
-		let reviewResult = await runReviewPass({
-			context,
-			executor,
-			gitSnapshot,
-			repoRootDir,
-			reviewAttempt: 1,
-			runDirectoryRelativePath,
-			timeoutMs,
-		});
-		await completePhase(repoRootDir, runDirectoryRelativePath, state, "review");
-
-		let mustFixFindings = getMustFixFindings(reviewResult);
-		while (mustFixFindings.length > 0) {
-			if (state.fixAttempts >= maxFixAttempts) {
-				throw new Error(
-					`Review still has ${mustFixFindings.length} must-fix finding(s) after ${state.fixAttempts}/${maxFixAttempts} fix attempt(s).`,
-				);
-			}
-
-			state.fixAttempts += 1;
-			await writeState(repoRootDir, runDirectoryRelativePath, state);
-			await runExecutorOrThrow(executor, {
-				prompt: buildFixPrompt({
-					context,
-					findings: mustFixFindings,
-					fixAttempt: state.fixAttempts,
-					maxFixAttempts,
-				}),
-				purpose: "fix",
-				repositoryRoot: repoRootDir,
-				profileName: "sbs-workspace-write",
-				sandboxMode: "workspace-write",
-				timeoutMs,
-			});
-			await completePhase(
-				repoRootDir,
-				runDirectoryRelativePath,
-				state,
-				"fix_findings",
-			);
-
-			context = await hydrateProgramRunSliceContext({
-				planPath,
-				programId,
-				repoRootDir,
-			});
-			proofCommands = await extractProgramRunSliceProofCommands({
-				planPath,
-				repoRootDir,
-			});
-			proofResults = await runProofCommands({
-				commands: proofCommands,
-				repoRootDir,
-				timeoutMs,
-			});
-			assertProofSucceeded(proofResults);
-			await writeProofSummary({
-				proofResults,
-				repoRootDir,
-				runDirectoryRelativePath,
-			});
-			await completePhase(
-				repoRootDir,
-				runDirectoryRelativePath,
-				state,
-				"reproof",
-			);
-
-			gitSnapshot = await readGitSnapshot(repoRootDir);
-			reviewResult = await runReviewPass({
-				context,
-				executor,
-				gitSnapshot,
-				repoRootDir,
-				reviewAttempt: state.fixAttempts + 1,
-				runDirectoryRelativePath,
-				timeoutMs,
-			});
-			mustFixFindings = getMustFixFindings(reviewResult);
-			await completePhase(
-				repoRootDir,
-				runDirectoryRelativePath,
-				state,
-				"review",
+		if (result.exitCode !== 0 || result.timedOut) {
+			return yield* Effect.fail(
+				new Error(
+					[
+						`codex exec ${input.purpose} failed with exit code ${result.exitCode}`,
+						result.timedOut ? "Timed out: true" : "",
+						result.stderr.trim() === "" ? "" : `STDERR:\n${result.stderr}`,
+						result.finalAgentMessage?.trim()
+							? `LAST MESSAGE:\n${result.finalAgentMessage}`
+							: "",
+					]
+						.filter(Boolean)
+						.join("\n\n"),
+				),
 			);
 		}
 
-		proofResults = await runProofCommands({
-			commands: proofCommands,
-			repoRootDir,
-			timeoutMs,
-		});
-		assertProofSucceeded(proofResults);
-		await writeProofSummary({
-			proofResults,
-			repoRootDir,
-			runDirectoryRelativePath,
-		});
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"reproof",
-		);
-
-		await syncProgramRunSliceDocs({
-			planPath,
-			programId,
-			proofResults,
-			repoRootDir,
-			reviewResult,
-			runDirectoryRelativePath,
-			runId,
-		});
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"sync_docs",
-		);
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"checkpoint",
-		);
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"complete",
-		);
-
 		return {
-			finalStatus: "complete",
-			fixAttempts: state.fixAttempts,
-			planPath,
-			programId,
-			proofResults,
-			reviewFindings: reviewResult.findings,
-			runDirectory,
-			runId,
+			finalMessage: result.finalAgentMessage ?? "",
+			structuredOutput: result.structuredOutput,
+			threadId: result.threadId,
 		};
-	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		state.errorMessage = errorMessage;
-		await completePhase(
-			repoRootDir,
-			runDirectoryRelativePath,
-			state,
-			"blocked",
-			"failed",
-		);
-		throw error;
-	}
-}
-
-async function defaultProgramRunSliceExecutor(
-	input: ProgramRunSliceExecutorInput,
-): Promise<ProgramRunSliceExecutorOutput> {
-	const result = await runCodexExec({
-		allowNonGitSmoke: false,
-		outputSchemaPath: input.outputSchemaPath,
-		profileName: input.profileName,
-		prompt: input.prompt,
-		repositoryRoot: input.repositoryRoot,
-		sandboxMode: input.sandboxMode,
-		timeoutMs: input.timeoutMs,
 	});
-
-	if (result.exitCode !== 0 || result.timedOut) {
-		throw new Error(
-			[
-				`codex exec ${input.purpose} failed with exit code ${result.exitCode}`,
-				result.timedOut ? "Timed out: true" : "",
-				result.stderr.trim() === "" ? "" : `STDERR:\n${result.stderr}`,
-				result.finalAgentMessage?.trim()
-					? `LAST MESSAGE:\n${result.finalAgentMessage}`
-					: "",
-			]
-				.filter(Boolean)
-				.join("\n\n"),
-		);
-	}
-
-	return {
-		finalMessage: result.finalAgentMessage ?? "",
-		structuredOutput: result.structuredOutput,
-		threadId: result.threadId,
-	};
 }
 
 async function hydrateProgramRunSliceContext(params: {
@@ -569,15 +720,33 @@ async function runExecutorOrThrow(
 	return result;
 }
 
-async function runReviewPass(params: {
+function runExecutorOrThrowEffect(
+	executor: ProgramRunSliceEffectExecutor,
+	input: ProgramRunSliceExecutorInput,
+) {
+	return Effect.flatMap(executor(input), (result) => {
+		if (result.finalMessage.trim() === "" && input.purpose !== "review") {
+			return Effect.fail(
+				new Error(`codex ${input.purpose} returned an empty final message.`),
+			);
+		}
+		return Effect.succeed(result);
+	});
+}
+
+function runReviewPassEffect(params: {
 	context: Awaited<ReturnType<typeof hydrateProgramRunSliceContext>>;
-	executor: ProgramRunSliceExecutor;
+	executor: ProgramRunSliceEffectExecutor;
 	gitSnapshot: GitSnapshot;
 	repoRootDir: string;
 	reviewAttempt: number;
 	runDirectoryRelativePath: string;
 	timeoutMs: number;
-}) {
+}): Effect.Effect<
+	ProgramRunSliceReviewResult,
+	Error,
+	CodexExecService | RepositoryBoundaryService
+> {
 	const reviewSchemaPath = path.posix.join(
 		params.runDirectoryRelativePath,
 		REVIEW_OUTPUT_SCHEMA_FILENAME,
@@ -606,63 +775,70 @@ async function runReviewPass(params: {
 		params.runDirectoryRelativePath,
 		`review-policy-summary-${params.reviewAttempt}.json`,
 	);
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewSchemaPath,
-		`${JSON.stringify(buildReviewOutputSchema(), null, 2)}\n`,
-	);
-	const reviewPrompt = buildReviewPrompt({
-		context: params.context,
-		gitSnapshot: params.gitSnapshot,
-	});
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewPromptPath,
-		reviewPrompt,
-	);
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewPromptAttemptPath,
-		reviewPrompt,
-	);
-	const result = await params.executor({
-		outputSchemaPath: resolveRepositoryPath(
+	return Effect.gen(function* () {
+		yield* writeRepositoryTextFileEffect(
 			params.repoRootDir,
 			reviewSchemaPath,
-		),
-		profileName: "sbs-doctor-readonly",
-		prompt: await readFile(
-			resolveRepositoryPath(params.repoRootDir, reviewPromptPath),
-			"utf8",
-		),
-		purpose: "review",
-		repositoryRoot: params.repoRootDir,
-		sandboxMode: "read-only",
-		timeoutMs: params.timeoutMs,
+			`${JSON.stringify(buildReviewOutputSchema(), null, 2)}\n`,
+		);
+		const reviewPrompt = buildReviewPrompt({
+			context: params.context,
+			gitSnapshot: params.gitSnapshot,
+		});
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			reviewPromptPath,
+			reviewPrompt,
+		);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			reviewPromptAttemptPath,
+			reviewPrompt,
+		);
+		const prompt = yield* capturePromiseError(() =>
+			readFile(
+				resolveRepositoryPath(params.repoRootDir, reviewPromptPath),
+				"utf8",
+			),
+		);
+		const result = yield* params.executor({
+			outputSchemaPath: resolveRepositoryPath(
+				params.repoRootDir,
+				reviewSchemaPath,
+			),
+			profileName: "sbs-doctor-readonly",
+			prompt,
+			purpose: "review",
+			repositoryRoot: params.repoRootDir,
+			sandboxMode: "read-only",
+			timeoutMs: params.timeoutMs,
+		});
+		const reviewResult = yield* captureSyncError(() =>
+			parseReviewResult(result.structuredOutput),
+		);
+		const reviewPolicySummary = buildReviewPolicySummary(reviewResult);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			reviewResultPath,
+			`${JSON.stringify(reviewResult, null, 2)}\n`,
+		);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			reviewResultAttemptPath,
+			`${JSON.stringify(reviewResult, null, 2)}\n`,
+		);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			reviewPolicySummaryPath,
+			`${JSON.stringify(reviewPolicySummary, null, 2)}\n`,
+		);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			reviewPolicySummaryAttemptPath,
+			`${JSON.stringify(reviewPolicySummary, null, 2)}\n`,
+		);
+		return reviewResult;
 	});
-	const reviewResult = parseReviewResult(result.structuredOutput);
-	const reviewPolicySummary = buildReviewPolicySummary(reviewResult);
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewResultPath,
-		`${JSON.stringify(reviewResult, null, 2)}\n`,
-	);
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewResultAttemptPath,
-		`${JSON.stringify(reviewResult, null, 2)}\n`,
-	);
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewPolicySummaryPath,
-		`${JSON.stringify(reviewPolicySummary, null, 2)}\n`,
-	);
-	await writeRepositoryTextFile(
-		params.repoRootDir,
-		reviewPolicySummaryAttemptPath,
-		`${JSON.stringify(reviewPolicySummary, null, 2)}\n`,
-	);
-	return reviewResult;
 }
 
 export async function extractProgramRunSliceProofCommands(params: {
@@ -734,38 +910,45 @@ export async function extractProgramRunSliceProofCommands(params: {
 	return commands;
 }
 
-async function runProofCommands(params: {
+export function runProgramRunSliceProofCommandsEffect(params: {
 	commands: ProgramRunSliceProofCommand[];
 	repoRootDir: string;
 	timeoutMs: number;
-}): Promise<ProgramRunSliceProofCommandResult[]> {
-	const results: ProgramRunSliceProofCommandResult[] = [];
-	for (const command of params.commands) {
-		await assertProofCommandCwdInsideRepository(
-			params.repoRootDir,
-			command.cwd,
-		);
-		const invocation = parseProofCommandInvocation(command.command);
-		const result = await runBoundedProcess({
-			args: invocation.args,
-			command: invocation.command,
-			cwd: command.cwd,
-			env: buildProofCommandEnvironment(invocation.env),
-			timeoutMs: params.timeoutMs,
-		});
-		results.push({
-			command: command.command,
-			cwd: command.cwd,
-			exitCode: result.exitCode ?? (result.succeeded ? 0 : null),
-			stderrTail: trimOutputTail(result.stderr),
-			stdoutTail: trimOutputTail(result.stdout),
-			succeeded: result.succeeded,
-		});
-		if (!result.succeeded) {
-			break;
+}): Effect.Effect<
+	ProgramRunSliceProofCommandResult[],
+	Error,
+	BoundedProcessService
+> {
+	return Effect.gen(function* () {
+		const results: ProgramRunSliceProofCommandResult[] = [];
+		for (const command of params.commands) {
+			yield* capturePromiseError(() =>
+				assertProofCommandCwdInsideRepository(params.repoRootDir, command.cwd),
+			);
+			const invocation = yield* captureSyncError(() =>
+				parseProofCommandInvocation(command.command),
+			);
+			const result = yield* runBoundedProcessEffect({
+				args: invocation.args,
+				command: invocation.command,
+				cwd: command.cwd,
+				env: buildProofCommandEnvironment(invocation.env),
+				timeoutMs: params.timeoutMs,
+			});
+			results.push({
+				command: command.command,
+				cwd: command.cwd,
+				exitCode: result.exitCode ?? (result.succeeded ? 0 : null),
+				stderrTail: trimOutputTail(result.stderr),
+				stdoutTail: trimOutputTail(result.stdout),
+				succeeded: result.succeeded,
+			});
+			if (!result.succeeded) {
+				break;
+			}
 		}
-	}
-	return results;
+		return results;
+	});
 }
 
 function assertProofSucceeded(results: ProgramRunSliceProofCommandResult[]) {
@@ -1107,7 +1290,7 @@ function buildReviewPolicySummary(reviewResult: ProgramRunSliceReviewResult) {
 	};
 }
 
-async function syncProgramRunSliceDocs(params: {
+function syncProgramRunSliceDocsEffect(params: {
 	planPath: string;
 	programId: string;
 	proofResults: ProgramRunSliceProofCommandResult[];
@@ -1115,7 +1298,7 @@ async function syncProgramRunSliceDocs(params: {
 	reviewResult: ProgramRunSliceReviewResult;
 	runDirectoryRelativePath: string;
 	runId: string;
-}) {
+}): Effect.Effect<void, Error, RepositoryBoundaryService> {
 	const completedAt = new Date().toISOString();
 	const proofPassed = params.proofResults.filter(
 		(result) => result.succeeded,
@@ -1130,50 +1313,58 @@ async function syncProgramRunSliceDocs(params: {
 		`Informational findings: ${reviewPolicySummary.informationalFindings}.`,
 		`Run artifacts: \`${params.runDirectoryRelativePath}/\`.`,
 	].join(" ");
-	const planAbsolutePath = resolveRepositoryPath(
-		params.repoRootDir,
-		params.planPath,
-	);
-	const planText = await readFile(planAbsolutePath, "utf8");
-	await writeFile(
-		planAbsolutePath,
-		insertIntoMarkdownSection(
-			planText,
-			"Artifacts and Notes",
-			["", `### Autonomous Run ${params.runId}`, "", summary, ""].join("\n"),
-		),
-	);
+	return Effect.gen(function* () {
+		const planAbsolutePath = resolveRepositoryPath(
+			params.repoRootDir,
+			params.planPath,
+		);
+		const planText = yield* capturePromiseError(() =>
+			readFile(planAbsolutePath, "utf8"),
+		);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			params.planPath,
+			insertIntoMarkdownSection(
+				planText,
+				"Artifacts and Notes",
+				["", `### Autonomous Run ${params.runId}`, "", summary, ""].join("\n"),
+			),
+		);
 
-	const planningBrief = await resolveCurrentPlanningBrief({
-		programId: params.programId,
-		repoRootDir: params.repoRootDir,
+		const planningBrief = yield* capturePromiseError(() =>
+			resolveCurrentPlanningBrief({
+				programId: params.programId,
+				repoRootDir: params.repoRootDir,
+			}),
+		);
+		const programPath = path.posix.join(
+			path.posix.dirname(planningBrief.planningBriefPath),
+			"program.md",
+		);
+		const programText = yield* capturePromiseError(() =>
+			readFile(resolveRepositoryPath(params.repoRootDir, programPath), "utf8"),
+		);
+		yield* writeRepositoryTextFileEffect(
+			params.repoRootDir,
+			programPath,
+			insertIntoMarkdownSection(
+				programText,
+				"Progress",
+				[
+					"",
+					`- [x] ${completedAt.slice(0, 10)}: Completed autonomous run \`${params.runId}\` for \`${params.planPath}\`; ${proofPassed} proof command(s) passed and ${params.reviewResult.findings.length} review finding(s) were recorded.`,
+					"",
+				].join("\n"),
+			),
+		);
 	});
-	const programPath = path.join(
-		path.dirname(
-			path.join(params.repoRootDir, planningBrief.planningBriefPath),
-		),
-		"program.md",
-	);
-	const programText = await readFile(programPath, "utf8");
-	await writeFile(
-		programPath,
-		insertIntoMarkdownSection(
-			programText,
-			"Progress",
-			[
-				"",
-				`- [x] ${completedAt.slice(0, 10)}: Completed autonomous run \`${params.runId}\` for \`${params.planPath}\`; ${proofPassed} proof command(s) passed and ${params.reviewResult.findings.length} review finding(s) were recorded.`,
-				"",
-			].join("\n"),
-		),
-	);
 }
 
-async function writeProofSummary(params: {
+function writeProofSummaryEffect(params: {
 	proofResults: ProgramRunSliceProofCommandResult[];
 	repoRootDir: string;
 	runDirectoryRelativePath: string;
-}) {
+}): Effect.Effect<void, Error, RepositoryBoundaryService> {
 	const lines = [
 		"# Proof Summary",
 		"",
@@ -1198,20 +1389,20 @@ async function writeProofSummary(params: {
 			"",
 		]),
 	];
-	await writeRepositoryTextFile(
+	return writeRepositoryTextFileEffect(
 		params.repoRootDir,
 		path.posix.join(params.runDirectoryRelativePath, "proof-summary.md"),
 		`${lines.join("\n")}\n`,
 	);
 }
 
-async function completePhase(
+function completePhaseEffect(
 	repoRootDir: string,
 	runDirectoryRelativePath: string,
 	state: ProgramRunSliceState,
 	phase: ProgramRunSlicePhase,
 	status: "completed" | "failed" = "completed",
-) {
+): Effect.Effect<void, Error, RepositoryBoundaryService> {
 	const now = new Date().toISOString();
 	state.currentPhase = phase;
 	state.updatedAt = now;
@@ -1220,78 +1411,88 @@ async function completePhase(
 		name: phase,
 		status,
 	});
-	await writeState(repoRootDir, runDirectoryRelativePath, state);
+	return writeStateEffect(repoRootDir, runDirectoryRelativePath, state);
 }
 
-async function writeState(
+function writeStateEffect(
 	repoRootDir: string,
 	runDirectoryRelativePath: string,
 	state: ProgramRunSliceState,
-) {
-	await writeRepositoryTextFile(
+): Effect.Effect<void, Error, RepositoryBoundaryService> {
+	return writeRepositoryTextFileEffect(
 		repoRootDir,
 		path.posix.join(runDirectoryRelativePath, "state.json"),
 		`${JSON.stringify(state, null, 2)}\n`,
 	);
 }
 
-async function readGitSnapshot(repoRootDir: string): Promise<GitSnapshot> {
-	const [
-		statusShort,
-		trackedDiffNameOnly,
-		trackedDiffStat,
-		trackedDiffSummary,
-		untrackedFilePaths,
-	] = await Promise.all([
-		runGit(["status", "--short", "--untracked-files=all"], { repoRootDir }),
-		runGit(["diff", "HEAD", "--name-only", "--"], { repoRootDir }),
-		runGit(["diff", "HEAD", "--stat", "--"], { repoRootDir }),
-		runGit(["diff", "HEAD", "--"], { repoRootDir }),
-		readUntrackedFilePaths(repoRootDir),
-	]);
-	const untrackedFileSnapshots = await buildUntrackedFileSnapshots({
-		repoRootDir,
-		untrackedFilePaths,
+function readGitSnapshotEffect(
+	repoRootDir: string,
+): Effect.Effect<GitSnapshot, Error, BoundedProcessService> {
+	return Effect.gen(function* () {
+		const statusShort = yield* runGitEffect(
+			["status", "--short", "--untracked-files=all"],
+			{ repoRootDir },
+		);
+		const trackedDiffNameOnly = yield* runGitEffect(
+			["diff", "HEAD", "--name-only", "--"],
+			{ repoRootDir },
+		);
+		const trackedDiffStat = yield* runGitEffect(
+			["diff", "HEAD", "--stat", "--"],
+			{ repoRootDir },
+		);
+		const trackedDiffSummary = yield* runGitEffect(["diff", "HEAD", "--"], {
+			repoRootDir,
+		});
+		const untrackedFilePaths = yield* readUntrackedFilePathsEffect(repoRootDir);
+		const untrackedFileSnapshots = yield* capturePromiseError(() =>
+			buildUntrackedFileSnapshots({
+				repoRootDir,
+				untrackedFilePaths,
+			}),
+		);
+		return {
+			diffNameOnly: truncateText(
+				joinNonEmptySections([
+					trackedDiffNameOnly,
+					untrackedFilePaths.join("\n"),
+				]),
+				12_000,
+			),
+			diffStat: truncateText(
+				joinNonEmptySections([
+					trackedDiffStat,
+					formatUntrackedFileStat(untrackedFilePaths),
+				]),
+				12_000,
+			),
+			diffSummary: truncateText(
+				[
+					"<TRACKED_DIFF_AGAINST_HEAD>",
+					trackedDiffSummary.trim() || "(no tracked diff)",
+					"</TRACKED_DIFF_AGAINST_HEAD>",
+					"",
+					"<UNTRACKED_FILE_SNAPSHOTS>",
+					untrackedFileSnapshots.trim() || "(no untracked files)",
+					"</UNTRACKED_FILE_SNAPSHOTS>",
+				].join("\n"),
+				40_000,
+			),
+			statusShort: truncateText(statusShort, 12_000),
+		};
 	});
-	return {
-		diffNameOnly: truncateText(
-			joinNonEmptySections([
-				trackedDiffNameOnly,
-				untrackedFilePaths.join("\n"),
-			]),
-			12_000,
-		),
-		diffStat: truncateText(
-			joinNonEmptySections([
-				trackedDiffStat,
-				formatUntrackedFileStat(untrackedFilePaths),
-			]),
-			12_000,
-		),
-		diffSummary: truncateText(
-			[
-				"<TRACKED_DIFF_AGAINST_HEAD>",
-				trackedDiffSummary.trim() || "(no tracked diff)",
-				"</TRACKED_DIFF_AGAINST_HEAD>",
-				"",
-				"<UNTRACKED_FILE_SNAPSHOTS>",
-				untrackedFileSnapshots.trim() || "(no untracked files)",
-				"</UNTRACKED_FILE_SNAPSHOTS>",
-			].join("\n"),
-			40_000,
-		),
-		statusShort: truncateText(statusShort, 12_000),
-	};
 }
 
-async function readUntrackedFilePaths(repoRootDir: string) {
-	const output = await runGit(
-		["ls-files", "--others", "--exclude-standard", "-z"],
-		{
+function readUntrackedFilePathsEffect(
+	repoRootDir: string,
+): Effect.Effect<string[], Error, BoundedProcessService> {
+	return Effect.map(
+		runGitEffect(["ls-files", "--others", "--exclude-standard", "-z"], {
 			repoRootDir,
-		},
+		}),
+		(output) => output.split("\0").filter(Boolean),
 	);
-	return output.split("\0").filter(Boolean);
 }
 
 async function buildUntrackedFileSnapshots(params: {
@@ -1382,19 +1583,28 @@ function joinNonEmptySections(sections: string[]) {
 		.join("\n");
 }
 
-async function runGit(args: string[], params: { repoRootDir: string }) {
-	const result = await runBoundedProcess({
-		args,
-		command: "git",
-		cwd: params.repoRootDir,
-		timeoutMs: 15_000,
-	});
-	if (!result.succeeded) {
-		throw new Error(
-			`git ${args.join(" ")} failed: ${result.stderr || result.stdout}`,
-		);
-	}
-	return result.stdout;
+function runGitEffect(
+	args: string[],
+	params: { repoRootDir: string },
+): Effect.Effect<string, Error, BoundedProcessService> {
+	return Effect.flatMap(
+		runBoundedProcessEffect({
+			args,
+			command: "git",
+			cwd: params.repoRootDir,
+			timeoutMs: 15_000,
+		}),
+		(result) => {
+			if (!result.succeeded) {
+				return Effect.fail(
+					new Error(
+						`git ${args.join(" ")} failed: ${result.stderr || result.stdout}`,
+					),
+				);
+			}
+			return Effect.succeed(result.stdout);
+		},
+	);
 }
 
 function extractMarkdownSection(source: string, heading: string) {

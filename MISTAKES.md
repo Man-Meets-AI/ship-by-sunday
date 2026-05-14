@@ -1,5 +1,17 @@
 # Mistakes
 
+## 2026-05-14 Program Brief Pointer Edit
+
+- Mistake: I updated `current-planning-brief.txt` with shell redirection instead of `apply_patch`.
+  Impact: The content was correct, but the edit violated the repo's file-editing discipline.
+  Corrective action: Use `apply_patch` for small text-file updates, including one-line pointer files.
+
+## 2026-05-14 Zsh Special Path Variable In Staging Helper
+
+- Mistake: I used `path` as a zsh loop variable while building index-only staged files, which shadowed the shell command search path and caused the helper to fail.
+  Impact: The helper did not stage the intended shared Program index files on that attempt.
+  Corrective action: Avoid zsh special parameter names such as `path`, `status`, and `signals` in shell snippets; use explicit names like `repo_file`.
+
 ## 2026-05-14 Repeated Convex Skill Path Lookup
 
 - Mistake: I retried a stale global Convex skill path instead of using the repo-local `.agents/skills/convex/SKILL.md` path that the skill inventory already identified.

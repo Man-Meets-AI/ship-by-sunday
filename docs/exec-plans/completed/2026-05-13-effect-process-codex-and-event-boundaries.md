@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Move Codex execution, runner event delivery, and workflow-run API calls behind injectable Effect services while preserving current promise APIs.
 post_build_recap: Codex execution, runner event delivery, and workflow-run API calls now expose injectable Effect services while current promise adapters and focused behavior tests remain green.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-3.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-3.md
 read_when:
   - Resuming the process, Codex, event, and workflow API Effect migration slice.
   - Validating Codex execution behavior after introducing Effect services.
@@ -150,8 +150,8 @@ Validate the plan and Program packet:
 
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/effect/runtime.ts packages/local-runner/src/core/codex-exec-runner.ts packages/local-runner/src/core/runner-events.ts packages/local-runner/src/core/workflow-run-api.ts packages/local-runner/tests/codex-exec-runner.test.ts packages/local-runner/tests/runner-events.test.ts packages/local-runner/tests/workflow-run-api.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/effect/runtime.ts packages/local-runner/src/core/codex-exec-runner.ts packages/local-runner/src/core/runner-events.ts packages/local-runner/src/core/workflow-run-api.ts packages/local-runner/tests/codex-exec-runner.test.ts packages/local-runner/tests/runner-events.test.ts packages/local-runner/tests/workflow-run-api.test.ts
 
 ## Validation and Acceptance
 
@@ -180,8 +180,8 @@ Run these commands before completing this plan:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/effect/runtime.ts packages/local-runner/src/core/codex-exec-runner.ts packages/local-runner/src/core/runner-events.ts packages/local-runner/src/core/workflow-run-api.ts packages/local-runner/tests/codex-exec-runner.test.ts packages/local-runner/tests/runner-events.test.ts packages/local-runner/tests/workflow-run-api.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/effect/runtime.ts packages/local-runner/src/core/codex-exec-runner.ts packages/local-runner/src/core/runner-events.ts packages/local-runner/src/core/workflow-run-api.ts packages/local-runner/tests/codex-exec-runner.test.ts packages/local-runner/tests/runner-events.test.ts packages/local-runner/tests/workflow-run-api.test.ts
 
 ## Idempotence and Recovery
 
@@ -196,8 +196,8 @@ Research sources read before implementation:
     docs/exec-plans/PLANS.md
     docs/programs/PROGRAMS.md
     repos/effect/AGENTS.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/research-pass-remaining-effect-migration.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/research-pass-remaining-effect-migration.md
     packages/local-runner/src/core/codex-exec-runner.ts
     packages/local-runner/src/core/runner-events.ts
     packages/local-runner/src/core/workflow-run-api.ts
@@ -234,9 +234,9 @@ Validation evidence recorded on 2026-05-13:
     bun run programs:lint
     local-runner-node-effect-migration: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
     docs/exec-plans/completed/2026-05-13-effect-process-codex-and-event-boundaries.md: ok
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md: ok
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md: ok
 
     git diff --check for touched slice files
     exited with code 0

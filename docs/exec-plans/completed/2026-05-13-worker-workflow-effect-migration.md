@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Migrate the Worker Foundations installer result/event sync boundary to Effect while preserving the public promise API.
 post_build_recap: "`finishAndMaybeSyncResult` now runs through `finishAndMaybeSyncResultEffect`, using injected runner-home and runner-event services for credential lookup, queue, and flush. A focused Worker test proves service injection without touching a real runner home or event outbox."
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-6.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-6.md
 read_when:
   - Resuming the Worker workflow Effect migration.
   - Migrating Worker Foundations install I/O boundaries after the module split.
@@ -129,8 +129,8 @@ After implementation, run:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts
 
 ## Validation and Acceptance
 
@@ -161,8 +161,8 @@ Run these commands before completing this plan:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install packages/local-runner/tests/worker-foundations-install.test.ts
 
 ## Idempotence and Recovery
 
@@ -172,8 +172,8 @@ This migration should stay incremental. If a migrated boundary changes test outp
 
 Research sources read before implementation:
 
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-6.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-6.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md
     docs/exec-plans/completed/2026-05-13-worker-workflow-module-split.md
     packages/local-runner/src/workflows/worker-foundations-install/
     packages/local-runner/tests/worker-foundations-install.test.ts
@@ -215,9 +215,9 @@ Validation evidence from 2026-05-13:
     bun run programs:lint
     local-runner-node-effect-migration: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
     docs/exec-plans/completed/2026-05-13-worker-workflow-effect-migration.md: ok
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md: ok
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md: ok
 
 ## Interfaces and Dependencies
 

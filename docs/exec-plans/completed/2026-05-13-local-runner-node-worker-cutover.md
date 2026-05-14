@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Make the local-runner package and generated Worker install surface run on Node/npm without requiring Bun.
 post_build_recap: The local-runner package now builds a Node-targeted CLI, packed package execution works through npm/npx, and Worker Foundations install generates Node/npm Worker files without a managed Bun toolchain.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-1.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-1.md
 read_when:
   - Resuming the local-runner Node cutover.
   - Validating Worker install runtime behavior.
@@ -152,8 +152,8 @@ Run these commands before completing this plan:
     bun run program:run -- --help
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-13-local-runner-node-worker-cutover.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-local-runner-node-worker-cutover.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/README.md
-    git diff --check -- package.json packages/local-runner docs/exec-plans/completed/2026-05-13-local-runner-node-worker-cutover.md docs/programs/active/2026-05-13-local-runner-node-effect-migration MISTAKES.md bun.lock
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-13-local-runner-node-worker-cutover.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/README.md
+    git diff --check -- package.json packages/local-runner docs/exec-plans/completed/2026-05-13-local-runner-node-worker-cutover.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration MISTAKES.md bun.lock
 
 ## Idempotence and Recovery
 

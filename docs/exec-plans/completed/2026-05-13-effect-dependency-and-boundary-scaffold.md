@@ -6,7 +6,7 @@ completed_at: 2026-05-13
 summary: Add published Effect dependencies and prove one small local-runner external I/O boundary through an injectable Effect service without changing behavior.
 post_build_recap: Published Effect dependencies, a tiny runtime scaffold, and the bounded-process Effect service boundary landed with behavior-preserving tests and validation.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md
 read_when:
   - Resuming the first local-runner Effect scaffold slice.
   - Validating bounded process behavior after adding Effect.
@@ -149,9 +149,9 @@ Validate the plan and Program packet:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/active/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
-    for slice_path in packages/local-runner/src/effect/runtime.ts packages/local-runner/src/effect/node-platform-runtime.ts docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md; do git diff --no-index --check /dev/null "$slice_path" >/dev/null || check_status=$?; if [ "${check_status:-0}" -gt 1 ]; then exit "$check_status"; fi; unset check_status; done
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/completed/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
+    for slice_path in packages/local-runner/src/effect/runtime.ts packages/local-runner/src/effect/node-platform-runtime.ts docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md; do git diff --no-index --check /dev/null "$slice_path" >/dev/null || check_status=$?; if [ "${check_status:-0}" -gt 1 ]; then exit "$check_status"; fi; unset check_status; done
 
 ## Validation and Acceptance
 
@@ -180,9 +180,9 @@ Run these commands before completing this plan:
     bun run --cwd packages/local-runner build
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/active/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
-    for slice_path in packages/local-runner/src/effect/runtime.ts packages/local-runner/src/effect/node-platform-runtime.ts docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md; do git diff --no-index --check /dev/null "$slice_path" >/dev/null || check_status=$?; if [ "${check_status:-0}" -gt 1 ]; then exit "$check_status"; fi; unset check_status; done
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/completed/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
+    for slice_path in packages/local-runner/src/effect/runtime.ts packages/local-runner/src/effect/node-platform-runtime.ts docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-2.md; do git diff --no-index --check /dev/null "$slice_path" >/dev/null || check_status=$?; if [ "${check_status:-0}" -gt 1 ]; then exit "$check_status"; fi; unset check_status; done
 
 ## Idempotence and Recovery
 
@@ -224,11 +224,11 @@ Evidence recorded on 2026-05-13:
     bun run programs:lint
     local-runner-node-effect-migration: ok
 
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
     docs/exec-plans/active/2026-05-13-effect-dependency-and-boundary-scaffold.md: ok
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md: ok
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md: ok
 
-    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/active/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
+    git diff --check -- bun.lock packages/local-runner/package.json packages/local-runner/src/core/bounded-process.ts packages/local-runner/tests/bounded-process.test.ts docs/programs/completed/2026-05-13-local-runner-node-effect-migration/current-planning-brief.txt docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md MISTAKES.md
     exited with code 0
 
     no-index whitespace checks for new slice files

@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Continue the Worker Foundations installer Effect migration by making proof process execution injectable without changing generated Worker output.
 post_build_recap: Worker proof command and dogfood child-plan process execution now expose Effect helpers backed by `BoundedProcessService`, with focused injected tests proving proof ordering, failure stop behavior, and command arguments without spawning child processes.
 program_id: local-runner-node-effect-migration
-planning_brief: docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-7.md
+planning_brief: docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-7.md
 read_when:
   - Resuming the Worker process and file Effect migration.
   - Validating Worker Foundations proof command execution after an Effect boundary change.
@@ -109,8 +109,8 @@ After implementation, run:
     bun run --cwd packages/local-runner package:smoke
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install/proof.ts packages/local-runner/tests/worker-foundations-install.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install/proof.ts packages/local-runner/tests/worker-foundations-install.test.ts
 
 Compatibility smoke and package smoke were run even though generated Worker output did not intentionally change, because this slice touches the installer proof path.
 
@@ -143,8 +143,8 @@ Run these commands before completing this plan:
     bun run --cwd packages/local-runner package:smoke
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration
-    git diff --check -- docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/active/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install/proof.ts packages/local-runner/tests/worker-foundations-install.test.ts
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration
+    git diff --check -- docs/exec-plans/completed/2026-05-14-worker-process-and-file-effect-boundaries.md docs/programs/completed/2026-05-13-local-runner-node-effect-migration packages/local-runner/src/workflows/worker-foundations-install/proof.ts packages/local-runner/tests/worker-foundations-install.test.ts
 
 ## Idempotence and Recovery
 
@@ -156,8 +156,8 @@ Do not stage unrelated dirty files. This repository may contain active work in `
 
 Research sources read before implementation:
 
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/program.md
-    docs/programs/active/2026-05-13-local-runner-node-effect-migration/planning-brief-7.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/program.md
+    docs/programs/completed/2026-05-13-local-runner-node-effect-migration/planning-brief-7.md
     docs/exec-plans/PLANS.md
     repos/effect/AGENTS.md
     packages/local-runner/src/workflows/worker-foundations-install/proof.ts
