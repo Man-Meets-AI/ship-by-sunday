@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-05-14
 completed_at: 2026-05-14
 summary: Move the shared Select primitive toward T3 Code recipes while preserving current Radix Select call-site behavior.
-post_build_recap: Select now carries T3 Code trigger, content, item, separator, scroll affordance, and compatibility helper recipes on the existing Radix Select API, with focused unit, codebase-flow integration, browser-auth limitation, lint, format, and typecheck proof.
+post_build_recap: Select now carries T3 Code trigger, content, item, separator, scroll affordance, and compatibility helper recipes on the existing Radix Select API, with focused unit, codebase-flow integration, EA-authenticated browser, lint, format, and typecheck proof.
 program_id: t3-code-source-design-system-port
 planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
@@ -39,7 +39,7 @@ The current worktree already includes unrelated prior-slice changes: `MISTAKES.m
 
 T3 Code's Select source uses `@base-ui/react/select`, `mergeProps`, `useRender`, a `SelectPopup` plus `SelectContent` alias, `SelectButton`, `selectTriggerVariants`, `SelectGroupLabel`, and CSS variables such as `--anchor-width` and `--available-height`. Ship by Sunday currently has no `@base-ui/react` dependency and live codebase-flow call sites use the Radix Select API from the bundled `radix-ui` package.
 
-The real Select route, `http://localhost:3000/starter/generate-codebase`, is protected by authentication and entitlement. Browser automation against the webpack dev server redirected to `http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fstarter%2Fgenerate-codebase`, where `document.querySelectorAll('[data-slot="select-trigger"]').length` and `document.querySelectorAll('[data-slot="select-content"]').length` both returned `0`. The route-level Select behavior is therefore covered by `apps/web/tests/integration-ui/codebase-page.test.tsx` in this slice.
+The real Select route, `http://localhost:3000/starter/generate-codebase`, is protected by authentication and entitlement. The connected Gmail account could send to `ea@parkerrex.com` but only exposed the sent copy, not an EA inbox-delivered verification email. The ignored release-persona file was therefore pointed at `ea@parkerrex.com`, `bun run release:personas:prepare -- --proof=default_ship --persona=member_with_access --base-url=http://localhost:3000` confirmed that the Clerk user exists and is entitled, and a one-off ignored Playwright proof used Clerk testing sign-in for the browser session.
 
 ## Decision Log
 
@@ -51,15 +51,15 @@ Decision: Preserve current exports and add only cheap T3-compatible aliases.
 Rationale: Current routes import `Select`, `SelectContent`, `SelectGroup`, `SelectItem`, `SelectTrigger`, and `SelectValue`. Keeping those exports prevents route churn. Adding `SelectButton`, `selectTriggerVariants`, and `SelectGroupLabel` helps future T3-style call sites without forcing existing code to move.
 Date: 2026-05-14
 
-Decision: Treat the authenticated browser redirect as the browser-proof limit for this slice.
-Rationale: The user requested browser proof on a route that actually renders Select, with integration-ui proof or a recorded limitation if auth blocks it. The local app redirected the real Select route to sign-in before rendering any Select nodes, so the existing codebase-page integration-ui test is the executable route proof for value-change behavior.
+Decision: Use the repo's release-persona auth path for browser proof when the real Select route is entitlement-gated.
+Rationale: The user requested a real login for `ea@parkerrex.com`. Manual Gmail-code retrieval for EA was unavailable through the connected mailbox, but the repo's release proof path supports real Clerk personas and deterministic testing sign-in after the passwordless challenge surface is verified. This keeps proof on the live protected route without changing product code or committing local auth state.
 Date: 2026-05-14
 
 ## Outcomes & Retrospective
 
 This slice kept Select Radix-backed and copied the T3 Code Select visual recipes onto the existing shared primitive. `apps/web/src/components/ui/select.tsx` now exports `selectTriggerVariants`, `SelectButton`, and `SelectGroupLabel` in addition to the existing Radix-compatible Select exports. The trigger supports `xs`, `sm`, `default`, and `lg` sizes plus `default` and `ghost` variants. Content, viewport, item, separator, and scroll controls now carry T3 popup/list/item surface tokens while preserving `SelectContent`, `SelectGroup`, `SelectItem`, `SelectTrigger`, and `SelectValue` behavior for current codebase-flow call sites.
 
-The focused unit test proves export compatibility, trigger size/className behavior, T3-only class tokens, and content/item slot availability. The existing codebase-page integration-ui test still proves codebase-flow value-change behavior through the shared Select export shape. No package or lockfile change was needed. The next heavier primitive slice should handle Popover and Tooltip together because T3 Select's popup treatment depends on the same Base UI positioner pattern those primitives expose directly.
+The focused unit test proves export compatibility, trigger size/className behavior, T3-only class tokens, and content/item slot availability. The existing codebase-page integration-ui test still proves codebase-flow value-change behavior through the shared Select export shape. The authenticated browser proof signs in as `ea@parkerrex.com`, opens the protected Starter codebase route, opens the design-preset Select, verifies trigger/content/item slots, verifies 8 rendered items, checks the migrated T3 class fragments, and captures desktop and mobile screenshots. No package or lockfile change was needed. The next heavier primitive slice should handle Popover and Tooltip together because T3 Select's popup treatment depends on the same Base UI positioner pattern those primitives expose directly.
 
 ## Context and Orientation
 
@@ -205,13 +205,19 @@ Validation completed on 2026-05-14:
     git diff --check
     No whitespace errors.
 
-Browser proof limitation on the webpack dev server:
+Browser proof on the webpack dev server:
 
-    URL attempted: http://localhost:3000/starter/generate-codebase
-    Actual URL: http://localhost:3000/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fstarter%2Fgenerate-codebase
-    Visible state: Sign in page.
-    Select trigger count: 0.
-    Select content count: 0.
+    PLAYWRIGHT_BASE_URL=http://localhost:3000 E2E_ENTITLED_EMAIL=ea@parkerrex.com node codex-scripts/prove-select-browser.mjs
+    status: ok
+    email: ea@parkerrex.com
+    URL: http://localhost:3000/starter/generate-codebase
+    Desktop Select trigger count: 2.
+    Desktop Select item count: 8.
+    First rendered item: Vercel Hosting Black-and-white precision with Geist typography.
+    Verified slots: select-trigger, select-content, select-item.
+    Verified class fragments: not-dark:bg-clip-padding, data-[state=open]:animate-in, data-[side=bottom]:slide-in-from-top-2, data-highlighted:bg-accent, in-data-[side=none]:min-w-[calc(var(--radix-select-trigger-width)+1.25rem)].
+    Desktop screenshot: codex-scripts/artifacts/select-desktop.png.
+    Mobile screenshot: codex-scripts/artifacts/select-mobile.png.
 
 ## Interfaces and Dependencies
 
