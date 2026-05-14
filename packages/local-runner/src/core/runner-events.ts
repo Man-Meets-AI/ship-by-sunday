@@ -18,7 +18,10 @@ import {
 	resolveRepositoryPath,
 } from "./repository-boundary";
 import { assertSyncSafeValue } from "./redaction";
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 export const RUNNER_EVENT_SCHEMA_VERSION = "workspace.runner-event.v1" as const;
 const DEFAULT_RUNNER_EVENT_DELIVERY_TIMEOUT_MS = 5_000;
@@ -220,13 +223,13 @@ type FlushRunnerEventsRequest = {
 export interface RunnerEventService {
 	readonly queue: (
 		request: QueueRunnerEventRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly readQueued: (
 		request: ReadQueuedRunnerEventsRequest,
-	) => Effect.Effect<RunnerEvent[], unknown>;
+	) => Effect.Effect<RunnerEvent[], Error>;
 	readonly flush: (
 		request: FlushRunnerEventsRequest,
-	) => Effect.Effect<RunnerEventFlushResult, unknown>;
+	) => Effect.Effect<RunnerEventFlushResult, Error>;
 }
 
 export const RunnerEventService = Context.GenericTag<RunnerEventService>(
@@ -239,17 +242,17 @@ export const NodeRunnerEventServiceLive = Layer.succeed(
 		queue: (request) =>
 			Effect.tryPromise({
 				try: () => queueRunnerEventNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		readQueued: (request) =>
 			Effect.tryPromise({
 				try: () => readQueuedRunnerEventsNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		flush: (request) =>
 			Effect.tryPromise({
 				try: (signal) => flushRunnerEventsNode(request, signal),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 	}),
 );
@@ -321,7 +324,7 @@ export function queueRunnerEventEffect(
 	repositoryRoot: string,
 	event: RunnerEvent,
 	options: { updateGitExclude?: boolean } = {},
-): Effect.Effect<void, unknown, RunnerEventService> {
+): Effect.Effect<void, Error, RunnerEventService> {
 	return Effect.flatMap(RunnerEventService, (service) =>
 		service.queue({
 			repositoryRoot,
@@ -360,7 +363,7 @@ export async function readQueuedRunnerEvents(repositoryRoot: string) {
 
 export function readQueuedRunnerEventsEffect(
 	repositoryRoot: string,
-): Effect.Effect<RunnerEvent[], unknown, RunnerEventService> {
+): Effect.Effect<RunnerEvent[], Error, RunnerEventService> {
 	return Effect.flatMap(RunnerEventService, (service) =>
 		service.readQueued({ repositoryRoot }),
 	);
@@ -430,7 +433,7 @@ export function flushRunnerEventsEffect({
 	deliveryTimeoutMs?: number;
 	fetchRunnerEvent?: typeof fetch;
 	updateGitExclude?: boolean;
-}): Effect.Effect<RunnerEventFlushResult, unknown, RunnerEventService> {
+}): Effect.Effect<RunnerEventFlushResult, Error, RunnerEventService> {
 	return Effect.flatMap(RunnerEventService, (service) =>
 		service.flush({
 			repositoryRoot,

@@ -18,7 +18,10 @@ import {
 	resolveRepositoryPath,
 	writeRepositoryTextFile,
 } from "./repository-boundary";
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 export const LOCAL_STATE_DIRECTORY_NAME = ".sbs";
 
@@ -80,34 +83,34 @@ type WriteLocalCodexThreadStateRequest = LocalProjectStateRepositoryRequest & {
 export interface LocalProjectStateService {
 	readonly ensureDirectory: (
 		request: EnsureLocalProjectStateDirectoryRequest,
-	) => Effect.Effect<string, unknown>;
+	) => Effect.Effect<string, Error>;
 	readonly readProjectState: (
 		request: LocalProjectStateRepositoryRequest,
-	) => Effect.Effect<LocalProjectState | null, unknown>;
+	) => Effect.Effect<LocalProjectState | null, Error>;
 	readonly writeProjectState: (
 		request: WriteLocalProjectStateRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly readDaemonStatus: (
 		request: LocalProjectStateRepositoryRequest,
-	) => Effect.Effect<LocalDaemonStatus | null, unknown>;
+	) => Effect.Effect<LocalDaemonStatus | null, Error>;
 	readonly writeDaemonStatus: (
 		request: WriteLocalDaemonStatusRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly readCodexThreadState: (
 		request: LocalProjectStateRepositoryRequest,
-	) => Effect.Effect<LocalCodexThreadState | null, unknown>;
+	) => Effect.Effect<LocalCodexThreadState | null, Error>;
 	readonly writeCodexThreadState: (
 		request: WriteLocalCodexThreadStateRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly requestDaemonStop: (
 		request: LocalProjectStateRepositoryRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly clearDaemonStop: (
 		request: LocalProjectStateRepositoryRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly shouldStopDaemon: (
 		request: LocalProjectStateRepositoryRequest,
-	) => Effect.Effect<boolean, unknown>;
+	) => Effect.Effect<boolean, Error>;
 }
 
 export const LocalProjectStateService =
@@ -121,47 +124,47 @@ export const NodeLocalProjectStateServiceLive = Layer.succeed(
 		ensureDirectory: (request) =>
 			Effect.tryPromise({
 				try: () => ensureLocalProjectStateDirectoryNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		readProjectState: (request) =>
 			Effect.tryPromise({
 				try: () => readLocalProjectStateNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		writeProjectState: (request) =>
 			Effect.tryPromise({
 				try: () => writeLocalProjectStateNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		readDaemonStatus: (request) =>
 			Effect.tryPromise({
 				try: () => readLocalDaemonStatusNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		writeDaemonStatus: (request) =>
 			Effect.tryPromise({
 				try: () => writeLocalDaemonStatusNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		readCodexThreadState: (request) =>
 			Effect.tryPromise({
 				try: () => readLocalCodexThreadStateNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		writeCodexThreadState: (request) =>
 			Effect.tryPromise({
 				try: () => writeLocalCodexThreadStateNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		requestDaemonStop: (request) =>
 			Effect.tryPromise({
 				try: () => requestLocalDaemonStopNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		clearDaemonStop: (request) =>
 			Effect.tryPromise({
 				try: () => clearLocalDaemonStopNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		shouldStopDaemon: (request) =>
 			Effect.sync(() => shouldStopLocalDaemonNode(request)),
@@ -209,7 +212,7 @@ export async function ensureLocalProjectStateDirectory(
 export function ensureLocalProjectStateDirectoryEffect(
 	repositoryRoot: string,
 	options: { updateGitExclude?: boolean } = {},
-): Effect.Effect<string, unknown, LocalProjectStateService> {
+): Effect.Effect<string, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.ensureDirectory({
 			repositoryRoot,
@@ -267,7 +270,7 @@ export async function readLocalProjectState(repositoryRoot: string) {
 
 export function readLocalProjectStateEffect(
 	repositoryRoot: string,
-): Effect.Effect<LocalProjectState | null, unknown, LocalProjectStateService> {
+): Effect.Effect<LocalProjectState | null, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.readProjectState({ repositoryRoot }),
 	);
@@ -307,7 +310,7 @@ export async function writeLocalProjectState(
 export function writeLocalProjectStateEffect(
 	repositoryRoot: string,
 	state: LocalProjectState,
-): Effect.Effect<void, unknown, LocalProjectStateService> {
+): Effect.Effect<void, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.writeProjectState({ repositoryRoot, state }),
 	);
@@ -335,7 +338,7 @@ export async function readLocalDaemonStatus(repositoryRoot: string) {
 
 export function readLocalDaemonStatusEffect(
 	repositoryRoot: string,
-): Effect.Effect<LocalDaemonStatus | null, unknown, LocalProjectStateService> {
+): Effect.Effect<LocalDaemonStatus | null, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.readDaemonStatus({ repositoryRoot }),
 	);
@@ -366,7 +369,7 @@ export async function writeLocalDaemonStatus(
 export function writeLocalDaemonStatusEffect(
 	repositoryRoot: string,
 	status: LocalDaemonStatus,
-): Effect.Effect<void, unknown, LocalProjectStateService> {
+): Effect.Effect<void, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.writeDaemonStatus({ repositoryRoot, status }),
 	);
@@ -397,7 +400,7 @@ export function readLocalCodexThreadStateEffect(
 	repositoryRoot: string,
 ): Effect.Effect<
 	LocalCodexThreadState | null,
-	unknown,
+	Error,
 	LocalProjectStateService
 > {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
@@ -443,7 +446,7 @@ export async function writeLocalCodexThreadState(
 export function writeLocalCodexThreadStateEffect(
 	repositoryRoot: string,
 	threadState: LocalCodexThreadState,
-): Effect.Effect<void, unknown, LocalProjectStateService> {
+): Effect.Effect<void, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.writeCodexThreadState({ repositoryRoot, threadState }),
 	);
@@ -474,7 +477,7 @@ export async function requestLocalDaemonStop(repositoryRoot: string) {
 
 export function requestLocalDaemonStopEffect(
 	repositoryRoot: string,
-): Effect.Effect<void, unknown, LocalProjectStateService> {
+): Effect.Effect<void, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.requestDaemonStop({ repositoryRoot }),
 	);
@@ -501,7 +504,7 @@ export async function clearLocalDaemonStop(repositoryRoot: string) {
 
 export function clearLocalDaemonStopEffect(
 	repositoryRoot: string,
-): Effect.Effect<void, unknown, LocalProjectStateService> {
+): Effect.Effect<void, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.clearDaemonStop({ repositoryRoot }),
 	);
@@ -525,7 +528,7 @@ export function shouldStopLocalDaemon(repositoryRoot: string) {
 
 export function shouldStopLocalDaemonEffect(
 	repositoryRoot: string,
-): Effect.Effect<boolean, unknown, LocalProjectStateService> {
+): Effect.Effect<boolean, Error, LocalProjectStateService> {
 	return Effect.flatMap(LocalProjectStateService, (service) =>
 		service.shouldStopDaemon({ repositoryRoot }),
 	);

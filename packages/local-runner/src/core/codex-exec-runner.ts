@@ -3,7 +3,10 @@ import { Context, Effect, Layer } from "effect";
 
 import type { JsonObject, JsonValue } from "./json-value";
 import { writeLocalCodexThreadState } from "./local-project-state";
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 type JsonRecord = JsonObject;
 
@@ -49,7 +52,7 @@ type CodexExecProcessResult = {
 export interface CodexExecService {
 	readonly run: (
 		request: ResolvedCodexExecRequest,
-	) => Effect.Effect<CodexExecRunnerResult, unknown>;
+	) => Effect.Effect<CodexExecRunnerResult, Error>;
 }
 
 export const CodexExecService = Context.GenericTag<CodexExecService>(
@@ -65,7 +68,7 @@ export const NodeCodexExecServiceLive = Layer.succeed(
 
 export function runCodexExecEffect(
 	request: CodexExecRequest,
-): Effect.Effect<CodexExecRunnerResult, unknown, CodexExecService> {
+): Effect.Effect<CodexExecRunnerResult, Error, CodexExecService> {
 	const resolvedRequest = resolveCodexExecRequest(request);
 
 	return Effect.flatMap(CodexExecService, (service) =>
@@ -105,7 +108,7 @@ function resolveCodexExecRequest({
 
 function runNodeCodexExec(
 	request: ResolvedCodexExecRequest,
-): Effect.Effect<CodexExecRunnerResult, unknown> {
+): Effect.Effect<CodexExecRunnerResult, Error> {
 	return Effect.flatMap(spawnCodexExecProcess(request), (processResult) =>
 		Effect.tryPromise({
 			try: async () => {
@@ -138,7 +141,7 @@ function runNodeCodexExec(
 					timedOut: processResult.timedOut,
 				};
 			},
-			catch: (error) => error,
+			catch: normalizeLocalRunnerEffectError,
 		}),
 	);
 }
@@ -152,7 +155,7 @@ function spawnCodexExecProcess({
 	timeoutMs,
 	codexBinary,
 	allowNonGitSmoke,
-}: ResolvedCodexExecRequest): Effect.Effect<CodexExecProcessResult, unknown> {
+}: ResolvedCodexExecRequest): Effect.Effect<CodexExecProcessResult, Error> {
 	const args = [
 		"exec",
 		"--json",
@@ -231,7 +234,7 @@ function spawnCodexExecProcess({
 					interruptProcess();
 				}
 			}),
-		catch: (error) => error,
+		catch: normalizeLocalRunnerEffectError,
 	});
 }
 

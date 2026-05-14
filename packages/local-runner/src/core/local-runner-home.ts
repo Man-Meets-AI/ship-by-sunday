@@ -14,7 +14,10 @@ import path from "node:path";
 import { Context, Effect, Layer } from "effect";
 
 import type { JsonObject, JsonValue } from "./json-value";
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 export const RUNNER_HOME_ENV_VAR = "SBS_RUNNER_HOME";
 
@@ -48,13 +51,13 @@ type WriteRunnerCredentialRequest = ReadRunnerCredentialRequest & {
 export interface LocalRunnerHomeService {
 	readonly ensureHome: (
 		request: EnsureLocalRunnerHomeRequest,
-	) => Effect.Effect<string, unknown>;
+	) => Effect.Effect<string, Error>;
 	readonly readCredential: (
 		request: ReadRunnerCredentialRequest,
-	) => Effect.Effect<RunnerCredential | null, unknown>;
+	) => Effect.Effect<RunnerCredential | null, Error>;
 	readonly writeCredential: (
 		request: WriteRunnerCredentialRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 }
 
 export const LocalRunnerHomeService =
@@ -68,17 +71,17 @@ export const NodeLocalRunnerHomeServiceLive = Layer.succeed(
 		ensureHome: (request) =>
 			Effect.tryPromise({
 				try: () => ensureLocalRunnerHomeNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		readCredential: (request) =>
 			Effect.tryPromise({
 				try: () => readRunnerCredentialNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		writeCredential: (request) =>
 			Effect.tryPromise({
 				try: () => writeRunnerCredentialNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 	}),
 );
@@ -104,7 +107,7 @@ export async function ensureLocalRunnerHome(
 
 export function ensureLocalRunnerHomeEffect(
 	runnerHome = resolveLocalRunnerHome(),
-): Effect.Effect<string, unknown, LocalRunnerHomeService> {
+): Effect.Effect<string, Error, LocalRunnerHomeService> {
 	return Effect.flatMap(LocalRunnerHomeService, (service) =>
 		service.ensureHome({ runnerHome }),
 	);
@@ -210,7 +213,7 @@ export function readRunnerCredentialEffect({
 }: {
 	runnerHome?: string;
 	repositoryRoot: string;
-}): Effect.Effect<RunnerCredential | null, unknown, LocalRunnerHomeService> {
+}): Effect.Effect<RunnerCredential | null, Error, LocalRunnerHomeService> {
 	return Effect.flatMap(LocalRunnerHomeService, (service) =>
 		service.readCredential({ runnerHome, repositoryRoot }),
 	);
@@ -253,7 +256,7 @@ export function writeRunnerCredentialEffect({
 	runnerHome?: string;
 	repositoryRoot: string;
 	credential: RunnerCredential;
-}): Effect.Effect<void, unknown, LocalRunnerHomeService> {
+}): Effect.Effect<void, Error, LocalRunnerHomeService> {
 	return Effect.flatMap(LocalRunnerHomeService, (service) =>
 		service.writeCredential({ runnerHome, repositoryRoot, credential }),
 	);

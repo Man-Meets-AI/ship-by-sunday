@@ -2,7 +2,10 @@ import { lstat, mkdir, realpath, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Context, Effect, Layer } from "effect";
 
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 export function normalizeRepositoryRelativePath(repoRelativePath: string) {
 	const normalizedPath = repoRelativePath.replaceAll("\\", "/");
@@ -41,13 +44,13 @@ type WriteRepositoryTextFileRequest = RepositoryBoundaryPathRequest & {
 export interface RepositoryBoundaryService {
 	readonly assertNoSymlinkPath: (
 		request: RepositoryBoundaryPathRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly ensureDirectory: (
 		request: RepositoryBoundaryPathRequest,
-	) => Effect.Effect<string, unknown>;
+	) => Effect.Effect<string, Error>;
 	readonly writeTextFile: (
 		request: WriteRepositoryTextFileRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 }
 
 export const RepositoryBoundaryService =
@@ -61,17 +64,17 @@ export const NodeRepositoryBoundaryServiceLive = Layer.succeed(
 		assertNoSymlinkPath: (request) =>
 			Effect.tryPromise({
 				try: () => assertNoRepositorySymlinkPathNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		ensureDirectory: (request) =>
 			Effect.tryPromise({
 				try: () => ensureRepositoryDirectoryNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		writeTextFile: (request) =>
 			Effect.tryPromise({
 				try: () => writeRepositoryTextFileNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 	}),
 );
@@ -90,7 +93,7 @@ export async function assertNoRepositorySymlinkPath(
 export function assertNoRepositorySymlinkPathEffect(
 	repositoryRoot: string,
 	repoRelativePath: string,
-): Effect.Effect<void, unknown, RepositoryBoundaryService> {
+): Effect.Effect<void, Error, RepositoryBoundaryService> {
 	return Effect.flatMap(RepositoryBoundaryService, (service) =>
 		service.assertNoSymlinkPath({ repositoryRoot, repoRelativePath }),
 	);
@@ -128,7 +131,7 @@ export async function ensureRepositoryDirectory(
 export function ensureRepositoryDirectoryEffect(
 	repositoryRoot: string,
 	repoRelativePath: string,
-): Effect.Effect<string, unknown, RepositoryBoundaryService> {
+): Effect.Effect<string, Error, RepositoryBoundaryService> {
 	return Effect.flatMap(RepositoryBoundaryService, (service) =>
 		service.ensureDirectory({ repositoryRoot, repoRelativePath }),
 	);
@@ -168,7 +171,7 @@ export function writeRepositoryTextFileEffect(
 	repositoryRoot: string,
 	repoRelativePath: string,
 	value: string,
-): Effect.Effect<void, unknown, RepositoryBoundaryService> {
+): Effect.Effect<void, Error, RepositoryBoundaryService> {
 	return Effect.flatMap(RepositoryBoundaryService, (service) =>
 		service.writeTextFile({ repositoryRoot, repoRelativePath, value }),
 	);

@@ -2,7 +2,10 @@ import { Context, Effect, Layer } from "effect";
 
 import type { RunnerCredential } from "./local-runner-home";
 import type { LocalProjectState } from "./local-project-state";
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 import {
 	DOCS_SPINE_ADOPTION_ALLOWED_TOUCH_TARGETS,
 	DOCS_SPINE_ADOPTION_DISALLOWED_TOUCH_TARGETS,
@@ -153,10 +156,10 @@ type ClaimApprovedWorkflowRunRequest = {
 export interface WorkflowRunApiService {
 	readonly resolve: (
 		request: ResolveApprovedWorkflowRunRequest,
-	) => Effect.Effect<ApprovedWorkflowRunPacket, unknown>;
+	) => Effect.Effect<ApprovedWorkflowRunPacket, Error>;
 	readonly claim: (
 		request: ClaimApprovedWorkflowRunRequest,
-	) => Effect.Effect<ApprovedWorkflowRunPacket | null, unknown>;
+	) => Effect.Effect<ApprovedWorkflowRunPacket | null, Error>;
 }
 
 export const WorkflowRunApiService = Context.GenericTag<WorkflowRunApiService>(
@@ -169,12 +172,12 @@ export const NodeWorkflowRunApiServiceLive = Layer.succeed(
 		resolve: (request) =>
 			Effect.tryPromise({
 				try: (signal) => resolveApprovedWorkflowRunNode(request, signal),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		claim: (request) =>
 			Effect.tryPromise({
 				try: (signal) => claimApprovedWorkflowRunNode(request, signal),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 	}),
 );
@@ -210,7 +213,7 @@ export function resolveApprovedWorkflowRunEffect({
 	credential: RunnerCredential;
 	workflowRunId: string;
 	fetchWorkflowRun?: typeof fetch;
-}): Effect.Effect<ApprovedWorkflowRunPacket, unknown, WorkflowRunApiService> {
+}): Effect.Effect<ApprovedWorkflowRunPacket, Error, WorkflowRunApiService> {
 	return Effect.flatMap(WorkflowRunApiService, (service) =>
 		service.resolve({
 			state,
@@ -289,7 +292,7 @@ export function claimApprovedWorkflowRunEffect({
 	fetchWorkflowRun?: typeof fetch;
 }): Effect.Effect<
 	ApprovedWorkflowRunPacket | null,
-	unknown,
+	Error,
 	WorkflowRunApiService
 > {
 	return Effect.flatMap(WorkflowRunApiService, (service) =>

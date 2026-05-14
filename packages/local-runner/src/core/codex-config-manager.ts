@@ -10,7 +10,10 @@ import {
 	parseCodexConfigToml,
 	replaceManagedTomlBlock,
 } from "./codex-config-toml";
-import { runLocalRunnerEffect } from "../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 export const CODEX_CONFIG_ENV_VAR = "CODEX_HOME";
 export const SBS_CODEX_BLOCK_START =
@@ -89,33 +92,33 @@ type RollbackCodexConfigPatchRequest = {
 export interface CodexConfigService {
 	readonly inspectSbs: (
 		request: InspectCodexConfigRequest,
-	) => Effect.Effect<CodexConfigInspection, unknown>;
+	) => Effect.Effect<CodexConfigInspection, Error>;
 	readonly inspectShipbysundayWorker: (
 		request: InspectCodexConfigRequest,
-	) => Effect.Effect<ShipbysundayWorkerCodexConfigInspection, unknown>;
+	) => Effect.Effect<ShipbysundayWorkerCodexConfigInspection, Error>;
 	readonly previewSbsPatch: (
 		request: CodexConfigEnvRequest,
-	) => Effect.Effect<CodexConfigPatchPreview, unknown>;
+	) => Effect.Effect<CodexConfigPatchPreview, Error>;
 	readonly previewShipbysundayWorkerPatch: (
 		request: CodexConfigEnvRequest,
-	) => Effect.Effect<CodexConfigPatchPreview, unknown>;
+	) => Effect.Effect<CodexConfigPatchPreview, Error>;
 	readonly applySbsPatch: (
 		request: CodexConfigEnvRequest,
-	) => Effect.Effect<CodexConfigPatchResult, unknown>;
+	) => Effect.Effect<CodexConfigPatchResult, Error>;
 	readonly applyShipbysundayWorkerPatch: (
 		request: CodexConfigEnvRequest,
-	) => Effect.Effect<CodexConfigPatchResult, unknown>;
+	) => Effect.Effect<CodexConfigPatchResult, Error>;
 	readonly rollbackSbsPatch: (
 		request: RollbackCodexConfigPatchRequest,
 	) => Effect.Effect<
 		{ configPath: string; backupPath: string; rollbackBackupPath: string },
-		unknown
+		Error
 	>;
 	readonly rollbackShipbysundayWorkerPatch: (
 		request: RollbackCodexConfigPatchRequest,
 	) => Effect.Effect<
 		{ configPath: string; backupPath: string; rollbackBackupPath: string },
-		unknown
+		Error
 	>;
 }
 
@@ -129,42 +132,42 @@ export const NodeCodexConfigServiceLive = Layer.succeed(
 		inspectSbs: (request) =>
 			Effect.tryPromise({
 				try: () => inspectCodexConfigNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		inspectShipbysundayWorker: (request) =>
 			Effect.tryPromise({
 				try: () => inspectShipbysundayWorkerCodexConfigNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		previewSbsPatch: (request) =>
 			Effect.tryPromise({
 				try: () => previewSbsCodexConfigPatchNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		previewShipbysundayWorkerPatch: (request) =>
 			Effect.tryPromise({
 				try: () => previewShipbysundayWorkerCodexConfigPatchNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		applySbsPatch: (request) =>
 			Effect.tryPromise({
 				try: () => applySbsCodexConfigPatchNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		applyShipbysundayWorkerPatch: (request) =>
 			Effect.tryPromise({
 				try: () => applyShipbysundayWorkerCodexConfigPatchNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		rollbackSbsPatch: (request) =>
 			Effect.tryPromise({
 				try: () => rollbackSbsCodexConfigPatchNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		rollbackShipbysundayWorkerPatch: (request) =>
 			Effect.tryPromise({
 				try: () => rollbackShipbysundayWorkerCodexConfigPatchNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 	}),
 );
@@ -199,7 +202,7 @@ export function inspectCodexConfigEffect({
 }: {
 	env?: NodeJS.ProcessEnv;
 	repositoryRoot?: string;
-} = {}): Effect.Effect<CodexConfigInspection, unknown, CodexConfigService> {
+} = {}): Effect.Effect<CodexConfigInspection, Error, CodexConfigService> {
 	return Effect.flatMap(CodexConfigService, (service) =>
 		service.inspectSbs({ env, repositoryRoot }),
 	);
@@ -266,7 +269,7 @@ export function inspectShipbysundayWorkerCodexConfigEffect({
 	repositoryRoot?: string;
 } = {}): Effect.Effect<
 	ShipbysundayWorkerCodexConfigInspection,
-	unknown,
+	Error,
 	CodexConfigService
 > {
 	return Effect.flatMap(CodexConfigService, (service) =>
@@ -625,7 +628,7 @@ export function previewSbsCodexConfigPatchEffect({
 	env = process.env,
 }: {
 	env?: NodeJS.ProcessEnv;
-} = {}): Effect.Effect<CodexConfigPatchPreview, unknown, CodexConfigService> {
+} = {}): Effect.Effect<CodexConfigPatchPreview, Error, CodexConfigService> {
 	return Effect.flatMap(CodexConfigService, (service) =>
 		service.previewSbsPatch({ env }),
 	);
@@ -659,7 +662,7 @@ export function previewShipbysundayWorkerCodexConfigPatchEffect({
 	env = process.env,
 }: {
 	env?: NodeJS.ProcessEnv;
-} = {}): Effect.Effect<CodexConfigPatchPreview, unknown, CodexConfigService> {
+} = {}): Effect.Effect<CodexConfigPatchPreview, Error, CodexConfigService> {
 	return Effect.flatMap(CodexConfigService, (service) =>
 		service.previewShipbysundayWorkerPatch({ env }),
 	);
@@ -731,7 +734,7 @@ export function applySbsCodexConfigPatchEffect({
 	env = process.env,
 }: {
 	env?: NodeJS.ProcessEnv;
-} = {}): Effect.Effect<CodexConfigPatchResult, unknown, CodexConfigService> {
+} = {}): Effect.Effect<CodexConfigPatchResult, Error, CodexConfigService> {
 	return Effect.flatMap(CodexConfigService, (service) =>
 		service.applySbsPatch({ env }),
 	);
@@ -763,7 +766,7 @@ export function applyShipbysundayWorkerCodexConfigPatchEffect({
 	env = process.env,
 }: {
 	env?: NodeJS.ProcessEnv;
-} = {}): Effect.Effect<CodexConfigPatchResult, unknown, CodexConfigService> {
+} = {}): Effect.Effect<CodexConfigPatchResult, Error, CodexConfigService> {
 	return Effect.flatMap(CodexConfigService, (service) =>
 		service.applyShipbysundayWorkerPatch({ env }),
 	);
@@ -824,7 +827,7 @@ export function rollbackSbsCodexConfigPatchEffect({
 	env?: NodeJS.ProcessEnv;
 }): Effect.Effect<
 	{ configPath: string; backupPath: string; rollbackBackupPath: string },
-	unknown,
+	Error,
 	CodexConfigService
 > {
 	return Effect.flatMap(CodexConfigService, (service) =>
@@ -866,7 +869,7 @@ export function rollbackShipbysundayWorkerCodexConfigPatchEffect({
 	env?: NodeJS.ProcessEnv;
 }): Effect.Effect<
 	{ configPath: string; backupPath: string; rollbackBackupPath: string },
-	unknown,
+	Error,
 	CodexConfigService
 > {
 	return Effect.flatMap(CodexConfigService, (service) =>

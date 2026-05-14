@@ -6,7 +6,10 @@ import { Context, Effect, Layer } from "effect";
 
 import type { JsonValue } from "../json-value";
 import { getLocalStateDirectory } from "../local-project-state";
-import { runLocalRunnerEffect } from "../../effect/runtime";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../../effect/runtime";
 
 export function createDoctorPassRunId(now = new Date()) {
 	const timestamp = now
@@ -58,13 +61,13 @@ type ReadJsonArtifactRequest = {
 export interface DoctorArtifactService {
 	readonly ensureReportDirectory: (
 		request: EnsureDoctorPassReportDirectoryRequest,
-	) => Effect.Effect<string, unknown>;
+	) => Effect.Effect<string, Error>;
 	readonly writeJson: (
 		request: WriteJsonArtifactRequest,
-	) => Effect.Effect<void, unknown>;
+	) => Effect.Effect<void, Error>;
 	readonly readJson: <T>(
 		request: ReadJsonArtifactRequest,
-	) => Effect.Effect<T, unknown>;
+	) => Effect.Effect<T, Error>;
 }
 
 export const DoctorArtifactService = Context.GenericTag<DoctorArtifactService>(
@@ -77,17 +80,17 @@ export const NodeDoctorArtifactServiceLive = Layer.succeed(
 		ensureReportDirectory: (request) =>
 			Effect.tryPromise({
 				try: () => ensureDoctorPassReportDirectoryNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		writeJson: (request) =>
 			Effect.tryPromise({
 				try: () => writeJsonArtifactNode(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 		readJson: <T>(request: ReadJsonArtifactRequest) =>
 			Effect.tryPromise({
 				try: () => readJsonArtifactNode<T>(request),
-				catch: (error) => error,
+				catch: normalizeLocalRunnerEffectError,
 			}),
 	}),
 );
@@ -113,7 +116,7 @@ export function ensureDoctorPassReportDirectoryEffect({
 }: {
 	repositoryRoot: string;
 	runId: string;
-}): Effect.Effect<string, unknown, DoctorArtifactService> {
+}): Effect.Effect<string, Error, DoctorArtifactService> {
 	return Effect.flatMap(DoctorArtifactService, (service) =>
 		service.ensureReportDirectory({ repositoryRoot, runId }),
 	);
@@ -151,7 +154,7 @@ export function writeJsonArtifactEffect({
 }: {
 	filePath: string;
 	value: JsonValue;
-}): Effect.Effect<void, unknown, DoctorArtifactService> {
+}): Effect.Effect<void, Error, DoctorArtifactService> {
 	return Effect.flatMap(DoctorArtifactService, (service) =>
 		service.writeJson({ filePath, value }),
 	);
@@ -177,7 +180,7 @@ export async function readJsonArtifact<T>(filePath: string): Promise<T> {
 
 export function readJsonArtifactEffect<T>(
 	filePath: string,
-): Effect.Effect<T, unknown, DoctorArtifactService> {
+): Effect.Effect<T, Error, DoctorArtifactService> {
 	return Effect.flatMap(DoctorArtifactService, (service) =>
 		service.readJson<T>({ filePath }),
 	);
