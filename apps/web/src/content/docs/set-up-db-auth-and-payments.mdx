@@ -10,6 +10,7 @@ Once the marketing surface is clear enough, wire the dynamic stack in this order
 1. Clerk
 2. Convex
 3. Stripe
+4. Cal.com for Worker Seal Team 6 booking
 
 ## Why this order matters
 
@@ -20,6 +21,7 @@ Clerk identifies the user. Convex stores product access and product state. Strip
 - Clerk is your identity system.
 - Convex is your app state and product-access system.
 - Stripe is your payment system.
+- Cal.com owns the Worker Seal Team 6 paid booking calendar, intake, payment, confirmation, and rescheduling flow.
 - Environment variables are the private keys and URLs that let those systems talk to each other.
 
 ## The setup path
@@ -30,6 +32,7 @@ Clerk identifies the user. Convex stores product access and product state. Strip
 4. Follow [Stripe Checkout + Webhook](/docs/stripe-checkout-webhook).
 5. Create the Stripe product and price from the repo scripts.
 6. Start the Stripe dev listener and let it sync the current webhook secret plus Stripe secret into your hosted Convex dev deployment.
+7. Follow [Worker Seal Team 6 Cal.com](/docs/worker-seal-team-6-cal-com) if the service page should accept paid bookings in this environment.
 
 ## Safety rules
 
@@ -45,5 +48,6 @@ You are wired correctly when:
 - sign-in works
 - protected routes can read viewer state
 - checkout starts from the app
-- the webhook grants product access
+- the Stripe webhook grants product access
+- the Cal.com webhook mirrors Worker Seal Team 6 booking state into Convex
 - `/checkout/success` eventually routes the buyer through passwordless sign-in into `/home`

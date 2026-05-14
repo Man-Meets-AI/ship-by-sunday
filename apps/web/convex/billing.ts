@@ -142,6 +142,19 @@ export const recordProcessedCalEvent = internalMutation({
 	handler: recordProcessedCalEventHandler,
 });
 
+export const recordProcessedCalEventFromServer = mutation({
+	args: {
+		...convexWebhookMutationSecretArgs,
+		...recordProcessedCalEventArgs,
+	},
+	returns: recordProcessedCalEventReturns,
+	handler: async (ctx, args) => {
+		assertConvexWebhookMutationSecret(args.convexWebhookMutationSecret);
+		const { convexWebhookMutationSecret: _secret, ...eventArgs } = args;
+		return await recordProcessedCalEventHandler(ctx, eventArgs);
+	},
+});
+
 export const upsertBillingRefund = internalMutation({
 	args: upsertBillingRefundArgs,
 	returns: upsertBillingRefundReturns,
@@ -158,4 +171,17 @@ export const syncWorkerSealTeam6Booking = internalMutation({
 	args: syncWorkerSealTeam6BookingArgs,
 	returns: syncWorkerSealTeam6BookingReturns,
 	handler: syncWorkerSealTeam6BookingHandler,
+});
+
+export const syncWorkerSealTeam6BookingFromServer = mutation({
+	args: {
+		...convexWebhookMutationSecretArgs,
+		...syncWorkerSealTeam6BookingArgs,
+	},
+	returns: syncWorkerSealTeam6BookingReturns,
+	handler: async (ctx, args) => {
+		assertConvexWebhookMutationSecret(args.convexWebhookMutationSecret);
+		const { convexWebhookMutationSecret: _secret, ...syncArgs } = args;
+		return await syncWorkerSealTeam6BookingHandler(ctx, syncArgs);
+	},
 });

@@ -37,7 +37,7 @@ The old generated-codebase homepage system under `src/app/_components/home-page/
 - Keep `/` informational. It should route visitors by intent: “I have an idea” goes to `/starter`; “I have a codebase” goes to `/workers`; direct, high-touch service interest goes to `/worker-seal-team-6`.
 - Do not put docs, tutorials, or generated-codebase links in the primary public nav.
 - Put checkout buttons on `/starter` and `/workers`, not on the Man Meets AI index.
-- Do not put an app-owned checkout button on `/worker-seal-team-6`. Worker Seal Team 6 booking is Cal.com-owned once provider setup is live, with direct scheduling as the truthful interim handoff.
+- Do not put an app-owned checkout button on `/worker-seal-team-6`. Worker Seal Team 6 booking is Cal.com-owned; the page embeds Cal.com when `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK` is configured, keeps the hosted Cal.com fallback link visible, and falls back to direct scheduling when the public link is unset.
 - Starter checkout must use offer id `starter` and route successful buyers to `/starter/home`.
 - Workers checkout must use offer id `workers` and route successful buyers to `/workers/setup`.
 - Keep `/workers` public. Only Worker operational routes such as `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/loops`, `/workers/runs`, and `/workers/privacy` are protected.

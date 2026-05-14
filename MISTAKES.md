@@ -273,3 +273,15 @@
 - Mistake: I ran root `bun typecheck` without disabling PostHog source map upload even though this mistake was already recorded.
   Impact: The Next build hook created a PostHog release and uploaded source maps during local validation for a non-release fix.
   Corrective action: Check `MISTAKES.md` before broad validation and run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` unless explicitly performing release proof.
+
+## 2026-05-14 Worker Seal Team 6 Cal Parser Typecheck
+
+- Mistake: I left `parseCalWebhookEnvelope` without an explicit return type after tightening the parser around `JsonValue`.
+  Impact: The first root typecheck failed because downstream code could not see optional Cal.com envelope fields.
+  Corrective action: Type boundary parser return values explicitly when later normalization depends on validated optional fields, then rerun root typecheck before closeout.
+
+## 2026-05-14 Typecheck PostHog Upload Repeat
+
+- Mistake: I again ran root `bun typecheck` without disabling PostHog source map upload during local validation.
+  Impact: The Next build hook uploaded source maps while validating the Worker Seal Team 6 Cal.com slice.
+  Corrective action: Run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for local validation unless the current task explicitly requires production source-map upload.

@@ -33,6 +33,7 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 - `STRIPE_SECRET_KEY`: Stripe API access
 - `STRIPE_PUBLISHABLE_KEY`: safe-to-expose Stripe key used by homepage Express Checkout
 - `STRIPE_WEBHOOK_SECRET`: verifies Stripe webhook signatures at `/api/stripe/webhook`
+- `CAL_WEBHOOK_SECRET`: verifies Cal.com webhook signatures at `/api/cal/worker-seal-team-6/webhook`
 - `CONVEX_WEBHOOK_MUTATION_SECRET`: server-only shared secret used by trusted Next.js routes to write billing sync state into Convex; use at least 32 random characters and mirror the same value into the matching Convex deployment
 - `CHECKOUT_FULFILLMENT_RETRY_SECRET`: server-only shared secret used by Next.js and Convex when checkout API routes create purchase-intent records and when `/checkout/success` retries paid-session fulfillment while webhook delivery catches up; use at least 32 random characters and mirror the same value into the matching Convex deployment
 - `STRIPE_STARTER_PRICE_ID`: dashboard-managed Starter price for the `$297` Starter offer; optional locally because checkout falls back to inline `price_data`, required for hosted preview and production billing proof
@@ -45,6 +46,16 @@ Run `bun run dev:convex` to connect the repo to your hosted Convex dev deploymen
 The app now has two checkout offers. Starter grants generator and lesson access, sends successful buyers to `/starter/home`, and charges `$297` through a one-time price. Workers grants Worker access only, sends successful buyers to `/workers/setup`, and charges `$600` through a recurring subscription price. Create one Stripe product and one matching price for each offer in every Stripe mode you test. Store the IDs in `.env.local`, Vercel, and any release-proof environment that runs hosted billing checks. Local checkout can run without price IDs because it uses inline price data, but hosted preview and production proof require managed price IDs for both offers.
 
 Stripe webhook verification now runs in the Next.js app route, then trusted billing writes cross into Convex through `CONVEX_WEBHOOK_MUTATION_SECRET`. Keep `CLERK_SECRET_KEY`, `STRIPE_SECRET_KEY`, `CONVEX_WEBHOOK_MUTATION_SECRET`, and `CHECKOUT_FULFILLMENT_RETRY_SECRET` synced into the active Convex deployment as well as the Next.js runtime where applicable. Keep `STRIPE_WEBHOOK_SECRET` in the Next.js runtime for `/api/stripe/webhook`; only mirror it into Convex if you deliberately use the legacy `/stripe/webhook` compatibility endpoint. If `STRIPE_WEBHOOK_SECRET` is missing or mismatched, the app route cannot verify Stripe events. If `CONVEX_WEBHOOK_MUTATION_SECRET` is missing or mismatched, verified webhook events cannot write billing state into Convex. If `CHECKOUT_FULFILLMENT_RETRY_SECRET` is missing, too short, or mismatched, checkout cannot write the protected purchase-intent ledger and the checkout success page cannot safely trigger the same server-side fulfillment retry.
+
+## Worker Seal Team 6 Cal.com
+
+- `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK`: public Cal Link slug or full hosted URL for the Worker Seal Team 6 booking page. When it is unset, `/worker-seal-team-6` shows the direct scheduling fallback instead of injecting Cal.com's embed script.
+- `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_ORIGIN`: optional Cal.com origin for the embed and hosted fallback link. Defaults to `https://cal.com`.
+- `CAL_WEBHOOK_SECRET`: server-only Cal.com webhook signing secret for `POST /api/cal/worker-seal-team-6/webhook`.
+
+Create the Cal.com event type as `Worker Seal Team 6`, set it to 60 minutes and `$2,500 USD`, connect the Cal.com Stripe app, and subscribe the webhook endpoint to `BOOKING_CREATED`, `BOOKING_PAYMENT_INITIATED`, `BOOKING_PAID`, `BOOKING_RESCHEDULED`, and `BOOKING_CANCELLED`. Store the public link in `.env.local` and Vercel env. Store `CAL_WEBHOOK_SECRET` only in the Next.js runtime. Keep `CONVEX_WEBHOOK_MUTATION_SECRET` mirrored into both Next.js and hosted Convex, because verified Cal.com events use that secret-gated boundary to write booking mirror state into Convex.
+
+See [Worker Seal Team 6 Cal.com](/docs/worker-seal-team-6-cal-com) for the full provider setup and verification steps.
 
 ## PostHog and Telegram observability
 

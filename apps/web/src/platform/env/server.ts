@@ -29,6 +29,7 @@ const serverEnvSchema = z.object({
 	STRIPE_SECRET_KEY: z.string().min(1).optional(),
 	STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+	CAL_WEBHOOK_SECRET: z.string().min(1).optional(),
 	CONVEX_WEBHOOK_MUTATION_SECRET: z.string().min(32).optional(),
 	CHECKOUT_FULFILLMENT_RETRY_SECRET: z.string().min(32).optional(),
 	STRIPE_PRICE_ID: z.string().min(1).optional(),
@@ -87,6 +88,7 @@ export function loadServerEnv() {
 			process.env.STRIPE_PUBLISHABLE_KEY,
 		),
 		STRIPE_WEBHOOK_SECRET: normalizeEnvValue(process.env.STRIPE_WEBHOOK_SECRET),
+		CAL_WEBHOOK_SECRET: normalizeEnvValue(process.env.CAL_WEBHOOK_SECRET),
 		CONVEX_WEBHOOK_MUTATION_SECRET: normalizeEnvValue(
 			process.env.CONVEX_WEBHOOK_MUTATION_SECRET,
 		),

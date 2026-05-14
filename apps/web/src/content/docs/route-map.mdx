@@ -10,6 +10,7 @@ description: See the main public, protected, and purchase-related routes in one 
 - `/`: public marketing surface
 - `/starter`: public Starter sales page for the `$297` idea-to-repo offer
 - `/workers`: public Workers sales page for the `$600` existing-codebase worker install
+- `/worker-seal-team-6`: public Worker Seal Team 6 sales page for the `$2,500` paid booking service
 - `/docs`: public builder docs when the docs module is enabled; disabled-state surface when it is off
 - `/blog`: public editorial index plus `/blog/<slug>` article routes for published posts
 - `/sign-in`: branded starter-owned Clerk sign-in surface
@@ -68,6 +69,7 @@ These protected routes render behind `src/app/(app)/layout.tsx`, starting from s
 - `POST /api/stripe/checkout`: creates hosted Stripe Checkout Sessions for Starter and Workers
 - `POST /api/stripe/checkout/express`: creates custom-ui Checkout Sessions for Express Checkout
 - `POST /api/stripe/webhook`: verifies Stripe webhook signatures at the app origin and synchronizes Starter and Workers billing state into Convex through the trusted billing boundary
+- `POST /api/cal/worker-seal-team-6/webhook`: verifies Cal.com booking webhook signatures and synchronizes Worker Seal Team 6 booking mirror state into Convex through the trusted billing boundary
 - `POST /api/observability/clerk`: verifies Clerk webhooks for observability
 - `POST /api/observability/vercel`: verifies Vercel deployment webhooks for observability
 

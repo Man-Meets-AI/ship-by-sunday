@@ -25,4 +25,33 @@ describe("convex billing sync boundary", () => {
 			}),
 		).rejects.toThrow("Unauthorized billing sync call.");
 	});
+
+	it("rejects public Worker Seal Team 6 booking sync calls with the wrong shared secret", async () => {
+		const { syncWorkerSealTeam6BookingFromServer } =
+			await import("@/convex/billing");
+
+		await expect(
+			syncWorkerSealTeam6BookingFromServer._handler({} as never, {
+				convexWebhookMutationSecret: "wrong_secret",
+				calBookingUid: "booking_123",
+				status: "scheduled",
+				paymentStatus: "paid",
+				attendeeEmail: "buyer@example.com",
+			}),
+		).rejects.toThrow("Unauthorized billing sync call.");
+	});
+
+	it("rejects public Cal.com processed-event writes with the wrong shared secret", async () => {
+		const { recordProcessedCalEventFromServer } =
+			await import("@/convex/billing");
+
+		await expect(
+			recordProcessedCalEventFromServer._handler({} as never, {
+				convexWebhookMutationSecret: "wrong_secret",
+				calEventId: "cal_event_123",
+				eventType: "BOOKING_PAID",
+				status: "applied",
+			}),
+		).rejects.toThrow("Unauthorized billing sync call.");
+	});
 });

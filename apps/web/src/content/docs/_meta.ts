@@ -18,6 +18,9 @@ export default {
 	"stripe-checkout-webhook": {
 		title: "Stripe Checkout + Webhook",
 	},
+	"worker-seal-team-6-cal-com": {
+		title: "Worker Seal Team 6 Cal.com",
+	},
 	"local-qa": {
 		title: "Local QA",
 	},

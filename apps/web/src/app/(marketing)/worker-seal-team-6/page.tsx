@@ -17,6 +17,8 @@ import {
 	routeConfig,
 	supportContactConfig,
 } from "@/config/product";
+import { WorkerSealTeam6CalBooking } from "./_components/worker-seal-team-6-cal-booking";
+import { createWorkerSealTeam6CalBookingConfig } from "./_lib/worker-seal-team-6-cal-config";
 
 export const metadata: Metadata = {
 	title: "Worker Seal Team 6",
@@ -51,11 +53,17 @@ const hourSteps = [
 
 const bookingFacts = [
 	"No app account is required before scheduling.",
-	"Paid booking, rescheduling, and intake will move to a Cal.com booking page.",
-	"Direct scheduling is the current handoff while that public booking page is connected.",
+	"Cal.com owns payment, intake, confirmation, and rescheduling.",
+	"Convex mirrors verified booking state for support and fulfillment proof.",
 ] as const;
 
 export default function WorkerSealTeam6Page() {
+	const calBookingConfig = createWorkerSealTeam6CalBookingConfig({
+		calLinkEnv: process.env.NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK,
+		calOriginEnv: process.env.NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_ORIGIN,
+		directSchedulingHref: supportContactConfig.telegramHref,
+	});
+
 	return (
 		<main className="min-h-screen bg-background text-foreground">
 			<PublicSiteHeader activeHref={routeConfig.workerSealTeam6} />
@@ -84,12 +92,8 @@ export default function WorkerSealTeam6Page() {
 						</p>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 							<Button asChild size="lg">
-								<a
-									href={supportContactConfig.telegramHref}
-									target="_blank"
-									rel="noreferrer"
-								>
-									Ask about the hands-on hour
+								<a href="#booking">
+									Book the hands-on hour
 									<ArrowRight data-icon="inline-end" aria-hidden />
 								</a>
 							</Button>
@@ -172,41 +176,31 @@ export default function WorkerSealTeam6Page() {
 							aria-hidden
 						/>
 						<h2 className="mt-4 font-heading-serif text-3xl leading-tight text-foreground sm:text-4xl">
-							Booking is direct while Cal.com is being connected.
+							Book the paid hour through Cal.com.
 						</h2>
 						<p className="mt-4 text-sm leading-6 text-muted-foreground">
-							The public paid booking flow will use Cal.com so scheduling,
-							payment, intake, confirmations, and rescheduling stay in one
-							system. Until that booking page is live, use the direct line for
-							fit and scheduling.
+							Scheduling, payment, intake, confirmation, and rescheduling stay
+							in one booking system. If the embedded calendar is unavailable,
+							the hosted booking page and direct line stay available.
 						</p>
-						<div className="mt-6">
-							<Button asChild>
-								<a
-									href={supportContactConfig.telegramHref}
-									target="_blank"
-									rel="noreferrer"
-								>
-									Start direct scheduling
-									<ArrowRight data-icon="inline-end" aria-hidden />
-								</a>
-							</Button>
-						</div>
 					</div>
-					<ul className="grid content-start gap-3">
-						{bookingFacts.map((fact) => (
-							<li
-								key={fact}
-								className="flex items-start gap-3 rounded-md border border-border/70 bg-background p-4 text-sm leading-6 text-muted-foreground"
-							>
-								<ShieldCheck
-									className="mt-1 size-4 shrink-0 text-foreground"
-									aria-hidden
-								/>
-								<span>{fact}</span>
-							</li>
-						))}
-					</ul>
+					<div className="grid content-start gap-5">
+						<WorkerSealTeam6CalBooking {...calBookingConfig} />
+						<ul className="grid content-start gap-3">
+							{bookingFacts.map((fact) => (
+								<li
+									key={fact}
+									className="flex items-start gap-3 rounded-md border border-border/70 bg-background p-4 text-sm leading-6 text-muted-foreground"
+								>
+									<ShieldCheck
+										className="mt-1 size-4 shrink-0 text-foreground"
+										aria-hidden
+									/>
+									<span>{fact}</span>
+								</li>
+							))}
+						</ul>
+					</div>
 				</div>
 			</section>
 
