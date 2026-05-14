@@ -110,7 +110,7 @@ function renderGeneratedAppReadme(
 		"- `config/product.ts`",
 		"- `config/generated-design-system.ts`",
 		"- `src/app/(marketing)/page.tsx`",
-		"- `src/app/(app)/dashboard/page.tsx`",
+		"- `src/app/(app)/chat/page.tsx`",
 		"- `convex/`",
 		"",
 		"## Commands",

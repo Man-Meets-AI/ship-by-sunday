@@ -129,7 +129,7 @@ Set:
 
 That Convex JWT setup is what allows authenticated browser, server-side, and route-handler flows to talk to Convex with the expected identity.
 
-If you see `Convex auth is not ready` when opening protected features like `/notes`, check these first:
+If you see `Convex auth is not ready` when opening protected features like `/chat`, check these first:
 
 - `CLERK_JWT_ISSUER_DOMAIN` matches your Clerk Frontend API URL in both `.env.local` and the Convex deployment env
 - the value is the base Clerk domain, such as `https://verb-noun-00.clerk.accounts.dev`, not the JWKS URL
@@ -143,7 +143,22 @@ Helpful docs:
 - [Clerk Convex integration docs](https://clerk.com/docs/guides/development/integrations/databases/convex)
 - [Clerk JWT templates docs](https://clerk.com/docs/backend-requests/jwt-templates)
 
-### 4. Set up Stripe
+### 4. Set up OpenAI
+
+Create an OpenAI API key for this app, then add it to the Convex deployment environment as:
+
+- `OPENAI_API_KEY`
+
+The protected chat route uses a Convex action for OpenAI calls, so the key must exist in Convex runtime env. For local development, keep the same value in `.env.local` as well so local validation and setup checks see the intended configuration.
+
+The chat implementation uses the OpenAI Responses API with streaming enabled, stores OpenAI response ids for `previous_response_id` continuation, and never exposes the key to browser code.
+
+Helpful docs:
+
+- [OpenAI Responses API migration guide](https://developers.openai.com/api/docs/guides/migrate-to-responses)
+- [OpenAI streaming responses guide](https://developers.openai.com/api/docs/guides/streaming-responses)
+
+### 5. Set up Stripe
 
 Create a recurring monthly price in Stripe, then add:
 
@@ -184,7 +199,7 @@ Helpful docs:
 - [Stripe Customer Portal docs](https://docs.stripe.com/customer-management/integrate-customer-portal)
 - [How I Stay Sane Implementing Stripe](https://github.com/t3dotgg/stripe-recommendations/blob/main/README.md)
 
-### 5. Set up Resend
+### 6. Set up Resend
 
 Create an API key, verify a sending domain, and add:
 
@@ -202,7 +217,7 @@ Helpful docs:
 - [Resend API keys docs](https://resend.com/docs/dashboard/api-keys/introduction)
 - [Resend send email docs](https://resend.com/docs/api-reference/emails/send-email)
 
-### 6. Set up PostHog
+### 7. Set up PostHog
 
 Create a PostHog project, then add:
 
@@ -218,7 +233,7 @@ Helpful docs:
 - [PostHog JavaScript config docs](https://posthog.com/docs/libraries/js/config)
 - [PostHog identify users docs](https://posthog.com/docs/getting-started/identify-users)
 
-### 7. Set up Sentry
+### 8. Set up Sentry
 
 Create a Sentry project for the app, then add:
 
@@ -235,7 +250,7 @@ Helpful docs:
 - [Sentry Next.js manual setup docs](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup)
 - [Sentry source maps docs](https://docs.sentry.io/platforms/javascript/guides/nextjs/sourcemaps/)
 
-### 8. Start local development
+### 9. Start local development
 
 Once your env file is populated, run:
 
@@ -248,7 +263,7 @@ That starts:
 - Next.js on `http://localhost:3000`
 - Convex dev in watch mode
 
-### 9. Verify the starter
+### 10. Verify the starter
 
 Before you start building on top of the template, run:
 
@@ -262,7 +277,7 @@ bun run build
 Then verify these flows manually:
 
 1. Sign in with Clerk and confirm your user syncs into Convex.
-2. Open `/notes` and create a note.
+2. Open `/chat` and send a message after `OPENAI_API_KEY` is configured in Convex.
 3. Open `/billing` and confirm billing state loads from Convex.
 4. Trigger a Stripe test checkout and replay webhook events locally.
 5. If you set `ENABLE_DEBUG_TOOLS=true`, send a test email.
@@ -286,6 +301,7 @@ Then verify these flows manually:
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: from Clerk
 - `CLERK_SECRET_KEY`: from Clerk
 - `CLERK_JWT_ISSUER_DOMAIN`: from Clerk
+- `OPENAI_API_KEY`: from OpenAI, server-only and also required in Convex runtime env for chat
 - `CONVEX_WEBHOOK_MUTATION_SECRET`: generate a long random secret shared only between Next.js and Convex for webhook billing writes
 - `STRIPE_SECRET_KEY`: from Stripe
 - `STRIPE_WEBHOOK_SECRET`: from Stripe CLI locally or Stripe Dashboard in production
@@ -307,6 +323,7 @@ Then verify these flows manually:
 Some values must also exist in the Convex runtime when Convex code reads `process.env`:
 
 - `CLERK_JWT_ISSUER_DOMAIN` for Clerk auth inside Convex
+- `OPENAI_API_KEY` for streaming assistant responses from `convex/chat.ts`
 - `CONVEX_WEBHOOK_MUTATION_SECRET` for trusted webhook billing writes from Next.js into Convex
 - `STRIPE_PRICE_PRO_MONTHLY` for entitlement decisions during billing sync
 - `RESEND_API_KEY` and `RESEND_FROM_EMAIL` for welcome email actions
@@ -361,13 +378,14 @@ convex/
 
 ## Included feature
 
-The authenticated `Notes` feature is the reference implementation for future work:
+The authenticated `Chat` feature is the reference implementation for future work:
 
-- protected route in `src/app/(app)/notes/page.tsx`
+- protected route in `src/app/(app)/chat/page.tsx`
 - user sync mutation in `convex/users.ts`
 - workspace-scoped auth helpers in `convex/auth.ts`
-- note query and mutation in `convex/notes.ts`
-- entitlement-aware free-plan limit enforced in Convex
+- chat queries, mutations, and OpenAI streaming action in `convex/chat.ts`
+- model allowlist and chat business rules in `src/lib/chat/`
+- entitlement-aware free assistant-message limit enforced in Convex
 
 ## Provider flows
 
@@ -388,7 +406,7 @@ The repo includes example regression tests:
 
 - env parsing in `src/lib/env/env.test.ts`
 - debug tool gating in `src/lib/app/debug-tools.test.ts`
-- note business rules in `src/lib/notes/rules.test.ts`
+- chat business rules in `src/lib/chat/rules.test.ts`
 - Stripe webhook sync target extraction in `src/lib/billing/stripe-webhooks.test.ts`
 - Stripe sync helpers in `src/lib/billing/stripe-sync.test.ts`
 - Stripe webhook route behavior in `src/app/api/stripe/webhook/route.test.ts`

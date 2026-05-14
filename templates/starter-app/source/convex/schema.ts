@@ -40,14 +40,51 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_workspace_user", ["workspaceId", "userId"]),
 
-  notes: defineTable({
+  chatConversations: defineTable({
     workspaceId: v.id("workspaces"),
     createdByUserId: v.id("users"),
     title: v.string(),
-    body: v.string(),
+    selectedModelKey: v.string(),
+    latestOpenAIResponseId: v.optional(v.string()),
+    archivedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_workspace_updated_at", ["workspaceId", "updatedAt"]),
+
+  chatMessages: defineTable({
+    workspaceId: v.id("workspaces"),
+    conversationId: v.id("chatConversations"),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+    status: v.union(
+      v.literal("streaming"),
+      v.literal("complete"),
+      v.literal("failed"),
+    ),
+    sourceUserMessageId: v.optional(v.id("chatMessages")),
+    modelKey: v.optional(v.string()),
+    modelId: v.optional(v.string()),
+    reasoningEffort: v.optional(v.string()),
+    verbosity: v.optional(v.string()),
+    openAIResponseId: v.optional(v.string()),
+    previousResponseId: v.optional(v.string()),
+    errorMessage: v.optional(v.string()),
+    attemptCount: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_conversation_created_at", ["conversationId", "createdAt"])
+    .index("by_conversation_status_created_at", [
+      "conversationId",
+      "status",
+      "createdAt",
+    ])
+    .index("by_workspace_role_status_created_at", [
+      "workspaceId",
+      "role",
+      "status",
+      "createdAt",
+    ]),
 
   stripeCustomers: defineTable({
     workspaceId: v.id("workspaces"),

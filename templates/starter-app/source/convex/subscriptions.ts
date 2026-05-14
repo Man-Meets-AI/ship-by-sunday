@@ -134,7 +134,7 @@ async function disableWorkspaceEntitlements(
   await setEntitlement({
     workspaceId: args.workspaceId,
     ctx,
-    key: "notes_unlimited",
+    key: "chat_unlimited",
     enabled: false,
     source: "free_plan",
   });
@@ -252,7 +252,7 @@ export async function syncStripeCustomerStateToDatabase(
   await setEntitlement({
     workspaceId,
     ctx: typedCtx,
-    key: "notes_unlimited",
+    key: "chat_unlimited",
     enabled: hasStarterProEntitlement,
     source: hasStarterProEntitlement ? "stripe_subscription" : "free_plan",
   });

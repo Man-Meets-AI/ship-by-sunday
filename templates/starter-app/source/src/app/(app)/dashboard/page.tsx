@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Orbit, ShieldCheck, Workflow } from "lucide-react";
+import { ArrowRight, MessageSquare, Orbit, ShieldCheck } from "lucide-react";
 
 import { areDebugToolsEnabled } from "@/lib/app/debug-tools";
 import { DebugToolsPanel } from "@/components/app/debug-tools-panel";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const extensionRules = [
-  "Start new product models in Convex so the domain stays coherent.",
+  "Start new product models in Convex so conversations stay coherent.",
   "Keep route protection inside Clerk middleware and internal auth helpers.",
   "Add analytics events to the shared registry before components capture them.",
   "Sync Stripe into Convex first, then let product UI read normalized billing state.",
@@ -19,8 +19,9 @@ const extensionRules = [
 const workspaceSignals = [
   {
     label: "Real app shell",
-    description: "Protected navigation, user bootstrap, and role-aware views are already connected.",
-    icon: Workflow,
+    description:
+      "Protected navigation, user bootstrap, and the chat route are already connected.",
+    icon: MessageSquare,
   },
   {
     label: "Clear boundaries",
@@ -29,7 +30,8 @@ const workspaceSignals = [
   },
   {
     label: "Safe extension points",
-    description: "Notes and billing are there to be copied, replaced, and pressure-tested.",
+    description:
+      "Chat, billing, and provider gates are ready to copy, replace, and pressure-test.",
     icon: ShieldCheck,
   },
 ];
@@ -42,10 +44,10 @@ export default function DashboardPage() {
       <SectionHeader
         eyebrow="Workspace"
         title="Your product starts here"
-        description="Use this authenticated shell as the base for real product routes. Navigation, workspace bootstrapping, role-aware billing, and a full sample workflow are already connected."
+        description="Use this authenticated shell as the base for real product routes. Navigation, workspace bootstrapping, role-aware billing, and a Convex-backed chat workflow are already connected."
         actions={
           <Button asChild>
-            <Link href="/notes">Open the notes demo</Link>
+            <Link href="/chat">Open chat</Link>
           </Button>
         }
       />
@@ -106,6 +108,7 @@ export default function DashboardPage() {
               <Badge variant="secondary">Convex</Badge>
               <Badge variant="secondary">Clerk</Badge>
               <Badge variant="secondary">Stripe</Badge>
+              <Badge variant="secondary">OpenAI</Badge>
               <Badge variant="secondary">Resend</Badge>
               <Badge variant="secondary">PostHog</Badge>
               <Badge variant="secondary">Sentry</Badge>

@@ -35,6 +35,7 @@ export const serverEnvSchema = z.object({
   SENTRY_ORG: z.string().min(1),
   SENTRY_PROJECT: z.string().min(1),
   CONVEX_WEBHOOK_MUTATION_SECRET: z.string().min(1),
+  OPENAI_API_KEY: z.string().min(1),
   STRIPE_PRICE_PRO_MONTHLY: z.string().min(1),
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
@@ -91,6 +92,10 @@ const analyticsServerEnvSchema = z.object({
 const emailServerEnvSchema = z.object({
   RESEND_API_KEY: z.string().min(1),
   RESEND_FROM_EMAIL: resendFromEmailSchema,
+});
+
+const openAIEnvSchema = z.object({
+  OPENAI_API_KEY: z.string().min(1),
 });
 
 const sentryServerEnvSchema = z.object({
@@ -193,6 +198,16 @@ export function getServerEmailEnv() {
       RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
     },
     "server email environment variables",
+  );
+}
+
+export function getOpenAIEnvIfConfigured() {
+  return parseOptionalEnv(
+    openAIEnvSchema,
+    {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    },
+    "OpenAI environment variables",
   );
 }
 

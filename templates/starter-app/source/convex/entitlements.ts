@@ -74,7 +74,7 @@ export const syncWorkspaceEntitlements = mutation({
     await setEntitlement({
       ctx,
       workspaceId: args.workspaceId,
-      key: "notes_unlimited",
+      key: "chat_unlimited",
       enabled: args.hasActiveSubscription,
       source: args.hasActiveSubscription ? "stripe_subscription" : "free_plan",
     });

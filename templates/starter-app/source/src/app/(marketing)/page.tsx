@@ -50,7 +50,7 @@ const heroQueue = [
   {
     title: "Monday kickoff",
     description:
-      "Team priorities, recent account notes, and next actions stay aligned in one queue.",
+      "Team priorities, recent account context, and next actions stay aligned in one queue.",
     badge: "Ready",
     icon: CheckCheck,
   },
@@ -74,7 +74,7 @@ const features = [
   {
     title: "Centralize team and client work",
     description:
-      "Keep requests, notes, and handoffs in one shared workspace instead of scattering them across tools.",
+      "Keep requests, context, and handoffs in one shared workspace instead of scattering them across tools.",
     icon: PanelTop,
   },
   {

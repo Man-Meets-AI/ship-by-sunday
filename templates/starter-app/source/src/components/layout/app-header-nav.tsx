@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CreditCard, FileText, LayoutDashboard } from "lucide-react";
+import { CreditCard, LayoutDashboard, MessageSquare } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Workspace", icon: LayoutDashboard },
-  { href: "/notes", label: "Notes demo", icon: FileText },
+  { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/billing", label: "Billing", icon: CreditCard },
 ];
 

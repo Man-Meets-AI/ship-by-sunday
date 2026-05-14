@@ -47,7 +47,7 @@ export function WelcomeEmail({
             </Text>
             <Text style={{ fontSize: "16px", lineHeight: "28px" }}>
               You&apos;re landing in a real product shell with authenticated routes,
-              a working notes workflow, billing that syncs back into Convex, and
+              a working chat workflow, billing that syncs back into Convex, and
               shared analytics conventions that the next feature can build on.
             </Text>
           </Section>

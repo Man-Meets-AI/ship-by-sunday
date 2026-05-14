@@ -1,3 +1,5 @@
+import type { Id } from "./_generated/dataModel";
+
 export type ConvexDocument = Record<string, unknown> & { _id: string };
 
 export type UserDoc = ConvexDocument & {
@@ -57,11 +59,32 @@ export type SubscriptionDoc = ConvexDocument & {
   updatedAt: number;
 };
 
-export type NoteDoc = ConvexDocument & {
+export type ChatConversationDoc = ConvexDocument & {
   workspaceId: string;
   createdByUserId: string;
   title: string;
-  body: string;
+  selectedModelKey: string;
+  latestOpenAIResponseId?: string;
+  archivedAt?: number;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type ChatMessageDoc = ConvexDocument & {
+  workspaceId: string;
+  conversationId: Id<"chatConversations">;
+  role: "user" | "assistant";
+  content: string;
+  status: "streaming" | "complete" | "failed";
+  sourceUserMessageId?: Id<"chatMessages">;
+  modelKey?: string;
+  modelId?: string;
+  reasoningEffort?: string;
+  verbosity?: string;
+  openAIResponseId?: string;
+  previousResponseId?: string;
+  errorMessage?: string;
+  attemptCount: number;
   createdAt: number;
   updatedAt: number;
 };

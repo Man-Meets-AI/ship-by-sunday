@@ -2,7 +2,7 @@
 title: Starter Template App Planning Brief 5
 program_id: starter-template-source-and-billing-proof
 brief_version: 5
-status: current
+status: superseded
 summary: Create the next child ExecPlan for turning the pinned Starter template app into a richer customer-ready app starter.
 read_when:
   - "Writing the fifth child ExecPlan for this Program."

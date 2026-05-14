@@ -10,9 +10,9 @@
 
 import type * as auth from "../auth.js";
 import type * as billing from "../billing.js";
+import type * as chat from "../chat.js";
 import type * as entitlements from "../entitlements.js";
 import type * as memberships from "../memberships.js";
-import type * as notes from "../notes.js";
 import type * as notifications from "../notifications.js";
 import type * as stripe_customers from "../stripe_customers.js";
 import type * as subscriptions from "../subscriptions.js";
@@ -29,9 +29,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   billing: typeof billing;
+  chat: typeof chat;
   entitlements: typeof entitlements;
   memberships: typeof memberships;
-  notes: typeof notes;
   notifications: typeof notifications;
   stripe_customers: typeof stripe_customers;
   subscriptions: typeof subscriptions;

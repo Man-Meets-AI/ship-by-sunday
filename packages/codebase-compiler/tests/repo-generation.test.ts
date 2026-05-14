@@ -342,6 +342,10 @@ describe("repo generation", () => {
 				"apps/web/src/components/ui/button.tsx",
 				"apps/web/src/app/(app)/layout.tsx",
 				"apps/web/src/app/(app)/dashboard/page.tsx",
+				"apps/web/src/app/(app)/chat/page.tsx",
+				"apps/web/src/components/app/chat-workbench.tsx",
+				"apps/web/src/lib/chat/models.ts",
+				"apps/web/convex/chat.ts",
 				"apps/web/convex/schema.ts",
 				"apps/web/next.config.ts",
 				"apps/web/package.json",
@@ -386,6 +390,9 @@ describe("repo generation", () => {
 				"apps/web/app/api/workspace/runner/events/route.ts",
 				"apps/web/src/app/_content/home-page.ts",
 				"apps/web/src/app/api/billing/checkout/route.ts",
+				"apps/web/src/app/(app)/notes/page.tsx",
+				"apps/web/src/components/app/notes-workbench.tsx",
+				"apps/web/convex/notes.ts",
 				"docs/PLANS.md",
 				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
@@ -464,6 +471,14 @@ describe("repo generation", () => {
 			.filter((file) => file.path.startsWith("apps/web/"))
 			.map(snapshotText)
 			.join("\n");
+		const browserReachableAppText = snapshotFiles
+			.filter(
+				(file) =>
+					file.path.startsWith("apps/web/src/app/") ||
+					file.path.startsWith("apps/web/src/components/"),
+			)
+			.map(snapshotText)
+			.join("\n");
 		const generatedGuidanceText = snapshotFiles
 			.filter(
 				(file) =>
@@ -509,6 +524,7 @@ describe("repo generation", () => {
 			"NEXT_PUBLIC_APP_URL=http://localhost:3000",
 		);
 		expect(appLocalEnvExample).toContain("CONVEX_WEBHOOK_MUTATION_SECRET=");
+		expect(appLocalEnvExample).toContain("OPENAI_API_KEY=");
 		expect(appLocalEnvExample).toContain("STRIPE_PRICE_PRO_MONTHLY=");
 		expect(appLocalEnvExample).toContain("NEXT_PUBLIC_POSTHOG_KEY=");
 		expect(appLocalEnvExample).not.toContain("APP_BASE_URL=");
@@ -526,6 +542,7 @@ describe("repo generation", () => {
 			"NEXT_PUBLIC_APP_URL=https://your-domain.example",
 		);
 		expect(appProductionEnvExample).toContain("STRIPE_PRICE_PRO_MONTHLY=");
+		expect(appProductionEnvExample).toContain("OPENAI_API_KEY=");
 		expect(appProductionEnvExample).not.toContain("APP_BASE_URL=");
 		expect(appProductionEnvExample).not.toContain("STRIPE_STARTER_PRICE_ID=");
 		expect(appProductionEnvExample).not.toContain("STRIPE_WORKERS");
@@ -545,6 +562,7 @@ describe("repo generation", () => {
 		);
 		expect(appSnapshotText).not.toContain('action="/api/billing/checkout"');
 		expect(appSnapshotText).not.toContain('action="/api/billing/portal"');
+		expect(browserReachableAppText).not.toContain("process.env.OPENAI_API_KEY");
 		expect(generatedGuidanceText).not.toContain("apps/web/content/docs/");
 		expect(generatedGuidanceText).not.toContain(
 			"apps/web/convex/_generated/ai/guidelines.md",
@@ -556,11 +574,11 @@ describe("repo generation", () => {
 		expect(templateSourceProvenance).toMatchObject({
 			schemaVersion: "generated-starter-template-source-provenance.v1",
 			templateId: "starter-app",
-			templateVersion: "2026-05-13-sibling-seed",
+			templateVersion: "2026-05-13-chat-starter",
 			materializedOutputRoot: "apps/web",
 			generatedOverlaysWin: true,
 			contentDigest:
-				"sha256-2050b63ecf39c24cfda55f1a3cb93c8d239b94bf701dd8435378be5d2492ee5c",
+				"sha256-69aa817c1510d24e103d19246589c7ebab0727ef82306f8938ea9a94e77adb52",
 		});
 		expect(
 			Object.keys(templateSourceProvenance.provenance ?? {}),
@@ -579,6 +597,9 @@ describe("repo generation", () => {
 				"apps/web/app/api/codex/generate/route.ts",
 				"apps/web/src/app/_content/home-page.ts",
 				"apps/web/src/app/api/billing/checkout/route.ts",
+				"apps/web/src/app/(app)/notes/page.tsx",
+				"apps/web/src/components/app/notes-workbench.tsx",
+				"apps/web/convex/notes.ts",
 				"apps/web/convex/workspace.ts",
 				"apps/web/platform/codex/app-server.ts",
 				"packages/local-runner/src/index.ts",

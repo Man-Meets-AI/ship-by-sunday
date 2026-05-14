@@ -204,7 +204,7 @@ function renderPlanningBrief(
 		"",
 		"Exact scope: prove the generated repo installs with Bun, validates its Program and ExecPlan structure, passes the Codebase contract, and keeps the app shell typecheckable before live provider setup.",
 		"",
-		"Exact boundaries: do not configure Clerk, Convex, Stripe, or product-specific feature work inside Core Boot. Those are separate child ExecPlans and should remain blocked until the prior proof is recorded.",
+		"Exact boundaries: do not configure Clerk, Convex, Stripe, OpenAI, or product-specific feature work inside Core Boot. Those are separate setup or product tasks and should remain blocked until the prior proof is recorded.",
 		"",
 		"## Setup Roadmap",
 		"",
@@ -375,7 +375,7 @@ function buildExecPlanDetails(
 					"Update this plan with validation evidence and the next recommendation.",
 				],
 				validation:
-					"Core Boot is acceptable when the generated repo installs with Bun, operating-pack validation passes, Codebase contract passes, and the app typechecks without Clerk, Convex, or Stripe credentials.",
+					"Core Boot is acceptable when the generated repo installs with Bun, operating-pack validation passes, Codebase contract passes, and the app typechecks without Clerk, Convex, Stripe, or OpenAI credentials.",
 				testCommands: [
 					"bun install",
 					"bun run agentic:check",
@@ -600,7 +600,7 @@ function buildExecPlanDetails(
 				],
 				outOfScope: [
 					"Rewriting auth, billing, provider setup, database schema, or generated design tokens unless this plan is revised first.",
-					"Adding a ChatGPT app implementation unless a later Program or ExecPlan explicitly names that scope.",
+					"Adding provider features beyond the existing setup-gated chat surface unless this plan is revised first.",
 				],
 				planOfWork:
 					"Use `$starter-first-slice`, inspect the product facts and Build Pack, choose the smallest visible change, edit the owning files, update docs if behavior changes, and run narrow validation before broader checks.",

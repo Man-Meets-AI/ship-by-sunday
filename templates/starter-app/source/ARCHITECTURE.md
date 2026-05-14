@@ -22,7 +22,7 @@ If you are changing code style or adding new functionality, read `CONVENTIONS.md
 ### Convex
 
 - owns application tables, domain logic, authorization helpers, and starter feature logic
-- stores users, workspaces, memberships, notes, stripe customers, subscriptions, and entitlements
+- stores users, workspaces, memberships, chat conversations, chat messages, stripe customers, subscriptions, and entitlements
 - exposes queries for reads, mutations for writes, actions for external side effects, and internal functions when the caller is another Convex function
 
 ### Clerk
@@ -54,13 +54,13 @@ If you are changing code style or adding new functionality, read `CONVENTIONS.md
 
 ## Request flow examples
 
-### Authenticated notes feature
+### Authenticated chat feature
 
-1. Clerk proxy protection gates `/notes`.
+1. Clerk proxy protection gates `/chat`.
 2. `src/components/providers/user-bootstrap.tsx` synchronizes the signed-in user into Convex.
-3. `src/components/app/notes-workbench.tsx` calls Convex query and mutation refs.
+3. `src/components/app/chat-workbench.tsx` calls Convex query, mutation, and action refs.
 4. `convex/auth.ts` resolves the current user and workspace membership.
-5. `convex/notes.ts` applies the business rule and writes the note.
+5. `convex/chat.ts` writes user and assistant messages, enforces the free assistant-message limit, streams OpenAI output into Convex state, and records the latest OpenAI response id for continuation.
 
 ### Billing
 
@@ -85,7 +85,8 @@ If you are changing code style or adding new functionality, read `CONVENTIONS.md
 - `users`: app-level user profile linked to an auth provider subject
 - `workspaces`: product-level tenant records
 - `memberships`: workspace membership and role
-- `notes`: starter authenticated feature
+- `chatConversations`: workspace-scoped conversation records with title, selected model, and latest OpenAI response id
+- `chatMessages`: persisted user and assistant messages with streaming, failed, or complete status
 - `stripeCustomers`: Stripe-to-workspace mapping
 - `subscriptions`: normalized billing lifecycle state
 - `entitlements`: app-readable feature access state

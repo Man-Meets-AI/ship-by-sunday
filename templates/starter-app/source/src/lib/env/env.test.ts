@@ -25,6 +25,7 @@ const baseEnv = {
   SENTRY_ORG: "example-org",
   SENTRY_PROJECT: "example-project",
   CONVEX_WEBHOOK_MUTATION_SECRET: "convex_webhook_secret",
+  OPENAI_API_KEY: "sk-proj-example",
   STRIPE_PRICE_PRO_MONTHLY: "price_example",
   STRIPE_SECRET_KEY: "sk_test_example",
   STRIPE_WEBHOOK_SECRET: "whsec_example",

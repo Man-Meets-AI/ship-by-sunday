@@ -10,12 +10,12 @@ describe("starter template source contract", () => {
 
 		expect(verification.manifest).toMatchObject({
 			contentDigest:
-				"sha256-2050b63ecf39c24cfda55f1a3cb93c8d239b94bf701dd8435378be5d2492ee5c",
-			fileCount: 131,
+				"sha256-69aa817c1510d24e103d19246589c7ebab0727ef82306f8938ea9a94e77adb52",
+			fileCount: 133,
 			sourceLayout: "single-next-app-root",
 			sourceRoot: STARTER_TEMPLATE_SOURCE_ROOT,
 			templateId: "starter-app",
-			templateVersion: "2026-05-13-sibling-seed",
+			templateVersion: "2026-05-13-chat-starter",
 		});
 		expect(verification.contentDigest).toBe(
 			verification.manifest.contentDigest,
@@ -32,11 +32,14 @@ describe("starter template source contract", () => {
 		}
 
 		expect(fileSet.has("src/app/(marketing)/page.tsx")).toBe(true);
-		expect(fileSet.has("src/app/(app)/notes/page.tsx")).toBe(true);
+		expect(fileSet.has("src/app/(app)/chat/page.tsx")).toBe(true);
 		expect(fileSet.has("src/app/api/billing/checkout/route.ts")).toBe(true);
 		expect(fileSet.has("src/lib/billing/stripe-sync.ts")).toBe(true);
+		expect(fileSet.has("src/lib/chat/models.ts")).toBe(true);
+		expect(fileSet.has("src/lib/chat/rules.ts")).toBe(true);
 		expect(fileSet.has("convex/schema.ts")).toBe(true);
-		expect(fileSet.has("convex/notes.ts")).toBe(true);
+		expect(fileSet.has("convex/chat.ts")).toBe(true);
+		expect(fileSet.has("convex/notes.ts")).toBe(false);
 	});
 
 	it("excludes dependency installs, local env, and build artifacts", async () => {

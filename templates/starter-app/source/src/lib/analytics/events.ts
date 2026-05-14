@@ -1,7 +1,7 @@
 export const analyticsEvents = {
   startedCheckout: "started_checkout",
+  chatMessageSent: "chat_message_sent",
   coreActionCompleted: "core_action_completed",
-  noteCreated: "note_created",
   testEmailSent: "test_email_sent",
   sentryDebugTriggered: "sentry_debug_triggered",
 } as const;

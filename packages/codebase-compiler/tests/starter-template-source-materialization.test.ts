@@ -28,6 +28,10 @@ describe("starter template source materialization", () => {
 			expect.arrayContaining([
 				"apps/web/src/components/ui/button.tsx",
 				"apps/web/src/app/(app)/dashboard/page.tsx",
+				"apps/web/src/app/(app)/chat/page.tsx",
+				"apps/web/src/components/app/chat-workbench.tsx",
+				"apps/web/src/lib/chat/models.ts",
+				"apps/web/convex/chat.ts",
 				"apps/web/src/lib/billing/stripe-sync.ts",
 				"apps/web/convex/schema.ts",
 			]),
@@ -37,6 +41,9 @@ describe("starter template source materialization", () => {
 				"apps/web/bun.lock",
 				"apps/web/README.md",
 				"apps/web/package.json",
+				"apps/web/src/app/(app)/notes/page.tsx",
+				"apps/web/src/components/app/notes-workbench.tsx",
+				"apps/web/convex/notes.ts",
 				"apps/web/.github/workflows/ci.yml",
 				"apps/web/src/app/api/billing/checkout/route.ts",
 				"apps/web/src/app/(marketing)/page.test.tsx",
@@ -86,6 +93,14 @@ describe("starter template source materialization", () => {
 		expect(snapshotPaths.has("apps/web/src/app/(app)/dashboard/page.tsx")).toBe(
 			true,
 		);
+		expect(snapshotPaths.has("apps/web/src/app/(app)/chat/page.tsx")).toBe(
+			true,
+		);
+		expect(snapshotPaths.has("apps/web/src/app/(app)/notes/page.tsx")).toBe(
+			false,
+		);
+		expect(snapshotPaths.has("apps/web/convex/chat.ts")).toBe(true);
+		expect(snapshotPaths.has("apps/web/convex/notes.ts")).toBe(false);
 		expect(snapshotPaths.has("apps/web/convex/schema.ts")).toBe(true);
 		expect(snapshotPaths.has("apps/web/app/page.tsx")).toBe(false);
 		expect(snapshotPaths.has("apps/web/app/layout.tsx")).toBe(false);
@@ -106,6 +121,7 @@ describe("starter template source materialization", () => {
 		expect(rootLayout).not.toContain("@/lib/env/client");
 		expect(appReadme).toContain("No-Provider Contract");
 		expect(appReadme).toContain("config/product.ts");
+		expect(appReadme).toContain("src/app/(app)/chat/page.tsx");
 		expect(appReadme).not.toContain("_content");
 		expect(appReadme).not.toContain("api/stripe/webhook");
 		expect(billingPanel).toContain(

@@ -41,7 +41,7 @@ Billing development: `stripe listen --forward-to http://localhost:3000/api/strip
 - `src/components/app/`, `layout/`, `providers/`, `ui/`
 - `src/lib/` — Analytics, auth, billing, env, email
 
-Reference implementation: Notes feature in `src/app/(app)/notes/`, `convex/notes.ts`, `convex/auth.ts`.
+Reference implementation: Chat feature in `src/app/(app)/chat/`, `convex/chat.ts`, `convex/auth.ts`.
 
 ## Boundaries
 
