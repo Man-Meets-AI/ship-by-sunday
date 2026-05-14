@@ -1,5 +1,11 @@
 # Mistakes
 
+## 2026-05-14 Dialog Sheet Validation Script Name
+
+- Mistake: I wrote and first ran `bun run --cwd apps/web test:integration-ui` for the admin Dialog compatibility check even though this repo's script is `test:integration:ui`.
+  Impact: The first command failed before running tests and the active ExecPlan briefly documented the wrong command.
+  Corrective action: Check the package scripts before recording validation commands in ExecPlans, then rerun the intended test through the actual script name.
+
 ## 2026-05-14 Program Brief Pointer Edit
 
 - Mistake: I updated `current-planning-brief.txt` with shell redirection instead of `apply_patch`.
@@ -297,3 +303,15 @@
 - Mistake: I tried to prove Separator rendering on `/checkout/cancel/confirmed` without first confirming that route still rendered a shared Separator.
   Impact: The browser proof failed on a bad route assumption; source code was unaffected.
   Corrective action: Probe candidate routes for the target `data-slot` before using them as proof surfaces.
+
+## 2026-05-14 Tooltip State Assertion
+
+- Mistake: I wrote the Popover/Tooltip primitive test as if Tooltip used Popover's `data-[state=open]` animation state.
+  Impact: The first focused unit run failed even though Tooltip correctly uses Radix's delayed-open state.
+  Corrective action: Assert Popover and Tooltip state tokens separately when adapting shared popup recipes across different Radix primitives.
+
+## 2026-05-14 Private Proof Route Segment
+
+- Mistake: I put the temporary Popover/Tooltip browser proof route under an underscore-prefixed app segment.
+  Impact: Next treated it as private route inventory, so the proof script hit a 404 and the first browser proof attempt failed.
+  Corrective action: Use ordinary URL segments for temporary App Router proof routes, then delete the route before final validation.

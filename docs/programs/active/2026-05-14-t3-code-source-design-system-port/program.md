@@ -84,6 +84,9 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`, moving Input and Textarea to T3 Code form-control wrappers with native compatibility escape hatches.
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md`, moving Field, Label, Separator, Checkbox, Switch, and RadioGroup to T3 Code recipes while preserving Radix compatibility exports.
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`, moving Select trigger, content, item, separator, scroll affordance, and T3-compatible helper recipes onto the current Radix Select API with EA-authenticated desktop Select browser proof and mobile protected-route proof on `/starter/generate-codebase`.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md`, adding a Radix-backed Popover wrapper and moving Tooltip to the T3 Code popup surface while preserving current Tooltip exports.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md`, moving Dialog and Sheet backdrop, viewport, popup, close-button, panel, and footer recipes to T3 Code surfaces while preserving current Radix call-site compatibility.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md`, moving DropdownMenu, NavigationMenu, and the app-shell command palette to T3 Code menu/command recipes while preserving Radix and cmdk compatibility.
 
 ## Decision Log
 
@@ -135,6 +138,9 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`: copied T3 Code Input and Textarea wrapper/control recipes into native compatibility primitives while keeping native props, refs, and explicit native field class escape hatches.
 - `docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md`: copied T3 Code Field, Label, Separator, Checkbox, Switch, and RadioGroup recipes onto the current Radix primitive surface while keeping existing export names and adding the T3-compatible `Radio` alias.
 - `docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`: copied T3 Code Select trigger, popup, item, separator, and scroll-arrow recipes onto the current Radix Select surface while keeping existing export names and adding `SelectButton`, `SelectGroupLabel`, and `selectTriggerVariants`; the adapter maps Radix `data-state="open"` to T3 open-state styling and defaults content to Radix popper positioning; browser proof signed in as `ea@parkerrex.com`, opened Select on desktop, and confirmed the protected Starter codebase route on mobile.
+- `docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md`: added a shared Popover primitive and copied T3 Code Popover/Tooltip popup recipes onto the current Radix surface while keeping `TooltipContent`, adding `TooltipPopup` and `PopoverPopup`, and proving both popups on desktop and mobile through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md`: copied T3 Code Dialog and Sheet backdrop, viewport, popup, panel, close-button, header, title, description, and footer recipes onto the current Radix surface while keeping `DialogContent`, `SheetContent`, `showCloseButton`, Sheet `side`, custom data attributes, and T3-style popup aliases; desktop and mobile browser proof passed through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md`: copied T3 Code menu and command popup recipes onto Radix DropdownMenu, Radix NavigationMenu, and a new shared cmdk-backed Command primitive while keeping current export names, adding honest `Menu*` aliases, and proving desktop/mobile render through a temporary local route.
 
 Planned child slices:
 
@@ -148,9 +154,9 @@ Planned child slices:
 
 ## Next Slice
 
-The next recommended slice is `Popover and Tooltip primitive migration`.
+The next recommended slice is `AlertDialog and Toast/Sonner primitive migration`.
 
-That slice should continue using `planning-brief-4.md` and decide whether the popup/positioner primitives are the first place to adopt Base UI or whether T3 Popover and Tooltip recipes should be adapted onto the current Radix APIs. Select stayed on Radix for compatibility, but its popup styling now depends on the same T3 surface, shadow, viewport, and positioning tokens that Popover and Tooltip expose directly.
+That slice should continue using `planning-brief-4.md` and adapt T3 Code's `alert-dialog.tsx`, `toast.tsx`, `toast.logic.ts`, and `toastHelpers.ts` recipes onto Ship by Sunday's current `alert-dialog.tsx` and `sonner.tsx` surfaces unless a new dependency decision is made first. The recent primitive slices stayed Radix-backed or existing-library-backed while adding T3-style aliases, so the next slice should preserve current Radix AlertDialog exports, current Sonner call-site compatibility, and existing toast invocation behavior unless it proves a route-level migration is safe.
 
 That slice does not need to implement generated-codebase changes. Generated codebase implementation should wait until the tracked app primitive strategy is proven.
 

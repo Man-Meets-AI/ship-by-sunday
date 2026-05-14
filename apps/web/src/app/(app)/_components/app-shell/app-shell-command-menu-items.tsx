@@ -1,7 +1,6 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
-import { CommandGroup, CommandItem, CommandSeparator } from "cmdk";
 import {
 	Bot,
 	Compass,
@@ -20,6 +19,11 @@ import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useAppShellPreferences } from "@/app/(app)/_hooks/app-shell/use-app-shell-preferences";
+import {
+	CommandGroup,
+	CommandItem,
+	CommandSeparator,
+} from "@/components/ui/command";
 import { buildCodebaseStageNavItems } from "@/lib/codebase-flow/codebase-stage-nav-model";
 import { startThemeTransition } from "@/lib/theme/start-theme-transition";
 import { routeConfig } from "@/config/product";
