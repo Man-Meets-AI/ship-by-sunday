@@ -8,7 +8,6 @@ import {
 	isProgramId,
 	resolveCurrentPlanningBrief,
 } from "../../../../scripts/programs/briefs";
-import { runBoundedProcess } from "./bounded-process";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
 import {
 	ensureRepositoryDirectory,
@@ -37,7 +36,6 @@ export type ProgramRunLoopSliceRunnerInput = {
 	planPath: string;
 	programId: string;
 	repoRootDir: string;
-	requireCleanWorktree: boolean;
 	runId: string;
 	timeoutMs?: number;
 };
@@ -124,7 +122,6 @@ export async function runProgramRunLoop(params: {
 	await ensureLocalProjectStateDirectory(repoRootDir);
 	await ensureRepositoryDirectory(repoRootDir, loopRunDirectoryRelativePath);
 	await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
-	await assertCleanWorktree(repoRootDir);
 
 	while (true) {
 		const programStatus = await readProgramStatus({ programId, repoRootDir });
@@ -176,7 +173,6 @@ export async function runProgramRunLoop(params: {
 				planPath: nextPlan.path,
 				programId,
 				repoRootDir,
-				requireCleanWorktree: false,
 				runId: sliceRunId,
 				timeoutMs,
 			});
@@ -351,40 +347,6 @@ async function writeLoopState(
 		path.posix.join(loopRunDirectoryRelativePath, "loop-state.json"),
 		`${JSON.stringify(state, null, 2)}\n`,
 	);
-}
-
-async function assertCleanWorktree(repoRootDir: string) {
-	const status = await runGit(["status", "--short", "--untracked-files=all"], {
-		repoRootDir,
-	});
-	const relevantLines = status
-		.split(/\r?\n/)
-		.map((line) => line.trimEnd())
-		.filter((line) => line !== "");
-	if (relevantLines.length > 0) {
-		throw new Error(
-			[
-				"Refusing to start program run loop with a dirty worktree.",
-				"Commit, stash, or remove unrelated changes before running this command.",
-				relevantLines.join("\n"),
-			].join("\n"),
-		);
-	}
-}
-
-async function runGit(args: string[], params: { repoRootDir: string }) {
-	const result = await runBoundedProcess({
-		args,
-		command: "git",
-		cwd: params.repoRootDir,
-		timeoutMs: 15_000,
-	});
-	if (!result.succeeded) {
-		throw new Error(
-			`git ${args.join(" ")} failed: ${result.stderr || result.stdout}`,
-		);
-	}
-	return result.stdout;
 }
 
 function normalizeProgramId(programId: string) {

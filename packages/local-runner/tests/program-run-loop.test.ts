@@ -19,14 +19,10 @@ const execFileAsync = promisify(execFile);
 describe("program run loop", () => {
 	it("runs matching active child ExecPlans until the Program is complete", async () => {
 		const repositoryRoot = await createProgramLoopFixture();
-		const calls: Array<{ planPath: string; requireCleanWorktree: boolean }> =
-			[];
+		const calls: string[] = [];
 		const sliceRunner = createFakeSliceRunner(repositoryRoot, {
 			onRun: async (input) => {
-				calls.push({
-					planPath: input.planPath,
-					requireCleanWorktree: input.requireCleanWorktree,
-				});
+				calls.push(input.planPath);
 				await writeRepoFile(
 					repositoryRoot,
 					`slice-${calls.length}.txt`,
@@ -57,10 +53,7 @@ describe("program run loop", () => {
 			PLAN_A_PATH,
 			PLAN_B_PATH,
 		]);
-		expect(calls).toEqual([
-			{ planPath: PLAN_A_PATH, requireCleanWorktree: false },
-			{ planPath: PLAN_B_PATH, requireCleanWorktree: false },
-		]);
+		expect(calls).toEqual([PLAN_A_PATH, PLAN_B_PATH]);
 		await expect(
 			readFile(
 				path.join(
@@ -145,22 +138,27 @@ describe("program run loop", () => {
 		).resolves.toContain("slice failed in fixture");
 	});
 
-	it("refuses to start from a dirty worktree", async () => {
+	it("runs from a dirty worktree", async () => {
 		const repositoryRoot = await createProgramLoopFixture();
 		await writeRepoFile(repositoryRoot, "dirty.txt", "uncommitted\n");
+		const calls: string[] = [];
 
-		await expect(
-			runProgramRunLoop({
-				maxSlices: 2,
-				programId: PROGRAM_ID,
-				repoRootDir: repositoryRoot,
-				runId: "loop-dirty",
-				sliceRunner: createFakeSliceRunner(repositoryRoot),
-				timeoutMs: 15_000,
+		const result = await runProgramRunLoop({
+			maxSlices: 1,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "loop-dirty",
+			sliceRunner: createFakeSliceRunner(repositoryRoot, {
+				onRun: async (input) => {
+					calls.push(input.planPath);
+				},
 			}),
-		).rejects.toThrow(
-			"Refusing to start program run loop with a dirty worktree",
-		);
+			timeoutMs: 15_000,
+		});
+
+		expect(result.finalStatus).toBe("stopped");
+		expect(result.stopReason).toBe("max_slices_reached");
+		expect(calls).toEqual([PLAN_A_PATH]);
 	});
 
 	it("prints the program run command in CLI help", async () => {

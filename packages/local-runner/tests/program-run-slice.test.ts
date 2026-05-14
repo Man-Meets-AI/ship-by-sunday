@@ -270,24 +270,34 @@ describe("program run slice", () => {
 		).rejects.toThrow("Review still has 1 must-fix finding");
 	});
 
-	it("refuses to start with unrelated dirty worktree state", async () => {
+	it("runs with pre-existing dirty worktree state", async () => {
 		const repositoryRoot = await createProgramRunFixture();
 		await writeRepoFile(repositoryRoot, "dirty.txt", "uncommitted\n");
 		const executor = createFakeExecutor({
+			onExecute: async () => {
+				await writeRepoFile(repositoryRoot, "implemented.txt", "done\n");
+			},
 			reviews: [],
 		});
 
+		const result = await runProgramRunSlice({
+			executor,
+			planPath: PLAN_PATH,
+			programId: PROGRAM_ID,
+			repoRootDir: repositoryRoot,
+			runId: "run-dirty",
+		});
+
+		expect(result.finalStatus).toBe("complete");
 		await expect(
-			runProgramRunSlice({
-				executor,
-				planPath: PLAN_PATH,
-				programId: PROGRAM_ID,
-				repoRootDir: repositoryRoot,
-				runId: "run-dirty",
-			}),
-		).rejects.toThrow(
-			"Refusing to start program run slice with a dirty worktree",
-		);
+			readFile(
+				path.join(
+					repositoryRoot,
+					".sbs/program-runs/autonomous-program-execution-loop/run-dirty/review-prompt.md",
+				),
+				"utf8",
+			),
+		).resolves.toContain("dirty.txt");
 	});
 
 	it("extracts runnable Test Commands from indented blocks", async () => {

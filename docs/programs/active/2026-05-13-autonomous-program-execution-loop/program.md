@@ -50,12 +50,13 @@ The core command path now exists in the local runner: `program run-slice` execut
 - [x] 2026-05-13: Created this Program packet and planning brief 1 for `program:run-slice` v1.
 - [x] 2026-05-13: Completed `Build Program Run Slice V1`; the local runner now exposes `program run-slice`, root/package scripts expose `program:run-slice`, and fixture tests prove execute, proof, fresh review, fix, reproof, docs sync, checkpoint, and blocked failure modes.
 - [x] 2026-05-13: Refreshed the Program with planning brief 2 for `Build Program Run Loop`.
-- [x] 2026-05-13: Completed `Build Program Run Loop`; the local runner now exposes `program run`, root/package scripts expose `program:run`, and tests prove Program child plan selection, sequencing, safety-limit stops, no-plan blocking, slice failure blocking, and clean-start safety.
+- [x] 2026-05-13: Completed `Build Program Run Loop`; the local runner now exposes `program run`, root/package scripts expose `program:run`, and tests prove Program child plan selection, sequencing, safety-limit stops, no-plan blocking, and slice failure blocking.
 - [x] 2026-05-13: Refreshed the Program with planning brief 3 for `Harden Program Review And Repair`.
 - [x] 2026-05-13: Completed `Harden Program Review And Repair`; review findings now carry category and disposition, severity policy is enforced before repair decisions, review prompts include staged and untracked changes, repair prompts include attempt budgets, and only missing-test findings can be intentionally deferred with rationale and follow-up.
 - [x] 2026-05-13: Refreshed the Program with planning brief 4 for `Package Runner Through Local Runner Install`.
 - [x] 2026-05-13: Completed `Package Runner Through Local Runner Install`; maintainers can now run `bun run execplan:build -- --program-id <id>` or `bun run execplan:build -- --plan <path>`, and installed Worker Foundations `execplan:build` forwards to `ship-by-sunday execplan build`.
 - [x] 2026-05-13: Refreshed the Program with planning brief 5 for `Decide Runner Extraction Boundary`.
+- [x] 2026-05-14: Removed the startup clean-worktree refusal from `program run`, `program run-slice`, and the `execplan build` paths that delegate to them so dogfood and mature repo automation can run on already-dirty checkouts.
 
 ## Decision Log
 
@@ -95,9 +96,9 @@ Decision: Keep v1 explicit with `--program-id` and `--plan`.
 Rationale: Auto-selecting the next child plan is part of full Program looping. The first runner should be deterministic and should not hide plan selection.
 Date: 2026-05-13.
 
-Decision: Require a clean worktree at run start.
-Rationale: The runner should not accidentally mix unrelated user edits into an autonomous execution. Dirty-scope ownership can be designed in a later slice.
-Date: 2026-05-13.
+Decision: Do not require a clean worktree at Program runner startup.
+Rationale: Dogfooding and mature-repo automation often happen in already-active checkouts. The runner should not block those loops before useful execution starts; a future TUI or approval design can decide whether to warn, checkpoint, or gate dirty state.
+Date: 2026-05-14.
 
 ## Slice Ledger
 

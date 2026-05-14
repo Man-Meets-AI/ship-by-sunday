@@ -1,5 +1,11 @@
 # Mistakes
 
+## 2026-05-14 Program Runner Validation Source Map Upload
+
+- Mistake: I ran root `bun run typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` while validating the Program runner dirty-worktree change.
+  Impact: The command passed, but the app typecheck path ran the production compile hook and uploaded source maps from this local environment.
+  Corrective action: Use `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run typecheck` for local broad validation unless source-map upload behavior is explicitly under test.
+
 ## 2026-05-13 Generated Next Env Churn
 
 - Mistake: I patched `apps/web/next-env.d.ts` as if it were source when Next.js owns and rewrites that file.

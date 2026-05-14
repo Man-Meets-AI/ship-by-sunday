@@ -183,7 +183,6 @@ export async function runProgramRunSlice(params: {
 	planPath: string;
 	programId: string;
 	repoRootDir: string;
-	requireCleanWorktree?: boolean;
 	runId?: string;
 	timeoutMs?: number;
 }): Promise<ProgramRunSliceResult> {
@@ -224,9 +223,6 @@ export async function runProgramRunSlice(params: {
 	try {
 		await ensureRepositoryDirectory(repoRootDir, runDirectoryRelativePath);
 		await writeState(repoRootDir, runDirectoryRelativePath, state);
-		if (params.requireCleanWorktree ?? true) {
-			await assertCleanWorktree(repoRootDir);
-		}
 		let context = await hydrateProgramRunSliceContext({
 			planPath,
 			programId,
@@ -1237,25 +1233,6 @@ async function writeState(
 		path.posix.join(runDirectoryRelativePath, "state.json"),
 		`${JSON.stringify(state, null, 2)}\n`,
 	);
-}
-
-async function assertCleanWorktree(repoRootDir: string) {
-	const status = await runGit(["status", "--short", "--untracked-files=all"], {
-		repoRootDir,
-	});
-	const relevantLines = status
-		.split(/\r?\n/)
-		.map((line) => line.trimEnd())
-		.filter((line) => line !== "");
-	if (relevantLines.length > 0) {
-		throw new Error(
-			[
-				"Refusing to start program run slice with a dirty worktree.",
-				"Commit, stash, or remove unrelated changes before running this command.",
-				relevantLines.join("\n"),
-			].join("\n"),
-		);
-	}
 }
 
 async function readGitSnapshot(repoRootDir: string): Promise<GitSnapshot> {
