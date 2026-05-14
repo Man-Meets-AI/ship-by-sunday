@@ -73,6 +73,7 @@ export {
 	renderGeneratedDesignMarkdown,
 	type GeneratedDesignSystem,
 } from "./design-system/generated-design-system";
+export { createDefaultStarterTemplateProjectDefinition } from "./repo-generation/default-starter-template-project-definition";
 export {
 	buildPresetPreviewCssVars,
 	decodePresetSafe,

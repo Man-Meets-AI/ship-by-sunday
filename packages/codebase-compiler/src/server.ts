@@ -1,4 +1,5 @@
 export { buildReviewDownloadZip } from "./bundle/build-review-download-zip";
+export { createDefaultStarterTemplateProjectDefinition } from "./repo-generation/default-starter-template-project-definition";
 export { buildRepoGenerationManifest } from "./repo-generation/build-repo-generation-manifest";
 export { buildRepoDownloadTraceIncludes } from "./repo-generation/repo-download-source-contract";
 export { materializeRepoSnapshot } from "./repo-generation/materialize-repo-snapshot";

@@ -3,6 +3,7 @@ export const nextApiRouteConfig = {
 	stripeExpressCheckout: "/api/stripe/checkout/express",
 	stripeWebhook: "/api/stripe/webhook",
 	calWorkerSealTeam6Webhook: "/api/cal/worker-seal-team-6/webhook",
+	starterTemplateDownload: "/api/download/starter-template",
 	observabilityClerk: "/api/observability/clerk",
 	observabilityVercel: "/api/observability/vercel",
 	observabilityIncidentStatus:

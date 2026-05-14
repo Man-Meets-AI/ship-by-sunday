@@ -1,11 +1,11 @@
 ---
 program_id: starter-template-source-and-billing-proof
 title: Starter Template Source And Billing Proof
-status: active
+status: complete
 created_at: 2026-05-13
-completed_at: null
+completed_at: 2026-05-14
 summary: Make hosted billing proof product-specific and turn the generated Starter repo into a pinned template-source pipeline built from the sibling app skeleton, a ChatGPT-style use case, and the Ship by Sunday operating pack.
-post_build_recap: null
+post_build_recap: Hosted billing proof now supports Starter and Workers, the generated Starter repo comes from pinned template source plus generated overlays, the customer template ships a ChatGPT-style BYO OpenAI app and first Program setup roadmap, and Starter Home has a direct generated template download path backed by the same compiler pipeline with default facts.
 read_when:
   - "Resuming hosted billing proof parity for Starter and Workers."
   - "Planning the Starter template source boundary."
@@ -28,15 +28,17 @@ The high-level implementation strategy is settled: use `~/Developer/next-js-conv
 
 ## Program Inputs
 
-The current repository research is recorded in `research-pass-current-generator-and-proof.md`. Product decisions are normalized in `normalized-pass-product-decisions.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. Completed slices used `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, and `planning-brief-5.md`; `current-planning-brief.txt` now points at `planning-brief-6.md`.
+The current repository research is recorded in `research-pass-current-generator-and-proof.md`. Product decisions are normalized in `normalized-pass-product-decisions.md`. Canonical decisions are recorded in `converged-decision-packet.md`. Ordering is recorded in `dependency-graph.md` and `plan-split-recommendation.md`. Risk review is recorded in `cross-repo-review.md`. Completed slices used `planning-brief-1.md`, `planning-brief-2.md`, `planning-brief-3.md`, `planning-brief-4.md`, `planning-brief-5.md`, `planning-brief-6.md`, and `planning-brief-7.md`; `current-planning-brief.txt` points at `planning-brief-7.md`, the final closeout brief.
 
 This Program follows `docs/programs/active/2026-05-12-public-product-split-starter-workers/`. That Program split Starter and Workers as products. This Program hardens the proof and generated Starter deliverable that now sit underneath that split.
 
 ## Current State
 
-Hosted checkout is app-owned and requires explicit purchase intent. The checkout route accepts `offerId` and routes Starter and Workers purchases through separate offer definitions. Hosted proof now accepts `--offer=starter|workers`, defaults to Starter, and carries offer-specific expectations for route, metadata, amount, and access.
+Hosted checkout is app-owned and requires explicit purchase intent. The checkout route accepts `offerId` and routes Starter and Workers purchases through separate offer definitions. Hosted proof now accepts `--offer=starter|workers`, defaults to Starter, and carries offer-specific expectations for route, metadata, amount, and access. Release billing preflight now also checks the trusted Convex billing sync boundary before proof proceeds.
 
-Generated repo downloads are built dynamically by `packages/codebase-compiler` and served by `apps/web/app/api/download/repo/route.ts`. The generated repo includes a runnable app, generated docs, source truth, design truth, Program material, ExecPlans, skills, bootstrap scripts, validation scripts, and `docs/facts/template-source.json` provenance. The generated app now starts from the pinned `templates/starter-app/source` snapshot through a tested adapter that maps the single-app source root into `apps/web/`, then applies manifest-allowed generated overlays.
+Generated repo downloads are built dynamically by `packages/codebase-compiler` and served by `apps/web/src/app/api/download/repo/route.ts` for authenticated Review downloads. The generated repo includes a runnable app, generated docs, source truth, design truth, Program material, ExecPlans, skills, bootstrap scripts, validation scripts, and `docs/facts/template-source.json` provenance. The generated app now starts from the pinned `templates/starter-app/source` snapshot through a tested adapter that maps the single-app source root into `apps/web/`, then applies manifest-allowed generated overlays.
+
+Direct Starter template downloads are served by `apps/web/src/app/api/download/starter-template/route.ts`. Starter Home signs a short-lived download URL after access succeeds. The route rate-limits requests, validates that token, uses compiler-owned default Starter facts from `packages/codebase-compiler/src/repo-generation/default-starter-template-project-definition.ts`, calls the same `buildReviewDownloadZip` path as Review downloads, and returns `ai-chat-starter.zip` without requiring questionnaire state or live provider calls. Starter Home links to that route as `Download template` while keeping the guided lessons path available.
 
 The generated output already has strong no-provider proof. The clean-room command contract installs the generated repo, lints Program and ExecPlan material, checks the Codebase contract, typechecks the generated app, and proves the dev command exists. Generated repos now ship a first customer Program with active setup ExecPlans for Core Boot, Clerk Setup, Convex Setup, Stripe Setup, and First Product Slice, and generated onboarding routes setup work through those plans. The generated app now keeps the sibling template's public marketing shell, auth routes, authenticated dashboard, billing screen, provider package dependencies, and setup-gated missing-provider states while exposing `/chat` as the protected ChatGPT-style BYO OpenAI product surface.
 
@@ -65,6 +67,9 @@ The first repo-local template-source boundary now exists at `templates/starter-a
 - [x] 2026-05-13: Advanced the current planning brief to `planning-brief-5.md` for the richer Starter template app slice.
 - [x] 2026-05-13: Completed `Beef Up Starter Template App`; the generated Starter app now replaces the Notes sample with `/chat`, Convex conversations/messages, a ChatGPT-style model picker and composer, server-only OpenAI Responses API streaming, setup-gated `OPENAI_API_KEY`, and updated generated-output proof.
 - [x] 2026-05-13: Advanced the current planning brief to `planning-brief-6.md` for the direct no-questions Starter download path.
+- [x] 2026-05-14: Completed `Add Direct Template Download Path`; Starter Home now links to signed `GET /api/download/starter-template` URLs, and the route generates `ai-chat-starter.zip` from compiler-owned default facts through the same dynamic repo-generation pipeline as Review downloads.
+- [x] 2026-05-14: Advanced the current planning brief to `planning-brief-7.md` for template update and release proof docs closeout.
+- [x] 2026-05-14: Completed `Template Update And Release Proof Docs`; docs now describe the direct generated template route, the release workflow records the Convex billing sync boundary preflight, and the Program packet is ready for the completed lane.
 
 ## Decision Log
 
@@ -87,6 +92,22 @@ Date: 2026-05-13.
 Decision: Keep the compiler as the zip producer.
 Rationale: The generated zip must stay tied to intake facts, generated docs, Program material, ExecPlans, design truth, and validation contracts. A static zip would drift.
 Date: 2026-05-13.
+
+Decision: Keep direct Starter template defaults in the compiler.
+Rationale: The compiler owns generated repo truth. A compiler-owned default project definition lets the direct route, focused tests, and future CLI surfaces generate the same deterministic `ai-chat-starter` repo without duplicating product facts in the web app.
+Date: 2026-05-14.
+
+Decision: Make the direct Starter template route provider-free, signed, and rate-limited.
+Rationale: The no-questions template path should not require live Clerk, Convex, Stripe, OpenAI, questionnaire state, or Review readiness inside the zip route. Starter Home already proves access before rendering, so a short-lived server-signed token avoids a public expensive zip endpoint while a dedicated rate-limit bucket protects the route and preserves the default generated repo contract.
+Date: 2026-05-14.
+
+Decision: Require Convex billing sync boundary preflight in release billing proof.
+Rationale: Stripe webhook verification alone does not prove paid access state can safely cross into Convex. Release proof should fail before checkout if the trusted sync mutation secret or customer-owner lookup boundary is missing.
+Date: 2026-05-14.
+
+Decision: Defer refund webhook events until refund reconciliation changes product state.
+Rationale: Listening to `charge.refunded` without updating entitlement or access state creates false confidence. Refund events should return only with a product-state reconciliation path and focused proof.
+Date: 2026-05-14.
 
 Decision: Consume pinned template source, not a mutable live remote branch.
 Rationale: Customer downloads must be deterministic and auditable. An external template repo can exist later, but the generator should consume a pinned source snapshot with recorded provenance.
@@ -268,8 +289,7 @@ Active child ExecPlans:
 
 Planned child ExecPlans:
 
-- `Add Direct Template Download Path` should use default facts to generate a no-questions Starter repo.
-- `Template Update And Release Proof Docs` should document template updates and product-specific billing proof operations.
+- None.
 
 Completed child ExecPlans:
 
@@ -278,10 +298,12 @@ Completed child ExecPlans:
 - [Migrate Generated Template App To Template Source](../../../exec-plans/completed/2026-05-13-migrate-generated-template-app-to-template-source.md) connected generated repo materialization to the pinned source snapshot, mapped source files into `apps/web/`, retargeted generated overlays, and preserved clean-room no-provider proof.
 - [Upgrade Generated Starter Operating Pack](../../../exec-plans/completed/2026-05-13-upgrade-generated-starter-operating-pack.md) made generated customer downloads ship a first Program with ordered setup ExecPlans, active child-plan link validation, and onboarding/skill instructions that route provider setup through those plans.
 - [Beef Up Starter Template App](../../../exec-plans/completed/2026-05-13-beef-up-starter-template-app.md) replaced the customer-facing Notes sample with the protected `/chat` product surface, Convex-owned chat state, server-only OpenAI streaming, setup-gated OpenAI config, updated template provenance, and preserved clean-room no-provider proof.
+- [Add Direct Template Download Path](../../../exec-plans/completed/2026-05-13-add-direct-template-download-path.md) added compiler-owned default Starter facts, signed `GET /api/download/starter-template` links, the Starter Home direct download action, and focused zip/route/UI tests proving the path uses dynamic generation.
+- [Template Update And Release Proof Docs](../../../exec-plans/completed/2026-05-14-template-update-and-release-proof-docs.md) closed the Program by documenting the direct generated template route, confirming product-specific billing proof docs, and preserving the template update and release proof contract.
 
 ## Next Slice
 
-The next recommended slice is `Add Direct Template Download Path`. It should be written as a child ExecPlan from `planning-brief-6.md`. It is next because the generated Starter repo now has the pinned source pipeline, generated operating roadmap, and ChatGPT-style app surface; the remaining product gap is a no-questions download path that uses the same generator with default facts instead of requiring the questionnaire flow.
+No required next slice remains for this Program. Future work that changes the pinned template source, generated app contract, or billing proof should start from a new Program or a focused ExecPlan that cites this completed packet.
 
 ## Risks and Watchpoints
 
@@ -341,7 +363,13 @@ Do not let generated overlays overwrite the template source unpredictably. The t
 
 ## Outcomes & Retrospective
 
-This Program is active. It should complete only after product-specific billing proof exists, a pinned template-source pipeline exists, the generated Starter app is materially stronger, the no-questions template path uses the same generator, and release/operator docs describe how to prove and update the system.
+Completed on 2026-05-14. Hosted billing proof now verifies Starter by default and Workers when selected, with offer-specific route, metadata, amount, and access expectations plus a Convex billing sync boundary preflight. The generated Starter repo now comes from a pinned repo-local template source snapshot, generated overlays, generated docs, a first customer Program, setup ExecPlans, skills, validation scripts, and template provenance rather than a static zip or mutable remote fetch.
+
+The customer-facing template now ships as a ChatGPT-style BYO OpenAI starter with `/chat`, Convex-owned conversation state, server-only OpenAI streaming, setup-gated provider configuration, and no-provider-safe validation. Starter Home now also offers a direct template-first download through signed `GET /api/download/starter-template` links; that route generates `ai-chat-starter.zip` from compiler-owned default facts through the same zip builder as the authenticated Review download.
+
+Closeout validation passed: direct generated zip tests, direct route integration, Starter Home rendered-link coverage, billing webhook and sync-boundary unit tests, production proof workflow tests, both closeout ExecPlan lints, Program lint, targeted markdown metadata lint, `git diff --check`, `bun run format`, `bun lint`, and `bun typecheck`.
+
+The main durability lesson is that the template is now a source and proof system, not an artifact. Future changes must update template source, manifest provenance, generated overlays, generated output tests, docs, and proof together.
 
 ## Validation and Acceptance
 
@@ -402,8 +430,10 @@ Current proof commands that matter include:
 
 Current generated repo creation flows through:
 
-    apps/web/app/api/download/repo/route.ts
+    apps/web/src/app/api/download/repo/route.ts
+    apps/web/src/app/api/download/starter-template/route.ts
     packages/codebase-compiler/src/bundle/build-review-download-zip.ts
+    packages/codebase-compiler/src/repo-generation/default-starter-template-project-definition.ts
     packages/codebase-compiler/src/repo-generation/materialize-repo-snapshot.ts
     packages/codebase-compiler/src/repo-generation/materialize-starter-template-source.ts
     packages/codebase-compiler/src/repo-generation/render-generated-template-app-files.ts
@@ -416,4 +446,4 @@ Current pinned template source boundary:
 
 ## Interfaces and Dependencies
 
-This Program depends on checkout proof code under `apps/web/scripts/`, release proof orchestration under `scripts/release/`, checkout route tests under `apps/web/tests/`, pinned template source under `templates/starter-app/`, generated repo source under `packages/codebase-compiler/src/repo-generation/`, generated repo tests under `packages/codebase-compiler/tests/`, the authenticated Starter UI source in the app route tree, and the public Starter page under `apps/web/app/starter/page.tsx`.
+This Program depends on checkout proof code under `apps/web/scripts/`, release proof orchestration under `scripts/release/`, checkout route tests under `apps/web/tests/`, pinned template source under `templates/starter-app/`, generated repo source under `packages/codebase-compiler/src/repo-generation/`, generated repo tests under `packages/codebase-compiler/tests/`, the authenticated Starter UI source in the app route tree, and the public Starter page under `apps/web/src/app/starter/page.tsx`.

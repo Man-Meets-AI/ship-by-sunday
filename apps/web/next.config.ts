@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
 	),
 	outputFileTracingIncludes: {
 		"/api/download/repo": [...repoDownloadTraceIncludes],
+		"/api/download/starter-template": [...repoDownloadTraceIncludes],
 	},
 	turbopack: {
 		ignoreIssue: [

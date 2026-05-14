@@ -54,6 +54,8 @@ export const customerSafeTelegramChatWidgetDirectoryPaths = [
 ] as const;
 
 export const codebaseCompilerTemplateSourceTracePaths = [
+	"../../templates/starter-app/template-source.json",
+	"../../templates/starter-app/source/**/*",
 	"../../docs/openai/**/*",
 	"../../docs/prompts/execplan*.md",
 ] as const;

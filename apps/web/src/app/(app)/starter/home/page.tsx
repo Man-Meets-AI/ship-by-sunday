@@ -1,4 +1,4 @@
-import { ClipboardList, Code2, ListVideo } from "lucide-react";
+import { ClipboardList, Code2, Download, ListVideo } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -15,6 +15,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { routeConfig } from "@/config/product";
+import { createStarterTemplateDownloadHref } from "@/lib/download/starter-template-download-token";
 import { hasProductSurfaceCapability } from "@/platform/access/product-surface-capabilities";
 
 export const metadata: Metadata = {
@@ -33,6 +34,9 @@ export default async function StarterHomePage() {
 	if (!hasStarterAccess) {
 		redirect(routeConfig.appHome);
 	}
+	const starterTemplateDownloadHref = createStarterTemplateDownloadHref(
+		routeConfig.starterTemplateDownload,
+	);
 
 	return (
 		<AppShell viewportMode="app" appScrollMode="page" showSkillRail={false}>
@@ -87,7 +91,13 @@ export default async function StarterHomePage() {
 								you want the build-along track.
 							</CardDescription>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="flex flex-wrap gap-2">
+							<Button asChild>
+								<a href={starterTemplateDownloadHref} download>
+									<Download className="size-4" aria-hidden />
+									Download template
+								</a>
+							</Button>
 							<Button asChild variant="outline">
 								<Link href={routeConfig.tutorials}>Open lessons</Link>
 							</Button>

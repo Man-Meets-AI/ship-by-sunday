@@ -54,8 +54,29 @@ vi.mock(
 	}),
 );
 
+vi.mock("@/app/(app)/_components/app-shell", () => ({
+	AppShell: ({ children }: { children: React.ReactNode }) => (
+		<div data-testid="app-shell">{children}</div>
+	),
+}));
+
 vi.mock("@/app/(app)/_components/paid-app-home/paid-app-home-page", () => ({
 	PaidAppHomePage: () => <div>Paid app home</div>,
+}));
+
+vi.mock("next/link", () => ({
+	default: ({
+		children,
+		href,
+		...props
+	}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+		children: React.ReactNode;
+		href: string;
+	}) => (
+		<a href={href} {...props}>
+			{children}
+		</a>
+	),
 }));
 
 vi.mock("@/convex/_generated/api", () => ({
@@ -294,6 +315,31 @@ describe("workspace codebase, review, and setup routes", () => {
 		);
 
 		expect(markup).toContain("Access recovery");
+	});
+
+	it("renders the direct Starter template download action on Starter Home", async () => {
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials"],
+				fulfillmentTrack: "generated_codebase",
+			},
+		});
+
+		const { default: StarterHomeRoutePage } =
+			await import("@/app/(app)/starter/home/page");
+
+		const markup = renderToStaticMarkup(await StarterHomeRoutePage());
+
+		expect(markup).toContain("Download template");
+		expect(markup).toContain(
+			'href="/api/download/starter-template?downloadToken=',
+		);
+		expect(markup).toContain('download=""');
+		expect(markup).toContain('href="/starter/lessons"');
 	});
 
 	it("redirects viewers without worker capability away from worker setup", async () => {

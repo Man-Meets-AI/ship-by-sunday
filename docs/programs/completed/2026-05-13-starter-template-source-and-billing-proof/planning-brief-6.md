@@ -2,7 +2,7 @@
 title: Direct Starter Download Planning Brief 6
 program_id: starter-template-source-and-billing-proof
 brief_version: 6
-status: current
+status: superseded
 summary: Create the next child ExecPlan for adding a no-questions Starter download path backed by the same generated repo pipeline.
 read_when:
   - "Writing the sixth child ExecPlan for this Program."

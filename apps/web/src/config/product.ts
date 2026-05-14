@@ -43,6 +43,7 @@ export const routeConfig = {
 	checkoutClearPending: "/checkout/clear-pending",
 	checkoutCancel: "/checkout/cancel",
 	checkoutCancelConfirmed: "/checkout/cancel/confirmed",
+	starterTemplateDownload: "/api/download/starter-template",
 	workspaceSetup: "/workers/setup",
 	workspaceDoctorPass: "/workers/doctor-pass",
 	workspaceFindings: "/workers/findings",

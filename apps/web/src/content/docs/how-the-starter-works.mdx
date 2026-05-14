@@ -65,7 +65,7 @@ Important module flags:
 Current behavior:
 
 - if `docs` is off, docs links hide and `/docs` renders a disabled-state surface
-- the canonical Starter buyer flow now uses `/starter/home` as the first paid landing surface and `/starter/generate-codebase/review` as the generated-codebase final handoff; `/generate-codebase`, `/tutorials`, `/start`, and the stage-entry routes stay as compatibility redirects
+- the canonical Starter buyer flow now uses `/starter/home` as the first paid landing surface, offers a direct generated template download through a signed `GET /api/download/starter-template` link, and uses `/starter/generate-codebase/review` as the generated-codebase final handoff; `/generate-codebase`, `/tutorials`, `/start`, and the stage-entry routes stay as compatibility redirects
 - `/mission` and `/lesson/[lessonKey]` act as the optional post-review bonus library after the Execute / Ship unlock, while `/artifacts` still forwards into `/starter/generate-codebase/review`
 - the legacy private starter repository invite module has been removed from the customer-visible protected app
 
@@ -114,6 +114,14 @@ What the buyer does not get:
 - separate Design, Marketing, or Build pack zip downloads
 - raw internal docs like `docs/openai/*` or `docs/ship-by-sunday/*`
 - raw env files, local output, or machine-specific junk
+
+## Direct template download contract
+
+`/starter/home` also exposes a template-first action for buyers who want the Starter repo before answering product questions.
+
+That action calls `GET /api/download/starter-template` with a short-lived server-signed download token minted after Starter Home access succeeds. The route rate-limits requests before token validation, then builds the zip on demand from compiler-owned default Starter facts, the pinned `templates/starter-app/source` snapshot, generated overlays, generated docs, the first customer Program, setup ExecPlans, skills, validation scripts, and `docs/facts/template-source.json` provenance.
+
+The direct route does not fetch a mutable remote template, read a static zip, or require live Clerk, Convex, Stripe, or OpenAI provider configuration. It should produce the same no-provider-safe repo shape as the Review download, with default AI chat starter facts instead of questionnaire-derived facts.
 
 ## Why the Clerk `convex` template matters
 
