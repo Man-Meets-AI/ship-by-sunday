@@ -93,6 +93,7 @@ export function CodebaseStageListFieldRow({
 			<Input
 				id={inputId}
 				className="h-9 flex-1"
+				inputClassName="h-9 leading-9 sm:h-9 sm:leading-9"
 				value={value}
 				placeholder={placeholder}
 				onChange={(event) => onChange(event.target.value)}

@@ -106,6 +106,7 @@ export function CodebaseStageLinkListField({
 				ref={inputRef}
 				id={inputId}
 				className="h-9"
+				inputClassName="h-9 leading-9 sm:h-9 sm:leading-9"
 				type="url"
 				value={inputValue}
 				placeholder={placeholder}
