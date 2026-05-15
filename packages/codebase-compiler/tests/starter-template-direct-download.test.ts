@@ -88,6 +88,18 @@ describe("direct Starter template download defaults", () => {
 			"Template-source provenance file",
 			"Provider setup ExecPlan evidence",
 		]);
+		expect(
+			snapshotText(
+				snapshotFiles.find((file) => file.path === "apps/web/config/product.ts"),
+			),
+		).toContain('"domain": "localhost:3000"');
+		expect(
+			snapshotText(
+				snapshotFiles.find(
+					(file) => file.path === "apps/web/src/lib/app/links.ts",
+				),
+			),
+		).toContain("normalizeProductUrl(productConfig.domain)");
 	});
 
 	it("builds a dynamic zip under the default repo slug", async () => {

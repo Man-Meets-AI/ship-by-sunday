@@ -64,6 +64,71 @@ describe("runner events", () => {
 		);
 	});
 
+	it("stops delivery after a retryable failure to preserve event order", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-runner-events-");
+		const firstEvent = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "runner.paired",
+				pairingStatus: "paired",
+				runnerMode: "daemon",
+			},
+		});
+		const secondEvent = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "runner.heartbeat",
+				runnerMode: "daemon",
+				status: "online",
+				machineHealthStatus: "ready",
+				projectHealthStatus: "ready",
+			},
+		});
+		const thirdEvent = createRunnerEvent({
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			payload: {
+				eventType: "workflow.blocked",
+				workflowId: "broken-app-triage",
+				writeLeaseId: "lease_workflowRuns_1",
+				blockedStage: "reproduction-command",
+				blockedReason:
+					"No approved read-only diagnostic command was available.",
+			},
+		});
+
+		await queueRunnerEvent(repositoryRoot, firstEvent);
+		await queueRunnerEvent(repositoryRoot, secondEvent);
+		await queueRunnerEvent(repositoryRoot, thirdEvent);
+		const deliveredPayloads: unknown[] = [];
+		let callCount = 0;
+		const result = await flushRunnerEvents({
+			repositoryRoot,
+			credential: {
+				projectId: "workspaceProjects_1",
+				runnerId: "workspaceRunnerBindings_1",
+				runnerToken: "sbs_run_secret",
+				apiBaseUrl: "https://example.com/",
+				eventEndpoint: "/api/workspace/runner/events",
+				updatedAt: 1,
+			},
+			fetchRunnerEvent: async (_url, init) => {
+				callCount += 1;
+				deliveredPayloads.push(JSON.parse(String(init?.body)).payload);
+				return new Response(null, { status: callCount === 1 ? 200 : 503 });
+			},
+		});
+
+		expect(result).toEqual({ delivered: 1, remaining: 2 });
+		expect(deliveredPayloads).toHaveLength(2);
+		await expect(readQueuedRunnerEvents(repositoryRoot)).resolves.toEqual([
+			secondEvent,
+			thirdEvent,
+		]);
+	});
+
 	it("keeps events queued while a flush is in progress", async () => {
 		const repositoryRoot = await createTemporaryDirectory("sbs-runner-events-");
 		const firstEvent = createRunnerEvent({

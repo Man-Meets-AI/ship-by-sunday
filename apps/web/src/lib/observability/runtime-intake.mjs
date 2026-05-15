@@ -3,7 +3,7 @@ import {
 	buildCanonicalTitle,
 	buildRuntimeIntakeFeed,
 	buildRuntimeIntakeIdentity,
-} from "../../../../scripts/release/lib/engineering-intake-contract.mjs";
+} from "../../../../../scripts/release/lib/engineering-intake-contract.mjs";
 
 const RUNTIME_STATUS_PRIORITY = {
 	firing: 4,

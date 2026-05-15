@@ -137,7 +137,7 @@ function renderProductConfig(projectDefinition: CanonicalProjectDefinition) {
 		currency: facts.currency,
 		primaryCta: facts.primary_cta,
 		supportEmail: facts.support_email,
-		domain: facts.domain,
+		domain: facts.domain ?? "localhost:3000",
 	};
 	const productContent = {
 		productName: facts.product_name,

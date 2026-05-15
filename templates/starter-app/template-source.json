@@ -4,8 +4,8 @@
 	"templateVersion": "2026-05-13-chat-starter",
 	"sourceRoot": "templates/starter-app/source",
 	"sourceLayout": "single-next-app-root",
-	"fileCount": 134,
-	"contentDigest": "sha256-21161b85025f6d462ddf1be45d39599c0143f89ae8b9736c327986b0dae11f18",
+	"fileCount": 132,
+	"contentDigest": "sha256-87e1150d49b01bf18aba28491fe5716850e4a9a808f7c1e91d43cf9464582d14",
 	"provenance": {
 		"originKind": "local-directory-snapshot",
 		"originPathHint": "~/Developer/next-js-convex-clerk-stripe-template",
@@ -46,7 +46,13 @@
 		"node_modules",
 		"test-results"
 	],
-	"excludedFilePaths": [".env.local", ".env.preview", ".env.production"],
+	"excludedFilePaths": [
+		".env.local",
+		".env.preview",
+		".env.production",
+		"next-env.d.ts",
+		"tsconfig.tsbuildinfo"
+	],
 	"generatedOverlayPolicy": {
 		"description": "Paths the generator may intentionally write under the materialized app after copying this template source. The compiler enforces this policy for every generated apps/web overlay; generated overlays win only for listed paths.",
 		"allowedExactPaths": [

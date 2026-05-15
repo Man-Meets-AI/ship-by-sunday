@@ -532,7 +532,8 @@ async function flushRunnerEventsNode(
 			break;
 		}
 
-		remainingEvents.push(event);
+		remainingEvents.push(...queuedEvents.slice(eventIndex));
+		break;
 	}
 
 	await appendQueuedRunnerEvents(repositoryRoot, remainingEvents, {

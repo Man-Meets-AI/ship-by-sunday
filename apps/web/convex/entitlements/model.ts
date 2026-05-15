@@ -26,6 +26,7 @@ import {
 	checkoutResolvedFulfillmentTrackValidator,
 	checkoutOfferIdValidator,
 } from "../billing/validators";
+import { getActiveBillingProductSurfaceCapabilities } from "../billing/model";
 import type {
 	EntitlementMutationCtx,
 	EntitlementQueryCtx,
@@ -127,6 +128,52 @@ function getStoredProductSurfaceCapabilities(
 	}
 
 	return getProductSurfaceCapabilitiesFromGrantFields(accessGrant);
+}
+
+function isBillingBackedProductAccessGrant(
+	accessGrant: {
+		source?: ProductAccessGrantSource;
+		stripeCustomerId?: string;
+		stripeCheckoutSessionId?: string;
+		stripePaymentIntentId?: string;
+	} | null,
+) {
+	return Boolean(
+		accessGrant &&
+		(accessGrant.source === "stripe_checkout" ||
+			accessGrant.source === "stripe_webhook" ||
+			accessGrant.stripeCustomerId ||
+			accessGrant.stripeCheckoutSessionId ||
+			accessGrant.stripePaymentIntentId),
+	);
+}
+
+async function getEffectiveProductSurfaceCapabilities(
+	ctx: EntitlementReadCtx,
+	clerkUserId: string,
+	accessGrant: {
+		status?: string;
+		source?: ProductAccessGrantSource;
+		capabilities?: string[];
+		offerIds?: string[];
+		lastCheckoutOfferId?: CheckoutOfferId;
+		fulfillmentTrack?: FulfillmentTrack;
+		stripeCustomerId?: string;
+		stripeCheckoutSessionId?: string;
+		stripePaymentIntentId?: string;
+	} | null,
+) {
+	if (!accessGrant || accessGrant.status !== "granted") {
+		return [];
+	}
+
+	if (!isBillingBackedProductAccessGrant(accessGrant)) {
+		return getStoredProductSurfaceCapabilities(accessGrant);
+	}
+
+	return getUniqueProductSurfaceCapabilities(
+		await getActiveBillingProductSurfaceCapabilities(ctx, clerkUserId),
+	);
 }
 
 function getUniqueProductSurfaceCapabilities(
@@ -255,8 +302,18 @@ export async function requireGrantedProductAccess(ctx: EntitlementReadCtx) {
 		ctx,
 		clerkUserId,
 	);
+	const effectiveCapabilities = await getEffectiveProductSurfaceCapabilities(
+		ctx,
+		clerkUserId,
+		accessGrant,
+	);
 
-	if (!accessGrant || accessGrant.status !== "granted") {
+	if (
+		!accessGrant ||
+		accessGrant.status !== "granted" ||
+		(isBillingBackedProductAccessGrant(accessGrant) &&
+			effectiveCapabilities.length === 0)
+	) {
 		throw new ConvexError("Access required");
 	}
 
@@ -271,8 +328,13 @@ export async function requireExistingCodebaseProductAccess(
 		ctx,
 		clerkUserId,
 	);
+	const effectiveCapabilities = await getEffectiveProductSurfaceCapabilities(
+		ctx,
+		clerkUserId,
+		accessGrant,
+	);
 
-	if (!getStoredProductSurfaceCapabilities(accessGrant).includes("worker")) {
+	if (!effectiveCapabilities.includes("worker")) {
 		throw new ConvexError("Existing codebase access required");
 	}
 
@@ -287,12 +349,13 @@ export async function requireGeneratedCodebaseProductAccess(
 		ctx,
 		clerkUserId,
 	);
+	const effectiveCapabilities = await getEffectiveProductSurfaceCapabilities(
+		ctx,
+		clerkUserId,
+		accessGrant,
+	);
 
-	if (
-		!getStoredProductSurfaceCapabilities(accessGrant).includes(
-			"generate_codebase",
-		)
-	) {
+	if (!effectiveCapabilities.includes("generate_codebase")) {
 		throw new ConvexError("Generated codebase access required");
 	}
 
@@ -305,8 +368,13 @@ export async function requireTutorialsProductAccess(ctx: EntitlementReadCtx) {
 		ctx,
 		clerkUserId,
 	);
+	const effectiveCapabilities = await getEffectiveProductSurfaceCapabilities(
+		ctx,
+		clerkUserId,
+		accessGrant,
+	);
 
-	if (!getStoredProductSurfaceCapabilities(accessGrant).includes("tutorials")) {
+	if (!effectiveCapabilities.includes("tutorials")) {
 		throw new ConvexError("Tutorials access required");
 	}
 
@@ -413,12 +481,20 @@ export async function viewerProductAccessHandler(ctx: EntitlementQueryCtx) {
 		ctx,
 		identity.subject,
 	);
+	const capabilities = await getEffectiveProductSurfaceCapabilities(
+		ctx,
+		identity.subject,
+		accessGrant,
+	);
+	const billingBackedAccess = isBillingBackedProductAccessGrant(accessGrant);
 
 	return {
 		clerkUserId: identity.subject,
-		hasAccess: accessGrant?.status === "granted",
+		hasAccess:
+			accessGrant?.status === "granted" &&
+			(!billingBackedAccess || capabilities.length > 0),
 		status: accessGrant?.status ?? ("no_access" as const),
-		capabilities: getStoredProductSurfaceCapabilities(accessGrant),
+		capabilities,
 		...(accessGrant ? getStoredCheckoutIntentFields(accessGrant) : undefined),
 	};
 }

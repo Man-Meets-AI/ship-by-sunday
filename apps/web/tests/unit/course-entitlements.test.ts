@@ -22,24 +22,58 @@ function createProductAccessGrant(
 
 function createAccessCtx({
 	productAccessGrant = null,
+	starterLicenseTerms = [],
+	workersSubscriptions = [],
 	patch = vi.fn().mockResolvedValue(undefined),
 	deleteMock = vi.fn().mockResolvedValue(undefined),
 	insert = vi.fn().mockResolvedValue("product_access_1"),
 }: {
 	productAccessGrant?: Record<string, unknown> | null;
+	starterLicenseTerms?: Array<Record<string, unknown>>;
+	workersSubscriptions?: Array<Record<string, unknown>>;
 	patch?: ReturnType<typeof vi.fn>;
 	deleteMock?: ReturnType<typeof vi.fn>;
 	insert?: ReturnType<typeof vi.fn>;
 } = {}) {
+	const tables: Record<string, Array<Record<string, unknown>>> = {
+		productAccessGrants: productAccessGrant ? [productAccessGrant] : [],
+		starterLicenseTerms,
+		workersSubscriptions,
+	};
+
 	return {
 		auth: {
 			getUserIdentity: vi.fn(),
 		},
 		db: {
-			query: vi.fn(() => ({
-				withIndex: vi.fn(() => ({
-					unique: vi.fn().mockResolvedValue(productAccessGrant),
-				})),
+			query: vi.fn((tableName: string) => ({
+				withIndex: vi.fn(
+					(
+						_indexName: string,
+						callback: (query: {
+							eq: (fieldName: string, value: unknown) => unknown;
+						}) => unknown,
+					) => {
+						const filters: Array<{ fieldName: string; value: unknown }> = [];
+						const queryBuilder = {
+							eq: (fieldName: string, value: unknown) => {
+								filters.push({ fieldName, value });
+								return queryBuilder;
+							},
+						};
+						callback(queryBuilder);
+						const matches = (tables[tableName] ?? []).filter((record) =>
+							filters.every(
+								(filter) => record[filter.fieldName] === filter.value,
+							),
+						);
+
+						return {
+							unique: vi.fn().mockResolvedValue(matches[0] ?? null),
+							collect: vi.fn().mockResolvedValue(matches),
+						};
+					},
+				),
 			})),
 			delete: deleteMock,
 			patch,
@@ -141,6 +175,132 @@ describe("convex/entitlements/model", () => {
 			checkoutCtaId: "unspecified",
 			fulfillmentTrack: "unspecified",
 		});
+	});
+
+	it("keeps Stripe-backed Starter access only while the billing license is active", async () => {
+		const now = Date.UTC(2026, 4, 13);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_123",
+				lastCheckoutOfferId: "starter",
+			}),
+			starterLicenseTerms: [
+				{
+					_id: "starterLicenseTerms_1",
+					ownerClerkUserId: clerkUserId,
+					status: "active",
+					stripeCheckoutSessionId: "cs_123",
+					purchasedAt: Date.UTC(2026, 0, 1),
+					termStartAt: Date.UTC(2026, 0, 1),
+					termEndAt: Date.UTC(2027, 0, 1),
+					refundState: "none",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
+		});
+	});
+
+	it("removes Stripe-backed Starter access after the billing license is refunded", async () => {
+		const now = Date.UTC(2026, 4, 13);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_123",
+				lastCheckoutOfferId: "starter",
+			}),
+			starterLicenseTerms: [
+				{
+					_id: "starterLicenseTerms_1",
+					ownerClerkUserId: clerkUserId,
+					status: "active",
+					stripeCheckoutSessionId: "cs_123",
+					purchasedAt: Date.UTC(2026, 0, 1),
+					termStartAt: Date.UTC(2026, 0, 1),
+					termEndAt: Date.UTC(2027, 0, 1),
+					refundState: "fully_refunded",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: false,
+			status: "granted",
+			capabilities: [],
+		});
+		await expect(
+			moduleUnderTest.requireGeneratedCodebaseProductAccess(ctx as never),
+		).rejects.toThrow("Access required");
+	});
+
+	it("removes Stripe-backed Workers access after the billing subscription is canceled", async () => {
+		const now = Date.UTC(2026, 4, 13);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				source: "stripe_webhook",
+				stripeCustomerId: "cus_123",
+				stripeCheckoutSessionId: "cs_123",
+				lastCheckoutOfferId: "workers",
+			}),
+			workersSubscriptions: [
+				{
+					_id: "workersSubscriptions_1",
+					ownerClerkUserId: clerkUserId,
+					stripeCustomerId: "cus_123",
+					stripeSubscriptionId: "sub_123",
+					cadence: "monthly",
+					status: "canceled",
+					cancelAtPeriodEnd: false,
+					currentPeriodEndAt: Date.UTC(2026, 5, 1),
+					terminalFailureAt: Date.UTC(2026, 4, 12),
+					refundState: "none",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: false,
+			status: "granted",
+			capabilities: [],
+		});
+		await expect(
+			moduleUnderTest.requireExistingCodebaseProductAccess(ctx as never),
+		).rejects.toThrow("Access required");
 	});
 
 	it("returns stored fulfillment intent and legacy Worker capabilities for a granted viewer", async () => {

@@ -82,6 +82,7 @@ function createCourseCtx({
 								clerkUserId,
 								status: "granted",
 								source: "manual",
+								capabilities: ["tutorials"],
 								grantedAt: 1,
 								updatedAt: 1,
 							}),

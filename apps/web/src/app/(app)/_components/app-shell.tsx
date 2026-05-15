@@ -124,7 +124,7 @@ function ShellInner({
 
 	if (viewportMode === "app") {
 		const appShellClassName = cn(
-			"min-h-screen bg-background text-foreground tracking-normal",
+			"flex min-h-screen flex-col bg-background text-foreground tracking-normal",
 			appScrollMode === "viewport" && "xl:h-dvh xl:overflow-hidden",
 		);
 		const sidebarProviderClassName = cn(

@@ -10,8 +10,8 @@ describe("starter template source contract", () => {
 
 		expect(verification.manifest).toMatchObject({
 			contentDigest:
-				"sha256-21161b85025f6d462ddf1be45d39599c0143f89ae8b9736c327986b0dae11f18",
-			fileCount: 134,
+				"sha256-87e1150d49b01bf18aba28491fe5716850e4a9a808f7c1e91d43cf9464582d14",
+			fileCount: 132,
 			sourceLayout: "single-next-app-root",
 			sourceRoot: STARTER_TEMPLATE_SOURCE_ROOT,
 			templateId: "starter-app",
@@ -54,6 +54,8 @@ describe("starter template source contract", () => {
 		expect(files).not.toContain(".env.local");
 		expect(files).not.toContain(".env.preview");
 		expect(files).not.toContain(".env.production");
+		expect(files).not.toContain("next-env.d.ts");
+		expect(files).not.toContain("tsconfig.tsbuildinfo");
 	});
 
 	it("defines an explicit generated overlay boundary", async () => {

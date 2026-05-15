@@ -6,6 +6,8 @@ function renderCssVariables(variables: Record<string, string>) {
 		.join("\n");
 }
 
+const globalDarkModeTokens = new Set(["--primary", "--primary-foreground"]);
+
 /**
  * Drop dark tokens that are identical to their light counterpart — they aren't
  * dark-mode-adapted and would override the correct inversions in globals.css.
@@ -15,7 +17,9 @@ function darkAdaptedOnly(
 	dark: Record<string, string>,
 ): Record<string, string> {
 	return Object.fromEntries(
-		Object.entries(dark).filter(([key, value]) => light[key] !== value),
+		Object.entries(dark).filter(
+			([key, value]) => light[key] !== value && !globalDarkModeTokens.has(key),
+		),
 	);
 }
 

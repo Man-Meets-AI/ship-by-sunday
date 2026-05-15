@@ -64,6 +64,7 @@ describe("workspace mission route", () => {
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
 		});
 		redirectMock.mockReset();
 		vi.resetModules();

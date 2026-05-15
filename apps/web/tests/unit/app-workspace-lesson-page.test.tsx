@@ -11,6 +11,9 @@ const getServerProductAccessMock = vi.fn();
 const notFoundMock = vi.fn(() => {
 	throw new Error("NEXT_NOT_FOUND");
 });
+const redirectMock = vi.fn((href: string) => {
+	throw new Error(`NEXT_REDIRECT:${href}`);
+});
 
 function getWorkspaceLocalNavMarkup(markup: string) {
 	const localNavStart =
@@ -39,6 +42,7 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
 	notFound: () => notFoundMock(),
+	redirect: (href: string) => redirectMock(href),
 }));
 
 vi.mock("@/app/(app)/_components/app-shell", () => ({
@@ -178,8 +182,10 @@ describe("workspace lesson route", () => {
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
 		});
 		notFoundMock.mockClear();
+		redirectMock.mockClear();
 		vi.resetModules();
 	});
 

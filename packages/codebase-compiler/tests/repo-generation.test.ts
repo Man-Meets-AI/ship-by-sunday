@@ -612,7 +612,7 @@ describe("repo generation", () => {
 			materializedOutputRoot: "apps/web",
 			generatedOverlaysWin: true,
 			contentDigest:
-				"sha256-21161b85025f6d462ddf1be45d39599c0143f89ae8b9736c327986b0dae11f18",
+				"sha256-87e1150d49b01bf18aba28491fe5716850e4a9a808f7c1e91d43cf9464582d14",
 		});
 		expect(
 			Object.keys(templateSourceProvenance.provenance ?? {}),

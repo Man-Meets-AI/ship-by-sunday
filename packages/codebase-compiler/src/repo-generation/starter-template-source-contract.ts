@@ -257,7 +257,13 @@ export async function listStarterTemplateSourceFiles({
 	repoRootPath?: string;
 }) {
 	const sourceRootPath = path.join(repoRootPath, manifest.sourceRoot);
-	return (await listFilesRecursive(sourceRootPath, sourceRootPath)).sort();
+	return (await listFilesRecursive(sourceRootPath, sourceRootPath))
+		.filter(
+			(file) =>
+				!manifest.excludedFilePaths.includes(file) &&
+				!hasExcludedPathSegment(file, manifest.excludedPathSegments),
+		)
+		.sort();
 }
 
 function hasExcludedPathSegment(
@@ -272,17 +278,6 @@ function assertStarterTemplateSourceFilesAllowed(
 	files: readonly string[],
 	manifest: StarterTemplateSourceManifest,
 ) {
-	const excludedFiles = files.filter(
-		(file) =>
-			manifest.excludedFilePaths.includes(file) ||
-			hasExcludedPathSegment(file, manifest.excludedPathSegments),
-	);
-	if (excludedFiles.length > 0) {
-		throw new Error(
-			`Starter template source contains excluded local artifact paths: ${excludedFiles.join(", ")}`,
-		);
-	}
-
 	const fileSet = new Set(files);
 	const missingRequiredFiles = manifest.requiredFiles.filter(
 		(file) => !fileSet.has(file),

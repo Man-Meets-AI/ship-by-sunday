@@ -39,6 +39,29 @@ describe("release scope classifier", () => {
 				"apps/web/src/platform/billing/managed-stripe-config.ts",
 			),
 		).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/lib/billing/stripe-sync.ts"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/lib/billing/stripe-webhooks.ts"),
+		).toBe(true);
+		expect(isBillingSensitivePath("apps/web/convex/billing/model.ts")).toBe(
+			true,
+		);
+		expect(isBillingSensitivePath("apps/web/convex/billing.ts")).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/platform/access/product-access.ts"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/api/cal/worker-seal-team-6/webhook/route.ts",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/lib/cal/worker-seal-team-6-webhook.ts",
+			),
+		).toBe(true);
 		expect(isBillingSensitivePath("apps/web/src/platform/env/server.ts")).toBe(
 			true,
 		);

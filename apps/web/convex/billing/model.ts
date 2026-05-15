@@ -679,6 +679,38 @@ function buildViewerEntitlementSummaries({
 	return entitlements;
 }
 
+export async function getActiveBillingProductSurfaceCapabilities(
+	ctx: BillingMutationCtx | BillingQueryCtx,
+	ownerClerkUserId: string,
+	now = Date.now(),
+) {
+	const [licenseTerms, subscriptions] = await Promise.all([
+		listStarterLicenseTermsForOwner(ctx, ownerClerkUserId),
+		listWorkersSubscriptionsForOwner(ctx, ownerClerkUserId),
+	]);
+	const currentStarterLicense = selectCurrentStarterLicenseTerm(
+		licenseTerms,
+		now,
+	);
+	const starterAccess = deriveStarterLicenseAccess(currentStarterLicense, now);
+	const currentWorkersSubscription =
+		selectCurrentWorkersSubscription(subscriptions);
+	const workersAccess = deriveWorkersSubscriptionAccess(
+		currentWorkersSubscription,
+		now,
+	);
+	const activeCapabilities: BillingEntitlementCapability[] = [];
+
+	if (starterAccess.hasAccess) {
+		activeCapabilities.push("generate_codebase", "tutorials");
+	}
+	if (workersAccess.hasAccess) {
+		activeCapabilities.push("worker");
+	}
+
+	return activeCapabilities;
+}
+
 export const syncStarterLicenseTermArgs = {
 	ownerClerkUserId: v.string(),
 	stripeCustomerId: v.optional(v.string()),
