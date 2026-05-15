@@ -58,6 +58,12 @@ type ProductAccessGrantUpsertInput = {
 	fulfillmentTrack?: FulfillmentTrack;
 };
 
+const legacyProductSplitCapabilities = [
+	"generate_codebase",
+	"tutorials",
+	"worker",
+] as const satisfies readonly ProductSurfaceCapability[];
+
 function getNextProductAccessGrantSource({
 	existingSource,
 	incomingSource,
@@ -118,6 +124,7 @@ function getStoredProductSurfaceCapabilities(
 	accessGrant: {
 		status?: string;
 		capabilities?: string[];
+		legacyWorkersAccessEndsAt?: number;
 		offerIds?: string[];
 		lastCheckoutOfferId?: CheckoutOfferId;
 		fulfillmentTrack?: FulfillmentTrack;
@@ -127,7 +134,10 @@ function getStoredProductSurfaceCapabilities(
 		return [];
 	}
 
-	return getProductSurfaceCapabilitiesFromGrantFields(accessGrant);
+	return applyStoredCapabilityExpirations(
+		getProductSurfaceCapabilitiesFromGrantFields(accessGrant),
+		accessGrant,
+	);
 }
 
 function isBillingBackedProductAccessGrant(
@@ -155,6 +165,7 @@ async function getEffectiveProductSurfaceCapabilities(
 		status?: string;
 		source?: ProductAccessGrantSource;
 		capabilities?: string[];
+		legacyWorkersAccessEndsAt?: number;
 		offerIds?: string[];
 		lastCheckoutOfferId?: CheckoutOfferId;
 		fulfillmentTrack?: FulfillmentTrack;
@@ -179,6 +190,11 @@ async function getEffectiveProductSurfaceCapabilities(
 		billingAccessState.activeCapabilities,
 	);
 	const storedCapabilities = getStoredProductSurfaceCapabilities(accessGrant);
+	const hasActiveLegacyWorkersAccess =
+		hasUnexpiredLegacyWorkersAccess(accessGrant);
+	const shouldUseStoredWorkersCapability =
+		!billingAccessState.hasWorkersBillingRecords ||
+		hasActiveLegacyWorkersAccess;
 
 	if (billingAccessState.hasBillingRecords) {
 		return getUniqueProductSurfaceCapabilities([
@@ -188,9 +204,9 @@ async function getEffectiveProductSurfaceCapabilities(
 				: storedCapabilities.filter((capability) =>
 						["generate_codebase", "tutorials"].includes(capability),
 					)),
-			...(billingAccessState.hasWorkersBillingRecords
-				? []
-				: storedCapabilities.filter((capability) => capability === "worker")),
+			...(shouldUseStoredWorkersCapability
+				? storedCapabilities.filter((capability) => capability === "worker")
+				: []),
 		]);
 	}
 
@@ -202,6 +218,33 @@ function getUniqueProductSurfaceCapabilities(
 ) {
 	return productSurfaceCapabilities.filter((capability) =>
 		capabilities.includes(capability),
+	);
+}
+
+function hasUnexpiredLegacyWorkersAccess(grant: {
+	legacyWorkersAccessEndsAt?: number;
+}) {
+	return Boolean(
+		grant.legacyWorkersAccessEndsAt &&
+		grant.legacyWorkersAccessEndsAt > Date.now(),
+	);
+}
+
+function applyStoredCapabilityExpirations(
+	capabilities: readonly ProductSurfaceCapability[],
+	grant: {
+		legacyWorkersAccessEndsAt?: number;
+	},
+) {
+	if (!grant.legacyWorkersAccessEndsAt) {
+		return getUniqueProductSurfaceCapabilities(capabilities);
+	}
+
+	return getUniqueProductSurfaceCapabilities(
+		capabilities.filter(
+			(capability) =>
+				capability !== "worker" || hasUnexpiredLegacyWorkersAccess(grant),
+		),
 	);
 }
 
@@ -305,6 +348,21 @@ function getMergedCheckoutOfferIds({
 	}
 
 	return [...mergedOfferIds];
+}
+
+function getMergedLegacyProductSplitOfferIds(existingOfferIds?: string[]) {
+	const mergedOfferIds = new Set<CheckoutOfferId>();
+	for (const offerId of existingOfferIds ?? []) {
+		if (offerId === "starter" || offerId === "workers") {
+			mergedOfferIds.add(offerId);
+		}
+	}
+	mergedOfferIds.add("starter");
+	mergedOfferIds.add("workers");
+
+	return (["starter", "workers"] as const).filter((offerId) =>
+		mergedOfferIds.has(offerId),
+	);
 }
 
 export async function getProductAccessGrantByClerkUserId(
@@ -558,6 +616,57 @@ export async function grantProductAccessHandler(
 		...args,
 		source: args.source ?? "manual",
 	});
+}
+
+export const grantLegacyProductSplitAccessArgs = {
+	clerkUserId: v.string(),
+	legacyWorkersAccessEndsAt: v.number(),
+};
+export const grantLegacyProductSplitAccessReturns =
+	productAccessGrantResultValidator;
+
+export async function grantLegacyProductSplitAccessHandler(
+	ctx: EntitlementMutationCtx,
+	args: {
+		clerkUserId: string;
+		legacyWorkersAccessEndsAt: number;
+	},
+) {
+	const now = Date.now();
+	const existingGrant = await getProductAccessGrantByClerkUserId(
+		ctx,
+		args.clerkUserId,
+	);
+
+	if (existingGrant) {
+		const capabilities = getUniqueProductSurfaceCapabilities([
+			...getProductSurfaceCapabilitiesFromGrantFields(existingGrant),
+			...legacyProductSplitCapabilities,
+		]);
+		await ctx.db.patch(existingGrant._id, {
+			status: "granted",
+			capabilities,
+			legacyWorkersAccessEndsAt: args.legacyWorkersAccessEndsAt,
+			offerIds: getMergedLegacyProductSplitOfferIds(existingGrant.offerIds),
+			updatedAt: now,
+			revokedAt: undefined,
+		});
+
+		return { granted: "patched" as const };
+	}
+
+	await ctx.db.insert("productAccessGrants", {
+		clerkUserId: args.clerkUserId,
+		status: "granted",
+		source: "manual",
+		capabilities: [...legacyProductSplitCapabilities],
+		legacyWorkersAccessEndsAt: args.legacyWorkersAccessEndsAt,
+		offerIds: ["starter", "workers"],
+		grantedAt: now,
+		updatedAt: now,
+	});
+
+	return { granted: "inserted" as const };
 }
 
 export const grantProductAccessFromStripeArgs = {

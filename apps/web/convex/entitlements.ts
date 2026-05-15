@@ -21,6 +21,9 @@ import {
 	grantProductAccessFromStripeArgs,
 	grantProductAccessFromStripeHandler,
 	grantProductAccessFromStripeReturns,
+	grantLegacyProductSplitAccessArgs,
+	grantLegacyProductSplitAccessHandler,
+	grantLegacyProductSplitAccessReturns,
 	grantProductAccessHandler,
 	grantProductAccessReturns,
 	resolveViewerFulfillmentTrackArgs,
@@ -50,6 +53,12 @@ export const grantProductAccessFromStripe = internalMutation({
 	args: grantProductAccessFromStripeArgs,
 	returns: grantProductAccessFromStripeReturns,
 	handler: grantProductAccessFromStripeHandler,
+});
+
+export const grantLegacyProductSplitAccess = internalMutation({
+	args: grantLegacyProductSplitAccessArgs,
+	returns: grantLegacyProductSplitAccessReturns,
+	handler: grantLegacyProductSplitAccessHandler,
 });
 
 export const resolveViewerFulfillmentTrack = mutation({

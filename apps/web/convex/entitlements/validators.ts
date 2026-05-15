@@ -69,6 +69,7 @@ export const productAccessGrantDocumentValidator = v.object({
 	stripeCheckoutSessionId: v.optional(v.string()),
 	stripePaymentIntentId: v.optional(v.string()),
 	capabilities: v.optional(v.array(productAccessCapabilityValidator)),
+	legacyWorkersAccessEndsAt: v.optional(v.number()),
 	offerIds: v.optional(v.array(checkoutOfferIdValidator)),
 	lastCheckoutOfferId: v.optional(checkoutOfferIdValidator),
 	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),

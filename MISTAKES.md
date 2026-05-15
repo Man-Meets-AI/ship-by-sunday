@@ -331,3 +331,9 @@
 - Mistake: I ran the first codex-review helper without disabling PostHog sourcemap upload, and the nested Next build uploaded source maps during review.
   Impact: An external PostHog release artifact was created or updated during a review pass that should have stayed local.
   Corrective action: Stop the review run and rerun with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` plus blank PostHog upload environment values for review builds.
+
+## 2026-05-15 Env Key Presence Check
+
+- Mistake: I used `rg` against `.env*` files while checking whether provider credentials existed, which printed secret values instead of only key names or presence.
+  Impact: Secret material was exposed in local command output during a read-only migration research pass; no provider state was changed.
+  Corrective action: For future env checks, use a script that reports only boolean key presence and mode labels, never raw values.

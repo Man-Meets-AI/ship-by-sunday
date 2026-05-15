@@ -282,6 +282,103 @@ describe("convex/entitlements/model", () => {
 		});
 	});
 
+	it("keeps legacy product-split Workers access until its manual end date", async () => {
+		const now = Date.UTC(2026, 4, 15);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				legacyWorkersAccessEndsAt: Date.UTC(2026, 7, 15),
+			}),
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
+		});
+		await expect(
+			moduleUnderTest.requireExistingCodebaseProductAccess(ctx as never),
+		).resolves.toBe(clerkUserId);
+	});
+
+	it("expires only Workers from a legacy product-split grant", async () => {
+		const now = Date.UTC(2026, 7, 16);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				legacyWorkersAccessEndsAt: Date.UTC(2026, 7, 15),
+			}),
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
+		});
+		await expect(
+			moduleUnderTest.requireGeneratedCodebaseProductAccess(ctx as never),
+		).resolves.toBe(clerkUserId);
+		await expect(
+			moduleUnderTest.requireExistingCodebaseProductAccess(ctx as never),
+		).rejects.toThrow("Existing codebase access required");
+	});
+
+	it("keeps unexpired legacy Workers access even when billing has a canceled Workers row", async () => {
+		const now = Date.UTC(2026, 4, 15);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				source: "stripe_checkout",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				legacyWorkersAccessEndsAt: Date.UTC(2026, 7, 15),
+			}),
+			workersSubscriptions: [
+				{
+					_id: "workersSubscriptions_1",
+					ownerClerkUserId: clerkUserId,
+					stripeCustomerId: "cus_legacy",
+					stripeSubscriptionId: "sub_legacy",
+					cadence: "monthly",
+					status: "canceled",
+					cancelAtPeriodEnd: false,
+					currentPeriodEndAt: Date.UTC(2026, 4, 1),
+					refundState: "none",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
+		});
+	});
+
 	it("removes Stripe-backed Starter access after the billing license is refunded", async () => {
 		const now = Date.UTC(2026, 4, 13);
 		vi.spyOn(Date, "now").mockReturnValue(now);
@@ -461,6 +558,53 @@ describe("convex/entitlements/model", () => {
 				capabilities: ["worker"],
 				updatedAt: 300,
 				revokedAt: undefined,
+			}),
+		);
+	});
+
+	it("patches legacy product-split access without erasing Stripe evidence", async () => {
+		const patch = vi.fn().mockResolvedValue(undefined);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				_id: "product_access_existing",
+				source: "stripe_checkout",
+				stripeCustomerId: "cus_legacy",
+				stripeCheckoutSessionId: "cs_legacy",
+				stripePaymentIntentId: "pi_legacy",
+				capabilities: ["worker"],
+				offerIds: ["workers"],
+				updatedAt: 25,
+			}),
+			patch,
+		});
+
+		vi.spyOn(Date, "now").mockReturnValue(320);
+
+		await expect(
+			moduleUnderTest.grantLegacyProductSplitAccessHandler(ctx as never, {
+				clerkUserId,
+				legacyWorkersAccessEndsAt: 123_456,
+			}),
+		).resolves.toEqual({
+			granted: "patched",
+		});
+		expect(patch).toHaveBeenCalledWith(
+			"product_access_existing",
+			expect.objectContaining({
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				legacyWorkersAccessEndsAt: 123_456,
+				offerIds: ["starter", "workers"],
+				updatedAt: 320,
+				revokedAt: undefined,
+			}),
+		);
+		expect(patch).not.toHaveBeenCalledWith(
+			"product_access_existing",
+			expect.objectContaining({
+				stripeCustomerId: undefined,
+				stripeCheckoutSessionId: undefined,
+				stripePaymentIntentId: undefined,
 			}),
 		);
 	});
