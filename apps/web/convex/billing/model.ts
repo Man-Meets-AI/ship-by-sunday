@@ -193,6 +193,20 @@ function assignDefinedBillingField(
 	}
 }
 
+function assignWorkersPastDueBillingField(
+	fields: Record<string, unknown>,
+	fieldName: string,
+	value: unknown,
+	shouldClearMissingValue: boolean,
+) {
+	if (shouldClearMissingValue) {
+		fields[fieldName] = value;
+		return;
+	}
+
+	assignDefinedBillingField(fields, fieldName, value);
+}
+
 function mergeBillingRefundState({
 	existingRefundState,
 	nextRefundState,
@@ -934,15 +948,18 @@ export async function syncWorkersSubscriptionHandler(
 		}),
 		updatedAt: now,
 	};
-	const accessThroughAt =
-		args.status === "past_due"
-			? (existingSubscription?.accessThroughAt ?? args.accessThroughAt)
-			: args.accessThroughAt;
-	const failedPaymentStartedAt =
-		args.status === "past_due"
-			? (existingSubscription?.failedPaymentStartedAt ??
-				args.failedPaymentStartedAt)
-			: args.failedPaymentStartedAt;
+	const isPastDueSubscription = args.status === "past_due";
+	const isContinuingPastDueSubscription =
+		isPastDueSubscription && existingSubscription?.status === "past_due";
+	const shouldClearStalePastDueFields =
+		!!existingSubscription && !isContinuingPastDueSubscription;
+	const accessThroughAt = isContinuingPastDueSubscription
+		? (existingSubscription?.accessThroughAt ?? args.accessThroughAt)
+		: args.accessThroughAt;
+	const failedPaymentStartedAt = isContinuingPastDueSubscription
+		? (existingSubscription?.failedPaymentStartedAt ??
+			args.failedPaymentStartedAt)
+		: args.failedPaymentStartedAt;
 	assignDefinedBillingField(
 		subscriptionFields,
 		"stripePriceId",
@@ -965,11 +982,6 @@ export async function syncWorkersSubscriptionHandler(
 	);
 	assignDefinedBillingField(
 		subscriptionFields,
-		"accessThroughAt",
-		accessThroughAt,
-	);
-	assignDefinedBillingField(
-		subscriptionFields,
 		"latestInvoiceId",
 		args.latestInvoiceId,
 	);
@@ -978,36 +990,60 @@ export async function syncWorkersSubscriptionHandler(
 		"latestInvoiceHostedUrl",
 		args.latestInvoiceHostedUrl,
 	);
-	assignDefinedBillingField(
-		subscriptionFields,
-		"paymentRecoveryUrl",
-		args.paymentRecoveryUrl,
-	);
-	assignDefinedBillingField(
-		subscriptionFields,
-		"failedPaymentStartedAt",
-		failedPaymentStartedAt,
-	);
-	assignDefinedBillingField(
-		subscriptionFields,
-		"failedPaymentAttemptCount",
-		args.failedPaymentAttemptCount,
-	);
-	assignDefinedBillingField(
-		subscriptionFields,
-		"nextPaymentAttemptAt",
-		args.nextPaymentAttemptAt,
-	);
+	// Past-due grace fields belong to a single failed-payment episode. Preserve
+	// them only while that same episode remains past due.
+	if (isPastDueSubscription) {
+		assignWorkersPastDueBillingField(
+			subscriptionFields,
+			"accessThroughAt",
+			accessThroughAt,
+			shouldClearStalePastDueFields,
+		);
+		assignWorkersPastDueBillingField(
+			subscriptionFields,
+			"paymentRecoveryUrl",
+			args.paymentRecoveryUrl,
+			shouldClearStalePastDueFields,
+		);
+		assignWorkersPastDueBillingField(
+			subscriptionFields,
+			"failedPaymentStartedAt",
+			failedPaymentStartedAt,
+			shouldClearStalePastDueFields,
+		);
+		assignWorkersPastDueBillingField(
+			subscriptionFields,
+			"failedPaymentAttemptCount",
+			args.failedPaymentAttemptCount,
+			shouldClearStalePastDueFields,
+		);
+		assignWorkersPastDueBillingField(
+			subscriptionFields,
+			"nextPaymentAttemptAt",
+			args.nextPaymentAttemptAt,
+			shouldClearStalePastDueFields,
+		);
+	} else if (existingSubscription) {
+		subscriptionFields.accessThroughAt = undefined;
+		subscriptionFields.paymentRecoveryUrl = undefined;
+		subscriptionFields.failedPaymentStartedAt = undefined;
+		subscriptionFields.failedPaymentAttemptCount = undefined;
+		subscriptionFields.nextPaymentAttemptAt = undefined;
+	}
 	assignDefinedBillingField(
 		subscriptionFields,
 		"recoveredFromPastDueAt",
 		args.recoveredFromPastDueAt,
 	);
-	assignDefinedBillingField(
-		subscriptionFields,
-		"terminalFailureAt",
-		args.terminalFailureAt,
-	);
+	if (args.status === "unpaid" || args.status === "canceled") {
+		assignDefinedBillingField(
+			subscriptionFields,
+			"terminalFailureAt",
+			args.terminalFailureAt,
+		);
+	} else if (existingSubscription) {
+		subscriptionFields.terminalFailureAt = undefined;
+	}
 
 	if (existingSubscription) {
 		await db.patch(existingSubscription._id, subscriptionFields);

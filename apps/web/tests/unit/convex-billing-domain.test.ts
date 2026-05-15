@@ -418,16 +418,24 @@ describe("convex billing domain model", () => {
 			cancelAtPeriodEnd: true,
 			currentPeriodStartAt: periodStartAt,
 			currentPeriodEndAt: periodEndAt,
-			accessThroughAt: periodEndAt,
 			latestInvoiceId: "in_existing",
 			latestInvoiceHostedUrl: "https://billing.stripe.test/invoice",
-			paymentRecoveryUrl: "https://billing.stripe.test/recover",
-			failedPaymentStartedAt: Date.UTC(2026, 4, 10),
-			failedPaymentAttemptCount: 2,
-			nextPaymentAttemptAt: Date.UTC(2026, 4, 14),
 			refundState: "fully_refunded",
 			status: "active",
 		});
+		expect(state.workersSubscriptions[0]).not.toHaveProperty("accessThroughAt");
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"paymentRecoveryUrl",
+		);
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"failedPaymentStartedAt",
+		);
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"failedPaymentAttemptCount",
+		);
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"nextPaymentAttemptAt",
+		);
 		expect(state.stripeCustomers).toHaveLength(1);
 	});
 
@@ -474,6 +482,84 @@ describe("convex billing domain model", () => {
 			accessThroughAt: firstAccessThroughAt,
 			failedPaymentStartedAt: firstFailureAt,
 			failedPaymentAttemptCount: 3,
+		});
+	});
+
+	it("resets Workers past-due grace fields after payment recovery", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-06-03T12:00:00.000Z"));
+		const firstFailureAt = Date.UTC(2026, 4, 10);
+		const firstAccessThroughAt = Date.UTC(2026, 4, 24);
+		const secondFailureAt = Date.UTC(2026, 5, 3);
+		const secondAccessThroughAt = Date.UTC(2026, 5, 17);
+		const { ctx, state } = createBillingMutationCtx({
+			workersSubscriptions: [
+				{
+					_id: "workersSubscriptions_existing",
+					ownerClerkUserId: "user_123",
+					stripeCustomerId: "cus_existing",
+					stripeSubscriptionId: "sub_123",
+					cadence: "monthly",
+					status: "past_due",
+					cancelAtPeriodEnd: false,
+					accessThroughAt: firstAccessThroughAt,
+					paymentRecoveryUrl: "https://billing.stripe.test/recover-first",
+					failedPaymentStartedAt: firstFailureAt,
+					failedPaymentAttemptCount: 2,
+					nextPaymentAttemptAt: Date.UTC(2026, 4, 14),
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+
+		await syncWorkersSubscriptionHandler(ctx as never, {
+			ownerClerkUserId: "user_123",
+			stripeCustomerId: "cus_existing",
+			stripeSubscriptionId: "sub_123",
+			cadence: "monthly",
+			status: "active",
+			recoveredFromPastDueAt: Date.UTC(2026, 4, 20),
+		});
+
+		expect(state.workersSubscriptions[0]).toMatchObject({
+			status: "active",
+			recoveredFromPastDueAt: Date.UTC(2026, 4, 20),
+		});
+		expect(state.workersSubscriptions[0]).not.toHaveProperty("accessThroughAt");
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"paymentRecoveryUrl",
+		);
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"failedPaymentStartedAt",
+		);
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"failedPaymentAttemptCount",
+		);
+		expect(state.workersSubscriptions[0]).not.toHaveProperty(
+			"nextPaymentAttemptAt",
+		);
+
+		await syncWorkersSubscriptionHandler(ctx as never, {
+			ownerClerkUserId: "user_123",
+			stripeCustomerId: "cus_existing",
+			stripeSubscriptionId: "sub_123",
+			cadence: "monthly",
+			status: "past_due",
+			accessThroughAt: secondAccessThroughAt,
+			paymentRecoveryUrl: "https://billing.stripe.test/recover-second",
+			failedPaymentStartedAt: secondFailureAt,
+			failedPaymentAttemptCount: 1,
+			nextPaymentAttemptAt: Date.UTC(2026, 5, 7),
+		});
+
+		expect(state.workersSubscriptions[0]).toMatchObject({
+			status: "past_due",
+			accessThroughAt: secondAccessThroughAt,
+			paymentRecoveryUrl: "https://billing.stripe.test/recover-second",
+			failedPaymentStartedAt: secondFailureAt,
+			failedPaymentAttemptCount: 1,
+			nextPaymentAttemptAt: Date.UTC(2026, 5, 7),
 		});
 	});
 
