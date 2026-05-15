@@ -4,7 +4,10 @@ import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 import type Stripe from "stripe";
 
 import { api } from "@/convex/_generated/api";
-import { readCheckoutPurchaseMetadata } from "@/platform/billing/checkout/checkout-metadata";
+import {
+	readCheckoutMetadataClerkUserId,
+	readCheckoutPurchaseMetadata,
+} from "@/platform/billing/checkout/checkout-metadata";
 import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
 import { getStripe } from "@/platform/billing/stripe";
 import { requireServerEnv } from "@/platform/env/server";
@@ -113,6 +116,15 @@ function getCheckoutPaymentIntentId(session: Stripe.Checkout.Session) {
 	return getStripeId(session.payment_intent);
 }
 
+function getCheckoutPaymentIntentCreatedAt(session: Stripe.Checkout.Session) {
+	return typeof session.payment_intent === "object" &&
+		session.payment_intent &&
+		"created" in session.payment_intent &&
+		typeof session.payment_intent.created === "number"
+		? session.payment_intent.created * 1000
+		: undefined;
+}
+
 function getCheckoutSubscriptionId(session: Stripe.Checkout.Session) {
 	return getStripeId(session.subscription);
 }
@@ -126,6 +138,10 @@ function isPaidCheckoutSession(session: Stripe.Checkout.Session) {
 
 function getCheckoutOfferId(session: Stripe.Checkout.Session) {
 	return readCheckoutPurchaseMetadata(session.metadata)?.offerId;
+}
+
+function getCheckoutSessionSyncCreatedAt(session: Stripe.Checkout.Session) {
+	return getCheckoutPaymentIntentCreatedAt(session) ?? session.created * 1000;
 }
 
 function getWorkersSubscriptionStatus(
@@ -224,6 +240,17 @@ async function recordSkippedStripeEvent(args: {
 }
 
 async function resolveCheckoutOwner(session: Stripe.Checkout.Session) {
+	const metadataOwnerClerkUserId = readCheckoutMetadataClerkUserId({
+		metadata: session.metadata,
+		clientReferenceId: session.client_reference_id,
+	});
+	if (metadataOwnerClerkUserId) {
+		return {
+			ownerClerkUserId: metadataOwnerClerkUserId,
+			customerEmail: getCheckoutCustomerEmail(session),
+		};
+	}
+
 	const fulfillment = await fetchAction(
 		api.checkoutClaimsActions.fulfillCheckoutSessionFromSuccessPage,
 		{
@@ -552,7 +579,7 @@ export async function syncStripeCheckoutSessionToConvex(args: {
 
 	const owner = await resolveCheckoutOwner(session);
 	return await syncPaidCheckoutSession({
-		eventCreatedAt: Date.now(),
+		eventCreatedAt: getCheckoutSessionSyncCreatedAt(session),
 		eventId: `${args.source}:${session.id}`,
 		eventType: args.source,
 		offerId,
