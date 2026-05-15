@@ -107,6 +107,7 @@ function expectPublicRouteSurface(markup: string) {
 	expect(markup).toContain('data-slot="public-site-header"');
 	expect(markup).not.toContain("font-heading-serif");
 	expect(markup).not.toContain("font-product-wordmark");
+	expect(markup).not.toContain("opacity-22");
 }
 
 describe("public marketing surfaces", () => {
@@ -115,9 +116,11 @@ describe("public marketing surfaces", () => {
 
 		expectPublicRouteSurface(markup);
 		expect(markup).toContain('data-slot="public-route-header"');
+		expect(markup).toContain('<h3 data-slot="public-route-panel-title"');
 		expect(markup).toContain('href="/starter"');
 		expect(markup).toContain('href="/workers"');
 		expect(markup).toContain('href="/worker-seal-team-6"');
+		expect(markup.match(/href="\/"/g)).toHaveLength(1);
 	});
 
 	it("preserves Starter checkout while using public route panels", () => {
@@ -146,6 +149,8 @@ describe("public marketing surfaces", () => {
 		expectPublicRouteSurface(markup);
 		expect(markup).toContain('href="#booking"');
 		expect(markup).toContain('data-testid="worker-seal-team-6-cal-booking"');
+		expect(markup).toContain('data-slot="public-route-list-panel"');
+		expect(markup).toContain('<h3 data-slot="public-route-panel-title"');
 		expect(markup).toContain("data-direct-scheduling-href=");
 		expect(markup).not.toContain("/api/stripe/checkout");
 	});

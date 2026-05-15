@@ -98,4 +98,33 @@ describe("docs navigation components", () => {
 		expect(docsThemeCss).not.toContain("Times New Roman");
 		expect(docsThemeCss).toContain("var(--font-sans)");
 	});
+
+	it("points homepage and starter docs at the migrated public header", () => {
+		const homepageDoc = readFileSync(
+			new URL(
+				"../../src/content/docs/configure-the-homepage.mdx",
+				import.meta.url,
+			),
+			"utf8",
+		);
+		const starterDoc = readFileSync(
+			new URL(
+				"../../src/content/docs/customize-the-starter.mdx",
+				import.meta.url,
+			),
+			"utf8",
+		);
+
+		expect(homepageDoc).toContain(
+			"src/components/layout/public-site-header.tsx",
+		);
+		expect(starterDoc).toContain(
+			"src/components/layout/public-site-header.tsx",
+		);
+		expect(starterDoc).toContain("the brand home link routes to `/`");
+		expect(`${homepageDoc}\n${starterDoc}`).not.toContain(
+			"src/app/_components/public-site",
+		);
+		expect(starterDoc).not.toContain("public navigation links Man Meets AI");
+	});
 });

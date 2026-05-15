@@ -91,7 +91,7 @@ export default function WorkerSealTeam6Page() {
 					alt=""
 					fill
 					priority
-					className="object-cover object-[63%_46%] opacity-22"
+					className="object-cover object-[63%_46%] opacity-[0.22]"
 					sizes="100vw"
 				/>
 				<div className="absolute inset-0 bg-background/84" />
@@ -184,7 +184,9 @@ function HourSection() {
 									<PublicRouteStepMarker className="size-7">
 										{index + 1}
 									</PublicRouteStepMarker>
-									<PublicRoutePanelTitle>{step.title}</PublicRoutePanelTitle>
+									<PublicRoutePanelTitle as="h3">
+										{step.title}
+									</PublicRoutePanelTitle>
 								</div>
 								<PublicRoutePanelDescription className="mt-3">
 									{step.description}

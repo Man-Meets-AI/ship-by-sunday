@@ -158,11 +158,14 @@ export function PublicRouteIcon({
 }
 
 export function PublicRoutePanelTitle({
+	as: Title = "h2",
 	className,
 	...props
-}: ComponentProps<"h2">) {
+}: ComponentProps<"h2"> & {
+	as?: "h2" | "h3" | "h4";
+}) {
 	return (
-		<h2
+		<Title
 			data-slot="public-route-panel-title"
 			className={cn("text-base font-semibold text-foreground", className)}
 			{...props}
@@ -219,7 +222,7 @@ export function PublicRouteListPanel({
 }: ComponentProps<"li">) {
 	return (
 		<li
-			data-slot="public-route-panel"
+			data-slot="public-route-list-panel"
 			className={cn(publicRoutePanelClassName, className)}
 			{...props}
 		/>

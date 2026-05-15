@@ -6,7 +6,6 @@ import { routeConfig } from "@/config/product";
 import { cn } from "@/lib/utils";
 
 const publicNavLinks = [
-	{ href: routeConfig.home, label: "Man Meets AI" },
 	{ href: routeConfig.starter, label: "Starter" },
 	{ href: routeConfig.workers, label: "Workers" },
 	{ href: routeConfig.workerSealTeam6, label: "Seal Team 6" },

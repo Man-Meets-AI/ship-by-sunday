@@ -82,11 +82,11 @@ Docs chrome and prose styling live under:
     apps/web/src/app/(marketing)/docs/_components/
     apps/web/src/app/(marketing)/docs/_styles/docs-theme.css
 
-The public header currently lives in the route-local underscore folder:
+Before this slice, the public header lived in the route-local underscore folder:
 
     apps/web/src/app/_components/public-site/public-site-header.tsx
 
-This slice should move that shared header to a plain source module under `apps/web/src/components/layout/` and update imports. The route group folders such as `(marketing)` can stay because they are Next.js route organization.
+This slice moves that shared header to a plain source module under `apps/web/src/components/layout/` and updates imports. The route group folders such as `(marketing)` can stay because they are Next.js route organization.
 
 ### In Scope
 
@@ -102,7 +102,7 @@ First, validate this active plan with `bun run plans:lint -- --plan docs/exec-pl
 
 Second, add a shared public route surface module under `apps/web/src/components/layout/public-route-surface.tsx`. It should provide page, section, header, title, description, panel, panel body, icon, and compact list primitives with `data-slot` attributes for tests. The recipes should use DM Sans, T3 Code tokens, compact headers, quiet panels, and stable responsive spacing.
 
-Third, move `PublicSiteHeader` from `apps/web/src/app/_components/public-site/public-site-header.tsx` to `apps/web/src/components/layout/public-site-header.tsx`, update public imports, and keep primary navigation unchanged: Man Meets AI, Starter, Workers, Seal Team 6, Blog, Sign in, and theme toggle. Do not add docs to primary public navigation.
+Third, move `PublicSiteHeader` from `apps/web/src/app/_components/public-site/public-site-header.tsx` to `apps/web/src/components/layout/public-site-header.tsx`, update public imports, and keep the brand home link plus primary navigation entries for Starter, Workers, Seal Team 6, Blog, Sign in, and theme toggle. Do not add docs to primary public navigation.
 
 Fourth, migrate `/`, `/starter`, `/workers`, and `/worker-seal-team-6` to the shared public route surface helpers. Preserve visible copy, hrefs, checkout button offer ids and test ids, the Cal.com booking component, hosted and direct booking fallbacks, and all metadata exports.
 

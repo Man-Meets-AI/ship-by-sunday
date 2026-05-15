@@ -47,7 +47,7 @@ Those are the highest-risk parts of the starter.
 - keep `/`, `/starter`, and `/workers` as separate public surfaces instead of rebuilding one giant sales page
 - keep the public blog route in `src/app/(marketing)/blog/[[...slug]]/page.tsx`, the editorial UI in `src/app/(marketing)/blog/_components/**`, route helpers in `src/app/(marketing)/blog/_lib/**`, and article source files in `src/content/blog/**`
 - use `starterConfig.modules` before inventing route-level hacks or manual hidden links
-- keep public offer work inside `src/app/(marketing)/page.tsx`, `src/app/(marketing)/starter/page.tsx`, `src/app/(marketing)/workers/page.tsx`, `src/app/_components/public-site/**`, and `public/`
+- keep public offer work inside `src/app/(marketing)/page.tsx`, `src/app/(marketing)/starter/page.tsx`, `src/app/(marketing)/workers/page.tsx`, `src/components/layout/public-site-header.tsx`, and `public/`
 - keep shared course contracts inside `src/lib/course/**` and route-facing course UI inside `src/app/(app)/_components/course/**`
 - keep starter-mode protected home work inside `src/app/(app)/_components/workspace-home/**` and `src/app/(app)/_lib/workspace-home-model.ts`
 - keep the access layer as the source of truth for product access
@@ -75,6 +75,6 @@ For the homepage specifically, clean customization now means:
 - `/` stays the Man Meets AI brand and routing page
 - `/starter` owns the Starter checkout CTA with offer id `starter`
 - `/workers` owns the Workers checkout CTA with offer id `workers`
-- public navigation links Man Meets AI, Starter, Workers, Blog, and Sign in
+- the brand home link routes to `/`, and public navigation links Starter, Workers, Seal Team 6, Blog, and Sign in
 
 If the homepage is part of the change, use [Configure the Homepage](/docs/configure-the-homepage) as the detailed source of truth instead of prompting from memory.

@@ -36,7 +36,7 @@ export default function Page() {
 					alt=""
 					fill
 					priority
-					className="object-cover object-[60%_50%] opacity-22"
+					className="object-cover object-[60%_50%] opacity-[0.22]"
 					sizes="100vw"
 				/>
 				<div className="absolute inset-0 bg-background/82" />
@@ -74,7 +74,7 @@ export default function Page() {
 					<div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
 						<PublicRoutePanel>
 							<PublicRoutePanelBody>
-								<PublicRoutePanelTitle>Starter</PublicRoutePanelTitle>
+								<PublicRoutePanelTitle as="h3">Starter</PublicRoutePanelTitle>
 								<PublicRoutePanelDescription>
 									For people starting from an idea, a Lovable-style prototype,
 									or a pile of prompts.
@@ -89,7 +89,7 @@ export default function Page() {
 						</PublicRoutePanel>
 						<PublicRoutePanel>
 							<PublicRoutePanelBody>
-								<PublicRoutePanelTitle>Workers</PublicRoutePanelTitle>
+								<PublicRoutePanelTitle as="h3">Workers</PublicRoutePanelTitle>
 								<PublicRoutePanelDescription>
 									For founders, agencies, and teams with existing repos that
 									need worker-ready source truth and proof loops.
@@ -104,7 +104,7 @@ export default function Page() {
 						</PublicRoutePanel>
 						<PublicRoutePanel>
 							<PublicRoutePanelBody>
-								<PublicRoutePanelTitle>
+								<PublicRoutePanelTitle as="h3">
 									Worker Seal Team 6
 								</PublicRoutePanelTitle>
 								<PublicRoutePanelDescription>
