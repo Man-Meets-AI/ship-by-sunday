@@ -35,6 +35,15 @@ ship-by-sunday program run-slice --program-id <program-id> --plan <docs/exec-pla
 
 Both commands write local artifacts under ignored `.sbs/program-runs/`. They include pre-existing dirty worktree state in the review prompt instead of blocking at startup, so keep unrelated edits reviewable and scoped.
 
+Both commands also stream live Program progress to stderr. In `--json` mode, stdout remains the final machine-readable result object; progress still goes to stderr so callers can display status without corrupting JSON parsing. Long-running Codex phases now mirror the underlying `codex exec --json` event stream into run-local JSONL files:
+
+- planning steps write `<planning-run-id>-codex-events.jsonl`
+- slice execute phases write `execute-codex-events.jsonl`
+- slice fix phases write `fix-attempt-<n>-codex-events.jsonl`
+- slice review phases write `review-attempt-<n>-codex-events.jsonl`
+
+Use those event logs with `loop-state.json`, slice `state.json`, and the stderr progress lines to see whether the runner is planning, executing a child slice, waiting on Codex tools, blocked, or finished.
+
 `program run` defaults to a small planning budget before it declares the Program blocked. Use `--max-planning-steps 0` for the older strict behavior where a missing active child ExecPlan stops immediately with `no_active_child_plan`.
 
 ## Worker Install Command Map

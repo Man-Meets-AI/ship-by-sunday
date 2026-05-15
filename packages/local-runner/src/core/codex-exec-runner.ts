@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createWriteStream } from "node:fs";
 import { Context, Effect, Layer } from "effect";
 
 import type { JsonObject, JsonValue } from "./json-value";
@@ -10,10 +11,14 @@ import {
 
 type JsonRecord = JsonObject;
 
+export type CodexExecJsonEvent = JsonRecord;
+export type CodexExecEventHandler = (event: CodexExecJsonEvent) => void;
+
 export type CodexExecRunnerResult = {
 	exitCode: number | null;
 	threadId: string | null;
 	events: JsonRecord[];
+	eventLogPath?: string;
 	finalAgentMessage: string | null;
 	structuredOutput: JsonValue;
 	stderr: string;
@@ -29,6 +34,8 @@ export type CodexExecRequest = {
 	timeoutMs?: number;
 	codexBinary?: string;
 	allowNonGitSmoke?: boolean;
+	eventLogPath?: string;
+	onEvent?: CodexExecEventHandler;
 };
 
 type ResolvedCodexExecRequest = {
@@ -40,11 +47,14 @@ type ResolvedCodexExecRequest = {
 	timeoutMs: number;
 	codexBinary: string;
 	allowNonGitSmoke: boolean;
+	eventLogPath?: string;
+	onEvent?: CodexExecEventHandler;
 };
 
 type CodexExecProcessResult = {
+	events: JsonRecord[];
 	exitCode: number | null;
-	stdout: string;
+	eventLogPath?: string;
 	stderr: string;
 	timedOut: boolean;
 };
@@ -93,6 +103,8 @@ function resolveCodexExecRequest({
 	timeoutMs = 120_000,
 	codexBinary = "codex",
 	allowNonGitSmoke = false,
+	eventLogPath,
+	onEvent,
 }: CodexExecRequest): ResolvedCodexExecRequest {
 	return {
 		prompt,
@@ -103,6 +115,8 @@ function resolveCodexExecRequest({
 		timeoutMs,
 		codexBinary,
 		allowNonGitSmoke,
+		eventLogPath,
+		onEvent,
 	};
 }
 
@@ -112,7 +126,7 @@ function runNodeCodexExec(
 	return Effect.flatMap(spawnCodexExecProcess(request), (processResult) =>
 		Effect.tryPromise({
 			try: async () => {
-				const events = parseJsonlEvents(processResult.stdout);
+				const events = processResult.events;
 				const threadId = findThreadId(events);
 				const finalAgentMessage = findFinalAgentMessage(events);
 				const structuredOutput =
@@ -135,6 +149,7 @@ function runNodeCodexExec(
 					exitCode: processResult.exitCode,
 					threadId,
 					events,
+					eventLogPath: processResult.eventLogPath,
 					finalAgentMessage,
 					structuredOutput,
 					stderr: processResult.stderr,
@@ -155,6 +170,8 @@ function spawnCodexExecProcess({
 	timeoutMs,
 	codexBinary,
 	allowNonGitSmoke,
+	eventLogPath,
+	onEvent,
 }: ResolvedCodexExecRequest): Effect.Effect<CodexExecProcessResult, Error> {
 	const args = [
 		"exec",
@@ -180,11 +197,18 @@ function spawnCodexExecProcess({
 					stdio: ["pipe", "pipe", "pipe"],
 					env: buildCodexExecEnvironment(),
 				});
+				const eventLogStream = eventLogPath
+					? createWriteStream(eventLogPath, { flags: "a" })
+					: null;
 
 				let stdout = "";
+				let stdoutBuffer = "";
 				let stderr = "";
+				let eventLogError: Error | null = null;
+				let jsonlParseError: Error | null = null;
 				let timedOut = false;
 				let settled = false;
+				const events: JsonRecord[] = [];
 
 				const finish = (callback: () => void) => {
 					if (settled) {
@@ -198,31 +222,96 @@ function spawnCodexExecProcess({
 				const interruptProcess = () => {
 					child.kill("SIGTERM");
 				};
+				const closeEventLog = (callback: () => void) => {
+					if (!eventLogStream || eventLogStream.closed) {
+						callback();
+						return;
+					}
+					eventLogStream.end(callback);
+				};
 				const timeout = setTimeout(() => {
 					timedOut = true;
 					child.kill("SIGTERM");
 				}, timeoutMs);
 
 				signal.addEventListener("abort", interruptProcess, { once: true });
+				eventLogStream?.once("error", (error) => {
+					eventLogError = error;
+					child.kill("SIGTERM");
+				});
 
 				child.stdout.on("data", (chunk: Buffer) => {
-					stdout += chunk.toString("utf8");
+					const text = chunk.toString("utf8");
+					stdout += text;
+					stdoutBuffer += text;
+					stdoutBuffer = consumeCompleteJsonlLines(stdoutBuffer, (line) => {
+						const event = parseJsonlLine(line, stdout);
+						if (event instanceof Error) {
+							jsonlParseError ??= event;
+							child.kill("SIGTERM");
+							return;
+						}
+						if (!event) {
+							return;
+						}
+						events.push(event);
+						eventLogStream?.write(`${line.trim()}\n`);
+						try {
+							onEvent?.(event);
+						} catch (error) {
+							jsonlParseError ??=
+								error instanceof Error
+									? error
+									: new Error(
+											`Codex exec event handler failed: ${String(error)}`,
+										);
+							child.kill("SIGTERM");
+						}
+					});
 				});
 				child.stderr.on("data", (chunk: Buffer) => {
 					stderr += chunk.toString("utf8");
 				});
 				child.once("error", (error) =>
 					finish(() => {
-						reject(error);
+						closeEventLog(() => reject(error));
 					}),
 				);
 				child.once("close", (exitCode) =>
 					finish(() => {
-						resolve({
-							exitCode,
-							stdout,
-							stderr,
-							timedOut,
+						const trailingEvent = parseTrailingJsonlLine(stdoutBuffer, stdout);
+						if (trailingEvent instanceof Error) {
+							jsonlParseError ??= trailingEvent;
+						} else if (trailingEvent) {
+							events.push(trailingEvent);
+							eventLogStream?.write(`${stdoutBuffer.trim()}\n`);
+							try {
+								onEvent?.(trailingEvent);
+							} catch (error) {
+								jsonlParseError ??=
+									error instanceof Error
+										? error
+										: new Error(
+												`Codex exec event handler failed: ${String(error)}`,
+											);
+							}
+						}
+						closeEventLog(() => {
+							if (eventLogError) {
+								reject(eventLogError);
+								return;
+							}
+							if (jsonlParseError) {
+								reject(jsonlParseError);
+								return;
+							}
+							resolve({
+								events,
+								eventLogPath,
+								exitCode,
+								stderr,
+								timedOut,
+							});
 						});
 					}),
 				);
@@ -265,6 +354,93 @@ export function parseJsonlEvents(stdout: string) {
 		.map((line) => line.trim())
 		.filter(Boolean)
 		.map((line) => JSON.parse(line) as JsonRecord);
+}
+
+export function summarizeCodexExecJsonEvent(event: CodexExecJsonEvent) {
+	const eventType = readString(event.type) ?? "codex.event";
+	const item = readJsonObject(event.item);
+	const itemType = readString(item?.type);
+	const label = itemType ? `${eventType} ${itemType}` : eventType;
+	const detail =
+		readCodexThreadId(event) ??
+		readString(item?.name) ??
+		readString(item?.command) ??
+		readString(item?.text) ??
+		readString(event.message);
+	if (!detail) {
+		return label;
+	}
+	return `${label}: ${trimInlineDetail(detail, 180)}`;
+}
+
+export function readCodexThreadId(event: CodexExecJsonEvent) {
+	const threadId = event.thread_id;
+	return typeof threadId === "string" ? threadId : null;
+}
+
+function consumeCompleteJsonlLines(
+	buffer: string,
+	consumeLine: (line: string) => void,
+) {
+	let nextNewlineIndex = buffer.indexOf("\n");
+	while (nextNewlineIndex !== -1) {
+		const line = buffer.slice(0, nextNewlineIndex).replace(/\r$/, "");
+		consumeLine(line);
+		buffer = buffer.slice(nextNewlineIndex + 1);
+		nextNewlineIndex = buffer.indexOf("\n");
+	}
+	return buffer;
+}
+
+function parseTrailingJsonlLine(buffer: string, stdout: string) {
+	if (buffer.trim() === "") {
+		return null;
+	}
+	return parseJsonlLine(buffer, stdout);
+}
+
+function parseJsonlLine(line: string, stdout: string) {
+	const trimmedLine = line.trim();
+	if (trimmedLine === "") {
+		return null;
+	}
+	try {
+		return JSON.parse(trimmedLine) as JsonRecord;
+	} catch (error) {
+		return new Error(
+			[
+				"Failed to parse Codex exec JSONL event.",
+				error instanceof Error ? error.message : String(error),
+				`Line: ${trimOutputTail(trimmedLine, 500)}`,
+				`Stdout tail: ${trimOutputTail(stdout, 1_000)}`,
+			].join("\n"),
+		);
+	}
+}
+
+function readJsonObject(value: JsonValue | undefined): JsonObject | null {
+	return value !== null && typeof value === "object" && !Array.isArray(value)
+		? (value as JsonObject)
+		: null;
+}
+
+function readString(value: JsonValue | undefined) {
+	return typeof value === "string" && value.trim() !== "" ? value : null;
+}
+
+function trimInlineDetail(value: string, maxLength: number) {
+	const normalizedValue = value.replace(/\s+/g, " ").trim();
+	if (normalizedValue.length <= maxLength) {
+		return normalizedValue;
+	}
+	return `${normalizedValue.slice(0, maxLength - 1)}...`;
+}
+
+function trimOutputTail(value: string, maxLength: number) {
+	if (value.length <= maxLength) {
+		return value;
+	}
+	return value.slice(value.length - maxLength);
 }
 
 function findThreadId(events: JsonRecord[]) {

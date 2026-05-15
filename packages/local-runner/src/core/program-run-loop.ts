@@ -9,7 +9,11 @@ import {
 	resolveProgramPacketPath,
 	resolveCurrentPlanningBrief,
 } from "../../../../scripts/programs/briefs";
-import { runCodexExec } from "./codex-exec-runner";
+import {
+	readCodexThreadId,
+	runCodexExec,
+	summarizeCodexExecJsonEvent,
+} from "./codex-exec-runner";
 import { ensureLocalProjectStateDirectory } from "./local-project-state";
 import {
 	ensureRepositoryDirectory,
@@ -18,8 +22,10 @@ import {
 } from "./repository-boundary";
 import {
 	runProgramRunSlice,
+	type ProgramRunSliceProgressReporter,
 	type ProgramRunSliceResult,
 } from "./program-run-slice";
+import type { JsonObject } from "./json-value";
 
 const DEFAULT_MAX_SLICES = 3;
 const DEFAULT_MAX_PLANNING_STEPS = 6;
@@ -40,6 +46,7 @@ export type ProgramRunLoopPlanningStepInput = {
 	loopRunDirectory: string;
 	loopRunId: string;
 	planningStepNumber: number;
+	progress?: ProgramRunLoopProgressReporter;
 	programId: string;
 	repoRootDir: string;
 	runId: string;
@@ -47,7 +54,10 @@ export type ProgramRunLoopPlanningStepInput = {
 };
 
 export type ProgramRunLoopPlanningStepResult = {
+	codexEventLogPath?: string;
+	codexEventCount?: number;
 	finalMessage: string;
+	threadId?: string | null;
 };
 
 export type ProgramRunLoopPlanningStepRunner = (
@@ -57,6 +67,7 @@ export type ProgramRunLoopPlanningStepRunner = (
 export type ProgramRunLoopSliceRunnerInput = {
 	maxFixAttempts?: number;
 	planPath: string;
+	progress?: ProgramRunSliceProgressReporter;
 	programId: string;
 	repoRootDir: string;
 	runId: string;
@@ -78,11 +89,14 @@ export type ProgramRunLoopSliceReceipt = {
 
 export type ProgramRunLoopPlanningStepReceipt = {
 	completedAt: string;
+	codexEventCount?: number;
+	codexEventLogPath?: string;
 	errorMessage?: string;
 	finalMessage?: string;
 	planningStepNumber: number;
 	runId: string;
 	status: "blocked" | "complete";
+	threadId?: string | null;
 };
 
 export type ProgramRunLoopResult = {
@@ -112,6 +126,30 @@ type ProgramRunLoopState = {
 	updatedAt: string;
 };
 
+export type ProgramRunLoopProgressEvent = {
+	details?: JsonObject;
+	loopRunId: string;
+	message: string;
+	programId: string;
+	timestamp: string;
+	type:
+		| "program_run.started"
+		| "program_run.status"
+		| "program_run.finished"
+		| "planning_step.started"
+		| "planning_step.codex_event"
+		| "planning_step.completed"
+		| "planning_step.blocked"
+		| "slice.started"
+		| "slice.progress"
+		| "slice.completed"
+		| "slice.blocked";
+};
+
+export type ProgramRunLoopProgressReporter = (
+	event: ProgramRunLoopProgressEvent,
+) => void;
+
 type ActiveChildPlan = {
 	path: string;
 };
@@ -121,6 +159,7 @@ export async function runProgramRunLoop(params: {
 	maxPlanningSteps?: number;
 	maxSlices?: number;
 	planningStepRunner?: ProgramRunLoopPlanningStepRunner;
+	progress?: ProgramRunLoopProgressReporter;
 	programId: string;
 	repoRootDir: string;
 	runId?: string;
@@ -167,6 +206,18 @@ export async function runProgramRunLoop(params: {
 	await ensureLocalProjectStateDirectory(repoRootDir);
 	await ensureRepositoryDirectory(repoRootDir, loopRunDirectoryRelativePath);
 	await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+	emitProgramRunProgress(params.progress, {
+		details: {
+			artifacts: loopRunDirectory,
+			maxPlanningSteps,
+			maxSlices,
+			repoRootDir,
+		},
+		loopRunId,
+		message: `started program run ${loopRunId}; artifacts: ${loopRunDirectory}`,
+		programId,
+		type: "program_run.started",
+	});
 
 	while (true) {
 		const programStatus = await readProgramStatus({ programId, repoRootDir });
@@ -176,6 +227,7 @@ export async function runProgramRunLoop(params: {
 				loopRunDirectory,
 				loopRunDirectoryRelativePath,
 				programId,
+				progress: params.progress,
 				state,
 				stopReason: "program_complete",
 			});
@@ -187,6 +239,7 @@ export async function runProgramRunLoop(params: {
 				loopRunDirectory,
 				loopRunDirectoryRelativePath,
 				programId,
+				progress: params.progress,
 				state,
 				stopReason: "max_slices_reached",
 			});
@@ -204,6 +257,7 @@ export async function runProgramRunLoop(params: {
 					loopRunDirectory,
 					loopRunDirectoryRelativePath,
 					programId,
+					progress: params.progress,
 					state,
 					stopReason: "no_active_child_plan",
 				});
@@ -215,6 +269,7 @@ export async function runProgramRunLoop(params: {
 					loopRunDirectory,
 					loopRunDirectoryRelativePath,
 					programId,
+					progress: params.progress,
 					state,
 					stopReason: "planning_step_limit_reached",
 				});
@@ -225,24 +280,50 @@ export async function runProgramRunLoop(params: {
 				loopRunId,
 				planningStepNumber,
 			});
+			emitProgramRunProgress(params.progress, {
+				details: {
+					maxPlanningSteps,
+					planningRunId,
+					planningStepNumber,
+				},
+				loopRunId,
+				message: `no active child ExecPlan; starting planning step ${planningStepNumber}/${maxPlanningSteps} (${planningRunId})`,
+				programId,
+				type: "planning_step.started",
+			});
 			try {
 				const planningResult = await planningStepRunner({
 					loopRunDirectory: loopRunDirectoryRelativePath,
 					loopRunId,
 					planningStepNumber,
+					progress: params.progress,
 					programId,
 					repoRootDir,
 					runId: planningRunId,
 					timeoutMs,
 				});
 				state.planningSteps.push({
+					codexEventCount: planningResult.codexEventCount,
+					codexEventLogPath: planningResult.codexEventLogPath,
 					completedAt: new Date().toISOString(),
 					finalMessage: planningResult.finalMessage,
 					planningStepNumber,
 					runId: planningRunId,
 					status: "complete",
+					threadId: planningResult.threadId,
 				});
 				await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+				emitProgramRunProgress(params.progress, {
+					details: {
+						codexEventCount: planningResult.codexEventCount ?? 0,
+						codexEventLogPath: planningResult.codexEventLogPath ?? "",
+						threadId: planningResult.threadId ?? "",
+					},
+					loopRunId,
+					message: `planning step ${planningStepNumber}/${maxPlanningSteps} completed`,
+					programId,
+					type: "planning_step.completed",
+				});
 				continue;
 			} catch (error) {
 				const errorMessage =
@@ -256,12 +337,24 @@ export async function runProgramRunLoop(params: {
 					status: "blocked",
 				});
 				await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+				emitProgramRunProgress(params.progress, {
+					details: {
+						errorMessage,
+						planningRunId,
+						planningStepNumber,
+					},
+					loopRunId,
+					message: `planning step ${planningStepNumber}/${maxPlanningSteps} blocked: ${errorMessage}`,
+					programId,
+					type: "planning_step.blocked",
+				});
 				return await finishProgramRunLoop({
 					errorMessage,
 					finalStatus: "blocked",
 					loopRunDirectory,
 					loopRunDirectoryRelativePath,
 					programId,
+					progress: params.progress,
 					state,
 					stopReason: "planning_blocked",
 				});
@@ -272,10 +365,29 @@ export async function runProgramRunLoop(params: {
 			loopRunId,
 			sliceNumber: state.slices.length + 1,
 		});
+		emitProgramRunProgress(params.progress, {
+			details: {
+				maxSlices,
+				planPath: nextPlan.path,
+				sliceRunId,
+				sliceNumber: state.slices.length + 1,
+			},
+			loopRunId,
+			message: `selected child ExecPlan ${nextPlan.path}; starting slice ${state.slices.length + 1}/${maxSlices} (${sliceRunId})`,
+			programId,
+			type: "slice.started",
+		});
 		try {
 			const sliceResult = await sliceRunner({
 				maxFixAttempts: params.maxFixAttempts,
 				planPath: nextPlan.path,
+				progress: params.progress
+					? bridgeSliceProgress(params.progress, {
+							loopRunId,
+							programId,
+							sliceRunId,
+						})
+					: undefined,
 				programId,
 				repoRootDir,
 				runId: sliceRunId,
@@ -291,12 +403,25 @@ export async function runProgramRunLoop(params: {
 			state.slices.push(receipt);
 			completedPlanPaths.add(nextPlan.path);
 			await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+			emitProgramRunProgress(params.progress, {
+				details: {
+					planPath: nextPlan.path,
+					runDirectory: sliceResult.runDirectory,
+					sliceRunId,
+					status: sliceResult.finalStatus,
+				},
+				loopRunId,
+				message: `slice ${sliceRunId} ${sliceResult.finalStatus}`,
+				programId,
+				type: "slice.completed",
+			});
 			if (sliceResult.finalStatus !== "complete") {
 				return await finishProgramRunLoop({
 					finalStatus: "blocked",
 					loopRunDirectory,
 					loopRunDirectoryRelativePath,
 					programId,
+					progress: params.progress,
 					state,
 					stopReason: "slice_blocked",
 				});
@@ -313,12 +438,24 @@ export async function runProgramRunLoop(params: {
 				status: "blocked",
 			});
 			await writeLoopState(repoRootDir, loopRunDirectoryRelativePath, state);
+			emitProgramRunProgress(params.progress, {
+				details: {
+					errorMessage,
+					planPath: nextPlan.path,
+					sliceRunId,
+				},
+				loopRunId,
+				message: `slice ${sliceRunId} blocked: ${errorMessage}`,
+				programId,
+				type: "slice.blocked",
+			});
 			return await finishProgramRunLoop({
 				errorMessage,
 				finalStatus: "blocked",
 				loopRunDirectory,
 				loopRunDirectoryRelativePath,
 				programId,
+				progress: params.progress,
 				state,
 				stopReason: "slice_blocked",
 			});
@@ -332,6 +469,7 @@ async function finishProgramRunLoop(params: {
 	loopRunDirectory: string;
 	loopRunDirectoryRelativePath: string;
 	programId: string;
+	progress?: ProgramRunLoopProgressReporter;
 	state: ProgramRunLoopState;
 	stopReason: ProgramRunLoopStopReason;
 }): Promise<ProgramRunLoopResult> {
@@ -344,6 +482,12 @@ async function finishProgramRunLoop(params: {
 		params.loopRunDirectoryRelativePath,
 		params.state,
 	);
+	emitProgramRunProgress(params.progress, {
+		loopRunId: params.state.loopRunId,
+		message: `program run ${params.finalStatus}: ${params.stopReason}`,
+		programId: params.programId,
+		type: "program_run.finished",
+	});
 	return {
 		finalStatus: params.finalStatus,
 		loopRunDirectory: params.loopRunDirectory,
@@ -453,11 +597,66 @@ async function writeLoopState(
 	);
 }
 
+function emitProgramRunProgress(
+	reporter: ProgramRunLoopProgressReporter | undefined,
+	event: Omit<ProgramRunLoopProgressEvent, "timestamp">,
+) {
+	reporter?.({
+		...event,
+		timestamp: new Date().toISOString(),
+	});
+}
+
+function bridgeSliceProgress(
+	reporter: ProgramRunLoopProgressReporter,
+	params: {
+		loopRunId: string;
+		programId: string;
+		sliceRunId: string;
+	},
+): ProgramRunSliceProgressReporter {
+	return (event) => {
+		emitProgramRunProgress(reporter, {
+			details: {
+				...(event.details ?? {}),
+				sliceEventType: event.type,
+				sliceRunId: params.sliceRunId,
+			},
+			loopRunId: params.loopRunId,
+			message: event.message,
+			programId: params.programId,
+			type: "slice.progress",
+		});
+	};
+}
+
 async function runProgramPlanningStep(
 	input: ProgramRunLoopPlanningStepInput,
 ): Promise<ProgramRunLoopPlanningStepResult> {
+	const codexEventLogPath = resolveRepositoryPath(
+		input.repoRootDir,
+		path.posix.join(
+			input.loopRunDirectory,
+			`${input.runId}-codex-events.jsonl`,
+		),
+	);
 	const result = await runCodexExec({
 		allowNonGitSmoke: false,
+		eventLogPath: codexEventLogPath,
+		onEvent: (event) => {
+			emitProgramRunProgress(input.progress, {
+				details: {
+					codexEvent: event,
+					planningRunId: input.runId,
+					planningStepNumber: input.planningStepNumber,
+					threadId: readCodexThreadId(event) ?? "",
+				},
+				loopRunId: input.loopRunId,
+				message: `planning ${input.planningStepNumber}: ${summarizeCodexExecJsonEvent(event)}`,
+				programId: input.programId,
+				type: "planning_step.codex_event",
+			});
+		},
 		profileName: "sbs-workspace-write",
 		prompt: await buildProgramPlanningStepPrompt(input),
 		repositoryRoot: input.repoRootDir,
@@ -481,7 +680,10 @@ async function runProgramPlanningStep(
 	}
 
 	return {
+		codexEventCount: result.events.length,
+		codexEventLogPath,
 		finalMessage: result.finalAgentMessage ?? "",
+		threadId: result.threadId,
 	};
 }
 
