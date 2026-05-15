@@ -73,11 +73,78 @@ describe("convex/checkoutClaims", () => {
 
 	afterEach(() => {
 		vi.restoreAllMocks();
+		vi.unstubAllEnvs();
 	});
 
 	it("normalizes checkout emails before persistence comparisons", () => {
 		expect(moduleUnderTest.normalizeCheckoutEmail(" Buyer@Example.com ")).toBe(
 			"buyer@example.com",
+		);
+	});
+
+	it("rejects server checkout grants with the wrong webhook secret", async () => {
+		vi.stubEnv(
+			"CONVEX_WEBHOOK_MUTATION_SECRET",
+			"convex_webhook_mutation_secret_1234567890",
+		);
+
+		await expect(
+			moduleUnderTest.grantProductAccessForCheckoutSessionFromServer._handler(
+				{} as never,
+				{
+					convexWebhookMutationSecret: "wrong_secret",
+					clerkUserId: "user_123",
+					source: "stripe_webhook",
+					stripeCheckoutSessionId: "cs_test_123",
+					offerId: "starter",
+				},
+			),
+		).rejects.toThrow("Unauthorized checkout claim sync call.");
+	});
+
+	it("lets the webhook sync grant checkout session access with the shared secret", async () => {
+		vi.stubEnv(
+			"CONVEX_WEBHOOK_MUTATION_SECRET",
+			"convex_webhook_mutation_secret_1234567890",
+		);
+		const insert = vi.fn().mockResolvedValue("product_access_1");
+		const ctx = createCheckoutClaimsCtx({ insert });
+		vi.spyOn(Date, "now").mockReturnValue(250);
+
+		await expect(
+			moduleUnderTest.grantProductAccessForCheckoutSessionFromServer._handler(
+				ctx as never,
+				{
+					convexWebhookMutationSecret:
+						"convex_webhook_mutation_secret_1234567890",
+					clerkUserId: "user_123",
+					source: "stripe_webhook",
+					stripeCustomerId: "cus_123",
+					stripeCheckoutSessionId: "cs_test_123",
+					stripePaymentIntentId: "pi_123",
+					offerId: "starter",
+				},
+			),
+		).resolves.toEqual({
+			granted: "inserted",
+		});
+
+		expect(insert).toHaveBeenCalledWith(
+			"productAccessGrants",
+			expect.objectContaining({
+				clerkUserId: "user_123",
+				source: "stripe_webhook",
+				status: "granted",
+				stripeCustomerId: "cus_123",
+				stripeCheckoutSessionId: "cs_test_123",
+				stripePaymentIntentId: "pi_123",
+				capabilities: ["generate_codebase", "tutorials"],
+				offerIds: ["starter"],
+				lastCheckoutOfferId: "starter",
+				fulfillmentTrack: "generated_codebase",
+				grantedAt: 250,
+				updatedAt: 250,
+			}),
 		);
 	});
 

@@ -4,6 +4,8 @@ import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 import type Stripe from "stripe";
 
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { readCheckoutIntentFromMetadata } from "@/platform/billing/checkout/checkout-intent";
 import {
 	readCheckoutMetadataClerkUserId,
 	readCheckoutPurchaseMetadata,
@@ -26,6 +28,7 @@ type WorkersSubscriptionStatus =
 	| "unpaid"
 	| "canceled"
 	| "paused";
+type StripeCheckoutGrantSource = "stripe_checkout" | "stripe_webhook";
 
 export type StripeBillingSyncResult =
 	| {
@@ -138,6 +141,12 @@ function isPaidCheckoutSession(session: Stripe.Checkout.Session) {
 
 function getCheckoutOfferId(session: Stripe.Checkout.Session) {
 	return readCheckoutPurchaseMetadata(session.metadata)?.offerId;
+}
+
+function getCheckoutPurchaseIntentId(session: Stripe.Checkout.Session) {
+	return readCheckoutPurchaseMetadata(session.metadata)?.purchaseIntentId as
+		| Id<"checkoutPurchaseIntents">
+		| undefined;
 }
 
 function getCheckoutSessionSyncCreatedAt(session: Stripe.Checkout.Session) {
@@ -290,10 +299,36 @@ async function retrieveSubscription(stripeSubscriptionId: string) {
 	})) as StripeSubscriptionWithPeriods;
 }
 
+async function grantProductAccessForPaidCheckoutSession(args: {
+	offerId: CheckoutOfferId;
+	ownerClerkUserId: string;
+	session: Stripe.Checkout.Session;
+	source: StripeCheckoutGrantSource;
+}) {
+	const stripeCustomerId = getStripeId(args.session.customer);
+	const stripePaymentIntentId = getCheckoutPaymentIntentId(args.session);
+
+	await fetchMutation(
+		api.checkoutClaims.grantProductAccessForCheckoutSessionFromServer,
+		{
+			convexWebhookMutationSecret: getConvexWebhookMutationSecret(),
+			clerkUserId: args.ownerClerkUserId,
+			source: args.source,
+			stripeCheckoutSessionId: args.session.id,
+			checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(args.session),
+			offerId: args.offerId,
+			...(stripeCustomerId ? { stripeCustomerId } : {}),
+			...(stripePaymentIntentId ? { stripePaymentIntentId } : {}),
+			...readCheckoutIntentFromMetadata(args.session.metadata),
+		},
+	);
+}
+
 async function syncStarterCheckoutSession(args: {
 	eventCreatedAt: number;
 	eventId: string;
 	eventType: string;
+	grantSource: StripeCheckoutGrantSource;
 	ownerClerkUserId: string;
 	session: Stripe.Checkout.Session;
 	customerEmail?: string;
@@ -309,6 +344,12 @@ async function syncStarterCheckoutSession(args: {
 		...(stripeCustomerId ? { stripeCustomerId } : {}),
 		...(args.customerEmail ? { customerEmail: args.customerEmail } : {}),
 		...(stripePaymentIntentId ? { stripePaymentIntentId } : {}),
+	});
+	await grantProductAccessForPaidCheckoutSession({
+		offerId: "starter",
+		ownerClerkUserId: args.ownerClerkUserId,
+		session: args.session,
+		source: args.grantSource,
 	});
 	await recordProcessedStripeEvent({
 		eventId: args.eventId,
@@ -329,6 +370,7 @@ async function syncWorkersSubscriptionSnapshot(args: {
 	eventCreatedAt: number;
 	eventId: string;
 	eventType: string;
+	recordProcessedEvent?: boolean;
 	stripeSubscriptionId: string;
 	customerEmail?: string;
 	ownerClerkUserId?: string;
@@ -420,13 +462,15 @@ async function syncWorkersSubscriptionSnapshot(args: {
 			? { terminalFailureAt: args.eventCreatedAt }
 			: {}),
 	});
-	await recordProcessedStripeEvent({
-		eventId: args.eventId,
-		eventType: args.eventType,
-		status: "applied",
-		ownerClerkUserId,
-		stripeObjectId: subscription.id,
-	});
+	if (args.recordProcessedEvent ?? true) {
+		await recordProcessedStripeEvent({
+			eventId: args.eventId,
+			eventType: args.eventType,
+			status: "applied",
+			ownerClerkUserId,
+			stripeObjectId: subscription.id,
+		});
+	}
 
 	return {
 		kind: "workers_synced" as const,
@@ -463,6 +507,7 @@ async function syncCheckoutSessionTarget(
 		eventCreatedAt: target.eventCreatedAt,
 		eventId: target.eventId,
 		eventType: target.eventType,
+		grantSource: "stripe_webhook",
 		offerId,
 		ownerClerkUserId: owner.ownerClerkUserId,
 		session,
@@ -475,6 +520,7 @@ async function syncPaidCheckoutSession(args: {
 	eventCreatedAt: number;
 	eventId: string;
 	eventType: string;
+	grantSource: StripeCheckoutGrantSource;
 	offerId: CheckoutOfferId;
 	ownerClerkUserId: string;
 	session: Stripe.Checkout.Session;
@@ -493,14 +539,34 @@ async function syncPaidCheckoutSession(args: {
 		});
 	}
 
-	return await syncWorkersSubscriptionSnapshot({
+	const workersSyncResult = await syncWorkersSubscriptionSnapshot({
 		eventCreatedAt: args.eventCreatedAt,
 		eventId: args.eventId,
 		eventType: args.eventType,
 		stripeSubscriptionId,
 		customerEmail: args.customerEmail,
 		ownerClerkUserId: args.ownerClerkUserId,
+		recordProcessedEvent: false,
 	});
+	if (workersSyncResult.kind !== "workers_synced") {
+		return workersSyncResult;
+	}
+
+	await grantProductAccessForPaidCheckoutSession({
+		offerId: args.offerId,
+		ownerClerkUserId: args.ownerClerkUserId,
+		session: args.session,
+		source: args.grantSource,
+	});
+	await recordProcessedStripeEvent({
+		eventId: args.eventId,
+		eventType: args.eventType,
+		status: "applied",
+		ownerClerkUserId: args.ownerClerkUserId,
+		stripeObjectId: workersSyncResult.stripeSubscriptionId,
+	});
+
+	return workersSyncResult;
 }
 
 async function syncSubscriptionTarget(
@@ -582,6 +648,7 @@ export async function syncStripeCheckoutSessionToConvex(args: {
 		eventCreatedAt: getCheckoutSessionSyncCreatedAt(session),
 		eventId: `${args.source}:${session.id}`,
 		eventType: args.source,
+		grantSource: "stripe_checkout",
 		offerId,
 		ownerClerkUserId: owner.ownerClerkUserId,
 		session,

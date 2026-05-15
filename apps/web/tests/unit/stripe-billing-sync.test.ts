@@ -109,15 +109,27 @@ describe("stripe billing sync", () => {
 		});
 
 		expect(fetchActionMock).not.toHaveBeenCalled();
-		expect(
-			getMutationArgs((args) => "stripeCheckoutSessionId" in args),
-		).toEqual(
+		expect(getMutationArgs((args) => "purchasedAt" in args)).toEqual(
 			expect.objectContaining({
 				ownerClerkUserId: "user_123",
 				stripeCheckoutSessionId: "cs_test_metadata_owner",
 				stripeCustomerId: "cus_123",
 				stripePaymentIntentId: "pi_123",
 				purchasedAt: 1_800_000_100_000,
+			}),
+		);
+		expect(getMutationArgs((args) => args.source === "stripe_webhook")).toEqual(
+			expect.objectContaining({
+				clerkUserId: "user_123",
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_test_metadata_owner",
+				stripeCustomerId: "cus_123",
+				stripePaymentIntentId: "pi_123",
+				checkoutPurchaseIntentId: "purchase_intent_123",
+				offerId: "starter",
+				buyerStartingPoint: "unspecified",
+				checkoutCtaId: "unspecified",
+				fulfillmentTrack: "unspecified",
 			}),
 		);
 	});
@@ -153,9 +165,7 @@ describe("stripe billing sync", () => {
 		});
 
 		expect(fetchActionMock).not.toHaveBeenCalled();
-		expect(
-			getMutationArgs((args) => "stripeCheckoutSessionId" in args),
-		).toEqual(
+		expect(getMutationArgs((args) => "purchasedAt" in args)).toEqual(
 			expect.objectContaining({
 				customerEmail: "buyer@example.com",
 				ownerClerkUserId: "user_123",
