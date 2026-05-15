@@ -1,6 +1,12 @@
 import { resolveRepositoryRoot } from "../core/repository-root";
-import { runProgramRunLoop } from "../core/program-run-loop";
-import { runProgramRunSlice } from "../core/program-run-slice";
+import {
+	runProgramRunLoop,
+	type ProgramRunLoopProgressEvent,
+} from "../core/program-run-loop";
+import {
+	runProgramRunSlice,
+	type ProgramRunSliceProgressEvent,
+} from "../core/program-run-slice";
 
 const HELP_TEXT = `
 Ship by Sunday Program commands
@@ -48,6 +54,7 @@ export async function runProgramCommand(argv = process.argv.slice(2)) {
 			maxFixAttempts: parseResult.maxFixAttempts,
 			maxPlanningSteps: parseResult.maxPlanningSteps,
 			maxSlices: parseResult.maxSlices,
+			progress: printProgramRunProgress,
 			programId: parseResult.programId,
 			repoRootDir: repositoryRoot,
 		});
@@ -77,6 +84,7 @@ export async function runProgramCommand(argv = process.argv.slice(2)) {
 		const result = await runProgramRunSlice({
 			maxFixAttempts: parseResult.maxFixAttempts,
 			planPath: parseResult.planPath,
+			progress: printProgramRunSliceProgress,
 			programId: parseResult.programId,
 			repoRootDir: repositoryRoot,
 		});
@@ -94,6 +102,14 @@ export async function runProgramCommand(argv = process.argv.slice(2)) {
 	}
 
 	throw new Error(`Unknown Program command: ${subcommand}`);
+}
+
+function printProgramRunProgress(event: ProgramRunLoopProgressEvent) {
+	console.error(`[program-run] ${event.message}`);
+}
+
+function printProgramRunSliceProgress(event: ProgramRunSliceProgressEvent) {
+	console.error(`[program-run] ${event.message}`);
 }
 
 function parseRunArgs(argv: string[]): ParsedRunArgs | "help" {

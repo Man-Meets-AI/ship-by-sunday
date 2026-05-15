@@ -25,7 +25,9 @@ import {
 import {
 	CodexExecService,
 	NodeCodexExecServiceLive,
+	readCodexThreadId,
 	runCodexExecEffect,
+	summarizeCodexExecJsonEvent,
 } from "./codex-exec-runner";
 import {
 	normalizeLocalRunnerEffectError,
@@ -100,8 +102,10 @@ export type ProgramRunSlicePhase =
 export type ProgramRunSliceExecutorPurpose = "execute" | "fix" | "review";
 
 export type ProgramRunSliceExecutorInput = {
+	eventLogPath?: string;
 	outputSchemaPath?: string;
 	profileName: string;
+	progress?: ProgramRunSliceProgressReporter;
 	prompt: string;
 	purpose: ProgramRunSliceExecutorPurpose;
 	repositoryRoot: string;
@@ -118,6 +122,20 @@ export type ProgramRunSliceExecutorOutput = {
 export type ProgramRunSliceExecutor = (
 	input: ProgramRunSliceExecutorInput,
 ) => Promise<ProgramRunSliceExecutorOutput>;
+
+export type ProgramRunSliceProgressEvent = {
+	details?: JsonObject;
+	message: string;
+	timestamp: string;
+	type:
+		| "slice_phase.codex_started"
+		| "slice_phase.codex_event"
+		| "slice_phase.codex_completed";
+};
+
+export type ProgramRunSliceProgressReporter = (
+	event: ProgramRunSliceProgressEvent,
+) => void;
 
 export type ProgramRunSliceProofCommand = {
 	command: string;
@@ -200,6 +218,7 @@ export type ProgramRunSliceParams = {
 	executor?: ProgramRunSliceExecutor;
 	maxFixAttempts?: number;
 	planPath: string;
+	progress?: ProgramRunSliceProgressReporter;
 	programId: string;
 	repoRootDir: string;
 	runId?: string;
@@ -210,6 +229,7 @@ type ProgramRunSliceResolvedParams = {
 	executor: ProgramRunSliceEffectExecutor;
 	maxFixAttempts: number;
 	planPath: string;
+	progress?: ProgramRunSliceProgressReporter;
 	programId: string;
 	repoRootDir: string;
 	runDirectory: string;
@@ -292,7 +312,13 @@ export function runProgramRunSliceEffect(
 			);
 
 			yield* runExecutorOrThrowEffect(resolvedParams.executor, {
+				eventLogPath: buildSliceCodexEventLogPath({
+					label: "execute",
+					repoRootDir: resolvedParams.repoRootDir,
+					runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+				}),
 				prompt: buildExecutePrompt(context),
+				progress: resolvedParams.progress,
 				purpose: "execute",
 				repositoryRoot: resolvedParams.repoRootDir,
 				profileName: "sbs-workspace-write",
@@ -344,6 +370,7 @@ export function runProgramRunSliceEffect(
 				context,
 				executor: resolvedParams.executor,
 				gitSnapshot,
+				progress: resolvedParams.progress,
 				repoRootDir: resolvedParams.repoRootDir,
 				reviewAttempt: 1,
 				runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
@@ -373,12 +400,18 @@ export function runProgramRunSliceEffect(
 					state,
 				);
 				yield* runExecutorOrThrowEffect(resolvedParams.executor, {
+					eventLogPath: buildSliceCodexEventLogPath({
+						label: `fix-attempt-${state.fixAttempts}`,
+						repoRootDir: resolvedParams.repoRootDir,
+						runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
+					}),
 					prompt: buildFixPrompt({
 						context,
 						findings: mustFixFindings,
 						fixAttempt: state.fixAttempts,
 						maxFixAttempts: resolvedParams.maxFixAttempts,
 					}),
+					progress: resolvedParams.progress,
 					purpose: "fix",
 					repositoryRoot: resolvedParams.repoRootDir,
 					profileName: "sbs-workspace-write",
@@ -428,6 +461,7 @@ export function runProgramRunSliceEffect(
 					context,
 					executor: resolvedParams.executor,
 					gitSnapshot,
+					progress: resolvedParams.progress,
 					repoRootDir: resolvedParams.repoRootDir,
 					reviewAttempt: state.fixAttempts + 1,
 					runDirectoryRelativePath: resolvedParams.runDirectoryRelativePath,
@@ -527,6 +561,7 @@ function resolveProgramRunSliceParams(
 			: defaultProgramRunSliceExecutorEffect,
 		maxFixAttempts,
 		planPath,
+		progress: params.progress,
 		programId,
 		repoRootDir,
 		runDirectory,
@@ -565,6 +600,19 @@ function defaultProgramRunSliceExecutorEffect(
 	return Effect.gen(function* () {
 		const result = yield* runCodexExecEffect({
 			allowNonGitSmoke: false,
+			eventLogPath: input.eventLogPath,
+			onEvent: (event) => {
+				emitProgramRunSliceProgress(input.progress, {
+					details: {
+						codexEvent: event,
+						eventLogPath: input.eventLogPath ?? "",
+						purpose: input.purpose,
+						threadId: readCodexThreadId(event) ?? "",
+					},
+					message: `codex ${input.purpose}: ${summarizeCodexExecJsonEvent(event)}`,
+					type: "slice_phase.codex_event",
+				});
+			},
 			outputSchemaPath: input.outputSchemaPath,
 			profileName: input.profileName,
 			prompt: input.prompt,
@@ -596,6 +644,30 @@ function defaultProgramRunSliceExecutorEffect(
 			threadId: result.threadId,
 		};
 	});
+}
+
+function emitProgramRunSliceProgress(
+	reporter: ProgramRunSliceProgressReporter | undefined,
+	event: Omit<ProgramRunSliceProgressEvent, "timestamp">,
+) {
+	reporter?.({
+		...event,
+		timestamp: new Date().toISOString(),
+	});
+}
+
+function buildSliceCodexEventLogPath(params: {
+	label: string;
+	repoRootDir: string;
+	runDirectoryRelativePath: string;
+}) {
+	return resolveRepositoryPath(
+		params.repoRootDir,
+		path.posix.join(
+			params.runDirectoryRelativePath,
+			`${params.label}-codex-events.jsonl`,
+		),
+	);
 }
 
 async function hydrateProgramRunSliceContext(params: {
@@ -706,12 +778,29 @@ function runExecutorOrThrowEffect(
 	executor: ProgramRunSliceEffectExecutor,
 	input: ProgramRunSliceExecutorInput,
 ) {
+	emitProgramRunSliceProgress(input.progress, {
+		details: {
+			eventLogPath: input.eventLogPath ?? "",
+			purpose: input.purpose,
+		},
+		message: `codex ${input.purpose} started`,
+		type: "slice_phase.codex_started",
+	});
 	return Effect.flatMap(executor(input), (result) => {
 		if (result.finalMessage.trim() === "" && input.purpose !== "review") {
 			return Effect.fail(
 				new Error(`codex ${input.purpose} returned an empty final message.`),
 			);
 		}
+		emitProgramRunSliceProgress(input.progress, {
+			details: {
+				eventLogPath: input.eventLogPath ?? "",
+				purpose: input.purpose,
+				threadId: result.threadId ?? "",
+			},
+			message: `codex ${input.purpose} completed`,
+			type: "slice_phase.codex_completed",
+		});
 		return Effect.succeed(result);
 	});
 }
@@ -720,6 +809,7 @@ function runReviewPassEffect(params: {
 	context: Awaited<ReturnType<typeof hydrateProgramRunSliceContext>>;
 	executor: ProgramRunSliceEffectExecutor;
 	gitSnapshot: GitSnapshot;
+	progress?: ProgramRunSliceProgressReporter;
 	repoRootDir: string;
 	reviewAttempt: number;
 	runDirectoryRelativePath: string;
@@ -783,12 +873,18 @@ function runReviewPassEffect(params: {
 				"utf8",
 			),
 		);
-		const result = yield* params.executor({
+		const result = yield* runExecutorOrThrowEffect(params.executor, {
+			eventLogPath: buildSliceCodexEventLogPath({
+				label: `review-attempt-${params.reviewAttempt}`,
+				repoRootDir: params.repoRootDir,
+				runDirectoryRelativePath: params.runDirectoryRelativePath,
+			}),
 			outputSchemaPath: resolveRepositoryPath(
 				params.repoRootDir,
 				reviewSchemaPath,
 			),
 			profileName: "sbs-doctor-readonly",
+			progress: params.progress,
 			prompt,
 			purpose: "review",
 			repositoryRoot: params.repoRootDir,

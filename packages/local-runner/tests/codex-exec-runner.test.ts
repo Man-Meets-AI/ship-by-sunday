@@ -55,6 +55,45 @@ describe("codex exec runner", () => {
 		expect(args).not.toContain("dangerously");
 	});
 
+	it("streams JSONL events while preserving an event log", async () => {
+		const repositoryRoot = await createTemporaryDirectory("sbs-codex-exec-");
+		const eventLogPath = path.join(repositoryRoot, "codex-events.jsonl");
+		const codexBinary = await createCodexBinary(
+			repositoryRoot,
+			"codex-streams-events",
+			[
+				"#!/usr/bin/env node",
+				'if (process.argv[2] !== "exec") process.exit(1);',
+				"process.stdin.resume();",
+				'process.stdout.write("{\\"type\\":\\"thread.started\\",\\"thread_id\\":\\"thread_live\\"}\\n");',
+				"setTimeout(() => {",
+				'  process.stdout.write("{\\"type\\":\\"item.completed\\",\\"item\\":{\\"type\\":\\"agent_message\\",\\"text\\":\\"done\\"}}\\n");',
+				"  process.exit(0);",
+				"}, 25);",
+				"",
+			].join("\n"),
+		);
+		const seenEvents: string[] = [];
+
+		const result = await runCodexExec({
+			prompt: "Return JSON.",
+			repositoryRoot,
+			codexBinary,
+			eventLogPath,
+			onEvent: (event) => {
+				seenEvents.push(String(event.type));
+			},
+			timeoutMs: 1_000,
+		});
+		const eventLog = await readFile(eventLogPath, "utf8");
+
+		expect(seenEvents).toEqual(["thread.started", "item.completed"]);
+		expect(result.events.map((event) => event.type)).toEqual(seenEvents);
+		expect(result.eventLogPath).toBe(eventLogPath);
+		expect(eventLog).toContain('"thread_id":"thread_live"');
+		expect(eventLog).toContain('"agent_message"');
+	});
+
 	it("supports injecting the Effect Codex exec service", async () => {
 		const repositoryRoot = await createTemporaryDirectory("sbs-codex-exec-");
 		const stubCodexExecService = Layer.succeed(
