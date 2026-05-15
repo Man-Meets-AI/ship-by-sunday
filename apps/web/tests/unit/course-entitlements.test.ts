@@ -242,6 +242,46 @@ describe("convex/entitlements/model", () => {
 		});
 	});
 
+	it("keeps legacy Starter capabilities when only Workers has billing rows", async () => {
+		const now = Date.UTC(2026, 4, 13);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_starter_legacy",
+				lastCheckoutOfferId: "starter",
+			}),
+			workersSubscriptions: [
+				{
+					_id: "workersSubscriptions_1",
+					ownerClerkUserId: clerkUserId,
+					stripeCustomerId: "cus_123",
+					stripeSubscriptionId: "sub_123",
+					cadence: "monthly",
+					status: "active",
+					cancelAtPeriodEnd: false,
+					currentPeriodEndAt: Date.UTC(2026, 5, 1),
+					refundState: "none",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
+		});
+	});
+
 	it("removes Stripe-backed Starter access after the billing license is refunded", async () => {
 		const now = Date.UTC(2026, 4, 13);
 		vi.spyOn(Date, "now").mockReturnValue(now);

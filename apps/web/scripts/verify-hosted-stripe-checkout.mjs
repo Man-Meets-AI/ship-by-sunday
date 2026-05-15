@@ -741,6 +741,48 @@ const context = await browser.newContext({
 	baseURL: baseUrl,
 });
 const page = await context.newPage();
+let directProofSubscriptionId = null;
+
+function getStripeObjectId(value) {
+	if (typeof value === "string") {
+		return value;
+	}
+
+	return typeof value?.id === "string" ? value.id : null;
+}
+
+async function cancelDirectProofSubscription(subscriptionId) {
+	if (!subscriptionId) {
+		return {
+			canceled: false,
+			status: "not_applicable",
+			subscriptionId: null,
+		};
+	}
+
+	const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+	if (subscription.status === "canceled") {
+		return {
+			canceled: true,
+			status: subscription.status,
+			subscriptionId,
+		};
+	}
+
+	const canceledSubscription = await stripe.subscriptions.cancel(
+		subscriptionId,
+		{
+			invoice_now: false,
+			prorate: false,
+		},
+	);
+
+	return {
+		canceled: canceledSubscription.status === "canceled",
+		status: canceledSubscription.status,
+		subscriptionId,
+	};
+}
 
 try {
 	const clerkUserId = await signInBuyer(page, {
@@ -816,6 +858,7 @@ try {
 	const finalSession = await stripe.checkout.sessions.retrieve(
 		checkoutSession.id,
 	);
+	directProofSubscriptionId = getStripeObjectId(finalSession.subscription);
 	const finalLineItems = await stripe.checkout.sessions.listLineItems(
 		checkoutSession.id,
 		{
@@ -843,6 +886,9 @@ try {
 		offer: proofOffer,
 		timeoutMs,
 	});
+	const directProofSubscriptionCleanup = await cancelDirectProofSubscription(
+		directProofSubscriptionId,
+	);
 	const productAccessMatchesOffer = productAccess
 		? productAccess.stripeCheckoutSessionId === checkoutSession.id &&
 			hostedProofAccessGrantMatchesOffer(productAccess, proofOffer.id)
@@ -915,6 +961,13 @@ try {
 			? `access required at ${appVerification.url}`
 			: `${appVerification.url}; evidence_visible=${appVerification.evidenceVisible}`,
 	);
+	if (directProofSubscriptionId) {
+		printCheck(
+			"Direct Workers proof subscription cleanup",
+			directProofSubscriptionCleanup.canceled,
+			`subscription=${directProofSubscriptionCleanup.subscriptionId}, status=${directProofSubscriptionCleanup.status}`,
+		);
+	}
 	if (productAccess) {
 		printCheck(
 			"Convex product access granted",
@@ -974,6 +1027,7 @@ try {
 				productAccess,
 				productAccessMatchesOffer,
 				appVerification,
+				directProofSubscriptionCleanup,
 				sessionStatus: finalSession.status,
 				paymentStatus: finalSession.payment_status,
 			},
@@ -998,6 +1052,8 @@ try {
 		homepageCheckoutContract.hostedCheckoutButtonCount <= 0 ||
 		homepageCheckoutContract.expressCheckoutRequestCount !== 0 ||
 		!appVerification.authorized ||
+		(!directProofSubscriptionCleanup.canceled &&
+			directProofSubscriptionCleanup.status !== "not_applicable") ||
 		(productAccess && !productAccessMatchesOffer) ||
 		(requireConvexDebug &&
 			(!productAccess ||
@@ -1009,5 +1065,10 @@ try {
 		process.exitCode = 1;
 	}
 } finally {
+	if (directProofSubscriptionId) {
+		await cancelDirectProofSubscription(directProofSubscriptionId).catch(
+			() => null,
+		);
+	}
 	await browser.close();
 }

@@ -162,11 +162,13 @@ export function metadataMatchesHostedProofCheckoutSession({
 	offerId = DEFAULT_HOSTED_BILLING_PROOF_OFFER_ID,
 	paymentIntentMetadata,
 	sessionMetadata,
+	subscriptionMetadata,
 }) {
+	const downstreamMetadata = subscriptionMetadata ?? paymentIntentMetadata;
 	return (
 		isExpectedHostedProofCheckoutMetadata(sessionMetadata, offerId) &&
-		isExpectedHostedProofCheckoutMetadata(paymentIntentMetadata, offerId) &&
-		paymentIntentMetadata.purchaseIntentId === sessionMetadata.purchaseIntentId
+		isExpectedHostedProofCheckoutMetadata(downstreamMetadata, offerId) &&
+		downstreamMetadata?.purchaseIntentId === sessionMetadata.purchaseIntentId
 	);
 }
 

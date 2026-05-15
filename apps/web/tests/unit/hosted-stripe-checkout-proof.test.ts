@@ -184,10 +184,17 @@ describe("hosted Stripe checkout proof helpers", () => {
 		expect(
 			metadataMatchesHostedProofCheckoutSession({
 				offerId: "workers",
-				paymentIntentMetadata: sessionMetadata,
 				sessionMetadata,
+				subscriptionMetadata: sessionMetadata,
 			}),
 		).toBe(true);
+		expect(
+			metadataMatchesHostedProofCheckoutSession({
+				offerId: "workers",
+				paymentIntentMetadata: undefined,
+				sessionMetadata,
+			}),
+		).toBe(false);
 		expect(
 			hostedProofAccessGrantMatchesOffer(
 				{

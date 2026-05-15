@@ -329,6 +329,91 @@ const page = await context.newPage();
 const expressCheckoutRequests = [];
 const checkoutRouteResponses = [];
 let checkoutSessionId = null;
+let checkoutSubscriptionId = null;
+
+function getStripeObjectId(value) {
+	if (typeof value === "string") {
+		return value;
+	}
+
+	return typeof value?.id === "string" ? value.id : null;
+}
+
+function getStripePaymentIntent(value) {
+	if (!value || typeof value === "string") {
+		return null;
+	}
+
+	return typeof value.id === "string" && value.object === "payment_intent"
+		? value
+		: null;
+}
+
+async function getCheckoutSessionPaymentDetails(finalSession) {
+	if (typeof finalSession.payment_intent === "string") {
+		return {
+			paymentIntent: await stripe.paymentIntents.retrieve(
+				finalSession.payment_intent,
+			),
+			subscription: null,
+		};
+	}
+
+	const inlinePaymentIntent = getStripePaymentIntent(
+		finalSession.payment_intent,
+	);
+	if (inlinePaymentIntent) {
+		return {
+			paymentIntent: inlinePaymentIntent,
+			subscription: null,
+		};
+	}
+
+	const subscriptionId = getStripeObjectId(finalSession.subscription);
+	if (!subscriptionId) {
+		return {
+			paymentIntent: null,
+			subscription: null,
+		};
+	}
+
+	const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+		expand: ["latest_invoice.payment_intent"],
+	});
+	const latestInvoice =
+		typeof subscription.latest_invoice === "object"
+			? subscription.latest_invoice
+			: null;
+	const invoicePaymentIntent = getStripePaymentIntent(
+		latestInvoice?.payment_intent,
+	);
+	const paymentIntent =
+		invoicePaymentIntent ??
+		(typeof latestInvoice?.payment_intent === "string"
+			? await stripe.paymentIntents.retrieve(latestInvoice.payment_intent)
+			: null);
+
+	return {
+		paymentIntent,
+		subscription,
+	};
+}
+
+async function cancelCheckoutSubscription() {
+	if (!checkoutSubscriptionId) {
+		return;
+	}
+
+	const subscription = await stripe.subscriptions.retrieve(
+		checkoutSubscriptionId,
+	);
+	if (subscription.status !== "canceled") {
+		await stripe.subscriptions.cancel(checkoutSubscriptionId, {
+			invoice_now: false,
+			prorate: false,
+		});
+	}
+}
 
 page.on("request", (request) => {
 	const requestUrl = request.url();
@@ -408,10 +493,9 @@ try {
 
 	const finalSession =
 		await stripe.checkout.sessions.retrieve(checkoutSessionId);
-	const paymentIntent =
-		typeof finalSession.payment_intent === "string"
-			? await stripe.paymentIntents.retrieve(finalSession.payment_intent)
-			: null;
+	checkoutSubscriptionId = getStripeObjectId(finalSession.subscription);
+	const { paymentIntent, subscription } =
+		await getCheckoutSessionPaymentDetails(finalSession);
 	const checkoutSuccessPath = finalSession.success_url
 		? new URL(finalSession.success_url).pathname
 		: null;
@@ -419,13 +503,16 @@ try {
 		offerId: proofOffer.id,
 		paymentIntentMetadata: paymentIntent?.metadata,
 		sessionMetadata: finalSession.metadata,
+		subscriptionMetadata: subscription?.metadata,
 	});
 	const expectedHandoffRedirectUrl = `${proofOffer.successPath}?welcome=checkout`;
 
 	printCheck(
 		"Dev staging uses Stripe test mode",
-		finalSession.livemode === false && paymentIntent?.livemode === false,
-		`session_livemode=${finalSession.livemode}, payment_intent_livemode=${paymentIntent?.livemode ?? "missing"}`,
+		finalSession.livemode === false &&
+			paymentIntent?.livemode === false &&
+			(subscription ? subscription.livemode === false : true),
+		`session_livemode=${finalSession.livemode}, payment_intent_livemode=${paymentIntent?.livemode ?? "missing"}, subscription_livemode=${subscription?.livemode ?? "not_applicable"}`,
 	);
 	printCheck(
 		"Homepage hosted checkout CTAs visible",
@@ -451,7 +538,7 @@ try {
 	printCheck(
 		"Checkout used paid-app purchase metadata",
 		checkoutMetadataMatches,
-		`session_metadata=${JSON.stringify(finalSession.metadata)}, payment_intent_metadata=${JSON.stringify(paymentIntent?.metadata)}`,
+		`session_metadata=${JSON.stringify(finalSession.metadata)}, payment_intent_metadata=${JSON.stringify(paymentIntent?.metadata)}, subscription_metadata=${JSON.stringify(subscription?.metadata)}`,
 	);
 	printCheck(
 		"Checkout returns through shared success route",
@@ -516,6 +603,14 @@ try {
 							status: paymentIntent.status,
 						}
 					: null,
+				subscription: subscription
+					? {
+							id: subscription.id,
+							livemode: subscription.livemode,
+							metadata: subscription.metadata,
+							status: subscription.status,
+						}
+					: null,
 				visibleCheckoutButtonCount,
 			},
 			null,
@@ -526,6 +621,7 @@ try {
 	if (
 		finalSession.livemode !== false ||
 		paymentIntent?.livemode !== false ||
+		(subscription && subscription.livemode !== false) ||
 		visibleCheckoutButtonCount <= 0 ||
 		expressCheckoutRequests.length !== 0 ||
 		!checkoutRouteResponses.some((response) => response.ok) ||
@@ -562,5 +658,6 @@ try {
 		`${error instanceof Error ? error.message : "Unknown dev Stripe card verification failure."} Failure screenshot: ${screenshotPath}`,
 	);
 } finally {
+	await cancelCheckoutSubscription().catch(() => null);
 	await browser.close();
 }

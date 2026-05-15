@@ -707,6 +707,8 @@ export async function getBillingProductSurfaceAccessState(
 	return {
 		activeCapabilities,
 		hasBillingRecords: licenseTerms.length > 0 || subscriptions.length > 0,
+		hasStarterBillingRecords: licenseTerms.length > 0,
+		hasWorkersBillingRecords: subscriptions.length > 0,
 	};
 }
 

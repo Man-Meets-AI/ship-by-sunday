@@ -9,6 +9,10 @@ import { loadAdminImpersonationPageData } from "./_server/admin-impersonation-se
 
 export const metadata: Metadata = {
 	title: "Admin impersonation",
+	robots: {
+		index: false,
+		follow: false,
+	},
 };
 
 export default async function Page() {

@@ -178,12 +178,23 @@ async function getEffectiveProductSurfaceCapabilities(
 	const billingCapabilities = getUniqueProductSurfaceCapabilities(
 		billingAccessState.activeCapabilities,
 	);
+	const storedCapabilities = getStoredProductSurfaceCapabilities(accessGrant);
 
 	if (billingAccessState.hasBillingRecords) {
-		return billingCapabilities;
+		return getUniqueProductSurfaceCapabilities([
+			...billingCapabilities,
+			...(billingAccessState.hasStarterBillingRecords
+				? []
+				: storedCapabilities.filter((capability) =>
+						["generate_codebase", "tutorials"].includes(capability),
+					)),
+			...(billingAccessState.hasWorkersBillingRecords
+				? []
+				: storedCapabilities.filter((capability) => capability === "worker")),
+		]);
 	}
 
-	return getStoredProductSurfaceCapabilities(accessGrant);
+	return storedCapabilities;
 }
 
 function getUniqueProductSurfaceCapabilities(

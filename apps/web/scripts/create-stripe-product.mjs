@@ -24,6 +24,9 @@ const stripeOffers = [
 		description:
 			"Existing-repo Worker install, doctor pass, approved loop, and proof.",
 		offerId: "workers",
+		recurring: {
+			interval: "month",
+		},
 		unitAmount: 60000,
 	},
 ];
@@ -39,6 +42,7 @@ for (const offer of stripeOffers) {
 		},
 		default_price_data: {
 			currency: "usd",
+			...(offer.recurring ? { recurring: offer.recurring } : {}),
 			unit_amount: offer.unitAmount,
 		},
 	});

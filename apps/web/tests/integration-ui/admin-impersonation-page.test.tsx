@@ -25,7 +25,7 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
-vi.mock("@/app/(app)/admin/impersonation/actions", () => ({
+vi.mock("@/app/admin/impersonation/actions", () => ({
 	startAdminImpersonationAction: (input: unknown) => startActionMock(input),
 	completeAdminImpersonationHandoffAction: () => completeActionMock(),
 	failAdminImpersonationHandoffAction: (sessionId: unknown) =>
@@ -34,8 +34,8 @@ vi.mock("@/app/(app)/admin/impersonation/actions", () => ({
 		searchActionMock(query),
 }));
 
-import { AdminImpersonationPageClient } from "@/app/(app)/admin/impersonation/_components/admin-impersonation-page-client";
-import type { AdminImpersonationPageData } from "@/app/(app)/admin/impersonation/_server/admin-impersonation-server";
+import { AdminImpersonationPageClient } from "@/app/admin/impersonation/_components/admin-impersonation-page-client";
+import type { AdminImpersonationPageData } from "@/app/admin/impersonation/_server/admin-impersonation-server";
 
 const pageData = {
 	adminEmail: "me@parkerrex.com",
