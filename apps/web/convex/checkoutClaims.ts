@@ -9,6 +9,7 @@ import {
 } from "../src/platform/billing/checkout/checkout-intent";
 import {
 	getCheckoutOffer,
+	getCheckoutOfferIdForLegacyFulfillmentTrack,
 	type CheckoutOfferId,
 } from "../src/platform/billing/checkout/checkout-offers";
 import { internal } from "./_generated/api";
@@ -168,17 +169,15 @@ function getCheckoutOfferGrantFields(
 	offerId: CheckoutOfferId | undefined,
 	fallbackFulfillmentTrack?: FulfillmentTrack,
 ) {
-	if (!offerId) {
-		return {
-			...(fallbackFulfillmentTrack
-				? { fulfillmentTrack: fallbackFulfillmentTrack }
-				: {}),
-		};
-	}
-
-	const offer = getCheckoutOffer(offerId);
+	const resolvedOfferId =
+		offerId ??
+		(fallbackFulfillmentTrack
+			? getCheckoutOfferIdForLegacyFulfillmentTrack(fallbackFulfillmentTrack)
+			: undefined) ??
+		"starter";
+	const offer = getCheckoutOffer(resolvedOfferId);
 	return {
-		checkoutOfferId: offerId,
+		checkoutOfferId: resolvedOfferId,
 		capabilities: [...offer.capabilities],
 		fulfillmentTrack: offer.fulfillmentTrack,
 	};

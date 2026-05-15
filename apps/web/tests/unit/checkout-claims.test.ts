@@ -148,6 +148,47 @@ describe("convex/checkoutClaims", () => {
 		);
 	});
 
+	it("defaults legacy server checkout grants without offer metadata to Starter access", async () => {
+		vi.stubEnv(
+			"CONVEX_WEBHOOK_MUTATION_SECRET",
+			"convex_webhook_mutation_secret_1234567890",
+		);
+		const insert = vi.fn().mockResolvedValue("product_access_1");
+		const ctx = createCheckoutClaimsCtx({ insert });
+		vi.spyOn(Date, "now").mockReturnValue(275);
+
+		await expect(
+			moduleUnderTest.grantProductAccessForCheckoutSessionFromServer._handler(
+				ctx as never,
+				{
+					convexWebhookMutationSecret:
+						"convex_webhook_mutation_secret_1234567890",
+					clerkUserId: "user_legacy",
+					source: "stripe_webhook",
+					stripeCheckoutSessionId: "cs_legacy_no_offer",
+				},
+			),
+		).resolves.toEqual({
+			granted: "inserted",
+		});
+
+		expect(insert).toHaveBeenCalledWith(
+			"productAccessGrants",
+			expect.objectContaining({
+				clerkUserId: "user_legacy",
+				source: "stripe_webhook",
+				status: "granted",
+				stripeCheckoutSessionId: "cs_legacy_no_offer",
+				capabilities: ["generate_codebase", "tutorials"],
+				offerIds: ["starter"],
+				lastCheckoutOfferId: "starter",
+				fulfillmentTrack: "generated_codebase",
+				grantedAt: 275,
+				updatedAt: 275,
+			}),
+		);
+	});
+
 	it("inserts a pending claim when the session is new", async () => {
 		const insert = vi.fn().mockResolvedValue("pending_checkout_claim_1");
 		const ctx = createCheckoutClaimsCtx({ insert });

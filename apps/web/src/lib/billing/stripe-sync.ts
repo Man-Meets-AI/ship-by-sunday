@@ -366,6 +366,27 @@ async function syncStarterCheckoutSession(args: {
 	};
 }
 
+function getWorkersPastDueGraceFields({
+	eventCreatedAt,
+	eventType,
+	status,
+}: {
+	eventCreatedAt: number;
+	eventType: string;
+	status: WorkersSubscriptionStatus;
+}) {
+	if (status !== "past_due" || eventType !== "invoice.payment_failed") {
+		return {};
+	}
+
+	const failedPaymentStartedAt = eventCreatedAt;
+	return {
+		accessThroughAt:
+			failedPaymentStartedAt + workersFailedPaymentAccessWindowMs,
+		failedPaymentStartedAt,
+	};
+}
+
 async function syncWorkersSubscriptionSnapshot(args: {
 	eventCreatedAt: number;
 	eventId: string;
@@ -433,21 +454,17 @@ async function syncWorkersSubscriptionSnapshot(args: {
 		...(stripeProductId ? { stripeProductId } : {}),
 		...(currentPeriodStartAt ? { currentPeriodStartAt } : {}),
 		...(currentPeriodEndAt ? { currentPeriodEndAt } : {}),
-		...(status === "past_due"
-			? {
-					accessThroughAt:
-						args.eventCreatedAt + workersFailedPaymentAccessWindowMs,
-				}
-			: {}),
+		...getWorkersPastDueGraceFields({
+			eventCreatedAt: args.eventCreatedAt,
+			eventType: args.eventType,
+			status,
+		}),
 		...(latestInvoice?.id ? { latestInvoiceId: latestInvoice.id } : {}),
 		...(latestInvoice?.hosted_invoice_url
 			? {
 					latestInvoiceHostedUrl: latestInvoice.hosted_invoice_url,
 					paymentRecoveryUrl: latestInvoice.hosted_invoice_url,
 				}
-			: {}),
-		...(args.eventType === "invoice.payment_failed"
-			? { failedPaymentStartedAt: args.eventCreatedAt }
 			: {}),
 		...(typeof latestInvoice?.attempt_count === "number"
 			? { failedPaymentAttemptCount: latestInvoice.attempt_count }

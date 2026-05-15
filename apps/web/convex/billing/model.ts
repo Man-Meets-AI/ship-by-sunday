@@ -934,6 +934,15 @@ export async function syncWorkersSubscriptionHandler(
 		}),
 		updatedAt: now,
 	};
+	const accessThroughAt =
+		args.status === "past_due"
+			? (existingSubscription?.accessThroughAt ?? args.accessThroughAt)
+			: args.accessThroughAt;
+	const failedPaymentStartedAt =
+		args.status === "past_due"
+			? (existingSubscription?.failedPaymentStartedAt ??
+				args.failedPaymentStartedAt)
+			: args.failedPaymentStartedAt;
 	assignDefinedBillingField(
 		subscriptionFields,
 		"stripePriceId",
@@ -957,7 +966,7 @@ export async function syncWorkersSubscriptionHandler(
 	assignDefinedBillingField(
 		subscriptionFields,
 		"accessThroughAt",
-		args.accessThroughAt,
+		accessThroughAt,
 	);
 	assignDefinedBillingField(
 		subscriptionFields,
@@ -977,7 +986,7 @@ export async function syncWorkersSubscriptionHandler(
 	assignDefinedBillingField(
 		subscriptionFields,
 		"failedPaymentStartedAt",
-		args.failedPaymentStartedAt,
+		failedPaymentStartedAt,
 	);
 	assignDefinedBillingField(
 		subscriptionFields,

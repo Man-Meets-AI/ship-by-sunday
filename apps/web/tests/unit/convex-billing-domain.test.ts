@@ -431,6 +431,52 @@ describe("convex billing domain model", () => {
 		expect(state.stripeCustomers).toHaveLength(1);
 	});
 
+	it("keeps Workers past-due grace pinned to the first failed payment", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-20T12:00:00.000Z"));
+		const firstFailureAt = Date.UTC(2026, 4, 10);
+		const firstAccessThroughAt = Date.UTC(2026, 4, 24);
+		const { ctx, state } = createBillingMutationCtx({
+			workersSubscriptions: [
+				{
+					_id: "workersSubscriptions_existing",
+					ownerClerkUserId: "user_123",
+					stripeCustomerId: "cus_existing",
+					stripeSubscriptionId: "sub_123",
+					cadence: "monthly",
+					status: "past_due",
+					cancelAtPeriodEnd: false,
+					accessThroughAt: firstAccessThroughAt,
+					failedPaymentStartedAt: firstFailureAt,
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+
+		const result = await syncWorkersSubscriptionHandler(ctx as never, {
+			ownerClerkUserId: "user_123",
+			stripeCustomerId: "cus_existing",
+			stripeSubscriptionId: "sub_123",
+			cadence: "monthly",
+			status: "past_due",
+			accessThroughAt: Date.UTC(2026, 5, 3),
+			failedPaymentStartedAt: Date.UTC(2026, 4, 20),
+			failedPaymentAttemptCount: 3,
+		});
+
+		expect(result).toEqual({
+			subscriptionId: "workersSubscriptions_existing",
+			upserted: "patched",
+		});
+		expect(state.workersSubscriptions[0]).toMatchObject({
+			status: "past_due",
+			accessThroughAt: firstAccessThroughAt,
+			failedPaymentStartedAt: firstFailureAt,
+			failedPaymentAttemptCount: 3,
+		});
+	});
+
 	it("records processed Stripe events idempotently by provider event id", async () => {
 		const { ctx, state } = createBillingMutationCtx();
 

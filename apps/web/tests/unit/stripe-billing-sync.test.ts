@@ -6,12 +6,14 @@ const {
 	fetchQueryMock,
 	getStripeMock,
 	retrieveSessionMock,
+	retrieveSubscriptionMock,
 } = vi.hoisted(() => ({
 	fetchActionMock: vi.fn(),
 	fetchMutationMock: vi.fn(),
 	fetchQueryMock: vi.fn(),
 	getStripeMock: vi.fn(),
 	retrieveSessionMock: vi.fn(),
+	retrieveSubscriptionMock: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -59,11 +61,15 @@ beforeEach(() => {
 	fetchQueryMock.mockReset();
 	getStripeMock.mockReset();
 	retrieveSessionMock.mockReset();
+	retrieveSubscriptionMock.mockReset();
 	getStripeMock.mockReturnValue({
 		checkout: {
 			sessions: {
 				retrieve: retrieveSessionMock,
 			},
+		},
+		subscriptions: {
+			retrieve: retrieveSubscriptionMock,
 		},
 	});
 	vi.resetModules();
@@ -173,6 +179,134 @@ describe("stripe billing sync", () => {
 				stripeCheckoutSessionId: "cs_test_success",
 			}),
 		);
+	});
+
+	it("starts Workers past-due grace only from invoice payment failure events", async () => {
+		retrieveSubscriptionMock.mockResolvedValue({
+			id: "sub_workers_123",
+			customer: "cus_workers_123",
+			metadata: {
+				ownerClerkUserId: "user_workers_123",
+			},
+			status: "past_due",
+			cancel_at_period_end: false,
+			items: {
+				data: [
+					{
+						price: {
+							id: "price_workers_monthly",
+							recurring: {
+								interval: "month",
+								interval_count: 1,
+							},
+							product: "prod_workers",
+						},
+					},
+				],
+			},
+			latest_invoice: {
+				id: "in_failed_123",
+				hosted_invoice_url: "https://billing.stripe.test/recover",
+				attempt_count: 2,
+				next_payment_attempt: 1_800_000_500,
+			},
+		});
+		const { syncStripeWebhookEventToConvex } =
+			await import("@/lib/billing/stripe-sync");
+
+		await expect(
+			syncStripeWebhookEventToConvex({
+				id: "evt_invoice_failed",
+				created: 1_800_000_100,
+				type: "invoice.payment_failed",
+				data: {
+					object: {
+						id: "in_failed_123",
+						customer: "cus_workers_123",
+						subscription: "sub_workers_123",
+					},
+				},
+			} as never),
+		).resolves.toEqual({
+			kind: "workers_synced",
+			eventId: "evt_invoice_failed",
+			stripeSubscriptionId: "sub_workers_123",
+		});
+
+		expect(
+			getMutationArgs(
+				(args) => args.stripeSubscriptionId === "sub_workers_123",
+			),
+		).toEqual(
+			expect.objectContaining({
+				status: "past_due",
+				failedPaymentStartedAt: 1_800_000_100_000,
+				accessThroughAt: 1_801_209_700_000,
+			}),
+		);
+	});
+
+	it("does not slide Workers past-due grace on subscription update retries", async () => {
+		retrieveSubscriptionMock.mockResolvedValue({
+			id: "sub_workers_123",
+			customer: "cus_workers_123",
+			metadata: {
+				ownerClerkUserId: "user_workers_123",
+			},
+			status: "past_due",
+			cancel_at_period_end: false,
+			items: {
+				data: [
+					{
+						price: {
+							id: "price_workers_monthly",
+							recurring: {
+								interval: "month",
+								interval_count: 1,
+							},
+							product: "prod_workers",
+						},
+					},
+				],
+			},
+			latest_invoice: {
+				id: "in_failed_123",
+				hosted_invoice_url: "https://billing.stripe.test/recover",
+				attempt_count: 3,
+			},
+		});
+		const { syncStripeWebhookEventToConvex } =
+			await import("@/lib/billing/stripe-sync");
+
+		await expect(
+			syncStripeWebhookEventToConvex({
+				id: "evt_subscription_update",
+				created: 1_800_086_500,
+				type: "customer.subscription.updated",
+				data: {
+					object: {
+						id: "sub_workers_123",
+						customer: "cus_workers_123",
+					},
+				},
+			} as never),
+		).resolves.toEqual({
+			kind: "workers_synced",
+			eventId: "evt_subscription_update",
+			stripeSubscriptionId: "sub_workers_123",
+		});
+
+		const syncArgs = getMutationArgs(
+			(args) => args.stripeSubscriptionId === "sub_workers_123",
+		);
+		expect(syncArgs).toEqual(
+			expect.objectContaining({
+				status: "past_due",
+				failedPaymentAttemptCount: 3,
+			}),
+		);
+		expect(syncArgs).not.toHaveProperty("failedPaymentStartedAt");
+		expect(syncArgs).not.toHaveProperty("accessThroughAt");
 	});
 });
 
