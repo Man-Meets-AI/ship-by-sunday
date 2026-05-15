@@ -41,7 +41,7 @@ import { createWorkerSealTeam6CalBookingConfig } from "@/components/workerSealTe
 export const metadata: Metadata = {
 	title: "Worker Seal Team 6",
 	description:
-		"A $2500 hands-on hour for teams with a live codebase that need the first AI-worker loop chosen, bounded, and proven.",
+		"A $500 hands-on hour for teams with a live codebase that need the first AI-worker loop chosen, bounded, and proven.",
 };
 
 const readinessSignals = [
@@ -102,8 +102,8 @@ export default function WorkerSealTeam6Page() {
 							One hands-on hour for the first AI-worker loop.
 						</PublicRouteTitle>
 						<PublicRouteDescription>
-							A $2,500 service for teams with a live codebase that need the
-							first worker loop chosen, bounded, and proven before they scale
+							A $500 service for teams with a live codebase that need the first
+							worker loop chosen, bounded, and proven before they scale
 							automation.
 						</PublicRouteDescription>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">

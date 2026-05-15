@@ -88,7 +88,7 @@ Worker Seal Team 6 ops recipients should be configured through `WORKER_SEAL_TEAM
 
 Convex should mirror Worker Seal Team 6 state from Cal.com booking webhooks and Stripe reconciliation where available. The app should not maintain custom booking holds, custom Google Calendar FreeBusy logic, or a separate `/api/billing/checkout` path for this service unless Cal.com is rejected by a later implementation slice.
 
-Cal.com should be configured for the accepted service policy: one-hour duration, $2500 paid booking, operator-owned connected calendar, customer as attendee, required intake questions, self-serve rescheduling until 24 hours before the call, manual/support-handled cancellations and refunds, and booking lifecycle webhooks.
+Cal.com should be configured for the accepted service policy: one-hour duration, $500 paid booking, operator-owned connected calendar, customer as attendee, required intake questions, self-serve rescheduling until 24 hours before the call, manual/support-handled cancellations and refunds, and booking lifecycle webhooks.
 
 The prior custom shadcn/Google Calendar/Mobbin booking plan is fallback/reference only. If Cal.com cannot satisfy payment, branding, data ownership, webhook, or policy requirements, a later slice can reactivate that fallback with an explicit deviation.
 

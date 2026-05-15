@@ -162,7 +162,7 @@ Rationale: Cal.com already provides the customer booking surface, calendar sync,
 
 Decision: Embed Cal.com on `/worker-seal-team-6`, with hosted Cal.com as fallback.
 
-Rationale: The customer should stay in the Ship by Sunday buying context for a premium $2500 service. The implementation should use a premium page frame around the Cal.com embed, keep the hosted Cal.com URL available when the embed fails, and treat cheap-looking embed limitations as a product requirement failure.
+Rationale: The customer should stay in the Ship by Sunday buying context for a premium $500 service. The implementation should use a premium page frame around the Cal.com embed, keep the hosted Cal.com URL available when the embed fails, and treat cheap-looking embed limitations as a product requirement failure.
 
 Decision: Do not require Clerk sign-in before Worker Seal Team 6 booking.
 
@@ -170,7 +170,7 @@ Rationale: Booking should feel like buying a premium meeting, not opening an app
 
 Decision: Send one branded Resend prep email after Worker Seal Team 6 paid booking sync.
 
-Rationale: Cal.com owns confirmation and rescheduling, but Ship by Sunday should still create a polished post-payment touchpoint for a $2500 service. The email should tell the customer what to expect, what to prepare, how to reschedule through Cal.com, and how to reach support. It must not include app onboarding, Clerk sign-in, or workspace setup.
+Rationale: Cal.com owns confirmation and rescheduling, but Ship by Sunday should still create a polished post-payment touchpoint for a $500 service. The email should tell the customer what to expect, what to prepare, how to reschedule through Cal.com, and how to reach support. It must not include app onboarding, Clerk sign-in, or workspace setup.
 
 Decision: Do not send the Worker Seal Team 6 prep email on booking creation or payment initiation.
 
@@ -194,7 +194,7 @@ Rationale: The prior custom flow analysis remains useful if Cal.com fails a prod
 
 Decision: Configure Cal.com to enforce the accepted Worker Seal Team 6 policy.
 
-Rationale: The Cal.com event should be one hour, paid at $2500, connected to the operator calendar, include required intake questions, allow self-serve rescheduling, close self-serve rescheduling 24 hours before the call, and leave cancellations/refunds manual/support-handled. Any limitation becomes an explicit deviation with a compensating app/support workflow.
+Rationale: The Cal.com event should be one hour, paid at $500, connected to the operator calendar, include required intake questions, allow self-serve rescheduling, close self-serve rescheduling 24 hours before the call, and leave cancellations/refunds manual/support-handled. Any limitation becomes an explicit deviation with a compensating app/support workflow.
 
 Decision: Use Next.js billing routes and route tests in the style of the sibling template.
 

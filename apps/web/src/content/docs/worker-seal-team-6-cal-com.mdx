@@ -14,7 +14,7 @@ Create one Cal.com event type in the maintainer-owned Cal.com account:
 - Name: `Worker Seal Team 6`
 - URL slug: `worker-seal-team-6`
 - Duration: `60 minutes`
-- Price: `$2,500 USD`
+- Price: `$500 USD`
 - Payment app: Cal.com Stripe app connected to the maintainer Stripe account
 - Calendar: Parker/operator calendar that owns the service call
 - Rescheduling: self-serve rescheduling allowed until `24 hours` before the call
@@ -33,7 +33,7 @@ Required booking questions:
 Set these in local `.env.local`, Vercel preview, and Vercel production:
 
 ```bash
-NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK=parker/worker-seal-team-6
+NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK=https://cal.com/parker-rex/worker-seal-team-6
 NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_ORIGIN=https://cal.com
 CAL_WEBHOOK_SECRET=
 CONVEX_WEBHOOK_MUTATION_SECRET=

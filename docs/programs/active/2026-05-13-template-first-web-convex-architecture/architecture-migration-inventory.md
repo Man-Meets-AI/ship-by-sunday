@@ -111,7 +111,7 @@ Workers is a subscription with monthly, quarterly, and annual variants. Initial 
 
 Workers failed-payment recovery uses Stripe Smart Retries with 8 retries over 2 weeks, then cancellation if recovery fails. Convex keeps access active during `past_due`, shows owner/admin billing attention, sends exactly-once customer and internal recovery emails from Convex state, sends recovered-payment confirmations after recovery, and sends terminal access-ended and internal closeout emails after retry-exhausted cancellation.
 
-Worker Seal Team 6 is a Cal.com paid booking for a one-hour, $2500 service. Cal.com owns booking and scheduling. Convex mirrors paid booking, reschedule, cancellation, refund, fulfillment, customer prep email, and internal ops email state. Booking does not create Clerk or workspace state.
+Worker Seal Team 6 is a Cal.com paid booking for a one-hour, $500 service. Cal.com owns booking and scheduling. Convex mirrors paid booking, reschedule, cancellation, refund, fulfillment, customer prep email, and internal ops email state. Booking does not create Clerk or workspace state.
 
 Refunds are initiated in Stripe or Cal.com provider dashboards. Full refunds update access or future fulfillment by product, then send exactly-once customer status and internal closeout emails when product state changes. Partial refunds are support/accounting mirror state only.
 

@@ -26,7 +26,7 @@ The target is not a light cleanup. The sibling template is the default source of
 
 Standing interview rule: do not ask whether to copy a template pattern. Copy it. Only ask when the decision is a product-specific expansion, a customer-experience tradeoff, or a deliberate deviation from the template.
 
-The billing target is a three-offer catalog across four public landing pages: `/` as the main marketing entry, `/starter` for the one-time one-year Starter license, `/workers` for the Workers subscription with monthly, quarterly, and annual variants, and `/worker-seal-team-6` for the $2500 hands-on one-hour service. Completion means the app has a clearer file tree, a smaller provider boundary surface, durable billing and fulfillment state in Convex, audited Stripe fulfillment paths, route-level billing tests, first-class Sentry and Resend setup, and docs that tell future agents which conventions are now law.
+The billing target is a three-offer catalog across four public landing pages: `/` as the main marketing entry, `/starter` for the one-time one-year Starter license, `/workers` for the Workers subscription with monthly, quarterly, and annual variants, and `/worker-seal-team-6` for the $500 hands-on one-hour service. Completion means the app has a clearer file tree, a smaller provider boundary surface, durable billing and fulfillment state in Convex, audited Stripe fulfillment paths, route-level billing tests, first-class Sentry and Resend setup, and docs that tell future agents which conventions are now law.
 
 Plain-English framing: this began as four landing pages, but each page points at a different product, payment model, fulfillment path, and provider boundary. The Program ships those pages by adopting the better template architecture underneath them, because these routes are tied to revenue flows the app cannot afford to keep messy. The visible output is stronger product pages; the durable outcome is cleaner architecture, safer billing, clearer provider ownership, better customer communications, and better agent/developer ergonomics.
 
@@ -63,7 +63,7 @@ The current app has moved its browser source into `apps/web/src` and now uses te
 
 - [x] 2026-05-13: Compared the sibling template architecture and conventions against the current `apps/web` and Convex setup.
 - [x] 2026-05-13: Reframed the initiative around a template-first migration instead of a current-code-preserving cleanup.
-- [x] 2026-05-13: Confirmed billing must support Starter as a one-time one-year license, Workers as monthly/quarterly/annual subscription variants, and Worker Seal Team 6 as a $2500 one-hour service offer.
+- [x] 2026-05-13: Confirmed billing must support Starter as a one-time one-year license, Workers as monthly/quarterly/annual subscription variants, and Worker Seal Team 6 as a $500 one-hour service offer.
 - [x] 2026-05-13: Confirmed Sentry and Resend are in scope.
 - [x] 2026-05-13: Created this Program packet for the web app and Convex migration.
 - [x] 2026-05-13: Set the interview and implementation default to copy template patterns without re-confirming them.
@@ -237,7 +237,7 @@ Decision: Gate the Worker Seal Team 6 prep email on paid confirmation, not booki
 Rationale: Cal.com `booking.created` and payment-initiated events can update mirror state, but they must not send the customer prep email. The send trigger should be Convex state that proves the booking is paid, with a durable idempotency key so duplicate or out-of-order Cal.com and Stripe events cannot send multiple emails.
 
 Decision: Send one internal Resend ops email after Worker Seal Team 6 paid booking sync.
-Rationale: A $2500 hands-on meeting needs the operator prepared before the call. The ops email should use the same paid-confirmed Convex trigger as the customer prep email, but a separate idempotency key and template. It should include attendee, company URL, scheduled time, intake answers, Cal.com booking link, payment status, and support notes.
+Rationale: A $500 hands-on meeting needs the operator prepared before the call. The ops email should use the same paid-confirmed Convex trigger as the customer prep email, but a separate idempotency key and template. It should include attendee, company URL, scheduled time, intake answers, Cal.com booking link, payment status, and support notes.
 
 Decision: Configure Worker Seal Team 6 ops recipients through `WORKER_SEAL_TEAM_6_OPS_EMAILS`.
 Rationale: Ops notification recipients are environment setup, not hardcoded product logic. Production must fail clearly if `WORKER_SEAL_TEAM_6_OPS_EMAILS` is missing or invalid. Local and preview may leave it unset unless exercising the ops-email path or debug tools, where missing config should produce a clear skipped/blocked result rather than silently pretending delivery happened.

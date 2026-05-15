@@ -53,7 +53,7 @@ Stripe webhook verification now runs in the Next.js app route, then trusted bill
 - `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_ORIGIN`: optional Cal.com origin for the embed and hosted fallback link. Defaults to `https://cal.com`.
 - `CAL_WEBHOOK_SECRET`: server-only Cal.com webhook signing secret for `POST /api/cal/worker-seal-team-6/webhook`.
 
-Create the Cal.com event type as `Worker Seal Team 6`, set it to 60 minutes and `$2,500 USD`, connect the Cal.com Stripe app, and subscribe the webhook endpoint to `BOOKING_CREATED`, `BOOKING_PAYMENT_INITIATED`, `BOOKING_PAID`, `BOOKING_RESCHEDULED`, and `BOOKING_CANCELLED`. Store the public link in `.env.local` and Vercel env. Store `CAL_WEBHOOK_SECRET` only in the Next.js runtime. Keep `CONVEX_WEBHOOK_MUTATION_SECRET` mirrored into both Next.js and hosted Convex, because verified Cal.com events use that secret-gated boundary to write booking mirror state into Convex.
+Create the Cal.com event type as `Worker Seal Team 6`, set it to 60 minutes and `$500 USD`, connect the Cal.com Stripe app, and subscribe the webhook endpoint to `BOOKING_CREATED`, `BOOKING_PAYMENT_INITIATED`, `BOOKING_PAID`, `BOOKING_RESCHEDULED`, and `BOOKING_CANCELLED`. Store the public link in `.env.local` and Vercel env. Store `CAL_WEBHOOK_SECRET` only in the Next.js runtime. Keep `CONVEX_WEBHOOK_MUTATION_SECRET` mirrored into both Next.js and hosted Convex, because verified Cal.com events use that secret-gated boundary to write booking mirror state into Convex.
 
 See [Worker Seal Team 6 Cal.com](/docs/worker-seal-team-6-cal-com) for the full provider setup and verification steps.
 

@@ -33,9 +33,9 @@ describe("WorkerSealTeam6CalBooking", () => {
 	it("loads the Cal.com embed and keeps hosted/direct fallbacks", async () => {
 		render(
 			<WorkerSealTeam6CalBooking
-				calLink="parker/worker-seal-team-6"
+				calLink="parker-rex/worker-seal-team-6"
 				calOrigin="https://cal.com"
-				hostedBookingUrl="https://cal.com/parker/worker-seal-team-6"
+				hostedBookingUrl="https://cal.com/parker-rex/worker-seal-team-6"
 				directSchedulingHref="https://t.me/parkerrex"
 			/>,
 		);
@@ -43,7 +43,7 @@ describe("WorkerSealTeam6CalBooking", () => {
 		expect(screen.getByTestId("worker-seal-team-6-cal-embed")).toBeTruthy();
 		expect(
 			screen.getByRole("link", { name: /Open hosted booking page/i }).href,
-		).toBe("https://cal.com/parker/worker-seal-team-6");
+		).toBe("https://cal.com/parker-rex/worker-seal-team-6");
 		expect(screen.getByRole("link", { name: /Direct backup/i }).href).toBe(
 			"https://t.me/parkerrex",
 		);
@@ -58,7 +58,7 @@ describe("WorkerSealTeam6CalBooking", () => {
 		expect(window.Cal?.ns?.["worker-seal-team-6"]?.q).toContainEqual([
 			"inline",
 			expect.objectContaining({
-				calLink: "parker/worker-seal-team-6",
+				calLink: "parker-rex/worker-seal-team-6",
 			}),
 		]);
 	});

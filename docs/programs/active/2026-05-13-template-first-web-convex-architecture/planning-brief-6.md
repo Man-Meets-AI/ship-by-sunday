@@ -18,7 +18,7 @@ Public landing-page set and Worker Seal Team 6 route.
 
 ## Desired Outcome
 
-Add `/worker-seal-team-6` as the fourth public marketing route in the Program's target landing-page set. The page should present Worker Seal Team 6 as a $2500 one-hour hands-on service for teams with an existing codebase, route through public navigation, appear in public metadata routes, and stay truthful about the current provider state.
+Add `/worker-seal-team-6` as the fourth public marketing route in the Program's target landing-page set. The page should present Worker Seal Team 6 as a $500 one-hour hands-on service for teams with an existing codebase, route through public navigation, appear in public metadata routes, and stay truthful about the current provider state.
 
 This slice creates the public page and IA wiring only. It must not pretend the Cal.com booking flow is live, must not add an app-owned checkout button, and must not require Clerk sign-in. Until the Cal.com provider slice lands, the page should use a direct inquiry/scheduling CTA and document that the paid Cal.com embed, hosted fallback, webhooks, payment mirror, refund mirror, and emails remain follow-up work.
 
@@ -71,7 +71,7 @@ Out of scope:
 - The child ExecPlan records `program_id: "template-first-web-convex-architecture"` and this planning brief path.
 - `/worker-seal-team-6` exists under `apps/web/src/app/(marketing)`.
 - The page has metadata title and description specific to Worker Seal Team 6.
-- The first viewport clearly names "Worker Seal Team 6", explains the $2500 one-hour hands-on service, includes a primary direct-inquiry CTA, includes a secondary route to Workers, and uses a real visual asset.
+- The first viewport clearly names "Worker Seal Team 6", explains the $500 one-hour hands-on service, includes a primary direct-inquiry CTA, includes a secondary route to Workers, and uses a real visual asset.
 - The page does not use `CheckoutButton`, does not include a fake Cal.com embed, and does not require Clerk sign-in.
 - The public header includes the service page.
 - Robots allow the service page.
