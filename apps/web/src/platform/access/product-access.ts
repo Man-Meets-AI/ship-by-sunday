@@ -111,10 +111,6 @@ export async function getServerProductAccess(): Promise<ProductAccess> {
 
 	const access = await refreshViewerProductAccess(session.token);
 
-	if (access.hasAccess) {
-		return access;
-	}
-
 	const pendingCheckoutSessionId =
 		await getPendingCheckoutSessionIdFromCookie();
 	if (pendingCheckoutSessionId) {

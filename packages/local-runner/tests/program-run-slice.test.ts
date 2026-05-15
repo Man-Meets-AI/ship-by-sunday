@@ -485,6 +485,31 @@ describe("program run slice", () => {
 		).rejects.toThrow("Proof command cd must stay inside the repository");
 	});
 
+	it("rejects proof executable paths that traverse outside the repository", async () => {
+		const repositoryRoot = await createProgramRunFixture({
+			planText: buildFixturePlan({
+				testCommands: ["./scripts/../../outside-runner --version"],
+			}),
+		});
+		const executor = createFakeExecutor({
+			onExecute: async () => {},
+			reviews: [],
+		});
+
+		await expect(
+			runProgramRunSlice({
+				executor,
+				planPath: PLAN_PATH,
+				programId: PROGRAM_ID,
+				repoRootDir: repositoryRoot,
+				runId: "run-executable-path-escape",
+				timeoutMs: 15_000,
+			}),
+		).rejects.toThrow(
+			"Proof command executable must be repo-relative or resolved from PATH",
+		);
+	});
+
 	it("rejects shell operators in proof commands", async () => {
 		const repositoryRoot = await createProgramRunFixture({
 			planText: buildFixturePlan({

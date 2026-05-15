@@ -1901,7 +1901,7 @@ function parseProofCommandInvocation(commandLine: string): {
 	if (
 		path.isAbsolute(command) ||
 		command.startsWith("~/") ||
-		command.startsWith("../")
+		hasParentDirectoryPathSegment(command)
 	) {
 		throw new Error(
 			`Proof command executable must be repo-relative or resolved from PATH: ${commandLine}`,
@@ -1913,6 +1913,10 @@ function parseProofCommandInvocation(commandLine: string): {
 		command,
 		env,
 	};
+}
+
+function hasParentDirectoryPathSegment(command: string) {
+	return command.split(/[\\/]+/).includes("..");
 }
 
 function tokenizeProofCommandLine(line: string) {
