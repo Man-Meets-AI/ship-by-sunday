@@ -15,6 +15,7 @@ import {
 	memberWithoutAccessStorageStatePath,
 	shouldRunAuthenticatedE2E,
 } from "./auth-state";
+import { isSignedInWorkspaceLandingUrl } from "./auth-bootstrap-url";
 
 const DEFAULT_COURSE_SLUG = "ship-by-sunday";
 const appsWebDirectory = path.resolve(__dirname, "../..");
@@ -323,15 +324,9 @@ async function assertPasswordlessOtpCanSend(
 }
 
 async function waitForSignedInWorkspaceLanding(page: Page) {
-	await page.waitForURL(
-		(url) =>
-			url.pathname === "/generate-codebase" ||
-			url.pathname === "/home" ||
-			url.pathname === "/workers/setup",
-		{
-			timeout: 15_000,
-		},
-	);
+	await page.waitForURL((url) => isSignedInWorkspaceLandingUrl(url), {
+		timeout: 15_000,
+	});
 }
 
 async function describeAuthBootstrapPage(
