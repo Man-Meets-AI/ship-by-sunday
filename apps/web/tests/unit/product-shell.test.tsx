@@ -100,6 +100,7 @@ vi.mock("@/components/ui/navigation-menu", () => ({
 globalThis.React = React;
 
 import { AppShell } from "@/app/(app)/_components/app-shell";
+import { AppShellBillingAttentionProvider } from "@/app/(app)/_components/app-shell/app-shell-billing-attention-context";
 import type {
 	AppShellLocalNav,
 	AppShellPrimaryNav,
@@ -243,6 +244,34 @@ describe("AppShell", () => {
 		expect(markup).toContain("Manage billing");
 		expect(markup).not.toContain("Dismiss");
 		expect(markup).not.toContain("Snooze");
+	});
+
+	it("inherits billing attention from the protected app layout provider", () => {
+		const markup = renderAppShell(
+			<AppShellBillingAttentionProvider
+				billingAttention={{
+					title: "Payment needs attention",
+					message:
+						"Workers access stays active during the retry window. Update the payment method to keep the workspace current.",
+					statusLabel: "past_due",
+					action: {
+						label: "Update payment method",
+						href: "https://billing.stripe.test/recover",
+					},
+				}}
+			>
+				<AppShell showSkillRail={false} primaryNav={primaryNav}>
+					<div>Body</div>
+				</AppShell>
+			</AppShellBillingAttentionProvider>,
+		);
+
+		expect(markup).toContain('aria-label="Billing attention"');
+		expect(markup).toContain("Payment needs attention");
+		expect(markup).toContain("Workers access stays active");
+		expect(markup).toContain("past_due");
+		expect(markup).toContain('href="https://billing.stripe.test/recover"');
+		expect(markup).toContain("Update payment method");
 	});
 
 	it("lets app surfaces opt into page scrolling without the fixed viewport shell", () => {

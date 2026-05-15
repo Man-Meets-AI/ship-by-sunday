@@ -39,6 +39,9 @@ describe("release scope classifier", () => {
 				"apps/web/src/platform/billing/managed-stripe-config.ts",
 			),
 		).toBe(true);
+		expect(isBillingSensitivePath("apps/web/src/app/(app)/layout.tsx")).toBe(
+			true,
+		);
 		expect(
 			isBillingSensitivePath("apps/web/src/lib/billing/stripe-sync.ts"),
 		).toBe(true);

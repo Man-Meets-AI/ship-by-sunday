@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { type AppShellProps } from "@/app/(app)/_components/app-shell/app-shell-props";
 import { isBlockActive } from "@/app/(app)/_components/app-shell/app-shell-block-status";
 import { AppShellBillingAttentionBanner } from "@/app/(app)/_components/app-shell/app-shell-billing-attention-banner";
+import { useAppShellBillingAttention } from "@/app/(app)/_components/app-shell/app-shell-billing-attention-context";
 import {
 	AppShellMobileHeader,
 	AppShellSidebar,
@@ -47,6 +48,11 @@ function ShellInner({
 	completionCue,
 	billingAttention,
 }: AppShellProps) {
+	const inheritedBillingAttention = useAppShellBillingAttention();
+	const resolvedBillingAttention =
+		billingAttention === undefined
+			? inheritedBillingAttention
+			: billingAttention;
 	const scrolled = useHeaderScrollShadow({ mainId: APP_SHELL_MAIN_ID });
 	const headerClassName = cn(
 		headerBaseClassName,
@@ -157,7 +163,7 @@ function ShellInner({
 					<SidebarInset className={sidebarInsetClassName}>
 						<AppShellMobileHeader primaryNav={primaryNav} />
 						<AppShellBillingAttentionBanner
-							billingAttention={billingAttention}
+							billingAttention={resolvedBillingAttention}
 						/>
 						<div
 							id={APP_SHELL_MAIN_ID}
@@ -188,7 +194,9 @@ function ShellInner({
 						lesson11Viewport={lesson11Viewport}
 					/>
 				</header>
-				<AppShellBillingAttentionBanner billingAttention={billingAttention} />
+				<AppShellBillingAttentionBanner
+					billingAttention={resolvedBillingAttention}
+				/>
 				<div className={appContentClassName}>
 					{localNav ? (
 						<AppShellLocalNavRail

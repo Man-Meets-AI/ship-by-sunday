@@ -10,7 +10,7 @@ describe("starter template source contract", () => {
 
 		expect(verification.manifest).toMatchObject({
 			contentDigest:
-				"sha256-87e1150d49b01bf18aba28491fe5716850e4a9a808f7c1e91d43cf9464582d14",
+				"sha256-403cdf0d386f35d6ba8972d1aa3d887764468ed9de3326f8f40846e3f1e584f1",
 			fileCount: 132,
 			sourceLayout: "single-next-app-root",
 			sourceRoot: STARTER_TEMPLATE_SOURCE_ROOT,

@@ -325,3 +325,9 @@
 - Mistake: I put the temporary Popover/Tooltip browser proof route under an underscore-prefixed app segment.
   Impact: Next treated it as private route inventory, so the proof script hit a 404 and the first browser proof attempt failed.
   Corrective action: Use ordinary URL segments for temporary App Router proof routes, then delete the route before final validation.
+
+## 2026-05-15 Review Build PostHog Upload
+
+- Mistake: I ran the first codex-review helper without disabling PostHog sourcemap upload, and the nested Next build uploaded source maps during review.
+  Impact: An external PostHog release artifact was created or updated during a review pass that should have stayed local.
+  Corrective action: Stop the review run and rerun with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` plus blank PostHog upload environment values for review builds.

@@ -1,8 +1,8 @@
 # Autonomous SDLC Vision
 - [ ] Look at the Cursor SDLC video to infer different roles and how this plays out.
-   - [ ] EM role 
-   - [ ] PM role 
-   - [ ] Bug bot role 
+   - [ ] EM role
+   - [ ] PM role
+   - [ ] Bug bot role
 
 This note describes the target operating model for turning the current manual Program and ExecPlan workflow into a programmatic software delivery loop.
 

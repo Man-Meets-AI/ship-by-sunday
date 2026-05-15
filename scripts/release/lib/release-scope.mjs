@@ -8,6 +8,7 @@ const exactBillingSensitivePaths = new Set([
 	"apps/web/convex/stripeWebhookEvents.ts",
 	"apps/web/config/product.ts",
 	"apps/web/src/config/product.ts",
+	"apps/web/src/app/(app)/layout.tsx",
 	"apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-codebase-branch.tsx",
 	"apps/web/src/app/_components/home-page/sections/codebase-demo/codebase-demo-codebase-branch.tsx",
 	"apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx",

@@ -110,14 +110,14 @@ describe("stripe webhook route", () => {
 
     expect(response.status).toBe(200);
     expect(syncStripeCustomerToConvexMock).toHaveBeenCalledWith({
-        eventId: "evt_subscription",
-        eventType: "customer.subscription.updated",
-        stripeCustomerId: "cus_123",
-        workspaceId: "workspace_123",
-      });
+      eventId: "evt_subscription",
+      eventType: "customer.subscription.updated",
+      stripeCustomerId: "cus_123",
+      workspaceId: "workspace_123",
+    });
   });
 
-  it("still returns 200 when background sync fails after verification", async () => {
+  it("returns a retryable failure when Convex sync fails after verification", async () => {
     constructEventMock.mockReturnValue({
       id: "evt_subscription",
       type: "customer.subscription.updated",
@@ -155,7 +155,7 @@ describe("stripe webhook route", () => {
       }),
     );
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(500);
     expect(captureServerExceptionMock).toHaveBeenCalled();
   });
 
