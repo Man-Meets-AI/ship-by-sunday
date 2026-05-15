@@ -48,6 +48,7 @@ The guiding rule is simple: when the current Ship by Sunday design docs, fronten
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md`
+- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-11.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
 - T3 Code source app: `/Users/bazelrex/Developer/oss/t3code/apps/web`
@@ -107,6 +108,8 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-15: Added `planning-brief-9.md` for the public homepage, product landing page, docs, blog, and public support surface migration and pointed `current-planning-brief.txt` at it.
 - [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`, migrating the current Man Meets AI homepage, Starter, Workers, Worker Seal Team 6, blog chrome, and docs chrome onto T3 Code-style public route surfaces while preserving checkout, Cal.com, metadata, docs, and blog contracts.
 - [x] 2026-05-15: Added `planning-brief-10.md` for auth, checkout, and edge-surface migration and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`, migrating auth, checkout success framing, checkout cancel confirmation, checkout clear-pending, global not-found, and error boundary screens onto a shared T3 Code edge route surface while preserving Clerk, Stripe, access, metadata, and error reporting behavior.
+- [x] 2026-05-15: Added `planning-brief-11.md` for the Telegram widget visual migration and pointed `current-planning-brief.txt` at it.
 
 ## Decision Log
 
@@ -168,22 +171,22 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`: migrated Worker findings, finding detail, runs, loops, privacy, and the Starter tutorial index to the shared protected route-surface recipe while preserving filters, links, copy buttons, workflow approval behavior, privacy mutations, local nav, AppShell props, and tutorial hrefs.
 - `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`: migrated Doctor Pass, paid app home, access recovery, codebase overview, mission intro, and lesson watch surfaces to shared protected route headers, panels, and dense typography while preserving protected access, AppShell props, approval/retry actions, local navigation, codebase authoring, mission progress, and lesson content behavior.
 - `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`: added shared public route-surface helpers, moved the public site header into `apps/web/src/components/layout`, migrated the current public homepage, Starter, Workers, Worker Seal Team 6, blog shells, and docs chrome away from old serif/editorial surfaces, and preserved checkout CTAs, Cal.com booking, metadata, sitemap/robots, docs inventory, and blog route behavior.
+- `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`: added shared edge route-surface helpers, migrated auth, checkout success framing, checkout cancel confirmation, checkout clear-pending, global not-found, and error boundary screens away from old serif/cinematic shells, and preserved Clerk passwordless sign-in, reset tasks, Stripe success sync, cancel recovery, direct access redirect, metadata, and error telemetry behavior.
 
 Planned child slices:
 
 - Remaining shared primitive migration: finish any shared primitive gaps as they appear during route-surface migration, while continuing to avoid unplanned dependency changes.
-- Course, tutorials, auth, checkout, and edge-surface sweep: convert the remaining user-facing route islands and high-risk screens with targeted behavior proof.
 - Telegram widget visual migration: update `packages/telegram-chat-widget` CSS and any package UI assumptions so the widget supports T3 Code light and dark mode.
 - Generated codebase migration: update `packages/codebase-compiler`, `templates/starter-app`, generated design facts, generated customer docs, and generated app primitives/templates so downloaded codebases inherit the T3 Code system.
 - Visual proof and cleanup: remove old font utilities, stale design-pack conflicts, and remaining avoidable underscore implementation folders; run desktop/mobile browser proof; and lock the new source in Program/docs.
 
 ## Next Slice
 
-The next recommended slice is `Auth, checkout, and edge-surface sweep`.
+The next recommended slice is `Telegram widget visual migration`.
 
-That slice should use `planning-brief-10.md` and build on the completed protected and public route-surface strategies from `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md` and `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`. It should migrate sign-in, sign-up, reset-password, checkout success/cancel/recovery, not-found, error, access-adjacent, and remaining support edge screens so buyers and blocked users do not fall back into old route shells around purchase, auth, or recovery. It must preserve Clerk behavior, Stripe offer selection, checkout success/cancel behavior, entitlement checks, protected redirects, access recovery, route URLs, metadata, and provider setup.
+That slice should use `planning-brief-11.md` and build on the now-stable tracked app tokens, shared primitives, public/protected route surfaces, and auth/checkout edge surfaces. It should migrate `packages/telegram-chat-widget` CSS and any minimal package UI assumptions so the launcher, panel, messages, composer, attachment controls, bug-report state, and error states support the T3 Code look in light and dark mode while preserving package exports, support transport, Convex realtime capability behavior, screenshot privacy policy, analytics event schema, and host route contracts.
 
-That slice does not need to implement generated-codebase, Telegram widget, Stripe/Clerk provider setup, Convex schema/function, billing behavior changes, or public homepage offer changes. Generated codebase implementation should wait until the tracked app shell, protected route surfaces, public surfaces, and auth/checkout edge surfaces are proven.
+That slice does not need to implement generated-codebase migration, support API route changes, Telegram bot/provider setup, Convex schema/function changes, billing behavior changes, or public homepage offer changes. Generated codebase implementation should wait until the tracked app, standalone widget, and cleanup proof are stable.
 
 ## Risks and Watchpoints
 

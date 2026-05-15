@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { Button } from "@/components/ui/button";
+
 export function ClearPendingCheckoutForm({
 	redirectPath,
 }: {
@@ -22,12 +24,9 @@ export function ClearPendingCheckoutForm({
 			method="post"
 			className="flex flex-col gap-3"
 		>
-			<button
-				type="submit"
-				className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-			>
+			<Button type="submit" className="w-full justify-center">
 				Clear checkout and continue
-			</button>
+			</Button>
 		</form>
 	);
 }

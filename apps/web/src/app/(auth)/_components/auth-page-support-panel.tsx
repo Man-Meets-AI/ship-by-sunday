@@ -1,6 +1,16 @@
 import Link from "next/link";
 
+import {
+	edgeRoutePanelClassName,
+	EdgeRoutePanelBody,
+	EdgeRoutePanelDescription,
+	EdgeRoutePanelHeader,
+	EdgeRoutePanelTitle,
+	EdgeRouteStatusItem,
+	EdgeRouteStatusList,
+} from "@/components/layout/edge-route-surface";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export type AuthPageSupportPanelAction = {
 	href: string;
@@ -20,32 +30,33 @@ export function AuthPageSupportPanel({
 	content: AuthPageSupportPanelContent;
 }) {
 	return (
-		<aside className="relative flex min-w-0 flex-col gap-5 border-t border-border/70 py-6 sm:py-8 lg:border-l lg:border-t-0 lg:pl-12 lg:py-10">
-			<div className="space-y-2">
-				<h2 className="max-w-sm text-balance text-lg font-semibold tracking-tight sm:text-xl">
-					{content.title}
-				</h2>
-				<p className="max-w-sm text-sm leading-6 text-muted-foreground">
+		<aside
+			data-slot="edge-route-panel"
+			className={cn(edgeRoutePanelClassName, "flex min-w-0 flex-col")}
+		>
+			<EdgeRoutePanelHeader>
+				<EdgeRoutePanelTitle>{content.title}</EdgeRoutePanelTitle>
+				<EdgeRoutePanelDescription>
 					{content.description}
-				</p>
-			</div>
+				</EdgeRoutePanelDescription>
+			</EdgeRoutePanelHeader>
 			{content.bullets.length > 0 ? (
-				<ul className="grid gap-2.5" aria-label="Sign-in guidance">
-					{content.bullets.map((bullet) => (
-						<li key={bullet} className="flex items-start gap-2.5">
-							<span
-								aria-hidden
-								className="mt-1.5 size-1.5 shrink-0 rounded-full bg-foreground/50"
-							/>
-							<span className="text-sm leading-6 text-foreground/75">
-								{bullet}
-							</span>
-						</li>
-					))}
-				</ul>
+				<EdgeRoutePanelBody>
+					<EdgeRouteStatusList aria-label="Sign-in guidance">
+						{content.bullets.map((bullet) => (
+							<EdgeRouteStatusItem key={bullet}>
+								<span
+									aria-hidden
+									className="mt-2 size-1.5 rounded-full bg-foreground/50"
+								/>
+								<span>{bullet}</span>
+							</EdgeRouteStatusItem>
+						))}
+					</EdgeRouteStatusList>
+				</EdgeRoutePanelBody>
 			) : null}
 			{content.action ? (
-				<div className="mt-auto pt-3">
+				<div className="mt-auto border-t border-border/60 px-4 py-3.5 sm:px-5">
 					<Button asChild variant="outline" size="sm">
 						<Link href={content.action.href}>{content.action.label}</Link>
 					</Button>

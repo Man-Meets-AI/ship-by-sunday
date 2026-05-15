@@ -3,13 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { motion } from "motion/react";
 
-import { routeConfig } from "@/config/product";
+import {
+	EdgeRouteActionRow,
+	EdgeRouteContainer,
+	EdgeRouteDescription,
+	EdgeRouteEyebrow,
+	EdgeRouteHeader,
+	EdgeRoutePage,
+	EdgeRoutePanel,
+	EdgeRoutePanelBody,
+	EdgeRoutePanelDescription,
+	EdgeRoutePanelTitle,
+	EdgeRouteTitle,
+} from "@/components/layout/edge-route-surface";
 import { Button } from "@/components/ui/button";
+import { routeConfig } from "@/config/product";
 import { reportClientError } from "@/lib/observability/client-error-report";
-
-const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 export function ErrorBoundaryScreen({
 	error,
@@ -39,78 +49,50 @@ export function ErrorBoundaryScreen({
 	}, [code, error, pathname]);
 
 	return (
-		<main className="min-h-screen bg-ink text-white selection:bg-white selection:text-ink">
-			<div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-20 text-center">
-				<div className="space-y-12">
-					<div className="space-y-4">
-						<motion.p
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5, ease }}
-							className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-red-500/80"
-						>
-							{title} / {code.replace(/_/g, " ")}
-						</motion.p>
-						<motion.h1
-							initial={{ opacity: 0, scale: 0.95 }}
-							animate={{ opacity: 1, scale: 1 }}
-							transition={{ duration: 0.7, ease }}
-							className="font-heading-serif text-[clamp(4rem,14vw,10rem)] leading-[0.88]"
-						>
-							Logic <span className="text-white/20 italic">Error</span>
-						</motion.h1>
+		<EdgeRoutePage className="flex items-center py-10">
+			<EdgeRouteContainer className="max-w-3xl">
+				<EdgeRoutePanel>
+					<EdgeRoutePanelBody className="space-y-6 p-5 sm:p-6">
+						<EdgeRouteHeader className="border-b-0 pb-0">
+							<EdgeRouteEyebrow>
+								{title} / {code.replace(/_/g, " ")}
+							</EdgeRouteEyebrow>
+							<EdgeRouteTitle>Something broke</EdgeRouteTitle>
+							<EdgeRouteDescription>{description}</EdgeRouteDescription>
+						</EdgeRouteHeader>
+						<div className="border-t border-border/60 pt-5">
+							<EdgeRoutePanelTitle>Telemetry captured</EdgeRoutePanelTitle>
+							<EdgeRoutePanelDescription className="mt-2">
+								We recorded the route context and digest for investigation.
+							</EdgeRoutePanelDescription>
+							<div className="mt-4 space-y-2 border-l border-border/60 pl-3 font-mono text-xs text-muted-foreground">
+								<p>Path: {pathname ?? "unknown"}</p>
+								<p>Digest: {error.digest ?? "none"}</p>
+								<p>Trace: captured in telemetry</p>
+							</div>
+						</div>
+					</EdgeRoutePanelBody>
+					<div className="border-t border-border/60 px-5 py-4 sm:px-6">
+						<EdgeRouteActionRow>
+							<Button
+								type="button"
+								onClick={reset}
+								variant="secondary"
+								className="min-w-[10rem] justify-center"
+							>
+								Try again
+							</Button>
+							<Button
+								asChild
+								variant="outline"
+								className="min-w-[10rem] justify-center"
+							>
+								<Link href={routeConfig.home}>Safe exit</Link>
+							</Button>
+						</EdgeRouteActionRow>
 					</div>
-
-					<div className="space-y-4 max-w-xl mx-auto">
-						<motion.p
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.2, duration: 0.6 }}
-							className="text-lg text-white/60 leading-relaxed"
-						>
-							{description}
-						</motion.p>
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.3, duration: 0.6 }}
-							className="bg-white/5 border border-white/10 rounded-xl p-4 text-xs font-mono text-white/40 space-y-2 text-left"
-						>
-							<p>Path: {pathname ?? "unknown"}</p>
-							<p>Digest: {error.digest ?? "none"}</p>
-							<p>Trace: captured in telemetry</p>
-						</motion.div>
-					</div>
-
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.4, duration: 0.5, ease }}
-						className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
-					>
-						<Button
-							onClick={reset}
-							size="lg"
-							className="h-14 px-8 text-lg rounded-full bg-white text-ink hover:bg-white/90"
-						>
-							Try to recompile
-						</Button>
-						<Button
-							asChild
-							variant="outline"
-							size="lg"
-							className="h-14 px-8 text-lg rounded-full bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white"
-						>
-							<Link href={routeConfig.home}>Safe exit</Link>
-						</Button>
-					</motion.div>
-				</div>
-
-				{/* Subtle background delight - red tint scanlines */}
-				<div className="pointer-events-none fixed inset-0 z-50 overflow-hidden opacity-[0.04]">
-					<div className="h-full w-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(17,17,17,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.1),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-				</div>
-			</div>
-		</main>
+				</EdgeRoutePanel>
+			</EdgeRouteContainer>
+		</EdgeRoutePage>
 	);
 }

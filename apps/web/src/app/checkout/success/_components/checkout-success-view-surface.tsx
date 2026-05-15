@@ -1,3 +1,8 @@
+import {
+	EdgeRouteContainer,
+	EdgeRoutePage,
+} from "@/components/layout/edge-route-surface";
+
 import { CheckoutSuccessHelpPanel } from "./checkout-success-help-panel";
 import { CheckoutSuccessMainPanel } from "./checkout-success-main-panel";
 import type { CheckoutViewModel } from "../_lib/checkout-success-view-model";
@@ -12,17 +17,17 @@ export function CheckoutSuccessSurface({
 	fixtureSlug?: string;
 }) {
 	return (
-		<main
-			className="flex min-h-dvh items-start justify-center bg-background px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-foreground tracking-normal sm:items-center sm:px-6 sm:py-10"
+		<EdgeRoutePage
+			className="flex items-start justify-center pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:items-center sm:py-10"
 			data-checkout-fixture={fixtureSlug}
 		>
-			<div className="flex w-full max-w-xl flex-col gap-4">
+			<EdgeRouteContainer className="flex max-w-xl flex-col gap-4">
 				<CheckoutSuccessMainPanel
 					viewModel={viewModel}
 					canAutoRedirect={canAutoRedirect}
 				/>
 				<CheckoutSuccessHelpPanel viewModel={viewModel} />
-			</div>
-		</main>
+			</EdgeRouteContainer>
+		</EdgeRoutePage>
 	);
 }

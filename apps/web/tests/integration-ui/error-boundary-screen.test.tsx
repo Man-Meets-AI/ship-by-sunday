@@ -3,41 +3,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-type MotionElementProps = {
-	children?: React.ReactNode;
-	initial?: unknown;
-	animate?: unknown;
-	transition?: unknown;
-	[key: string]: unknown;
-};
-
 const pathnameMock = vi.fn(() => "/mission");
 const reportClientErrorMock = vi.fn();
 const resetMock = vi.fn();
-
-vi.mock("motion/react", async () => {
-	const ReactModule = await import("react");
-	const createMotionComponent = (tagName: string) => {
-		const MotionComponent = ({
-			children,
-			initial: _initial,
-			animate: _animate,
-			transition: _transition,
-			...props
-		}: MotionElementProps) =>
-			ReactModule.createElement(tagName, props, children);
-		MotionComponent.displayName = `MockMotion${tagName}`;
-		return MotionComponent;
-	};
-
-	return {
-		motion: {
-			div: createMotionComponent("div"),
-			h1: createMotionComponent("h1"),
-			p: createMotionComponent("p"),
-		},
-	};
-});
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => pathnameMock(),
@@ -67,6 +35,14 @@ describe("ErrorBoundaryScreen", () => {
 		expect(
 			screen.getByText("The workspace failed while loading protected content."),
 		).toBeTruthy();
+		expect(
+			document.body.innerHTML.includes('data-slot="edge-route-page"'),
+		).toBe(true);
+		expect(
+			document.body.innerHTML.includes('data-slot="edge-route-panel"'),
+		).toBe(true);
+		expect(document.body.innerHTML).not.toContain("font-heading-serif");
+		expect(document.body.innerHTML).not.toContain("bg-ink");
 		expect(screen.getByText("Path: /mission")).toBeTruthy();
 		expect(reportClientErrorMock).toHaveBeenCalledWith(
 			expect.objectContaining({
@@ -75,7 +51,7 @@ describe("ErrorBoundaryScreen", () => {
 			}),
 		);
 
-		await user.click(screen.getByRole("button", { name: "Try to recompile" }));
+		await user.click(screen.getByRole("button", { name: "Try again" }));
 		expect(resetMock).toHaveBeenCalledTimes(1);
 	});
 

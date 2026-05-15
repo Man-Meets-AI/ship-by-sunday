@@ -40,6 +40,10 @@ vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: vi.fn(),
 }));
 
+vi.mock("@/lib/billing/stripe-sync", () => ({
+	syncStripeCheckoutSessionToConvex: vi.fn(),
+}));
+
 import { metadata as checkoutSuccessMetadata } from "@/app/checkout/success/page";
 import { metadata as resetPasswordMetadata } from "@/app/(auth)/session-tasks/reset-password/page";
 import { metadata as signInMetadata } from "@/app/(auth)/sign-in/[[...sign-in]]/page";

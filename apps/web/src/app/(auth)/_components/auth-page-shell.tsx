@@ -1,5 +1,13 @@
 import type { ReactNode } from "react";
 
+import {
+	EdgeRouteDescription,
+	EdgeRouteEyebrow,
+	EdgeRouteHeader,
+	EdgeRoutePanel,
+	EdgeRoutePanelBody,
+	EdgeRouteTitle,
+} from "@/components/layout/edge-route-surface";
 import { cn } from "@/lib/utils";
 
 import {
@@ -21,28 +29,32 @@ export function AuthPageShell({
 	title,
 }: AuthPageShellProps) {
 	return (
-		<section className="relative w-full max-w-6xl">
+		<section
+			className="relative w-full max-w-6xl"
+			data-slot="identity-route-shell"
+		>
 			<div
 				className={cn(
-					"grid",
+					"grid gap-5",
 					supportPanel
 						? "lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.92fr)] lg:items-start"
-						: "grid-cols-1",
+						: "mx-auto w-full max-w-xl grid-cols-1",
 				)}
 			>
-				<div className="flex min-w-0 flex-col gap-8 py-6 sm:py-8 lg:py-10 lg:pr-12">
-					<div className="max-w-xl space-y-4">
-						<h1 className="font-heading-serif text-3xl font-normal text-foreground sm:text-4xl">
-							{title}
-						</h1>
-						{description ? (
-							<p className="max-w-2xl text-base leading-7 text-muted-foreground">
-								{description}
-							</p>
-						) : null}
-					</div>
-					<div className="max-w-xl">{children}</div>
-				</div>
+				<EdgeRoutePanel>
+					<EdgeRoutePanelBody className="flex min-w-0 flex-col gap-7 p-5 sm:p-6 lg:p-8">
+						<EdgeRouteHeader className="border-b-0 pb-0">
+							<EdgeRouteEyebrow>Account access</EdgeRouteEyebrow>
+							<EdgeRouteTitle>{title}</EdgeRouteTitle>
+							{description ? (
+								<EdgeRouteDescription className="text-base leading-7">
+									{description}
+								</EdgeRouteDescription>
+							) : null}
+						</EdgeRouteHeader>
+						<div className="max-w-xl">{children}</div>
+					</EdgeRoutePanelBody>
+				</EdgeRoutePanel>
 				{supportPanel ? <AuthPageSupportPanel content={supportPanel} /> : null}
 			</div>
 		</section>

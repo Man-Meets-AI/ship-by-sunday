@@ -1,78 +1,68 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 
-import { routeConfig } from "@/config/product";
+import {
+	EdgeRouteActionRow,
+	EdgeRouteContainer,
+	EdgeRouteDescription,
+	EdgeRouteEyebrow,
+	EdgeRouteHeader,
+	EdgeRoutePage,
+	EdgeRoutePanel,
+	EdgeRoutePanelBody,
+	EdgeRoutePanelDescription,
+	EdgeRoutePanelTitle,
+	EdgeRouteTitle,
+} from "@/components/layout/edge-route-surface";
 import { Button } from "@/components/ui/button";
+import { routeConfig } from "@/config/product";
 import { workspaceDisplayConfig } from "@/config/starter-selectors";
-
-const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 export function NotFoundScreen() {
 	return (
-		<main className="min-h-screen bg-ink text-white selection:bg-white selection:text-ink">
-			<div className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center px-6 py-20 text-center">
-				<div className="space-y-8">
-					<div className="space-y-4">
-						<motion.p
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5, ease }}
-							className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-white/40"
-						>
-							Error 404 / Missing Path
-						</motion.p>
-						<motion.h1
-							initial={{ opacity: 0, scale: 0.95 }}
-							animate={{ opacity: 1, scale: 1 }}
-							transition={{ duration: 0.7, ease }}
-							className="font-heading-serif text-[clamp(4rem,15vw,12rem)] leading-[0.88]"
-						>
-							Path Not <span className="text-white/20 italic">Found</span>
-						</motion.h1>
+		<EdgeRoutePage className="flex items-center py-10">
+			<EdgeRouteContainer className="max-w-3xl">
+				<EdgeRoutePanel>
+					<EdgeRoutePanelBody className="space-y-6 p-5 sm:p-6">
+						<EdgeRouteHeader className="border-b-0 pb-0">
+							<EdgeRouteEyebrow>Error 404 / Missing path</EdgeRouteEyebrow>
+							<EdgeRouteTitle>Page not found</EdgeRouteTitle>
+							<EdgeRouteDescription>
+								The route you requested is not available. It may have moved, or
+								the app may no longer publish that path.
+							</EdgeRouteDescription>
+						</EdgeRouteHeader>
+						<div className="border-t border-border/60 pt-5">
+							<EdgeRoutePanelTitle>Recovery options</EdgeRoutePanelTitle>
+							<EdgeRoutePanelDescription className="mt-2">
+								Open the product home if you were trying to continue app work,
+								or return to the public site.
+							</EdgeRoutePanelDescription>
+						</div>
+					</EdgeRoutePanelBody>
+					<div className="border-t border-border/60 px-5 py-4 sm:px-6">
+						<EdgeRouteActionRow>
+							<Button
+								asChild
+								variant="secondary"
+								className="min-w-[11rem] justify-center"
+							>
+								<Link href={routeConfig.appHome}>
+									{workspaceDisplayConfig.openHomeActionLabel}
+								</Link>
+							</Button>
+							<Button
+								asChild
+								variant="outline"
+								className="min-w-[11rem] justify-center"
+							>
+								<Link href={routeConfig.home}>Exit to safety</Link>
+							</Button>
+						</EdgeRouteActionRow>
 					</div>
-
-					<motion.p
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						transition={{ delay: 0.2, duration: 0.6 }}
-						className="max-w-md mx-auto text-lg text-white/60 leading-relaxed"
-					>
-						The coordinates you requested do not exist in this app. The codebase
-						may have been moved or the logic was never compiled.
-					</motion.p>
-
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.3, duration: 0.5, ease }}
-						className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
-					>
-						<Button
-							asChild
-							size="lg"
-							className="h-14 px-8 text-lg rounded-full bg-white text-ink hover:bg-white/90"
-						>
-							<Link href={routeConfig.appHome}>
-								{workspaceDisplayConfig.openHomeActionLabel}
-							</Link>
-						</Button>
-						<Button
-							asChild
-							size="lg"
-							className="h-14 rounded-full border-white/20 bg-white px-8 text-lg text-ink hover:bg-white/90 hover:text-ink"
-						>
-							<Link href={routeConfig.home}>Exit to safety</Link>
-						</Button>
-					</motion.div>
-				</div>
-
-				{/* Subtle background delight - scanlines */}
-				<div className="pointer-events-none fixed inset-0 z-50 overflow-hidden opacity-[0.03]">
-					<div className="h-full w-full bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(17,17,17,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-				</div>
-			</div>
-		</main>
+				</EdgeRoutePanel>
+			</EdgeRouteContainer>
+		</EdgeRoutePage>
 	);
 }

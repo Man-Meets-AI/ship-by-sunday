@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+	EdgeRouteActionRow,
+	EdgeRouteContainer,
+	EdgeRouteDescription,
+	EdgeRouteEyebrow,
+	EdgeRouteHeader,
+	EdgeRoutePage,
+	EdgeRoutePanel,
+	EdgeRoutePanelBody,
+	EdgeRoutePanelDescription,
+	EdgeRoutePanelTitle,
+	EdgeRouteTitle,
+} from "@/components/layout/edge-route-surface";
 import { Button } from "@/components/ui/button";
 import { productConfig, routeConfig } from "@/config/product";
 
@@ -21,42 +26,46 @@ export const metadata: Metadata = {
 
 export default function Page() {
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 tracking-normal">
-			<Card className="w-full max-w-2xl">
-				<CardHeader>
-					<CardDescription>Checkout canceled</CardDescription>
-					<CardTitle className="text-3xl">No charge was completed</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-6">
-					<p className="text-sm text-muted-foreground">
-						You can return to the offer page and restart checkout whenever you
-						are ready. Nothing was charged from this canceled flow.
-					</p>
-					<div className="rounded-lg border bg-muted/30 p-4">
-						<p className="text-sm font-medium">Next step</p>
-						<p className="mt-2 text-sm text-muted-foreground">
-							Go back to Starter if you still want {productConfig.name}, or
-							return home if you were just checking the offer.
-						</p>
+		<EdgeRoutePage className="flex items-center py-10">
+			<EdgeRouteContainer className="max-w-2xl">
+				<EdgeRoutePanel>
+					<EdgeRoutePanelBody className="space-y-6 p-5 sm:p-6">
+						<EdgeRouteHeader className="border-b-0 pb-0">
+							<EdgeRouteEyebrow>Checkout canceled</EdgeRouteEyebrow>
+							<EdgeRouteTitle>No charge was completed</EdgeRouteTitle>
+							<EdgeRouteDescription>
+								You can return to the offer page and restart checkout whenever
+								you are ready. Nothing was charged from this canceled flow.
+							</EdgeRouteDescription>
+						</EdgeRouteHeader>
+						<div className="border-t border-border/60 pt-5">
+							<EdgeRoutePanelTitle>Next step</EdgeRoutePanelTitle>
+							<EdgeRoutePanelDescription className="mt-2">
+								Go back to Starter if you still want {productConfig.name}, or
+								return home if you were just checking the offer.
+							</EdgeRoutePanelDescription>
+						</div>
+					</EdgeRoutePanelBody>
+					<div className="border-t border-border/60 px-5 py-4 sm:px-6">
+						<EdgeRouteActionRow>
+							<Button
+								asChild
+								variant="secondary"
+								className="min-w-[12rem] justify-center"
+							>
+								<Link href={routeConfig.starter}>Back to Starter</Link>
+							</Button>
+							<Button
+								asChild
+								variant="outline"
+								className="min-w-[11rem] justify-center"
+							>
+								<Link href={routeConfig.home}>Go home</Link>
+							</Button>
+						</EdgeRouteActionRow>
 					</div>
-				</CardContent>
-				<CardFooter className="flex flex-wrap gap-3">
-					<Button
-						asChild
-						variant="secondary"
-						className="min-w-[12rem] justify-center"
-					>
-						<Link href={routeConfig.starter}>Back to Starter</Link>
-					</Button>
-					<Button
-						asChild
-						variant="outline"
-						className="min-w-[11rem] justify-center"
-					>
-						<Link href={routeConfig.home}>Go home</Link>
-					</Button>
-				</CardFooter>
-			</Card>
-		</main>
+				</EdgeRoutePanel>
+			</EdgeRouteContainer>
+		</EdgeRoutePage>
 	);
 }

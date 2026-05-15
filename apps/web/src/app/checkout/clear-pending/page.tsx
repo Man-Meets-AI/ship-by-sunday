@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
 
+import {
+	EdgeRouteContainer,
+	EdgeRouteDescription,
+	EdgeRouteEyebrow,
+	EdgeRouteHeader,
+	EdgeRoutePage,
+	EdgeRoutePanel,
+	EdgeRoutePanelBody,
+	EdgeRouteTitle,
+} from "@/components/layout/edge-route-surface";
 import { getSafeRedirectPath } from "@/platform/auth/auth-route-utils";
 
 import { ClearPendingCheckoutForm } from "./_components/clear-pending-checkout-form";
@@ -20,18 +30,21 @@ export default async function Page({
 	const redirectPath = getSafeRedirectPath(redirectUrl);
 
 	return (
-		<main className="flex min-h-dvh items-center justify-center bg-background px-4 py-10 text-foreground">
-			<section className="w-full max-w-sm space-y-4 rounded-xl border border-border/60 bg-card p-5 shadow-sm">
-				<div className="space-y-1">
-					<h1 className="text-lg font-semibold tracking-normal">
-						Clearing checkout state
-					</h1>
-					<p className="text-sm leading-6 text-muted-foreground">
-						You will be sent back to the checkout recovery page.
-					</p>
-				</div>
-				<ClearPendingCheckoutForm redirectPath={redirectPath} />
-			</section>
-		</main>
+		<EdgeRoutePage className="flex items-center py-10">
+			<EdgeRouteContainer className="max-w-sm">
+				<EdgeRoutePanel>
+					<EdgeRoutePanelBody className="space-y-5">
+						<EdgeRouteHeader className="border-b-0 pb-0">
+							<EdgeRouteEyebrow>Checkout recovery</EdgeRouteEyebrow>
+							<EdgeRouteTitle>Clearing checkout state</EdgeRouteTitle>
+							<EdgeRouteDescription>
+								You will be sent back to the checkout recovery page.
+							</EdgeRouteDescription>
+						</EdgeRouteHeader>
+						<ClearPendingCheckoutForm redirectPath={redirectPath} />
+					</EdgeRoutePanelBody>
+				</EdgeRoutePanel>
+			</EdgeRouteContainer>
+		</EdgeRoutePage>
 	);
 }
