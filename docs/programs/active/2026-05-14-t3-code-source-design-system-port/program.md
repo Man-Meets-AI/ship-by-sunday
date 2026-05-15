@@ -89,6 +89,7 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md`, moving DropdownMenu, NavigationMenu, and the app-shell command palette to T3 Code menu/command recipes while preserving Radix and cmdk compatibility.
 - [x] 2026-05-14: Repaired copied Base UI state selectors in completed primitive slices so Checkbox, Switch, RadioGroup, Field checked-state styling, NavigationMenu open styling, and Tooltip instant-open styling target the actual Radix `data-state` attributes, with focused tests strengthened to catch regressions.
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-alert-dialog-toast-primitives.md`, moving AlertDialog and Sonner Toaster surfaces to T3 Code alert/toast recipes while preserving Radix and Sonner runtime compatibility.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`, moving ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty to T3 Code utility recipes while preserving Radix/shared runtime compatibility and deferring unused Sidebar to the protected app-shell slice.
 
 ## Decision Log
 
@@ -144,10 +145,11 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md`: copied T3 Code Dialog and Sheet backdrop, viewport, popup, panel, close-button, header, title, description, and footer recipes onto the current Radix surface while keeping `DialogContent`, `SheetContent`, `showCloseButton`, Sheet `side`, custom data attributes, and T3-style popup aliases; desktop and mobile browser proof passed through a temporary local route.
 - `docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md`: copied T3 Code menu and command popup recipes onto Radix DropdownMenu, Radix NavigationMenu, and a new shared cmdk-backed Command primitive while keeping current export names, adding honest `Menu*` aliases, and proving desktop/mobile render through a temporary local route.
 - `docs/exec-plans/completed/2026-05-14-t3-code-alert-dialog-toast-primitives.md`: copied T3 Code AlertDialog modal recipes onto the current Radix AlertDialog surface and copied T3 Code toast surface recipes onto the existing Sonner Toaster while keeping current `AlertDialog*`, `Toaster`, and `sonner` toast invocation behavior; desktop and mobile browser proof passed through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`: copied T3 Code utility recipes onto Radix-backed ScrollArea, Collapsible, Toggle, and ToggleGroup plus shared Spinner and Empty while keeping existing exports, adding `CollapsiblePanel`, `ToggleGroupSeparator`, ScrollArea fade/gutter/hide-scrollbar controls, and proving desktop/mobile render through a temporary local route.
 
 Planned child slices:
 
-- Shared primitive migration: port or adapt T3 Code Base UI primitives into `apps/web/src/components/ui`, add dependencies, and preserve call-site compatibility deliberately.
+- Remaining shared primitive migration: finish any shared primitive gaps as they appear during app-shell and route-surface migration, while continuing to avoid unplanned dependency changes.
 - App shell and operational dashboard migration: replace the current AppShell/header/local-rail feel with a T3 Code sidebar-first shell across protected app, codebase flow, workers, settings, support, and admin surfaces while moving implementation out of underscore folders.
 - Public surfaces migration: rebuild marketing pages, homepage sections, docs chrome, blog prose, starter/workers pages, and public support surfaces with the T3 Code system.
 - Course, tutorials, auth, checkout, and edge-surface sweep: convert the remaining user-facing route islands and high-risk screens with targeted behavior proof.
@@ -157,11 +159,11 @@ Planned child slices:
 
 ## Next Slice
 
-The next recommended slice is `Sidebar and supporting utility primitive migration`.
+The next recommended slice is `Sidebar and protected app-shell migration`.
 
-That slice should continue using `planning-brief-4.md` and adapt T3 Code's `sidebar.tsx`, `scroll-area.tsx`, `collapsible.tsx`, `toggle.tsx`, `toggle-group.tsx`, `spinner.tsx`, and `empty.tsx` recipes onto Ship by Sunday's current shared primitives unless a new dependency decision is made first. The current app already has local wrappers for those names, and the recent primitive slices stayed Radix-backed or existing-library-backed while adding T3-style aliases, so the next slice should preserve current Sidebar, ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty call-site behavior while aligning their class recipes.
+That slice should continue using `planning-brief-4.md` unless a newer planning brief is written first, and should adapt T3 Code's `sidebar.tsx` together with the protected app shell, codebase flow shell, workspace setup shell, and shared operational navigation surfaces. `apps/web/src/components/ui/sidebar.tsx` currently has no live app or test imports, so Sidebar should move with the first route-level app-shell call sites that can prove it visually and behaviorally. Recent primitive slices stayed Radix-backed or existing-library-backed while adding T3-style aliases, so the Sidebar/app-shell slice should preserve current protected-route behavior and entitlement/auth boundaries while replacing the old top-header/local-rail feel with the T3 sidebar-first shell.
 
-That slice does not need to implement generated-codebase changes. Generated codebase implementation should wait until the tracked app primitive strategy is proven.
+That slice does not need to implement generated-codebase changes. Generated codebase implementation should wait until the tracked app shell and remaining primitive strategy are proven.
 
 ## Risks and Watchpoints
 
