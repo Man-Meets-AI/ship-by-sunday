@@ -343,8 +343,28 @@ describe("workspace codebase, review, and setup routes", () => {
 			'href="/api/download/starter-template?downloadToken=',
 		);
 		expect(markup).toContain('download=""');
+		expect(markup).toContain('href="/starter/generate-codebase"');
 		expect(markup).toContain('href="/starter/lessons"');
 		expect(markup).not.toContain("font-heading-serif");
+	});
+
+	it("redirects viewers without Starter capability away from Starter Home", async () => {
+		loadWorkspacePageAccessMock.mockResolvedValue({
+			kind: "granted",
+			access: {
+				clerkUserId: "user_123",
+				hasAccess: true,
+				status: "granted",
+				capabilities: ["worker"],
+				fulfillmentTrack: "existing_codebase_doctor",
+			},
+		});
+
+		const { default: StarterHomeRoutePage } =
+			await import("@/app/(app)/starter/home/page");
+
+		await expect(StarterHomeRoutePage()).rejects.toThrow("redirect:/home");
+		expect(redirectMock).toHaveBeenCalledWith("/home");
 	});
 
 	it("redirects viewers without worker capability away from worker setup", async () => {
