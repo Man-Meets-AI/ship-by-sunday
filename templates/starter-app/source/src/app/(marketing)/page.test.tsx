@@ -13,14 +13,14 @@ describe("MarketingHomePage", () => {
     expect(markup).not.toContain("GitHub");
 
     expect(markup).toContain('id="features"');
-    expect(markup).toContain('id="why-northstar"');
+    expect(markup).toContain('id="workflow"');
     expect(markup).toContain('id="pricing"');
-    expect(markup).toContain('id="faq"');
+    expect(markup).not.toContain('id="faq"');
 
     expect(markup).toMatch(/<a[^>]*href="\/sign-up"[^>]*>Get started<\/a>/);
 
-    expect(markup).toContain("Starter");
-    expect(markup).toContain("Pro");
-    expect(markup).toContain("Enterprise");
+    expect(markup).toContain("Operations for small teams");
+    expect(markup).toContain("Why Northstar");
+    expect(markup).toContain("Provider-ready");
   });
 });

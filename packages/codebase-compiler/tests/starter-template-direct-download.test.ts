@@ -90,7 +90,9 @@ describe("direct Starter template download defaults", () => {
 		]);
 		expect(
 			snapshotText(
-				snapshotFiles.find((file) => file.path === "apps/web/config/product.ts"),
+				snapshotFiles.find(
+					(file) => file.path === "apps/web/config/product.ts",
+				),
 			),
 		).toContain('"domain": "localhost:3000"');
 		expect(

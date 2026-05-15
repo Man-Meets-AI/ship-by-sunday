@@ -2,7 +2,10 @@ import path from "node:path";
 import type { NextConfig } from "next";
 import createMDX from "@next/mdx";
 import { withPostHogConfig } from "@posthog/nextjs-config";
-import { repoDownloadTraceIncludes } from "./src/config/vercel-output-tracing";
+import {
+	repoDownloadTraceExcludes,
+	repoDownloadTraceIncludes,
+} from "./src/config/vercel-output-tracing";
 
 const withMDX = createMDX({
 	options: {
@@ -19,6 +22,10 @@ const nextConfig: NextConfig = {
 	outputFileTracingIncludes: {
 		"/api/download/repo": [...repoDownloadTraceIncludes],
 		"/api/download/starter-template": [...repoDownloadTraceIncludes],
+	},
+	outputFileTracingExcludes: {
+		"/api/download/repo": [...repoDownloadTraceExcludes],
+		"/api/download/starter-template": [...repoDownloadTraceExcludes],
 	},
 	turbopack: {
 		ignoreIssue: [

@@ -39,11 +39,12 @@ describe("Public marketing chrome", () => {
     expect(markup).not.toContain("GitHub");
   });
 
-  it("keeps GitHub as a subtle footer link", async () => {
+  it("renders the product footer without a GitHub link", async () => {
     const { PublicFooter } = await import("@/components/layout/public-footer");
     const markup = renderToStaticMarkup(<PublicFooter />);
 
-    expect(markup).toContain("Built from the open-source starter");
-    expect(markup).toContain("GitHub");
+    expect(markup).toContain("Built from the generated starter source.");
+    expect(markup).toContain("Northstar helps small teams");
+    expect(markup).not.toContain("GitHub");
   });
 });

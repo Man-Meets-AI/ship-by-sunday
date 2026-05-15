@@ -6,6 +6,8 @@ import {
 } from "../src/repo-generation/repo-download-source-contract";
 import {
 	buildRepoGenerationManifest,
+	buildRepoDownloadTraceExcludes,
+	buildRepoDownloadTraceIncludes,
 	materializeRepoSnapshot,
 	renderTemplateOverrides,
 } from "../src/server";
@@ -143,6 +145,46 @@ describe("repo generation", () => {
 				"bunfig.toml",
 				"apps/web/.env.local.example",
 				"apps/web/scripts/run-next-build-serialized.mjs",
+			]),
+		);
+	});
+
+	it("traces starter template source files without ignored artifacts", () => {
+		const includes = buildRepoDownloadTraceIncludes();
+
+		expect(includes).toContain(
+			"../../templates/starter-app/template-source.json",
+		);
+		expect(includes).toContain("../../templates/starter-app/source/src/**/*");
+		expect(includes).toContain(
+			"../../templates/starter-app/source/.env.local.example",
+		);
+		expect(includes).not.toContain("../../templates/starter-app/source/**/*");
+		expect(buildRepoDownloadTraceExcludes()).toEqual(
+			expect.arrayContaining([
+				"../../templates/starter-app/source/node_modules/**/*",
+				"../../templates/starter-app/source/**/node_modules/**/*",
+				"../../templates/starter-app/source/.next/**/*",
+			]),
+		);
+		expect(
+			includes.filter((tracePath) =>
+				[
+					"/node_modules/",
+					"/.next/",
+					"/.vercel/",
+					"/coverage/",
+					"/test-results/",
+				].some((fragment) => tracePath.includes(fragment)),
+			),
+		).toEqual([]);
+		expect(includes).not.toEqual(
+			expect.arrayContaining([
+				"../../templates/starter-app/source/.env.local",
+				"../../templates/starter-app/source/.env.preview",
+				"../../templates/starter-app/source/.env.production",
+				"../../templates/starter-app/source/next-env.d.ts",
+				"../../templates/starter-app/source/tsconfig.tsbuildinfo",
 			]),
 		);
 	});
@@ -612,7 +654,7 @@ describe("repo generation", () => {
 			materializedOutputRoot: "apps/web",
 			generatedOverlaysWin: true,
 			contentDigest:
-				"sha256-403cdf0d386f35d6ba8972d1aa3d887764468ed9de3326f8f40846e3f1e584f1",
+				"sha256-6681c4e9492ea7cb07634a9beb7d8c656b2dec556e939b8fe01c7f35fff79c0c",
 		});
 		expect(
 			Object.keys(templateSourceProvenance.provenance ?? {}),

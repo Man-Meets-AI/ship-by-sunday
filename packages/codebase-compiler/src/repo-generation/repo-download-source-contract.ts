@@ -54,8 +54,6 @@ export const customerSafeTelegramChatWidgetDirectoryPaths = [
 ] as const;
 
 export const codebaseCompilerTemplateSourceTracePaths = [
-	"../../templates/starter-app/template-source.json",
-	"../../templates/starter-app/source/**/*",
 	"../../docs/openai/**/*",
 	"../../docs/prompts/execplan*.md",
 ] as const;
@@ -169,7 +167,7 @@ function toAppTraceDirectoryGlob(repoRelativePath: string) {
 	return `./${repoRelativePath.slice(appRootPrefix.length)}/**/*`;
 }
 
-export function buildRepoDownloadTraceIncludes() {
+export function buildStaticRepoDownloadTraceIncludes() {
 	return [
 		...customerSafeAppFilePaths.map(toAppTraceFilePath),
 		...customerSafeAppDirectoryPaths.map(toAppTraceDirectoryGlob),
@@ -185,5 +183,5 @@ export function buildRepoDownloadTraceIncludes() {
 			toRepoTraceDirectoryGlob,
 		),
 		...codebaseCompilerTemplateSourceTracePaths,
-	] as const;
+	];
 }

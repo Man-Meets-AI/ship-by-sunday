@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readdirSync, readFileSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { resolveRepoRootPath } from "../repo-root";
@@ -227,26 +228,77 @@ export async function loadStarterTemplateSourceManifest(
 	);
 }
 
+export function loadStarterTemplateSourceManifestSync(
+	repoRootPath = resolveRepoRootPath(),
+) {
+	const manifestPath = path.join(
+		repoRootPath,
+		STARTER_TEMPLATE_SOURCE_MANIFEST_PATH,
+	);
+	return parseStarterTemplateSourceManifest(
+		JSON.parse(readFileSync(manifestPath, "utf8")) as JsonValue,
+	);
+}
+
 async function listFilesRecursive(
 	rootPath: string,
 	directoryPath: string,
+	excludedPathSegments: readonly string[],
 ): Promise<string[]> {
 	const entries = await readdir(directoryPath, { withFileTypes: true });
 	const files: string[][] = await Promise.all(
 		entries.map(async (entry): Promise<string[]> => {
 			const absolutePath = path.join(directoryPath, entry.name);
+			const relativePath = normalizeRelativeFilePath(
+				path.relative(rootPath, absolutePath),
+			);
 			if (entry.isDirectory()) {
-				return listFilesRecursive(rootPath, absolutePath);
+				if (hasExcludedPathSegment(relativePath, excludedPathSegments)) {
+					return [];
+				}
+
+				return listFilesRecursive(rootPath, absolutePath, excludedPathSegments);
 			}
 			if (!entry.isFile()) {
 				return [];
 			}
 
-			return [normalizeRelativeFilePath(path.relative(rootPath, absolutePath))];
+			return [relativePath];
 		}),
 	);
 
 	return files.flat();
+}
+
+function listFilesRecursiveSync(
+	rootPath: string,
+	directoryPath: string,
+	excludedPathSegments: readonly string[],
+): string[] {
+	const entries = readdirSync(directoryPath, { withFileTypes: true });
+	return entries.flatMap((entry) => {
+		const absolutePath = path.join(directoryPath, entry.name);
+		const relativePath = normalizeRelativeFilePath(
+			path.relative(rootPath, absolutePath),
+		);
+
+		if (entry.isDirectory()) {
+			if (hasExcludedPathSegment(relativePath, excludedPathSegments)) {
+				return [];
+			}
+
+			return listFilesRecursiveSync(
+				rootPath,
+				absolutePath,
+				excludedPathSegments,
+			);
+		}
+		if (!entry.isFile()) {
+			return [];
+		}
+
+		return [relativePath];
+	});
 }
 
 export async function listStarterTemplateSourceFiles({
@@ -257,7 +309,34 @@ export async function listStarterTemplateSourceFiles({
 	repoRootPath?: string;
 }) {
 	const sourceRootPath = path.join(repoRootPath, manifest.sourceRoot);
-	return (await listFilesRecursive(sourceRootPath, sourceRootPath))
+	return (
+		await listFilesRecursive(
+			sourceRootPath,
+			sourceRootPath,
+			manifest.excludedPathSegments,
+		)
+	)
+		.filter(
+			(file) =>
+				!manifest.excludedFilePaths.includes(file) &&
+				!hasExcludedPathSegment(file, manifest.excludedPathSegments),
+		)
+		.sort();
+}
+
+export function listStarterTemplateSourceFilesSync({
+	manifest,
+	repoRootPath = resolveRepoRootPath(),
+}: {
+	manifest: StarterTemplateSourceManifest;
+	repoRootPath?: string;
+}) {
+	const sourceRootPath = path.join(repoRootPath, manifest.sourceRoot);
+	return listFilesRecursiveSync(
+		sourceRootPath,
+		sourceRootPath,
+		manifest.excludedPathSegments,
+	)
 		.filter(
 			(file) =>
 				!manifest.excludedFilePaths.includes(file) &&

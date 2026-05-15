@@ -1,8 +1,43 @@
+import { chmod, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import {
 	STARTER_TEMPLATE_SOURCE_ROOT,
 	isStarterTemplateGeneratedOverlayAllowed,
+	listStarterTemplateSourceFiles,
+	listStarterTemplateSourceFilesSync,
 	verifyStarterTemplateSourceSnapshot,
+	type StarterTemplateSourceManifest,
 } from "../src/server";
+
+function createPruningTestManifest(): StarterTemplateSourceManifest {
+	return {
+		schemaVersion: "starter-template-source.v1",
+		templateId: "starter-app",
+		templateVersion: "test-pruning",
+		sourceRoot: STARTER_TEMPLATE_SOURCE_ROOT,
+		sourceLayout: "single-next-app-root",
+		fileCount: 1,
+		contentDigest: "sha256-test",
+		provenance: {
+			originKind: "local-directory-snapshot",
+			originPathHint: "test",
+			originGitCommit: null,
+			capturedAt: "2026-05-15",
+			capturedByProgram: "test",
+			notes: "Test fixture.",
+		},
+		requiredFiles: ["README.md"],
+		excludedPathSegments: [".next", "node_modules"],
+		excludedFilePaths: [".env.local"],
+		generatedOverlayPolicy: {
+			description: "Test policy.",
+			allowedExactPaths: [],
+			allowedPathPrefixes: [],
+			blockedPathPrefixes: ["node_modules/"],
+		},
+	};
+}
 
 describe("starter template source contract", () => {
 	it("pins the imported Starter source snapshot by manifest digest", async () => {
@@ -10,7 +45,7 @@ describe("starter template source contract", () => {
 
 		expect(verification.manifest).toMatchObject({
 			contentDigest:
-				"sha256-403cdf0d386f35d6ba8972d1aa3d887764468ed9de3326f8f40846e3f1e584f1",
+				"sha256-6681c4e9492ea7cb07634a9beb7d8c656b2dec556e939b8fe01c7f35fff79c0c",
 			fileCount: 132,
 			sourceLayout: "single-next-app-root",
 			sourceRoot: STARTER_TEMPLATE_SOURCE_ROOT,
@@ -56,6 +91,41 @@ describe("starter template source contract", () => {
 		expect(files).not.toContain(".env.production");
 		expect(files).not.toContain("next-env.d.ts");
 		expect(files).not.toContain("tsconfig.tsbuildinfo");
+	});
+
+	it("prunes excluded source directories before recursing", async () => {
+		const tempRoot = await mkdtemp(path.join(tmpdir(), "sbs-template-prune-"));
+		const sourceRoot = path.join(tempRoot, STARTER_TEMPLATE_SOURCE_ROOT);
+		const unreadableDependencyDirectory = path.join(
+			sourceRoot,
+			"node_modules",
+			"blocked",
+		);
+
+		try {
+			await mkdir(unreadableDependencyDirectory, { recursive: true });
+			await writeFile(path.join(sourceRoot, "README.md"), "template");
+			await writeFile(path.join(sourceRoot, ".env.local"), "secret");
+			await chmod(unreadableDependencyDirectory, 0);
+
+			const manifest = createPruningTestManifest();
+
+			await expect(
+				listStarterTemplateSourceFiles({
+					manifest,
+					repoRootPath: tempRoot,
+				}),
+			).resolves.toEqual(["README.md"]);
+			expect(
+				listStarterTemplateSourceFilesSync({
+					manifest,
+					repoRootPath: tempRoot,
+				}),
+			).toEqual(["README.md"]);
+		} finally {
+			await chmod(unreadableDependencyDirectory, 0o700).catch(() => {});
+			await rm(tempRoot, { force: true, recursive: true });
+		}
 	});
 
 	it("defines an explicit generated overlay boundary", async () => {

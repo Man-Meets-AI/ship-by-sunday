@@ -4,11 +4,11 @@ import {
 	CUSTOMER_SAFE_SNAPSHOT_REQUIRED_REPLACEMENTS,
 } from "../src/repo-generation/customer-safe-snapshot-contract";
 import {
-	buildRepoDownloadTraceIncludes,
 	isExcludedSnapshotPath,
 	starterSnapshotForbiddenFilePaths,
 	starterSnapshotForbiddenPathPrefixes,
 } from "../src/repo-generation/repo-download-source-contract";
+import { buildRepoDownloadTraceIncludes } from "../src/server";
 
 describe("customer-safe snapshot contract", () => {
 	it("starts from the tracked repo baseline and captures the frozen grill decisions", () => {
@@ -150,10 +150,13 @@ describe("customer-safe snapshot contract", () => {
 		expect(buildRepoDownloadTraceIncludes()).toEqual(
 			expect.arrayContaining([
 				"../../templates/starter-app/template-source.json",
-				"../../templates/starter-app/source/**/*",
+				"../../templates/starter-app/source/src/**/*",
 				"../../docs/prompts/execplan*.md",
 				"./.env.local.example",
 			]),
+		);
+		expect(buildRepoDownloadTraceIncludes()).not.toContain(
+			"../../templates/starter-app/source/**/*",
 		);
 		expect(buildRepoDownloadTraceIncludes()).not.toContain("./tests/**/*");
 		expect(buildRepoDownloadTraceIncludes()).not.toContain(
