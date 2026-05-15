@@ -63,7 +63,7 @@ Sidebar stayed out of this slice. The file exists, but current app and test impo
 
 ## Context and Orientation
 
-The T3 Code source app is `/Users/bazelrex/Developer/t3code/apps/web`. The relevant source files are `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui/scroll-area.tsx`, `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui/collapsible.tsx`, `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui/toggle.tsx`, `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui/toggle-group.tsx`, `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui/spinner.tsx`, and `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui/empty.tsx`.
+The T3 Code source app is `/Users/bazelrex/Developer/oss/t3code/apps/web`. The relevant source files are `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/scroll-area.tsx`, `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/collapsible.tsx`, `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/toggle.tsx`, `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/toggle-group.tsx`, `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/spinner.tsx`, and `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/empty.tsx`.
 
 The target shared files are `apps/web/src/components/ui/scroll-area.tsx`, `apps/web/src/components/ui/collapsible.tsx`, `apps/web/src/components/ui/toggle.tsx`, `apps/web/src/components/ui/toggle-group.tsx`, `apps/web/src/components/ui/spinner.tsx`, and `apps/web/src/components/ui/empty.tsx`. Live consumers include Dialog/Sheet panels, codebase theme advanced options, codebase scale fields, worker setup command selectors, lesson panels, Codex connection buttons, access-required buttons, and lesson empty states.
 
@@ -167,12 +167,12 @@ The primitive edits are local and deterministic. If a T3 selector does not compi
 
 Important source references:
 
-    /Users/bazelrex/Developer/t3code/apps/web/src/components/ui/scroll-area.tsx
-    /Users/bazelrex/Developer/t3code/apps/web/src/components/ui/collapsible.tsx
-    /Users/bazelrex/Developer/t3code/apps/web/src/components/ui/toggle.tsx
-    /Users/bazelrex/Developer/t3code/apps/web/src/components/ui/toggle-group.tsx
-    /Users/bazelrex/Developer/t3code/apps/web/src/components/ui/spinner.tsx
-    /Users/bazelrex/Developer/t3code/apps/web/src/components/ui/empty.tsx
+    /Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/scroll-area.tsx
+    /Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/collapsible.tsx
+    /Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/toggle.tsx
+    /Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/toggle-group.tsx
+    /Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/spinner.tsx
+    /Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/empty.tsx
     apps/web/src/components/ui/scroll-area.tsx
     apps/web/src/components/ui/collapsible.tsx
     apps/web/src/components/ui/toggle.tsx

@@ -2,7 +2,7 @@
 title: "T3 Code Shared Primitive Planning Brief 4"
 program_id: "t3-code-source-design-system-port"
 brief_version: 4
-status: "current"
+status: "superseded"
 summary: "Next slice for moving shared UI primitives toward the T3 Code Base UI source after app foundation tokens landed."
 read_when:
   - "Writing the shared primitive child ExecPlan for the T3 Code migration."

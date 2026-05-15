@@ -64,9 +64,11 @@ function installDesktopMediaQuery() {
 
 function renderResizableSidebar({
 	onResize = vi.fn(),
+	onRailClick,
 	shouldAcceptWidth,
 }: {
 	onResize?: (width: number) => void;
+	onRailClick?: React.MouseEventHandler<HTMLButtonElement>;
 	shouldAcceptWidth?: (context: {
 		currentWidth: number;
 		nextWidth: number;
@@ -87,7 +89,7 @@ function renderResizableSidebar({
 				<SidebarContent>
 					<div>Navigation</div>
 				</SidebarContent>
-				<SidebarRail />
+				<SidebarRail onClick={onRailClick} />
 			</Sidebar>
 			<SidebarInset>Main content</SidebarInset>
 		</SidebarProvider>,
@@ -140,6 +142,12 @@ describe("T3 Code Sidebar primitive adapter", () => {
 		expect(sidebarSource).toContain("resizable?: boolean");
 		expect(sidebarSource).toContain("SidebarInstanceContext");
 		expect(sidebarSource).toContain("TooltipProvider delayDuration={0}");
+		expect(sidebarSource).toContain(
+			'const SIDEBAR_WIDTH_MOBILE = "calc(100vw - 0.75rem)"',
+		);
+		expect(sidebarSource).not.toContain("var(--spacing(3))");
+		expect(sidebarSource).toContain("group-data-[side=right]:left-0 md:flex");
+		expect(sidebarSource).not.toContain("sm:flex");
 		expect(sidebarSource).not.toContain("@base-ui/react");
 		expect(sidebarSource).not.toContain("effect/Schema");
 	});
@@ -184,6 +192,79 @@ describe("T3 Code Sidebar primitive adapter", () => {
 		expect(window.localStorage.getItem("sidebar-test-width")).toBe("300");
 		expect(onResize).toHaveBeenLastCalledWith(300);
 		expect(root?.getAttribute("data-state")).toBe("expanded");
+	});
+
+	it("flushes the final pending drag width before a delayed animation frame runs", () => {
+		const onResize = vi.fn();
+		const cancelAnimationFrame = vi.fn();
+		window.requestAnimationFrame = vi.fn(
+			(_callback: FrameRequestCallback) => 41,
+		);
+		window.cancelAnimationFrame = cancelAnimationFrame;
+		renderResizableSidebar({ onResize });
+
+		const container = document.querySelector<HTMLElement>(
+			'[data-slot="sidebar-container"]',
+		);
+		const wrapper = document.querySelector<HTMLElement>(
+			'[data-slot="sidebar-wrapper"]',
+		);
+		const rail = document.querySelector<HTMLButtonElement>(
+			'[data-slot="sidebar-rail"]',
+		);
+
+		container!.getBoundingClientRect = () =>
+			({
+				width: 260,
+				height: 800,
+				top: 0,
+				left: 0,
+				right: 260,
+				bottom: 800,
+				x: 0,
+				y: 0,
+				toJSON: () => ({}),
+			}) as DOMRect;
+
+		fireEvent.pointerDown(rail!, { button: 0, clientX: 260, pointerId: 9 });
+		fireEvent.pointerMove(rail!, { clientX: 315, pointerId: 9 });
+		fireEvent.pointerUp(rail!, { pointerId: 9 });
+
+		expect(cancelAnimationFrame).toHaveBeenCalledWith(41);
+		expect(wrapper?.style.getPropertyValue("--sidebar-width")).toBe("315px");
+		expect(window.localStorage.getItem("sidebar-test-width")).toBe("315");
+		expect(onResize).toHaveBeenLastCalledWith(315);
+	});
+
+	it("suppresses caller click handlers after a resize drag", () => {
+		const onRailClick = vi.fn();
+		renderResizableSidebar({ onRailClick });
+
+		const container = document.querySelector<HTMLElement>(
+			'[data-slot="sidebar-container"]',
+		);
+		const rail = document.querySelector<HTMLButtonElement>(
+			'[data-slot="sidebar-rail"]',
+		);
+		container!.getBoundingClientRect = () =>
+			({
+				width: 260,
+				height: 800,
+				top: 0,
+				left: 0,
+				right: 260,
+				bottom: 800,
+				x: 0,
+				y: 0,
+				toJSON: () => ({}),
+			}) as DOMRect;
+
+		fireEvent.pointerDown(rail!, { button: 0, clientX: 260, pointerId: 10 });
+		fireEvent.pointerMove(rail!, { clientX: 300, pointerId: 10 });
+		fireEvent.pointerUp(rail!, { pointerId: 10 });
+		fireEvent.click(rail!);
+
+		expect(onRailClick).not.toHaveBeenCalled();
 	});
 
 	it("rejects drag widths that would violate the caller's main-content guard", () => {

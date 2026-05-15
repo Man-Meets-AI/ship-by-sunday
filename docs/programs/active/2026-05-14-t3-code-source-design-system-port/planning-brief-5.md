@@ -2,7 +2,7 @@
 title: "T3 Code Protected App Shell Planning Brief 5"
 program_id: "t3-code-source-design-system-port"
 brief_version: 5
-status: "current"
+status: "superseded"
 summary: "Next slice for moving the protected app shell from the old top-header/local-rail layout toward T3 Code's sidebar-first app chrome."
 read_when:
   - "Writing the protected app shell child ExecPlan for the T3 Code migration."

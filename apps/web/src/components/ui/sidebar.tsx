@@ -29,7 +29,7 @@ import { PanelLeftCloseIcon, PanelLeftIcon } from "lucide-react";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "calc(100vw - var(--spacing(3)))";
+const SIDEBAR_WIDTH_MOBILE = "calc(100vw - 0.75rem)";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 const SIDEBAR_RESIZE_DEFAULT_MIN_WIDTH = 16 * 16;
@@ -416,6 +416,34 @@ function SidebarRail({
 	const railLabel = canResize ? "Resize Sidebar" : "Toggle Sidebar";
 	const railTitle = canResize ? "Drag to resize sidebar" : "Toggle Sidebar";
 
+	const applyPendingResizeState = React.useCallback(
+		(resizeState: NonNullable<typeof resizeStateRef.current>) => {
+			if (!resolvedResizable) {
+				return;
+			}
+			const nextWidth = resizeState.pendingWidth;
+			const accepted =
+				resolvedResizable.shouldAcceptWidth?.({
+					currentWidth: resizeState.width,
+					nextWidth,
+					rail: resizeState.rail,
+					side: resizeState.side,
+					sidebarRoot: resizeState.sidebarRoot,
+					wrapper: resizeState.wrapper,
+				}) ?? true;
+			if (!accepted) {
+				return;
+			}
+
+			resizeState.wrapper.style.setProperty(
+				"--sidebar-width",
+				`${nextWidth}px`,
+			);
+			resizeState.width = nextWidth;
+		},
+		[resolvedResizable],
+	);
+
 	const stopResize = React.useCallback(
 		(pointerId: number) => {
 			const resizeState = resizeStateRef.current;
@@ -424,7 +452,9 @@ function SidebarRail({
 			}
 			if (resizeState.rafId !== null) {
 				window.cancelAnimationFrame(resizeState.rafId);
+				resizeState.rafId = null;
 			}
+			applyPendingResizeState(resizeState);
 			resizeState.transitionTargets.forEach((element) => {
 				element.style.removeProperty("transition-duration");
 			});
@@ -442,7 +472,7 @@ function SidebarRail({
 			document.body.style.removeProperty("cursor");
 			document.body.style.removeProperty("user-select");
 		},
-		[resolvedResizable],
+		[applyPendingResizeState, resolvedResizable],
 	);
 
 	const handlePointerDown = React.useCallback(
@@ -546,28 +576,10 @@ function SidebarRail({
 				}
 
 				activeResizeState.rafId = null;
-				const nextWidth = activeResizeState.pendingWidth;
-				const accepted =
-					resolvedResizable.shouldAcceptWidth?.({
-						currentWidth: activeResizeState.width,
-						nextWidth,
-						rail: activeResizeState.rail,
-						side: activeResizeState.side,
-						sidebarRoot: activeResizeState.sidebarRoot,
-						wrapper: activeResizeState.wrapper,
-					}) ?? true;
-				if (!accepted) {
-					return;
-				}
-
-				activeResizeState.wrapper.style.setProperty(
-					"--sidebar-width",
-					`${nextWidth}px`,
-				);
-				activeResizeState.width = nextWidth;
+				applyPendingResizeState(activeResizeState);
 			});
 		},
-		[onPointerMove, resolvedResizable],
+		[applyPendingResizeState, onPointerMove, resolvedResizable],
 	);
 
 	const endResizeInteraction = React.useCallback(
@@ -608,13 +620,13 @@ function SidebarRail({
 
 	const handleClick = React.useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
-			onClick?.(event);
-			if (event.defaultPrevented) {
-				return;
-			}
 			if (suppressClickRef.current) {
 				suppressClickRef.current = false;
 				event.preventDefault();
+				return;
+			}
+			onClick?.(event);
+			if (event.defaultPrevented) {
 				return;
 			}
 			if (resolvedResizable && open) {
@@ -677,7 +689,7 @@ function SidebarRail({
 			title={railTitle}
 			type="button"
 			className={cn(
-				"-translate-x-1/2 group-data-[side=left]:-right-4 absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=right]:left-0 sm:flex [[data-collapsible=offcanvas][data-state=collapsed]_&]:pointer-events-none",
+				"-translate-x-1/2 group-data-[side=left]:-right-4 absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=right]:left-0 md:flex [[data-collapsible=offcanvas][data-state=collapsed]_&]:pointer-events-none",
 				"in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",
 				"[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
 				"group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar",

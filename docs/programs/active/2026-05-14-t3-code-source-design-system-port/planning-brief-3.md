@@ -2,7 +2,7 @@
 title: "T3 Code App Foundation Planning Brief 3"
 program_id: "t3-code-source-design-system-port"
 brief_version: 3
-status: "current"
+status: "superseded"
 summary: "Next slice for tracked-app fonts, tokens, dark/light mode, and generated-design override removal after structural source adoption proof."
 read_when:
   - "Writing the app foundation child ExecPlan for the T3 Code migration."

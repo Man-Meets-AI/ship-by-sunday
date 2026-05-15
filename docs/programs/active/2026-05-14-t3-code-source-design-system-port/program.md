@@ -20,7 +20,7 @@ Maintain this Program in accordance with `docs/programs/PROGRAMS.md`.
 
 ## Purpose / Big Picture
 
-Ship by Sunday should stop blending its existing visual system and app structure with T3 Code. The target is to make `/Users/bazelrex/Developer/t3code/apps/web` the source of truth for every web-facing Ship by Sunday UI surface: file shape, component organization, colors, typography, spacing rhythm, primitive styling, dark mode, light mode, shell chrome, dense operational surfaces, command/settings patterns, chat/composer treatment, and generated-codebase app output.
+Ship by Sunday should stop blending its existing visual system and app structure with T3 Code. The target is to make `/Users/bazelrex/Developer/oss/t3code/apps/web` the source of truth for every web-facing Ship by Sunday UI surface: file shape, component organization, colors, typography, spacing rhythm, primitive styling, dark mode, light mode, shell chrome, dense operational surfaces, command/settings patterns, chat/composer treatment, and generated-codebase app output.
 
 This Program exists because the reset spans more than one implementation slice. It touches repo instructions, old design/frontend doctrine docs, `apps/web` file layout, `apps/web` global CSS and font loading, shared primitives, protected app shell, marketing pages, docs chrome, blog prose, worker dashboards, tutorials/course surfaces, checkout/auth surfaces, the standalone Telegram widget package, and generated codebase runtime/templates/docs.
 
@@ -46,7 +46,7 @@ The guiding rule is simple: when the current Ship by Sunday design docs, fronten
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
-- T3 Code source app: `/Users/bazelrex/Developer/t3code/apps/web`
+- T3 Code source app: `/Users/bazelrex/Developer/oss/t3code/apps/web`
 - Current web app: `apps/web`
 - Current widget package: `packages/telegram-chat-widget`
 - Generated codebase compiler: `packages/codebase-compiler`
@@ -94,6 +94,7 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`, moving ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty to T3 Code utility recipes while preserving Radix/shared runtime compatibility and deferring unused Sidebar to the protected app-shell slice.
 - [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`, moving protected `viewportMode="app"` onto a T3 Code-style Sidebar shell while preserving AppShell props, document-mode compatibility, workspace/codebase/lesson/local navigation, command/theme/user controls, billing attention, and mobile Sheet-backed navigation.
 - [x] 2026-05-15: Added `planning-brief-6.md` for the protected route-surface migration and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Applied Sidebar app-shell review fixes for mobile width CSS, mobile rail breakpoint alignment, final resize persistence, drag-click suppression, and stale planning-brief source metadata.
 
 ## Decision Log
 
@@ -212,19 +213,19 @@ This Program can move to completed only when:
 
 Important T3 Code source references:
 
-- `/Users/bazelrex/Developer/t3code/apps/web/src/index.css`
-- `/Users/bazelrex/Developer/t3code/apps/web/components.json`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/components/ui`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/components/AppSidebarLayout.tsx`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/components/ChatView.tsx`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/components/chat/ChatComposer.tsx`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/components/settings/settingsLayout.tsx`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/hooks/useTheme.ts`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/routes`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/hooks`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/lib`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/rpc`
-- `/Users/bazelrex/Developer/t3code/apps/web/src/environments`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/components.json`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/AppSidebarLayout.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ChatView.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/chat/ChatComposer.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/settings/settingsLayout.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/hooks/useTheme.ts`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/routes`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/hooks`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/lib`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/rpc`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/environments`
 
 Important Ship by Sunday replacement surfaces:
 

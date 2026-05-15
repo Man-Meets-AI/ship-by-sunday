@@ -41,7 +41,7 @@ After this slice, a protected `viewportMode="app"` page should render a `Sidebar
 
 ## Surprises & Discoveries
 
-The Program names `/Users/bazelrex/Developer/t3code` as the T3 Code source, but that path is not present in this environment. The available local reference is `/Users/bazelrex/Developer/oss/t3code`, verified by finding `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/AppSidebarLayout.tsx` and `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/sidebar.tsx`.
+The initial Program packet named `/Users/bazelrex/Developer/t3code` as the T3 Code source, but that path is not present in this environment. The available local reference is `/Users/bazelrex/Developer/oss/t3code`, verified by finding `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/AppSidebarLayout.tsx` and `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/sidebar.tsx`. A review follow-up updated the active Program metadata to point at `/Users/bazelrex/Developer/oss/t3code`.
 
 `apps/web/src/components/ui/sidebar.tsx` exists but still had no live imports before this slice. This slice creates the first live app-shell call site so Sidebar can be proven through real protected app chrome instead of static primitive churn.
 
@@ -70,6 +70,8 @@ This slice made the previously unused shared Sidebar primitive live through the 
 Focused unit tests prove the Sidebar primitive keeps the Radix-compatible source shape, mounts T3 scroll-fade content, clamps stored widths, persists accepted drag widths, suppresses accidental toggle after dragging, rejects caller-disallowed widths, and does not import Base UI or Effect. Focused integration-ui tests prove protected app viewport sidebar rendering, document-mode compatibility, local-nav collapse/restore behavior, and representative command/workspace/codebase page coverage.
 
 Browser proof used a temporary public local route at `http://localhost:3017/codex-app-shell-sidebar-proof` on a webpack dev server, then deleted the route before final validation. Desktop proof verified `data-slot="sidebar-wrapper"`, `data-slot="sidebar"`, `data-slot="sidebar-inset"`, a `Resize Sidebar` rail, 8 sidebar menu items, scroll-fade class fragments, workspace/codebase/lesson/local navigation, billing attention, and command/theme/user controls. Mobile proof emulated `390x844`, opened the `Open app sidebar` trigger, and verified the Sheet-backed mobile sidebar with the same navigation groups and accessible title/description. Screenshots were saved under ignored `codex-scripts/artifacts/app-shell-sidebar-desktop.png` and `codex-scripts/artifacts/app-shell-sidebar-mobile.png`. Clerk emitted expected local dev-key authorized-party warnings on port 3017, but the proof page rendered and the verified AppShell/Sidebar behavior was unaffected.
+
+Review follow-up on 2026-05-15 fixed mobile Sidebar width CSS, hid the resize rail until the same `md` breakpoint used by `useIsMobile`, flushed a pending resize frame before persisting on pointerup/cancel, suppressed caller `onClick` handlers after drag, and added focused regression tests for those cases.
 
 The next Program slice should migrate the protected operational route surfaces now that the shell foundation is live: make Starter, Workers, settings, support/admin, and course surfaces read as T3 Code-style product tools inside the sidebar shell, while continuing to move avoidable route-local implementation out of underscore folders.
 
