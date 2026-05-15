@@ -7,12 +7,16 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { readCheckoutIntentFromMetadata } from "@/platform/billing/checkout/checkout-intent";
 import {
+	isPaidAppCheckoutMetadata,
 	readCheckoutMetadataClerkUserId,
 	readCheckoutPurchaseMetadata,
 } from "@/platform/billing/checkout/checkout-metadata";
-import type { CheckoutOfferId } from "@/platform/billing/checkout/checkout-offers";
+import {
+	getCheckoutOfferIdForLegacyFulfillmentTrack,
+	type CheckoutOfferId,
+} from "@/platform/billing/checkout/checkout-offers";
 import { getStripe } from "@/platform/billing/stripe";
-import { requireServerEnv } from "@/platform/env/server";
+import { requireServerEnv, serverEnv } from "@/platform/env/server";
 import {
 	getStripeBillingSyncTargetFromWebhookEvent,
 	type StripeBillingSyncTarget,
@@ -139,8 +143,24 @@ function isPaidCheckoutSession(session: Stripe.Checkout.Session) {
 	);
 }
 
+function getCheckoutOfferIdFromMetadata(
+	metadata: Record<string, string> | null | undefined,
+) {
+	const purchaseOfferId = readCheckoutPurchaseMetadata(metadata)?.offerId;
+	if (purchaseOfferId) {
+		return purchaseOfferId;
+	}
+
+	return getCheckoutOfferIdForLegacyFulfillmentTrack(
+		readCheckoutIntentFromMetadata(metadata).fulfillmentTrack,
+	);
+}
+
 function getCheckoutOfferId(session: Stripe.Checkout.Session) {
-	return readCheckoutPurchaseMetadata(session.metadata)?.offerId;
+	return (
+		getCheckoutOfferIdFromMetadata(session.metadata) ??
+		(isPaidAppCheckoutMetadata(session.metadata) ? "starter" : undefined)
+	);
 }
 
 function getCheckoutPurchaseIntentId(session: Stripe.Checkout.Session) {
@@ -204,6 +224,55 @@ function getExpandedLatestInvoice(subscription: Stripe.Subscription) {
 		subscription.latest_invoice
 		? (subscription.latest_invoice as StripeInvoiceWithAttemptContext)
 		: undefined;
+}
+
+function getCheckoutOfferIdFromStripeSubscriptionItem(
+	firstItem: Stripe.SubscriptionItem | undefined,
+) {
+	const stripePriceId = firstItem?.price.id;
+	if (stripePriceId) {
+		if (stripePriceId === serverEnv.STRIPE_WORKERS_PRICE_ID) {
+			return "workers";
+		}
+
+		if (
+			stripePriceId === serverEnv.STRIPE_STARTER_PRICE_ID ||
+			stripePriceId === serverEnv.STRIPE_PRICE_ID
+		) {
+			return "starter";
+		}
+	}
+
+	const stripeProductId = getStripeId(firstItem?.price.product);
+	if (stripeProductId) {
+		if (stripeProductId === serverEnv.STRIPE_WORKERS_PRODUCT_ID) {
+			return "workers";
+		}
+
+		if (
+			stripeProductId === serverEnv.STRIPE_STARTER_PRODUCT_ID ||
+			stripeProductId === serverEnv.STRIPE_PRODUCT_ID
+		) {
+			return "starter";
+		}
+	}
+
+	return undefined;
+}
+
+function isWorkersSubscriptionSnapshot(
+	subscription: Stripe.Subscription,
+	firstItem: Stripe.SubscriptionItem | undefined,
+	expectedOfferId?: CheckoutOfferId,
+) {
+	if (expectedOfferId === "workers") {
+		return true;
+	}
+
+	return (
+		(getCheckoutOfferIdFromMetadata(subscription.metadata) ??
+			getCheckoutOfferIdFromStripeSubscriptionItem(firstItem)) === "workers"
+	);
 }
 
 async function recordProcessedStripeEvent(args: {
@@ -394,9 +463,26 @@ async function syncWorkersSubscriptionSnapshot(args: {
 	recordProcessedEvent?: boolean;
 	stripeSubscriptionId: string;
 	customerEmail?: string;
+	expectedOfferId?: CheckoutOfferId;
 	ownerClerkUserId?: string;
 }) {
 	const subscription = await retrieveSubscription(args.stripeSubscriptionId);
+	const firstItem = subscription.items.data[0];
+	if (
+		!isWorkersSubscriptionSnapshot(
+			subscription,
+			firstItem,
+			args.expectedOfferId,
+		)
+	) {
+		return await recordSkippedStripeEvent({
+			eventId: args.eventId,
+			eventType: args.eventType,
+			reason: "non_workers_subscription",
+			stripeObjectId: args.stripeSubscriptionId,
+		});
+	}
+
 	const stripeCustomerId = getStripeId(subscription.customer);
 	if (!stripeCustomerId) {
 		return await recordSkippedStripeEvent({
@@ -424,7 +510,6 @@ async function syncWorkersSubscriptionSnapshot(args: {
 		});
 	}
 
-	const firstItem = subscription.items.data[0];
 	const latestInvoice = getExpandedLatestInvoice(subscription);
 	const customerEmail =
 		args.customerEmail ??
@@ -562,6 +647,7 @@ async function syncPaidCheckoutSession(args: {
 		eventType: args.eventType,
 		stripeSubscriptionId,
 		customerEmail: args.customerEmail,
+		expectedOfferId: args.offerId,
 		ownerClerkUserId: args.ownerClerkUserId,
 		recordProcessedEvent: false,
 	});

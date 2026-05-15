@@ -55,6 +55,8 @@ beforeEach(() => {
 		CHECKOUT_FULFILLMENT_RETRY_SECRET:
 			"checkout_fulfillment_retry_secret_1234567890",
 		STRIPE_SECRET_KEY: "sk_test_123",
+		STRIPE_WORKERS_PRICE_ID: "price_workers_monthly",
+		STRIPE_WORKERS_PRODUCT_ID: "prod_workers",
 	};
 	fetchActionMock.mockReset();
 	fetchMutationMock.mockReset();
@@ -136,6 +138,142 @@ describe("stripe billing sync", () => {
 				buyerStartingPoint: "unspecified",
 				checkoutCtaId: "unspecified",
 				fulfillmentTrack: "unspecified",
+			}),
+		);
+	});
+
+	it("syncs legacy paid app checkout metadata without an offer as Starter", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_test_legacy_starter",
+			client_reference_id: null,
+			created: 1_800_000_000,
+			customer: "cus_legacy_starter",
+			customer_details: {
+				email: "legacy@example.com",
+			},
+			metadata: {
+				courseSlug: "ship-by-sunday",
+				clerkUserId: "user_legacy_starter",
+			},
+			payment_intent: {
+				id: "pi_legacy_starter",
+				created: 1_800_000_002,
+			},
+			payment_status: "paid",
+		});
+		const { syncStripeWebhookEventToConvex } =
+			await import("@/lib/billing/stripe-sync");
+
+		await expect(
+			syncStripeWebhookEventToConvex({
+				id: "evt_legacy_checkout_completed",
+				created: 1_800_000_100,
+				type: "checkout.session.completed",
+				data: {
+					object: {
+						id: "cs_test_legacy_starter",
+					},
+				},
+			} as never),
+		).resolves.toEqual({
+			kind: "starter_synced",
+			eventId: "evt_legacy_checkout_completed",
+			sessionId: "cs_test_legacy_starter",
+		});
+
+		expect(fetchActionMock).not.toHaveBeenCalled();
+		expect(getMutationArgs((args) => args.source === "stripe_webhook")).toEqual(
+			expect.objectContaining({
+				clerkUserId: "user_legacy_starter",
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_test_legacy_starter",
+				stripeCustomerId: "cus_legacy_starter",
+				stripePaymentIntentId: "pi_legacy_starter",
+				offerId: "starter",
+			}),
+		);
+	});
+
+	it("syncs legacy Workers checkout metadata through the checkout session subscription", async () => {
+		retrieveSessionMock.mockResolvedValue({
+			id: "cs_test_legacy_workers",
+			client_reference_id: null,
+			created: 1_800_000_000,
+			customer: "cus_legacy_workers",
+			customer_details: {
+				email: "workers@example.com",
+			},
+			metadata: {
+				courseSlug: "ship-by-sunday",
+				clerkUserId: "user_legacy_workers",
+				fulfillmentTrack: "existing_codebase_doctor",
+			},
+			payment_intent: null,
+			payment_status: "paid",
+			subscription: "sub_legacy_workers",
+		});
+		retrieveSubscriptionMock.mockResolvedValue({
+			id: "sub_legacy_workers",
+			customer: "cus_legacy_workers",
+			metadata: {},
+			status: "active",
+			cancel_at_period_end: false,
+			items: {
+				data: [
+					{
+						price: {
+							id: "price_legacy_workers_untracked",
+							recurring: {
+								interval: "month",
+								interval_count: 1,
+							},
+							product: "prod_legacy_workers_untracked",
+						},
+					},
+				],
+			},
+			latest_invoice: null,
+		});
+		const { syncStripeWebhookEventToConvex } =
+			await import("@/lib/billing/stripe-sync");
+
+		await expect(
+			syncStripeWebhookEventToConvex({
+				id: "evt_legacy_workers_checkout_completed",
+				created: 1_800_000_100,
+				type: "checkout.session.completed",
+				data: {
+					object: {
+						id: "cs_test_legacy_workers",
+					},
+				},
+			} as never),
+		).resolves.toEqual({
+			kind: "workers_synced",
+			eventId: "evt_legacy_workers_checkout_completed",
+			stripeSubscriptionId: "sub_legacy_workers",
+		});
+
+		expect(
+			getMutationArgs(
+				(args) => args.stripeSubscriptionId === "sub_legacy_workers",
+			),
+		).toEqual(
+			expect.objectContaining({
+				ownerClerkUserId: "user_legacy_workers",
+				stripeCustomerId: "cus_legacy_workers",
+				stripePriceId: "price_legacy_workers_untracked",
+				status: "active",
+				cadence: "monthly",
+			}),
+		);
+		expect(getMutationArgs((args) => args.source === "stripe_webhook")).toEqual(
+			expect.objectContaining({
+				clerkUserId: "user_legacy_workers",
+				source: "stripe_webhook",
+				stripeCheckoutSessionId: "cs_test_legacy_workers",
+				offerId: "workers",
+				fulfillmentTrack: "existing_codebase_doctor",
 			}),
 		);
 	});
@@ -242,6 +380,69 @@ describe("stripe billing sync", () => {
 				status: "past_due",
 				failedPaymentStartedAt: 1_800_000_100_000,
 				accessThroughAt: 1_801_209_700_000,
+			}),
+		);
+	});
+
+	it("skips known-customer subscriptions that do not match the Workers offer", async () => {
+		fetchQueryMock.mockResolvedValue({
+			ownerClerkUserId: "user_known_customer",
+			email: "known@example.com",
+		});
+		retrieveSubscriptionMock.mockResolvedValue({
+			id: "sub_unrelated_123",
+			customer: "cus_known_customer",
+			metadata: {},
+			status: "active",
+			cancel_at_period_end: false,
+			items: {
+				data: [
+					{
+						price: {
+							id: "price_other_monthly",
+							recurring: {
+								interval: "month",
+								interval_count: 1,
+							},
+							product: "prod_other",
+						},
+					},
+				],
+			},
+			latest_invoice: null,
+		});
+		const { syncStripeWebhookEventToConvex } =
+			await import("@/lib/billing/stripe-sync");
+
+		await expect(
+			syncStripeWebhookEventToConvex({
+				id: "evt_subscription_other",
+				created: 1_800_000_100,
+				type: "customer.subscription.updated",
+				data: {
+					object: {
+						id: "sub_unrelated_123",
+						customer: "cus_known_customer",
+					},
+				},
+			} as never),
+		).resolves.toEqual({
+			kind: "skipped",
+			eventId: "evt_subscription_other",
+			reason: "non_workers_subscription",
+		});
+
+		expect(fetchQueryMock).not.toHaveBeenCalled();
+		expect(
+			getMutationArgs(
+				(args) => args.stripeSubscriptionId === "sub_unrelated_123",
+			),
+		).toBeUndefined();
+		expect(getMutationArgs((args) => args.status === "skipped")).toEqual(
+			expect.objectContaining({
+				status: "skipped",
+				stripeObjectId: "sub_unrelated_123",
+				errorMessage: "non_workers_subscription",
 			}),
 		);
 	});

@@ -741,6 +741,7 @@ const context = await browser.newContext({
 	baseURL: baseUrl,
 });
 const page = await context.newPage();
+let directCheckoutSessionId = null;
 let directProofSubscriptionId = null;
 
 function getStripeObjectId(value) {
@@ -749,6 +750,10 @@ function getStripeObjectId(value) {
 	}
 
 	return typeof value?.id === "string" ? value.id : null;
+}
+
+function sleep(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function cancelDirectProofSubscription(subscriptionId) {
@@ -784,6 +789,41 @@ async function cancelDirectProofSubscription(subscriptionId) {
 	};
 }
 
+async function tryCaptureDirectProofSubscriptionId(checkoutSessionId) {
+	if (directProofSubscriptionId || !checkoutSessionId) {
+		return directProofSubscriptionId;
+	}
+
+	try {
+		const session = await stripe.checkout.sessions.retrieve(checkoutSessionId, {
+			expand: ["subscription"],
+		});
+		directProofSubscriptionId = getStripeObjectId(session.subscription);
+	} catch (error) {
+		console.warn(
+			`Unable to capture proof subscription for ${checkoutSessionId}: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
+
+	return directProofSubscriptionId;
+}
+
+async function waitForDirectProofSubscriptionId(checkoutSessionId) {
+	if (proofOffer.id !== "workers") {
+		return directProofSubscriptionId;
+	}
+
+	const deadline = Date.now() + 15_000;
+	while (!directProofSubscriptionId && Date.now() < deadline) {
+		await tryCaptureDirectProofSubscriptionId(checkoutSessionId);
+		if (!directProofSubscriptionId) {
+			await sleep(1_000);
+		}
+	}
+
+	return directProofSubscriptionId;
+}
+
 try {
 	const clerkUserId = await signInBuyer(page, {
 		baseUrl,
@@ -815,6 +855,7 @@ try {
 			priceId: stripePriceId,
 		}),
 	);
+	directCheckoutSessionId = checkoutSession.id;
 	await attachHostedProofCheckoutPurchaseIntent({
 		purchaseIntentId,
 		stripeCheckoutSessionId: checkoutSession.id,
@@ -850,6 +891,7 @@ try {
 	console.log("Opened hosted Stripe Checkout");
 	await submitHostedCheckout(page, { allowCardEntry });
 	console.log("Submitted hosted Stripe Checkout");
+	await waitForDirectProofSubscriptionId(checkoutSession.id);
 	await waitForHostedCheckoutReturn(page, {
 		offer: proofOffer,
 		successPathPattern: hostedCheckoutAppPathPattern,
@@ -1065,6 +1107,7 @@ try {
 		process.exitCode = 1;
 	}
 } finally {
+	await tryCaptureDirectProofSubscriptionId(directCheckoutSessionId);
 	if (directProofSubscriptionId) {
 		await cancelDirectProofSubscription(directProofSubscriptionId).catch(
 			() => null,
