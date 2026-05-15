@@ -31,7 +31,7 @@ The first child ExecPlan should be `Structural source adoption and doctrine reti
 It should:
 
 - Update `AGENTS.md`, `apps/web/AGENTS.md`, and docs routing so old `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and design-pack docs are not treated as preserved doctrine.
-- Use `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md` as the structural map.
+- Use `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md` as the structural map.
 - Preserve useful Next.js route groups such as `(auth)`, `(marketing)`, and `(app)`.
 - Target underscore implementation folders such as `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata`.
 - Name one small structural proof slice that moves implementation toward T3 Code-style plain modules without changing public URLs.

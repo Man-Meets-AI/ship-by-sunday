@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move Input and Textarea toward T3 Code form-control recipes with native compatibility wrappers.
 post_build_recap: Input and Textarea now use T3 Code form-control wrappers with native field escape hatches, focused render tests, app build proof, and public sign-in browser proof.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the Input and Textarea primitive slice.
   - Reviewing form-control compatibility during the T3 Code migration.
@@ -132,7 +132,7 @@ Run static validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is completed and moved, rerun plan lint against the completed path.
@@ -150,7 +150,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery

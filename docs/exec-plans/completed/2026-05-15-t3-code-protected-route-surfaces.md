@@ -6,7 +6,7 @@ completed_at: 2026-05-15
 summary: Migrate representative protected Starter, Workers setup, and settings route content to dense T3 Code-style operational surfaces inside the Sidebar-backed app shell.
 post_build_recap: Added shared protected route-surface helpers and migrated Starter home, Workers existing-codebase setup, and settings onto compact T3 Code-style headers, panels, and summary rows while preserving protected route behavior and AppShell props. Focused route/settings/setup tests, browser proof through a temporary local AppShell route, app lint/typecheck, and docs validation passed.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md
 read_when:
   - Resuming the protected route-surface migration.
   - Reviewing why shared protected route surface helpers were introduced.
@@ -72,7 +72,7 @@ No generated customer repository work, public surface work, auth/checkout work, 
 
 ## Context and Orientation
 
-The active Program is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`, and the current brief is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`. The prior shell slice is `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`.
+The active Program is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`, and the current brief is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`. The prior shell slice is `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`.
 
 The T3 Code references for this slice are `/Users/bazelrex/Developer/oss/t3code/apps/web/src/routes/_chat.index.tsx`, `/Users/bazelrex/Developer/oss/t3code/apps/web/src/routes/settings.tsx`, and `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/settings/settingsLayout.tsx`. These references use a Sidebar inset, compact page headers, restrained card/panel surfaces, and dense setting rows.
 
@@ -144,7 +144,7 @@ Edit:
     apps/web/tests/integration-ui/workspace-setup-page.test.tsx
     apps/web/tests/unit/settings-page.test.tsx
     docs/exec-plans/active/2026-05-15-t3-code-protected-route-surfaces.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -158,7 +158,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -181,7 +181,7 @@ Validation completed on 2026-05-15 from `/Users/bazelrex/Developer/ship-by-sunda
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check

@@ -45,9 +45,9 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
 - `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`
 - `/Users/bazelrex/Developer/oss/t3code/apps/web/src/routes`
 - `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/settings/settingsLayout.tsx`
 - `apps/web/src/components/app/protected-route-surface.tsx`

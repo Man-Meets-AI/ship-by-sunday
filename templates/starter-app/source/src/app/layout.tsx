@@ -1,21 +1,16 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { clientEnv } from "@/lib/env/client";
 
 import "./globals.css";
 
-const instrumentSans = Instrument_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500"],
+  variable: "--font-dm-sans",
+  weight: ["400", "500", "600", "700"],
 });
 
 void clientEnv;
@@ -37,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${instrumentSans.variable} ${ibmPlexMono.variable}`}
+      className={dmSans.variable}
       lang="en"
       suppressHydrationWarning
     >

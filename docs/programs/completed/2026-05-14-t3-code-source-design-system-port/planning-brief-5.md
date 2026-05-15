@@ -45,8 +45,8 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/AppSidebarLayout.tsx`
 - `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui/sidebar.tsx`
 - `apps/web/src/components/ui/sidebar.tsx`

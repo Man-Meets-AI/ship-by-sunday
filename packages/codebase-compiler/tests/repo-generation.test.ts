@@ -451,6 +451,20 @@ describe("repo generation", () => {
 				(file) => file.path === "apps/web/src/app/(marketing)/page.tsx",
 			),
 		);
+		const generatedDesignSystem = JSON.parse(
+			snapshotText(
+				snapshotFiles.find(
+					(file) => file.path === "docs/facts/design-system.json",
+				),
+			) || "{}",
+		) as {
+			selection?: { presetLabel?: string };
+			preset?: {
+				font?: { label?: string };
+				baseColorLabel?: string;
+				tokens?: { light?: Record<string, string> };
+			};
+		};
 		const appReadme = snapshotText(
 			snapshotFiles.find((file) => file.path === "apps/web/README.md"),
 		);
@@ -559,7 +573,16 @@ describe("repo generation", () => {
 		expect(marketingPage).toContain(
 			'import { productConfig, productContent } from "@/config/product";',
 		);
+		expect(marketingPage).toContain("productContent.headline");
+		expect(marketingPage).toContain("bg-primary");
+		expect(marketingPage).not.toContain("radial-gradient");
 		expect(marketingPage).not.toContain("@/app/_content");
+		expect(generatedDesignSystem.selection?.presetLabel).toBe("T3 Code");
+		expect(generatedDesignSystem.preset?.font?.label).toBe("DM Sans");
+		expect(generatedDesignSystem.preset?.baseColorLabel).toBe("Zinc");
+		expect(generatedDesignSystem.preset?.tokens?.light?.["--primary"]).toBe(
+			"oklch(0.488 0.217 264)",
+		);
 		expect(appSnapshotText).not.toContain("Northstar");
 		expect(appSnapshotText).not.toContain("thienlnam");
 		expect(appSnapshotText).not.toContain(
@@ -573,6 +596,7 @@ describe("repo generation", () => {
 			"apps/web/convex/_generated/ai/guidelines.md",
 		);
 		expect(appReadme).toContain("No-Provider Contract");
+		expect(appReadme).toContain("T3 Code visual contract");
 		expect(appReadme).toContain("config/product.ts");
 		expect(appReadme).not.toContain("_content");
 		expect(appReadme).not.toContain("api/stripe/webhook");
@@ -588,7 +612,7 @@ describe("repo generation", () => {
 			materializedOutputRoot: "apps/web",
 			generatedOverlaysWin: true,
 			contentDigest:
-				"sha256-5a0c27830caa417749264f5968c28a44083b63b742260a11c4757702c2924755",
+				"sha256-21161b85025f6d462ddf1be45d39599c0143f89ae8b9736c327986b0dae11f18",
 		});
 		expect(
 			Object.keys(templateSourceProvenance.provenance ?? {}),

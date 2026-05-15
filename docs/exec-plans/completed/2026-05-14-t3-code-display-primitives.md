@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move Card, Alert, Skeleton, and Kbd toward T3 Code class recipes while preserving current call-site APIs.
 post_build_recap: Card, Alert, Skeleton, and Kbd now use T3 Code display recipes with compatibility aliases and focused render plus browser proof.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the display primitive slice of the T3 Code migration.
   - Reviewing Card, Alert, Skeleton, or Kbd compatibility during the T3 Code migration.
@@ -129,7 +129,7 @@ Run static validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is completed and moved, rerun plan lint against the completed path.
@@ -147,7 +147,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery

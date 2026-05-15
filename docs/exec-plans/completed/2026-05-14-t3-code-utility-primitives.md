@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty toward T3 Code recipes while preserving current Radix call-site compatibility.
 post_build_recap: ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty now carry T3-style utility recipes on top of the existing Radix/shared runtime. Focused primitive tests, workspace setup live-consumer coverage, codebase page behavior coverage, desktop/mobile browser proof, app lint/typecheck, repo lint/typecheck, plan/program/docs lint, markdown lint, and diff checks passed. Sidebar remains intentionally deferred to the protected app-shell/sidebar slice because it has no live imports today.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the utility primitive slice.
   - Reviewing shared ScrollArea, Collapsible, Toggle, Spinner, or Empty compatibility during the T3 Code migration.
@@ -69,7 +69,7 @@ The target shared files are `apps/web/src/components/ui/scroll-area.tsx`, `apps/
 
 ### In Scope
 
-This plan updates the six utility primitive files above, adds focused tests under `apps/web/tests/unit`, reruns representative live call-site tests, and updates this ExecPlan plus `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`.
+This plan updates the six utility primitive files above, adds focused tests under `apps/web/tests/unit`, reruns representative live call-site tests, and updates this ExecPlan plus `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`.
 
 ### Out Of Scope
 
@@ -121,7 +121,7 @@ Edit:
     apps/web/src/components/ui/empty.tsx
     apps/web/tests/unit/ui-utility-primitives.test.tsx
     docs/exec-plans/active/2026-05-14-t3-code-utility-primitives.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -135,7 +135,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is still active while running intermediate checks, use the active path for `plans:lint` and `markdown:lint`. Once it is moved to completed, use the completed path shown above.
@@ -154,7 +154,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -193,7 +193,7 @@ Validation completed on 2026-05-14:
     PLAYWRIGHT_BASE_URL=http://localhost:3015 node codex-scripts/prove-utility-browser.mjs
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check

@@ -43,7 +43,7 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
 - `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`
 - `packages/telegram-chat-widget/README.md`
 - `packages/telegram-chat-widget/package.json`

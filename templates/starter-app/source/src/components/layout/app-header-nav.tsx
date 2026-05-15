@@ -17,7 +17,7 @@ export function AppHeaderNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-1 rounded-full border border-zinc-200/80 bg-white/80 p-1 shadow-sm dark:border-zinc-800 dark:bg-zinc-950/80 md:flex">
+    <nav className="hidden items-center gap-1 rounded-lg border bg-card p-1 md:flex">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname.startsWith(item.href);
@@ -28,9 +28,8 @@ export function AppHeaderNav() {
             asChild
             variant={isActive ? "secondary" : "ghost"}
             className={cn(
-              "rounded-full",
-              isActive &&
-                "bg-zinc-950 text-white hover:bg-zinc-900 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100",
+              "rounded-md",
+              isActive && "bg-primary text-primary-foreground hover:bg-primary/90",
             )}
           >
             <Link href={item.href}>

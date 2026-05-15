@@ -18,28 +18,24 @@ export function SectionHeader({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-4xl border border-zinc-200/80 bg-white/80 px-6 py-6 shadow-[0_24px_60px_-44px_rgba(15,23,42,0.45)] backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80 md:flex md:items-end md:justify-between md:gap-6 lg:px-8",
+        "border-b pb-5 md:flex md:items-end md:justify-between md:gap-6",
         className,
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-zinc-400/40 to-transparent dark:via-zinc-600/40"
-      />
       <div className="space-y-3">
         {eyebrow ? (
           <div className="inline-flex items-center gap-3">
-            <span className="h-px w-10 bg-zinc-300 dark:bg-zinc-700" />
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500">
+            <span className="h-px w-8 bg-border" />
+            <p className="text-xs font-semibold text-muted-foreground">
               {eyebrow}
             </p>
           </div>
         ) : null}
         <div className="space-y-2">
-          <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50 sm:text-[2.15rem]">
+          <h1 className="max-w-3xl text-2xl font-semibold text-foreground sm:text-3xl">
             {title}
           </h1>
-          <p className="max-w-2xl text-sm leading-7 text-zinc-600 dark:text-zinc-400">
+          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
             {description}
           </p>
         </div>

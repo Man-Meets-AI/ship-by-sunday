@@ -2,11 +2,10 @@
 
 This file is no longer active instructions for Ship by Sunday UI work.
 
-Use the active T3 Code migration Program instead:
+Use the completed T3 Code migration Program instead:
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 
 Do not preserve this pack's old visual, planning, or frontend doctrine over T3 Code.
 

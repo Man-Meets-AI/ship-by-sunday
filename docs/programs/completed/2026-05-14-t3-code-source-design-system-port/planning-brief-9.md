@@ -46,7 +46,7 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
 - `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`
 - `apps/web/src/content/docs/configure-the-homepage.mdx`
 - `apps/web/src/config/product.ts`

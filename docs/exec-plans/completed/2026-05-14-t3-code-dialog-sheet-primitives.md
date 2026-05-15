@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move Dialog and Sheet toward T3 Code modal recipes while preserving current Radix call-site compatibility.
 post_build_recap: Dialog and Sheet now carry T3 Code backdrop, viewport, popup, panel, close-button, header, title, description, and footer recipes on Radix adapters, with focused tests, app compatibility tests, guarded typecheck, and desktop/mobile browser proof passing.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the Dialog and Sheet primitive slice.
   - Reviewing shared modal primitive compatibility during the T3 Code migration.
@@ -68,7 +68,7 @@ The target files are `apps/web/src/components/ui/dialog.tsx` and `apps/web/src/c
 
 ### In Scope
 
-This plan updates `apps/web/src/components/ui/dialog.tsx`, `apps/web/src/components/ui/sheet.tsx`, adds a focused unit test under `apps/web/tests/unit`, and updates this ExecPlan plus `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`. The implementation should preserve existing exports, add T3-style aliases for popup/backdrop/panel surfaces, and carry the T3 modal and sheet class recipes.
+This plan updates `apps/web/src/components/ui/dialog.tsx`, `apps/web/src/components/ui/sheet.tsx`, adds a focused unit test under `apps/web/tests/unit`, and updates this ExecPlan plus `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`. The implementation should preserve existing exports, add T3-style aliases for popup/backdrop/panel surfaces, and carry the T3 modal and sheet class recipes.
 
 ### Out Of Scope
 
@@ -114,7 +114,7 @@ Edit:
     apps/web/src/components/ui/sheet.tsx
     apps/web/tests/unit/ui-dialog-sheet-primitives.test.tsx
     docs/exec-plans/active/2026-05-14-t3-code-dialog-sheet-primitives.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -128,7 +128,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is still active while running intermediate checks, use the active path for `plans:lint` and `markdown:lint`. Once it is moved to completed, use the completed path shown above.
@@ -148,7 +148,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery
@@ -204,7 +204,7 @@ Validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed for the completed plan and Program.
 
     git diff --check

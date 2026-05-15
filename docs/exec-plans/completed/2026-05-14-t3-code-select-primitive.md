@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move the shared Select primitive toward T3 Code recipes while preserving current Radix Select call-site behavior.
 post_build_recap: Select now carries T3 Code trigger, content, item, separator, scroll affordance, and compatibility helper recipes on the existing Radix Select API, with focused unit, codebase-flow integration, EA-authenticated browser, lint, format, and typecheck proof.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the Select primitive slice.
   - Reviewing whether Select should stay on Radix or move to Base UI.
@@ -80,7 +80,7 @@ The target primitive is `apps/web/src/components/ui/select.tsx`. Current live ca
 
 ### In Scope
 
-This plan updates `apps/web/src/components/ui/select.tsx`, adds a focused unit test for Select under `apps/web/tests/unit`, runs the existing codebase-flow integration-ui test when relevant, and updates this ExecPlan plus `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`. It may add T3-compatible `SelectButton`, `selectTriggerVariants`, and `SelectGroupLabel` exports if they do not require a new dependency or call-site rewrite.
+This plan updates `apps/web/src/components/ui/select.tsx`, adds a focused unit test for Select under `apps/web/tests/unit`, runs the existing codebase-flow integration-ui test when relevant, and updates this ExecPlan plus `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`. It may add T3-compatible `SelectButton`, `selectTriggerVariants`, and `SelectGroupLabel` exports if they do not require a new dependency or call-site rewrite.
 
 ### Out Of Scope
 
@@ -125,7 +125,7 @@ Edit:
     apps/web/src/components/ui/select.tsx
     apps/web/tests/unit/ui-select-primitive.test.tsx
     docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -138,7 +138,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is completed and moved, rerun plan lint against the completed path:
@@ -159,7 +159,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery
@@ -210,7 +210,7 @@ Validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed for the completed plan and Program.
 
     git diff --check
@@ -239,7 +239,7 @@ Review repair validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed for the completed plan and Program.
 
     git diff --check

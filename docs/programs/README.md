@@ -15,8 +15,6 @@ read_when:
 ## Current State
 
 Active:
-
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/`: T3 Code source-of-truth visual-system migration for every current and generated Ship by Sunday web UI surface while keeping Ship by Sunday branding.
 - `docs/programs/active/2026-05-13-autonomous-program-execution-loop/`: autonomous Program and ExecPlan execution loop that runs approved child plans through execution, fresh review, fixes, proof, docs sync, and checkpoints.
 - `docs/programs/active/2026-05-13-template-first-web-convex-architecture/`: template-first migration of `apps/web` and Convex toward the sibling Next.js Convex Clerk Stripe architecture, including billing, Sentry, Resend, route groups, and provider conventions.
 - `docs/programs/active/2026-05-12-public-product-split-starter-workers/`: Man Meets AI brand homepage, public Starter and Workers sales paths, Starter-owned generator/videos, unpromoted support docs, and generated template-app boundaries.
@@ -26,6 +24,7 @@ Active:
 
 Recently completed:
 
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/`: completed T3 Code source-of-truth visual-system migration for every current and generated Ship by Sunday web UI surface while keeping Ship by Sunday branding.
 - `docs/programs/completed/2026-05-13-local-runner-node-effect-migration/`: completed Node-first `packages/local-runner` runtime and distribution cutover plus staged Effect migration for process, Codex, event, workflow API, Worker install, and Program run-slice orchestration boundaries.
 - `docs/programs/completed/2026-05-13-starter-template-source-and-billing-proof/`: completed product-specific hosted billing proof and pinned Starter template source Program that added dynamic generated template downloads from default facts.
 - `docs/programs/completed/2026-05-10-standalone-telegram-chat-widget/`: completed standalone Telegram chat widget Program that extracted the polished support chat into an internal React package, preserved screenshot and bug-report support, added optional Convex realtime with scoped conversation capabilities, and removed visitor-side polling while realtime is active.

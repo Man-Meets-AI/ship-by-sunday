@@ -6,7 +6,7 @@ completed_at: 2026-05-15
 summary: Move the current public homepage, product pages, docs chrome, and blog chrome onto T3 Code-style public route surfaces without changing checkout, metadata, or route contracts.
 post_build_recap: Current public homepage, Starter, Workers, Worker Seal Team 6, blog chrome, and docs chrome now use T3 Code-style public route surfaces and sans docs/blog typography while preserving checkout, Cal.com, metadata, and route contracts.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md
 read_when:
   - Resuming the public surface migration slice.
   - Reviewing homepage, Starter, Workers, Worker Seal Team 6, docs, or blog T3 Code migration work.
@@ -64,7 +64,7 @@ Focused tests now cover public marketing route slots, Starter and Workers checko
 
 ## Context and Orientation
 
-The active Program is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`, and this plan is driven by `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md`. The current homepage contract is documented in `apps/web/src/content/docs/configure-the-homepage.mdx`.
+The active Program is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`, and this plan is driven by `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md`. The current homepage contract is documented in `apps/web/src/content/docs/configure-the-homepage.mdx`.
 
 The public pages for this pass are:
 
@@ -150,7 +150,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -175,7 +175,7 @@ Feature risk for this slice is P1-adjacent because it changes public checkout en
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -211,7 +211,7 @@ The implementation is local React composition and CSS changes. If a test shows t
 
 Important references:
 
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md
     apps/web/src/content/docs/configure-the-homepage.mdx
     apps/web/src/config/product.ts
     apps/web/src/app/(marketing)/page.tsx

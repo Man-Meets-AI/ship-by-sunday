@@ -1,6 +1,6 @@
 ---
 title: 'Retired Frontend Route'
-summary: 'Temporary pointer away from the old frontend doctrine during the T3 Code migration.'
+summary: 'Pointer away from the old frontend doctrine after the T3 Code migration.'
 docType: 'redirect'
 status: 'active'
 read_when:
@@ -11,10 +11,10 @@ read_when:
 
 This file is no longer a current frontend doctrine surface.
 
-Use the active T3 Code migration Program instead:
+Use the completed T3 Code migration Program instead:
 
-- [program.md](programs/active/2026-05-14-t3-code-source-design-system-port/program.md)
-- [current-planning-brief.txt](programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt)
+- [program.md](programs/completed/2026-05-14-t3-code-source-design-system-port/program.md)
+- [structure-map-t3-code-to-ship-by-sunday.md](programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md)
 
 Keep Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` when they are useful framework organization. The cleanup target is the underscore implementation-folder pattern such as `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata`.
 

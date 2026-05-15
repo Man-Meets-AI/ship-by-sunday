@@ -42,11 +42,11 @@ const defaultStarterTemplateFacts = {
 	price_usd_cents: 1900,
 	price_display: "$19/mo",
 	currency: "USD",
-	design_preset_id: "vercel",
+	design_preset_id: "t3-code",
 	design_references: [
 		"ChatGPT conversation layout",
-		"Vercel dashboard clarity",
-		"shadcn/ui component primitives",
+		"T3 Code app shell and primitive system",
+		"DM Sans, zinc surfaces, and blue primary actions",
 	],
 	visual_thesis:
 		"A calm, product-grade AI workspace with a focused chat surface, restrained chrome, and clear setup states.",
@@ -55,16 +55,16 @@ const defaultStarterTemplateFacts = {
 	interaction_thesis:
 		"Make the chat loop feel immediate while keeping setup, billing, and provider actions explicit.",
 	design_tokens:
-		"Neutral app tokens, tight borders, compact controls, readable chat spacing, and one strong primary action.",
+		"Zinc semantic surfaces, blue primary actions, compact T3 Code radii, readable chat spacing, and one strong primary action.",
 	typography_direction:
-		"Use clear sans-serif UI text with mono treatment for setup values, scripts, and validation commands.",
+		"Use DM Sans for primary UI text with mono treatment only for setup values, scripts, and validation commands.",
 	imagery_direction:
 		"Prefer concrete product screenshots, setup states, and chat workspace previews over abstract AI art.",
 	layout_direction:
 		"Use a narrow marketing shell, authenticated dashboard, conversation sidebar, and full-height chat workbench.",
 	brand_assets: ["Generated wordmark", "Product facts", "Design tokens"],
 	existing_system_mode:
-		"Generated Next.js app using shadcn-style primitives and template-source layout conventions.",
+		"Generated Next.js app using the T3 Code visual contract and template-source layout conventions.",
 	hero_goal:
 		"Show that the download is a runnable AI chat starter with explicit setup proof.",
 	primary_cta: "Start chatting",

@@ -59,16 +59,16 @@ export default function DashboardPage() {
           return (
             <Card
               key={signal.label}
-              className="border-zinc-200/80 bg-white/80 transition-transform duration-200 hover:-translate-y-1 dark:border-zinc-800 dark:bg-zinc-950/80"
+              className="transition-colors hover:bg-accent/40"
             >
               <CardHeader className="gap-3">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Icon className="h-5 w-5" />
                 </div>
                 <CardTitle>{signal.label}</CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm leading-6 text-muted-foreground">
                   {signal.description}
                 </p>
               </CardContent>
@@ -79,14 +79,14 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
         <Card>
-          <CardHeader className="border-b border-zinc-200/80 dark:border-zinc-800">
+          <CardHeader className="border-b">
             <CardTitle>Patterns worth copying</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3">
             {extensionRules.map((rule) => (
               <div
                 key={rule}
-                className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+                className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground"
               >
                 {rule}
               </div>
@@ -95,11 +95,11 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader className="border-b border-zinc-200/80 dark:border-zinc-800">
+          <CardHeader className="border-b">
             <CardTitle>Platform already connected</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm leading-6 text-muted-foreground">
               Each integration has a clear lane so you can add new features
               without spreading provider-specific logic through every screen.
             </p>

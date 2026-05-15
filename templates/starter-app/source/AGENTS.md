@@ -1,6 +1,6 @@
 # Agent Instructions
 
-Next.js App Router, Convex, Clerk, Stripe, Tailwind, shadcn/ui. Before changing code, read `ARCHITECTURE.md` and `CONVENTIONS.md` — they define layer ownership, request flows, and rules for adding features without eroding structure.
+Next.js App Router, Convex, Clerk, Stripe, Tailwind, and T3 Code-styled local primitives. Before changing code, read `ARCHITECTURE.md` and `CONVENTIONS.md` — they define layer ownership, request flows, and rules for adding features without eroding structure.
 
 ## Commands
 

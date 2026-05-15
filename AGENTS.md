@@ -7,7 +7,7 @@
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 - For work in `packages/codebase-compiler`, also follow `packages/codebase-compiler/AGENTS.md`.
 - For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
-- The active T3 Code migration Program is the current source for web UI visual and structure decisions. Do not treat root `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, or `docs/ship-by-sunday/design-pack/` as preserved doctrine while that Program is active.
+- The completed T3 Code Source Design System Port Program is the current source for web UI visual and structure decisions. Do not treat root `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, or `docs/ship-by-sunday/design-pack/` as preserved doctrine.
 - Canonical repo-reference docs live in `docs/`. Start with `docs/index.md`, then read only the file relevant to the task:
   - `docs/ARCHITECTURE.md`
   - `docs/RELIABILITY.md`
@@ -16,7 +16,7 @@
   - `docs/QUALITY_SCORE.md`
   - `docs/programs/README.md`
 - `docs/openai/` and `docs/ship-by-sunday/` are source instruction packs. `docs/generated/` mirrors generated customer-facing output. Do not edit generated mirrors without also updating their source or the generation path.
-- Treat `docs/ship-by-sunday/` as background context unless a local `AGENTS.md`, active Program packet, or current runtime code points there as the active contract.
+- Treat `docs/ship-by-sunday/` as background context unless a local `AGENTS.md`, Program packet, or current runtime code points there as the active contract.
 
 ## Vendored Reference Repositories
 
@@ -47,7 +47,7 @@
 ## Path Triggers
 
 - Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
-- User-facing UI or app structure during the T3 migration: read `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md` and its current planning brief before changing layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or route-local implementation structure.
+- User-facing UI or app structure: read `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or route-local implementation structure.
 - Public homepage: read `apps/web/src/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Routes, auth, checkout, entitlement, browser proof, or release readiness: read `docs/release-workflow.md` before changing the surface or judging release confidence.

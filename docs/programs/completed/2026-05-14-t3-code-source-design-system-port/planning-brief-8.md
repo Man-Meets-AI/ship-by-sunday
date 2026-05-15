@@ -45,7 +45,7 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
 - `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`
 - `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`
 - `apps/web/src/components/app/protected-route-surface.tsx`

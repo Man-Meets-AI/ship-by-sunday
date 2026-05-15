@@ -339,10 +339,7 @@ export function getPresetStyleMeta(style: string): PresetStyleMeta {
 }
 
 function getThemeAccentTokens(theme: string, mode: "light" | "dark") {
-	const primary =
-		theme in THEME_COLOR_HEX
-			? (THEME_PRIMARY_OKLCH[theme] ?? THEME_PRIMARY_OKLCH.neutral)
-			: THEME_PRIMARY_OKLCH.neutral;
+	const primary = getThemePrimaryOklch(theme, mode);
 	const primaryForeground = LIGHT_PRIMARY_WITH_DARK_FG.has(theme)
 		? "oklch(0.145 0 0)"
 		: "oklch(0.985 0 0)";
@@ -357,6 +354,18 @@ function getThemeAccentTokens(theme: string, mode: "light" | "dark") {
 		"--sidebar-ring": primary,
 		...(mode === "light" ? CHART_TOKENS.light : CHART_TOKENS.dark),
 	};
+}
+
+function getThemePrimaryOklch(theme: string, mode: "light" | "dark") {
+	if (theme === "blue") {
+		return mode === "dark"
+			? "oklch(0.588 0.217 264)"
+			: "oklch(0.488 0.217 264)";
+	}
+
+	return theme in THEME_COLOR_HEX
+		? (THEME_PRIMARY_OKLCH[theme] ?? THEME_PRIMARY_OKLCH.neutral)
+		: THEME_PRIMARY_OKLCH.neutral;
 }
 
 const THEME_PRIMARY_OKLCH: Record<string, string> = {

@@ -37,7 +37,7 @@ It assumes the ownership model in `ARCHITECTURE.md` and focuses on the rules con
 ## UI
 
 - Use local app-level abstractions like `PageShell`, `AppHeader`, and `SectionHeader` before inventing new page structures.
-- Do not paste raw shadcn primitives everywhere when a reusable local component should exist.
+- Do not paste raw primitive recipes everywhere when a reusable local component should exist.
 - Default to server components and keep client islands small.
 
 ## Environment variables

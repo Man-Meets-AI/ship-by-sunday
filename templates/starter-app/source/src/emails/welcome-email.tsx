@@ -25,7 +25,7 @@ export function WelcomeEmail({
           backgroundColor: "#f4f1ea",
           color: "#18181b",
           fontFamily:
-            '"Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
+            '"DM Sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
           padding: "24px 0",
         }}
       >

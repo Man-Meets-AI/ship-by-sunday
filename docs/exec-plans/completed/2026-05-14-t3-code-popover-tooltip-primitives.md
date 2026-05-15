@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move Popover and Tooltip toward T3 Code popup recipes while preserving current Radix compatibility.
 post_build_recap: Popover now exists as a Radix-backed shared primitive with T3 popup aliases, Tooltip now uses the T3 popup surface while keeping current exports and Radix instant/delayed open states, and focused unit, app lint/typecheck, and desktop/mobile browser proof passed.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the Popover and Tooltip primitive slice.
   - Reviewing whether popup primitives should stay Radix-backed during the T3 Code migration.
@@ -71,7 +71,7 @@ The target files are `apps/web/src/components/ui/popover.tsx` and `apps/web/src/
 
 ### In Scope
 
-This plan updates `apps/web/src/components/ui/tooltip.tsx`, adds `apps/web/src/components/ui/popover.tsx`, adds a focused unit test under `apps/web/tests/unit`, and updates this ExecPlan plus `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`. The implementation should preserve existing Tooltip exports, add `TooltipPopup` as an alias, expose the standard Popover Radix exports, and add `PopoverPopup` as a T3-style alias for `PopoverContent`.
+This plan updates `apps/web/src/components/ui/tooltip.tsx`, adds `apps/web/src/components/ui/popover.tsx`, adds a focused unit test under `apps/web/tests/unit`, and updates this ExecPlan plus `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`. The implementation should preserve existing Tooltip exports, add `TooltipPopup` as an alias, expose the standard Popover Radix exports, and add `PopoverPopup` as a T3-style alias for `PopoverContent`.
 
 ### Out Of Scope
 
@@ -117,7 +117,7 @@ Edit:
     apps/web/src/components/ui/tooltip.tsx
     apps/web/tests/unit/ui-popover-tooltip-primitives.test.tsx
     docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -129,7 +129,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is still active while running intermediate checks, use the active path for `plans:lint` and `markdown:lint`. Once it is moved to completed, use the completed path shown above.
@@ -147,7 +147,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery
@@ -198,7 +198,7 @@ Validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed for the completed plan and Program.
 
     git diff --check
@@ -240,7 +240,7 @@ Review repair validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed for the completed plan and Program.
 
     git diff --check
@@ -269,7 +269,7 @@ Radix open-state selector repair validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed.
 
     git diff --check

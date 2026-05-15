@@ -18,10 +18,10 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className="flex min-h-screen items-center justify-center bg-[var(--background)] px-6">
-        <div className="max-w-md space-y-4 text-center">
+      <body className="flex min-h-screen items-center justify-center bg-background px-6 font-sans text-foreground">
+        <div className="max-w-md space-y-4 rounded-lg border bg-card p-6 text-center text-card-foreground">
           <h1 className="text-2xl font-semibold">Something went wrong</h1>
-          <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm leading-6 text-muted-foreground">
             The error was captured for debugging. Try the action again, or return
             after refreshing the page.
           </p>

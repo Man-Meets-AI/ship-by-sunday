@@ -6,7 +6,7 @@ completed_at: 2026-05-15
 summary: Finish the remaining protected app route-surface migration for Doctor Pass, paid app home, access recovery, codebase flow, mission, and lesson watch surfaces.
 post_build_recap: Doctor Pass, paid home, access recovery, codebase overview, mission intro, and lesson watch surfaces now use T3 Code-style protected route headers, panels, and compact typography while preserving behavior-sensitive route actions.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md
 read_when:
   - Resuming the protected app route closeout slice.
   - Reviewing Doctor Pass, paid app home, access recovery, codebase flow, mission, or lesson watch T3 Code migration work.
@@ -68,7 +68,7 @@ Focused tests cover the behavior-sensitive paths and the visible route-surface c
 
 ## Context and Orientation
 
-The active Program is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`, and this plan is driven by `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md`.
+The active Program is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`, and this plan is driven by `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md`.
 
 The shared protected route-surface helpers live in `apps/web/src/components/app/protected-route-surface.tsx`. They provide `ProtectedRoutePage`, `ProtectedRouteHeader`, `ProtectedRouteEyebrow`, `ProtectedRouteTitle`, `ProtectedRouteDescription`, `ProtectedRouteIcon`, `ProtectedRoutePanel`, `ProtectedRoutePanelHeader`, `ProtectedRoutePanelTitle`, `ProtectedRoutePanelDescription`, `ProtectedRoutePanelBody`, `ProtectedRouteSummaryGrid`, and `protectedRoutePanelClassName`.
 
@@ -158,7 +158,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -183,7 +183,7 @@ Feature risk for this slice is P1-adjacent because it touches protected access, 
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -198,7 +198,7 @@ Passed before completing this plan:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check

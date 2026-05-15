@@ -47,11 +47,11 @@ Out of scope for the replacement child ExecPlan:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/research-pass-t3-code-and-current-ui.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/dependency-graph.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/plan-split-recommendation.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/research-pass-t3-code-and-current-ui.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/dependency-graph.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/plan-split-recommendation.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `/Users/bazelrex/Developer/t3code/apps/web/src`
 - `/Users/bazelrex/Developer/t3code/apps/web/src/components`
 - `/Users/bazelrex/Developer/t3code/apps/web/src/routes`

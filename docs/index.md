@@ -34,7 +34,7 @@ Root guidance starts at `AGENTS.md` and this docs index. More specific nested `A
 - Architecture and authority split: [docs/ARCHITECTURE.md](ARCHITECTURE.md)
 - Validation, worktree behavior, and review loops: [docs/RELIABILITY.md](RELIABILITY.md)
 - Secrets, approvals, and trust boundaries: [docs/SECURITY.md](SECURITY.md)
-- Active web UI and app-shape migration: [docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md](programs/active/2026-05-14-t3-code-source-design-system-port/program.md)
+- T3 Code web UI and app-shape source: [docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md](programs/completed/2026-05-14-t3-code-source-design-system-port/program.md)
 - Product judgment and spec routing: [docs/PRODUCT_SENSE.md](PRODUCT_SENSE.md)
 - Quality-score landing surface: [docs/QUALITY_SCORE.md](QUALITY_SCORE.md)
 - Planning contract compatibility route: [docs/PLANS.md](PLANS.md)

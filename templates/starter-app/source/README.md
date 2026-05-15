@@ -1,6 +1,6 @@
 # Starter Stack
 
-Next.js App Router starter with Convex, Clerk, Stripe, Tailwind CSS, shadcn/ui, Resend, PostHog, and Sentry wired behind clear internal boundaries.
+Next.js App Router starter with Convex, Clerk, Stripe, Tailwind CSS, T3 Code-styled local primitives, Resend, PostHog, and Sentry wired behind clear internal boundaries.
 
 ## Why this exists
 

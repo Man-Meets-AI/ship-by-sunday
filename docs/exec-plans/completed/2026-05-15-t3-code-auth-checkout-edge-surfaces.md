@@ -6,7 +6,7 @@ completed_at: 2026-05-15
 summary: Move auth, checkout recovery, global error, and missing-route edge screens onto T3 Code-style surfaces without changing Clerk, Stripe, access, or redirect behavior.
 post_build_recap: Auth, checkout success framing, checkout cancel confirmation, checkout clear-pending, not-found, and error boundary screens now use a shared T3 Code edge route surface while preserving Clerk, Stripe, access, metadata, and telemetry behavior.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md
 read_when:
   - Resuming the auth, checkout, or edge-surface migration slice.
   - Changing sign-in, reset-password, checkout success, checkout cancel, checkout clear-pending, not-found, or error boundary UI during the T3 Code migration.
@@ -69,7 +69,7 @@ The full auth flow modules remain under `apps/web/src/app/(auth)/_components/sig
 
 ## Context and Orientation
 
-The active Program is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`, and this plan is driven by `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md`. The immediate predecessor slice is `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`, which added `apps/web/src/components/layout/public-route-surface.tsx` and `apps/web/src/components/layout/public-site-header.tsx`.
+The active Program is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`, and this plan is driven by `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md`. The immediate predecessor slice is `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`, which added `apps/web/src/components/layout/public-route-surface.tsx` and `apps/web/src/components/layout/public-site-header.tsx`.
 
 The auth routes live under `apps/web/src/app/(auth)`. `apps/web/src/app/(auth)/layout.tsx` wraps the group in `IdentityPageFrame`. `apps/web/src/app/(auth)/sign-in/[[...sign-in]]/page.tsx` preserves safe redirect behavior, bypass behavior, and pending checkout email locking before rendering the custom `SignInPage`. `apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx` redirects sign-up attempts to either the safe redirect target or checkout success. `apps/web/src/app/(auth)/session-tasks/reset-password/page.tsx` renders Clerk `TaskResetPassword` with `redirectUrlComplete` derived from the route query.
 
@@ -103,7 +103,7 @@ Sixth, update focused tests. Existing tests should continue covering Clerk behav
 
 Seventh, run browser proof on a local webpack dev server for one auth route and one checkout or edge route at desktop and mobile sizes. Use the existing webpack fallback if Turbopack panics in this environment.
 
-Eighth, complete this ExecPlan, move it to `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`, update `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md` to record completion and point to the next recommended slice, and run final validation.
+Eighth, complete this ExecPlan, move it to `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`, update `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md` to record completion and point to the next recommended slice, and run final validation.
 
 ## Milestones
 
@@ -139,7 +139,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -164,7 +164,7 @@ Feature risk for this slice is P1-adjacent because it changes auth, checkout, an
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -179,7 +179,7 @@ If a check fails after moving the plan to `completed/`, move the plan back to `a
 
 Important references:
 
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md
     docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md
     docs/release-workflow.md
     apps/web/src/app/(auth)
@@ -200,7 +200,7 @@ Passed focused validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check

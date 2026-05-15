@@ -51,6 +51,40 @@ function createPresetCode(overrides: Partial<PresetConfig>) {
 
 export const designPresetDefinitions = [
 	{
+		id: "t3-code",
+		label: "T3 Code",
+		summary: "Dense product UI with DM Sans, zinc surfaces, and blue actions.",
+		category: "Software",
+		presetCode: createPresetCode({
+			theme: "blue",
+			style: "mira",
+			font: "dm-sans",
+			radius: "default",
+			baseColor: "zinc",
+		}),
+		previewPageUrl:
+			"/docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md",
+		rawDesignMdUrl:
+			"/docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md",
+		previewImagePath: "/codebase/design-presets/previews/t3-code.svg",
+		logoPath: "/codebase/design-presets/logos/t3-code.svg",
+		designReferences: [
+			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css",
+			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui",
+		],
+		narrativeOverrides: {
+			copy_tone: "Direct, compact, product-grade, and implementation-focused.",
+			typography_direction:
+				"Use DM Sans for primary UI typography and system monospace only for code, values, and command text.",
+			layout_direction:
+				"Favor dense app-like sections, compact controls, quiet borders, and clear left-aligned hierarchy over editorial or decorative layouts.",
+			design_tokens:
+				"Zinc semantic surfaces, blue primary actions, additive T3 Code radii, and light/dark tokens inherited from the app shell.",
+			interaction_thesis:
+				"Favor quick, low-noise feedback and direct interactions that keep the interface efficient and calm.",
+		},
+	},
+	{
 		id: "vercel",
 		label: "Vercel",
 		summary: "Black-and-white precision with Geist typography.",
@@ -231,7 +265,7 @@ export const designPresetDefinitions = [
 
 export type DesignPresetId = (typeof designPresetDefinitions)[number]["id"];
 
-export const DEFAULT_DESIGN_PRESET_ID = "vercel" satisfies DesignPresetId;
+export const DEFAULT_DESIGN_PRESET_ID = "t3-code" satisfies DesignPresetId;
 
 const designPresetDefinitionById = new Map(
 	designPresetDefinitions.map((preset) => [preset.id, preset]),

@@ -19,13 +19,13 @@ export function BrandLockup({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-2 text-zinc-950 transition-opacity hover:opacity-80 focus-visible:rounded-2xl focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 focus-visible:outline-none sm:gap-3 dark:text-zinc-50 dark:focus-visible:ring-white",
+        "inline-flex items-center gap-2 text-foreground transition-opacity hover:opacity-80 focus-visible:rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:gap-3",
         className,
       )}
     >
       <span
         aria-hidden
-        className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-950 text-white shadow-[0_18px_36px_-24px_rgba(15,23,42,0.6)] sm:h-10 sm:w-10 sm:rounded-2xl dark:bg-white dark:text-zinc-950"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground sm:h-10 sm:w-10"
       >
         <span className="grid grid-cols-2 gap-1">
           <span className="h-1.5 w-1.5 rounded-full bg-current opacity-45" />
@@ -39,7 +39,7 @@ export function BrandLockup({
           {title}
         </span>
         {subtitle ? (
-          <span className="mt-1 hidden truncate text-[11px] font-medium text-zinc-500 dark:text-zinc-400 sm:block">
+          <span className="mt-1 hidden truncate text-[11px] font-medium text-muted-foreground sm:block">
             {subtitle}
           </span>
         ) : null}

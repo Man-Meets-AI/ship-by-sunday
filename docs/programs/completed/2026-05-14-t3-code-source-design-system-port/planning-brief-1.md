@@ -52,10 +52,10 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/research-pass-t3-code-and-current-ui.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/normalized-pass-t3-code-target.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/converged-decision-packet.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/research-pass-t3-code-and-current-ui.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/normalized-pass-t3-code-target.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/converged-decision-packet.md`
 - `/Users/bazelrex/Developer/t3code/apps/web/src/index.css`
 - `/Users/bazelrex/Developer/t3code/apps/web/components.json`
 - `/Users/bazelrex/Developer/t3code/apps/web/src/hooks/useTheme.ts`

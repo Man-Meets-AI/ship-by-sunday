@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Retire old UI doctrine as active guidance and prove the T3 Code app-shape migration by moving one route-local underscore implementation set into plain feature modules.
 post_build_recap: Moved the Worker Seal Team 6 Cal booking component and logic from route-local underscore folders into plain `src/components/workerSealTeam6` modules, updated route/test imports, aligned app structure docs, and advanced the Program to the app foundation brief.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-2.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-2.md
 read_when:
   - Resuming the first structural T3 Code migration proof.
   - Moving implementation out of apps/web underscore folders.
@@ -66,14 +66,14 @@ Validation passed:
     bun run --cwd apps/web lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md docs/programs/active/2026-05-14-t3-code-source-design-system-port AGENTS.md apps/web/AGENTS.md apps/web/ARCHITECTURE.md apps/web/CONVENTIONS.md DESIGN.md docs/DESIGN.md docs/FRONTEND.md docs/index.md docs/ship-by-sunday/design-pack/AGENTS.md docs/ship-by-sunday/design-pack/README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port AGENTS.md apps/web/AGENTS.md apps/web/ARCHITECTURE.md apps/web/CONVENTIONS.md DESIGN.md docs/DESIGN.md docs/FRONTEND.md docs/index.md docs/ship-by-sunday/design-pack/AGENTS.md docs/ship-by-sunday/design-pack/README.md
     git diff --check
 
 ## Context and Orientation
 
-The active Program is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`. This completed plan was written from `planning-brief-2.md`, which says the migration should keep useful Next.js route groups while targeting `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata`. The Program pointer has since advanced to `planning-brief-3.md` for app foundation work.
+The active Program is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`. This completed plan was written from `planning-brief-2.md`, which says the migration should keep useful Next.js route groups while targeting `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata`. The Program pointer has since advanced to `planning-brief-3.md` for app foundation work.
 
-The structural map is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`. It recommends moving reusable or cross-route UI toward `apps/web/src/components/<feature>` and colocating pure logic as `.logic.ts` when useful.
+The structural map is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`. It recommends moving reusable or cross-route UI toward `apps/web/src/components/<feature>` and colocating pure logic as `.logic.ts` when useful.
 
 The proof route is `apps/web/src/app/(marketing)/worker-seal-team-6/page.tsx`. It now imports `WorkerSealTeam6CalBooking` from `@/components/workerSealTeam6/WorkerSealTeam6CalBooking` and `createWorkerSealTeam6CalBookingConfig` from `@/components/workerSealTeam6/WorkerSealTeam6CalBooking.logic`. The focused UI test is `apps/web/tests/integration-ui/worker-seal-team-6-cal-booking.test.tsx`.
 
@@ -125,7 +125,7 @@ Run app static checks:
 Run Program, docs, and whitespace checks:
 
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md docs/programs/active/2026-05-14-t3-code-source-design-system-port AGENTS.md apps/web/AGENTS.md apps/web/ARCHITECTURE.md apps/web/CONVENTIONS.md DESIGN.md docs/DESIGN.md docs/FRONTEND.md docs/index.md docs/ship-by-sunday/design-pack/AGENTS.md docs/ship-by-sunday/design-pack/README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port AGENTS.md apps/web/AGENTS.md apps/web/ARCHITECTURE.md apps/web/CONVENTIONS.md DESIGN.md docs/DESIGN.md docs/FRONTEND.md docs/index.md docs/ship-by-sunday/design-pack/AGENTS.md docs/ship-by-sunday/design-pack/README.md
     git diff --check
 
 ## Validation and Acceptance
@@ -143,7 +143,7 @@ The test brief for this slice is: Feature: structural source proof for Worker Se
     bun run --cwd apps/web lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md docs/programs/active/2026-05-14-t3-code-source-design-system-port AGENTS.md apps/web/AGENTS.md apps/web/ARCHITECTURE.md apps/web/CONVENTIONS.md DESIGN.md docs/DESIGN.md docs/FRONTEND.md docs/index.md docs/ship-by-sunday/design-pack/AGENTS.md docs/ship-by-sunday/design-pack/README.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port AGENTS.md apps/web/AGENTS.md apps/web/ARCHITECTURE.md apps/web/CONVENTIONS.md DESIGN.md docs/DESIGN.md docs/FRONTEND.md docs/index.md docs/ship-by-sunday/design-pack/AGENTS.md docs/ship-by-sunday/design-pack/README.md
     git diff --check
 
 ## Idempotence and Recovery

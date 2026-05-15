@@ -6,7 +6,7 @@ completed_at: 2026-05-15
 summary: Move the protected AppShell onto a T3 Code-style Sidebar layout while preserving current protected route behavior and AppShell props.
 post_build_recap: Protected `viewportMode="app"` AppShell now renders through a T3 Code-style Sidebar shell with workspace, codebase, lesson, local-nav, command, theme, user, billing, skip-link, and mobile Sheet-backed navigation preserved. Sidebar stayed Radix-compatible, gained T3 resize and scroll recipes, and focused unit/integration tests plus desktop/mobile browser proof passed.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-5.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-5.md
 read_when:
   - Resuming the protected AppShell sidebar migration.
   - Reviewing Sidebar resize behavior or AppShell protected-route chrome.
@@ -107,7 +107,7 @@ Fifth, add focused tests. The meaningful user-facing risk is P1 core product ris
 
 Sixth, run browser proof. Use a temporary local route or proof harness that renders `AppShell viewportMode="app"` with sample `primaryNav` and `localNav`, then verify desktop sidebar slots, workspace navigation, local navigation, command/theme/user controls, mobile trigger, and screenshots. Delete the temporary route before final validation.
 
-Seventh, complete this ExecPlan, move it to `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`, update `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`, and run the final validation commands.
+Seventh, complete this ExecPlan, move it to `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`, update `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`, and run the final validation commands.
 
 ## Milestones
 
@@ -137,7 +137,7 @@ Edit:
     apps/web/tests/integration-ui/app-shell-sidebar-layout.test.tsx
     apps/web/tests/unit/ui-sidebar-primitive.test.tsx
     docs/exec-plans/active/2026-05-14-t3-code-sidebar-app-shell.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -151,7 +151,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -175,7 +175,7 @@ Validation completed on 2026-05-15 from `/Users/bazelrex/Developer/ship-by-sunda
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check

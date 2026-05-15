@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Install the T3 Code app font, light and dark tokens, radius semantics, and tracked-app root layout boundary in apps/web.
 post_build_recap: apps/web now loads DM Sans as the canonical sans font, exposes T3 Code light and dark token semantics, and no longer injects generated-design CSS from the root layout.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-3.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-3.md
 read_when:
   - Resuming the app foundation slice.
   - Reviewing the tracked-app font, token, or root layout boundary.
@@ -87,7 +87,7 @@ Third, update `apps/web/src/app/layout.tsx` by deleting the generated-design imp
 
 Fourth, run focused tests and static checks. If generated-design helper tests fail because expectations assumed tracked-app injection, update only the test language or helper boundary needed to preserve generated-output behavior. If app lint/typecheck fails because of the root layout import cleanup, repair the narrow failure before moving on.
 
-Fifth, update this ExecPlan to complete, move it to `docs/exec-plans/completed/`, and update `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md` plus `current-planning-brief.txt` and a new planning brief if the next slice is clear.
+Fifth, update this ExecPlan to complete, move it to `docs/exec-plans/completed/`, and update `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md` plus `current-planning-brief.txt` and a new planning brief if the next slice is clear.
 
 ## Milestones
 
@@ -129,7 +129,7 @@ Run planning and docs checks:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-14-t3-code-app-foundation.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-14-t3-code-app-foundation.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-14-t3-code-app-foundation.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is completed and moved, rerun plan lint against the completed path:
@@ -150,7 +150,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 Browser visual proof for this slice used the webpack dev server after the default Turbopack dev server panicked in HMR. The proof route was `/starter` at desktop `1440x900` and mobile `390x844`, with external Clerk, Cal, PostHog, and Sentry calls blocked for stability. Light and dark runs both showed no `#generated-design-system` style tag, DM Sans body font, radius `0.625rem`, T3 Code primary tokens, and no horizontal overflow. A later primitive or route rewrite slice should capture screenshot artifacts.
@@ -207,7 +207,7 @@ Validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed for the touched plan and Program.
 
     git diff --check

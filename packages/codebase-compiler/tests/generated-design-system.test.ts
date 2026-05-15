@@ -24,9 +24,10 @@ describe("generated design system", () => {
 		);
 
 		expect(designSystem.selection.presetId).toBe(DEFAULT_DESIGN_PRESET_ID);
-		expect(designSystem.selection.presetLabel).toBe("Vercel");
+		expect(designSystem.selection.presetLabel).toBe("T3 Code");
 		expect(designSystem.preset.presetConfig.style).toBe("mira");
-		expect(designSystem.preset.font.label).toBe("Geist");
+		expect(designSystem.preset.font.label).toBe("DM Sans");
+		expect(designSystem.preset.baseColorLabel).toBe("Zinc");
 		expect(designSystem.preset.tokens.light["--primary"]).toBeDefined();
 		expect(designSystem.derivedFacts.visualThesis).toContain("Signal Desk");
 		expect(designSystem.designPrinciples.length).toBeGreaterThan(2);

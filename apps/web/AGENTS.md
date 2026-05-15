@@ -11,7 +11,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 - For any `apps/web` task, start with the repo root `AGENTS.md`.
 - Before changing app architecture, route groups, Convex module shape, billing boundaries, provider setup, Sentry, Resend, or debug tooling, read `apps/web/ARCHITECTURE.md` and `apps/web/CONVENTIONS.md`.
 - For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
-- For UI layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or component/file structure while the T3 Code migration is active, read `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md` and its current planning brief. Do not use root `DESIGN.md`, `docs/FRONTEND.md`, or `docs/ship-by-sunday/design-pack/` as preserved doctrine for that work.
+- For UI layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or component/file structure, read `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`. Do not use root `DESIGN.md`, `docs/FRONTEND.md`, or `docs/ship-by-sunday/design-pack/` as preserved doctrine for that work.
 - Before changing the public homepage, read `apps/web/src/content/docs/configure-the-homepage.mdx`.
 - Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Before changing Next.js App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries, read the relevant guide in the installed `next` package's `dist/docs/`. In this Bun workspace, Next.js is hoisted to `../../node_modules/next/dist/docs/` from `apps/web`.
@@ -19,13 +19,13 @@ This app is codebase-first, not course-first. The public customer outcome is one
 ## Product Contract
 
 - Current pre-migration protected handoff: `/home -> /generate-codebase -> /generate-codebase/review`, with Worker under `/workers/*` and Tutorials under `/tutorials`.
-- Target route, provider, and Convex architecture are governed by `apps/web/ARCHITECTURE.md`, `apps/web/CONVENTIONS.md`, and the active Program inventory. Current paths are not preservation constraints unless a slice documents a live customer, provider callback, or release dependency plus the removal path.
+- Target route, provider, and Convex architecture are governed by `apps/web/ARCHITECTURE.md`, `apps/web/CONVENTIONS.md`, and relevant Program records. Current paths are not preservation constraints unless a slice documents a live customer, provider callback, or release dependency plus the removal path.
 - `/start`, `/product`, `/design`, `/marketing`, and `/build-plan` are current compatibility redirects, not target architecture.
 - Optional post-download library: Execute / Ship.
 - Do not preserve old CEO / Design / Build / Ship framing if it conflicts with codebase-first logic.
 - Do not reintroduce separate pre-review download artifacts or staged download contracts into the UI unless the live product changes first.
 - Do not turn workflow or ephemeral state into canonical intake.
-- Use current `apps/web` runtime code to understand behavior that exists today, but use the template-first app docs and Program packet to choose migration targets. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code and active Program docs do not answer the question.
+- Use current `apps/web` runtime code to understand behavior that exists today, but use the template-first app docs and Program packet to choose migration targets. Use older `docs/ship-by-sunday/*.md` planning files only for background context when runtime code and Program docs do not answer the question.
 
 ## State Rules
 
@@ -40,7 +40,7 @@ This app is codebase-first, not course-first. The public customer outcome is one
 
 ## UI And Component Rules
 
-- The active T3 Code migration supersedes the old visual and frontend structure doctrine. Keep Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` when useful, but treat underscore implementation folders such as `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata` as migration targets.
+- The completed T3 Code migration supersedes the old visual and frontend structure doctrine. Keep Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` when useful, but treat underscore implementation folders such as `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata` as migration targets.
 - Keep presentation in components and stateful or behavioral logic in hooks, helpers, or controller layers.
 - Split components above 150 lines when a clean feature-local boundary exists.
 - Use product language in UI copy. Do not leak planning, prompt, or implementation terminology into customer-facing surfaces.

@@ -6,7 +6,7 @@ completed_at: 2026-05-14
 summary: Move menu and command surfaces toward T3 Code recipes while preserving current Radix, cmdk, and navigation call-site compatibility.
 post_build_recap: DropdownMenu and NavigationMenu now use T3 Code menu surface recipes adapted to Radix state attributes, a shared cmdk-backed Command primitive owns command-palette styling, app-shell command imports moved to that primitive, focused tests and desktop/mobile browser proof passed, and no package changes were needed.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
   - Resuming the Menu and Command primitive slice.
   - Reviewing shared menu, navigation menu, or app-shell command menu compatibility during the T3 Code migration.
@@ -76,7 +76,7 @@ The target shared files are `apps/web/src/components/ui/dropdown-menu.tsx`, `app
 
 ### In Scope
 
-This plan updates DropdownMenu styling and aliases, updates NavigationMenu popup and link recipes without changing workspace navigation behavior, adds a shared cmdk-backed Command primitive file, moves the app-shell command menu and item imports to that shared primitive, adds focused unit tests, and updates this ExecPlan plus `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`.
+This plan updates DropdownMenu styling and aliases, updates NavigationMenu popup and link recipes without changing workspace navigation behavior, adds a shared cmdk-backed Command primitive file, moves the app-shell command menu and item imports to that shared primitive, adds focused unit tests, and updates this ExecPlan plus `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`.
 
 ### Out Of Scope
 
@@ -127,7 +127,7 @@ Edit:
     apps/web/src/app/(app)/_components/app-shell/app-shell-command-menu-items.tsx
     apps/web/tests/unit/ui-menu-command-primitives.test.tsx
     docs/exec-plans/active/2026-05-14-t3-code-menu-command-primitives.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -147,7 +147,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 If the plan is still active while running intermediate checks, use the active path for `plans:lint` and `markdown:lint`. Once it is moved to completed, use the completed path shown above.
@@ -167,7 +167,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     git diff --check
 
 ## Idempotence and Recovery
@@ -201,7 +201,7 @@ Validation completed on 2026-05-14:
     PLAYWRIGHT_BASE_URL=http://localhost:3013 node codex-scripts/prove-menu-command-browser.mjs
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -229,7 +229,7 @@ Review repair validation completed on 2026-05-14:
     bun run programs:lint
     Program docs, packets, and prompts passed.
 
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     Markdown metadata lint passed.
 
     git diff --check

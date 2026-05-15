@@ -110,7 +110,8 @@ describe("canonical project definition schema", () => {
 		);
 
 		expect(parsedProjectDefinition.facts.design_references).toEqual([
-			"https://getdesign.md/vercel/design-md",
+			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css",
+			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui",
 		]);
 	});
 

@@ -43,8 +43,8 @@ Out of scope:
 
 ## Inputs
 
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`
-- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-5.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-5.md`
 - `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`
 - `/Users/bazelrex/Developer/oss/t3code/apps/web/src/routes`
 - `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/AppSidebarLayout.tsx`

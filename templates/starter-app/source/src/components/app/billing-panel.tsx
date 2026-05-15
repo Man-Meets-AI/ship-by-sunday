@@ -47,7 +47,7 @@ function BillingPanelContent({
   if (billingState === undefined) {
     return (
       <Card>
-        <CardContent className="py-10 text-sm text-zinc-500">
+        <CardContent className="py-10 text-sm text-muted-foreground">
           Loading workspace billing...
         </CardContent>
       </Card>
@@ -66,33 +66,33 @@ function BillingPanelContent({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="font-medium text-zinc-950 dark:text-zinc-50">
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="font-medium text-foreground">
               Workspace
             </p>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted-foreground">
               {billingState.workspace.name}
             </p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="font-medium text-zinc-950 dark:text-zinc-50">
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="font-medium text-foreground">
               Plan status
             </p>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted-foreground">
               {billingState.subscription?.status ?? "free"}
             </p>
             {billingState.subscription?.currentPeriodEnd ? (
-              <p className="mt-1 text-zinc-500">
+              <p className="mt-1 text-muted-foreground">
                 Current period ends{" "}
                 {formatDate(billingState.subscription.currentPeriodEnd)}
               </p>
             ) : null}
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="font-medium text-zinc-950 dark:text-zinc-50">
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <p className="font-medium text-foreground">
               Entitlements
             </p>
-            <ul className="mt-2 space-y-1 text-zinc-600 dark:text-zinc-400">
+            <ul className="mt-2 space-y-1 text-muted-foreground">
               {billingState.entitlements.length === 0 ? (
                 <li>No paid features are enabled yet.</li>
               ) : (
@@ -117,14 +117,14 @@ function BillingPanelContent({
         </CardHeader>
         <CardContent className="space-y-3">
           {!billingConfigured ? (
-            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm leading-6 text-muted-foreground">
               Stripe billing is not configured for this environment yet. Add the
               billing env values before using checkout or the billing portal.
             </p>
           ) : canManageBilling ? (
             <>
               {billingStatus === "unconfigured" ? (
-                <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                <p className="text-sm leading-6 text-muted-foreground">
                   Billing actions stay disabled until Stripe is configured for this
                   environment.
                 </p>
@@ -141,7 +141,7 @@ function BillingPanelContent({
               </form>
             </>
           ) : (
-            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm leading-6 text-muted-foreground">
               Only workspace owners and admins can change billing.
             </p>
           )}

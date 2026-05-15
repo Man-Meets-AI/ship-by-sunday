@@ -6,7 +6,7 @@ completed_at: 2026-05-15
 summary: Apply the shared protected route-surface recipe to Worker findings, finding detail, Worker runs, loops, privacy, and tutorial index surfaces inside the Sidebar app shell.
 post_build_recap: Worker findings, finding detail, runs, loops, privacy, and the Starter tutorial index now use the shared protected route page/header/panel recipe while preserving AppShell props, local navigation, route URLs, copy controls, filters, run history, privacy actions, workflow approvals, and tutorial hrefs.
 program_id: t3-code-source-design-system-port
-planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md
+planning_brief: docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md
 read_when:
   - Resuming the remaining protected route-surface sweep.
   - Reviewing Worker findings/detail, Worker runs, loops, privacy, or tutorial index visual migration.
@@ -67,7 +67,7 @@ Browser proof used a temporary local route at `/codex-remaining-protected-surfac
 
 ## Context and Orientation
 
-The active Program is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md`, and the current brief is `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md`. The prior protected route-surface slice is `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`.
+The active Program is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md`, and the current brief is `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md`. The prior protected route-surface slice is `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`.
 
 The shared route-surface helpers live in `apps/web/src/components/app/protected-route-surface.tsx`. They provide `ProtectedRoutePage`, `ProtectedRouteHeader`, `ProtectedRouteEyebrow`, `ProtectedRouteTitle`, `ProtectedRouteDescription`, `ProtectedRoutePanel`, `ProtectedRoutePanelHeader`, `ProtectedRoutePanelTitle`, `ProtectedRoutePanelDescription`, `ProtectedRoutePanelBody`, `ProtectedRouteSummaryGrid`, and `protectedRoutePanelClassName`.
 
@@ -158,7 +158,7 @@ Edit:
     apps/web/tests/integration-ui/workspace-privacy-page.test.tsx
     apps/web/tests/unit/app-workspace-tutorial-routes.test.tsx
     docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md
-    docs/programs/active/2026-05-14-t3-code-source-design-system-port/program.md
+    docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md
 
 Run focused validation:
 
@@ -172,7 +172,7 @@ Run static and docs validation:
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
@@ -190,7 +190,7 @@ Passed commands:
     bun run format
     bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md docs/programs/active/2026-05-14-t3-code-source-design-system-port
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md docs/programs/completed/2026-05-14-t3-code-source-design-system-port
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check

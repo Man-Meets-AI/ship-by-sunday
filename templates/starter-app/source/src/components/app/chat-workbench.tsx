@@ -176,7 +176,7 @@ function ChatWorkbenchContent() {
   }
 
   return (
-    <div className="grid min-h-[680px] overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-[0_24px_70px_-48px_rgba(15,23,42,0.55)] dark:border-zinc-800 dark:bg-zinc-950 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <div className="grid min-h-[680px] overflow-hidden rounded-lg border bg-card text-card-foreground lg:grid-cols-[280px_minmax(0,1fr)]">
       <ConversationSidebar
         conversations={conversations}
         isCreatingConversation={isCreatingConversation}
@@ -252,13 +252,13 @@ function ConversationSidebar({
   const [renameTitle, setRenameTitle] = useState("");
 
   return (
-    <aside className="flex min-h-0 flex-col border-b border-zinc-200 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-900/40 lg:border-r lg:border-b-0">
-      <div className="flex items-center justify-between gap-3 border-b border-zinc-200 p-4 dark:border-zinc-800">
+    <aside className="flex min-h-0 flex-col border-b bg-muted/40 lg:border-r lg:border-b-0">
+      <div className="flex items-center justify-between gap-3 border-b p-4">
         <div>
-          <p className="text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+          <p className="text-sm font-semibold text-foreground">
             Conversations
           </p>
-          <p className="text-xs text-zinc-500">Workspace history</p>
+          <p className="text-xs text-muted-foreground">Workspace history</p>
         </div>
         <Button
           aria-label="New chat"
@@ -277,11 +277,11 @@ function ConversationSidebar({
       </div>
       <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
         {conversations === undefined ? (
-          <p className="px-2 py-6 text-sm text-zinc-500">
+          <p className="px-2 py-6 text-sm text-muted-foreground">
             Loading conversations...
           </p>
         ) : conversations.length === 0 ? (
-          <p className="px-2 py-6 text-sm leading-6 text-zinc-500">
+          <p className="px-2 py-6 text-sm leading-6 text-muted-foreground">
             Start with a prompt and the first conversation will appear here.
           </p>
         ) : (
@@ -293,10 +293,10 @@ function ConversationSidebar({
               <div
                 key={conversation._id}
                 className={cn(
-                  "rounded-xl border border-transparent p-2 transition-colors",
+                  "rounded-md border border-transparent p-2 transition-colors",
                   isSelected
-                    ? "border-zinc-300 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
-                    : "hover:bg-white/80 dark:hover:bg-zinc-950/70",
+                    ? "border-input bg-card"
+                    : "hover:bg-accent hover:text-accent-foreground",
                 )}
               >
                 {isRenaming ? (
@@ -310,7 +310,7 @@ function ConversationSidebar({
                   >
                     <input
                       autoFocus
-                      className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-sm text-zinc-950 outline-none focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50"
+                      className="min-w-0 flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
                       value={renameTitle}
                       onChange={(event) => setRenameTitle(event.target.value)}
                     />
@@ -325,10 +325,10 @@ function ConversationSidebar({
                       onClick={() => onSelectConversation(conversation._id)}
                       type="button"
                     >
-                      <span className="block truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                      <span className="block truncate text-sm font-medium text-foreground">
                         {conversation.title}
                       </span>
-                      <span className="mt-1 block text-xs text-zinc-500">
+                      <span className="mt-1 block text-xs text-muted-foreground">
                         {formatDate(conversation.updatedAt)}
                       </span>
                     </button>
@@ -384,24 +384,24 @@ function ChatToolbar({
   selectedConversation: ChatConversation | null;
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-zinc-200 px-4 py-4 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-zinc-500" />
-          <h2 className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50">
+          <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          <h2 className="truncate text-sm font-semibold text-foreground">
             {selectedConversation?.title ?? "New chat"}
           </h2>
         </div>
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {isAssistantStreaming
             ? "Assistant is responding"
             : "One active response per conversation"}
         </p>
       </div>
-      <label className="flex items-center gap-2 text-xs font-medium text-zinc-500">
+      <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
         Model
         <select
-          className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-900 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground outline-none transition-colors focus:ring-2 focus:ring-ring"
           value={modelKey}
           onChange={(event) =>
             void onModelChange(event.target.value as ChatModelKey)
@@ -420,7 +420,7 @@ function ChatToolbar({
 
 function OpenAISetupNotice() {
   return (
-    <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+    <div className="border-b border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-400">
       OpenAI is not configured for Convex yet. Set `OPENAI_API_KEY` in the
       Convex environment before using live assistant responses.
     </div>
@@ -451,7 +451,7 @@ function MessageTimeline({
 
   if (messages === undefined) {
     return (
-      <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-sm text-zinc-500">
+      <div className="flex min-h-0 flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
         Loading messages...
       </div>
     );
@@ -469,12 +469,12 @@ function MessageTimeline({
   }
 
   return (
-    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-zinc-50/50 p-4 dark:bg-zinc-950">
+    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-muted/30 p-4">
       {messages.map((message) => (
         <MessageBubble key={message._id} message={message} onRetry={onRetry} />
       ))}
       {isAssistantStreaming ? (
-        <div className="flex items-center gap-2 pl-11 text-xs text-zinc-500">
+        <div className="flex items-center gap-2 pl-11 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           Streaming from OpenAI
         </div>
@@ -495,16 +495,16 @@ function MessageBubble({
   return (
     <div className={cn("flex gap-3", isUser && "justify-end")}>
       {!isUser ? (
-        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
+        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <Bot className="h-4 w-4" />
         </div>
       ) : null}
       <Card
         className={cn(
-          "max-w-[min(760px,100%)] border-zinc-200 shadow-none dark:border-zinc-800",
+          "max-w-[min(760px,100%)] shadow-none",
           isUser
-            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950"
-            : "bg-white dark:bg-zinc-900",
+            ? "border-transparent bg-primary text-primary-foreground"
+            : "bg-card",
         )}
       >
         <CardContent className="space-y-3 p-4">
@@ -513,13 +513,13 @@ function MessageBubble({
               (message.status === "streaming" ? "Thinking..." : "")}
           </p>
           {!isUser ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {message.modelLabel ? (
                 <Badge variant="secondary">{message.modelLabel}</Badge>
               ) : null}
               {message.status === "failed" ? (
                 <>
-                  <span className="text-red-600 dark:text-red-300">
+                  <span className="text-destructive">
                     {message.errorMessage ?? "Assistant response failed."}
                   </span>
                   <Button
@@ -538,7 +538,7 @@ function MessageBubble({
         </CardContent>
       </Card>
       {isUser ? (
-        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
           <User className="h-4 w-4" />
         </div>
       ) : null}
@@ -577,10 +577,10 @@ function ChatComposer({
 
   return (
     <form
-      className="border-t border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
+      className="border-t bg-card p-4"
       onSubmit={handleSubmit}
     >
-      <div className="flex items-end gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex items-end gap-3 rounded-lg border bg-muted/40 p-2">
         <Textarea
           className="min-h-20 resize-none border-0 bg-transparent shadow-none focus-visible:ring-0"
           disabled={disabled || isSending}
@@ -608,7 +608,7 @@ function ChatComposer({
         </Button>
       </div>
       {disabledReason ? (
-        <p className="mt-2 text-xs text-zinc-500">{disabledReason}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{disabledReason}</p>
       ) : null}
     </form>
   );
