@@ -87,7 +87,7 @@ html[data-product-theme] {
 
 .sbs-docs-sidebar {
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: var(--sbs-docs-panel-muted-bg);
 	box-shadow: var(--sbs-docs-shell-shadow);
 	padding: 0.75rem;
@@ -107,7 +107,7 @@ html[data-product-theme] {
 	display: flex;
 	align-items: center;
 	min-height: 2.75rem;
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	padding: 0.55rem 0.7rem;
 	color: rgb(var(--product-muted));
 	font-size: 0.9rem;
@@ -172,7 +172,7 @@ html[data-product-theme] {
 	width: 100%;
 	margin-inline: auto;
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: var(--sbs-docs-panel-bg);
 	box-shadow: var(--sbs-docs-shell-shadow);
 	padding: 1.5rem 1.5rem 3.25rem;
@@ -181,7 +181,7 @@ html[data-product-theme] {
 .sbs-docs-toc {
 	display: none;
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: var(--sbs-docs-panel-muted-bg);
 	box-shadow: var(--sbs-docs-shell-shadow);
 	padding: 1rem;
@@ -238,26 +238,27 @@ html[data-product-theme] {
 
 .sbs-docs-prose h1,
 .sbs-docs-prose h2 {
-	font-family: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
-	letter-spacing: -0.04em;
-	line-height: 0.92;
+	font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+	font-weight: 650;
+	letter-spacing: 0;
+	line-height: 1.08;
 	color: rgb(var(--product-text));
 }
 
 .sbs-docs-prose h1 {
 	margin-top: 0;
 	margin-bottom: 1.5rem;
-	max-width: 10ch;
+	max-width: 16ch;
 	text-align: left;
-	font-size: 3.25rem;
+	font-size: 2.5rem;
 }
 
 .sbs-docs-prose h2 {
 	margin-top: 3.25rem;
 	padding-top: 1rem;
 	border-top: 1px solid var(--sbs-docs-shell-border-strong);
-	max-width: 14ch;
-	font-size: 2rem;
+	max-width: 20ch;
+	font-size: 1.75rem;
 	scroll-margin-top: calc(var(--sbs-docs-navbar-height) + 1.5rem);
 }
 
@@ -308,7 +309,7 @@ html[data-product-theme] {
 
 .sbs-docs-prose pre {
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: rgb(var(--product-surface-strong) / 0.94);
 	box-shadow: inset 0 1px 0 rgb(var(--product-border) / 0.08);
 	overflow-x: auto;
@@ -354,7 +355,7 @@ html[data-product-theme] {
 .sbs-docs-prose blockquote {
 	margin: 2rem 0;
 	border-left: 4px solid rgb(var(--product-accent) / 0.45);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: rgb(var(--product-surface-strong) / 0.58);
 	padding: 1rem 1.25rem 1rem 1.1rem;
 	color: rgb(var(--product-text));
@@ -374,7 +375,7 @@ html[data-product-theme] {
 	width: 100%;
 	overflow-x: auto;
 	border: 1px solid var(--sbs-docs-shell-border);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: rgb(var(--product-surface) / 0.8);
 	border-collapse: separate;
 	border-spacing: 0;
@@ -427,11 +428,11 @@ html[data-product-theme] {
 	}
 
 	.sbs-docs-prose h1 {
-		font-size: 5.25rem;
+		font-size: 3.75rem;
 	}
 
 	.sbs-docs-prose h2 {
-		font-size: 2.9rem;
+		font-size: 2.25rem;
 	}
 }
 

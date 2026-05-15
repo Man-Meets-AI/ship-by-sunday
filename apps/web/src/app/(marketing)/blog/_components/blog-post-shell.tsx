@@ -12,6 +12,15 @@ import { formatBlogDate } from "@/app/(marketing)/blog/_lib/blog-formatters";
 import type { BlogTocEntry } from "@/app/(marketing)/blog/_lib/blog-toc";
 import { getBlogPagePath } from "@/app/(marketing)/blog/_server/page-paths";
 import type { BlogPostSummary } from "@/app/(marketing)/blog/_server/blog-posts";
+import {
+	PublicRouteContainer,
+	PublicRouteDescription,
+	PublicRouteEyebrow,
+	PublicRouteHeader,
+	PublicRoutePage,
+	PublicRouteSection,
+	PublicRouteTitle,
+} from "@/components/layout/public-route-surface";
 
 type BlogPostShellProps = {
 	post: BlogPostSummary;
@@ -27,26 +36,25 @@ export function BlogPostShell({
 	children,
 }: BlogPostShellProps) {
 	return (
-		<main id="top" className="min-h-screen bg-background text-foreground">
+		<PublicRoutePage id="top">
 			<BlogSurfaceHeader activeHref={getBlogPagePath()} />
 			<article>
-				<header className="border-b border-border">
-					<div className="mx-auto max-w-[1720px] px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-						<div className="max-w-6xl space-y-6">
-							<div className="space-y-2 text-sm text-foreground/60">
-								<p>{formatBlogDate(post.publishedAt)}</p>
-								<p className="font-medium text-foreground">Field notes</p>
-							</div>
-							<h1 className="font-heading-serif max-w-5xl text-balance text-5xl font-normal leading-[0.95] text-foreground sm:text-7xl lg:text-8xl">
+				<PublicRouteSection>
+					<PublicRouteContainer className="py-12 sm:py-16 lg:py-20">
+						<PublicRouteHeader className="max-w-6xl">
+							<PublicRouteEyebrow>
+								{formatBlogDate(post.publishedAt)} · Field notes
+							</PublicRouteEyebrow>
+							<PublicRouteTitle className="max-w-5xl">
 								{post.title}
-							</h1>
-							<p className="max-w-3xl text-pretty text-xl leading-8 text-foreground/70 sm:text-2xl sm:leading-9">
+							</PublicRouteTitle>
+							<PublicRouteDescription className="max-w-3xl">
 								{post.summary}
-							</p>
-						</div>
-					</div>
-				</header>
-				<div className="mx-auto grid max-w-[1720px] gap-10 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-[10rem_minmax(0,52rem)_1fr] lg:px-8">
+							</PublicRouteDescription>
+						</PublicRouteHeader>
+					</PublicRouteContainer>
+				</PublicRouteSection>
+				<div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-12 lg:grid-cols-[10rem_minmax(0,52rem)_1fr] lg:px-8">
 					<BlogPostShareRail postPath={post.href} />
 					<div className="min-w-0">
 						<BlogRichText>{children}</BlogRichText>
@@ -65,7 +73,7 @@ export function BlogPostShell({
 					</div>
 					<BlogPostToc items={toc} postPath={post.href} />
 				</div>
-				<div className="mx-auto max-w-[1720px] px-4 pb-12 sm:px-6 lg:px-8">
+				<div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
 					<footer className="border-t border-border pt-8">
 						<Link
 							href={getBlogPagePath()}
@@ -76,6 +84,6 @@ export function BlogPostShell({
 					</footer>
 				</div>
 			</article>
-		</main>
+		</PublicRoutePage>
 	);
 }

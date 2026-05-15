@@ -14,7 +14,7 @@ export function BlogPostPromo({ target }: BlogPostPromoProps) {
 			</p>
 			<div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
 				<div className="space-y-3">
-					<h2 className="max-w-3xl text-balance text-3xl font-medium leading-tight tracking-[-0.035em] text-foreground sm:text-4xl">
+					<h2 className="max-w-3xl text-balance text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
 						{blogPromoContent.title}
 					</h2>
 					<p className="max-w-2xl text-pretty text-base leading-7 text-foreground/70">

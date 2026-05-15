@@ -16,21 +16,30 @@ const publicNavLinks = [
 export function PublicSiteHeader({
 	activeHref,
 	className,
+	containerClassName,
 }: {
 	readonly activeHref?: string;
 	readonly className?: string;
+	readonly containerClassName?: string;
 }) {
 	return (
 		<header
+			data-slot="public-site-header"
 			className={cn(
 				"sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur-xl",
 				className,
 			)}
 		>
-			<div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+			<div
+				data-slot="public-site-header-container"
+				className={cn(
+					"mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8",
+					containerClassName,
+				)}
+			>
 				<Link
 					href={routeConfig.home}
-					className="min-w-0 text-sm font-semibold tracking-normal text-foreground"
+					className="min-w-0 text-sm font-semibold text-foreground"
 				>
 					Man Meets AI
 				</Link>
@@ -45,7 +54,7 @@ export function PublicSiteHeader({
 								key={link.href}
 								href={link.href}
 								aria-current={isActive ? "page" : undefined}
-								className="inline-flex min-h-10 items-center rounded-md px-3 font-medium transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground"
+								className="inline-flex min-h-9 items-center rounded-lg px-3 font-medium transition-colors hover:bg-muted hover:text-foreground aria-[current=page]:bg-muted aria-[current=page]:text-foreground"
 							>
 								{link.label}
 							</Link>

@@ -10,7 +10,25 @@ import {
 	Wrench,
 } from "lucide-react";
 
-import { PublicSiteHeader } from "@/app/_components/public-site/public-site-header";
+import {
+	PublicRouteContainer,
+	PublicRouteDescription,
+	PublicRouteEyebrow,
+	PublicRouteHeader,
+	PublicRouteIcon,
+	PublicRouteListItem,
+	PublicRouteListPanel,
+	PublicRoutePage,
+	PublicRoutePanel,
+	PublicRoutePanelBody,
+	PublicRoutePanelDescription,
+	PublicRoutePanelTitle,
+	PublicRouteSection,
+	PublicRouteSectionTitle,
+	PublicRouteStepMarker,
+	PublicRouteTitle,
+} from "@/components/layout/public-route-surface";
+import { PublicSiteHeader } from "@/components/layout/public-site-header";
 import { Button } from "@/components/ui/button";
 import {
 	assetPaths,
@@ -65,31 +83,29 @@ export default function WorkerSealTeam6Page() {
 	});
 
 	return (
-		<main className="min-h-screen bg-background text-foreground">
+		<PublicRoutePage>
 			<PublicSiteHeader activeHref={routeConfig.workerSealTeam6} />
-			<section className="relative min-h-[calc(88svh-4rem)] overflow-hidden border-b border-border/60">
+			<PublicRouteSection className="relative overflow-hidden">
 				<Image
 					src={assetPaths.founderProof}
 					alt=""
 					fill
 					priority
-					className="object-cover object-[63%_46%] opacity-35"
+					className="object-cover object-[63%_46%] opacity-22"
 					sizes="100vw"
 				/>
-				<div className="absolute inset-0 bg-background/76" />
-				<div className="relative mx-auto flex min-h-[calc(88svh-4rem)] max-w-7xl flex-col justify-center px-4 py-16 sm:px-6 lg:px-8">
-					<div className="max-w-4xl">
-						<p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-							Worker Seal Team 6
-						</p>
-						<h1 className="mt-5 max-w-3xl font-heading-serif text-5xl leading-[0.98] tracking-normal text-foreground sm:text-7xl">
+				<div className="absolute inset-0 bg-background/84" />
+				<PublicRouteContainer className="relative grid min-h-[calc(82svh-4rem)] content-center py-16">
+					<PublicRouteHeader className="max-w-4xl">
+						<PublicRouteEyebrow>Worker Seal Team 6</PublicRouteEyebrow>
+						<PublicRouteTitle className="max-w-3xl">
 							One hands-on hour for the first AI-worker loop.
-						</h1>
-						<p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
+						</PublicRouteTitle>
+						<PublicRouteDescription>
 							A $2,500 service for teams with a live codebase that need the
 							first worker loop chosen, bounded, and proven before they scale
 							automation.
-						</p>
+						</PublicRouteDescription>
 						<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 							<Button asChild size="lg">
 								<a href="#booking">
@@ -103,115 +119,136 @@ export default function WorkerSealTeam6Page() {
 								</Link>
 							</Button>
 						</div>
-					</div>
-				</div>
-			</section>
+					</PublicRouteHeader>
+				</PublicRouteContainer>
+			</PublicRouteSection>
 
-			<section className="border-b border-border/60 bg-muted/20">
-				<div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
-					<div>
-						<FileCode2 className="size-5 text-muted-foreground" aria-hidden />
-						<h2 className="mt-4 font-heading-serif text-3xl leading-tight text-foreground sm:text-4xl">
-							Use it when the codebase is already real.
-						</h2>
-						<p className="mt-4 text-sm leading-6 text-muted-foreground">
-							This is not a generic strategy call. It is for the moment when a
-							repo, a team, and a shipping deadline need a narrow worker loop
-							that can survive contact with production constraints.
-						</p>
-					</div>
-					<ul className="grid gap-3 sm:grid-cols-2">
-						{readinessSignals.map((signal) => (
-							<li
-								key={signal}
-								className="flex items-start gap-3 rounded-md border border-border/70 bg-background p-4 text-sm leading-6 text-muted-foreground"
-							>
-								<CheckCircle2
+			<ReadinessSection />
+			<HourSection />
+			<BookingSection calBookingConfig={calBookingConfig} />
+			<CrossSellSection />
+		</PublicRoutePage>
+	);
+}
+
+function ReadinessSection() {
+	return (
+		<PublicRouteSection tone="muted">
+			<PublicRouteContainer className="grid gap-8 py-14 lg:grid-cols-[0.85fr_1.15fr]">
+				<div>
+					<PublicRouteIcon>
+						<FileCode2 className="size-5" aria-hidden />
+					</PublicRouteIcon>
+					<PublicRouteSectionTitle>
+						Use it when the codebase is already real.
+					</PublicRouteSectionTitle>
+					<p className="mt-4 text-sm leading-6 text-muted-foreground">
+						This is not a generic strategy call. It is for the moment when a
+						repo, a team, and a shipping deadline need a narrow worker loop that
+						can survive contact with production constraints.
+					</p>
+				</div>
+				<ul className="grid gap-3 sm:grid-cols-2">
+					{readinessSignals.map((signal) => (
+						<PublicRouteListItem key={signal}>
+							<CheckCircle2
+								className="mt-1 size-4 shrink-0 text-foreground"
+								aria-hidden
+							/>
+							<span>{signal}</span>
+						</PublicRouteListItem>
+					))}
+				</ul>
+			</PublicRouteContainer>
+		</PublicRouteSection>
+	);
+}
+
+function HourSection() {
+	return (
+		<PublicRouteSection>
+			<PublicRouteContainer className="grid gap-10 py-14 lg:grid-cols-[0.8fr_1.2fr]">
+				<div>
+					<PublicRouteIcon>
+						<Wrench className="size-5" aria-hidden />
+					</PublicRouteIcon>
+					<PublicRouteSectionTitle>
+						What happens in the hour
+					</PublicRouteSectionTitle>
+				</div>
+				<ol className="grid gap-3">
+					{hourSteps.map((step, index) => (
+						<PublicRouteListPanel key={step.title}>
+							<PublicRoutePanelBody>
+								<div className="flex items-center gap-3">
+									<PublicRouteStepMarker className="size-7">
+										{index + 1}
+									</PublicRouteStepMarker>
+									<PublicRoutePanelTitle>{step.title}</PublicRoutePanelTitle>
+								</div>
+								<PublicRoutePanelDescription className="mt-3">
+									{step.description}
+								</PublicRoutePanelDescription>
+							</PublicRoutePanelBody>
+						</PublicRouteListPanel>
+					))}
+				</ol>
+			</PublicRouteContainer>
+		</PublicRouteSection>
+	);
+}
+
+function BookingSection({
+	calBookingConfig,
+}: {
+	calBookingConfig: ReturnType<typeof createWorkerSealTeam6CalBookingConfig>;
+}) {
+	return (
+		<PublicRouteSection id="booking" tone="muted">
+			<PublicRouteContainer className="grid gap-8 py-14 lg:grid-cols-[0.9fr_1.1fr]">
+				<div>
+					<PublicRouteIcon>
+						<CalendarClock className="size-5" aria-hidden />
+					</PublicRouteIcon>
+					<PublicRouteSectionTitle>
+						Book the paid hour through Cal.com.
+					</PublicRouteSectionTitle>
+					<p className="mt-4 text-sm leading-6 text-muted-foreground">
+						Scheduling, payment, intake, confirmation, and rescheduling stay in
+						one booking system. If the embedded calendar is unavailable, the
+						hosted booking page and direct line stay available.
+					</p>
+				</div>
+				<div className="grid content-start gap-5">
+					<WorkerSealTeam6CalBooking {...calBookingConfig} />
+					<ul className="grid content-start gap-3">
+						{bookingFacts.map((fact) => (
+							<PublicRouteListItem key={fact}>
+								<ShieldCheck
 									className="mt-1 size-4 shrink-0 text-foreground"
 									aria-hidden
 								/>
-								<span>{signal}</span>
-							</li>
+								<span>{fact}</span>
+							</PublicRouteListItem>
 						))}
 					</ul>
 				</div>
-			</section>
+			</PublicRouteContainer>
+		</PublicRouteSection>
+	);
+}
 
-			<section className="border-b border-border/60">
-				<div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-					<div>
-						<Wrench className="size-5 text-muted-foreground" aria-hidden />
-						<h2 className="mt-4 font-heading-serif text-3xl leading-tight text-foreground sm:text-4xl">
-							What happens in the hour
-						</h2>
-					</div>
-					<ol className="grid gap-3">
-						{hourSteps.map((step, index) => (
-							<li
-								key={step.title}
-								className="rounded-md border border-border/70 bg-background p-5"
-							>
-								<div className="flex items-center gap-3">
-									<span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
-										{index + 1}
-									</span>
-									<h3 className="font-semibold text-foreground">
-										{step.title}
-									</h3>
-								</div>
-								<p className="mt-3 text-sm leading-6 text-muted-foreground">
-									{step.description}
-								</p>
-							</li>
-						))}
-					</ol>
-				</div>
-			</section>
-
-			<section id="booking" className="border-b border-border/60 bg-muted/20">
-				<div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
-					<div>
-						<CalendarClock
-							className="size-5 text-muted-foreground"
-							aria-hidden
-						/>
-						<h2 className="mt-4 font-heading-serif text-3xl leading-tight text-foreground sm:text-4xl">
-							Book the paid hour through Cal.com.
-						</h2>
-						<p className="mt-4 text-sm leading-6 text-muted-foreground">
-							Scheduling, payment, intake, confirmation, and rescheduling stay
-							in one booking system. If the embedded calendar is unavailable,
-							the hosted booking page and direct line stay available.
-						</p>
-					</div>
-					<div className="grid content-start gap-5">
-						<WorkerSealTeam6CalBooking {...calBookingConfig} />
-						<ul className="grid content-start gap-3">
-							{bookingFacts.map((fact) => (
-								<li
-									key={fact}
-									className="flex items-start gap-3 rounded-md border border-border/70 bg-background p-4 text-sm leading-6 text-muted-foreground"
-								>
-									<ShieldCheck
-										className="mt-1 size-4 shrink-0 text-foreground"
-										aria-hidden
-									/>
-									<span>{fact}</span>
-								</li>
-							))}
-						</ul>
-					</div>
-				</div>
-			</section>
-
-			<section>
-				<div className="mx-auto grid max-w-7xl gap-4 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:px-8">
-					<div className="rounded-md border border-border/70 bg-background p-5">
-						<h2 className="font-semibold text-foreground">Need a system?</h2>
-						<p className="mt-2 text-sm leading-6 text-muted-foreground">
+function CrossSellSection() {
+	return (
+		<PublicRouteSection className="border-b-0">
+			<PublicRouteContainer className="grid gap-4 py-14 lg:grid-cols-2">
+				<PublicRoutePanel>
+					<PublicRoutePanelBody>
+						<PublicRoutePanelTitle>Need a system?</PublicRoutePanelTitle>
+						<PublicRoutePanelDescription>
 							Workers is the subscription for ongoing private doctor passes,
 							approved loops, and proof across an existing codebase.
-						</p>
+						</PublicRoutePanelDescription>
 						<Link
 							href={routeConfig.workers}
 							className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-foreground underline underline-offset-4"
@@ -219,15 +256,17 @@ export default function WorkerSealTeam6Page() {
 							Open Workers
 							<ArrowRight className="size-4" aria-hidden />
 						</Link>
-					</div>
-					<div className="rounded-md border border-border/70 bg-background p-5">
-						<h2 className="font-semibold text-foreground">
+					</PublicRoutePanelBody>
+				</PublicRoutePanel>
+				<PublicRoutePanel>
+					<PublicRoutePanelBody>
+						<PublicRoutePanelTitle>
 							Starting from an idea?
-						</h2>
-						<p className="mt-2 text-sm leading-6 text-muted-foreground">
+						</PublicRoutePanelTitle>
+						<PublicRoutePanelDescription>
 							Starter is the one-year path for turning a new idea into source
 							truth, a template app, and worker-ready plans.
-						</p>
+						</PublicRoutePanelDescription>
 						<Link
 							href={routeConfig.starter}
 							className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-foreground underline underline-offset-4"
@@ -235,9 +274,9 @@ export default function WorkerSealTeam6Page() {
 							Open Starter
 							<ArrowRight className="size-4" aria-hidden />
 						</Link>
-					</div>
-				</div>
-			</section>
-		</main>
+					</PublicRoutePanelBody>
+				</PublicRoutePanel>
+			</PublicRouteContainer>
+		</PublicRouteSection>
 	);
 }

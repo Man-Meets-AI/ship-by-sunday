@@ -85,6 +85,8 @@ const docsMdxModuleLoaders: Record<string, DocsMdxModuleLoader> = {
 		import("@/content/docs/troubleshooting/stripe-convex.mdx") as Promise<DocsMdxModule>,
 	"video-pipeline": () =>
 		import("@/content/docs/video-pipeline.mdx") as Promise<DocsMdxModule>,
+	"worker-seal-team-6-cal-com": () =>
+		import("@/content/docs/worker-seal-team-6-cal-com.mdx") as Promise<DocsMdxModule>,
 };
 
 function createDocsSegmentsKey(segments: string[] = []) {
