@@ -60,7 +60,7 @@ In scope:
 - Decision that Worker Seal Team 6 sends one internal Resend ops email after paid booking sync, with a separate template and idempotency key from the customer prep email.
 - Decision that Worker Seal Team 6 ops recipients are configured through production-required `WORKER_SEAL_TEAM_6_OPS_EMAILS`.
 - Decision that Starter and Workers stay on the template Stripe/Convex billing path, while Worker Seal Team 6 mirrors Cal.com booking/payment state into Convex.
-- Decision that Cal.com must be configured for the accepted service policy: one-hour duration, $2500 paid booking, required intake questions, self-serve reschedule until 24 hours before the call, and manual/support-handled cancellations/refunds.
+- Decision that Cal.com must be configured for the accepted service policy: one-hour duration, $500 paid booking, required intake questions, self-serve reschedule until 24 hours before the call, and manual/support-handled cancellations/refunds.
 - Test and proof inventory for later billing, auth, Convex, Sentry, Resend, and route migration slices.
 - Explicit statement that `platform/` is migration debt unless a later slice justifies keeping a specific piece.
 

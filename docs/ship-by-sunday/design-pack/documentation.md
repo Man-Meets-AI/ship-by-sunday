@@ -167,7 +167,7 @@ If helpful, also record the external official references used for the work:
 
 - **Date:** 2026-05-14
 - **Surface:** `/worker-seal-team-6` public landing page, public navigation, and the `/` routing section.
-- **Change:** Added the fourth Program landing page for the $2500 hands-on service. The page uses the existing founder proof image as a full-bleed first-screen visual, names Worker Seal Team 6 as the hero product signal, explains when to use the service, shows what happens in the hour, and now routes the primary action to a booking section that renders a Cal.com embed and hosted fallback when configured.
+- **Change:** Added the fourth Program landing page for the $500 hands-on service. The page uses the existing founder proof image as a full-bleed first-screen visual, names Worker Seal Team 6 as the hero product signal, explains when to use the service, shows what happens in the hour, and now routes the primary action to a booking section that renders a Cal.com embed and hosted fallback when configured.
 - **Design direction:** Keep the service page premium and codebase-first: one calm hero composition, no hero cards, no fake booking embed, no app-owned checkout, and cards only after the first viewport for use-case, process, booking, and product-lane routing.
 - **Out of scope:** No Stripe checkout, no Clerk gate, no Resend email, and no Sentry setup.
 - **Verification:** Public route metadata tests, app lint, and app typecheck/build should pass. Desktop and mobile browser proof should verify the hero image, navigation, CTAs, and responsive text fit before the ExecPlan closes.

@@ -12,7 +12,7 @@ read_when:
 
 ## Research Question
 
-Worker Seal Team 6 is a $2500 one-hour hands-on service. The booking flow should be excellent for the customer and low-risk for the codebase.
+Worker Seal Team 6 is a $500 one-hour hands-on service. The booking flow should be excellent for the customer and low-risk for the codebase.
 
 The decision is now to use Cal.com for the booking surface instead of building a custom Google Calendar API scheduler.
 
@@ -61,7 +61,7 @@ Ops recipients should come from `WORKER_SEAL_TEAM_6_OPS_EMAILS`, parsed as a com
 The Worker Seal Team 6 Cal.com event type should be configured as:
 
 - One-hour duration.
-- $2500 paid booking through the Cal.com Stripe app connected to the Ship by Sunday Stripe account.
+- $500 paid booking through the Cal.com Stripe app connected to the Ship by Sunday Stripe account.
 - Operator-owned calendar connection for availability and destination events.
 - Customer as attendee.
 - Required intake questions:
