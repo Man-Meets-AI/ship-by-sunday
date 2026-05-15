@@ -1,14 +1,26 @@
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteHeader,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import type { MissionState } from "@/lib/course/mission/mission-page-model";
 
 export function MissionPageIntro({ mission }: { mission: MissionState }) {
 	return (
-		<div className="space-y-1">
-			<h1 className="font-heading-serif text-2xl font-normal sm:text-3xl">
-				Your weekend roadmap
-			</h1>
-			<p className="text-sm text-muted-foreground">
+		<ProtectedRouteHeader
+			actions={
+				<p className="rounded-xl border border-border/60 bg-card/70 px-3 py-2 text-sm text-muted-foreground">
+					<span className="font-number font-medium text-foreground">
+						{mission.progressCount}
+					</span>{" "}
+					of {mission.totalLessons} lessons complete
+				</p>
+			}
+		>
+			<ProtectedRouteTitle>Your weekend roadmap</ProtectedRouteTitle>
+			<ProtectedRouteDescription>
 				{mission.progressCount} of {mission.totalLessons} lessons complete
-			</p>
-		</div>
+			</ProtectedRouteDescription>
+		</ProtectedRouteHeader>
 	);
 }

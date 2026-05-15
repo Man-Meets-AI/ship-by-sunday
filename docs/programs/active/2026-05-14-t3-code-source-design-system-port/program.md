@@ -46,6 +46,7 @@ The guiding rule is simple: when the current Ship by Sunday design docs, fronten
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md`
+- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
 - T3 Code source app: `/Users/bazelrex/Developer/oss/t3code/apps/web`
@@ -101,6 +102,8 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-15: Added `planning-brief-7.md` for the remaining protected Worker findings/runs, support/admin, and course/tutorial surface sweep and pointed `current-planning-brief.txt` at it.
 - [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`, migrating Worker findings, finding detail, runs, loops, privacy, and the Starter tutorial index onto shared protected route-surface helpers while preserving behavior-sensitive actions.
 - [x] 2026-05-15: Added `planning-brief-8.md` for the remaining protected app route closeout and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`, migrating Doctor Pass, paid app home, access recovery, codebase overview, mission intro, and lesson watch surfaces onto protected route headers, panels, and compact T3 Code typography.
+- [x] 2026-05-15: Added `planning-brief-9.md` for the public homepage, product landing page, docs, blog, and public support surface migration and pointed `current-planning-brief.txt` at it.
 
 ## Decision Log
 
@@ -160,11 +163,11 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`: copied T3 Code Sidebar behavior onto the current Radix-compatible Sidebar primitive, added desktop resize persistence and scroll-fade content, and moved protected `viewportMode="app"` AppShell rendering to `SidebarProvider`, `Sidebar`, `SidebarRail`, and `SidebarInset` while preserving document mode and current product navigation behavior.
 - `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`: added shared protected route-surface helpers and migrated Starter home, Workers existing-codebase setup, and settings route content to compact T3-style headers, panels, and summary rows while preserving protected access behavior, AppShell props, direct Starter template download, Workers setup mutations, and settings card anchors.
 - `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`: migrated Worker findings, finding detail, runs, loops, privacy, and the Starter tutorial index to the shared protected route-surface recipe while preserving filters, links, copy buttons, workflow approval behavior, privacy mutations, local nav, AppShell props, and tutorial hrefs.
+- `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`: migrated Doctor Pass, paid app home, access recovery, codebase overview, mission intro, and lesson watch surfaces to shared protected route headers, panels, and dense typography while preserving protected access, AppShell props, approval/retry actions, local navigation, codebase authoring, mission progress, and lesson content behavior.
 
 Planned child slices:
 
 - Remaining shared primitive migration: finish any shared primitive gaps as they appear during route-surface migration, while continuing to avoid unplanned dependency changes.
-- Protected app route-surface closeout: update Doctor Pass, paid app home, access recovery, codebase flow overview, mission, and lesson surfaces so the new sidebar shell contains T3 Code-style dense product surfaces instead of old page islands.
 - Public surfaces migration: rebuild marketing pages, homepage sections, docs chrome, blog prose, starter/workers pages, and public support surfaces with the T3 Code system.
 - Course, tutorials, auth, checkout, and edge-surface sweep: convert the remaining user-facing route islands and high-risk screens with targeted behavior proof.
 - Telegram widget visual migration: update `packages/telegram-chat-widget` CSS and any package UI assumptions so the widget supports T3 Code light and dark mode.
@@ -173,11 +176,11 @@ Planned child slices:
 
 ## Next Slice
 
-The next recommended slice is `Protected app route-surface closeout`.
+The next recommended slice is `Public surfaces migration`.
 
-That slice should use `planning-brief-8.md` and build on the shared protected route-surface helpers from `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md` plus the Worker findings/support/tutorial sweep in `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`. It should migrate Doctor Pass, paid app home, access recovery, codebase flow overview, mission, and lesson surfaces inside `viewportMode="app"` so the Sidebar shell has no obvious remaining protected app page islands. It should preserve route URLs, protected access boundaries, data loading, AppShell props, entitlement behavior, command/theme/user controls, billing/support affordances, local runner controls, lesson progression, and current product navigation behavior.
+That slice should use `planning-brief-9.md` and build on the completed protected route-surface strategy from `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`. It should migrate the public homepage, product landing pages, docs chrome, blog pages, Starter/Workers public pages, Worker Seal Team 6 page, and public support-adjacent route islands so the public web experience no longer diverges from the T3 Code app system. It must preserve route URLs, redirects, metadata, structured data, checkout CTA behavior, Cal.com fallback links, docs navigation, blog slugs, homepage section ownership, and current product copy contracts unless an owning doc and child ExecPlan record a deliberate contract change.
 
-That slice does not need to implement generated-codebase, public marketing/docs/blog, auth/checkout, or Telegram widget changes. Generated codebase implementation should wait until the tracked app shell and protected route-surface strategy are proven across the remaining protected app routes.
+That slice does not need to implement generated-codebase, Telegram widget, auth, checkout success, Stripe/Clerk provider setup, Convex schema/function, or billing behavior changes. Generated codebase implementation should wait until the tracked app shell, protected route surfaces, and public surface strategy are proven.
 
 ## Risks and Watchpoints
 

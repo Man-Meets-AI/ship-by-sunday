@@ -325,6 +325,13 @@ describe("CodebasePage", () => {
 			2,
 		);
 		expect(
+			document.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			document.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(document.body.innerHTML).not.toContain("font-heading-serif");
+		expect(
 			screen.getByText("All sections complete. Continue to review when ready."),
 		).toBeTruthy();
 		expect(

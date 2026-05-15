@@ -3,15 +3,20 @@ import Link from "next/link";
 
 import { AppShell } from "@/app/(app)/_components/app-shell";
 import type { PaidAppHomeModel } from "@/app/(app)/_lib/paid-app-home-model";
-import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRouteIcon,
+	ProtectedRoutePage,
+	ProtectedRoutePanel,
+	ProtectedRoutePanelBody,
+	ProtectedRoutePanelDescription,
+	ProtectedRoutePanelHeader,
+	ProtectedRoutePanelTitle,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
+import { Button } from "@/components/ui/button";
 
 const pathIcons = {
 	starter: Code2,
@@ -29,35 +34,36 @@ export function PaidAppHomePage({
 }) {
 	return (
 		<AppShell viewportMode="app" appScrollMode="page" showSkillRail={false}>
-			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-10 pt-2">
-				<section className="border-b border-border/60 pb-6">
-					<p className="text-sm text-muted-foreground">
+			<ProtectedRoutePage className="max-w-6xl gap-6">
+				<ProtectedRouteHeader
+					actions={
+						model.secondaryLinks.length > 0 ? (
+							<div className="flex flex-wrap gap-2">
+								{model.secondaryLinks.map((link) => (
+									<Button key={link.id} asChild variant="outline" size="sm">
+										<Link href={link.href}>{link.label}</Link>
+									</Button>
+								))}
+							</div>
+						) : null
+					}
+				>
+					<ProtectedRouteEyebrow>
 						{showCheckoutWelcome
 							? accountEmail
 								? `Access is live for ${accountEmail}.`
 								: "Access is live."
 							: "Paid app hub"}
-					</p>
-					<div className="mt-3 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-						<div className="max-w-3xl">
-							<h1 className="font-heading-serif text-4xl leading-tight text-foreground sm:text-5xl">
-								{showCheckoutWelcome ? "You're in." : model.title}
-							</h1>
-							<p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-								{showCheckoutWelcome
-									? "Choose where you want to start. You can come back here anytime from the logo, user menu, or Command-K."
-									: model.description}
-							</p>
-						</div>
-						<div className="flex flex-wrap gap-2">
-							{model.secondaryLinks.map((link) => (
-								<Button key={link.id} asChild variant="outline" size="sm">
-									<Link href={link.href}>{link.label}</Link>
-								</Button>
-							))}
-						</div>
-					</div>
-				</section>
+					</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>
+						{showCheckoutWelcome ? "You're in." : model.title}
+					</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
+						{showCheckoutWelcome
+							? "Choose where you want to start. You can come back here anytime from the logo, user menu, or Command-K."
+							: model.description}
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 				<section
 					aria-label="Product paths"
 					className="grid gap-4 md:grid-cols-2"
@@ -66,30 +72,31 @@ export function PaidAppHomePage({
 					{model.paths.map((path) => {
 						const Icon = pathIcons[path.id];
 						return (
-							<Card key={path.id} className="flex min-h-[15rem] flex-col">
-								<CardHeader>
-									<div className="mb-4 flex size-10 items-center justify-center rounded-lg border border-border/70 bg-muted/40">
-										<Icon
-											className="size-5 text-muted-foreground"
-											aria-hidden
-										/>
-									</div>
-									<CardTitle>{path.title}</CardTitle>
-									<CardDescription className="leading-6">
+							<ProtectedRoutePanel
+								key={path.id}
+								className="flex min-h-[15rem] flex-col"
+							>
+								<ProtectedRoutePanelHeader>
+									<ProtectedRouteIcon className="mb-2">
+										<Icon className="size-5" aria-hidden />
+									</ProtectedRouteIcon>
+									<ProtectedRoutePanelTitle>
+										{path.title}
+									</ProtectedRoutePanelTitle>
+									<ProtectedRoutePanelDescription>
 										{path.description}
-									</CardDescription>
-								</CardHeader>
-								<CardContent className="flex-1" />
-								<CardFooter>
+									</ProtectedRoutePanelDescription>
+								</ProtectedRoutePanelHeader>
+								<ProtectedRoutePanelBody className="mt-auto">
 									<Button asChild className="w-full">
 										<Link href={path.href}>{path.actionLabel}</Link>
 									</Button>
-								</CardFooter>
-							</Card>
+								</ProtectedRoutePanelBody>
+							</ProtectedRoutePanel>
 						);
 					})}
 				</section>
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }

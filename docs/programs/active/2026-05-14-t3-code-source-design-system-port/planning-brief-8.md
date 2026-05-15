@@ -2,7 +2,7 @@
 title: "T3 Code Protected App Route Closeout Planning Brief 8"
 program_id: "t3-code-source-design-system-port"
 brief_version: 8
-status: "current"
+status: "superseded"
 summary: "Next slice for closing out remaining protected app route islands after the Worker findings/support/tutorial sweep."
 read_when:
   - "Writing the next protected route-surface child ExecPlan after the Worker findings/support/tutorial sweep."

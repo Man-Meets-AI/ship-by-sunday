@@ -10,6 +10,7 @@ import { CodebasePageOverview } from "@/app/(app)/_components/codebase-flow/code
 import { CodebasePageProgressSidebar } from "@/app/(app)/_components/codebase-flow/codebase-page-progress-sidebar";
 import { CodebasePageSaveBar } from "@/app/(app)/_components/codebase-flow/codebase-page-save-bar";
 import { CodebasePageSectionCard } from "@/app/(app)/_components/codebase-flow/codebase-page-section-card";
+import { ProtectedRoutePage } from "@/components/app/protected-route-surface";
 import type { CodebasePageSectionStatus } from "@/app/(app)/_hooks/codebase-flow/use-codebase-page-state";
 import { codebasePageSections } from "@/lib/codebase-flow/codebase-page-sections";
 import type { CodebaseStepInlineFeedback } from "@/lib/codebase-flow/codebase-step-save-feedback";
@@ -54,7 +55,7 @@ export function CodebasePageBody({
 	const prefersReducedMotion = useCodebasePageReducedMotion();
 
 	return (
-		<div className="mx-auto flex w-full max-w-4xl flex-1 gap-8 px-4 pb-20 pt-4 lg:gap-10 xl:gap-12">
+		<ProtectedRoutePage className="max-w-5xl flex-row gap-8 pb-20 pt-4 lg:gap-10 xl:gap-12">
 			<div className="hidden w-48 shrink-0 xl:block">
 				<div className="sticky top-20">
 					<CodebasePageProgressSidebar
@@ -110,6 +111,6 @@ export function CodebasePageBody({
 					onSaveAndContinue={handleSaveAndContinue}
 				/>
 			</div>
-		</div>
+		</ProtectedRoutePage>
 	);
 }

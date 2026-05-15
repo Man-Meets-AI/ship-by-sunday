@@ -35,6 +35,8 @@ describe("LessonShellWatch", () => {
 		);
 
 		expect(markup).toContain(lesson.title);
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).toContain("<iframe");
 	});
 

@@ -370,6 +370,9 @@ describe("MissionPage", () => {
 		expect(markup).toContain('data-viewport-mode="app"');
 		expect(markup).toContain('data-app-scroll-mode="page"');
 		expect(markup).not.toContain('data-starter-repo-card="mission"');
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).toContain("Your weekend roadmap");
 		expect(markup).toContain("20 of 30 lessons complete");
 		expect(markup).toContain("Start 1.5");

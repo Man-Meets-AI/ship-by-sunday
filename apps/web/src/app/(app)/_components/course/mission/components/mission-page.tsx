@@ -14,6 +14,7 @@ import {
 	enrichBlock,
 } from "@/lib/course/mission/mission-page-model";
 import { AppShell } from "@/app/(app)/_components/app-shell";
+import { ProtectedRoutePage } from "@/components/app/protected-route-surface";
 
 function MissionPageContent({
 	mission,
@@ -38,7 +39,7 @@ function MissionPageContent({
 			{mission === undefined || currentBlock === null ? (
 				<MissionLoading />
 			) : (
-				<div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 pb-10 pt-2">
+				<ProtectedRoutePage className="max-w-4xl gap-5">
 					<MissionPageIntro mission={mission} />
 					<MissionHeroCard block={currentBlock} />
 					<MissionUpcomingSteps lessons={currentBlock.upcomingLessons} />
@@ -47,7 +48,7 @@ function MissionPageContent({
 						currentBlockId={currentBlock.id}
 					/>
 					<MissionExtrasRow />
-				</div>
+				</ProtectedRoutePage>
 			)}
 		</AppShell>
 	);

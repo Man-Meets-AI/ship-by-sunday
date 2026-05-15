@@ -29,6 +29,17 @@ import {
 	showWorkspaceActionSuccessToast,
 } from "@/app/(app)/_lib/workspace-action-feedback";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRoutePage,
+	ProtectedRoutePanel,
+	ProtectedRoutePanelBody,
+	ProtectedRoutePanelHeader,
+	ProtectedRoutePanelTitle,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
@@ -135,27 +146,25 @@ export function WorkspaceDoctorPassPage({
 				desktop: <WorkspaceLocalNavRail model={localNavModel} />,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 pb-12 pt-2 sm:px-4 lg:px-6">
-				<header className="grid gap-4 border-b border-border/60 pb-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.36fr)]">
-					<div className="min-w-0">
-						<p className="text-sm font-medium text-muted-foreground">
-							Doctor Pass
-						</p>
-						<h1 className="mt-2 font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-							{presentation.title}
-						</h1>
-						<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-							{presentation.subtitle}
-						</p>
-					</div>
-					<WorkspaceOperatorSummaryCard
-						title="Run summary"
-						rows={buildDoctorPassOperatorSummaryRows({
-							doctorPassRun,
-							localRunId,
-						})}
-					/>
-				</header>
+			<ProtectedRoutePage>
+				<ProtectedRouteHeader
+					actions={
+						<WorkspaceOperatorSummaryCard
+							title="Run summary"
+							rows={buildDoctorPassOperatorSummaryRows({
+								doctorPassRun,
+								localRunId,
+							})}
+						/>
+					}
+					actionsClassName="lg:min-w-[18rem]"
+				>
+					<ProtectedRouteEyebrow>Doctor Pass</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>{presentation.title}</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
+						{presentation.subtitle}
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<div className="grid gap-5">
@@ -172,7 +181,7 @@ export function WorkspaceDoctorPassPage({
 						onApprove={() => void approveCurrentPreview()}
 					/>
 				</div>
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }
@@ -194,7 +203,7 @@ function ApprovalPanel({
 }) {
 	return (
 		<aside className="grid gap-5 lg:sticky lg:top-20">
-			<section className="rounded-xl border border-border/60 bg-background p-3">
+			<ProtectedRoutePanel className="p-3">
 				<div className="grid gap-3">
 					<div className="flex items-center gap-2">
 						<ShieldCheck className="size-4 text-foreground" aria-hidden />
@@ -231,7 +240,7 @@ function ApprovalPanel({
 					doctorPassRun={doctorPassRun}
 					localRunId={localRunId}
 				/>
-			</section>
+			</ProtectedRoutePanel>
 		</aside>
 	);
 }
@@ -271,11 +280,11 @@ function StatusSummaryPanel({
 			];
 
 	return (
-		<section
+		<ProtectedRoutePanel
 			id={doctorPassDetailsPanelId}
 			aria-labelledby="workspace-doctor-pass-summary-heading"
 			tabIndex={-1}
-			className="rounded-xl border border-border/60 bg-background p-5"
+			className="p-5"
 		>
 			<div className="flex items-start gap-3">
 				<ListChecks className="mt-0.5 size-4 text-foreground" aria-hidden />
@@ -310,7 +319,7 @@ function StatusSummaryPanel({
 					</ul>
 				</div>
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 
@@ -318,9 +327,11 @@ function ProgressStepper({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 	const steps = buildDoctorPassSteps(doctorPassRun);
 
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<h2 className="text-base font-semibold text-foreground">Current flow</h2>
-			<div className="mt-4 grid gap-3">
+		<ProtectedRoutePanel>
+			<ProtectedRoutePanelHeader>
+				<ProtectedRoutePanelTitle>Current flow</ProtectedRoutePanelTitle>
+			</ProtectedRoutePanelHeader>
+			<ProtectedRoutePanelBody className="grid gap-3">
 				{steps.map((step, index) => (
 					<div key={step.label} className="flex items-start gap-3">
 						<StepIcon status={step.status} index={index + 1} />
@@ -343,8 +354,8 @@ function ProgressStepper({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 						</div>
 					</div>
 				))}
-			</div>
-		</section>
+			</ProtectedRoutePanelBody>
+		</ProtectedRoutePanel>
 	);
 }
 
@@ -380,10 +391,10 @@ function StepIcon({
 function PreviewPanel({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 	if (!doctorPassRun) {
 		return (
-			<section
+			<ProtectedRoutePanel
 				id={doctorPassPreviewPanelId}
 				tabIndex={-1}
-				className="rounded-xl border border-border/60 bg-background p-5"
+				className="p-5"
 			>
 				<div className="flex items-start gap-3">
 					<Upload className="mt-0.5 size-4 text-foreground" aria-hidden />
@@ -402,15 +413,15 @@ function PreviewPanel({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 						</p>
 					</div>
 				</div>
-			</section>
+			</ProtectedRoutePanel>
 		);
 	}
 
 	return (
-		<section
+		<ProtectedRoutePanel
 			id={doctorPassPreviewPanelId}
 			tabIndex={-1}
-			className="rounded-xl border border-border/60 bg-background p-5"
+			className="p-5"
 		>
 			<div className="flex items-start gap-3">
 				<FileJson className="mt-0.5 size-4 text-foreground" aria-hidden />
@@ -442,7 +453,7 @@ function PreviewPanel({ doctorPassRun }: { doctorPassRun: DoctorPassRun }) {
 					</code>
 				</p>
 			) : null}
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 

@@ -79,11 +79,15 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Access Required");
 		expect(markup).toContain("Checking product access");
 		expect(markup).toContain("Protected app");
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).toContain('data-slot="protected-route-panel"');
 		expect(markup).toContain("What to do next");
 		expect(markup).not.toContain("Need help reconnecting access?");
 		expect(markup).toContain(
 			"Keep this page open while we verify whether product access is ready.",
 		);
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 
