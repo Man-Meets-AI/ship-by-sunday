@@ -4,7 +4,7 @@ status: complete
 created_at: 2026-05-14
 completed_at: 2026-05-14
 summary: Move ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty toward T3 Code recipes while preserving current Radix call-site compatibility.
-post_build_recap: ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty now carry T3-style utility recipes on top of the existing Radix/shared runtime. Focused primitive tests, representative codebase/workspace integration tests, desktop/mobile browser proof, app lint/typecheck, repo lint/typecheck, plan/program/docs lint, markdown lint, and diff checks passed. Sidebar remains intentionally deferred to the protected app-shell/sidebar slice because it has no live imports today.
+post_build_recap: ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty now carry T3-style utility recipes on top of the existing Radix/shared runtime. Focused primitive tests, workspace setup live-consumer coverage, codebase page behavior coverage, desktop/mobile browser proof, app lint/typecheck, repo lint/typecheck, plan/program/docs lint, markdown lint, and diff checks passed. Sidebar remains intentionally deferred to the protected app-shell/sidebar slice because it has no live imports today.
 program_id: t3-code-source-design-system-port
 planning_brief: docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md
 read_when:
@@ -32,7 +32,7 @@ After this slice, current call sites should keep importing the same primitive na
 - [x] 2026-05-14: Created this active ExecPlan and recorded the Radix-adapter strategy before coding.
 - [x] 2026-05-14: Validated the active plan with `plans:lint`.
 - [x] 2026-05-14: Migrated ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty recipes while preserving current exports and props.
-- [x] 2026-05-14: Added focused primitive tests and reran representative live call-site tests.
+- [x] 2026-05-14: Added focused primitive tests and reran representative page tests; workspace setup used live primitive consumers, while the codebase page test remained behavior-focused with primitive mocks.
 - [x] 2026-05-14: Ran desktop/mobile browser proof through a temporary local route, captured ignored screenshots, and removed the temporary route before final validation.
 - [x] 2026-05-14: Ran final format, repo lint/typecheck, Program/plan/docs lint, markdown lint, and `git diff --check`.
 - [x] 2026-05-14: Moved this ExecPlan to completed and updated the Program ledger with the next slice.
@@ -55,9 +55,9 @@ Date: 2026-05-14
 
 ## Outcomes & Retrospective
 
-This slice moved the shared utility primitives closer to the T3 Code source recipes while keeping the current app's Radix and shared-library behavior. `ScrollArea` kept Radix Root/Viewport/Scrollbar/Thumb/Corner and added T3-compatible `scrollFade`, `scrollbarGutter`, `hideScrollbars`, and `chainVerticalScroll` controls. `CollapsibleContent` remains exported but now aliases the T3-compatible `CollapsiblePanel`, with height animation mapped to Radix `data-state` and `--radix-collapsible-content-height`. `Toggle` and `ToggleGroup` kept Radix pressed and single-selection behavior while mapping copied T3 pressed styling to `data-state="on"` and adding `ToggleGroupSeparator`. `Spinner` kept the existing loading role and label. `Empty` moved to the T3 media/title/description/content recipes and now exposes `data-slot="empty-media"`.
+This slice moved the shared utility primitives closer to the T3 Code source recipes while keeping the current app's Radix and shared-library behavior. `ScrollArea` kept Radix Root/Viewport/Scrollbar/Thumb/Corner and added T3-compatible `scrollFade`, `scrollbarGutter`, `hideScrollbars`, and `chainVerticalScroll` controls. The Radix adapter computes the T3 overflow CSS variables on the viewport for fade masks, marks actual overflow with `data-has-overflow-x` and `data-has-overflow-y`, and keeps hidden custom scrollbars mounted so Radix still enables scroll axes. `CollapsibleContent` remains exported but now aliases the T3-compatible `CollapsiblePanel`, with height animation mapped to Radix `data-state` and `--radix-collapsible-content-height`. `Toggle` and `ToggleGroup` kept Radix pressed and single-selection behavior while mapping copied T3 pressed styling to `data-state="on"` and adding `ToggleGroupSeparator`. `Spinner` kept the existing loading role and label. `Empty` moved to the T3 media/title/description/content recipes and now exposes `data-slot="empty-media"`.
 
-The focused unit test renders the primitives directly and reads source tokens to guard against accidental Base UI imports or copied Base UI-only state selectors. Representative live call-site integration coverage passed for the codebase page and workspace setup page. Desktop and mobile browser proof ran against a temporary `/codex-utility-proof` route on a local webpack dev server, verified the Collapsible panel, ToggleGroup item, ScrollArea viewport, Empty media, and Spinner state, and captured screenshots under ignored `codex-scripts/artifacts/`. The temporary route was deleted before final validation.
+The focused unit test renders the primitives directly and reads source tokens to guard against accidental Base UI imports or copied Base UI-only state selectors. It also proves Radix scroll axes remain enabled when `hideScrollbars` is set, Radix-compatible fade metrics are written to the viewport, and DialogPanel/SheetPanel pass `scrollFade` through to ScrollArea. Workspace setup integration coverage exercised live Collapsible and ToggleGroup consumers. The codebase page integration test still proves page behavior but mocks some primitive modules, so it is not claimed as live primitive coverage. Desktop and mobile browser proof ran against a temporary `/codex-utility-proof` route on a local webpack dev server, verified the Collapsible panel, ToggleGroup item, ScrollArea viewport, Empty media, and Spinner state, and captured screenshots under ignored `codex-scripts/artifacts/`. The temporary route was deleted before final validation.
 
 Sidebar stayed out of this slice. The file exists, but current app and test imports do not use it, so moving it with the protected app-shell/sidebar slice gives the Program a real call site and browser-proof target instead of static wrapper churn.
 
@@ -79,7 +79,7 @@ This plan does not add `@base-ui/react`, migrate `apps/web/src/components/ui/sid
 
 First, validate this active plan with `bun run plans:lint -- --plan docs/exec-plans/active/2026-05-14-t3-code-utility-primitives.md`.
 
-Second, update `apps/web/src/components/ui/scroll-area.tsx`. Preserve the Radix root, viewport, scrollbar, thumb, corner, `className`, and children behavior. Add T3-compatible props `scrollFade`, `scrollbarGutter`, `hideScrollbars`, and `chainVerticalScroll`. Use T3 compact scrollbar classes adapted to Radix `data-orientation`.
+Second, update `apps/web/src/components/ui/scroll-area.tsx`. Preserve the Radix root, viewport, scrollbar, thumb, corner, `className`, and children behavior. Add T3-compatible props `scrollFade`, `scrollbarGutter`, `hideScrollbars`, and `chainVerticalScroll`. Use T3 compact scrollbar classes adapted to Radix `data-orientation`, compute Radix-compatible overflow metrics for fade masks, and do not unmount Radix scrollbar parts when hiding custom scrollbar chrome.
 
 Third, update `apps/web/src/components/ui/collapsible.tsx`. Preserve `Collapsible`, `CollapsibleTrigger`, and `CollapsibleContent`, add `CollapsiblePanel` as an alias, and adapt T3 panel height animation classes to Radix `data-state` plus `--radix-collapsible-content-height`.
 
@@ -87,7 +87,7 @@ Fourth, update `apps/web/src/components/ui/toggle.tsx` and `apps/web/src/compone
 
 Fifth, update `apps/web/src/components/ui/spinner.tsx` and `apps/web/src/components/ui/empty.tsx`. Keep Spinner's role and label behavior. Move Empty to the T3 spacing, media, title, description, content, and icon-card recipes while preserving existing export names.
 
-Sixth, add focused tests. The meaningful user-facing risk is P2 normal product risk because these primitives affect live setup, codebase, and lesson UI, but this slice does not change persisted state, auth, checkout, billing, or external I/O. The source of truth is visible markup, class recipes, and live call-site behavior. Must work: Radix ScrollArea render, hide-scrollbar behavior, Collapsible `asChild`, Collapsible open state selectors, Toggle pressed state selectors, ToggleGroup single selection, Empty media/title/description rendering, and Spinner loading semantics.
+Sixth, add focused tests. The meaningful user-facing risk is P2 normal product risk because these primitives affect live setup, codebase, and lesson UI, but this slice does not change persisted state, auth, checkout, billing, or external I/O. The source of truth is visible markup, class recipes, and live call-site behavior. Must work: Radix ScrollArea render, hide-scrollbar behavior without disabling scroll axes, Radix-compatible fade metrics, Dialog/Sheet scrollFade forwarding, Collapsible `asChild`, Collapsible open state selectors, Toggle pressed state selectors, ToggleGroup single selection, Empty media/title/description rendering, and Spinner loading semantics.
 
 Seventh, run desktop/mobile browser proof with a temporary local route or equivalent local proof harness, delete temporary route code before final validation, record validation results, complete this ExecPlan, move it to `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`, and update the Program progress, completed ledger, and next slice.
 
@@ -197,6 +197,22 @@ Validation completed on 2026-05-14:
     bun lint
     DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
     git diff --check
+
+Review follow-up completed on 2026-05-15:
+
+    bunx oxfmt -c .oxfmtrc.json apps/web/src/components/ui/scroll-area.tsx apps/web/src/components/ui/dialog.tsx apps/web/src/components/ui/sheet.tsx apps/web/tests/unit/ui-utility-primitives.test.tsx
+    bun run --cwd apps/web test:unit -- tests/unit/ui-utility-primitives.test.tsx
+    bun run --cwd apps/web test:integration:ui -- tests/integration-ui/codebase-page.test.tsx tests/integration-ui/workspace-setup-page.test.tsx
+    bun run --cwd apps/web lint
+    DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run --cwd apps/web typecheck
+    bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md
+    bun run markdown:lint -- --paths docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md
+    bun lint
+    DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck
+    bun run format:check
+    git diff --check
+
+Review follow-up browser proof used a temporary local route at `http://localhost:3016/codex-utility-fix-proof` on a webpack dev server. An inline Playwright probe verified desktop and mobile viewports both kept two hidden Radix scrollbars mounted, kept viewport `overflow-x` and `overflow-y` at `scroll`, wrote nonzero fade metrics after scrolling, set `data-has-overflow-x` and `data-has-overflow-y`, applied the fade mask to ScrollArea and DialogPanel, and left SheetPanel without the mask when `scrollFade={false}`. The temporary route was deleted before final validation.
 
 Browser proof used a temporary local route and local webpack dev server at `http://localhost:3015/codex-utility-proof`, then deleted the route before final validation. Ignored screenshots were written to `codex-scripts/artifacts/utility-desktop.png` and `codex-scripts/artifacts/utility-mobile.png`.
 

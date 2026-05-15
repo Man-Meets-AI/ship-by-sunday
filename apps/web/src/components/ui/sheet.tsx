@@ -217,7 +217,7 @@ function SheetPanel({
 }: SheetPanelProps) {
 	return (
 		<ScrollArea
-			data-scroll-fade={scrollFade ? "true" : undefined}
+			scrollFade={scrollFade}
 			className="min-h-0 flex-1 rounded-[inherit]"
 		>
 			<div

@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -29,6 +29,8 @@ import {
 	ToggleGroupItem,
 	ToggleGroupSeparator,
 } from "@/components/ui/toggle-group";
+import { DialogPanel } from "@/components/ui/dialog";
+import { SheetPanel } from "@/components/ui/sheet";
 
 const scrollAreaSource = readFileSync(
 	join(process.cwd(), "src/components/ui/scroll-area.tsx"),
@@ -58,6 +60,7 @@ const emptySource = readFileSync(
 describe("T3 Code utility primitive recipes", () => {
 	afterEach(() => {
 		cleanup();
+		vi.unstubAllGlobals();
 	});
 
 	it("keeps compatibility exports while adding T3 aliases", () => {
@@ -73,9 +76,9 @@ describe("T3 Code utility primitive recipes", () => {
 		expect(Spinner).toBeTypeOf("function");
 	});
 
-	it("renders ScrollArea with T3 viewport controls and optional hidden scrollbars", () => {
-		const { rerender } = render(
-			<ScrollArea chainVerticalScroll hideScrollbars scrollbarGutter scrollFade>
+	it("renders ScrollArea with Radix-compatible fade metrics and T3 viewport controls", async () => {
+		render(
+			<ScrollArea chainVerticalScroll scrollbarGutter scrollFade>
 				<div>Scrollable content</div>
 			</ScrollArea>,
 		);
@@ -83,24 +86,89 @@ describe("T3 Code utility primitive recipes", () => {
 		const viewport = document.querySelector(
 			'[data-slot="scroll-area-viewport"]',
 		);
+		if (!(viewport instanceof HTMLElement)) {
+			throw new Error("Expected ScrollArea viewport to render.");
+		}
+		Object.defineProperties(viewport, {
+			clientHeight: { configurable: true, value: 40 },
+			clientWidth: { configurable: true, value: 50 },
+			scrollHeight: { configurable: true, value: 120 },
+			scrollWidth: { configurable: true, value: 90 },
+		});
+		viewport.scrollTop = 8;
+		viewport.scrollLeft = 5;
+		viewport.dispatchEvent(new Event("scroll"));
+
 		expect(viewport?.className).toContain("overscroll-y-auto");
 		expect(viewport?.className).toContain("mask-t-from");
 		expect(viewport?.className).toContain("[scrollbar-gutter:stable]");
-		expect(viewport?.className).toContain("[scrollbar-width:none]");
+		await waitFor(() => {
+			expect(
+				viewport.style.getPropertyValue("--scroll-area-overflow-y-start"),
+			).toBe("8px");
+		});
 		expect(
-			document.querySelector('[data-slot="scroll-area-scrollbar"]'),
-		).toBeNull();
+			viewport.style.getPropertyValue("--scroll-area-overflow-y-end"),
+		).toBe("72px");
+		expect(
+			viewport.style.getPropertyValue("--scroll-area-overflow-x-start"),
+		).toBe("5px");
+		expect(
+			viewport.style.getPropertyValue("--scroll-area-overflow-x-end"),
+		).toBe("35px");
+		expect(viewport.hasAttribute("data-has-overflow-y")).toBe(true);
+		expect(viewport.hasAttribute("data-has-overflow-x")).toBe(true);
+	});
 
-		rerender(
-			<ScrollArea>
+	it("keeps Radix scroll axes enabled when custom scrollbars are hidden", async () => {
+		vi.stubGlobal(
+			"ResizeObserver",
+			class ResizeObserver {
+				disconnect() {}
+				observe() {}
+				unobserve() {}
+			},
+		);
+
+		render(
+			<ScrollArea hideScrollbars type="always">
 				<div>Scrollable content</div>
 			</ScrollArea>,
 		);
 
-		expect(scrollAreaSource).toContain('<ScrollBar orientation="vertical" />');
-		expect(scrollAreaSource).toContain(
-			'<ScrollBar orientation="horizontal" />',
+		const viewport = document.querySelector(
+			'[data-slot="scroll-area-viewport"]',
 		);
+		if (!(viewport instanceof HTMLElement)) {
+			throw new Error("Expected ScrollArea viewport to render.");
+		}
+
+		await waitFor(() => {
+			expect(viewport.style.overflowY).toBe("scroll");
+			expect(viewport.style.overflowX).toBe("scroll");
+		});
+		expect(viewport.className).toContain("[scrollbar-width:none]");
+		const scrollbars = document.querySelectorAll(
+			'[data-slot="scroll-area-scrollbar"]',
+		);
+		expect(scrollbars).toHaveLength(2);
+		for (const scrollbar of scrollbars) {
+			expect(scrollbar.hasAttribute("hidden")).toBe(true);
+		}
+		expect(scrollAreaSource).toContain(
+			'<ScrollBar orientation="vertical" hidden={hideScrollbars} />',
+		);
+	});
+
+	it("passes scrollFade through DialogPanel and SheetPanel", () => {
+		const { unmount } = render(<DialogPanel>Dialog content</DialogPanel>);
+		let viewport = document.querySelector('[data-slot="scroll-area-viewport"]');
+		expect(viewport?.className).toContain("mask-t-from");
+		unmount();
+
+		render(<SheetPanel scrollFade={false}>Sheet content</SheetPanel>);
+		viewport = document.querySelector('[data-slot="scroll-area-viewport"]');
+		expect(viewport?.className).not.toContain("mask-t-from");
 	});
 
 	it("maps Collapsible panel animation to Radix data-state output", async () => {
