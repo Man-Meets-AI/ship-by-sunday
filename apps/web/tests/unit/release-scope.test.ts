@@ -87,6 +87,12 @@ describe("release scope classifier", () => {
 			true,
 		);
 		expect(isBillingSensitivePath("apps/web/src/config/product.ts")).toBe(true);
+		expect(isBillingSensitivePath("apps/web/src/proxy.ts")).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/platform/auth/clerk-middleware-bypass.ts",
+			),
+		).toBe(true);
 		expect(
 			isBillingSensitivePath(
 				"apps/web/src/app/_components/home-page/sections/home-page-checkout-cta.tsx",
@@ -174,5 +180,19 @@ describe("release scope classifier", () => {
 			"apps/web/src/app/api/stripe/checkout/route.ts",
 		);
 		expect(summary.convexSensitiveFiles).toContain("apps/web/convex/schema.ts");
+	});
+
+	it("classifies auth proxy changes as billing sensitive", () => {
+		const summary = classifyReleaseScope([
+			"apps/web/src/proxy.ts",
+			"apps/web/src/platform/auth/clerk-authorized-parties.ts",
+		]);
+
+		expect(summary.billingSensitive).toBe(true);
+		expect(summary.billingSensitiveFiles).toEqual([
+			"apps/web/src/proxy.ts",
+			"apps/web/src/platform/auth/clerk-authorized-parties.ts",
+		]);
+		expect(summary.convexSensitive).toBe(false);
 	});
 });
