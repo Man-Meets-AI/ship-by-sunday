@@ -18,6 +18,11 @@ import { cn } from "@/lib/utils";
 import { type AppShellProps } from "@/app/(app)/_components/app-shell/app-shell-props";
 import { isBlockActive } from "@/app/(app)/_components/app-shell/app-shell-block-status";
 import { AppShellBillingAttentionBanner } from "@/app/(app)/_components/app-shell/app-shell-billing-attention-banner";
+import {
+	AppShellMobileHeader,
+	AppShellSidebar,
+} from "@/app/(app)/_components/app-shell/app-shell-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const headerBaseClassName =
 	"relative z-20 shrink-0 overflow-visible border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 transition-shadow duration-200 motion-reduce:transition-none";
@@ -117,73 +122,91 @@ function ShellInner({
 				}
 			: undefined);
 
+	if (viewportMode === "app") {
+		const appShellClassName = cn(
+			"min-h-screen bg-background text-foreground tracking-normal",
+			appScrollMode === "viewport" && "xl:h-dvh xl:overflow-hidden",
+		);
+		const sidebarProviderClassName = cn(
+			"min-h-screen bg-background text-foreground",
+			appScrollMode === "viewport" && "xl:h-dvh xl:min-h-0",
+		);
+		const sidebarInsetClassName = cn(
+			"min-h-screen min-w-0",
+			appScrollMode === "viewport" && "xl:h-dvh xl:min-h-0 xl:overflow-hidden",
+		);
+		const appMainClassName = cn(
+			"flex min-h-0 flex-1 flex-col focus:outline-none",
+			appScrollMode === "viewport" && "xl:overflow-auto",
+		);
+
+		return (
+			<div className={appShellClassName}>
+				<AppShellSkipToContentLink />
+				<SupportModeBar />
+				<SidebarProvider className={sidebarProviderClassName} defaultOpen>
+					<AppShellSidebar
+						layoutMode={layoutMode}
+						localNav={localNav}
+						localNavCollapsed={localNavCollapsed}
+						onLayoutModeChange={onLayoutModeChange}
+						onToggleLocalNavCollapsed={toggleLocalNavCollapsed}
+						primaryNav={primaryNav}
+						progressSummary={resolvedProgressSummary}
+					/>
+					<SidebarInset className={sidebarInsetClassName}>
+						<AppShellMobileHeader primaryNav={primaryNav} />
+						<AppShellBillingAttentionBanner
+							billingAttention={billingAttention}
+						/>
+						<div
+							id={APP_SHELL_MAIN_ID}
+							tabIndex={-1}
+							className={appMainClassName}
+						>
+							{children}
+						</div>
+						{footerRail}
+					</SidebarInset>
+				</SidebarProvider>
+			</div>
+		);
+	}
+
 	return (
 		<main className={shellClassName}>
 			<AppShellSkipToContentLink />
 			<SupportModeBar />
-			{viewportMode === "app" ? (
-				<>
-					<header className={headerClassName}>
-						<AppShellHeader
-							viewportMode={viewportMode}
-							primaryNav={primaryNav}
-							progressSummary={resolvedProgressSummary}
-							layoutMode={layoutMode}
-							onLayoutModeChange={onLayoutModeChange}
-							lesson11Viewport={lesson11Viewport}
+			<div className={shellInnerClassName}>
+				<header className={headerClassName}>
+					<AppShellHeader
+						viewportMode={viewportMode}
+						primaryNav={primaryNav}
+						progressSummary={resolvedProgressSummary}
+						layoutMode={layoutMode}
+						onLayoutModeChange={onLayoutModeChange}
+						lesson11Viewport={lesson11Viewport}
+					/>
+				</header>
+				<AppShellBillingAttentionBanner billingAttention={billingAttention} />
+				<div className={appContentClassName}>
+					{localNav ? (
+						<AppShellLocalNavRail
+							localNav={localNav}
+							collapsed={localNavCollapsed}
+							onToggleCollapsed={toggleLocalNavCollapsed}
 						/>
-					</header>
-					<AppShellBillingAttentionBanner billingAttention={billingAttention} />
-					<div className={appContentClassName}>
-						{localNav ? (
-							<AppShellLocalNavRail
-								localNav={localNav}
-								collapsed={localNavCollapsed}
-								onToggleCollapsed={toggleLocalNavCollapsed}
-							/>
-						) : null}
-						<div
-							id={APP_SHELL_MAIN_ID}
-							tabIndex={-1}
-							className={mainContentClassName}
-						>
-							{children}
-						</div>
+					) : null}
+					<div
+						id={APP_SHELL_MAIN_ID}
+						tabIndex={-1}
+						className={mainContentClassName}
+					>
+						{children}
 					</div>
-					{footerRail}
-				</>
-			) : (
-				<div className={shellInnerClassName}>
-					<header className={headerClassName}>
-						<AppShellHeader
-							viewportMode={viewportMode}
-							primaryNav={primaryNav}
-							progressSummary={resolvedProgressSummary}
-							layoutMode={layoutMode}
-							onLayoutModeChange={onLayoutModeChange}
-							lesson11Viewport={lesson11Viewport}
-						/>
-					</header>
-					<AppShellBillingAttentionBanner billingAttention={billingAttention} />
-					<div className={appContentClassName}>
-						{localNav ? (
-							<AppShellLocalNavRail
-								localNav={localNav}
-								collapsed={localNavCollapsed}
-								onToggleCollapsed={toggleLocalNavCollapsed}
-							/>
-						) : null}
-						<div
-							id={APP_SHELL_MAIN_ID}
-							tabIndex={-1}
-							className={mainContentClassName}
-						>
-							{children}
-						</div>
-					</div>
-					{footerRail}
 				</div>
-			)}
+				{footerRail}
+			</div>
 		</main>
 	);
 }
