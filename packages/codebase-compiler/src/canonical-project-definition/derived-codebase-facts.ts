@@ -4,8 +4,8 @@ import { buildDesignPresetFactSeed } from "../design-system/design-preset-catalo
 
 const DEFAULT_SCOPE_OUT = ["Provider setup wizard", "GitHub invite flow"];
 const DEFAULT_DESIGN_REFERENCES = [
-	"/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css",
-	"/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui",
+	"apps/web/src/app/globals.css",
+	"apps/web/src/components/ui",
 ];
 const DEFAULT_BRAND_ASSETS = ["wordmark.svg"];
 const DEFAULT_OBJECTIONS = [

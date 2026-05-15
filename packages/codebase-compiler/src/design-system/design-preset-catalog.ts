@@ -69,8 +69,8 @@ export const designPresetDefinitions = [
 		previewImagePath: "/codebase/design-presets/previews/t3-code.svg",
 		logoPath: "/codebase/design-presets/logos/t3-code.svg",
 		designReferences: [
-			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css",
-			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui",
+			"apps/web/src/app/globals.css",
+			"apps/web/src/components/ui",
 		],
 		narrativeOverrides: {
 			copy_tone: "Direct, compact, product-grade, and implementation-focused.",

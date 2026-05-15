@@ -110,8 +110,8 @@ describe("canonical project definition schema", () => {
 		);
 
 		expect(parsedProjectDefinition.facts.design_references).toEqual([
-			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css",
-			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui",
+			"apps/web/src/app/globals.css",
+			"apps/web/src/components/ui",
 		]);
 	});
 

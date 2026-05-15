@@ -31,9 +31,14 @@ describe("design preset catalog", () => {
 		expect(defaultSeed.design_preset_id).toBe(DEFAULT_DESIGN_PRESET_ID);
 		expect(defaultSeed.theme_preset).toBeTruthy();
 		expect(defaultSeed.design_references).toEqual([
-			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css",
-			"/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui",
+			"apps/web/src/app/globals.css",
+			"apps/web/src/components/ui",
 		]);
+		expect(
+			defaultSeed.design_references.every(
+				(reference) => !path.isAbsolute(reference),
+			),
+		).toBe(true);
 		expect(getDesignPresetDefinition(DEFAULT_DESIGN_PRESET_ID)?.label).toBe(
 			"T3 Code",
 		);
