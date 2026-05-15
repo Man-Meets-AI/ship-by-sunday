@@ -21,6 +21,20 @@ function runMetadataFromSummary(summary) {
 	};
 }
 
+function getBillingProofOfferIds(proof) {
+	if (Array.isArray(proof.billingProofOfferIds)) {
+		return proof.billingProofOfferIds;
+	}
+	if (typeof proof.billingProofOfferId === "string") {
+		return [proof.billingProofOfferId];
+	}
+	return [];
+}
+
+function formatBillingProofOfferIds(proof) {
+	return getBillingProofOfferIds(proof).join(", ");
+}
+
 function validateProductionReleaseProofSummaryShape(summary, expectedCommitSha) {
 	const issues = [];
 
@@ -79,18 +93,25 @@ function validateProductionReleaseProofSummaryShape(summary, expectedCommitSha) 
 		}
 	}
 
+	const billingProofOfferIds = getBillingProofOfferIds(summary.proof);
 	if (summary.proof.billingIntegration === "success") {
-		if (!productionBillingProofOfferIds.has(summary.proof.billingProofOfferId)) {
+		if (
+			billingProofOfferIds.length === 0 ||
+			!billingProofOfferIds.every((offerId) =>
+				productionBillingProofOfferIds.has(offerId),
+			)
+		) {
 			issues.push(
-				`Production release proof summary proof.billingProofOfferId must be one of ${Array.from(productionBillingProofOfferIds).join(", ")} when billingIntegration is success.`,
+				`Production release proof summary proof.billingProofOfferIds must include only ${Array.from(productionBillingProofOfferIds).join(", ")} when billingIntegration is success.`,
 			);
 		}
 	} else if (
-		summary.proof.billingProofOfferId !== null &&
-		summary.proof.billingProofOfferId !== undefined
+		(summary.proof.billingProofOfferId !== null &&
+			summary.proof.billingProofOfferId !== undefined) ||
+		billingProofOfferIds.length > 0
 	) {
 		issues.push(
-			"Production release proof summary proof.billingProofOfferId must be null when billingIntegration is not success.",
+			"Production release proof summary proof.billingProofOfferIds must be empty when billingIntegration is not success.",
 		);
 	}
 
@@ -172,7 +193,7 @@ export function buildProofStatesFromProductionReleaseProofSummary(
 			...runMetadata,
 			status: billingPassed ? "passed" : "failed",
 			notes: billingPassed
-				? `Production proof classified the release as billing-sensitive and billing_integration passed for ${summary.proof.billingProofOfferId}.`
+				? `Production proof classified the release as billing-sensitive and billing_integration passed for ${formatBillingProofOfferIds(summary.proof)}.`
 				: `Production proof classified the release as billing-sensitive, but billing_integration was ${summary.proof.billingIntegration}.`,
 		});
 	} else {

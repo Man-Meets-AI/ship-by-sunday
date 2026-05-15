@@ -9,6 +9,11 @@ export type SessionTaskKey = keyof typeof sessionTaskUrls;
 const redirectUrlParam = "redirect_url";
 const redirectValidationOrigin = "https://ship-by-sunday.local";
 const encodedPathSeparatorPattern = /%(?:2f|5c)/i;
+const checkoutWelcomeRedirectPaths = new Set<string>([
+	routeConfig.appHome,
+	routeConfig.starterHome,
+	routeConfig.workspaceSetup,
+]);
 
 function hasUnsafeRedirectCharacter(value: string) {
 	for (const character of value) {
@@ -134,7 +139,7 @@ export function isCheckoutWelcomeRedirectPath(rawPath?: string | null) {
 	}
 
 	return (
-		redirectUrl.pathname === routeConfig.appHome &&
+		checkoutWelcomeRedirectPaths.has(redirectUrl.pathname) &&
 		redirectUrl.searchParams.get("welcome") === "checkout"
 	);
 }

@@ -20,9 +20,10 @@ on:
         required: false
         type: choice
         options:
+          - all
           - starter
           - workers
-        default: starter
+        default: all
 
 permissions:
   contents: read
@@ -41,6 +42,7 @@ jobs:
       billing_sensitive: ${{ steps.scope.outputs.billing_sensitive }}
       convex_sensitive: ${{ steps.scope.outputs.convex_sensitive }}
       billing_offer: ${{ steps.refs.outputs.billing_offer }}
+      billing_offers: ${{ steps.refs.outputs.billing_offers }}
       head_sha: ${{ steps.refs.outputs.head_sha }}
     steps:
       - name: Check out repository
@@ -59,7 +61,7 @@ jobs:
           MANUAL_BILLING_OFFER: ${{ inputs.billing_offer }}
           MANUAL_BASE_SHA: ${{ inputs.base_sha }}
         run: |
-          billing_offer="starter"
+          billing_offer="all"
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             if [[ "${{ github.ref }}" != "refs/heads/main" ]]; then
               echo "Manual production release proof must run from refs/heads/main." >&2
@@ -68,7 +70,7 @@ jobs:
 
             head_sha="$(git rev-parse HEAD)"
             base_sha="$(printf '%s' "$MANUAL_BASE_SHA" | tr -d '[:space:]')"
-            billing_offer="$(printf '%s' "${MANUAL_BILLING_OFFER:-starter}" | tr -d '[:space:]')"
+            billing_offer="$(printf '%s' "${MANUAL_BILLING_OFFER:-all}" | tr -d '[:space:]')"
 
             if [[ -z "$base_sha" ]]; then
               echo "Manual production release proof requires inputs.base_sha so billing and Convex release-scope detection covers the intended commit range." >&2
@@ -96,16 +98,21 @@ jobs:
           fi
 
           case "$billing_offer" in
+            all)
+              billing_offers="starter workers"
+              ;;
             starter|workers)
+              billing_offers="$billing_offer"
               ;;
             *)
-              echo "billing_offer must be starter or workers, got: $billing_offer" >&2
+              echo "billing_offer must be all, starter, or workers, got: $billing_offer" >&2
               exit 1
               ;;
           esac
 
           echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
           echo "billing_offer=$billing_offer" >> "$GITHUB_OUTPUT"
+          echo "billing_offers=$billing_offers" >> "$GITHUB_OUTPUT"
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
 
       - name: Detect release scope
@@ -308,7 +315,7 @@ jobs:
       APP_BASE_URL: https://www.man-meets-ai.com
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       PLAYWRIGHT_BASE_URL: https://www.man-meets-ai.com
-      BILLING_PROOF_OFFER: ${{ needs.release_scope.outputs.billing_offer }}
+      BILLING_PROOF_OFFERS: ${{ needs.release_scope.outputs.billing_offers }}
       PLAYWRIGHT_KEEP_SENSITIVE_ARTIFACTS: "0"
       QA_ALLOW_BILLING_INTEGRATION: "1"
       QA_ENV_FILE: apps/web/.env.production
@@ -412,7 +419,11 @@ jobs:
           PRODUCTION_STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
           STRIPE_SECRET_KEY: ${{ secrets.PRODUCTION_STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.PRODUCTION_STRIPE_WEBHOOK_SECRET }}
-        run: bun run release:proof -- --proof=billing_integration --offer="$BILLING_PROOF_OFFER"
+        run: |
+          for billing_offer in $BILLING_PROOF_OFFERS; do
+            echo "Running production billing integration proof for $billing_offer"
+            bun run release:proof -- --proof=billing_integration --offer="$billing_offer"
+          done
 
       - name: Upload Playwright artifacts
         if: failure()
@@ -455,7 +466,7 @@ jobs:
       - name: Write production release proof summary
         if: always()
         env:
-          BILLING_PROOF_OFFER: ${{ needs.release_scope.outputs.billing_offer }}
+          BILLING_PROOF_OFFERS: ${{ needs.release_scope.outputs.billing_offers }}
           BILLING_RESULT: ${{ needs.billing_integration.result }}
           BILLING_SENSITIVE: ${{ needs.release_scope.outputs.billing_sensitive }}
           CONVEX_SENSITIVE: ${{ needs.release_scope.outputs.convex_sensitive }}
@@ -479,8 +490,11 @@ jobs:
             proof: {
               billingSensitive: process.env.BILLING_SENSITIVE === "true",
               billingProofOfferId: process.env.BILLING_RESULT === "success"
-                ? process.env.BILLING_PROOF_OFFER
+                ? (process.env.BILLING_PROOF_OFFERS || "").trim().split(/\s+/)[0] || null
                 : null,
+              billingProofOfferIds: process.env.BILLING_RESULT === "success"
+                ? (process.env.BILLING_PROOF_OFFERS || "").trim().split(/\s+/).filter(Boolean)
+                : [],
               convexSensitive: process.env.CONVEX_SENSITIVE === "true",
               defaultShip: process.env.DEFAULT_SHIP_RESULT,
               billingIntegration: process.env.BILLING_RESULT,

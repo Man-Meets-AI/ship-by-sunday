@@ -18,6 +18,7 @@ import {
 	assertManagedStripePriceMatchesProductConfig,
 	getStripe,
 } from "@/platform/billing/stripe";
+import { hasActiveWorkersAccessForCheckout } from "@/platform/billing/checkout/workers-checkout-access-guard";
 import { getAppBaseUrl } from "@/platform/next/app-url";
 import { recordBlockedSupportModeActionForRequest } from "@/platform/admin-impersonation/route-policy";
 import { requireServerEnv } from "@/platform/env/server";
@@ -34,7 +35,8 @@ async function readCheckoutOfferId(request: Request) {
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
-	const { userId } = await auth();
+	const authState = await auth();
+	const { userId } = authState;
 	const offerId = await readCheckoutOfferId(request);
 
 	const appBaseUrl = getAppBaseUrl(request);
@@ -72,6 +74,22 @@ export async function POST(request: Request) {
 			return jsonWithRequestId(
 				{ error: "Checkout is unavailable during support mode.", requestId },
 				{ status: 403 },
+				requestId,
+			);
+		}
+
+		if (
+			await hasActiveWorkersAccessForCheckout({
+				offerId,
+				getToken: userId ? authState.getToken : undefined,
+			})
+		) {
+			return jsonWithRequestId(
+				{
+					error: "Workers access is already active for this account.",
+					requestId,
+				},
+				{ status: 409 },
 				requestId,
 			);
 		}

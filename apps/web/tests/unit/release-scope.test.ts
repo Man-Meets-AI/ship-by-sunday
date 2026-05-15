@@ -53,6 +53,24 @@ describe("release scope classifier", () => {
 			isBillingSensitivePath("apps/web/src/platform/access/product-access.ts"),
 		).toBe(true);
 		expect(
+			isBillingSensitivePath("apps/web/src/app/access-required/page.tsx"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(app)/_components/access-required/access-required-page.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(app)/_hooks/use-access-required-controller.ts",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(app)/_lib/access-required-view-model.ts",
+			),
+		).toBe(true);
+		expect(
 			isBillingSensitivePath(
 				"apps/web/src/app/api/cal/worker-seal-team-6/webhook/route.ts",
 			),

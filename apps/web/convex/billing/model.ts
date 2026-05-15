@@ -452,14 +452,10 @@ export function selectCurrentWorkersSubscription(
 		currentWorkersSubscriptionStatuses.has(subscription.status),
 	);
 
-	if (currentLikeSubscriptions.length > 1) {
-		throw new Error(
-			"Expected at most one current Workers subscription per billing owner. Reconcile Stripe state before continuing.",
+	if (currentLikeSubscriptions.length > 0) {
+		return (
+			[...currentLikeSubscriptions].sort(compareByUpdatedAtThenId)[0] ?? null
 		);
-	}
-
-	if (currentLikeSubscriptions.length === 1) {
-		return currentLikeSubscriptions[0];
 	}
 
 	return [...subscriptions].sort(compareByUpdatedAtThenId)[0] ?? null;
@@ -679,7 +675,7 @@ function buildViewerEntitlementSummaries({
 	return entitlements;
 }
 
-export async function getActiveBillingProductSurfaceCapabilities(
+export async function getBillingProductSurfaceAccessState(
 	ctx: BillingMutationCtx | BillingQueryCtx,
 	ownerClerkUserId: string,
 	now = Date.now(),
@@ -708,7 +704,19 @@ export async function getActiveBillingProductSurfaceCapabilities(
 		activeCapabilities.push("worker");
 	}
 
-	return activeCapabilities;
+	return {
+		activeCapabilities,
+		hasBillingRecords: licenseTerms.length > 0 || subscriptions.length > 0,
+	};
+}
+
+export async function getActiveBillingProductSurfaceCapabilities(
+	ctx: BillingMutationCtx | BillingQueryCtx,
+	ownerClerkUserId: string,
+	now = Date.now(),
+) {
+	return (await getBillingProductSurfaceAccessState(ctx, ownerClerkUserId, now))
+		.activeCapabilities;
 }
 
 export const syncStarterLicenseTermArgs = {

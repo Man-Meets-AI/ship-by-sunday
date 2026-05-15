@@ -12,6 +12,7 @@ import {
 	getStripe,
 	getStripePublishableKey,
 } from "@/platform/billing/stripe";
+import { hasActiveWorkersAccessForCheckout } from "@/platform/billing/checkout/workers-checkout-access-guard";
 import { captureServerError } from "@/platform/observability/capture-server-error";
 import { getUnexpectedApiErrorResponse } from "@/platform/observability/api-error-response";
 import {
@@ -35,7 +36,8 @@ async function readCheckoutOfferId(request: Request) {
 
 export async function POST(request: Request) {
 	const requestId = getRequestIdFromRequest(request);
-	const { userId } = await auth();
+	const authState = await auth();
+	const { userId } = authState;
 	const offerId = await readCheckoutOfferId(request);
 
 	const appBaseUrl = getAppBaseUrl(request);
@@ -79,6 +81,22 @@ export async function POST(request: Request) {
 					requestId,
 				},
 				{ status: 403 },
+				requestId,
+			);
+		}
+
+		if (
+			await hasActiveWorkersAccessForCheckout({
+				offerId,
+				getToken: userId ? authState.getToken : undefined,
+			})
+		) {
+			return jsonWithRequestId(
+				{
+					error: "Workers access is already active for this account.",
+					requestId,
+				},
+				{ status: 409 },
 				requestId,
 			);
 		}

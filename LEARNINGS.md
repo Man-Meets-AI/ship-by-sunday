@@ -90,3 +90,8 @@
 
 - Fact: The default `apps/web` Turbopack dev server can panic during browser smoke with `Failed to write app endpoint /page` caused by `app_dir must be a directory`; the webpack dev script is stable for this proof path.
   Verified by: `bun run --cwd apps/web dev:web:only -- --port 3000` repeatedly emitted the Turbopack panic while Playwright navigated public pages, then `bun run --cwd apps/web dev:web:webpack -- --port 3000` completed the desktop and mobile `/starter` token smoke.
+
+## 2026-05-15 Local Typecheck
+
+- Fact: In the current local environment, `bun typecheck` runs the Next production build and the app's PostHog source-map hook can upload source maps when the PostHog token is already present in the environment.
+  Verified by: `bun typecheck` logged `posthog_cli` source-map injection/upload during the `apps/web` build before TypeScript failed; rerunning with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` avoided the upload path and completed successfully.

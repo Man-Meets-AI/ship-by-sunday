@@ -15,9 +15,15 @@ const getStripeModeLabelMock = vi.fn();
 const getStripeDashboardUrlMock = vi.fn();
 const getStripeProductDashboardUrlMock = vi.fn();
 const fetchActionMock = vi.fn();
+const fetchMutationMock = vi.fn();
+const fetchQueryMock = vi.fn();
+const getRateLimitedResponseMock = vi.fn();
+const recordBlockedSupportModeActionForRequestMock = vi.fn();
 
 vi.mock("convex/nextjs", () => ({
 	fetchAction: fetchActionMock,
+	fetchMutation: fetchMutationMock,
+	fetchQuery: fetchQueryMock,
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({
@@ -41,6 +47,15 @@ vi.mock("@/platform/next/app-url", () => ({
 	getAppBaseUrl: getAppBaseUrlMock,
 }));
 
+vi.mock("@/app/api/_lib/request-rate-limit", () => ({
+	getRateLimitedResponse: getRateLimitedResponseMock,
+}));
+
+vi.mock("@/platform/admin-impersonation/route-policy", () => ({
+	recordBlockedSupportModeActionForRequest:
+		recordBlockedSupportModeActionForRequestMock,
+}));
+
 const hostedCheckoutMetadata = {
 	metadataSchema: "mma_checkout_v1",
 	app: "man_meets_ai",
@@ -55,10 +70,10 @@ const expressCheckoutMetadata = {
 	checkoutSurface: "express_checkout",
 } as const;
 
-function createAuthState(userId: string | null) {
+function createAuthState(userId: string | null, token: string | null = null) {
 	return {
 		userId,
-		getToken: vi.fn().mockResolvedValue(null),
+		getToken: vi.fn().mockResolvedValue(token),
 	};
 }
 
@@ -87,6 +102,10 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
 		fetchActionMock.mockReset();
+		fetchMutationMock.mockReset();
+		fetchQueryMock.mockReset();
+		getRateLimitedResponseMock.mockReset();
+		recordBlockedSupportModeActionForRequestMock.mockReset();
 		fetchActionMock.mockImplementation(
 			async (_ref: unknown, args: Record<string, unknown>) => {
 				if ("checkoutSurface" in args) {
@@ -100,8 +119,18 @@ describe("POST /api/stripe/checkout", () => {
 				);
 			},
 		);
+		fetchQueryMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: false,
+			status: "no_access",
+			capabilities: [],
+		});
+		fetchMutationMock.mockResolvedValue({ kind: "not_impersonating" });
+		getRateLimitedResponseMock.mockReturnValue(null);
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(false);
 		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET =
 			"checkout_server_secret_123456789012345";
+		process.env.CLERK_SECRET_KEY = "clerk_secret_for_route_audit_tests";
 		getStripeModeLabelMock.mockReturnValue("test");
 		getStripeDashboardUrlMock.mockImplementation((path?: string) =>
 			path
@@ -114,6 +143,97 @@ describe("POST /api/stripe/checkout", () => {
 		getStripePublishableKeyMock.mockReturnValue("pk_test_publishable");
 		getStripeCheckoutDiscountsMock.mockReturnValue(undefined);
 		vi.resetModules();
+	});
+
+	it("rejects missing or unsupported checkout offers before touching Stripe", async () => {
+		authMock.mockResolvedValue(createAuthState(null));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest({ offerId: "pro" }));
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			error: "A valid checkout offer is required.",
+			requestId: expect.any(String),
+		});
+		expect(getRateLimitedResponseMock).not.toHaveBeenCalled();
+		expect(recordBlockedSupportModeActionForRequestMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects malformed checkout offer payloads before touching Stripe", async () => {
+		authMock.mockResolvedValue(createAuthState(null));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(
+			new Request("https://example.com/api/stripe/checkout", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: "{",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			error: "A valid checkout offer is required.",
+			requestId: expect.any(String),
+		});
+		expect(getRateLimitedResponseMock).not.toHaveBeenCalled();
+		expect(recordBlockedSupportModeActionForRequestMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+	});
+
+	it("returns the rate-limit response before support-mode or Stripe work", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		const rateLimitedResponse = Response.json(
+			{ error: "Too many checkout attempts." },
+			{ status: 429 },
+		);
+		getRateLimitedResponseMock.mockReturnValue(rateLimitedResponse);
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest());
+
+		expect(response).toBe(rateLimitedResponse);
+		expect(response.status).toBe(429);
+		expect(recordBlockedSupportModeActionForRequestMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+	});
+
+	it("blocks checkout while support mode is active", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest());
+
+		expect(response.status).toBe(403);
+		expect(await response.json()).toEqual({
+			error: "Checkout is unavailable during support mode.",
+			requestId: expect.any(String),
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "stripe.checkout.createSession",
+				blockReason: "billing_action_blocked",
+			},
+		);
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
 	});
 
 	it("creates a guest checkout session when the viewer is signed out", async () => {
@@ -259,6 +379,36 @@ describe("POST /api/stripe/checkout", () => {
 		expect(response.headers.get("set-cookie")).toContain(
 			"sbs_pending_checkout_session=cs_workers_guest_123",
 		);
+	});
+
+	it("blocks Workers checkout when the signed-in account already has Workers access", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123", "convex_token"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		fetchQueryMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["worker"],
+		});
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest({ offerId: "workers" }));
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toEqual({
+			error: "Workers access is already active for this account.",
+			requestId: expect.any(String),
+		});
+		expect(fetchQueryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			{},
+			{ token: "convex_token" },
+		);
+		expect(currentUserMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+		expect(fetchActionMock).not.toHaveBeenCalled();
 	});
 
 	it("creates a checkout session with account metadata and ignores request intent", async () => {
@@ -422,6 +572,37 @@ describe("POST /api/stripe/checkout", () => {
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
 		).toHaveBeenCalledWith(expect.anything(), "starter");
+	});
+
+	it("blocks express Workers checkout when the signed-in account already has Workers access", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123", "convex_token"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		fetchQueryMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["worker"],
+		});
+
+		const { POST } =
+			await import("../../src/app/api/stripe/checkout/express/route");
+
+		const response = await POST(createRequest({ offerId: "workers" }));
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toEqual({
+			error: "Workers access is already active for this account.",
+			requestId: expect.any(String),
+		});
+		expect(fetchQueryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			{},
+			{ token: "convex_token" },
+		);
+		expect(currentUserMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+		expect(fetchActionMock).not.toHaveBeenCalled();
 	});
 
 	it("creates an express checkout session with a client secret", async () => {

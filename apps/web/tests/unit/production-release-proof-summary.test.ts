@@ -20,6 +20,7 @@ const validSummary = {
 		defaultShip: "success",
 		billingIntegration: "success",
 		billingProofOfferId: "workers",
+		billingProofOfferIds: ["workers"],
 	},
 	generatedAt: "2026-05-10T00:00:00.000Z",
 };
@@ -80,6 +81,7 @@ describe("Production release proof summary verification", () => {
 						billingSensitive: false,
 						billingIntegration: "skipped",
 						billingProofOfferId: null,
+						billingProofOfferIds: [],
 					},
 				},
 				"main-sha",
@@ -104,6 +106,7 @@ describe("Production release proof summary verification", () => {
 						billingSensitive: true,
 						billingIntegration: "skipped",
 						billingProofOfferId: null,
+						billingProofOfferIds: [],
 					},
 				},
 				"main-sha",
@@ -140,6 +143,7 @@ describe("Production release proof summary verification", () => {
 					proof: {
 						...validSummary.proof,
 						billingProofOfferId: null,
+						billingProofOfferIds: [],
 					},
 				},
 				"main-sha",
@@ -147,8 +151,35 @@ describe("Production release proof summary verification", () => {
 		).toMatchObject({
 			ok: false,
 			issues: expect.arrayContaining([
-				"Production release proof summary proof.billingProofOfferId must be one of starter, workers when billingIntegration is success.",
+				"Production release proof summary proof.billingProofOfferIds must include only starter, workers when billingIntegration is success.",
 			]),
+		});
+	});
+
+	it("accepts successful production billing proof for both paid offers", () => {
+		const summary = {
+			...validSummary,
+			proof: {
+				...validSummary.proof,
+				billingProofOfferId: "starter",
+				billingProofOfferIds: ["starter", "workers"],
+			},
+		};
+
+		expect(validateProductionReleaseProofSummary(summary, "main-sha")).toEqual({
+			ok: true,
+			issues: [],
+		});
+		expect(
+			buildProofStatesFromProductionReleaseProofSummary(summary, "main-sha"),
+		).toMatchObject({
+			ok: true,
+			proof: {
+				billing: {
+					notes:
+						"Production proof classified the release as billing-sensitive and billing_integration passed for starter, workers.",
+				},
+			},
 		});
 	});
 });

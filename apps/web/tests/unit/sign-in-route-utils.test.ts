@@ -48,9 +48,18 @@ describe("sign-in route utils", () => {
 
 	it("detects the immediate post-checkout home welcome redirect", () => {
 		expect(isCheckoutWelcomeRedirectPath("/home?welcome=checkout")).toBe(true);
+		expect(
+			isCheckoutWelcomeRedirectPath("/starter/home?welcome=checkout"),
+		).toBe(true);
+		expect(
+			isCheckoutWelcomeRedirectPath("/workers/setup?welcome=checkout"),
+		).toBe(true);
 		expect(isCheckoutWelcomeRedirectPath("/home?welcome=returning")).toBe(
 			false,
 		);
+		expect(
+			isCheckoutWelcomeRedirectPath("/workers/setup?welcome=returning"),
+		).toBe(false);
 		expect(isCheckoutWelcomeRedirectPath(null)).toBe(false);
 		expect(isCheckoutWelcomeRedirectPath("https://example.com/home")).toBe(
 			false,

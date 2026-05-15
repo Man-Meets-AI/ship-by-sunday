@@ -62,6 +62,10 @@ const exactBillingSensitivePaths = new Set([
 const billingSensitivePrefixes = [
 	"apps/web/app/access-required/",
 	"apps/web/src/app/(app)/access-required/",
+	"apps/web/src/app/access-required/",
+	"apps/web/src/app/(app)/_components/access-required/",
+	"apps/web/src/app/(app)/_hooks/use-access-required",
+	"apps/web/src/app/(app)/_lib/access-required",
 	"apps/web/app/api/stripe/",
 	"apps/web/src/app/api/stripe/",
 	"apps/web/src/app/api/cal/worker-seal-team-6/",

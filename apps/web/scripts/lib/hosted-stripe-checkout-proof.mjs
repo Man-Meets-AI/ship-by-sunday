@@ -15,7 +15,7 @@ export const hostedBillingProofOffers = {
 			"codebase-demo-checkout-cta",
 			"pricing-primary-cta",
 		],
-		expectedAccessSource: "stripe_webhook",
+		expectedAccessSources: ["stripe_webhook", "stripe_checkout"],
 		expectedAmountCents: 29_700,
 		expectedCapabilities: ["generate_codebase", "tutorials"],
 		id: "starter",
@@ -35,7 +35,7 @@ export const hostedBillingProofOffers = {
 			/Pair the local runner/i,
 		],
 		checkoutButtonTestIds: ["workers-checkout-cta"],
-		expectedAccessSource: "stripe_webhook",
+		expectedAccessSources: ["stripe_webhook", "stripe_checkout"],
 		expectedAmountCents: 60_000,
 		expectedCapabilities: ["worker"],
 		id: "workers",
@@ -183,9 +183,12 @@ export function hostedProofAccessGrantMatchesOffer(
 	offerId = DEFAULT_HOSTED_BILLING_PROOF_OFFER_ID,
 ) {
 	const offer = getHostedBillingProofOffer(offerId);
+	const expectedAccessSources = offer.expectedAccessSources ?? [
+		offer.expectedAccessSource,
+	];
 	return Boolean(
 		productAccess?.status === "granted" &&
-		productAccess.source === offer.expectedAccessSource &&
+		expectedAccessSources.includes(productAccess.source) &&
 		productAccess.stripeCheckoutSessionId &&
 		(productAccess.lastCheckoutOfferId === offer.id ||
 			productAccess.offerIds?.includes(offer.id)) &&
@@ -295,6 +298,7 @@ export function buildHostedProofCheckoutSessionParams({
 		offerId: offer.id,
 		purchaseIntentId,
 	};
+	const checkoutMode = offer.id === "workers" ? "subscription" : "payment";
 
 	return {
 		billing_address_collection: "auto",
@@ -304,10 +308,18 @@ export function buildHostedProofCheckoutSessionParams({
 		discounts: [{ coupon: couponId }],
 		line_items: [{ price: priceId, quantity: 1 }],
 		metadata: checkoutMetadata,
-		mode: "payment",
-		payment_intent_data: {
-			metadata: checkoutMetadata,
-		},
+		mode: checkoutMode,
+		...(checkoutMode === "payment"
+			? {
+					payment_intent_data: {
+						metadata: checkoutMetadata,
+					},
+				}
+			: {
+					subscription_data: {
+						metadata: checkoutMetadata,
+					},
+				}),
 		success_url: `${normalizedAppBaseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
 	};
 }

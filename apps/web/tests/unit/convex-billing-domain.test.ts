@@ -5,6 +5,7 @@ import {
 	getStarterRenewalTermWindow,
 	isWorkerSealTeam6PaidBookingReady,
 	recordProcessedStripeEventHandler,
+	selectCurrentWorkersSubscription,
 	syncStarterLicenseTermHandler,
 	syncWorkersSubscriptionHandler,
 	syncWorkerSealTeam6BookingHandler,
@@ -314,6 +315,25 @@ describe("convex billing domain model", () => {
 			latestInvoiceId: "in_123",
 			paymentRecoveryUrl: "https://billing.stripe.test/pay",
 		});
+	});
+
+	it("selects the latest current Workers subscription when duplicate current rows exist", () => {
+		const selected = selectCurrentWorkersSubscription([
+			{
+				_id: "workersSubscriptions_1",
+				status: "active",
+				updatedAt: Date.UTC(2026, 4, 10),
+				createdAt: Date.UTC(2026, 4, 1),
+			},
+			{
+				_id: "workersSubscriptions_2",
+				status: "past_due",
+				updatedAt: Date.UTC(2026, 4, 12),
+				createdAt: Date.UTC(2026, 4, 2),
+			},
+		] as never);
+
+		expect(selected?._id).toBe("workersSubscriptions_2");
 	});
 
 	it("removes Workers access for terminal and fully refunded states", () => {

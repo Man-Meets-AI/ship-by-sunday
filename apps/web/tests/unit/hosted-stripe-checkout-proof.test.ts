@@ -160,7 +160,9 @@ describe("hosted Stripe checkout proof helpers", () => {
 			offerId: "workers",
 			purchaseIntentId: "j123purchaseintent",
 		});
-		expect(session.payment_intent_data.metadata).toEqual(session.metadata);
+		expect(session.mode).toBe("subscription");
+		expect(session.subscription_data.metadata).toEqual(session.metadata);
+		expect(session).not.toHaveProperty("payment_intent_data");
 		expect(session.line_items).toEqual([
 			{
 				price: "price_workers",
@@ -191,7 +193,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 				{
 					capabilities: ["worker"],
 					lastCheckoutOfferId: "workers",
-					source: "stripe_webhook",
+					source: "stripe_checkout",
 					status: "granted",
 					stripeCheckoutSessionId: "cs_test_123",
 				},

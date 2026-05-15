@@ -26,7 +26,7 @@ import {
 	checkoutResolvedFulfillmentTrackValidator,
 	checkoutOfferIdValidator,
 } from "../billing/validators";
-import { getActiveBillingProductSurfaceCapabilities } from "../billing/model";
+import { getBillingProductSurfaceAccessState } from "../billing/model";
 import type {
 	EntitlementMutationCtx,
 	EntitlementQueryCtx,
@@ -171,9 +171,19 @@ async function getEffectiveProductSurfaceCapabilities(
 		return getStoredProductSurfaceCapabilities(accessGrant);
 	}
 
-	return getUniqueProductSurfaceCapabilities(
-		await getActiveBillingProductSurfaceCapabilities(ctx, clerkUserId),
+	const billingAccessState = await getBillingProductSurfaceAccessState(
+		ctx,
+		clerkUserId,
 	);
+	const billingCapabilities = getUniqueProductSurfaceCapabilities(
+		billingAccessState.activeCapabilities,
+	);
+
+	if (billingAccessState.hasBillingRecords) {
+		return billingCapabilities;
+	}
+
+	return getStoredProductSurfaceCapabilities(accessGrant);
 }
 
 function getUniqueProductSurfaceCapabilities(
@@ -487,13 +497,18 @@ export async function viewerProductAccessHandler(ctx: EntitlementQueryCtx) {
 		accessGrant,
 	);
 	const billingBackedAccess = isBillingBackedProductAccessGrant(accessGrant);
+	const hasAccess =
+		accessGrant?.status === "granted" &&
+		(!billingBackedAccess || capabilities.length > 0);
+	const status =
+		accessGrant?.status === "granted" && !hasAccess
+			? ("no_access" as const)
+			: (accessGrant?.status ?? ("no_access" as const));
 
 	return {
 		clerkUserId: identity.subject,
-		hasAccess:
-			accessGrant?.status === "granted" &&
-			(!billingBackedAccess || capabilities.length > 0),
-		status: accessGrant?.status ?? ("no_access" as const),
+		hasAccess,
+		status,
 		capabilities,
 		...(accessGrant ? getStoredCheckoutIntentFields(accessGrant) : undefined),
 	};

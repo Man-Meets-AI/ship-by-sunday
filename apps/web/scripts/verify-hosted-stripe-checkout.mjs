@@ -693,6 +693,9 @@ function printCheck(label, passed, detail) {
 
 const { baseUrl, offerId, timeoutMs } = parseArgs(process.argv.slice(2));
 const proofOffer = getHostedBillingProofOffer(offerId);
+const expectedAccessSources = proofOffer.expectedAccessSources ?? [
+	proofOffer.expectedAccessSource,
+];
 const hostedCheckoutAppPathPattern =
 	buildHostedBillingProofSuccessPathPattern(offerId);
 Object.assign(
@@ -920,8 +923,8 @@ try {
 		);
 		printCheck(
 			"Product access source",
-			productAccess.source === proofOffer.expectedAccessSource,
-			`source=${productAccess.source}`,
+			expectedAccessSources.includes(productAccess.source),
+			`source=${productAccess.source}; expected=${expectedAccessSources.join("|")}`,
 		);
 		printCheck(
 			"Session id linked",
@@ -999,7 +1002,7 @@ try {
 		(requireConvexDebug &&
 			(!productAccess ||
 				productAccess.status !== "granted" ||
-				productAccess.source !== proofOffer.expectedAccessSource ||
+				!expectedAccessSources.includes(productAccess.source) ||
 				productAccess.stripeCheckoutSessionId !== checkoutSession.id ||
 				!hostedProofAccessGrantMatchesOffer(productAccess, proofOffer.id)))
 	) {

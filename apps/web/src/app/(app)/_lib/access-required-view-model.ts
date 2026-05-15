@@ -70,7 +70,10 @@ export function formatRefreshTime(timestamp: number | null) {
 export function getAccessViewState(
 	access: ProductAccess | undefined,
 ): AccessViewState {
-	if (access === undefined || access.status === "granted") {
+	if (
+		access === undefined ||
+		(access.status === "granted" && access.hasAccess)
+	) {
 		return { kind: "loading" };
 	}
 
@@ -79,6 +82,10 @@ export function getAccessViewState(
 			kind: "paid_checkout_recovery",
 			recovery: access.pendingCheckoutRecovery,
 		};
+	}
+
+	if (access.status === "granted") {
+		return { kind: "no_access" };
 	}
 
 	return { kind: access.status };

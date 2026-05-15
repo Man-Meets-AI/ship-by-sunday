@@ -95,7 +95,7 @@ For billing-sensitive releases, the same workflow should also run:
 PLAYWRIGHT_BASE_URL=https://<production-url> QA_ENV_FILE=apps/web/.env.production QA_ALLOW_BILLING_INTEGRATION=1 bun run release:proof -- --proof=billing_integration
 ```
 
-That proof defaults to Starter. Add `--offer=workers` when the release needs Workers-specific proof; the command then expects the Workers price env (`STRIPE_WORKERS_PRICE_ID`), 60000 cents, `/workers/setup`, and the `worker` access capability. Starter expects 29700 cents and `/starter/home`. Only billing-sensitive releases should spend that extra live no-cost Checkout proof.
+The local proof defaults to Starter. Add `--offer=workers` when you need Workers-specific proof; the command then expects the Workers price env (`STRIPE_WORKERS_PRICE_ID`), 60000 cents, `/workers/setup`, and the `worker` access capability. Starter expects 29700 cents and `/starter/home`. The production release workflow defaults billing-sensitive proof to `billing_offer=all`, which runs Starter and Workers separately. Only billing-sensitive releases should spend that extra live no-cost Checkout proof.
 
 When PostHog error tracking is enabled, the production build uses `@posthog/nextjs-config` to upload source maps. After the build, run:
 
