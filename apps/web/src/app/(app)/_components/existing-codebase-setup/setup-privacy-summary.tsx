@@ -1,6 +1,8 @@
 import { ShieldCheck } from "lucide-react";
 
 import type { setupPrivacyDefaults } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import { protectedRoutePanelClassName } from "@/components/app/protected-route-surface";
+import { cn } from "@/lib/utils";
 
 type PrivacyDefault = (typeof setupPrivacyDefaults)[number];
 
@@ -10,7 +12,7 @@ export function SetupPrivacySummary({
 	defaults: readonly PrivacyDefault[];
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<section className={cn(protectedRoutePanelClassName, "p-4")}>
 			<div className="flex items-start gap-3">
 				<span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/30">
 					<ShieldCheck className="size-4" aria-hidden />

@@ -1,6 +1,7 @@
 import { RefreshCw, Wrench, XCircle, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { protectedRoutePanelClassName } from "@/components/app/protected-route-surface";
 import type { buildWorkspaceSetupReadinessModel } from "@/app/(app)/_lib/workspace-setup-readiness-model";
 import { cn } from "@/lib/utils";
 import {
@@ -48,7 +49,7 @@ export function SetupPairingPanel({
 	const hasRepairCommand = isPaired && hasCommand;
 
 	return (
-		<section className="rounded-xl border border-border/60 bg-background">
+		<section className={protectedRoutePanelClassName}>
 			<div
 				className={cn(
 					"grid gap-5 p-4 sm:p-5",

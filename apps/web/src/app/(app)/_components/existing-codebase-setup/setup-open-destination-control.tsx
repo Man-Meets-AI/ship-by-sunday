@@ -2,6 +2,7 @@ import type {
 	WorkspaceDefaultOpenDestination,
 	WorkspaceOpenDestinationOption,
 } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import { protectedRoutePanelClassName } from "@/components/app/protected-route-surface";
 import { cn } from "@/lib/utils";
 
 export function SetupOpenDestinationControl({
@@ -16,7 +17,7 @@ export function SetupOpenDestinationControl({
 	pending: boolean;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<section className={cn(protectedRoutePanelClassName, "p-4")}>
 			<div className="space-y-1">
 				<h2 className="text-sm font-semibold text-foreground">
 					Default open destination

@@ -239,8 +239,15 @@ describe("ExistingCodebaseSetupPage", () => {
 	it("renders the setup command, readiness sections, blockers, and privacy defaults", async () => {
 		const user = userEvent.setup();
 
-		renderSetupPage();
+		const { container } = renderSetupPage();
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-summary"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", { name: "Existing codebase setup" }),
 		).toBeTruthy();

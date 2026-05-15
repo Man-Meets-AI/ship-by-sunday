@@ -1,4 +1,5 @@
 import type { WorkspaceSetupSection } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import { protectedRoutePanelClassName } from "@/components/app/protected-route-surface";
 import { SetupCheckRow } from "./setup-check-row";
 import { SetupStatusBadge } from "./setup-status-badge";
 
@@ -10,7 +11,7 @@ export function SetupReadinessSection({
 	return (
 		<section
 			aria-labelledby={`setup-section-${section.id}`}
-			className="overflow-hidden rounded-xl border border-border/60 bg-background"
+			className={protectedRoutePanelClassName}
 		>
 			<div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
 				<div>

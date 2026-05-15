@@ -2,7 +2,7 @@
 title: "T3 Code Protected Route Surfaces Planning Brief 6"
 program_id: "t3-code-source-design-system-port"
 brief_version: 6
-status: "current"
+status: "superseded"
 summary: "Next slice for migrating protected Starter, Workers, settings, support, admin, and course surfaces inside the new Sidebar-backed app shell."
 read_when:
   - "Writing the next protected route-surface child ExecPlan for the T3 Code migration."

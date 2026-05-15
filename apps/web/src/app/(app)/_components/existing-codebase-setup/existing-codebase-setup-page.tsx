@@ -7,7 +7,6 @@ import type { FunctionReturnType } from "convex/server";
 
 import { AppShell } from "@/app/(app)/_components/app-shell";
 import { WorkspaceLocalNavRail } from "@/app/(app)/_components/workspace-navigation/workspace-local-nav-rail";
-import { WorkspaceOperatorSummaryCard } from "@/app/(app)/_components/workspace-operator-summary-card";
 import {
 	showWorkspaceActionErrorToast,
 	showWorkspaceActionSuccessToast,
@@ -17,6 +16,14 @@ import {
 	buildWorkspaceSetupReadinessModel,
 	type WorkspaceDefaultOpenDestination,
 } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRoutePage,
+	ProtectedRouteSummaryGrid,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
 import {
@@ -270,34 +277,35 @@ export function ExistingCodebaseSetupPage({
 				desktop: <WorkspaceLocalNavRail model={localNavModel} />,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 pb-12 pt-2 sm:px-4 lg:px-6">
-				<header className="grid gap-4 border-b border-border/60 pb-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.36fr)]">
-					<div className="min-w-0">
-						<p className="text-sm font-medium text-muted-foreground">Setup</p>
-						<h1 className="mt-2 font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-							Existing codebase setup
-						</h1>
-						<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-							{model.subtitle}
-						</p>
-					</div>
-					<WorkspaceOperatorSummaryCard
-						title="Setup summary"
-						rows={[
-							{ label: "Project", value: model.projectLabel },
-							{ label: "Repository", value: model.repositoryLabel },
-							{ label: "Runner", value: model.pairing.activeRunnerLabel },
-							{ label: "State", value: model.pairing.statusLabel },
-							{ label: "Owner", value: "Human" },
-							{
-								label: "Next",
-								value: model.doctorPassAction.disabled
-									? "Resolve setup blockers"
-									: "Run Doctor Pass",
-							},
-						]}
-					/>
-				</header>
+			<ProtectedRoutePage>
+				<ProtectedRouteHeader
+					className="lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.36fr)]"
+					actionsClassName="w-full"
+					actions={
+						<ProtectedRouteSummaryGrid
+							heading="Setup summary"
+							items={[
+								{ label: "Project", value: model.projectLabel },
+								{ label: "Repository", value: model.repositoryLabel },
+								{ label: "Runner", value: model.pairing.activeRunnerLabel },
+								{ label: "State", value: model.pairing.statusLabel },
+								{ label: "Owner", value: "Human" },
+								{
+									label: "Next",
+									value: model.doctorPassAction.disabled
+										? "Resolve setup blockers"
+										: "Run Doctor Pass",
+								},
+							]}
+						/>
+					}
+				>
+					<ProtectedRouteEyebrow>Setup</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>Existing codebase setup</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
+						{model.subtitle}
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 
 				<SetupPairingPanel
 					pairing={model.pairing}
@@ -339,7 +347,7 @@ export function ExistingCodebaseSetupPage({
 						<SetupPrivacySummary defaults={model.privacyDefaults} />
 					</aside>
 				</div>
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }

@@ -28,6 +28,8 @@ describe("SettingsPage", () => {
 	it("includes Codex and account cards", () => {
 		const markup = renderToStaticMarkup(<SettingsPage />);
 
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
 		expect(markup).toContain("Connect Codex and open Clerk");
 		expect(markup).toContain('id="settings-toc"');
 		expect(markup).toContain('id="settings-account"');
@@ -38,5 +40,6 @@ describe("SettingsPage", () => {
 		expect(codex).toBeLessThan(account);
 		expect(markup).not.toContain("Starter repository");
 		expect(markup).not.toContain("Starter repo");
+		expect(markup).not.toContain("font-heading-serif");
 	});
 });

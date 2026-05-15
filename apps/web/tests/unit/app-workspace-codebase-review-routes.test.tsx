@@ -334,12 +334,17 @@ describe("workspace codebase, review, and setup routes", () => {
 
 		const markup = renderToStaticMarkup(await StarterHomeRoutePage());
 
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).toContain('data-slot="protected-route-panel"');
+		expect(markup).toContain("Choose your build path");
 		expect(markup).toContain("Download template");
 		expect(markup).toContain(
 			'href="/api/download/starter-template?downloadToken=',
 		);
 		expect(markup).toContain('download=""');
 		expect(markup).toContain('href="/starter/lessons"');
+		expect(markup).not.toContain("font-heading-serif");
 	});
 
 	it("redirects viewers without worker capability away from worker setup", async () => {

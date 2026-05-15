@@ -1,7 +1,9 @@
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { protectedRoutePanelClassName } from "@/components/app/protected-route-surface";
 import type { buildWorkspaceSetupReadinessModel } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import { cn } from "@/lib/utils";
 
 type DoctorPassActionModel = ReturnType<
 	typeof buildWorkspaceSetupReadinessModel
@@ -17,7 +19,7 @@ export function SetupDoctorPassAction({
 	onRunDoctorPass: () => void;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<section className={cn(protectedRoutePanelClassName, "p-4")}>
 			<div className="space-y-1">
 				<h2 className="text-sm font-semibold text-foreground">Doctor Pass</h2>
 				<p className="text-sm leading-6 text-muted-foreground">

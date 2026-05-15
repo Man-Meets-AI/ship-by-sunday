@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 
 import type { buildWorkspaceSetupReadinessModel } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import { protectedRoutePanelClassName } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import {
 	Collapsible,
@@ -128,7 +129,7 @@ export function SetupWorkerInstallPanel({
 		workerInstall.proofCommandResults.length > 0;
 
 	return (
-		<section className="rounded-xl border border-border/60 bg-background">
+		<section className={protectedRoutePanelClassName}>
 			<div className="grid gap-5 p-4 sm:p-5">
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 					<div className="min-w-0">

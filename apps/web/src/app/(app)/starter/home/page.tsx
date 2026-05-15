@@ -6,14 +6,22 @@ import { redirect } from "next/navigation";
 import { AccessRequiredPage } from "@/app/(app)/_components/access-required/access-required-page";
 import { AppShell } from "@/app/(app)/_components/app-shell";
 import { loadWorkspacePageAccess } from "@/app/(app)/_server/load-workspace-page-access";
-import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRouteIcon,
+	ProtectedRoutePage,
+	ProtectedRoutePanel,
+	ProtectedRoutePanelBody,
+	ProtectedRoutePanelDescription,
+	ProtectedRoutePanelHeader,
+	ProtectedRoutePanelTitle,
+	ProtectedRouteSummaryGrid,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { createStarterTemplateDownloadHref } from "@/lib/download/starter-template-download-token";
 import { hasProductSurfaceCapability } from "@/platform/access/product-surface-capabilities";
@@ -40,71 +48,98 @@ export default async function StarterHomePage() {
 
 	return (
 		<AppShell viewportMode="app" appScrollMode="page" showSkillRail={false}>
-			<div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-10 pt-2">
-				<section className="border-b border-border/60 pb-6">
-					<div className="flex size-10 items-center justify-center rounded-lg border border-border/70 bg-muted/40">
-						<ClipboardList
-							className="size-5 text-muted-foreground"
-							aria-hidden
+			<ProtectedRoutePage className="max-w-6xl">
+				<ProtectedRouteHeader
+					actionsClassName="w-full lg:w-72"
+					actions={
+						<ProtectedRouteSummaryGrid
+							heading="Starter summary"
+							items={[
+								{ label: "Guided", value: "Codebase questions" },
+								{ label: "Template", value: "Direct download" },
+								{ label: "Lessons", value: "Build-along track" },
+							]}
 						/>
-					</div>
-					<h1 className="mt-4 font-heading-serif text-4xl leading-tight text-foreground sm:text-5xl">
-						Starter
-					</h1>
-					<p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+					}
+				>
+					<ProtectedRouteIcon>
+						<ClipboardList className="size-4" aria-hidden />
+					</ProtectedRouteIcon>
+					<ProtectedRouteEyebrow>Starter</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>Choose your build path</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
 						Choose the guided questions for a customized repo path, or jump into
 						the template and guided videos.
-					</p>
-				</section>
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 				<section
 					className="grid gap-4 md:grid-cols-2"
 					aria-label="Starter paths"
 				>
-					<Card>
-						<CardHeader>
-							<div className="mb-4 flex size-9 items-center justify-center rounded-lg border border-border/70 bg-muted/40">
-								<Code2 className="size-4 text-muted-foreground" aria-hidden />
+					<ProtectedRoutePanel>
+						<ProtectedRoutePanelHeader>
+							<div className="mb-2 flex items-center justify-between gap-3">
+								<span className="flex size-8 items-center justify-center rounded-lg border border-border/70 bg-background/70 text-muted-foreground">
+									<Code2 className="size-4" aria-hidden />
+								</span>
+								<Badge variant="info" size="sm">
+									Guided
+								</Badge>
 							</div>
-							<CardTitle>Generate Codebase</CardTitle>
-							<CardDescription className="leading-6">
+							<ProtectedRoutePanelTitle>
+								Generate Codebase
+							</ProtectedRoutePanelTitle>
+							<ProtectedRoutePanelDescription>
 								Answer the product questions and shape the generated repo
 								package around the app you want to build.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<Button asChild variant="outline">
+							</ProtectedRoutePanelDescription>
+						</ProtectedRoutePanelHeader>
+						<ProtectedRoutePanelBody className="flex flex-col gap-4">
+							<p className="text-sm leading-6 text-muted-foreground">
+								Use this when Ship by Sunday should assemble a tailored starter
+								repository from the product brief.
+							</p>
+							<Button asChild variant="outline" size="sm" className="w-fit">
 								<Link href={routeConfig.codebase}>Start questions</Link>
 							</Button>
-						</CardContent>
-					</Card>
-					<Card>
-						<CardHeader>
-							<div className="mb-4 flex size-9 items-center justify-center rounded-lg border border-border/70 bg-muted/40">
-								<ListVideo
-									className="size-4 text-muted-foreground"
-									aria-hidden
-								/>
+						</ProtectedRoutePanelBody>
+					</ProtectedRoutePanel>
+					<ProtectedRoutePanel>
+						<ProtectedRoutePanelHeader>
+							<div className="mb-2 flex items-center justify-between gap-3">
+								<span className="flex size-8 items-center justify-center rounded-lg border border-border/70 bg-background/70 text-muted-foreground">
+									<ListVideo className="size-4" aria-hidden />
+								</span>
+								<Badge variant="secondary" size="sm">
+									Template
+								</Badge>
 							</div>
-							<CardTitle>Lessons</CardTitle>
-							<CardDescription className="leading-6">
+							<ProtectedRoutePanelTitle>Lessons</ProtectedRoutePanelTitle>
+							<ProtectedRoutePanelDescription>
 								Use the template-first path and follow the guided videos when
 								you want the build-along track.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="flex flex-wrap gap-2">
-							<Button asChild>
-								<a href={starterTemplateDownloadHref} download>
-									<Download className="size-4" aria-hidden />
-									Download template
-								</a>
-							</Button>
-							<Button asChild variant="outline">
-								<Link href={routeConfig.tutorials}>Open lessons</Link>
-							</Button>
-						</CardContent>
-					</Card>
+							</ProtectedRoutePanelDescription>
+						</ProtectedRoutePanelHeader>
+						<ProtectedRoutePanelBody className="flex flex-col gap-4">
+							<p className="text-sm leading-6 text-muted-foreground">
+								Start from the template, then keep the lessons open while you
+								wire the first product pass.
+							</p>
+							<div className="flex flex-wrap gap-2">
+								<Button asChild size="sm">
+									<a href={starterTemplateDownloadHref} download>
+										<Download className="size-4" aria-hidden />
+										Download template
+									</a>
+								</Button>
+								<Button asChild variant="outline" size="sm">
+									<Link href={routeConfig.tutorials}>Open lessons</Link>
+								</Button>
+							</div>
+						</ProtectedRoutePanelBody>
+					</ProtectedRoutePanel>
 				</section>
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }

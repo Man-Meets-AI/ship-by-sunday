@@ -44,6 +44,7 @@ The guiding rule is simple: when the current Ship by Sunday design docs, fronten
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-5.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`
+- `docs/programs/active/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
 - `docs/programs/active/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
 - T3 Code source app: `/Users/bazelrex/Developer/oss/t3code/apps/web`
@@ -95,6 +96,8 @@ The largest technical mismatch is not Tailwind. Both apps are Tailwind 4. The mi
 - [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`, moving protected `viewportMode="app"` onto a T3 Code-style Sidebar shell while preserving AppShell props, document-mode compatibility, workspace/codebase/lesson/local navigation, command/theme/user controls, billing attention, and mobile Sheet-backed navigation.
 - [x] 2026-05-15: Added `planning-brief-6.md` for the protected route-surface migration and pointed `current-planning-brief.txt` at it.
 - [x] 2026-05-15: Applied Sidebar app-shell review fixes for mobile width CSS, mobile rail breakpoint alignment, final resize persistence, drag-click suppression, and stale planning-brief source metadata.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`, adding shared protected route-surface helpers and migrating Starter home, Workers existing-codebase setup, and settings route content to compact T3-style headers, panels, and summaries.
+- [x] 2026-05-15: Added `planning-brief-7.md` for the remaining protected Worker findings/runs, support/admin, and course/tutorial surface sweep and pointed `current-planning-brief.txt` at it.
 
 ## Decision Log
 
@@ -152,11 +155,12 @@ Completed child ExecPlans:
 - `docs/exec-plans/completed/2026-05-14-t3-code-alert-dialog-toast-primitives.md`: copied T3 Code AlertDialog modal recipes onto the current Radix AlertDialog surface and copied T3 Code toast surface recipes onto the existing Sonner Toaster while keeping current `AlertDialog*`, `Toaster`, and `sonner` toast invocation behavior; desktop and mobile browser proof passed through a temporary local route.
 - `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`: copied T3 Code utility recipes onto Radix-backed ScrollArea, Collapsible, Toggle, and ToggleGroup plus shared Spinner and Empty while keeping existing exports, adding `CollapsiblePanel`, `ToggleGroupSeparator`, ScrollArea fade/gutter/hide-scrollbar controls, and proving desktop/mobile render through a temporary local route.
 - `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`: copied T3 Code Sidebar behavior onto the current Radix-compatible Sidebar primitive, added desktop resize persistence and scroll-fade content, and moved protected `viewportMode="app"` AppShell rendering to `SidebarProvider`, `Sidebar`, `SidebarRail`, and `SidebarInset` while preserving document mode and current product navigation behavior.
+- `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`: added shared protected route-surface helpers and migrated Starter home, Workers existing-codebase setup, and settings route content to compact T3-style headers, panels, and summary rows while preserving protected access behavior, AppShell props, direct Starter template download, Workers setup mutations, and settings card anchors.
 
 Planned child slices:
 
 - Remaining shared primitive migration: finish any shared primitive gaps as they appear during route-surface migration, while continuing to avoid unplanned dependency changes.
-- Protected operational route-surface migration: update Starter, Workers, settings, support/admin, and course route content so the new sidebar shell contains T3 Code-style dense product surfaces instead of old page islands.
+- Remaining protected operational route-surface sweep: update Worker findings/runs, support/admin, and course/tutorial route content so the new sidebar shell contains T3 Code-style dense product surfaces instead of old page islands.
 - Public surfaces migration: rebuild marketing pages, homepage sections, docs chrome, blog prose, starter/workers pages, and public support surfaces with the T3 Code system.
 - Course, tutorials, auth, checkout, and edge-surface sweep: convert the remaining user-facing route islands and high-risk screens with targeted behavior proof.
 - Telegram widget visual migration: update `packages/telegram-chat-widget` CSS and any package UI assumptions so the widget supports T3 Code light and dark mode.
@@ -165,11 +169,11 @@ Planned child slices:
 
 ## Next Slice
 
-The next recommended slice is `Protected operational route surface migration`.
+The next recommended slice is `Remaining protected operational route-surface sweep`.
 
-That slice should use `planning-brief-6.md` and build on the completed Sidebar app shell. It should migrate representative Starter, Workers, settings, support/admin, and course route content inside `viewportMode="app"` so the new sidebar shell contains T3 Code-style dense product surfaces instead of old page islands. It should preserve route URLs, protected access boundaries, data loading, AppShell props, command/theme/user controls, billing/support affordances, and current product navigation behavior while moving avoidable route-local implementation out of underscore folders only where the touched surfaces require it.
+That slice should use `planning-brief-7.md` and build on the shared protected route-surface helpers from `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`. It should migrate representative Worker findings/runs, support/admin, and course/tutorial route content inside `viewportMode="app"` so the Sidebar shell stays visually coherent beyond Starter home, Workers setup, and settings. It should preserve route URLs, protected access boundaries, data loading, AppShell props, support/admin policy behavior, command/theme/user controls, billing/support affordances, and current product navigation behavior while moving avoidable route-local implementation out of underscore folders only where touched surfaces require it.
 
-That slice does not need to implement generated-codebase, public marketing/docs/blog, auth/checkout, or Telegram widget changes. Generated codebase implementation should wait until the tracked app shell and protected route-surface strategy are proven.
+That slice does not need to implement generated-codebase, public marketing/docs/blog, auth/checkout, or Telegram widget changes. Generated codebase implementation should wait until the tracked app shell and protected route-surface strategy are proven across the remaining protected routes.
 
 ## Risks and Watchpoints
 
