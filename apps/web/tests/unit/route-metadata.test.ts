@@ -14,8 +14,8 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		access: {
-			viewerProductAccess: "access.viewerProductAccess",
+		entitlements: {
+			viewerProductAccess: "entitlements.viewerProductAccess",
 		},
 	},
 }));
@@ -40,9 +40,13 @@ vi.mock("@/platform/convex/server-preload", () => ({
 	fetchAuthenticatedQuery: vi.fn(),
 }));
 
+vi.mock("@/lib/billing/stripe-sync", () => ({
+	syncStripeCheckoutSessionToConvex: vi.fn(),
+}));
+
 import { metadata as checkoutSuccessMetadata } from "@/app/checkout/success/page";
-import { metadata as resetPasswordMetadata } from "@/app/(identity)/session-tasks/reset-password/page";
-import { metadata as signInMetadata } from "@/app/(identity)/sign-in/[[...sign-in]]/page";
+import { metadata as resetPasswordMetadata } from "@/app/(auth)/session-tasks/reset-password/page";
+import { metadata as signInMetadata } from "@/app/(auth)/sign-in/[[...sign-in]]/page";
 
 function expectNoindexRobots(metadata: { robots?: unknown }) {
 	expect(metadata.robots).toMatchObject({

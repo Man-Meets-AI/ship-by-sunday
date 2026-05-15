@@ -1,5 +1,57 @@
 # Mistakes
 
+## 2026-05-15 T3 Closeout Tooling Discipline
+
+- Mistake: I first read only part of the Browser skill file even though the skill explicitly required reading the whole file in one read before browser work.
+  Impact: No source impact, but it violated the tool workflow and forced a corrective full read before continuing browser proof.
+  Corrective action: Read skill files with a full-file command when the skill says full reading is mandatory, especially before browser automation.
+
+- Mistake: I used a few chained shell commands and a bulk Perl path rewrite during the T3 closeout docs move despite the repo preference for one read/edit boundary at a time.
+  Impact: The changes were mechanical and reviewed afterward, but the transcript was noisier and the edit path was less disciplined than `apply_patch`.
+  Corrective action: Use `multi_tool_use.parallel` for multiple reads and reserve shell rewrites for generated or purely mechanical cases after stating the scope.
+
+## 2026-05-14 Dialog Sheet Validation Script Name
+
+- Mistake: I wrote and first ran `bun run --cwd apps/web test:integration-ui` for the admin Dialog compatibility check even though this repo's script is `test:integration:ui`.
+  Impact: The first command failed before running tests and the active ExecPlan briefly documented the wrong command.
+  Corrective action: Check the package scripts before recording validation commands in ExecPlans, then rerun the intended test through the actual script name.
+
+## 2026-05-14 Program Brief Pointer Edit
+
+- Mistake: I updated `current-planning-brief.txt` with shell redirection instead of `apply_patch`.
+  Impact: The content was correct, but the edit violated the repo's file-editing discipline.
+  Corrective action: Use `apply_patch` for small text-file updates, including one-line pointer files.
+
+## 2026-05-14 Zsh Special Path Variable In Staging Helper
+
+- Mistake: I used `path` as a zsh loop variable while building index-only staged files, which shadowed the shell command search path and caused the helper to fail.
+  Impact: The helper did not stage the intended shared Program index files on that attempt.
+  Corrective action: Avoid zsh special parameter names such as `path`, `status`, and `signals` in shell snippets; use explicit names like `repo_file`.
+
+## 2026-05-14 Repeated Convex Skill Path Lookup
+
+- Mistake: I retried a stale global Convex skill path instead of using the repo-local `.agents/skills/convex/SKILL.md` path that the skill inventory already identified.
+  Impact: The read failed before source edits, but it repeated a known context error and wasted a step.
+  Corrective action: Resolve skills from the current turn's skill inventory and prefer repo-local `.agents/skills/` paths when listed there.
+
+## 2026-05-14 Program Runner Validation Source Map Upload
+
+- Mistake: I ran root `bun run typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` while validating the Program runner dirty-worktree change.
+  Impact: The command passed, but the app typecheck path ran the production compile hook and uploaded source maps from this local environment.
+  Corrective action: Use `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run typecheck` for local broad validation unless source-map upload behavior is explicitly under test.
+
+## 2026-05-13 Generated Next Env Churn
+
+- Mistake: I patched `apps/web/next-env.d.ts` as if it were source when Next.js owns and rewrites that file.
+  Impact: `next dev` and `next build` kept flipping the route type import between `.next/dev/types` and `.next/types`, creating repeated dirty diffs.
+  Corrective action: Keep `apps/web/next-env.d.ts` ignored and untracked, and let the app lint guard reject it if it is re-added.
+
+## 2026-05-13 Template-First Interview Drift
+
+- Mistake: I kept asking Parker to reconfirm template-copy decisions after he had already made the template-first rule explicit.
+  Impact: The interview wasted attention on settled choices and forced repeated steering.
+  Corrective action: Treat `~/Developer/next-js-convex-clerk-stripe-template` as the default for this Program; ask only about product-specific expansions, customer-experience tradeoffs, or deliberate deviations from the template.
+
 ## 2026-05-12 App Typecheck Side Effect
 
 - Mistake: I ran `bun run --cwd apps/web typecheck` without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
@@ -138,6 +190,150 @@
   Impact: The command updated the unit test file, then failed before touching the intended integration test; no source code was changed by the failed path.
   Corrective action: Re-run the mechanical update with the exact `workspace-setup-page.test.tsx` path and verify with `rg` before continuing.
 
+## 2026-05-13 App Src Migration Typecheck
+
+- Mistake: I ran `bun run --cwd apps/web typecheck` without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` in a credentialed local environment.
+  Impact: The build/typecheck passed, but the PostHog compile hook created a release and uploaded source maps for the local commit.
+  Corrective action: Prefix future local app build/typecheck commands with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is the thing being tested.
+
 - Mistake: I ran root `bun typecheck` while shepherding the release without setting `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
   Impact: The command passed, but it created a PostHog release and uploaded source maps for the local branch commit from the credentialed environment.
   Corrective action: Run local app build/typecheck validation with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` unless source-map upload behavior is explicitly under test.
+
+## 2026-05-13 Worker Seal Team 6 Booking Scope
+
+- Mistake: I incorrectly turned a Cal.com paid meeting booking into post-payment Clerk/workspace onboarding.
+  Impact: The Program briefly implied that a service-call booker should receive an app workspace invitation, which adds customer friction and misrepresents Worker Seal Team 6 as an app purchase instead of a meeting.
+  Corrective action: Keep Worker Seal Team 6 as a Cal.com-managed paid meeting; mirror booking state for support/fulfillment/proof only, and create app accounts/workspaces only through Starter or Workers purchase paths.
+
+## 2026-05-13 Stripe Skill Reference Path
+
+- Mistake: I tried to read the Stripe billing reference from the skill directory instead of the `stripe-best-practices/references/` subdirectory.
+  Impact: The first read failed, but no docs or code were changed from the bad path.
+  Corrective action: Resolve plugin reference paths with `find` when the skill body points to a relative reference file, then read the actual reference before making billing decisions.
+
+## 2026-05-13 Template Billing Search Glob Order
+
+- Mistake: I put `rg --glob` flags after the search paths while inspecting the sibling template billing UI.
+  Impact: `rg` treated the flags as file paths, returned partial useful output, and exited with an error before the corrected search.
+  Corrective action: Put `rg` flags before patterns and paths, especially when searching outside the repo with excluded globs.
+
+## 2026-05-13 Local Runner Node Cutover
+
+- Mistake: I used a one-off `perl -0pi` replacement while updating the Worker compatibility smoke file instead of `apply_patch`.
+  Impact: The edit was scoped to one test file and was reviewed afterward, but it violated the repository editing rule for manual code changes.
+  Corrective action: Use `apply_patch` for manual source edits, including broad string replacements, and reserve shell commands for inspection or formatter-driven changes.
+
+## 2026-05-13 Effect Scaffold Whitespace Check
+
+- Mistake: I used `status` as a zsh loop variable while adding an extra no-index whitespace check for new files.
+  Impact: zsh treats `status` as read-only, so the first check command failed before doing useful work; no files changed.
+  Corrective action: Avoid reserved shell variable names in validation snippets and rerun the check with a domain-specific variable name.
+
+## 2026-05-13 Effect Boundary Scoped Staging
+
+- Mistake: I staged the whole `docs/exec-plans/active` directory while preparing the Effect boundary commit, which picked up unrelated active ExecPlan files.
+  Impact: The unrelated files were staged briefly but were removed from the index before commit; no unrelated content was committed.
+  Corrective action: Stage moved plan files with exact old/new path handling or inspect and unstage immediately before committing.
+
+## 2026-05-13 Convex Skill Path
+
+- Mistake: I tried to read the Convex routing skill from `/Users/bazelrex/.codex/skills/convex/SKILL.md` even though this repo's Convex skill is installed under `.agents/skills/convex/SKILL.md`.
+  Impact: The first read failed before any source edits; the correct skill path was read immediately afterward.
+  Corrective action: Resolve repo-local skill roots from the skill inventory before assuming every skill lives under the global Codex skill directory.
+
+## 2026-05-13 Scoped Commit Staging
+
+- Mistake: I accidentally let `apps/web/next-env.d.ts` stage into a local-runner Effect docs commit while making grouped conventional commits.
+  Impact: The first commit shape was misleading until amended; the generated file deletion belongs to the web source-tree/generated-file cleanup.
+  Corrective action: Inspect `git diff --cached --name-status` before every commit and amend immediately when a staged file crosses the intended commit boundary.
+
+## 2026-05-13 Source Move Staging Command
+
+- Mistake: I chained Git staging commands and included a missing pathspec while repairing the web `src` move review findings.
+  Impact: The command failed noisily after partial staging; no source files were corrupted, and I verified the final index state with focused Git checks.
+  Corrective action: Use separate Git commands for path-sensitive staging and verify each scoped state change before continuing.
+
+## 2026-05-13 Typecheck PostHog Upload
+
+- Mistake: I ran `bun typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The Next build hook created a PostHog release and uploaded source maps while validation was running.
+  Corrective action: Use `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for local validation unless an explicit release proof needs the upload.
+
+## 2026-05-13 Typecheck PostHog Upload Repeat
+
+- Mistake: I repeated the local validation mistake and ran root `bun typecheck` without `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1`.
+  Impact: The command completed successfully but created a PostHog release and uploaded source maps during a non-release validation run.
+  Corrective action: Run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for broad local typecheck proof and check recent mistakes before running production-build validation commands.
+
+## 2026-05-13 Backtick Rg Quoting
+
+- Mistake: I ran an `rg` command with backticks inside a double-quoted zsh argument.
+  Impact: zsh attempted command substitution and printed `command not found` errors; no files changed and validation commands were unaffected.
+  Corrective action: Single-quote search patterns that contain shell-special characters, especially backticks.
+
+## 2026-05-14 Corrupt Patch During Event Sync Fix
+
+- Mistake: I applied an oversized patch to `packages/local-runner/src/workflows/worker-foundations-install/result.ts` and left a duplicate helper plus invalid references in the file.
+  Impact: The source file was temporarily syntactically invalid before tests ran; I re-read the affected section and removed the duplicate block immediately.
+  Corrective action: Patch one function at a time and re-read the edited region before moving on to tests or additional edits.
+
+## 2026-05-14 Starter Template Digest Repin
+
+- Mistake: I updated the Starter template manifest to a stale digest after a late source patch.
+  Impact: The focused generated repo tests failed fast on the manifest mismatch before any customer output proof ran.
+  Corrective action: Recompute the digest after the final source edit, then rerun the template-source contract and clean-room generated repo tests before finishing.
+
+## 2026-05-14 Typecheck PostHog Upload Repeat
+
+- Mistake: I ran root `bun typecheck` without disabling PostHog source map upload even though this mistake was already recorded.
+  Impact: The Next build hook created a PostHog release and uploaded source maps during local validation for a non-release fix.
+  Corrective action: Check `MISTAKES.md` before broad validation and run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` unless explicitly performing release proof.
+
+## 2026-05-14 Worker Seal Team 6 Cal Parser Typecheck
+
+- Mistake: I left `parseCalWebhookEnvelope` without an explicit return type after tightening the parser around `JsonValue`.
+  Impact: The first root typecheck failed because downstream code could not see optional Cal.com envelope fields.
+  Corrective action: Type boundary parser return values explicitly when later normalization depends on validated optional fields, then rerun root typecheck before closeout.
+
+## 2026-05-14 Typecheck PostHog Upload Repeat
+
+- Mistake: I again ran root `bun typecheck` without disabling PostHog source map upload during local validation.
+  Impact: The Next build hook uploaded source maps while validating the Worker Seal Team 6 Cal.com slice.
+  Corrective action: Run `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` for local validation unless the current task explicitly requires production source-map upload.
+
+## 2026-05-14 ExecPlan Lint Flag Mixup
+
+- Mistake: I passed multiple ExecPlan paths after a single `--plan` flag instead of using `--paths`.
+  Impact: The docs lint command failed before validating the files; no source files changed from the failed command.
+  Corrective action: Use repeated `--plan` flags or a single `--paths` list when linting multiple ExecPlans.
+
+## 2026-05-14 Wrong Browser Proof Surface
+
+- Mistake: I tried to prove Separator rendering on `/checkout/cancel/confirmed` without first confirming that route still rendered a shared Separator.
+  Impact: The browser proof failed on a bad route assumption; source code was unaffected.
+  Corrective action: Probe candidate routes for the target `data-slot` before using them as proof surfaces.
+
+## 2026-05-14 Tooltip State Assertion
+
+- Mistake: I wrote the Popover/Tooltip primitive test as if Tooltip used Popover's `data-[state=open]` animation state.
+  Impact: The first focused unit run failed even though Tooltip correctly uses Radix's delayed-open state.
+  Corrective action: Assert Popover and Tooltip state tokens separately when adapting shared popup recipes across different Radix primitives.
+
+## 2026-05-14 Private Proof Route Segment
+
+- Mistake: I put the temporary Popover/Tooltip browser proof route under an underscore-prefixed app segment.
+  Impact: Next treated it as private route inventory, so the proof script hit a 404 and the first browser proof attempt failed.
+  Corrective action: Use ordinary URL segments for temporary App Router proof routes, then delete the route before final validation.
+
+## 2026-05-15 Review Build PostHog Upload
+
+- Mistake: I ran the first codex-review helper without disabling PostHog sourcemap upload, and the nested Next build uploaded source maps during review.
+  Impact: An external PostHog release artifact was created or updated during a review pass that should have stayed local.
+  Corrective action: Stop the review run and rerun with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1` plus blank PostHog upload environment values for review builds.
+
+## 2026-05-15 Env Key Presence Check
+
+- Mistake: I used `rg` against `.env*` files while checking whether provider credentials existed, which printed secret values instead of only key names or presence.
+  Impact: Secret material was exposed in local command output during a read-only migration research pass; no provider state was changed.
+  Corrective action: For future env checks, use a script that reports only boolean key presence and mode labels, never raw values.

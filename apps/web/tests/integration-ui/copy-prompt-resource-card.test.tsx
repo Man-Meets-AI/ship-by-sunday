@@ -14,7 +14,7 @@ vi.mock("sonner", () => ({
 }));
 
 import { getLessonById } from "@/lib/course/lesson/model";
-import { CopyPromptResourceCard } from "@/app/(workspace)/_components/course/lesson/shells/copy-prompt-resource-card";
+import { CopyPromptResourceCard } from "@/app/(app)/_components/course/lesson/shells/copy-prompt-resource-card";
 
 describe("CopyPromptResourceCard interactions", () => {
 	beforeEach(() => {

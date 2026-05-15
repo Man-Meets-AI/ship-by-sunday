@@ -6,18 +6,29 @@ import {
 	type BuyerStartingPoint,
 	type CheckoutCtaId,
 	type FulfillmentTrack,
-} from "../platform/billing/checkout/checkout-intent";
+} from "../src/platform/billing/checkout/checkout-intent";
+import {
+	getCheckoutOffer,
+	getCheckoutOfferIdForLegacyFulfillmentTrack,
+	type CheckoutOfferId,
+} from "../src/platform/billing/checkout/checkout-offers";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { action, internalMutation, internalQuery } from "./_generated/server";
+import {
+	action,
+	internalMutation,
+	internalQuery,
+	mutation,
+} from "./_generated/server";
 import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
-import { upsertProductAccessGrant } from "./access/model";
-import { productAccessGrantResultValidator } from "./access/validators";
+import { upsertProductAccessGrant } from "./entitlements/model";
+import { productAccessGrantResultValidator } from "./entitlements/validators";
 import {
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
-} from "./checkoutIntentValidators";
+	checkoutOfferIdValidator,
+} from "./billing/validators";
 import { requireConvexEnv } from "./env";
 
 const pendingCheckoutClaimStatusValidator = v.union(
@@ -62,6 +73,7 @@ const pendingCheckoutClaimReturnValidator = v.union(
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -142,6 +154,35 @@ export function normalizeCheckoutEmail(email: string) {
 	return email.trim().toLowerCase();
 }
 
+function assertConvexWebhookMutationSecret(
+	convexWebhookMutationSecret: string,
+) {
+	if (
+		convexWebhookMutationSecret !==
+		requireConvexEnv("CONVEX_WEBHOOK_MUTATION_SECRET")
+	) {
+		throw new Error("Unauthorized checkout claim sync call.");
+	}
+}
+
+function getCheckoutOfferGrantFields(
+	offerId: CheckoutOfferId | undefined,
+	fallbackFulfillmentTrack?: FulfillmentTrack,
+) {
+	const resolvedOfferId =
+		offerId ??
+		(fallbackFulfillmentTrack
+			? getCheckoutOfferIdForLegacyFulfillmentTrack(fallbackFulfillmentTrack)
+			: undefined) ??
+		"starter";
+	const offer = getCheckoutOffer(resolvedOfferId);
+	return {
+		checkoutOfferId: resolvedOfferId,
+		capabilities: [...offer.capabilities],
+		fulfillmentTrack: offer.fulfillmentTrack,
+	};
+}
+
 const hostedCheckoutProofTokenIdentifier =
 	"release-proof:hosted-checkout-billing";
 
@@ -169,6 +210,7 @@ export const createCheckoutPurchaseIntent = action({
 		clerkUserId: v.optional(v.string()),
 		checkoutEmail: v.optional(v.string()),
 		checkoutSurface: checkoutSurfaceValidator,
+		offerId: checkoutOfferIdValidator,
 	},
 	returns: checkoutPurchaseIntentCreateResultValidator,
 	handler: async (ctx, args): Promise<CheckoutPurchaseIntentCreateResult> => {
@@ -182,6 +224,7 @@ export const createCheckoutPurchaseIntent = action({
 				clerkUserId: args.clerkUserId,
 				checkoutEmail: args.checkoutEmail,
 				checkoutSurface: args.checkoutSurface,
+				offerId: args.offerId,
 			},
 		);
 	},
@@ -192,6 +235,7 @@ export const createCheckoutPurchaseIntentRecord = internalMutation({
 		clerkUserId: v.optional(v.string()),
 		checkoutEmail: v.optional(v.string()),
 		checkoutSurface: checkoutSurfaceValidator,
+		offerId: checkoutOfferIdValidator,
 	},
 	returns: checkoutPurchaseIntentCreateResultValidator,
 	handler: async (ctx, args) => {
@@ -204,6 +248,7 @@ export const createCheckoutPurchaseIntentRecord = internalMutation({
 				? normalizeCheckoutEmail(checkoutEmail)
 				: undefined,
 			checkoutSurface: args.checkoutSurface,
+			offerId: args.offerId,
 			status: "created",
 			createdAt: now,
 			updatedAt: now,
@@ -320,39 +365,75 @@ function assertPurchaseIntentFulfilled(
 	}
 }
 
+const grantProductAccessForCheckoutSessionArgs = {
+	clerkUserId: v.string(),
+	source: v.union(v.literal("stripe_checkout"), v.literal("stripe_webhook")),
+	stripeCustomerId: v.optional(v.string()),
+	stripeCheckoutSessionId: v.string(),
+	stripePaymentIntentId: v.optional(v.string()),
+	checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+	offerId: v.optional(checkoutOfferIdValidator),
+	buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
+	checkoutCtaId: v.optional(checkoutCtaIdValidator),
+	fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
+} as const;
+
+type GrantProductAccessForCheckoutSessionArgs = {
+	clerkUserId: string;
+	source: "stripe_checkout" | "stripe_webhook";
+	stripeCustomerId?: string;
+	stripeCheckoutSessionId: string;
+	stripePaymentIntentId?: string;
+	checkoutPurchaseIntentId?: Id<"checkoutPurchaseIntents">;
+	offerId?: CheckoutOfferId;
+	buyerStartingPoint?: BuyerStartingPoint;
+	checkoutCtaId?: CheckoutCtaId;
+	fulfillmentTrack?: FulfillmentTrack;
+};
+
+async function grantProductAccessForCheckoutSessionHandler(
+	ctx: MutationCtx,
+	args: GrantProductAccessForCheckoutSessionArgs,
+) {
+	const grantResult = await upsertProductAccessGrant(ctx, {
+		clerkUserId: args.clerkUserId,
+		source: args.source,
+		stripeCustomerId: args.stripeCustomerId,
+		stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+		stripePaymentIntentId: args.stripePaymentIntentId,
+		buyerStartingPoint: args.buyerStartingPoint,
+		checkoutCtaId: args.checkoutCtaId,
+		...getCheckoutOfferGrantFields(args.offerId, args.fulfillmentTrack),
+	});
+	assertPurchaseIntentFulfilled(
+		await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
+			checkoutPurchaseIntentId: args.checkoutPurchaseIntentId,
+			stripeCheckoutSessionId: args.stripeCheckoutSessionId,
+			clerkUserId: args.clerkUserId,
+		}),
+	);
+
+	return grantResult;
+}
+
 export const grantProductAccessForCheckoutSession = internalMutation({
+	args: grantProductAccessForCheckoutSessionArgs,
+	returns: productAccessGrantResultValidator,
+	handler: async (ctx, args) => {
+		return await grantProductAccessForCheckoutSessionHandler(ctx, args);
+	},
+});
+
+export const grantProductAccessForCheckoutSessionFromServer = mutation({
 	args: {
-		clerkUserId: v.string(),
-		source: v.union(v.literal("stripe_checkout"), v.literal("stripe_webhook")),
-		stripeCustomerId: v.optional(v.string()),
-		stripeCheckoutSessionId: v.string(),
-		stripePaymentIntentId: v.optional(v.string()),
-		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
-		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
-		checkoutCtaId: v.optional(checkoutCtaIdValidator),
-		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
+		convexWebhookMutationSecret: v.string(),
+		...grantProductAccessForCheckoutSessionArgs,
 	},
 	returns: productAccessGrantResultValidator,
 	handler: async (ctx, args) => {
-		const grantResult = await upsertProductAccessGrant(ctx, {
-			clerkUserId: args.clerkUserId,
-			source: args.source,
-			stripeCustomerId: args.stripeCustomerId,
-			stripeCheckoutSessionId: args.stripeCheckoutSessionId,
-			stripePaymentIntentId: args.stripePaymentIntentId,
-			buyerStartingPoint: args.buyerStartingPoint,
-			checkoutCtaId: args.checkoutCtaId,
-			fulfillmentTrack: args.fulfillmentTrack,
-		});
-		assertPurchaseIntentFulfilled(
-			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
-				checkoutPurchaseIntentId: args.checkoutPurchaseIntentId,
-				stripeCheckoutSessionId: args.stripeCheckoutSessionId,
-				clerkUserId: args.clerkUserId,
-			}),
-		);
-
-		return grantResult;
+		assertConvexWebhookMutationSecret(args.convexWebhookMutationSecret);
+		const { convexWebhookMutationSecret: _secret, ...grantArgs } = args;
+		return await grantProductAccessForCheckoutSessionHandler(ctx, grantArgs);
 	},
 });
 
@@ -484,6 +565,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -513,6 +595,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 				checkoutPurchaseIntentId:
 					args.checkoutPurchaseIntentId ??
 					existingClaim.checkoutPurchaseIntentId,
+				offerId: args.offerId ?? existingClaim.offerId,
 				fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 				stripeEventId: args.stripeEventId,
 				stripeEventType: args.stripeEventType,
@@ -533,6 +616,7 @@ export const upsertPendingCheckoutClaimFromStripe = internalMutation({
 			stripeCustomerId: args.stripeCustomerId,
 			stripePaymentIntentId: args.stripePaymentIntentId,
 			checkoutPurchaseIntentId: args.checkoutPurchaseIntentId,
+			offerId: args.offerId,
 			fulfillmentTrack: checkoutIntent.fulfillmentTrack,
 			stripeEventId: args.stripeEventId,
 			stripeEventType: args.stripeEventType,
@@ -588,13 +672,19 @@ export const claimPendingCheckoutClaim = internalMutation({
 			};
 		}
 
+		const checkoutIntent = getPendingCheckoutClaimIntentFields(existingClaim);
 		const grantResult = await upsertProductAccessGrant(ctx, {
 			clerkUserId: viewerIdentity.clerkUserId,
 			source: "stripe_checkout",
 			stripeCustomerId: existingClaim.stripeCustomerId,
 			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
-			...getPendingCheckoutClaimIntentFields(existingClaim),
+			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+			checkoutCtaId: checkoutIntent.checkoutCtaId,
+			...getCheckoutOfferGrantFields(
+				existingClaim.offerId,
+				checkoutIntent.fulfillmentTrack,
+			),
 		});
 		assertPurchaseIntentFulfilled(
 			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {
@@ -690,13 +780,19 @@ export const repairPaidCheckoutClaim = internalMutation({
 		}
 
 		const now = Date.now();
+		const checkoutIntent = getPendingCheckoutClaimIntentFields(existingClaim);
 		const grantResult = await upsertProductAccessGrant(ctx, {
 			clerkUserId,
 			source: "stripe_checkout",
 			stripeCustomerId: existingClaim.stripeCustomerId,
 			stripeCheckoutSessionId: existingClaim.stripeCheckoutSessionId,
 			stripePaymentIntentId: existingClaim.stripePaymentIntentId,
-			...getPendingCheckoutClaimIntentFields(existingClaim),
+			buyerStartingPoint: checkoutIntent.buyerStartingPoint,
+			checkoutCtaId: checkoutIntent.checkoutCtaId,
+			...getCheckoutOfferGrantFields(
+				existingClaim.offerId,
+				checkoutIntent.fulfillmentTrack,
+			),
 		});
 		assertPurchaseIntentFulfilled(
 			await recordCheckoutPurchaseIntentFulfillmentInTransaction(ctx, {

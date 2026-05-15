@@ -32,7 +32,7 @@ describe("billing integration step planner", () => {
 			steps.some(
 				(step) =>
 					step.command.join(" ") ===
-					"bun run --cwd apps/web stripe:hosted:verify",
+					"bun run --cwd apps/web stripe:hosted:verify -- --offer=starter",
 			),
 		).toBe(true);
 		expect(
@@ -61,7 +61,7 @@ describe("billing integration step planner", () => {
 			steps.some(
 				(step) =>
 					step.command.join(" ") ===
-					"bun run --cwd apps/web stripe:hosted:verify:dev-card -- --base-url=https://dev.man-meets-ai.com",
+					"bun run --cwd apps/web stripe:hosted:verify:dev-card -- --base-url=https://dev.man-meets-ai.com --offer=starter",
 			),
 		).toBe(true);
 		expect(
@@ -78,5 +78,47 @@ describe("billing integration step planner", () => {
 					"bun run --cwd apps/web test:e2e:sandbox:billing-integration",
 			),
 		).toBe(false);
+	});
+
+	it("passes the selected Workers offer to hosted billing proofs", () => {
+		const productionSteps = buildBillingIntegrationSteps({
+			authenticatedBrowserEnv: {
+				PLAYWRIGHT_BASE_URL: "https://www.man-meets-ai.com",
+			},
+			billingProofOfferId: "workers",
+			isLocalBillingTarget: false,
+			personaPrepareEnv: {
+				PLAYWRIGHT_BASE_URL: "https://www.man-meets-ai.com",
+			},
+			slug: "prod-workers-billing-123",
+			targetUrl: "https://www.man-meets-ai.com",
+		});
+		const devSteps = buildBillingIntegrationSteps({
+			authenticatedBrowserEnv: {
+				PLAYWRIGHT_BASE_URL: "https://dev.man-meets-ai.com",
+			},
+			billingProofOfferId: "workers",
+			isLocalBillingTarget: false,
+			personaPrepareEnv: {
+				PLAYWRIGHT_BASE_URL: "https://dev.man-meets-ai.com",
+			},
+			slug: "dev-workers-billing-123",
+			targetUrl: "https://dev.man-meets-ai.com",
+		});
+
+		expect(
+			productionSteps.some(
+				(step) =>
+					step.command.join(" ") ===
+					"bun run --cwd apps/web stripe:hosted:verify -- --offer=workers",
+			),
+		).toBe(true);
+		expect(
+			devSteps.some(
+				(step) =>
+					step.command.join(" ") ===
+					"bun run --cwd apps/web stripe:hosted:verify:dev-card -- --base-url=https://dev.man-meets-ai.com --offer=workers",
+			),
+		).toBe(true);
 	});
 });

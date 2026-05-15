@@ -16,8 +16,8 @@ describe("convex product access grant helper", () => {
 			args: [
 				CONVEX_BIN_PATH,
 				"run",
-				"access:grantProductAccess",
-				'{"clerkUserId":"user_123","source":"manual"}',
+				"entitlements:grantProductAccess",
+				'{"clerkUserId":"user_123","source":"manual","capabilities":["generate_codebase","tutorials"]}',
 			],
 		});
 	});
@@ -41,8 +41,8 @@ describe("convex product access grant helper", () => {
 			[
 				CONVEX_BIN_PATH,
 				"run",
-				"access:grantProductAccess",
-				'{"clerkUserId":"user_123","source":"manual"}',
+				"entitlements:grantProductAccess",
+				'{"clerkUserId":"user_123","source":"manual","capabilities":["generate_codebase","tutorials"]}',
 			],
 			{
 				cwd: APPS_WEB_DIRECTORY,

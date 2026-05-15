@@ -9,7 +9,7 @@ import {
 describe("release scope classifier", () => {
 	it("marks checkout and billing proof files as billing sensitive", () => {
 		expect(
-			isBillingSensitivePath("apps/web/app/api/stripe/checkout/route.ts"),
+			isBillingSensitivePath("apps/web/src/app/api/stripe/checkout/route.ts"),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
@@ -31,56 +31,106 @@ describe("release scope classifier", () => {
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/platform/billing/checkout/checkout-session.ts",
+				"apps/web/src/platform/billing/checkout/checkout-session.ts",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/platform/billing/managed-stripe-config.ts",
+				"apps/web/src/platform/billing/managed-stripe-config.ts",
 			),
 		).toBe(true);
-		expect(isBillingSensitivePath("apps/web/platform/env/server.ts")).toBe(
+		expect(isBillingSensitivePath("apps/web/src/app/(app)/layout.tsx")).toBe(
 			true,
 		);
-		expect(isBillingSensitivePath("apps/web/config/product.ts")).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/lib/billing/stripe-sync.ts"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/lib/billing/stripe-webhooks.ts"),
+		).toBe(true);
+		expect(isBillingSensitivePath("apps/web/convex/billing/model.ts")).toBe(
+			true,
+		);
+		expect(isBillingSensitivePath("apps/web/convex/billing.ts")).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/platform/access/product-access.ts"),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath("apps/web/src/app/access-required/page.tsx"),
+		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/_components/home-page/sections/home-page-checkout-cta.tsx",
+				"apps/web/src/app/(app)/_components/access-required/access-required-page.tsx",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx",
+				"apps/web/src/app/(app)/_hooks/use-access-required-controller.ts",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/_components/home-page/sections/hero-sections.tsx",
+				"apps/web/src/app/(app)/_lib/access-required-view-model.ts",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/_components/home-page/sections/pricing-footer-sections.tsx",
+				"apps/web/src/app/api/cal/worker-seal-team-6/webhook/route.ts",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/blog/_components/blog-post-promo.tsx",
+				"apps/web/src/lib/cal/worker-seal-team-6-webhook.ts",
+			),
+		).toBe(true);
+		expect(isBillingSensitivePath("apps/web/src/platform/env/server.ts")).toBe(
+			true,
+		);
+		expect(isBillingSensitivePath("apps/web/src/config/product.ts")).toBe(true);
+		expect(isBillingSensitivePath("apps/web/src/proxy.ts")).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/platform/auth/clerk-middleware-bypass.ts",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/(identity)/_components/checkout-email-handoff/checkout-email-handoff-form.tsx",
+				"apps/web/src/app/_components/home-page/sections/home-page-checkout-cta.tsx",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/(identity)/_components/checkout-email-handoff/use-checkout-email-handoff-flow.ts",
+				"apps/web/src/app/_components/home-page/sections/codebase-demo/codebase-demo-cta-bar.tsx",
 			),
 		).toBe(true);
 		expect(
 			isBillingSensitivePath(
-				"apps/web/app/(identity)/sign-up/[[...sign-up]]/page.tsx",
+				"apps/web/src/app/_components/home-page/sections/hero-sections.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/_components/home-page/sections/pricing-footer-sections.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(marketing)/blog/_components/blog-post-promo.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(auth)/_components/checkout-email-handoff/checkout-email-handoff-form.tsx",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(auth)/_components/checkout-email-handoff/use-checkout-email-handoff-flow.ts",
+			),
+		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
 			),
 		).toBe(true);
 		expect(
@@ -95,6 +145,11 @@ describe("release scope classifier", () => {
 		expect(
 			isBillingSensitivePath("apps/web/convex/stripeWebhookEvents.ts"),
 		).toBe(true);
+		expect(
+			isBillingSensitivePath(
+				"apps/web/convex/migrations/legacyBillingReset.ts",
+			),
+		).toBe(true);
 	});
 
 	it("marks convex files as convex sensitive", () => {
@@ -104,7 +159,7 @@ describe("release scope classifier", () => {
 		).toBe(true);
 		expect(
 			isConvexSensitivePath(
-				"apps/web/platform/billing/checkout/checkout-session-recovery.ts",
+				"apps/web/src/platform/billing/checkout/checkout-session-recovery.ts",
 			),
 		).toBe(false);
 		expect(
@@ -114,7 +169,7 @@ describe("release scope classifier", () => {
 
 	it("classifies billing and convex changes independently", () => {
 		const summary = classifyReleaseScope([
-			"apps/web/app/api/stripe/checkout/route.ts",
+			"apps/web/src/app/api/stripe/checkout/route.ts",
 			"apps/web/convex/schema.ts",
 			"README.md",
 		]);
@@ -122,8 +177,22 @@ describe("release scope classifier", () => {
 		expect(summary.billingSensitive).toBe(true);
 		expect(summary.convexSensitive).toBe(true);
 		expect(summary.billingSensitiveFiles).toContain(
-			"apps/web/app/api/stripe/checkout/route.ts",
+			"apps/web/src/app/api/stripe/checkout/route.ts",
 		);
 		expect(summary.convexSensitiveFiles).toContain("apps/web/convex/schema.ts");
+	});
+
+	it("classifies auth proxy changes as billing sensitive", () => {
+		const summary = classifyReleaseScope([
+			"apps/web/src/proxy.ts",
+			"apps/web/src/platform/auth/clerk-authorized-parties.ts",
+		]);
+
+		expect(summary.billingSensitive).toBe(true);
+		expect(summary.billingSensitiveFiles).toEqual([
+			"apps/web/src/proxy.ts",
+			"apps/web/src/platform/auth/clerk-authorized-parties.ts",
+		]);
+		expect(summary.convexSensitive).toBe(false);
 	});
 });

@@ -1,11 +1,19 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
-import { DocsSidebar } from "@/app/docs/_components/docs-sidebar";
-import { DocsTableOfContents } from "@/app/docs/_components/docs-table-of-contents";
+import { DocsArticle } from "@/app/(marketing)/docs/_components/docs-article";
+import { DocsFooter } from "@/app/(marketing)/docs/_components/docs-footer";
+import { DocsNavbar } from "@/app/(marketing)/docs/_components/docs-navbar";
+import { DocsSidebar } from "@/app/(marketing)/docs/_components/docs-sidebar";
+import { DocsTableOfContents } from "@/app/(marketing)/docs/_components/docs-table-of-contents";
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => "/docs/local-setup",
+}));
+
+vi.mock("@/app/(marketing)/docs/_components/docs-theme-toggle", () => ({
+	DocsThemeToggle: () => <button type="button">Theme</button>,
 }));
 
 describe("docs navigation components", () => {
@@ -54,5 +62,69 @@ describe("docs navigation components", () => {
 
 		expect(markup).toContain('href="#install-tools"');
 		expect(markup).toContain("sbs-docs-toc-depth-3");
+	});
+
+	it("uses the public sans chrome instead of old wordmark and serif docs rules", () => {
+		const navMarkup = renderToStaticMarkup(<DocsNavbar />);
+		const footerMarkup = renderToStaticMarkup(<DocsFooter />);
+		const articleMarkup = renderToStaticMarkup(
+			<DocsArticle
+				entry={{
+					kind: "docs",
+					segments: [],
+					pathname: "/docs",
+					title: "Start Here",
+					description: "Docs index.",
+					sourcePath: "content/docs/index.mdx",
+					lastModified: new Date("2026-05-15T00:00:00.000Z"),
+					headings: [],
+				}}
+			>
+				<h1>Start Here</h1>
+			</DocsArticle>,
+		);
+		const docsThemeCss = readFileSync(
+			new URL(
+				"../../src/app/(marketing)/docs/_styles/docs-theme.css",
+				import.meta.url,
+			),
+			"utf8",
+		);
+
+		expect(navMarkup).toContain("Man Meets AI");
+		expect(footerMarkup).not.toContain("font-product-wordmark");
+		expect(articleMarkup).toContain("sbs-docs-article");
+		expect(docsThemeCss).not.toContain("font-instrument-serif");
+		expect(docsThemeCss).not.toContain("Times New Roman");
+		expect(docsThemeCss).toContain("var(--font-sans)");
+	});
+
+	it("points homepage and starter docs at the migrated public header", () => {
+		const homepageDoc = readFileSync(
+			new URL(
+				"../../src/content/docs/configure-the-homepage.mdx",
+				import.meta.url,
+			),
+			"utf8",
+		);
+		const starterDoc = readFileSync(
+			new URL(
+				"../../src/content/docs/customize-the-starter.mdx",
+				import.meta.url,
+			),
+			"utf8",
+		);
+
+		expect(homepageDoc).toContain(
+			"src/components/layout/public-site-header.tsx",
+		);
+		expect(starterDoc).toContain(
+			"src/components/layout/public-site-header.tsx",
+		);
+		expect(starterDoc).toContain("the brand home link routes to `/`");
+		expect(`${homepageDoc}\n${starterDoc}`).not.toContain(
+			"src/app/_components/public-site",
+		);
+		expect(starterDoc).not.toContain("public navigation links Man Meets AI");
 	});
 });

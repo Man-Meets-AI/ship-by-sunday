@@ -8,7 +8,7 @@ import {
 	getBlogPageSegments,
 	getBlogSourcePath,
 	normalizeBlogSlug,
-} from "@/app/blog/_server/page-paths";
+} from "@/app/(marketing)/blog/_server/page-paths";
 
 describe("blog page paths", () => {
 	it("builds the public route segments and source path for a post", () => {
@@ -33,6 +33,9 @@ describe("blog page paths", () => {
 			{
 				slug: ["the-operating-system-beats-the-prompt"],
 			},
+			{
+				slug: ["starter-and-workers-are-different-jobs"],
+			},
 		]);
 	});
 
@@ -41,6 +44,9 @@ describe("blog page paths", () => {
 
 		expect(params).toContainEqual({
 			slug: ["the-operating-system-beats-the-prompt"],
+		});
+		expect(params).toContainEqual({
+			slug: ["starter-and-workers-are-different-jobs"],
 		});
 		expect(params).not.toContainEqual({ slug: [] });
 	});

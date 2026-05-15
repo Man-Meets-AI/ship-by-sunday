@@ -27,6 +27,9 @@ Inside that folder:
 
 Active Program folders:
 
+- `docs/programs/active/2026-05-13-autonomous-program-execution-loop/` - autonomous Program and ExecPlan execution loop that runs approved child plans through execution, fresh review, fixes, proof, docs sync, and checkpoints.
+- `docs/programs/active/2026-05-13-template-first-web-convex-architecture/` - template-first migration of `apps/web` and Convex toward the sibling Next.js Convex Clerk Stripe architecture, including billing, Sentry, Resend, route groups, and provider conventions.
+- `docs/programs/active/2026-05-12-public-product-split-starter-workers/` - Man Meets AI brand homepage, public Starter and Workers sales paths, Starter-owned generator/videos, unpromoted support docs, and generated template-app boundaries.
 - `docs/programs/active/2026-05-06-telegram-support-bot/` - first-party landing-page support chat, Convex support thread state, dedicated Telegram operator bot, and structured support actions.
 - `docs/programs/active/2026-05-05-admin-user-impersonation/` - Clerk actor-token admin impersonation, Convex actor visibility, audit logging, support UI, and release proof.
 - `docs/programs/active/2026-05-05-worker-generate-tutorials-ia/` - Generate Codebase, Tutorials, and Worker IA migration with capability-based access, canonical routes, navigation, copy, and runtime compatibility.

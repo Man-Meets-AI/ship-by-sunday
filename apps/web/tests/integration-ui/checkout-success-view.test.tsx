@@ -113,6 +113,9 @@ describe("CheckoutSuccessView", () => {
 		});
 
 		expect(markup).toContain("Finalizing access");
+		expect(markup).toContain('data-slot="edge-route-page"');
+		expect(markup).toContain('data-slot="edge-route-container"');
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).toContain("Polling access");
 		expect(markup).toContain("Confirming your product access.");
 		expect(markup).toContain("What happens next");

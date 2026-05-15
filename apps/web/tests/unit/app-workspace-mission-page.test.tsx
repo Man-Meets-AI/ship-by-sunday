@@ -26,7 +26,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({ children }: { children: React.ReactNode }) => (
 		<div>{children}</div>
 	),
@@ -40,12 +40,9 @@ vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
-vi.mock(
-	"@/app/(workspace)/_components/access-required/access-required-page",
-	() => ({
-		AccessRequiredPage: () => <div>Access recovery</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
+}));
 
 vi.mock("next/navigation", () => ({
 	redirect: (href: string) => redirectMock(href),
@@ -67,6 +64,7 @@ describe("workspace mission route", () => {
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
 		});
 		redirectMock.mockReset();
 		vi.resetModules();
@@ -80,7 +78,7 @@ describe("workspace mission route", () => {
 		});
 
 		const { default: MissionRoutePage } =
-			await import("@/app/(workspace)/mission/page");
+			await import("@/app/(app)/mission/page");
 
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
@@ -93,7 +91,7 @@ describe("workspace mission route", () => {
 		fetchAuthenticatedQueryMock.mockImplementation(async (query) => {
 			if (query === "getCodebaseResumeDestination") {
 				return {
-					destination: "/generate-codebase/review",
+					destination: "/starter/generate-codebase/review",
 					kind: "review",
 					codebaseStageId: "review",
 					postReviewTargets: null,
@@ -104,12 +102,12 @@ describe("workspace mission route", () => {
 		});
 
 		const { default: MissionRoutePage } =
-			await import("@/app/(workspace)/mission/page");
+			await import("@/app/(app)/mission/page");
 
 		const markup = renderToStaticMarkup(await MissionRoutePage());
 
 		expect(markup).toContain("Lesson Map opens after Review.");
-		expect(markup).toContain('href="/generate-codebase/review"');
+		expect(markup).toContain('href="/starter/generate-codebase/review"');
 	});
 
 	it("keeps the restored route reachable after unlock without redirecting to start", async () => {
@@ -120,10 +118,11 @@ describe("workspace mission route", () => {
 					kind: "post_review",
 					codebaseStageId: null,
 					postReviewTargets: {
-						reviewDestination: "/generate-codebase/review",
+						reviewDestination: "/starter/generate-codebase/review",
 						buildLessonsDestination: "/lesson/iterate-the-product-with-ai",
 						launchLessonsDestination: "/lesson/product-review",
-						lessonMapDestination: "/generate-codebase/review?showLessonMap=1",
+						lessonMapDestination:
+							"/starter/generate-codebase/review?showLessonMap=1",
 						latestLessonDestination: "/lesson/iterate-the-product-with-ai",
 					},
 				};
@@ -133,13 +132,13 @@ describe("workspace mission route", () => {
 		});
 
 		const { default: MissionRoutePage } =
-			await import("@/app/(workspace)/mission/page");
+			await import("@/app/(app)/mission/page");
 
 		await expect(MissionRoutePage()).rejects.toThrowError(
-			"NEXT_REDIRECT:/generate-codebase/review?showLessonMap=1",
+			"NEXT_REDIRECT:/starter/generate-codebase/review?showLessonMap=1",
 		);
 		expect(redirectMock).toHaveBeenCalledWith(
-			"/generate-codebase/review?showLessonMap=1",
+			"/starter/generate-codebase/review?showLessonMap=1",
 		);
 	});
 });

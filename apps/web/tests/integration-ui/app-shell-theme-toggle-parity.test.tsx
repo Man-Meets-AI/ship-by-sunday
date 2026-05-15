@@ -12,7 +12,7 @@ vi.mock("next-themes", () => ({
 globalThis.React = React;
 
 import { ThemeToggleButton } from "@/app/_components/theme-toggle-button";
-import { AppShellThemeToggle } from "@/app/(workspace)/_components/app-shell/app-shell-theme-toggle";
+import { AppShellThemeToggle } from "@/app/(app)/_components/app-shell/app-shell-theme-toggle";
 
 const PARITY_TOKENS = ["border-border/70", "bg-background/70", "rounded-full"];
 

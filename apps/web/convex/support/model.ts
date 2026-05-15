@@ -16,7 +16,7 @@ import {
 	normalizeSupportScreenshotFileName,
 	SUPPORT_SCREENSHOT_MAX_BYTES,
 	type SupportScreenshotContentType,
-} from "../../lib/support/support-attachment-policy";
+} from "../../src/lib/support/support-attachment-policy";
 import { normalizeSupportAiDraftFailureReason } from "./aiDrafts";
 import {
 	buildSupportOperatorActionEffect,

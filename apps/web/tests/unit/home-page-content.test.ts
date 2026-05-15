@@ -104,10 +104,7 @@ describe("home page content", () => {
 		expect(homePageContent.hero.body).toBe(
 			"Ship by Sunday diagnoses blockers, ranks the highest-leverage fixes, runs the first approved AI worker loop, and ends with proof or a clear blocked-proof report.",
 		);
-		expect(homePageContent.hero.promoBanner).toEqual({
-			label: "Pilot Member",
-			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. FULL TURBO included.`,
-		});
+		expect(homePageContent.hero.promoBanner).toBeNull();
 		expect(homePageContent.hero.loginLabel).toBe("Sign in");
 
 		expect(homePageContent.execLoopSection.title).toBe("How Workers Work.");
@@ -219,9 +216,7 @@ describe("home page content", () => {
 				"Next recommendation after the loop",
 			]),
 		);
-		expect(homePageContent.pricingSection.originalPriceDisplay).toBe(
-			productConfig.priceDisplay,
-		);
+		expect(homePageContent.pricingSection.originalPriceDisplay).toBeNull();
 		expect(homePageContent.pricingSection.headline).toEqual({
 			prefix: "Run the",
 			rotatingPhrases: ["doctor pass", "first worker loop"],
@@ -229,10 +224,7 @@ describe("home page content", () => {
 		expect(homePageContent.pricingSection.offerPriceDisplay).toBe(
 			productConfig.checkoutPriceDisplay,
 		);
-		expect(homePageContent.pricingSection.offerBanner).toEqual({
-			label: "Pilot Member",
-			message: `${productConfig.checkoutPriceDisplay} Pilot Member price. Auto-applied at checkout.`,
-		});
+		expect(homePageContent.pricingSection.offerBanner).toBeNull();
 		expect(homePageContent.pricingSection.ctaTitle).toBe("Start my AI build");
 	});
 

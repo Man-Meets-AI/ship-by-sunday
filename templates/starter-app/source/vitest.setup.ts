@@ -1,0 +1,20 @@
+process.env.CLERK_JWT_ISSUER_DOMAIN = "https://example.clerk.accounts.dev";
+process.env.CLERK_SECRET_KEY = "sk_test_example";
+process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_example";
+process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
+process.env.NEXT_PUBLIC_POSTHOG_HOST = "https://us.i.posthog.com";
+process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_example";
+process.env.NEXT_PUBLIC_SENTRY_DSN =
+  "https://public@example.ingest.sentry.io/123456";
+process.env.POSTHOG_API_KEY = "phx_example";
+process.env.RESEND_API_KEY = "re_example";
+process.env.RESEND_FROM_EMAIL = "hello@example.com";
+process.env.SENTRY_AUTH_TOKEN = "token";
+process.env.SENTRY_ENVIRONMENT = "test";
+process.env.SENTRY_ORG = "example-org";
+process.env.SENTRY_PROJECT = "example-project";
+process.env.CONVEX_WEBHOOK_MUTATION_SECRET = "convex_webhook_secret";
+process.env.STRIPE_PRICE_PRO_MONTHLY = "price_example";
+process.env.STRIPE_SECRET_KEY = "sk_test_example";
+process.env.STRIPE_WEBHOOK_SECRET = "whsec_example";

@@ -19,9 +19,39 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 	[
 		{
 			pathPattern: "apps/web/**",
-			shippingMode: "ship-unchanged",
+			shippingMode: "ship-generalized",
 			reason:
-				"Ship the tracked Codebase app by default, then narrow unsafe env, build-output, and machine-local files with explicit exceptions.",
+				"Ship an explicit generated template app instead of the tracked Man Meets AI core app route tree.",
+		},
+		{
+			pathPattern: "apps/web/app/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude the tracked root App Router tree; generated Starter repos use the pinned template materialized under apps/web/src/app with the marketing, auth, and app route groups.",
+		},
+		{
+			pathPattern: "apps/web/convex/workspace.ts",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker workspace Convex state from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/convex/workspace/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude Worker workspace Convex models, validators, and runner state from generated Starter repos.",
+		},
+		{
+			pathPattern: "apps/web/platform/codex/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude core-app Codex server bridge code from generated Starter repos.",
+		},
+		{
+			pathPattern: "packages/local-runner/**",
+			shippingMode: "exclude",
+			reason:
+				"Exclude the Worker local runner package from generated Starter repos.",
 		},
 		{
 			pathPattern: "packages/codebase-compiler/**",
@@ -96,10 +126,10 @@ export const CUSTOMER_SAFE_SNAPSHOT_CONTRACT: CustomerSafeSnapshotContractEntry[
 				"Ship a customer-safe ExecPlan contract for generated product work.",
 		},
 		{
-			pathPattern: "docs/exec-plans/active/<generated-plan>.md",
+			pathPattern: "docs/exec-plans/active/<generated-plans>.md",
 			shippingMode: "ship-generalized",
 			reason:
-				"Ship only the generated customer's first active ExecPlan, not internal ExecPlan archives.",
+				"Ship only the generated customer's active setup and product ExecPlans, not internal ExecPlan archives.",
 		},
 		{
 			pathPattern: "apps/web/.env.local.example",

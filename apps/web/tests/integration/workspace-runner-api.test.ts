@@ -53,7 +53,8 @@ describe("workspace runner API", () => {
 			runnerMode: "daemon",
 			pairingStatus: "paired",
 		});
-		const { POST } = await import("../../app/api/workspace/runner/pair/route");
+		const { POST } =
+			await import("../../src/app/api/workspace/runner/pair/route");
 
 		const response = await POST(
 			createJsonRequest("https://example.com/api/workspace/runner/pair", {
@@ -84,7 +85,7 @@ describe("workspace runner API", () => {
 			eventDocumentId: "workspaceRunnerEvents_1",
 		});
 		const { POST } =
-			await import("../../app/api/workspace/runner/events/route");
+			await import("../../src/app/api/workspace/runner/events/route");
 
 		const response = await POST(
 			createJsonRequest(
@@ -123,7 +124,7 @@ describe("workspace runner API", () => {
 			eventDocumentId: "workspaceRunnerEvents_1",
 		});
 		const { POST } =
-			await import("../../app/api/workspace/runner/events/route");
+			await import("../../src/app/api/workspace/runner/events/route");
 
 		const response = await POST(
 			createJsonRequest(
@@ -157,7 +158,7 @@ describe("workspace runner API", () => {
 
 	it("rejects runner events without bearer credentials", async () => {
 		const { POST } =
-			await import("../../app/api/workspace/runner/events/route");
+			await import("../../src/app/api/workspace/runner/events/route");
 
 		const response = await POST(
 			createJsonRequest("https://example.com/api/workspace/runner/events", {}),
@@ -173,7 +174,7 @@ describe("workspace runner API", () => {
 			startedAt: 1234,
 		});
 		const { POST } =
-			await import("../../app/api/workspace/runner/doctor-pass/start/route");
+			await import("../../src/app/api/workspace/runner/doctor-pass/start/route");
 
 		const response = await POST(
 			createJsonRequest(
@@ -206,7 +207,7 @@ describe("workspace runner API", () => {
 			patchedCount: 0,
 		});
 		const { POST } =
-			await import("../../app/api/workspace/runner/findings/route");
+			await import("../../src/app/api/workspace/runner/findings/route");
 
 		const response = await POST(
 			createJsonRequest(
@@ -256,7 +257,7 @@ describe("workspace runner API", () => {
 			localProofRef: ".sbs/runs/workflowRuns_1/proof.json",
 		});
 		const { POST } =
-			await import("../../app/api/workspace/runner/workflow-runs/resolve/route");
+			await import("../../src/app/api/workspace/runner/workflow-runs/resolve/route");
 
 		const response = await POST(
 			createJsonRequest(

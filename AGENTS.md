@@ -7,19 +7,24 @@
 - For work in `apps/web`, also follow `apps/web/AGENTS.md`.
 - For work in `packages/codebase-compiler`, also follow `packages/codebase-compiler/AGENTS.md`.
 - For route, auth, checkout, entitlement, browser proof, release-readiness, or ship-readiness work, also read `docs/release-workflow.md`.
-- Root `DESIGN.md` is the canonical visual source of truth for user-facing UI. `docs/DESIGN.md` is supporting reference.
+- The completed T3 Code Source Design System Port Program is the current source for web UI visual and structure decisions. Do not treat root `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, or `docs/ship-by-sunday/design-pack/` as preserved doctrine.
 - Canonical repo-reference docs live in `docs/`. Start with `docs/index.md`, then read only the file relevant to the task:
   - `docs/ARCHITECTURE.md`
   - `docs/RELIABILITY.md`
   - `docs/SECURITY.md`
-  - `docs/FRONTEND.md`
-  - `docs/DESIGN.md`
   - `docs/PRODUCT_SENSE.md`
   - `docs/QUALITY_SCORE.md`
   - `docs/programs/README.md`
-  - `docs/design-docs/index.md`
 - `docs/openai/` and `docs/ship-by-sunday/` are source instruction packs. `docs/generated/` mirrors generated customer-facing output. Do not edit generated mirrors without also updating their source or the generation path.
-- Treat `docs/ship-by-sunday/` as background context unless a local `AGENTS.md`, root `DESIGN.md`, or current runtime code points there as the active contract.
+- Treat `docs/ship-by-sunday/` as background context unless a local `AGENTS.md`, Program packet, or current runtime code points there as the active contract.
+
+## Vendored Reference Repositories
+
+- `repos/effect/` is a squashed `git subtree` copy of the upstream Effect repository for local reference while migrating `packages/local-runner`.
+- Treat `repos/effect/` as read-only reference material. Do not edit files under it unless the task is explicitly to refresh the subtree from upstream.
+- Do not import runtime code from `repos/effect/`. Production code must use published packages such as `effect` and `@effect/platform-node` after they are added as dependencies.
+- When working on the Effect migration, inspect `repos/effect/AGENTS.md` and `repos/effect/LLMS.md` if present, then read only the relevant Effect source or docs needed for the slice.
+- Refresh the reference from a clean worktree with `git subtree pull --prefix=repos/effect https://github.com/Effect-TS/effect.git main --squash`.
 
 ## Default Workflow
 
@@ -42,8 +47,8 @@
 ## Path Triggers
 
 - Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
-- User-facing UI: read root `DESIGN.md` and `docs/ship-by-sunday/design-pack/AGENTS.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, or component presentation.
-- Public homepage: read `apps/web/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
+- User-facing UI or app structure: read `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or route-local implementation structure.
+- Public homepage: read `apps/web/src/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Routes, auth, checkout, entitlement, browser proof, or release readiness: read `docs/release-workflow.md` before changing the surface or judging release confidence.
 - Codebase compiler output: read `packages/codebase-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.
@@ -91,11 +96,11 @@ Document all of this when it applies:
 
 The homepage contract is split deliberately:
 
-- `starterConfig.homePage` in `apps/web/config/product.ts` is the control plane.
-- `apps/web/app/_content/home-page.ts` owns copy and assets.
-- `apps/web/app/_lib/home-page-render-model.ts` owns section and CTA behavior.
-- `apps/web/app/_components/home-page/sections/home-page-primary-cta.tsx` is the CTA rendering boundary for hero and pricing.
-- `apps/web/app/_lib/home-page-structured-data.ts` must stay truthful to visible sections.
+- `starterConfig.homePage` in `apps/web/src/config/product.ts` is the control plane.
+- `apps/web/src/app/_content/home-page.ts` owns copy and assets.
+- `apps/web/src/app/_lib/home-page-render-model.ts` owns section and CTA behavior.
+- `apps/web/src/app/_components/home-page/sections/home-page-primary-cta.tsx` is the CTA rendering boundary for hero and pricing.
+- `apps/web/src/app/_lib/home-page-structured-data.ts` must stay truthful to visible sections.
 
 Do not re-hardwire checkout into hero or pricing, scatter section gating across multiple components, or leave `FAQPage` or `Product` schema behind when the visible homepage no longer supports them.
 
@@ -103,7 +108,7 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 
 - Do not leave a component above 150 lines if it can be split cleanly.
 - Split large components into feature-local pieces that keep presentation, state, and domain logic separated.
-- Preserve the existing visual system unless the task explicitly calls for redesign.
+- Preserve the existing visual system unless the task explicitly calls for redesign or an active Program supersedes the existing system.
 
 ### Release Proof
 

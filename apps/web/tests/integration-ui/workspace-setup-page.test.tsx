@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceSetupState } from "@/app/(workspace)/_lib/workspace-setup-readiness-model";
+import type { WorkspaceSetupState } from "@/app/(app)/_lib/workspace-setup-readiness-model";
 
 const useConvexAuthMock = vi.fn();
 const useQueryMock = vi.fn();
@@ -74,7 +74,7 @@ vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: reportClientErrorMock,
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -89,7 +89,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { ExistingCodebaseSetupPage } from "@/app/(workspace)/_components/existing-codebase-setup/existing-codebase-setup-page";
+import { ExistingCodebaseSetupPage } from "@/app/(app)/_components/existing-codebase-setup/existing-codebase-setup-page";
 
 const renderedAt = 1_000_000;
 
@@ -239,8 +239,15 @@ describe("ExistingCodebaseSetupPage", () => {
 	it("renders the setup command, readiness sections, blockers, and privacy defaults", async () => {
 		const user = userEvent.setup();
 
-		renderSetupPage();
+		const { container } = renderSetupPage();
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-summary"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", { name: "Existing codebase setup" }),
 		).toBeTruthy();

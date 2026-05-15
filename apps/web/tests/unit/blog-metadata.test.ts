@@ -4,7 +4,7 @@ import {
 	buildBlogIndexMetadata,
 	buildBlogPostMetadata,
 	getBlogMetadataDefaults,
-} from "@/app/blog/_lib/blog-metadata";
+} from "@/app/(marketing)/blog/_lib/blog-metadata";
 
 describe("blog metadata helpers", () => {
 	it("provides canonical and social defaults for the blog landing page", () => {
@@ -34,7 +34,7 @@ describe("blog metadata helpers", () => {
 			href: "/blog/the-operating-system-beats-the-prompt",
 			slug: ["the-operating-system-beats-the-prompt"],
 			sourcePath:
-				"/Users/parkerrex/Projects/ship-by-sunday/apps/web/content/blog/the-operating-system-beats-the-prompt.mdx",
+				"/Users/parkerrex/Projects/ship-by-sunday/apps/web/src/content/blog/the-operating-system-beats-the-prompt.mdx",
 		};
 		const metadata = buildBlogPostMetadata(post);
 

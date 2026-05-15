@@ -1,6 +1,6 @@
-import { lessonMedia } from "../lib/course/lesson/model/media";
-import { getCodebaseVideoInventory } from "../lib/codebase-flow/codebase-stage-videos";
-import { verifyBunnyEmbedUrl } from "../lib/course/lesson/lib/video-verification";
+import { lessonMedia } from "../src/lib/course/lesson/model/media";
+import { getCodebaseVideoInventory } from "../src/lib/codebase-flow/codebase-stage-videos";
+import { verifyBunnyEmbedUrl } from "../src/lib/course/lesson/lib/video-verification";
 
 type VideoInventoryEntry = {
 	key: string;

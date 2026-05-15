@@ -3,13 +3,17 @@ import { describe, expect, it } from "vitest";
 import {
 	buildDocsMetadata,
 	getDocsMetadataDefaults,
-} from "@/app/docs/_lib/docs-metadata";
+} from "@/app/(marketing)/docs/_lib/docs-metadata";
 
 describe("docs metadata helpers", () => {
 	it("provides canonical and social defaults for the docs landing page", () => {
 		const metadata = getDocsMetadataDefaults();
 
 		expect(metadata.alternates?.canonical).toBe("/docs");
+		expect(metadata.robots).toMatchObject({
+			index: false,
+			follow: false,
+		});
 		expect(metadata.openGraph?.url).toBe("/docs");
 		expect(metadata.openGraph?.type).toBe("article");
 		expect(metadata.twitter?.card).toBe("summary_large_image");
@@ -25,6 +29,10 @@ describe("docs metadata helpers", () => {
 		});
 
 		expect(metadata.alternates?.canonical).toBe("/docs/local-setup");
+		expect(metadata.robots).toMatchObject({
+			index: false,
+			follow: false,
+		});
 		expect(metadata.openGraph?.url).toBe("/docs/local-setup");
 		expect(metadata.openGraph?.title).toBe("Local Setup");
 		expect(metadata.openGraph?.description).toBe(

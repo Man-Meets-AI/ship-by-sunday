@@ -1,17 +1,85 @@
 .sbs-telegram-chat-widget {
-	--sbs-chat-background: var(--background, #fffaf3);
-	--sbs-chat-foreground: var(--foreground, #1b1712);
-	--sbs-chat-muted: var(--muted, #f4efe7);
-	--sbs-chat-muted-foreground: var(--muted-foreground, #71685f);
-	--sbs-chat-border: var(--border, #ded5c8);
-	--sbs-chat-primary: var(--primary, #14110f);
-	--sbs-chat-primary-foreground: var(--primary-foreground, #fffaf3);
-	--sbs-chat-danger: var(--destructive, #b42318);
-	--sbs-chat-radius: var(--radius, 8px);
-	--sbs-chat-shadow: 0 18px 48px rgb(27 23 18 / 18%);
+	--sbs-chat-background: var(--background, #ffffff);
+	--sbs-chat-foreground: var(--foreground, #262626);
+	--sbs-chat-card: var(--card, #ffffff);
+	--sbs-chat-card-foreground: var(--card-foreground, #262626);
+	--sbs-chat-popover: var(--popover, #ffffff);
+	--sbs-chat-popover-foreground: var(--popover-foreground, #262626);
+	--sbs-chat-muted: var(--muted, rgb(0 0 0 / 4%));
+	--sbs-chat-muted-foreground: var(--muted-foreground, #525252);
+	--sbs-chat-accent: var(--accent, rgb(0 0 0 / 4%));
+	--sbs-chat-accent-foreground: var(--accent-foreground, #262626);
+	--sbs-chat-border: var(--border, rgb(0 0 0 / 8%));
+	--sbs-chat-input: var(--input, rgb(0 0 0 / 10%));
+	--sbs-chat-primary: var(--primary, oklch(0.488 0.217 264));
+	--sbs-chat-primary-foreground: var(--primary-foreground, #ffffff);
+	--sbs-chat-danger: var(--destructive, #ef4444);
+	--sbs-chat-danger-foreground: var(--destructive-foreground, #b91c1c);
+	--sbs-chat-success: var(--success, #10b981);
+	--sbs-chat-success-foreground: var(--success-foreground, #047857);
+	--sbs-chat-ring: var(--ring, oklch(0.488 0.217 264));
+	--sbs-chat-radius: var(--radius, 0.625rem);
+	--sbs-chat-radius-sm: max(4px, calc(var(--sbs-chat-radius) - 4px));
+	--sbs-chat-radius-md: max(6px, calc(var(--sbs-chat-radius) - 2px));
+	--sbs-chat-radius-lg: var(--sbs-chat-radius);
+	--sbs-chat-radius-xl: calc(var(--sbs-chat-radius) + 4px);
+	--sbs-chat-radius-2xl: calc(var(--sbs-chat-radius) + 8px);
+	--sbs-chat-shadow: 0 18px 50px rgb(0 0 0 / 14%);
+	--sbs-chat-focus-ring:
+		0 0 0 2px var(--sbs-chat-background),
+		0 0 0 4px color-mix(in srgb, var(--sbs-chat-ring) 64%, transparent);
 
 	color: var(--sbs-chat-foreground);
 	font: inherit;
+}
+
+:is(.dark, [data-theme="dark"]) .sbs-telegram-chat-widget,
+.sbs-telegram-chat-widget[data-theme="dark"] {
+	--sbs-chat-background: var(--background, #111113);
+	--sbs-chat-foreground: var(--foreground, #f5f5f5);
+	--sbs-chat-card: var(--card, #171719);
+	--sbs-chat-card-foreground: var(--card-foreground, #f5f5f5);
+	--sbs-chat-popover: var(--popover, #171719);
+	--sbs-chat-popover-foreground: var(--popover-foreground, #f5f5f5);
+	--sbs-chat-muted: var(--muted, rgb(255 255 255 / 4%));
+	--sbs-chat-muted-foreground: var(--muted-foreground, #a3a3a3);
+	--sbs-chat-accent: var(--accent, rgb(255 255 255 / 4%));
+	--sbs-chat-accent-foreground: var(--accent-foreground, #f5f5f5);
+	--sbs-chat-border: var(--border, rgb(255 255 255 / 6%));
+	--sbs-chat-input: var(--input, rgb(255 255 255 / 8%));
+	--sbs-chat-primary: var(--primary, oklch(0.588 0.217 264));
+	--sbs-chat-primary-foreground: var(--primary-foreground, #ffffff);
+	--sbs-chat-danger: var(--destructive, #f87171);
+	--sbs-chat-danger-foreground: var(--destructive-foreground, #fca5a5);
+	--sbs-chat-success: var(--success, #10b981);
+	--sbs-chat-success-foreground: var(--success-foreground, #34d399);
+	--sbs-chat-ring: var(--ring, oklch(0.588 0.217 264));
+	--sbs-chat-shadow: 0 18px 54px rgb(0 0 0 / 32%);
+}
+
+@media (prefers-color-scheme: dark) {
+	.sbs-telegram-chat-widget:not([data-theme="light"]) {
+		--sbs-chat-background: var(--background, #111113);
+		--sbs-chat-foreground: var(--foreground, #f5f5f5);
+		--sbs-chat-card: var(--card, #171719);
+		--sbs-chat-card-foreground: var(--card-foreground, #f5f5f5);
+		--sbs-chat-popover: var(--popover, #171719);
+		--sbs-chat-popover-foreground: var(--popover-foreground, #f5f5f5);
+		--sbs-chat-muted: var(--muted, rgb(255 255 255 / 4%));
+		--sbs-chat-muted-foreground: var(--muted-foreground, #a3a3a3);
+		--sbs-chat-accent: var(--accent, rgb(255 255 255 / 4%));
+		--sbs-chat-accent-foreground: var(--accent-foreground, #f5f5f5);
+		--sbs-chat-border: var(--border, rgb(255 255 255 / 6%));
+		--sbs-chat-input: var(--input, rgb(255 255 255 / 8%));
+		--sbs-chat-primary: var(--primary, oklch(0.588 0.217 264));
+		--sbs-chat-primary-foreground: var(--primary-foreground, #ffffff);
+		--sbs-chat-danger: var(--destructive, #f87171);
+		--sbs-chat-danger-foreground: var(--destructive-foreground, #fca5a5);
+		--sbs-chat-success: var(--success, #10b981);
+		--sbs-chat-success-foreground: var(--success-foreground, #34d399);
+		--sbs-chat-ring: var(--ring, oklch(0.588 0.217 264));
+		--sbs-chat-shadow: 0 18px 54px rgb(0 0 0 / 32%);
+	}
 }
 
 .sbs-telegram-chat-widget,
@@ -47,30 +115,32 @@
 .sbs-telegram-chat-launcher {
 	pointer-events: auto;
 	display: inline-flex;
+	min-height: 40px;
 	align-items: center;
 	gap: 8px;
-	min-height: 44px;
-	border: 1px solid rgb(255 255 255 / 15%);
-	border-radius: 999px;
-	background: #111418;
-	box-shadow: 0 18px 48px rgb(0 0 0 / 25%);
-	color: #ffffff;
+	border: 1px solid var(--sbs-chat-border);
+	border-radius: var(--sbs-chat-radius-lg);
+	background: var(--sbs-chat-primary);
+	box-shadow: var(--sbs-chat-shadow);
+	color: var(--sbs-chat-primary-foreground);
+	cursor: pointer;
 	font: inherit;
 	font-size: 14px;
 	font-weight: 650;
 	line-height: 1;
-	padding: 12px 16px;
 	outline: none;
+	padding: 10px 14px;
 	transform-origin: bottom right;
 	transition:
-		transform 180ms ease,
-		background-color 180ms ease,
-		box-shadow 180ms ease;
+		transform 160ms ease,
+		background-color 160ms ease,
+		box-shadow 160ms ease,
+		border-color 160ms ease;
 }
 
 .sbs-telegram-chat-launcher:hover {
-	background: #1a1f25;
-	transform: translateY(-2px);
+	background: color-mix(in srgb, var(--sbs-chat-primary) 88%, black);
+	transform: translateY(-1px);
 }
 
 .sbs-telegram-chat-launcher:active {
@@ -78,22 +148,20 @@
 }
 
 .sbs-telegram-chat-launcher:focus-visible {
-	box-shadow:
-		0 18px 48px rgb(0 0 0 / 25%),
-		0 0 0 2px #d8ff76;
+	box-shadow: var(--sbs-chat-shadow), var(--sbs-chat-focus-ring);
 }
 
 .sbs-telegram-chat-launcher--squishy:hover {
-	box-shadow: 0 20px 52px rgb(0 0 0 / 35%);
-	transform: translateY(-4px) scale(1.03);
+	box-shadow: 0 20px 52px rgb(0 0 0 / 20%);
+	transform: translateY(-2px) scale(1.01);
 }
 
 .sbs-telegram-chat-launcher--squishy:active {
-	transform: translateY(2px) scaleX(1.06) scaleY(0.94);
+	transform: translateY(1px) scale(0.99);
 }
 
 .sbs-telegram-chat-launcher--squishy:hover .sbs-telegram-chat-icon {
-	transform: rotate(-6deg) scale(1.1);
+	transform: rotate(-4deg) scale(1.06);
 }
 
 .sbs-telegram-chat-panel {
@@ -101,15 +169,14 @@
 	display: flex;
 	width: 100%;
 	max-height: calc(100dvh - 16px);
-	min-height: 32rem;
+	min-height: min(28rem, calc(100dvh - 24px));
 	flex-direction: column;
 	overflow: hidden;
-	border: 1px solid rgb(255 255 255 / 10%);
-	border-radius: 22px;
-	background: rgb(27 27 27 / 98%);
-	box-shadow: 0 22px 64px rgb(0 0 0 / 35%);
-	color: #ffffff;
-	backdrop-filter: blur(18px);
+	border: 1px solid var(--sbs-chat-border);
+	border-radius: var(--sbs-chat-radius-2xl);
+	background: var(--sbs-chat-popover);
+	box-shadow: var(--sbs-chat-shadow);
+	color: var(--sbs-chat-popover-foreground);
 }
 
 .sbs-telegram-chat-panel-header {
@@ -117,8 +184,13 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	border-bottom: 1px solid rgb(255 255 255 / 8%);
-	padding: 12px 16px;
+	border-bottom: 1px solid var(--sbs-chat-border);
+	background: color-mix(
+		in srgb,
+		var(--sbs-chat-popover) 96%,
+		var(--sbs-chat-foreground)
+	);
+	padding: 12px 14px;
 }
 
 .sbs-telegram-chat-panel-title-block {
@@ -136,8 +208,9 @@
 	height: 8px;
 	flex: 0 0 auto;
 	border-radius: 999px;
-	background: #d8ff76;
-	box-shadow: 0 0 0 3px rgb(216 255 118 / 8%);
+	background: var(--sbs-chat-success);
+	box-shadow: 0 0 0 3px
+		color-mix(in srgb, var(--sbs-chat-success) 14%, transparent);
 }
 
 .sbs-telegram-chat-panel-title {
@@ -153,7 +226,7 @@
 .sbs-telegram-chat-panel-subtitle {
 	overflow: hidden;
 	margin: 2px 0 0;
-	color: rgb(255 255 255 / 52%);
+	color: var(--sbs-chat-muted-foreground);
 	font-size: 12px;
 	line-height: 20px;
 	text-overflow: ellipsis;
@@ -174,6 +247,7 @@
 .sbs-telegram-chat-mode-button {
 	appearance: none;
 	border: 0;
+	cursor: pointer;
 	font: inherit;
 }
 
@@ -182,30 +256,48 @@
 	width: 32px;
 	height: 32px;
 	place-items: center;
-	border-radius: 8px;
+	border-radius: var(--sbs-chat-radius-md);
 	background: transparent;
-	color: rgb(255 255 255 / 54%);
+	color: var(--sbs-chat-muted-foreground);
+	outline: none;
 	text-decoration: none;
 	transition:
 		background-color 160ms ease,
-		color 160ms ease;
+		color 160ms ease,
+		box-shadow 160ms ease;
 }
 
 .sbs-telegram-chat-icon-button:hover {
-	background: rgb(255 255 255 / 8%);
-	color: #ffffff;
+	background: var(--sbs-chat-accent);
+	color: var(--sbs-chat-accent-foreground);
+}
+
+.sbs-telegram-chat-icon-button:focus-visible,
+.sbs-telegram-chat-attach-button:focus-visible,
+.sbs-telegram-chat-remove-attachment:focus-visible,
+.sbs-telegram-chat-send-button:focus-visible,
+.sbs-telegram-chat-mode-button:focus-visible {
+	box-shadow: var(--sbs-chat-focus-ring);
+	outline: none;
 }
 
 .sbs-telegram-chat-transcript {
 	flex: 1;
 	overflow-y: auto;
-	padding: 20px 16px;
+	background: color-mix(
+		in srgb,
+		var(--sbs-chat-muted) 42%,
+		var(--sbs-chat-popover)
+	);
+	padding: 16px 14px;
 }
 
 .sbs-telegram-chat-message-list {
 	display: flex;
+	min-height: 100%;
 	flex-direction: column;
-	gap: 20px;
+	gap: 12px;
+	justify-content: flex-end;
 }
 
 .sbs-telegram-chat-assistant-intro {
@@ -220,9 +312,10 @@
 	height: 28px;
 	flex: 0 0 auto;
 	place-items: center;
+	border: 1px solid var(--sbs-chat-border);
 	border-radius: 999px;
-	background: #ffffff;
-	color: #1b1b1b;
+	background: var(--sbs-chat-muted);
+	color: var(--sbs-chat-foreground);
 	font-size: 12px;
 	font-weight: 700;
 	line-height: 1;
@@ -232,38 +325,51 @@
 	max-width: 20rem;
 	margin: 0;
 	padding-top: 2px;
-	color: rgb(255 255 255 / 76%);
+	color: var(--sbs-chat-muted-foreground);
 	font-size: 14px;
 	line-height: 24px;
 }
 
 .sbs-telegram-chat-composer-shell {
-	border-top: 1px solid rgb(255 255 255 / 8%);
-	background: #1b1b1b;
-	padding: 12px;
+	border-top: 1px solid var(--sbs-chat-border);
+	background: color-mix(
+		in srgb,
+		var(--sbs-chat-popover) 96%,
+		var(--sbs-chat-foreground)
+	);
+	padding: 10px;
 }
 
 .sbs-telegram-chat-closed-message,
 .sbs-telegram-chat-error-message {
-	margin: 0 4px 12px;
+	margin: 0 4px 10px;
 	font-size: 12px;
 	line-height: 20px;
 }
 
 .sbs-telegram-chat-closed-message {
-	color: rgb(255 255 255 / 60%);
+	color: var(--sbs-chat-muted-foreground);
 }
 
 .sbs-telegram-chat-error-message {
-	color: #ffb4a8;
+	color: var(--sbs-chat-danger-foreground);
 }
 
 .sbs-telegram-chat-composer {
-	border: 1px solid rgb(255 255 255 / 9%);
-	border-radius: 20px;
-	background: #2a2a2a;
-	box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+	border: 1px solid var(--sbs-chat-input);
+	border-radius: var(--sbs-chat-radius-xl);
+	background: var(--sbs-chat-card);
+	color: var(--sbs-chat-card-foreground);
 	padding: 8px;
+	transition:
+		border-color 160ms ease,
+		box-shadow 160ms ease;
+}
+
+.sbs-telegram-chat-composer:focus-within {
+	border-color: color-mix(in srgb, var(--sbs-chat-ring) 72%, transparent);
+	box-shadow: 0 0 0 3px
+		color-mix(in srgb, var(--sbs-chat-ring) 16%, transparent);
 }
 
 .sbs-telegram-chat-file-input {
@@ -276,7 +382,7 @@
 	resize: none;
 	border: 0;
 	background: transparent;
-	color: #ffffff;
+	color: var(--sbs-chat-foreground);
 	font: inherit;
 	font-size: 14px;
 	line-height: 24px;
@@ -284,13 +390,13 @@
 }
 
 .sbs-telegram-chat-message-textarea {
-	min-height: 64px;
+	min-height: 52px;
 	padding: 4px 8px;
 }
 
 .sbs-telegram-chat-message-textarea::placeholder,
 .sbs-telegram-chat-bug-textarea::placeholder {
-	color: rgb(255 255 255 / 34%);
+	color: color-mix(in srgb, var(--sbs-chat-muted-foreground) 68%, transparent);
 }
 
 .sbs-telegram-chat-bug-fields {
@@ -301,35 +407,39 @@
 
 .sbs-telegram-chat-bug-textarea,
 .sbs-telegram-chat-bug-impact {
-	border: 1px solid rgb(255 255 255 / 8%);
-	border-radius: 12px;
-	background: rgb(255 255 255 / 5%);
-	transition: border-color 160ms ease;
+	border: 1px solid var(--sbs-chat-input);
+	border-radius: var(--sbs-chat-radius-lg);
+	background: var(--sbs-chat-muted);
+	transition:
+		border-color 160ms ease,
+		box-shadow 160ms ease;
 }
 
 .sbs-telegram-chat-bug-textarea {
 	min-height: 44px;
-	padding: 8px 12px;
+	padding: 8px 10px;
 	line-height: 20px;
 }
 
 .sbs-telegram-chat-bug-textarea:focus,
 .sbs-telegram-chat-bug-impact:focus {
-	border-color: rgb(255 255 255 / 30%);
+	border-color: color-mix(in srgb, var(--sbs-chat-ring) 72%, transparent);
+	box-shadow: 0 0 0 3px
+		color-mix(in srgb, var(--sbs-chat-ring) 16%, transparent);
 }
 
 .sbs-telegram-chat-bug-impact {
 	width: 100%;
 	height: 36px;
-	padding: 0 12px;
-	color: #ffffff;
+	padding: 0 10px;
+	color: var(--sbs-chat-foreground);
 	font: inherit;
 	font-size: 12px;
 	outline: none;
 }
 
 .sbs-telegram-chat-bug-impact option {
-	color: #1b1b1b;
+	color: #262626;
 }
 
 .sbs-telegram-chat-attachment-chip {
@@ -337,13 +447,13 @@
 	align-items: center;
 	gap: 8px;
 	margin-top: 8px;
-	border: 1px solid rgb(255 255 255 / 8%);
-	border-radius: 12px;
-	background: rgb(255 255 255 / 5%);
-	color: rgb(255 255 255 / 70%);
+	border: 1px solid var(--sbs-chat-border);
+	border-radius: var(--sbs-chat-radius-lg);
+	background: var(--sbs-chat-muted);
+	color: var(--sbs-chat-muted-foreground);
 	font-size: 12px;
 	line-height: 16px;
-	padding: 8px 12px;
+	padding: 8px 10px;
 }
 
 .sbs-telegram-chat-attachment-name {
@@ -359,12 +469,14 @@
 	display: grid;
 	flex: 0 0 auto;
 	place-items: center;
-	border-radius: 999px;
+	border-radius: var(--sbs-chat-radius-md);
 	background: transparent;
-	color: rgb(255 255 255 / 55%);
+	color: var(--sbs-chat-muted-foreground);
+	outline: none;
 	transition:
 		background-color 160ms ease,
-		color 160ms ease;
+		color 160ms ease,
+		box-shadow 160ms ease;
 }
 
 .sbs-telegram-chat-remove-attachment {
@@ -379,13 +491,13 @@
 
 .sbs-telegram-chat-remove-attachment:hover,
 .sbs-telegram-chat-attach-button:hover {
-	background: rgb(255 255 255 / 8%);
-	color: #ffffff;
+	background: var(--sbs-chat-accent);
+	color: var(--sbs-chat-accent-foreground);
 }
 
 .sbs-telegram-chat-attach-button:disabled {
 	cursor: not-allowed;
-	color: rgb(255 255 255 / 24%);
+	color: color-mix(in srgb, var(--sbs-chat-muted-foreground) 45%, transparent);
 }
 
 .sbs-telegram-chat-composer-toolbar {
@@ -408,12 +520,13 @@
 	height: 32px;
 	align-items: center;
 	gap: 6px;
-	border-radius: 999px;
+	border-radius: var(--sbs-chat-radius-md);
 	background: transparent;
-	color: rgb(255 255 255 / 54%);
+	color: var(--sbs-chat-muted-foreground);
 	font-size: 12px;
 	font-weight: 650;
-	padding: 0 12px;
+	outline: none;
+	padding: 0 10px;
 	transition:
 		background-color 160ms ease,
 		color 160ms ease,
@@ -421,14 +534,14 @@
 }
 
 .sbs-telegram-chat-mode-button:hover {
-	background: rgb(255 255 255 / 8%);
-	color: #ffffff;
+	background: var(--sbs-chat-accent);
+	color: var(--sbs-chat-accent-foreground);
 }
 
 .sbs-telegram-chat-mode-button--active {
-	background: rgb(255 255 255 / 12%);
-	box-shadow: 0 0 0 1px rgb(255 255 255 / 10%);
-	color: #ffffff;
+	background: var(--sbs-chat-accent);
+	box-shadow: inset 0 0 0 1px var(--sbs-chat-border);
+	color: var(--sbs-chat-accent-foreground);
 }
 
 .sbs-telegram-chat-send-button {
@@ -437,26 +550,30 @@
 	height: 32px;
 	flex: 0 0 auto;
 	place-items: center;
-	border-radius: 999px;
-	background: #ffffff;
-	color: #151912;
+	border-radius: var(--sbs-chat-radius-md);
+	background: var(--sbs-chat-primary);
+	color: var(--sbs-chat-primary-foreground);
+	outline: none;
 	transition:
 		background-color 160ms ease,
-		color 160ms ease;
+		color 160ms ease,
+		box-shadow 160ms ease;
 }
 
 .sbs-telegram-chat-send-button:hover:not(:disabled) {
-	background: rgb(255 255 255 / 90%);
+	background: color-mix(in srgb, var(--sbs-chat-primary) 88%, black);
 }
 
 .sbs-telegram-chat-send-button:disabled {
 	cursor: not-allowed;
-	background: rgb(255 255 255 / 12%);
-	color: rgb(255 255 255 / 35%);
+	background: var(--sbs-chat-muted);
+	color: color-mix(in srgb, var(--sbs-chat-muted-foreground) 55%, transparent);
 }
 
 .sbs-telegram-chat-message-row {
 	display: flex;
+	align-items: flex-start;
+	gap: 10px;
 	justify-content: flex-start;
 }
 
@@ -472,15 +589,20 @@
 }
 
 .sbs-telegram-chat-message-bubble--visitor {
-	border-radius: 18px;
-	background: #303030;
-	color: #ffffff;
-	padding: 10px 14px;
+	border: 1px solid transparent;
+	border-radius: var(--sbs-chat-radius-xl);
+	background: var(--sbs-chat-primary);
+	color: var(--sbs-chat-primary-foreground);
+	padding: 9px 12px;
 }
 
 .sbs-telegram-chat-message-bubble--operator {
-	padding-top: 2px;
-	color: rgb(255 255 255 / 82%);
+	border: 1px solid var(--sbs-chat-border);
+	border-radius: var(--sbs-chat-radius-xl);
+	background: var(--sbs-chat-card);
+	box-shadow: 0 1px 0 rgb(0 0 0 / 3%);
+	color: var(--sbs-chat-card-foreground);
+	padding: 9px 12px;
 }
 
 .sbs-telegram-chat-message-body {
@@ -491,7 +613,7 @@
 
 .sbs-telegram-chat-system-message {
 	padding: 0 28px;
-	color: rgb(255 255 255 / 38%);
+	color: var(--sbs-chat-muted-foreground);
 	font-size: 12px;
 	line-height: 20px;
 	text-align: center;
@@ -500,14 +622,18 @@
 .sbs-telegram-chat-message-attachment {
 	overflow: hidden;
 	margin-top: 8px;
-	border: 1px solid rgb(255 255 255 / 8%);
-	border-radius: 8px;
-	background: rgb(255 255 255 / 4%);
+	border: 1px solid var(--sbs-chat-border);
+	border-radius: var(--sbs-chat-radius-md);
+	background: var(--sbs-chat-muted);
 }
 
 .sbs-telegram-chat-message-bubble--visitor
 	.sbs-telegram-chat-message-attachment {
-	background: rgb(0 0 0 / 10%);
+	background: color-mix(
+		in srgb,
+		var(--sbs-chat-primary-foreground) 10%,
+		transparent
+	);
 }
 
 .sbs-telegram-chat-message-attachment-image {
@@ -524,12 +650,16 @@
 	padding: 8px 10px;
 	font-size: 11px;
 	line-height: 16px;
-	opacity: 0.7;
+	opacity: 0.78;
 }
 
 .sbs-telegram-chat-delivery-label {
 	margin: 4px 0 0;
-	color: rgb(255 255 255 / 38%);
+	color: color-mix(
+		in srgb,
+		var(--sbs-chat-primary-foreground) 72%,
+		transparent
+	);
 	font-size: 11px;
 	line-height: 16px;
 	text-align: right;
@@ -594,7 +724,7 @@
 	}
 
 	.sbs-telegram-chat-panel {
-		width: 27rem;
+		width: 26rem;
 	}
 }
 

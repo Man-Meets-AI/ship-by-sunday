@@ -6,6 +6,9 @@ import Stripe from "stripe";
 const WEBHOOK_ENV_KEY = "STRIPE_WEBHOOK_SECRET";
 const STRIPE_SECRET_ENV_KEY = "STRIPE_SECRET_KEY";
 const CLERK_SECRET_ENV_KEY = "CLERK_SECRET_KEY";
+const CHECKOUT_FULFILLMENT_RETRY_SECRET_ENV_KEY =
+	"CHECKOUT_FULFILLMENT_RETRY_SECRET";
+const CONVEX_WEBHOOK_MUTATION_SECRET_ENV_KEY = "CONVEX_WEBHOOK_MUTATION_SECRET";
 const ENV_FILE_PATH = path.join(process.cwd(), ".env.local");
 const LOCALHOST_HOSTS = new Set(["127.0.0.1", "0.0.0.0", "localhost"]);
 const ANSI_ESCAPE_PATTERN_SOURCE =
@@ -22,8 +25,8 @@ function printUsage() {
   bun run stripe:webhook:sync -- --secret whsec_...
 
 Commands:
-  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret plus Stripe and Clerk secrets into the active hosted Convex dev env.
-  sync     Sync a provided webhook secret into .env.local and the active hosted Convex dev env without starting a listener.`);
+  listen   Start stripe listen against STRIPE_SECRET_KEY, then sync the printed webhook secret into .env.local and trusted Convex billing secrets into the active hosted Convex dev env.
+  sync     Sync a provided webhook secret into .env.local and trusted Convex billing secrets into the active hosted Convex dev env without starting a listener.`);
 }
 
 function isLocalhostUrl(urlString) {
@@ -69,8 +72,9 @@ function getHostedConvexDevContext() {
 }
 
 function getDefaultForwardUrl() {
-	const { convexSiteUrl } = getHostedConvexDevContext();
-	return `${convexSiteUrl.replace(/\/$/, "")}/stripe/webhook`;
+	const appBaseUrl =
+		process.env.APP_BASE_URL?.trim() || "http://localhost:3000";
+	return `${appBaseUrl.replace(/\/$/, "")}/api/stripe/webhook`;
 }
 
 function parseArgs(argv) {
@@ -201,25 +205,46 @@ async function syncConvexEnv(key, value) {
 	return stripAnsi(result.stdout || result.stderr).trim();
 }
 
+function requireLocalEnvValue(key) {
+	const value = process.env[key]?.trim();
+	if (!value) {
+		throw new Error(`Missing ${key} in .env.local.`);
+	}
+
+	return value;
+}
+
 async function syncWebhookSecret(secret) {
 	if (!secret?.startsWith("whsec_")) {
 		throw new Error("Expected a Stripe webhook secret starting with whsec_.");
 	}
 
 	const envFileStatus = await updateEnvFile(secret);
-	const convexWebhookStatus = await syncConvexEnv(WEBHOOK_ENV_KEY, secret);
-	const stripeSecretKey = process.env[STRIPE_SECRET_ENV_KEY]?.trim();
-	const convexStripeSecretStatus = stripeSecretKey
-		? await syncConvexEnv(STRIPE_SECRET_ENV_KEY, stripeSecretKey)
-		: "skipped (missing STRIPE_SECRET_KEY in app env)";
-	const clerkSecretKey = process.env[CLERK_SECRET_ENV_KEY]?.trim();
-	const convexClerkSecretStatus = clerkSecretKey
-		? await syncConvexEnv(CLERK_SECRET_ENV_KEY, clerkSecretKey)
-		: "skipped (missing CLERK_SECRET_KEY in app env)";
+	const convexMutationSecretStatus = await syncConvexEnv(
+		CONVEX_WEBHOOK_MUTATION_SECRET_ENV_KEY,
+		requireLocalEnvValue(CONVEX_WEBHOOK_MUTATION_SECRET_ENV_KEY),
+	);
+	const convexCheckoutFulfillmentStatus = await syncConvexEnv(
+		CHECKOUT_FULFILLMENT_RETRY_SECRET_ENV_KEY,
+		requireLocalEnvValue(CHECKOUT_FULFILLMENT_RETRY_SECRET_ENV_KEY),
+	);
+	const convexStripeSecretStatus = await syncConvexEnv(
+		STRIPE_SECRET_ENV_KEY,
+		requireLocalEnvValue(STRIPE_SECRET_ENV_KEY),
+	);
+	const convexClerkSecretStatus = await syncConvexEnv(
+		CLERK_SECRET_ENV_KEY,
+		requireLocalEnvValue(CLERK_SECRET_ENV_KEY),
+	);
 
 	console.log(`Synced ${WEBHOOK_ENV_KEY}:`);
 	console.log(`- .env.local: ${envFileStatus}`);
-	console.log(`- Convex dev env (${WEBHOOK_ENV_KEY}): ${convexWebhookStatus}`);
+	console.log(
+		`- Convex dev env (${CONVEX_WEBHOOK_MUTATION_SECRET_ENV_KEY}): ${convexMutationSecretStatus}`,
+	);
+	console.log(
+		`- Convex dev env (${CHECKOUT_FULFILLMENT_RETRY_SECRET_ENV_KEY}): ${convexCheckoutFulfillmentStatus}`,
+	);
 	console.log(
 		`- Convex dev env (${STRIPE_SECRET_ENV_KEY}): ${convexStripeSecretStatus}`,
 	);
@@ -335,11 +360,6 @@ try {
 		await runSyncMode(secret);
 	} else {
 		const resolvedForwardTo = forwardTo ?? getDefaultForwardUrl();
-		if (isLocalhostUrl(resolvedForwardTo)) {
-			throw new Error(
-				"Stripe dev webhook forwarding must target your hosted Convex dev deployment, not localhost.",
-			);
-		}
 		await runListenMode(resolvedForwardTo);
 	}
 } catch (error) {

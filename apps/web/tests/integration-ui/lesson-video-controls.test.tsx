@@ -14,8 +14,8 @@ import React, { useRef } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { getLessonById } from "@/lib/course/lesson/model";
-import { LessonVideoSurface } from "@/app/(workspace)/_components/course/lesson/components/lesson-video-surface";
-import { useBunnyPlayerKeyboard } from "@/app/(workspace)/_components/course/lesson/components/use-bunny-player-controls";
+import { LessonVideoSurface } from "@/app/(app)/_components/course/lesson/components/lesson-video-surface";
+import { useBunnyPlayerKeyboard } from "@/app/(app)/_components/course/lesson/components/use-bunny-player-controls";
 
 function BunnyKeyboardHarness({
 	postMessageSpy,

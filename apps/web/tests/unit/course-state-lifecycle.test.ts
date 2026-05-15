@@ -82,6 +82,7 @@ function createCourseCtx({
 								clerkUserId,
 								status: "granted",
 								source: "manual",
+								capabilities: ["tutorials"],
 								grantedAt: 1,
 								updatedAt: 1,
 							}),
@@ -198,7 +199,7 @@ describe("course state lifecycle", () => {
 		const resume = await getResumeDestinationHandler._handler(ctx);
 
 		expect(resume).toEqual({
-			destination: "/generate-codebase/review?showLessonMap=1",
+			destination: "/starter/generate-codebase/review?showLessonMap=1",
 			lessonKey: null,
 		});
 	});

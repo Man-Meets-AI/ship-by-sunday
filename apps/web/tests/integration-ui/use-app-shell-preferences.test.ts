@@ -7,8 +7,8 @@ import {
 	getAppShellPreferences,
 	resetAppShellPreferencesForTests,
 	setAppShellPreferences,
-} from "@/app/(workspace)/_components/app-shell/app-shell-preferences-store";
-import { useAppShellPreferences } from "@/app/(workspace)/_hooks/app-shell/use-app-shell-preferences";
+} from "@/app/(app)/_components/app-shell/app-shell-preferences-store";
+import { useAppShellPreferences } from "@/app/(app)/_hooks/app-shell/use-app-shell-preferences";
 
 beforeEach(() => {
 	resetAppShellPreferencesForTests();

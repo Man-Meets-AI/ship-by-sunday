@@ -7,6 +7,7 @@ const hostedCheckoutMetadata = {
 	app: "man_meets_ai",
 	accessProduct: "paid_app_access",
 	purchaseIntentId: "purchase_intent_123",
+	offerId: "starter",
 	checkoutSurface: "hosted_checkout",
 } as const;
 
@@ -32,7 +33,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("builds the signed-in checkout handoff with the active promotion code", async () => {
+	it("builds the signed-in checkout handoff for the selected offer", async () => {
 		const { buildStripeCheckoutSessionCreateParams } =
 			await import("@/platform/billing/checkout/checkout-session-params");
 
@@ -41,10 +42,12 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 				appBaseUrl: "https://app.example.com",
 				clerkUserId: "user_123",
 				customerEmail: "buyer@example.com",
+				offerId: "starter",
 				purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
 			}),
 		).toEqual({
 			mode: "payment",
+			allow_promotion_codes: true,
 			billing_address_collection: "auto",
 			customer_creation: "always",
 			cancel_url: "https://app.example.com/checkout/cancel",
@@ -52,7 +55,6 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 				"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
 			client_reference_id: "user_123",
 			customer_email: "buyer@example.com",
-			discounts: [{ promotion_code: "promo_50_off" }],
 			line_items: [{ price: "price_250_managed", quantity: 1 }],
 			metadata: {
 				...hostedCheckoutMetadata,
@@ -75,6 +77,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			appBaseUrl: "https://app.example.com",
 			clerkUserId: null,
 			customerEmail: null,
+			offerId: "starter",
 			purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
 		});
 
@@ -82,17 +85,57 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			client_reference_id: undefined,
 			customer_creation: "always",
 			customer_email: undefined,
-			discounts: [{ promotion_code: "promo_50_off" }],
+			allow_promotion_codes: true,
 			metadata: hostedCheckoutMetadata,
 			payment_intent_data: {
 				metadata: hostedCheckoutMetadata,
 			},
 		});
-		expect(params).not.toHaveProperty("allow_promotion_codes");
+		expect(params).not.toHaveProperty("discounts");
 		expect(params.metadata).not.toHaveProperty("clerkUserId");
 		expect(params.payment_intent_data?.metadata).not.toHaveProperty(
 			"clerkUserId",
 		);
+	});
+
+	it("builds Workers checkout as a subscription session", async () => {
+		const { buildStripeCheckoutSessionCreateParams } =
+			await import("@/platform/billing/checkout/checkout-session-params");
+
+		const params = buildStripeCheckoutSessionCreateParams({
+			appBaseUrl: "https://app.example.com",
+			clerkUserId: "user_123",
+			customerEmail: "buyer@example.com",
+			offerId: "workers",
+			purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
+		});
+
+		const workersMetadata = {
+			...hostedCheckoutMetadata,
+			offerId: "workers",
+			clerkUserId: "user_123",
+		};
+		expect(params).toMatchObject({
+			mode: "subscription",
+			client_reference_id: "user_123",
+			customer_email: "buyer@example.com",
+			metadata: workersMetadata,
+			subscription_data: {
+				metadata: workersMetadata,
+			},
+			line_items: [
+				{
+					price_data: {
+						recurring: {
+							interval: "month",
+						},
+					},
+					quantity: 1,
+				},
+			],
+		});
+		expect(params).not.toHaveProperty("customer_creation");
+		expect(params).not.toHaveProperty("payment_intent_data");
 	});
 
 	it("builds an express checkout session for custom UI", async () => {
@@ -104,18 +147,19 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 				appBaseUrl: "https://app.example.com",
 				clerkUserId: "user_123",
 				customerEmail: "buyer@example.com",
+				offerId: "starter",
 				purchaseIntentId: expressCheckoutMetadata.purchaseIntentId,
 			}),
 		).toEqual({
 			mode: "payment",
 			ui_mode: "custom",
+			allow_promotion_codes: true,
 			billing_address_collection: "auto",
 			customer_creation: "always",
 			return_url:
 				"https://app.example.com/checkout/success?session_id={CHECKOUT_SESSION_ID}",
 			client_reference_id: "user_123",
 			customer_email: "buyer@example.com",
-			discounts: [{ promotion_code: "promo_50_off" }],
 			line_items: [{ price: "price_250_managed", quantity: 1 }],
 			metadata: {
 				...expressCheckoutMetadata,
@@ -138,6 +182,7 @@ describe("buildStripeCheckoutSessionCreateParams", () => {
 			appBaseUrl: "https://app.example.com",
 			clerkUserId: null,
 			customerEmail: null,
+			offerId: "starter",
 			purchaseIntentId: hostedCheckoutMetadata.purchaseIntentId,
 		});
 

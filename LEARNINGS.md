@@ -1,5 +1,15 @@
 # Learnings
 
+## 2026-05-14 Webpack Dev Fallback For App Router Proof
+
+- Fact: In this checkout, `bun run --cwd apps/web dev:web:only -- -p 3100` can fail before rendering with a Turbopack `apps/web/proxy.ts` module parse error, while `bun run --cwd apps/web dev:web:webpack -- -p 3100` renders the same route successfully.
+  Verified by: Browser proof for `/worker-seal-team-6` on 2026-05-14. The default dev server returned the runtime overlay "Could not parse module '[project]/apps/web/proxy.ts', file not found"; the webpack dev server returned 200 responses for `/worker-seal-team-6` and `/`.
+
+## 2026-05-13 Next Env Generation
+
+- Fact: Next.js generates `apps/web/next-env.d.ts`; `next dev` writes the route import through `.next/dev/types/routes.d.ts`, while `next build` writes it through `.next/types/routes.d.ts`.
+  Verified by: The installed Next.js TypeScript docs say `next-env.d.ts` is generated and should be ignored, and `node_modules/next/dist/lib/typescript/writeAppTypeDeclarations.js.map` shows the import is derived from the active `.next` dist directory.
+
 ## 2026-05-08 Root Typecheck
 
 - Fact: `bun typecheck` at the repo root runs the web production build path and the PostHog sourcemap upload hook when the local PostHog token is present.
@@ -75,3 +85,13 @@
 
 - Fact: An unauthenticated in-app browser navigation to `/workers/setup` redirects to the custom sign-in screen.
   Verified by: Running `bun run --cwd apps/web dev:web:only` and opening `http://localhost:3000/workers/setup` in the in-app browser produced `/sign-in?redirect_url=http%3A%2F%2Flocalhost%3A3000%2Fworkers%2Fsetup`.
+
+## 2026-05-14 T3 Code App Foundation
+
+- Fact: The default `apps/web` Turbopack dev server can panic during browser smoke with `Failed to write app endpoint /page` caused by `app_dir must be a directory`; the webpack dev script is stable for this proof path.
+  Verified by: `bun run --cwd apps/web dev:web:only -- --port 3000` repeatedly emitted the Turbopack panic while Playwright navigated public pages, then `bun run --cwd apps/web dev:web:webpack -- --port 3000` completed the desktop and mobile `/starter` token smoke.
+
+## 2026-05-15 Local Typecheck
+
+- Fact: In the current local environment, `bun typecheck` runs the Next production build and the app's PostHog source-map hook can upload source maps when the PostHog token is already present in the environment.
+  Verified by: `bun typecheck` logged `posthog_cli` source-map injection/upload during the `apps/web` build before TypeScript failed; rerunning with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` avoided the upload path and completed successfully.

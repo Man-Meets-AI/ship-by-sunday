@@ -72,7 +72,7 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		title,
 		children,
@@ -282,7 +282,7 @@ vi.mock("@/components/ui/toggle-group", () => {
 });
 
 vi.mock(
-	"@/app/(workspace)/_components/course/lesson/components/lesson-video-player",
+	"@/app/(app)/_components/course/lesson/components/lesson-video-player",
 	() => ({
 		LessonVideoPlayer: ({ title }: { title?: string }) => (
 			<div data-testid="codebase-page-video-player">
@@ -292,7 +292,7 @@ vi.mock(
 	}),
 );
 
-import { CodebasePage } from "@/app/(workspace)/_components/codebase-flow/codebase-page";
+import { CodebasePage } from "@/app/(app)/_components/codebase-flow/codebase-page";
 
 describe("CodebasePage", () => {
 	beforeEach(() => {
@@ -324,6 +324,13 @@ describe("CodebasePage", () => {
 		expect(screen.getAllByRole("heading", { name: "Codebase" })).toHaveLength(
 			2,
 		);
+		expect(
+			document.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			document.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(document.body.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByText("All sections complete. Continue to review when ready."),
 		).toBeTruthy();
@@ -403,7 +410,7 @@ describe("CodebasePage", () => {
 			expect(unlockExecuteShipMock).toHaveBeenCalledWith({});
 		});
 		expect(pushMock).toHaveBeenCalledWith(
-			"/generate-codebase/review?download=1",
+			"/starter/generate-codebase/review?download=1",
 		);
 		expect(replaceMock).not.toHaveBeenCalled();
 	});

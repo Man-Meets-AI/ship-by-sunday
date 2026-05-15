@@ -3,7 +3,7 @@ import {
 	getCodebaseStageDefinition,
 	parseCanonicalProjectFactsDraft,
 } from "../../../../packages/codebase-compiler/src";
-import { resolveWorkspaceResumeDestination } from "../../lib/workspace-navigation/post-review-destination";
+import { resolveWorkspaceResumeDestination } from "../../src/lib/workspace-navigation/post-review-destination";
 
 import { getProjectDefinitionByClerkUserId } from "./projectDefinition";
 import type { CodebaseQueryCtx } from "./types";
@@ -15,7 +15,7 @@ import {
 	getCodebaseWorkflowStateByClerkUserId,
 	serializeCodebaseWorkflowState,
 } from "./workflowState";
-import { requireGeneratedCodebaseProductAccess } from "../access/model";
+import { requireGeneratedCodebaseProductAccess } from "../entitlements/model";
 import { loadViewerCourseState } from "../course/shared";
 
 export const getCodebaseWorkspaceStateArgs = {};

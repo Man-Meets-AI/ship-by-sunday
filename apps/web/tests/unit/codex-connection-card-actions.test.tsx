@@ -5,7 +5,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { CodexConnectionCardActions } from "@/app/(workspace)/_components/codex-connection-card/codex-connection-card-actions";
+import { CodexConnectionCardActions } from "@/app/(app)/_components/codex-connection-card/codex-connection-card-actions";
 
 describe("CodexConnectionCardActions", () => {
 	it("opens a confirmation dialog before disconnecting", async () => {

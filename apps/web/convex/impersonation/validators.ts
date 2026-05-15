@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-import { supportModeIntegrityWarningValues } from "../../platform/admin-impersonation/status";
+import { supportModeIntegrityWarningValues } from "../../src/platform/admin-impersonation/status";
 
 export const impersonationSessionStatusValues = [
 	"starting",

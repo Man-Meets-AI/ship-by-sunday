@@ -457,10 +457,11 @@ async function syncProductAccessState({
 	const result =
 		kind === "grant"
 			? await runConvexInternalCommand({
-					functionName: "access:grantProductAccess",
+					functionName: "entitlements:grantProductAccess",
 					args: {
 						clerkUserId,
 						source: "manual",
+						capabilities: ["generate_codebase", "tutorials"],
 						...(fulfillmentTrack ? { fulfillmentTrack } : {}),
 					},
 					env: {
@@ -469,7 +470,7 @@ async function syncProductAccessState({
 					},
 				})
 			: await runConvexInternalCommand({
-					functionName: "access:resetProductAccess",
+					functionName: "entitlements:resetProductAccess",
 					args: {
 						clerkUserId,
 					},
@@ -530,7 +531,7 @@ function runConvexInternalCommand({
 	env,
 }: {
 	functionName: string;
-	args: Record<string, string>;
+	args: Record<string, unknown>;
 	env: NodeJS.ProcessEnv;
 }) {
 	const convexEnv = withConvexDeploymentEnv(env);

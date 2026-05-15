@@ -27,6 +27,7 @@ describe("release billing doctor", () => {
 			"--expected-mode=test",
 			"--app-base-url=https://dev.man-meets-ai.com",
 			"--require-webhook-endpoint",
+			"--require-convex-sync-boundary",
 		]);
 	});
 
@@ -46,6 +47,7 @@ describe("release billing doctor", () => {
 			"--expected-mode=live",
 			"--app-base-url=https://www.man-meets-ai.com",
 			"--require-webhook-endpoint",
+			"--require-convex-sync-boundary",
 		]);
 	});
 

@@ -1,0 +1,126 @@
+---
+title: "Template First Target Normalized Pass"
+summary: "Normalized target state for the apps/web and Convex migration."
+docType: "normalized_pass"
+status: "active"
+read_when:
+  - "Needing the target architecture without reading the full research pass."
+  - "Writing child ExecPlans for this Program."
+---
+
+# Template First Target Normalized Pass
+
+## Target Principles
+
+- The sibling template is the default. Current code wins only with explicit justification.
+- Product concepts are modeled in Convex before UI or provider routes depend on them.
+- Next.js owns route groups, layouts, route handlers, debug endpoints, and browser-facing integration boundaries.
+- Convex owns product data, authorization checks, normalized billing state, and entitlement decisions.
+- Clerk owns identity and session protection, not product authorization.
+- Stripe owns app checkout, portal, subscription lifecycle, annual license payment, and signed webhooks; Cal.com owns Worker Seal Team 6 paid booking and scheduling.
+- Sentry owns error capture and tracing through Next.js-supported instrumentation.
+- Resend owns transactional email through server-only helpers and React Email templates.
+- Provider payloads stay at the edge. UI reads normalized app state.
+
+## Target App Tree
+
+```text
+apps/web/
+  src/
+    app/
+      (marketing)/
+      (auth)/
+      (app)/
+      api/
+    components/
+      app/
+      layout/
+      providers/
+      ui/
+    emails/
+    lib/
+      analytics/
+      app/
+      auth/
+      billing/
+      convex/
+      email/
+      env/
+      sentry/
+  convex/
+```
+
+## Target Billing Model
+
+The billing model should name the business states directly:
+
+- Stripe customer mapping for Clerk/Convex user or workspace identity.
+- Workers subscription records for monthly, quarterly, and annual recurring variants, including billing health, `past_due` retry context, recovered-payment context, refund context, billing attention state, failed-payment customer recovery email state, recovered-payment customer confirmation email state, failed-payment internal billing ops alert state, recovered-payment internal billing ops resolved email state, terminal failed-recovery customer access-ended email state, terminal failed-recovery internal billing ops closeout email state, full-refund customer status email state, full-refund internal ops closeout email state, cancellation intent, current period end, and cancellation confirmation email state.
+- Starter annual license records with purchase date, term, expiration, fresh-checkout renewal/replacement behavior, refund status, full-refund customer status email state, full-refund internal ops closeout email state, and status.
+- Worker Seal Team 6 service booking mirror records sourced from Cal.com, with Cal booking IDs, Stripe/payment references when available, attendee identity, intake answers, scheduled time, timezone, reschedule/cancellation/refund status, customer prep email delivery status, full-refund customer status email state, full-refund internal ops closeout email state, ops email delivery status, and communication status.
+- Entitlement records derived from subscription and license state, plus service fulfillment state where the service needs customer-facing access or operator workflow.
+- Processed Stripe and Cal.com event ledgers for idempotency.
+- Checkout session metadata for app-owned Stripe flows, and Cal.com metadata/custom fields for Worker Seal Team 6 booking identity.
+
+Subscription and license fulfillment should share common idempotency and Stripe-boundary helpers, but their product states should not be collapsed into one vague paid-access boolean.
+
+Refunds should be initiated in Stripe or Cal.com provider dashboards for this Program, then mirrored as provider-derived Convex state and interpreted by product. The app should not add admin refund mutations, refund buttons, or a custom approval workflow as part of the template migration. Stripe refund events such as `refund.created`, `refund.updated`, `refund.failed`, and `charge.refunded` should be treated as sync triggers that fetch or reconcile fresh Stripe state before Convex changes entitlement state. Refunds are a manual/support/admin decision, not a self-serve customer path or easy refund surface. Full refunds change active app state when they void the paid product: a full Starter refund voids the associated license term and removes any entitlement derived from that term; a full Workers refund removes subscription-derived access only when Stripe state also reports the subscription canceled, terminal, or voided for the refunded paid period; and a full Worker Seal Team 6 refund marks future service fulfillment canceled/refunded when the call has not been delivered. If a Worker Seal Team 6 call was already delivered, Convex keeps the delivered fulfillment record and marks the booking refunded for support and accounting. Partial refunds are mirrored for support and accounting only and do not change access or fulfillment. After Convex mirrors a full refund that changes access or future fulfillment, Resend should send exactly one branded customer status email. Starter email should say the license was refunded and access from that license ended. Workers email should say access ended because the refunded paid period is no longer active. Worker Seal Team 6 email should say the booking was refunded and canceled when the service has not been delivered. These emails should not duplicate Stripe or Cal.com payment receipts, should include support contact, and should use dedicated idempotency keys. The same Convex state should send exactly one internal full-refund ops closeout email. Starter and Workers closeouts go to `BILLING_OPS_EMAILS`; Worker Seal Team 6 undelivered-booking closeouts go to `BILLING_OPS_EMAILS` and `WORKER_SEAL_TEAM_6_OPS_EMAILS` so billing and service fulfillment share one state transition. The internal email should include product, customer/workspace or attendee, Stripe references, Cal.com references when relevant, access or fulfillment change, customer status email state, refund timestamp, and support notes. Partial refunds and delivered-service refunds do not send automatic product-status emails or automatic internal ops emails in this target program. Refund handling must distinguish full from partial refunds, link refunds to the relevant checkout session, invoice, payment intent, subscription, license, or Cal.com booking, and remain idempotent under duplicate or out-of-order provider events.
+
+Starter renewal should be a fresh app-owned Stripe Checkout Session for a new one-year license term. It should not be routed through Stripe Customer Portal because Starter is not a subscription. Convex should keep historical license records, create the renewed term only after verified payment, and derive entitlement from the active valid term. If the customer renews while the current license is active, the renewed term starts at the current expiration date. If the current license is expired, the renewed term starts at verified payment time. Stripe Customer Portal should be limited to Workers subscription management.
+
+Starter renewal checkout should require Clerk authentication and Convex authorization for the workspace/license being renewed. The Next.js route should return 401 when unauthenticated and 403 when the signed-in user lacks permission for the target workspace/license. The route must not trust client-provided workspace or license IDs until Convex verifies ownership or management permission. Stripe webhook fulfillment still verifies payment and creates the renewal term, but only sessions created through the authorized route should be accepted for renewal fulfillment.
+
+Workers plan changes between monthly, quarterly, and annual should happen through Stripe Customer Portal when the portal configuration supports those three prices and the chosen proration behavior. Upgrades and moves to longer commitments should apply immediately with fair proration. Downgrades should take effect at the end of the current billing period. The Workers prices should be configured so Stripe Customer Portal can distinguish supported switches and schedule downgrades correctly. Workers cancellation should also happen through Stripe Customer Portal. Customer-initiated cancellation should set or mirror `cancel_at_period_end`; Convex keeps subscription-derived entitlements active through the paid period and removes them only after Stripe reports the subscription canceled at period end. After Convex mirrors scheduled cancellation, Resend should send one branded Workers cancellation confirmation email with the access-through date, support contact, and portal/manage link when available. That email should use its own idempotency key and should not include guilt-trip retention copy. The app should own initial Workers checkout, portal session creation, webhook verification, normalized Convex subscription state, and cancellation email state. It should not add app-owned upgrade/downgrade/cancellation mutation flows unless Stripe Customer Portal cannot satisfy the final Workers subscription-management contract and the implementation slice records the deviation.
+
+Failed Workers renewal payments should keep access active during Stripe's configured retry/grace window. This matches the sibling template's entitlement stance, where `past_due` is part of active subscription access. Provider setup should use Stripe Smart Retries with 8 retries over 2 weeks, then cancel the subscription if recovery fails. Convex should mirror `past_due`, latest invoice, attempt count, next payment attempt when present, and the billing attention state from Stripe webhook events such as `invoice.payment_failed`, `invoice.paid`, and subscription updates. `invoice.payment_failed` and `invoice.paid` are intentional expansions of the template's tracked Stripe events for Ship by Sunday's recovery flow, but they must follow the same template convention: verify the webhook, treat the event as a trigger, fetch or sync fresh Stripe state, write normalized Convex state through the secret-gated billing boundary, and do not make the raw provider payload the app state. UI should show a clear billing attention state while preserving product access during retries. That attention state should appear globally in the authenticated app shell only for owners/admins or equivalent billing-management roles, with non-billing members left uninterrupted. The global banner should be low-height, non-blocking, not dismissible, and not snoozable while Convex reports active billing attention. It should mention that access remains active during the retry window, show retry/access-through context when available, and route its CTA to Stripe Customer Portal or the hosted invoice/payment recovery link, with `/billing` as the detailed fallback. It should clear only from provider-derived Convex state: successful renewal payment, recovered subscription state, or terminal cancellation after retry exhaustion. The `/billing` page should still show the full subscription, entitlement, and recovery state from Convex. After Convex first mirrors `past_due` for a failed renewal invoice, Resend should send exactly one branded customer recovery email for that invoice through the server-only template-style email helper. The customer recovery email should say access remains active during the 2-week recovery window, include the Stripe-hosted payment update or recovery link when available, include support contact, and avoid pressure copy. After Convex later mirrors `invoice.paid` or recovered subscription state for that same previously failed renewal invoice, Resend should send exactly one branded recovered-payment confirmation email. The recovered-payment confirmation should be short and reassuring: payment recovered, access stayed active, and no further action is needed. It should not duplicate Stripe receipt details, invoice line items, tax/payment metadata, or payment method details because Stripe owns receipts. The recovered-payment send should use a separate idempotency key from the failed-payment action email and must not send for normal renewal invoices that never entered failed-payment recovery. Billing ops means the maintainer-owned internal recipient list for payment issues, configured through `BILLING_OPS_EMAILS`; day one that is the operator/support email, and later it can become a shared billing inbox or small team list. It is not a Clerk role, workspace membership concept, customer-facing role, or separate admin UI requirement. The same failed-payment Convex state should send exactly one internal billing ops alert email through a separate template and idempotency key. The ops alert should go to `BILLING_OPS_EMAILS` and include the workspace/account, customer identity when available, plan, Stripe customer/subscription/invoice references, retry window, next payment attempt when available, hosted invoice or payment recovery link, and support notes. The recovered-payment Convex state should also send exactly one internal billing ops resolved email to `BILLING_OPS_EMAILS` with a separate template and idempotency key from the failed-payment ops alert and customer recovered-payment confirmation. It should include the workspace/account, customer identity when available, Stripe customer/subscription/invoice references, recovery timestamp, and a no-action-needed status. Production should require at least one valid `BILLING_OPS_EMAILS` recipient; local and preview may leave it unset unless exercising this path. The webhook acknowledgement path should not depend on Resend delivery succeeding. The app should not create a custom multi-email dunning sequence unless a later evidence-backed slice changes the policy. Entitlements should be removed when Stripe transitions the subscription to `canceled` after retry exhaustion. After Convex mirrors a terminal `canceled` subscription that was already in failed-payment recovery, Resend should send exactly one final branded customer access-ended email. This email is separate from customer-requested cancellation confirmation. It should say payment recovery failed, Workers access has ended, no further charges are planned, and the customer can restart through checkout or contact support. It should use a dedicated idempotency key and should not sound punitive. The same terminal failed-recovery Convex state should send exactly one internal billing ops closeout email to `BILLING_OPS_EMAILS`. The ops closeout email should use a separate template and idempotency key from the failed-payment alert, recovered-payment resolved email, and customer access-ended email. It should include the workspace/account, customer identity when available, Stripe customer/subscription/invoice references, canceled timestamp, access-ended status, customer-notified status, no-further-charges status, restart/support links, and whether manual follow-up is optional. Convex should also treat unexpected `unpaid` subscriptions as terminal access-removal states defensively, but provider setup should not intentionally choose `unpaid` or leave failed subscriptions indefinitely `past_due`.
+
+Worker Seal Team 6 should use Cal.com for booking and paid scheduling. The public `/worker-seal-team-6` page should embed the Cal.com event type as a premium booking module, with the hosted Cal.com booking URL retained as a fallback link. Cal.com owns slot selection, timezone handling, intake questions, booking confirmation, rescheduling, calendar sync, and paid booking through Stripe.
+
+Worker Seal Team 6 should not require Clerk sign-in before booking and should not trigger post-booking workspace setup. The Cal.com attendee email is meeting/support identity for this service only. If the same person later buys Starter or Workers, the normal app-owned billing/auth flow creates or attaches the Clerk account and workspace then.
+
+After the paid booking syncs, Resend should send one branded Worker Seal Team 6 prep email. This email should be a React Email template under the template-style email boundary and should include meeting context, prep instructions, the Cal.com reschedule link, and support contact only. It should be idempotent and must not introduce app onboarding or workspace setup.
+
+The prep email trigger should be paid confirmation mirrored in Convex, not Cal.com booking creation or payment initiation. Created and payment-initiated events can update mirror state, but email dispatch requires paid state plus a durable idempotency key for exactly-once delivery.
+
+The same paid-confirmed Convex state should also send one internal Worker Seal Team 6 ops email through Resend. The ops email should use a separate template and idempotency key from the customer prep email and include attendee, company URL, scheduled time, intake answers, Cal.com booking link, payment status, and support notes.
+
+Worker Seal Team 6 ops recipients should be configured through `WORKER_SEAL_TEAM_6_OPS_EMAILS`, parsed as a comma-separated list. The env var is required in production. Local and preview may leave it unset unless exercising the ops-email path or debug tools, where missing config should fail or skip explicitly.
+
+Convex should mirror Worker Seal Team 6 state from Cal.com booking webhooks and Stripe reconciliation where available. The app should not maintain custom booking holds, custom Google Calendar FreeBusy logic, or a separate `/api/billing/checkout` path for this service unless Cal.com is rejected by a later implementation slice.
+
+Cal.com should be configured for the accepted service policy: one-hour duration, $2500 paid booking, operator-owned connected calendar, customer as attendee, required intake questions, self-serve rescheduling until 24 hours before the call, manual/support-handled cancellations and refunds, and booking lifecycle webhooks.
+
+The prior custom shadcn/Google Calendar/Mobbin booking plan is fallback/reference only. If Cal.com cannot satisfy payment, branding, data ownership, webhook, or policy requirements, a later slice can reactivate that fallback with an explicit deviation.
+
+## Target Tests
+
+The test baseline should include:
+
+- Next.js billing route tests for Starter initial checkout, authenticated Starter renewal checkout, unauthorized renewal rejection, Workers checkout, Workers Customer Portal creation, success sync, webhook ingress, `invoice.payment_failed` trigger handling, `invoice.paid` recovery trigger handling, terminal failed-recovery cancellation handling, refund event handling, and no in-app admin refund action route.
+- Convex tests for customer mapping, Workers subscription state, Workers `past_due` retry context, billing attention derivation, failed-payment customer recovery email state, recovered-payment customer confirmation email state, failed-payment internal billing ops alert state, recovered-payment internal billing ops resolved email state, terminal failed-recovery customer access-ended email state, terminal failed-recovery internal billing ops closeout email state, full-refund customer status email state, full-refund internal ops closeout email state, access during the 2-week Smart Retries window, billing attention clearing on successful recovery or terminal cancellation, no recovered-payment confirmation for normal invoices that never entered failed-payment recovery, entitlement removal after retry-exhausted `canceled`, final customer access-ended and internal ops closeout state after retry-exhausted `canceled`, defensive entitlement removal if an unexpected `unpaid` status appears, Workers cancellation intent, cancellation confirmation email state, access through paid period, entitlement removal after Stripe cancellation, Starter annual license expiration, active-license renewal term extension, expired-license renewal start time, full Starter refund license voiding, full Workers refund with canceled/terminal subscription entitlement removal, partial Workers refund access preservation, no automatic product-status or internal closeout email for partial refunds, renewal workspace/license authorization, Worker Seal Team 6 booking mirror/fulfillment state, full undelivered Worker Seal Team 6 refund fulfillment cancellation, delivered Worker Seal Team 6 refund support/accounting mirror, no automatic product-status or internal closeout email for delivered-service refunds, entitlement derivation, duplicate Stripe and Cal.com events, refund handling, and unauthorized access.
+- Provider/setup tests or preflight checks proving Stripe Customer Portal has Workers monthly, quarterly, and annual prices configured for subscription updates, immediate proration for upgrades/longer commitments, period-end downgrade management, period-end cancellation, Smart Retries set to 8 retries over 2 weeks, and failed-payment final status set to cancel before treating portal-owned subscription management as live.
+- Worker Seal Team 6 tests proving booking sync does not create or invite Clerk accounts/workspaces, plus support-correction paths for attendee email mistakes.
+- Cal.com integration tests for webhook signature/secret handling, booking created/paid/rescheduled/cancelled events, duplicate webhooks, 24-hour reschedule cutoff configuration, refund/cancellation mirroring, full refund fulfillment effects, partial refund support/accounting mirror behavior, and Convex state sync.
+- Resend tests for exactly-once Workers failed-payment customer recovery email per failed renewal invoice after Convex first mirrors `past_due`, exactly-once Workers recovered-payment confirmation email per recovered failed renewal invoice after Convex mirrors `invoice.paid` or recovered subscription state, no recovered-payment confirmation for normal renewal invoices, recovered-payment content that avoids duplicating Stripe receipt details, exactly-once Workers terminal failed-recovery customer access-ended email after Convex mirrors retry-exhausted `canceled`, access-ended content that names ended access and avoids punitive copy, exactly-once branded full-refund customer status email when full refund changes Starter, Workers, or Worker Seal Team 6 access/fulfillment, exactly-once internal full-refund ops closeout email when full refund changes Starter, Workers, or Worker Seal Team 6 access/fulfillment, no automatic product-status or internal closeout email for partial refunds or delivered-service refunds, full-refund status content that names what changed without duplicating Stripe or Cal.com receipts, full-refund ops content that names product, customer/workspace or attendee, provider refs, access/fulfillment change, customer email state, refund timestamp, and support notes, exactly-once Workers failed-payment internal billing ops alert email to `BILLING_OPS_EMAILS`, exactly-once Workers recovered-payment internal billing ops resolved email to `BILLING_OPS_EMAILS`, exactly-once Workers terminal failed-recovery internal billing ops closeout email to `BILLING_OPS_EMAILS`, internal closeout content that names access ended, customer notified, no further charges, and optional manual follow-up, no duplicate send on repeated Stripe webhooks, no email send directly from raw webhook payload, webhook acknowledgement not blocked by Resend delivery failure, content that includes the recovery window and hosted payment update/recovery link when available, no custom multi-email dunning sequence, exactly-once Workers cancellation confirmation after Convex mirrors period-end cancellation, separate idempotency keys for customer-requested cancellation, terminal failed-recovery access-ended, terminal failed-recovery ops closeout, full-refund customer status, and full-refund ops closeout emails, email content that names the access-through date and avoids retention pressure, exactly-once Worker Seal Team 6 customer prep and internal ops email dispatch after paid booking sync, no dispatch on created/payment-initiated events, independent idempotency keys, `BILLING_OPS_EMAILS` and `WORKER_SEAL_TEAM_6_OPS_EMAILS` production-required behavior, missing-config behavior, and template content constraints that prevent workspace/onboarding links.
+- Missing-config tests for Stripe, Sentry, Resend, Clerk, and Convex where behavior differs by environment.
+- Browser or integration proof for protected billing UI after the route tree moves, including owner/admin global `past_due` billing attention, no dismiss/snooze control while `past_due`, provider-state-driven clearing, non-billing member suppression, CTA routing, and full `/billing` detail state.
+
+## Target Docs
+
+The migration should add or update:
+
+- App-level architecture and conventions docs derived from the sibling template.
+- Provider setup docs for Sentry and Resend.
+- Stripe setup docs for the final webhook endpoint and event list.
+- Release workflow docs and proof scripts that currently assume the old webhook route.
+- `.env.local.example` and Vercel/Convex env documentation.
+
+## Deviations
+
+Any deviation from the sibling template must be recorded with:
+
+- The current path or behavior.
+- The template path or behavior.
+- The chosen target.
+- The reason.
+- The validation that proves the deviation does not weaken billing, auth, observability, or operator setup.

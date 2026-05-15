@@ -51,7 +51,7 @@ vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: reportClientErrorMock,
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -68,7 +68,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceDoctorPassPage } from "@/app/(workspace)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page";
+import { WorkspaceDoctorPassPage } from "@/app/(app)/_components/existing-codebase-doctor-pass/workspace-doctor-pass-page";
 
 function createSyncPreviewState() {
 	return {
@@ -130,6 +130,16 @@ describe("WorkspaceDoctorPassPage", () => {
 		expect(
 			screen.getByRole("heading", { name: "Doctor Pass completed locally" }),
 		).toBeTruthy();
+		expect(
+			document.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			document.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(
+			document.querySelectorAll('[data-slot="protected-route-panel"]').length,
+		).toBeGreaterThanOrEqual(4);
+		expect(document.body.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByText(
 				"The local runner inspected this repo and found 2 items.",

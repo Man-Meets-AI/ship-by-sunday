@@ -21,7 +21,7 @@ const redirectMock = vi.fn((href: string) => {
 });
 const pushMock = vi.fn();
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		title,
 		subtitle,
@@ -74,7 +74,7 @@ vi.mock("@/convex/_generated/api", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/course/lesson/components/lesson-video-player",
+	"@/app/(app)/_components/course/lesson/components/lesson-video-player",
 	() => ({
 		LessonVideoPlayer: ({ title }: { title?: string }) => (
 			<div data-testid="codebase-review-video-player">
@@ -96,7 +96,7 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-import { CodebaseReviewPage } from "@/app/(workspace)/generate-codebase/review/_components/codebase-review-page";
+import { CodebaseReviewPage } from "@/app/(app)/generate-codebase/review/_components/codebase-review-page";
 
 describe("CodebaseReviewPage", () => {
 	beforeEach(() => {
@@ -253,7 +253,7 @@ describe("CodebaseReviewPage", () => {
 			render(
 				<CodebaseReviewPage initialWorkspaceState={lockedWorkspaceState} />,
 			),
-		).toThrowError("NEXT_REDIRECT:/generate-codebase");
-		expect(redirectMock).toHaveBeenCalledWith("/generate-codebase");
+		).toThrowError("NEXT_REDIRECT:/starter/generate-codebase");
+		expect(redirectMock).toHaveBeenCalledWith("/starter/generate-codebase");
 	});
 });

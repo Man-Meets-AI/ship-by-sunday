@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { WorkspacePrimaryNav } from "@/app/(workspace)/_components/workspace-navigation/workspace-primary-nav";
+import { WorkspacePrimaryNav } from "@/app/(app)/_components/workspace-navigation/workspace-primary-nav";
 import type { WorkspacePrimaryNavItem } from "@/lib/workspace-navigation/build-primary-nav-model";
 
 vi.mock("next/link", () => ({

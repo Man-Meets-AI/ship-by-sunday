@@ -64,6 +64,29 @@ describe("release proof workflows", () => {
 		expect(workflow).not.toContain('git rev-parse "${head_sha}^"');
 	});
 
+	it("passes the required billing offer set through production billing proof and evidence", () => {
+		const workflow = readFileSync(
+			path.join(repoRoot, ".github/workflows/production-release-proof.yml"),
+			"utf8",
+		);
+
+		expect(workflow).toContain("billing_offer:");
+		expect(workflow).toContain(
+			"MANUAL_BILLING_OFFER: ${{ inputs.billing_offer }}",
+		);
+		expect(workflow).toContain('billing_offers="starter workers"');
+		expect(workflow).toContain(
+			"BILLING_PROOF_OFFERS: ${{ needs.release_scope.outputs.billing_offers }}",
+		);
+		expect(workflow).toContain(
+			"for billing_offer in $BILLING_PROOF_OFFERS; do",
+		);
+		expect(workflow).toContain(
+			'bun run release:proof -- --proof=billing_integration --offer="$billing_offer"',
+		);
+		expect(workflow).toContain("billingProofOfferIds:");
+	});
+
 	it("runs Stripe webhook endpoint preflight before dev staging card proof", () => {
 		const workflow = readFileSync(
 			path.join(repoRoot, ".github/workflows/dev-staging-payment-proof.yml"),

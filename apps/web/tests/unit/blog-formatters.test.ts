@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBlogDate } from "@/app/blog/_lib/blog-formatters";
+import { formatBlogDate } from "@/app/(marketing)/blog/_lib/blog-formatters";
 
 describe("blog date formatting", () => {
 	it("keeps date-only frontmatter stable across local timezones", () => {

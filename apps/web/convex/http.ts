@@ -8,12 +8,12 @@ import {
 	incidentSourceValues,
 	incidentSurfaceValues,
 	normalizeIncidentEvent,
-} from "../lib/observability/incident";
+} from "../src/lib/observability/incident";
 import {
 	buildStripeWebhookResultIncidentEvent,
 	getStripeModeLabelFromSecretKey,
 	type StripeWebhookIncidentResult,
-} from "../lib/observability/stripe-webhook-incident";
+} from "../src/lib/observability/stripe-webhook-incident";
 import type { Id } from "./_generated/dataModel";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";

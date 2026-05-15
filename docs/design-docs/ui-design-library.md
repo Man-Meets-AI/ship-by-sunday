@@ -28,8 +28,8 @@ Ship by Sunday app UI should feel like a quiet professional desktop tool: neutra
 Use this hierarchy when resolving conflicts:
 
 1. Root `DESIGN.md` owns brand direction and high-level visual doctrine.
-2. `apps/web/app/globals.css` owns currently implemented app tokens.
-3. `apps/web/components/ui/*.tsx` owns current component primitives.
+2. `apps/web/src/app/globals.css` owns currently implemented app tokens.
+3. `apps/web/src/components/ui/*.tsx` owns current component primitives.
 4. This document owns the screenshot-grounded audit target for product UI consistency.
 
 ## Core Rules
@@ -159,7 +159,7 @@ Rules:
 
 ## Buttons And Controls
 
-Button primitives should stay close to `apps/web/components/ui/button.tsx` unless a surface has a clear reason to differ.
+Button primitives should stay close to `apps/web/src/components/ui/button.tsx` unless a surface has a clear reason to differ.
 
 | Control | Height | Padding | Radius | Text | Icon |
 | --- | ---: | ---: | ---: | --- | ---: |
@@ -255,7 +255,7 @@ Homepage-only custom presentation effects, including the current hero hover `Cov
 
 Operational app shells should apply normal tracking at the shell boundary. Keep explicit tracking for wordmarks, uppercase labels, keyboard shortcuts, mono metadata, code, blog/docs editorial typography, and homepage art-directed type. The current global body tracking rule is treated as inherited drift for operational UI until a later public-surface pass decides whether it can be removed globally.
 
-Implemented shared button geometry now follows the compact ladder in `apps/web/components/ui/button.tsx`: `sm` is `28px`, `default` is `32px`, `lg` is `40px`, `icon-xs` is `24px`, `icon-sm` is `28px`, and `icon` is `32px`. Route-specific overrides should be rare in operational UI; if a mobile surface needs a larger touch target, add the tap-area override at the caller instead of changing the shared desktop visual ladder.
+Implemented shared button geometry now follows the compact ladder in `apps/web/src/components/ui/button.tsx`: `sm` is `28px`, `default` is `32px`, `lg` is `40px`, `icon-xs` is `24px`, `icon-sm` is `28px`, and `icon` is `32px`. Route-specific overrides should be rare in operational UI; if a mobile surface needs a larger touch target, add the tap-area override at the caller instead of changing the shared desktop visual ladder.
 
 Operational app panels should stay at `rounded-xl` or `rounded-2xl` unless the surface is a modal, composer, docs/editorial shell, hero/pricing CTA, or an explicitly art-directed homepage section. The review handoff card and lesson-map surface use `rounded-2xl` so protected app handoffs do not inherit oversized marketing-card geometry.
 

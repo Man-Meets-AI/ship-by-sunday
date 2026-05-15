@@ -1,0 +1,96 @@
+---
+title: Worker Seal Team 6 Cal.com
+description: Configure the Worker Seal Team 6 paid booking page, embed, webhook, and Convex mirror path.
+---
+
+# Worker Seal Team 6 Cal.com
+
+Worker Seal Team 6 booking is Cal.com-owned. The app owns the public landing page, the verified webhook route, and the Convex booking mirror that later support and email workflows read.
+
+## Required Cal.com event
+
+Create one Cal.com event type in the maintainer-owned Cal.com account:
+
+- Name: `Worker Seal Team 6`
+- URL slug: `worker-seal-team-6`
+- Duration: `60 minutes`
+- Price: `$2,500 USD`
+- Payment app: Cal.com Stripe app connected to the maintainer Stripe account
+- Calendar: Parker/operator calendar that owns the service call
+- Rescheduling: self-serve rescheduling allowed until `24 hours` before the call
+- Cancellation and refunds: handled manually through support and the Cal.com or Stripe dashboards
+
+Required booking questions:
+
+- `Company URL`
+- `Repository or product context`
+- `What needs to be true by the end of the hour?`
+- `What has the AI-worker loop already tried?`
+- `Anything Parker should not touch?`
+
+## App values
+
+Set these in local `.env.local`, Vercel preview, and Vercel production:
+
+```bash
+NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK=parker/worker-seal-team-6
+NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_ORIGIN=https://cal.com
+CAL_WEBHOOK_SECRET=
+CONVEX_WEBHOOK_MUTATION_SECRET=
+```
+
+`NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK` may be either the Cal Link slug or the full hosted Cal.com URL. The app normalizes the full URL to a Cal Link slug for the inline embed and builds the hosted fallback URL from the same value.
+
+`NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_ORIGIN` is optional and defaults to `https://cal.com`. Only set a different origin for a deliberate non-standard Cal.com host.
+
+`CAL_WEBHOOK_SECRET` is server-only and belongs in the Next.js runtime. Do not expose it through `NEXT_PUBLIC_`.
+
+`CONVEX_WEBHOOK_MUTATION_SECRET` must match between the Next.js runtime and the matching hosted Convex deployment. The Cal.com route verifies the Cal.com signature first, then uses this shared secret for trusted Convex booking writes.
+
+## Webhook endpoint
+
+Create a Cal.com webhook endpoint for each environment that should mirror booking state:
+
+```text
+https://<app-domain>/api/cal/worker-seal-team-6/webhook
+```
+
+Subscribe only to these triggers:
+
+- `BOOKING_CREATED`
+- `BOOKING_PAYMENT_INITIATED`
+- `BOOKING_PAID`
+- `BOOKING_RESCHEDULED`
+- `BOOKING_CANCELLED`
+
+The app route requires `x-cal-signature-256`, caps webhook bodies at `128 KB`, and verifies the HMAC-SHA256 digest over the raw request body before parsing JSON.
+
+## Verification
+
+After setting the public link, open `/worker-seal-team-6`. The booking section should show the embedded Cal.com container, a hosted Cal.com fallback link, and the direct scheduling backup.
+
+Without `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK`, the same section should show only the direct scheduling fallback and should not inject the Cal.com embed script.
+
+To verify the webhook boundary locally, sign a sample payload with the same secret:
+
+```bash
+BODY='{"triggerEvent":"BOOKING_PAID","id":"cal_event_test","payload":{"uid":"booking_test","attendees":[{"email":"buyer@example.com"}]}}'
+SIGNATURE="$(node -e 'const crypto=require("node:crypto"); const body=process.argv[1]; const secret=process.env.CAL_WEBHOOK_SECRET; console.log(crypto.createHmac("sha256", secret).update(body).digest("hex"))' "${BODY}")"
+curl -i \
+  -H "content-type: application/json" \
+  -H "x-cal-signature-256: ${SIGNATURE}" \
+  --data "${BODY}" \
+  "http://localhost:3000/api/cal/worker-seal-team-6/webhook"
+```
+
+A correctly signed request reaches the Convex sync path. Unsigned or incorrectly signed requests return `400` before any Convex write. If Convex is unavailable or `CONVEX_WEBHOOK_MUTATION_SECRET` is missing or mismatched, the route returns `500` so Cal.com can retry.
+
+## Failure shapes
+
+- Missing public Cal link: the public page falls back to direct scheduling.
+- Wrong public Cal link: the hosted fallback may fail or open the wrong page; fix `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK`.
+- Missing `CAL_WEBHOOK_SECRET`: the route returns `500` with `Cal.com webhook is not configured.`
+- Invalid `x-cal-signature-256`: the route returns `400` and does not parse the payload.
+- Oversized webhook body: the route returns `413` and does not sync to Convex.
+- Missing or mismatched `CONVEX_WEBHOOK_MUTATION_SECRET`: the route verifies Cal.com, then returns `500` before booking state is mirrored.
+- Unsupported trigger: the event is recorded as skipped when it has enough identity, and no booking state changes.

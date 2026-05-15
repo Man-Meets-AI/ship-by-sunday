@@ -29,7 +29,7 @@ There is no active admin role model. No runtime code currently treats `me@parker
 
 Customer-owned state is keyed through `clerkUserId` across product access grants, workspace projects, generated codebase workflow state, lesson state, Codex connections/runs, checkout claims, and several managed integration paths. The support-mode design should preserve customer ownership by making the Clerk session subject the customer while retaining the admin actor for audit.
 
-The workspace shell has clean UI insertion points. `apps/web/app/(workspace)/_components/app-shell.tsx` can host a persistent top bar above the shell header. Header and account-menu components can host an admin-only entry point without faking Clerk's `useUser()` result.
+The protected app shell has clean UI insertion points. `apps/web/app/(protected)/_components/app-shell.tsx` can host a persistent top bar above the shell header. Header and account-menu components can host an admin-only entry point without faking Clerk's `useUser()` result.
 
 Existing audit is narrow and inconsistent for this feature. Managed GitHub audit stores an `actorClerkUserId`, workspace runner events are runner-centric, and incident-style records use a single user field. Support mode needs an explicit append-only audit ledger or a shared actor metadata helper before broad customer-impacting mutations are allowed.
 

@@ -11,8 +11,9 @@ import { resolveRepoRootPath } from "../src/repo-root";
 
 describe("design preset catalog", () => {
 	it("ships the curated preset catalog with stable ids", () => {
-		expect(designPresetDefinitions).toHaveLength(8);
+		expect(designPresetDefinitions).toHaveLength(9);
 		expect(designPresetDefinitions.map((preset) => preset.id)).toEqual([
+			"t3-code",
 			"vercel",
 			"linear",
 			"notion",
@@ -30,10 +31,16 @@ describe("design preset catalog", () => {
 		expect(defaultSeed.design_preset_id).toBe(DEFAULT_DESIGN_PRESET_ID);
 		expect(defaultSeed.theme_preset).toBeTruthy();
 		expect(defaultSeed.design_references).toEqual([
-			"https://getdesign.md/vercel/design-md",
+			"apps/web/src/app/globals.css",
+			"apps/web/src/components/ui",
 		]);
+		expect(
+			defaultSeed.design_references.every(
+				(reference) => !path.isAbsolute(reference),
+			),
+		).toBe(true);
 		expect(getDesignPresetDefinition(DEFAULT_DESIGN_PRESET_ID)?.label).toBe(
-			"Vercel",
+			"T3 Code",
 		);
 	});
 

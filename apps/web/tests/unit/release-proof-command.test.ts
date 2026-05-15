@@ -51,9 +51,44 @@ describe("release proof command", () => {
 			step.command.join(" "),
 		);
 
-		expect(commands).toContain("bun run --cwd apps/web stripe:hosted:verify");
+		expect(commands).toContain(
+			"bun run --cwd apps/web stripe:hosted:verify -- --offer=starter",
+		);
 		expect(commands).not.toContain(
 			"bun run --cwd apps/web test:e2e:sandbox:billing-integration",
+		);
+	});
+
+	it("plans explicit Workers hosted production verifier when selected", () => {
+		const envFilePath = createEmptyEnvFile();
+		const result = spawnSync(
+			"node",
+			[
+				"scripts/release/run-release-proof.mjs",
+				"--proof=billing_integration",
+				"--offer=workers",
+				"--dry-run",
+			],
+			{
+				cwd: repoRoot,
+				encoding: "utf8",
+				env: {
+					...process.env,
+					PLAYWRIGHT_BASE_URL: "https://www.man-meets-ai.com",
+					QA_ENV_FILE: envFilePath,
+				},
+			},
+		);
+
+		expect(result.status).toBe(0);
+		const output = JSON.parse(result.stdout);
+		const commands = output.steps.map((step: { command: string[] }) =>
+			step.command.join(" "),
+		);
+
+		expect(output.billingProofOfferId).toBe("workers");
+		expect(commands).toContain(
+			"bun run --cwd apps/web stripe:hosted:verify -- --offer=workers",
 		);
 	});
 });

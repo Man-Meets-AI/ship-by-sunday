@@ -307,7 +307,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/course/mission/components/mission/mission-extras-row",
+	"@/app/(app)/_components/course/mission/components/mission/mission-extras-row",
 	() => ({
 		MissionExtrasRow: () => (
 			<div data-extras-row="true">
@@ -335,7 +335,7 @@ vi.mock("@/components/ui/progress", () => ({
 	}) => <div className={className} data-slot="progress" data-value={value} />,
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		viewportMode,
@@ -357,7 +357,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 
 globalThis.React = React;
 
-import { MissionPage } from "@/app/(workspace)/_components/course/mission/components/mission-page";
+import { MissionPage } from "@/app/(app)/_components/course/mission/components/mission-page";
 
 describe("MissionPage", () => {
 	beforeEach(() => {
@@ -370,6 +370,9 @@ describe("MissionPage", () => {
 		expect(markup).toContain('data-viewport-mode="app"');
 		expect(markup).toContain('data-app-scroll-mode="page"');
 		expect(markup).not.toContain('data-starter-repo-card="mission"');
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).toContain("Your weekend roadmap");
 		expect(markup).toContain("20 of 30 lessons complete");
 		expect(markup).toContain("Start 1.5");

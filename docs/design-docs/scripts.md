@@ -39,7 +39,7 @@ Use the narrowest relevant command first, then broaden to the full set when the 
 For frontmatter-driven docs and plans:
 
 - `bun run lint` runs the repo-wide unknown-boundary lint before app lint. Explicit TypeScript `unknown` is allowed only in route handlers and DB-loading boundaries; move validation there and pass typed values through the rest of the source tree.
-- `bun run markdown:lint` validates the repo-owned markdown families that currently have checked-in metadata contracts: the canonical frontmatter-backed docs spine files under `docs/`, ExecPlans under `docs/exec-plans/`, docs MDX pages under `apps/web/content/docs/`, and blog post MDX files under `apps/web/content/blog/`.
+- `bun run markdown:lint` validates the repo-owned markdown families that currently have checked-in metadata contracts: the canonical frontmatter-backed docs spine files under `docs/`, ExecPlans under `docs/exec-plans/`, docs MDX pages under `apps/web/src/content/docs/`, and blog post MDX files under `apps/web/src/content/blog/`.
 - `bun run plans:lint` applies the stricter ExecPlan body and frontmatter contract from `docs/exec-plans/PLANS.md`.
 - `bun run programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
 - `markdown:lint` and `plans:lint` accept path-scoped arguments so docs-only work can be proved without widening into unrelated files.

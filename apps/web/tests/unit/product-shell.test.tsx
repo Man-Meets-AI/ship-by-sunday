@@ -44,16 +44,11 @@ vi.mock("@clerk/nextjs", () => ({
 	}),
 }));
 
-vi.mock(
-	"@/app/(workspace)/_components/app-shell/app-shell-theme-toggle",
-	() => ({
-		AppShellThemeToggle: () => (
-			<button type="button" aria-label="Toggle theme" />
-		),
-	}),
-);
+vi.mock("@/app/(app)/_components/app-shell/app-shell-theme-toggle", () => ({
+	AppShellThemeToggle: () => <button type="button" aria-label="Toggle theme" />,
+}));
 
-vi.mock("@/app/(workspace)/_components/app-shell/app-shell-user-menu", () => ({
+vi.mock("@/app/(app)/_components/app-shell/app-shell-user-menu", () => ({
 	AppShellUserMenu: () => (
 		<button type="button" aria-label="Open account menu" />
 	),
@@ -104,11 +99,12 @@ vi.mock("@/components/ui/navigation-menu", () => ({
 
 globalThis.React = React;
 
-import { AppShell } from "@/app/(workspace)/_components/app-shell";
+import { AppShell } from "@/app/(app)/_components/app-shell";
+import { AppShellBillingAttentionProvider } from "@/app/(app)/_components/app-shell/app-shell-billing-attention-context";
 import type {
 	AppShellLocalNav,
 	AppShellPrimaryNav,
-} from "@/app/(workspace)/_components/app-shell/app-shell-props";
+} from "@/app/(app)/_components/app-shell/app-shell-props";
 
 const codebaseStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
@@ -156,7 +152,7 @@ const primaryNav: AppShellPrimaryNav = {
 					kind: "link",
 					id: "bonus-lesson-map",
 					label: "Lesson Map",
-					href: "/generate-codebase/review?showLessonMap=1",
+					href: "/starter/generate-codebase/review?showLessonMap=1",
 					state: "available",
 				},
 			],
@@ -187,7 +183,7 @@ describe("AppShell", () => {
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/generate-codebase/review"');
+		expect(markup).toContain('href="/starter/generate-codebase/review"');
 		expect(markup).toContain('href="/lesson/iterate-the-product-with-ai"');
 		expect(markup).toContain("Launch Lessons");
 		expect(markup).toContain("Bonus");
@@ -196,6 +192,7 @@ describe("AppShell", () => {
 		expect(markup).toContain('data-shell-local-nav-kind="codebase"');
 		expect(markup).toContain("Compact codebase rail");
 		expect(markup).toContain("Desktop codebase rail");
+		expect(markup).not.toContain('aria-label="Billing attention"');
 		expect(markup).toContain(
 			"hidden min-h-0 min-w-0 xl:sticky xl:top-3 xl:block xl:self-start xl:pr-2",
 		);
@@ -206,16 +203,75 @@ describe("AppShell", () => {
 		expect(markup).not.toContain("Open CEO");
 	});
 
-	it("links the header brand to the codebase page and keeps account chrome visible", () => {
+	it("keeps product route links and account chrome visible", () => {
 		const markup = renderAppShell(
 			<AppShell showSkillRail={false} primaryNav={primaryNav}>
 				<div>Body</div>
 			</AppShell>,
 		);
 
-		expect(markup).toContain('href="/generate-codebase"');
+		expect(markup).toContain('href="/home"');
+		expect(markup).toContain('href="/starter/generate-codebase"');
 		expect(markup).toContain('aria-label="Ship by Sunday"');
 		expect(markup).toContain('aria-label="Open account menu"');
+	});
+
+	it("renders a non-dismissible billing attention banner when supplied", () => {
+		const markup = renderAppShell(
+			<AppShell
+				showSkillRail={false}
+				primaryNav={primaryNav}
+				billingAttention={{
+					title: "Payment needs attention",
+					message:
+						"Workers access stays active during the retry window. Update the payment method to keep the workspace current.",
+					statusLabel: "past_due",
+					action: {
+						label: "Manage billing",
+						href: "/billing",
+					},
+				}}
+			>
+				<div>Body</div>
+			</AppShell>,
+		);
+
+		expect(markup).toContain('aria-label="Billing attention"');
+		expect(markup).toContain("Payment needs attention");
+		expect(markup).toContain("Workers access stays active");
+		expect(markup).toContain("past_due");
+		expect(markup).toContain('href="/billing"');
+		expect(markup).toContain("Manage billing");
+		expect(markup).not.toContain("Dismiss");
+		expect(markup).not.toContain("Snooze");
+	});
+
+	it("inherits billing attention from the protected app layout provider", () => {
+		const markup = renderAppShell(
+			<AppShellBillingAttentionProvider
+				billingAttention={{
+					title: "Payment needs attention",
+					message:
+						"Workers access stays active during the retry window. Update the payment method to keep the workspace current.",
+					statusLabel: "past_due",
+					action: {
+						label: "Update payment method",
+						href: "https://billing.stripe.test/recover",
+					},
+				}}
+			>
+				<AppShell showSkillRail={false} primaryNav={primaryNav}>
+					<div>Body</div>
+				</AppShell>
+			</AppShellBillingAttentionProvider>,
+		);
+
+		expect(markup).toContain('aria-label="Billing attention"');
+		expect(markup).toContain("Payment needs attention");
+		expect(markup).toContain("Workers access stays active");
+		expect(markup).toContain("past_due");
+		expect(markup).toContain('href="https://billing.stripe.test/recover"');
+		expect(markup).toContain("Update payment method");
 	});
 
 	it("lets app surfaces opt into page scrolling without the fixed viewport shell", () => {

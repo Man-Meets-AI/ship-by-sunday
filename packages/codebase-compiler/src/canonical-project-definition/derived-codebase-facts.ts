@@ -3,7 +3,10 @@ import { buildGeneratedDesignSystem } from "../design-system/generated-design-sy
 import { buildDesignPresetFactSeed } from "../design-system/design-preset-catalog";
 
 const DEFAULT_SCOPE_OUT = ["Provider setup wizard", "GitHub invite flow"];
-const DEFAULT_DESIGN_REFERENCES = ["https://ui.shadcn.com/"];
+const DEFAULT_DESIGN_REFERENCES = [
+	"apps/web/src/app/globals.css",
+	"apps/web/src/components/ui",
+];
 const DEFAULT_BRAND_ASSETS = ["wordmark.svg"];
 const DEFAULT_OBJECTIONS = [
 	"Will this generate real output?",

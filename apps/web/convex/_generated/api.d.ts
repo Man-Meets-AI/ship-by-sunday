@@ -8,13 +8,12 @@
  * @module
  */
 
-import type * as access from "../access.js";
-import type * as access_model from "../access/model.js";
-import type * as access_types from "../access/types.js";
-import type * as access_validators from "../access/validators.js";
+import type * as billing from "../billing.js";
+import type * as billing_model from "../billing/model.js";
+import type * as billing_types from "../billing/types.js";
+import type * as billing_validators from "../billing/validators.js";
 import type * as checkoutClaims from "../checkoutClaims.js";
 import type * as checkoutClaimsActions from "../checkoutClaimsActions.js";
-import type * as checkoutIntentValidators from "../checkoutIntentValidators.js";
 import type * as codebase from "../codebase.js";
 import type * as codebase_projectDefinition from "../codebase/projectDefinition.js";
 import type * as codebase_stageReadiness from "../codebase/stageReadiness.js";
@@ -33,6 +32,10 @@ import type * as course_shared from "../course/shared.js";
 import type * as course_types from "../course/types.js";
 import type * as course_validators from "../course/validators.js";
 import type * as crons from "../crons.js";
+import type * as entitlements from "../entitlements.js";
+import type * as entitlements_model from "../entitlements/model.js";
+import type * as entitlements_types from "../entitlements/types.js";
+import type * as entitlements_validators from "../entitlements/validators.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
 import type * as impersonation from "../impersonation.js";
@@ -40,6 +43,7 @@ import type * as impersonation_blockedResult from "../impersonation/blockedResul
 import type * as impersonation_model from "../impersonation/model.js";
 import type * as impersonation_types from "../impersonation/types.js";
 import type * as impersonation_validators from "../impersonation/validators.js";
+import type * as migrations_legacyBillingReset from "../migrations/legacyBillingReset.js";
 import type * as observability from "../observability.js";
 import type * as observability_model from "../observability/model.js";
 import type * as observability_validators from "../observability/validators.js";
@@ -68,13 +72,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  access: typeof access;
-  "access/model": typeof access_model;
-  "access/types": typeof access_types;
-  "access/validators": typeof access_validators;
+  billing: typeof billing;
+  "billing/model": typeof billing_model;
+  "billing/types": typeof billing_types;
+  "billing/validators": typeof billing_validators;
   checkoutClaims: typeof checkoutClaims;
   checkoutClaimsActions: typeof checkoutClaimsActions;
-  checkoutIntentValidators: typeof checkoutIntentValidators;
   codebase: typeof codebase;
   "codebase/projectDefinition": typeof codebase_projectDefinition;
   "codebase/stageReadiness": typeof codebase_stageReadiness;
@@ -93,6 +96,10 @@ declare const fullApi: ApiFromModules<{
   "course/types": typeof course_types;
   "course/validators": typeof course_validators;
   crons: typeof crons;
+  entitlements: typeof entitlements;
+  "entitlements/model": typeof entitlements_model;
+  "entitlements/types": typeof entitlements_types;
+  "entitlements/validators": typeof entitlements_validators;
   env: typeof env;
   http: typeof http;
   impersonation: typeof impersonation;
@@ -100,6 +107,7 @@ declare const fullApi: ApiFromModules<{
   "impersonation/model": typeof impersonation_model;
   "impersonation/types": typeof impersonation_types;
   "impersonation/validators": typeof impersonation_validators;
+  "migrations/legacyBillingReset": typeof migrations_legacyBillingReset;
   observability: typeof observability;
   "observability/model": typeof observability_model;
   "observability/validators": typeof observability_validators;

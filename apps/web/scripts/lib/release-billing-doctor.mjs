@@ -32,5 +32,6 @@ export function buildReleaseBillingDoctorCommand(config) {
 		`--expected-mode=${config.expectedMode}`,
 		`--app-base-url=${config.appBaseUrl}`,
 		"--require-webhook-endpoint",
+		"--require-convex-sync-boundary",
 	];
 }

@@ -3,18 +3,18 @@
 import Stripe from "stripe";
 import { v } from "convex/values";
 
-import { apiConfig, PRODUCT_COURSE_SLUG } from "../config/product";
-import { readCheckoutIntentFromMetadata } from "../platform/billing/checkout/checkout-intent";
+import { apiConfig, PRODUCT_COURSE_SLUG } from "../src/config/product";
+import { readCheckoutIntentFromMetadata } from "../src/platform/billing/checkout/checkout-intent";
 import {
 	isPaidAppCheckoutMetadata,
 	readCheckoutMetadataClerkUserId,
 	readCheckoutPurchaseMetadata,
-} from "../platform/billing/checkout/checkout-metadata";
+} from "../src/platform/billing/checkout/checkout-metadata";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalAction } from "./_generated/server";
 import type { ActionCtx } from "./_generated/server";
-import { productAccessGrantResultValidator } from "./access/validators";
+import { productAccessGrantResultValidator } from "./entitlements/validators";
 import { normalizeCheckoutEmail } from "./checkoutClaims";
 import { requireConvexEnv } from "./env";
 
@@ -545,6 +545,10 @@ function getCheckoutPurchaseIntentId(session: Stripe.Checkout.Session) {
 		| undefined;
 }
 
+function getCheckoutOfferId(session: Stripe.Checkout.Session) {
+	return readCheckoutPurchaseMetadata(session.metadata)?.offerId;
+}
+
 async function fulfillPaidCheckoutSessionByEmail({
 	ctx,
 	session,
@@ -594,6 +598,7 @@ async function fulfillPaidCheckoutSessionByEmail({
 			stripeCustomerId,
 			stripePaymentIntentId,
 			checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
+			offerId: getCheckoutOfferId(session),
 			...checkoutFulfillment,
 			stripeEventId,
 			stripeEventType,
@@ -897,6 +902,7 @@ export const claimCheckoutSessionForViewer = action({
 								? session.payment_intent
 								: undefined,
 						checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
+						offerId: getCheckoutOfferId(session),
 						...getSessionLegacyFulfillmentFields(session),
 					},
 				);
@@ -930,6 +936,7 @@ export const claimCheckoutSessionForViewer = action({
 						? session.payment_intent
 						: undefined,
 				checkoutPurchaseIntentId: getCheckoutPurchaseIntentId(session),
+				offerId: getCheckoutOfferId(session),
 				...getSessionLegacyFulfillmentFields(session),
 				stripeEventId: `claim:${session.id}`,
 				stripeEventType: "checkout.success.claim",

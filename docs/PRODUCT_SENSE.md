@@ -34,4 +34,4 @@ This file owns the durable product-judgment rules that help agents keep scope ti
 ## Next
 
 - Use [docs/product-specs/index.md](product-specs/index.md) for stable product-spec routing.
-- Use [apps/web/content/docs/index.mdx](../apps/web/content/docs/index.mdx) for the customer-facing docs surface.
+- Use [apps/web/src/content/docs/index.mdx](../apps/web/src/content/docs/index.mdx) for the customer-facing docs surface.

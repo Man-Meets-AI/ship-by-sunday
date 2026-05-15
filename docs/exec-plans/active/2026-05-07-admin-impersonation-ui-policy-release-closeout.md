@@ -79,7 +79,7 @@ The relevant app code lives under `apps/web`. Clerk wraps the app in `apps/web/a
 
 The completed foundation lives in `apps/web/platform/admin-impersonation/`, `apps/web/convex/impersonation.ts`, and `apps/web/convex/impersonation/`. It already provides runtime env parsing, admin allowlist classification, session/audit schema, actor-claim parsing, support-mode status, and base write policy helpers.
 
-The workspace shell insertion point is `apps/web/app/(workspace)/_components/app-shell.tsx`. The account menu entry point is `apps/web/app/(workspace)/_components/app-shell/app-shell-user-menu-workspace-items.tsx`. The admin page route is `/admin/impersonation`, protected by `apps/web/proxy.ts`.
+The workspace shell insertion point is `apps/web/app/(protected)/_components/app-shell.tsx`. The account menu entry point is `apps/web/app/(protected)/_components/app-shell/app-shell-user-menu-workspace-items.tsx`. The admin page route is `/admin/impersonation`, protected by `apps/web/proxy.ts`.
 
 Provider setup and operating instructions live in `docs/internal/admin-impersonation.md`. The active Program packet lives under `docs/programs/active/2026-05-05-admin-user-impersonation/`.
 
@@ -144,7 +144,7 @@ Inspect the implementation surfaces:
 
     sed -n '1,240p' apps/web/convex/impersonation.ts
     sed -n '1,260p' apps/web/convex/impersonation/model.ts
-    sed -n '1,220p' apps/web/app/(workspace)/_components/app-shell.tsx
+    sed -n '1,220p' apps/web/app/(protected)/_components/app-shell.tsx
     sed -n '1,220p' apps/web/proxy.ts
 
 After Convex API changes, regenerate bindings from `apps/web`:
@@ -241,7 +241,7 @@ Implemented code surfaces:
 - `apps/web/convex/impersonation/model.ts`
 - `apps/web/convex/impersonation/validators.ts`
 - `apps/web/convex/schema.ts`
-- patched public mutations under `apps/web/convex/access.ts`, `codebase.ts`, `course.ts`, and `workspace.ts`
+- patched public mutations under `apps/web/convex/entitlements.ts`, `codebase.ts`, `course.ts`, and `workspace.ts`
 - patched side-effect routes under `apps/web/app/api/stripe`, `apps/web/app/api/codex`, and `apps/web/app/api/download/repo`
 - `docs/internal/admin-impersonation.md`
 

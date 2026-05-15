@@ -14,12 +14,12 @@ describe("tutorial route helpers", () => {
 		for (const lesson of lessons) {
 			const href = getTutorialVideoHref(lesson.lessonKey);
 
-			expect(href).toBe(`/tutorials/${lesson.routeSegment}`);
+			expect(href).toBe(`/starter/lessons/${lesson.routeSegment}`);
 			expect(href).not.toMatch(/^\/lesson\//);
 		}
 	});
 
 	it("exposes the Tutorial Videos index href", () => {
-		expect(getTutorialsHref()).toBe("/tutorials");
+		expect(getTutorialsHref()).toBe("/starter/lessons");
 	});
 });

@@ -1,10 +1,10 @@
 import { ConvexError, v } from "convex/values";
-import { getLessonByKey } from "../../lib/course/lesson/model/curriculum";
+import { getLessonByKey } from "../../src/lib/course/lesson/model/curriculum";
 
 import {
 	getCompletionIssues,
 	type PersistedFieldValues,
-} from "../../lib/course/lesson/model/registry";
+} from "../../src/lib/course/lesson/model/registry";
 import {
 	canAccessLesson,
 	ensureLessonIsUnlocked,

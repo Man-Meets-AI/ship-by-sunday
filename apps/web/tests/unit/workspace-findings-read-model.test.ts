@@ -4,7 +4,7 @@ import {
 	buildWorkspaceFindingDetailModel,
 	buildWorkspaceFindingsLedgerModel,
 	type WorkspaceFindingDocument,
-} from "@/app/(workspace)/_lib/workspace-findings-read-model";
+} from "@/app/(app)/_lib/workspace-findings-read-model";
 
 function createFinding(
 	overrides: Partial<WorkspaceFindingDocument> = {},

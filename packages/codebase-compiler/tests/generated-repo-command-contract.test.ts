@@ -75,6 +75,7 @@ function runCleanRoomCommand(repoRoot: string, args: readonly string[]) {
 		env: {
 			...process.env,
 			CI: "1",
+			DISABLE_POSTHOG_SOURCE_MAP_UPLOAD: "1",
 		},
 	});
 
@@ -102,18 +103,34 @@ describe("generated repo command contract", () => {
 		try {
 			await writeGeneratedRepoSnapshot(generatedRepoRoot);
 
-			runCleanRoomCommand(generatedRepoRoot, ["ci"]);
+			runCleanRoomCommand(generatedRepoRoot, ["install"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "programs:lint"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "plans:lint"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "codebase:contract"]);
 			runCleanRoomCommand(generatedRepoRoot, ["run", "agentic:check"]);
+			runCleanRoomCommand(generatedRepoRoot, [
+				"run",
+				"--cwd",
+				"apps/web",
+				"typecheck",
+			]);
+			runCleanRoomCommand(generatedRepoRoot, [
+				"run",
+				"--cwd",
+				"apps/web",
+				"dev",
+				"--",
+				"--help",
+			]);
 
 			const testedRunCommands = new Set([
-				"bun ci",
+				"bun install",
 				"bun run programs:lint",
 				"bun run plans:lint",
 				"bun run codebase:contract",
 				"bun run agentic:check",
+				"bun run --cwd apps/web typecheck",
+				"bun run --cwd apps/web dev -- --help",
 			]);
 			const packageJson = JSON.parse(
 				await readFile(path.join(generatedRepoRoot, "package.json"), "utf8"),
@@ -155,7 +172,7 @@ describe("generated repo command contract", () => {
 				]),
 			);
 			expect(workflowRunCommands).toEqual([
-				"bun ci",
+				"bun install",
 				"bun run codebase:contract",
 				"bun run agentic:check",
 			]);
@@ -170,7 +187,7 @@ describe("generated repo command contract", () => {
 
 			for (const command of workflowRunCommands) {
 				if (!command.startsWith("bun run ")) {
-					expect(command).toBe("bun ci");
+					expect(command).toBe("bun install");
 					continue;
 				}
 
@@ -179,5 +196,5 @@ describe("generated repo command contract", () => {
 		} finally {
 			await rm(tempRoot, { force: true, recursive: true });
 		}
-	}, 60_000);
+	}, 240_000);
 });

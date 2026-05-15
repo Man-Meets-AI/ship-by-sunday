@@ -18,7 +18,7 @@ import {
 	initializeGitRepository,
 } from "./test-utils";
 
-type PackageManager = "bun" | "npm" | "pnpm" | "yarn";
+type PackageManager = "npm" | "pnpm" | "yarn";
 
 type WorkerInstallBlocker = {
 	blockerId?: string;
@@ -76,8 +76,8 @@ const scenarios: CompatibilityScenario[] = [
 	{
 		name: "blank-slate",
 		description:
-			"Empty git repository with no package.json. The installer should create Bun defaults and a ready Worker surface.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+			"Empty git repository with no package.json. The installer should create npm defaults and a ready Worker surface.",
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(
@@ -87,7 +87,7 @@ const scenarios: CompatibilityScenario[] = [
 			);
 			assertEqual(
 				packageJson.packageManager,
-				"bun@1.3.5",
+				"npm@11.12.1",
 				`${label} generated packageManager`,
 			);
 			assertEqual(packageJson.private, true, `${label} generated private`);
@@ -97,8 +97,8 @@ const scenarios: CompatibilityScenario[] = [
 	{
 		name: "minimal-unclaimed-package",
 		description:
-			"Minimal existing package.json with no package-manager field or lockfile. The installer should default it to Bun.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+			"Minimal existing package.json with no package-manager field or lockfile. The installer should default it to npm.",
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(
@@ -108,7 +108,7 @@ const scenarios: CompatibilityScenario[] = [
 			);
 			assertEqual(
 				packageJson.packageManager,
-				"bun@1.3.5",
+				"npm@11.12.1",
 				`${label} default packageManager`,
 			);
 			assertEqual(
@@ -130,8 +130,8 @@ const scenarios: CompatibilityScenario[] = [
 	{
 		name: "bun-lockfile-owned-package",
 		description:
-			"Package with a Bun lockfile but no packageManager field. The installer should use Bun without writing a new package-manager identity.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+			"Package with a Bun lockfile but no packageManager field. The installer should cut over to npm identity.",
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(
@@ -141,7 +141,7 @@ const scenarios: CompatibilityScenario[] = [
 			);
 			assertEqual(
 				packageJson.packageManager,
-				undefined,
+				"npm@11.12.1",
 				`${label} packageManager`,
 			);
 			assertEqual(
@@ -227,14 +227,14 @@ const scenarios: CompatibilityScenario[] = [
 	{
 		name: "minimal-bun-package",
 		description:
-			"Minimal existing JavaScript repo that already declares Bun as its package manager.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+			"Minimal existing JavaScript repo that already declares the legacy Bun package manager.",
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(packageJson.name, "minimal-bun-package", `${label} name`);
 			assertEqual(
 				packageJson.packageManager,
-				"bun@1.3.5",
+				"npm@11.12.1",
 				`${label} packageManager`,
 			);
 			assertEqual(packageJson.private, true, `${label} private`);
@@ -494,14 +494,14 @@ const scenarios: CompatibilityScenario[] = [
 	{
 		name: "bun-different-version",
 		description:
-			"Bun repo whose root packageManager version is different from the Worker-managed Bun target.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+			"Legacy Bun repo whose root packageManager version is cut over.",
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(packageJson.name, "bun-different-version", `${label} name`);
 			assertEqual(
 				packageJson.packageManager,
-				"bun@1.2.0",
+				"npm@11.12.1",
 				`${label} packageManager`,
 			);
 			assertEqual(
@@ -525,13 +525,13 @@ const scenarios: CompatibilityScenario[] = [
 		name: "polyglot-standalone",
 		description:
 			"Polyglot repository with app and service directories outside apps/worker. Worker files should install standalone without touching those areas.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(packageJson.name, "polyglot-standalone", `${label} name`);
 			assertEqual(
 				packageJson.packageManager,
-				"bun@1.3.5",
+				"npm@11.12.1",
 				`${label} packageManager`,
 			);
 			assertEqual(
@@ -582,7 +582,7 @@ const scenarios: CompatibilityScenario[] = [
 		name: "arena-shaped-runtime",
 		description:
 			"Arena-shaped repository with an existing runtime launcher and app folders. Legacy Worker root scripts should upgrade without deleting unrelated owner files.",
-		expectation: { expectedPackageManager: "bun", type: "installs" },
+		expectation: { expectedPackageManager: "npm", type: "installs" },
 		assertTargetIdentity: async (repositoryRoot, label) => {
 			const packageJson = await readPackageJson(repositoryRoot);
 			assertEqual(packageJson.name, "arena-shaped-runtime", `${label} name`);
@@ -937,7 +937,7 @@ async function assertInstalledRepository({
 	repositoryRoot: string;
 }) {
 	assertExists(
-		path.join(repositoryRoot, "apps", "worker", "src", "worker-cli.ts"),
+		path.join(repositoryRoot, "apps", "worker", "src", "worker-cli.mjs"),
 		`${label} Worker CLI`,
 	);
 	assertExists(
@@ -963,6 +963,11 @@ async function assertInstalledRepository({
 		`${label} help usage`,
 	);
 	assertTextIncludes(help.stdout, "docs:validate", `${label} help command`);
+	assertTextIncludes(
+		help.stdout,
+		"execplan:build",
+		`${label} autonomous ExecPlan command`,
+	);
 
 	await runRequiredProcess("./scripts/run-worker.sh", ["docs:validate"], {
 		cwd: repositoryRoot,
@@ -998,6 +1003,11 @@ async function assertInstalledRepository({
 		"./scripts/run-worker.sh test",
 		`${label} root Worker test script`,
 	);
+	assertEqual(
+		packageJson.scripts?.["execplan:build"],
+		"./scripts/run-worker.sh execplan:build",
+		`${label} root ExecPlan build script`,
+	);
 
 	const readme = await readFile(path.join(repositoryRoot, "README.md"), "utf8");
 	assertTextIncludes(readme, "# Shipbysunday Worker", `${label} README title`);
@@ -1010,6 +1020,11 @@ async function assertInstalledRepository({
 		readme,
 		`${expectedPackageManager} run docs:validate`,
 		`${label} README docs command`,
+	);
+	assertTextIncludes(
+		readme,
+		`${expectedPackageManager} run execplan:build`,
+		`${label} README autonomous ExecPlan command`,
 	);
 	assertTextIncludes(
 		readme,

@@ -1,11 +1,14 @@
-#!/usr/bin/env bun
-import { pathToFileURL } from "node:url";
+#!/usr/bin/env node
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 import { runDaemonCommand } from "./commands/daemon";
 import { runDocsOperatingSystemCommand } from "./commands/docs-operating-system";
 import { runDoctorPassCommand } from "./commands/doctor-pass";
+import { runExecPlanCommand } from "./commands/execplan";
 import { runInstallCommand } from "./commands/install";
 import { runOneShotCommand } from "./commands/one-shot";
+import { runProgramCommand } from "./commands/program";
 import { runSetupCheckCommand } from "./commands/setup-check";
 import { runSetupPairCommand } from "./commands/setup-pair";
 import { runWorkflowCommand } from "./commands/workflow";
@@ -16,6 +19,10 @@ Ship by Sunday local runner
 Usage:
   shipbysunday install [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
   shipbysunday i [--repo <path>] [--yes] [--json] [--dry-run] [--no-commit] [--no-kickoff]
+  ship-by-sunday execplan build --program-id <id> [--repo <path>] [--max-planning-steps <count>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday execplan build --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday program run --program-id <id> [--repo <path>] [--max-planning-steps <count>] [--max-slices <count>] [--max-fix-attempts <count>] [--json]
+  ship-by-sunday program run-slice --program-id <id> --plan <path> [--repo <path>] [--max-fix-attempts <count>] [--json]
   ship-by-sunday setup pair <token> [--repo <path>] [--api-url <url>] [--repair] [--json]
   ship-by-sunday setup check [--repo <path>] [--json]
   ship-by-sunday setup check --codex-config-preview
@@ -62,6 +69,12 @@ export async function runCli(argv = process.argv.slice(2)) {
 		if (command === "one-shot") {
 			return await runOneShotCommand([subcommand, ...rest].filter(Boolean));
 		}
+		if (command === "program") {
+			return await runProgramCommand([subcommand, ...rest].filter(Boolean));
+		}
+		if (command === "execplan") {
+			return await runExecPlanCommand([subcommand, ...rest].filter(Boolean));
+		}
 		if (command === "doctor-pass") {
 			return await runDoctorPassCommand([subcommand, ...rest].filter(Boolean));
 		}
@@ -81,6 +94,14 @@ export async function runCli(argv = process.argv.slice(2)) {
 	}
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+function isEntrypoint() {
+	const invokedPath = process.argv[1];
+	if (!invokedPath) {
+		return false;
+	}
+	return realpathSync(invokedPath) === fileURLToPath(import.meta.url);
+}
+
+if (isEntrypoint()) {
 	process.exitCode = await runCli();
 }

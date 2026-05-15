@@ -19,6 +19,8 @@ const validSummary = {
 		convexSensitive: true,
 		defaultShip: "success",
 		billingIntegration: "success",
+		billingProofOfferId: "workers",
+		billingProofOfferIds: ["workers"],
 	},
 	generatedAt: "2026-05-10T00:00:00.000Z",
 };
@@ -48,6 +50,8 @@ describe("Production release proof summary verification", () => {
 					url: validSummary.runUrl,
 				},
 				billing: {
+					notes:
+						"Production proof classified the release as billing-sensitive and billing_integration passed for workers.",
 					runId: "456",
 					status: "passed",
 					url: validSummary.runUrl,
@@ -76,6 +80,8 @@ describe("Production release proof summary verification", () => {
 						...validSummary.proof,
 						billingSensitive: false,
 						billingIntegration: "skipped",
+						billingProofOfferId: null,
+						billingProofOfferIds: [],
 					},
 				},
 				"main-sha",
@@ -99,6 +105,8 @@ describe("Production release proof summary verification", () => {
 						...validSummary.proof,
 						billingSensitive: true,
 						billingIntegration: "skipped",
+						billingProofOfferId: null,
+						billingProofOfferIds: [],
 					},
 				},
 				"main-sha",
@@ -124,6 +132,54 @@ describe("Production release proof summary verification", () => {
 			issues: expect.arrayContaining([
 				"Summary commit main-sha does not match other-sha.",
 			]),
+		});
+	});
+
+	it("rejects successful billing proof summaries that omit the selected offer", () => {
+		expect(
+			validateProductionReleaseProofSummary(
+				{
+					...validSummary,
+					proof: {
+						...validSummary.proof,
+						billingProofOfferId: null,
+						billingProofOfferIds: [],
+					},
+				},
+				"main-sha",
+			),
+		).toMatchObject({
+			ok: false,
+			issues: expect.arrayContaining([
+				"Production release proof summary proof.billingProofOfferIds must include only starter, workers when billingIntegration is success.",
+			]),
+		});
+	});
+
+	it("accepts successful production billing proof for both paid offers", () => {
+		const summary = {
+			...validSummary,
+			proof: {
+				...validSummary.proof,
+				billingProofOfferId: "starter",
+				billingProofOfferIds: ["starter", "workers"],
+			},
+		};
+
+		expect(validateProductionReleaseProofSummary(summary, "main-sha")).toEqual({
+			ok: true,
+			issues: [],
+		});
+		expect(
+			buildProofStatesFromProductionReleaseProofSummary(summary, "main-sha"),
+		).toMatchObject({
+			ok: true,
+			proof: {
+				billing: {
+					notes:
+						"Production proof classified the release as billing-sensitive and billing_integration passed for starter, workers.",
+				},
+			},
 		});
 	});
 });

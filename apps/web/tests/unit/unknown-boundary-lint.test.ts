@@ -20,14 +20,14 @@ describe("unknown boundary lint", () => {
 
 	it("flags explicit unknown types outside route and DB boundaries", () => {
 		writeFixture(
-			"apps/web/lib/not-a-boundary.ts",
+			"apps/web/src/lib/not-a-boundary.ts",
 			"export type LeakyValue = unknown;\n",
 		);
 
 		expect(collectUnknownBoundaryViolations(fixtureRoot, ["apps/web"])).toEqual(
 			[
 				{
-					relativePath: "apps/web/lib/not-a-boundary.ts",
+					relativePath: "apps/web/src/lib/not-a-boundary.ts",
 					line: 1,
 					column: 26,
 				},
@@ -37,7 +37,7 @@ describe("unknown boundary lint", () => {
 
 	it("allows explicit unknown types in route handlers and DB-loading paths", () => {
 		writeFixture(
-			"apps/web/app/api/example/route.ts",
+			"apps/web/src/app/api/example/route.ts",
 			"export type RoutePayload = unknown;\n",
 		);
 		writeFixture(
@@ -45,7 +45,7 @@ describe("unknown boundary lint", () => {
 			"export type DbPayload = unknown;\n",
 		);
 		writeFixture(
-			"apps/web/app/(workspace)/_lib/workspace-support-read-model.ts",
+			"apps/web/src/app/(app)/_lib/workspace-support-read-model.ts",
 			"export type ReadModelPayload = unknown;\n",
 		);
 
@@ -56,14 +56,14 @@ describe("unknown boundary lint", () => {
 
 	it("flags explicit unknown types in API helper modules", () => {
 		writeFixture(
-			"apps/web/app/api/example/_server/helper.ts",
+			"apps/web/src/app/api/example/_server/helper.ts",
 			"export type HelperPayload = unknown;\n",
 		);
 
 		expect(collectUnknownBoundaryViolations(fixtureRoot, ["apps/web"])).toEqual(
 			[
 				{
-					relativePath: "apps/web/app/api/example/_server/helper.ts",
+					relativePath: "apps/web/src/app/api/example/_server/helper.ts",
 					line: 1,
 					column: 29,
 				},
@@ -73,7 +73,7 @@ describe("unknown boundary lint", () => {
 
 	it("ignores string literals and test files", () => {
 		writeFixture(
-			"apps/web/lib/status.ts",
+			"apps/web/src/lib/status.ts",
 			'export const status = "unknown";\n',
 		);
 		writeFixture(
@@ -90,7 +90,7 @@ describe("unknown boundary lint", () => {
 		expect(
 			formatUnknownBoundaryViolations([
 				{
-					relativePath: "apps/web/lib/not-a-boundary.ts",
+					relativePath: "apps/web/src/lib/not-a-boundary.ts",
 					line: 1,
 					column: 25,
 				},
@@ -101,21 +101,23 @@ describe("unknown boundary lint", () => {
 	});
 
 	it("documents allowed boundary paths", () => {
-		expect(allowsUnknownBoundaryType("apps/web/app/api/example/route.ts")).toBe(
-			true,
-		);
+		expect(
+			allowsUnknownBoundaryType("apps/web/src/app/api/example/route.ts"),
+		).toBe(true);
 		expect(allowsUnknownBoundaryType("apps/web/convex/model.ts")).toBe(true);
 		expect(
 			allowsUnknownBoundaryType(
-				"apps/web/app/(workspace)/_lib/workspace-support-read-model.ts",
+				"apps/web/src/app/(app)/_lib/workspace-support-read-model.ts",
 			),
 		).toBe(true);
 		expect(
-			allowsUnknownBoundaryType("apps/web/app/api/example/_server/helper.ts"),
+			allowsUnknownBoundaryType(
+				"apps/web/src/app/api/example/_server/helper.ts",
+			),
 		).toBe(false);
-		expect(allowsUnknownBoundaryType("apps/web/lib/not-a-boundary.ts")).toBe(
-			false,
-		);
+		expect(
+			allowsUnknownBoundaryType("apps/web/src/lib/not-a-boundary.ts"),
+		).toBe(false);
 	});
 
 	function writeFixture(relativePath: string, contents: string) {

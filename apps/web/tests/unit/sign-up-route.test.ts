@@ -6,19 +6,19 @@ vi.mock("next/navigation", () => ({
 	redirect: (href: string) => redirectMock(href),
 }));
 
-import Page from "@/app/(identity)/sign-up/[[...sign-up]]/page";
+import Page from "@/app/(auth)/sign-up/[[...sign-up]]/page";
 
 describe("sign-up route", () => {
 	beforeEach(() => {
 		redirectMock.mockReset();
 	});
 
-	it("redirects direct visits without a checkout session back to pricing", async () => {
+	it("redirects direct visits without a checkout session back to Starter", async () => {
 		await Page({
 			searchParams: Promise.resolve({}),
 		});
 
-		expect(redirectMock).toHaveBeenCalledWith("/#pricing");
+		expect(redirectMock).toHaveBeenCalledWith("/starter");
 	});
 
 	it("redirects checkout sessions back to checkout success", async () => {

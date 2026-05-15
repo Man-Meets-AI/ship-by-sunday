@@ -17,12 +17,14 @@ const TEST_FILE_PATTERN =
 
 const ROUTE_HANDLER_PATTERNS = [
 	/^apps\/web\/app\/api\/.*\/route\.ts$/,
+	/^apps\/web\/src\/app\/api\/.*\/route\.ts$/,
 	/^apps\/web\/convex\/http\.ts$/,
 ];
 
 const DATABASE_LOADING_PATTERNS = [
 	/^apps\/web\/convex\//,
 	/^apps\/web\/lib\/course\/lesson\/model\//,
+	/^apps\/web\/src\/lib\/course\/lesson\/model\//,
 	/(^|\/)[^/]*read-model\.ts$/,
 ];
 

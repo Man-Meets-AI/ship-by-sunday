@@ -2,6 +2,7 @@
 
 ## today
 
+- Decide whether the autonomous Program runner should show a dirty-worktree warning, explicit checkpoint prompt, or future TUI gate before mutating work starts. The current dogfood behavior intentionally allows dirty checkouts.
 - Execute `docs/exec-plans/active/2026-04-25-codex-style-docs-cleanup.md` so active docs follow the lean Codex-style structure without losing compiler-owned source packs or historical release evidence.
 - Keep the temporary `browser-smoke` and `cli` compatibility CI jobs until live branch protection no longer requires those labels on both `dev` and `main`.
 - Record only concrete SBS-owned repo-quality debt in `docs/exec-plans/tech-debt-tracker.md`; do not import Worker tracker rows.

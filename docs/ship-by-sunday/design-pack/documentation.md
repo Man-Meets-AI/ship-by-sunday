@@ -163,6 +163,24 @@ If helpful, also record the external official references used for the work:
 - {{official reference 2}}
 - {{official reference 3}}
 
+## Shipped Note: Worker Seal Team 6 Public Landing Page
+
+- **Date:** 2026-05-14
+- **Surface:** `/worker-seal-team-6` public landing page, public navigation, and the `/` routing section.
+- **Change:** Added the fourth Program landing page for the $2500 hands-on service. The page uses the existing founder proof image as a full-bleed first-screen visual, names Worker Seal Team 6 as the hero product signal, explains when to use the service, shows what happens in the hour, and now routes the primary action to a booking section that renders a Cal.com embed and hosted fallback when configured.
+- **Design direction:** Keep the service page premium and codebase-first: one calm hero composition, no hero cards, no fake booking embed, no app-owned checkout, and cards only after the first viewport for use-case, process, booking, and product-lane routing.
+- **Out of scope:** No Stripe checkout, no Clerk gate, no Resend email, and no Sentry setup.
+- **Verification:** Public route metadata tests, app lint, and app typecheck/build should pass. Desktop and mobile browser proof should verify the hero image, navigation, CTAs, and responsive text fit before the ExecPlan closes.
+
+## Shipped Note: Worker Seal Team 6 Cal.com Booking Foundation
+
+- **Date:** 2026-05-14
+- **Surface:** `/worker-seal-team-6` booking section and `POST /api/cal/worker-seal-team-6/webhook`.
+- **Change:** Added a route-local Cal.com booking component that loads the hosted embed only when `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK` is set, keeps the hosted Cal.com fallback link visible, and preserves direct scheduling when the link is unset. Added the verified Cal.com webhook route and Convex mirror boundary for booking lifecycle state.
+- **Design direction:** Keep the booking module below the first viewport so the hero remains a service landing page, not a scheduling dashboard. The embed gets stable height and a restrained frame; support and hosted fallbacks stay visible because third-party embeds can fail.
+- **Out of scope:** No Resend prep/ops email, no Sentry setup, no app-owned Worker Seal Team 6 checkout, no Clerk or workspace onboarding, and no refund closeout UX.
+- **Verification:** Focused unit, route integration, and integration-ui tests cover signature verification, mapping, failure modes, and configured/unconfigured booking states. Browser proof should verify desktop and mobile spacing with the unconfigured fallback and, when a Cal Link is available, the configured embed state.
+
 ## Shipped Note: Codebase Intake Section Draft Assist
 
 - **Date:** 2026-05-01

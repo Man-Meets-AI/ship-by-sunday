@@ -52,7 +52,7 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 	),
 }));
 
-import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
+import { AccessRequiredPage } from "@/app/(app)/_components/access-required/access-required-page";
 
 describe("AccessRequiredPage", () => {
 	beforeEach(() => {
@@ -79,11 +79,15 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Access Required");
 		expect(markup).toContain("Checking product access");
 		expect(markup).toContain("Protected app");
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).toContain('data-slot="protected-route-panel"');
 		expect(markup).toContain("What to do next");
 		expect(markup).not.toContain("Need help reconnecting access?");
 		expect(markup).toContain(
 			"Keep this page open while we verify whether product access is ready.",
 		);
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).not.toContain('data-testid="access-required-buy-access"');
 	});
 
@@ -147,8 +151,8 @@ describe("AccessRequiredPage", () => {
 		expect(markup).toContain("Signed in as test-entitled@test.com");
 		expect(markup).toContain('data-testid="access-required-buy-access"');
 		expect(markup).toContain("Buy access now");
-		expect(markup).toContain("Review pricing");
-		expect(markup).toContain('href="/#pricing"');
+		expect(markup).toContain("Review offer");
+		expect(markup).toContain('href="/starter"');
 	});
 
 	it("renders paid checkout recovery before purchase actions when a pending claim is known", () => {

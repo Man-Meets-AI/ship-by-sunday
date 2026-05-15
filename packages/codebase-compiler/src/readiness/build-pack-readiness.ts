@@ -259,11 +259,7 @@ const starterFileReferences = [
 	{
 		path: "apps/web/config/product.ts",
 		reason:
-			"Generated product identity, promise, pricing display, and CTA configuration.",
-	},
-	{
-		path: "apps/web/app/_content/home-page.ts",
-		reason: "Generated homepage copy and proof framing.",
+			"Generated product identity, questionnaire-derived homepage content, pricing display, and CTA configuration.",
 	},
 	{
 		path: "apps/web/config/generated-design-system.ts",

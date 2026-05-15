@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildTutorialVideoLibrary } from "@/app/(workspace)/tutorials/_lib/tutorial-video-library";
+import { buildTutorialVideoLibrary } from "@/app/(app)/tutorials/_lib/tutorial-video-library";
 
 describe("tutorial video library model", () => {
 	it("groups all student-facing lessons by curriculum block without lock state", () => {
@@ -29,7 +29,7 @@ describe("tutorial video library model", () => {
 		expect(library.blocks.flatMap((block) => block.lessons)).toHaveLength(29);
 
 		for (const lesson of library.blocks.flatMap((block) => block.lessons)) {
-			expect(lesson.href).toBe(`/tutorials/${lesson.routeSegment}`);
+			expect(lesson.href).toBe(`/starter/lessons/${lesson.routeSegment}`);
 			expect(lesson.durationLabel).toMatch(/m|s/);
 			expect(lesson.thumbnailUrl).toMatch(/^\/api\/video\/thumbnails\//);
 			expect("status" in lesson).toBe(false);

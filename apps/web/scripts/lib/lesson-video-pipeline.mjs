@@ -43,7 +43,8 @@ export const VIDEO_CUT_PYTHON_PATH = path.join(
 );
 export const MEDIA_FILE_PATH = path.join(
 	process.cwd(),
-	"features",
+	"src",
+	"lib",
 	"course",
 	"lesson",
 	"model",
@@ -59,11 +60,11 @@ const VENDORED_VAD_SCRIPT_PATH = path.join(
 );
 
 const LESSON_SOURCE_FILES = [
-	"lib/course/lesson/model/lessons/start-here.ts",
-	"lib/course/lesson/model/lessons/ceo.ts",
-	"lib/course/lesson/model/lessons/design.ts",
-	"lib/course/lesson/content/build.ts",
-	"lib/course/lesson/model/lessons/ship.ts",
+	"src/lib/course/lesson/model/lessons/start-here.ts",
+	"src/lib/course/lesson/model/lessons/ceo.ts",
+	"src/lib/course/lesson/model/lessons/design.ts",
+	"src/lib/course/lesson/content/build.ts",
+	"src/lib/course/lesson/model/lessons/ship.ts",
 ];
 
 const SUPPORTED_VIDEO_EXTENSIONS = new Set([
@@ -217,7 +218,7 @@ export function extractLessonMediaMap(source) {
 		source.match(/String\.raw`([\s\S]*)`;/) ?? source.match(/`([\s\S]*)`;/);
 	if (!match) {
 		throw createError(
-			"Could not parse lib/course/lesson/model/media.ts JSON payload.",
+			"Could not parse src/lib/course/lesson/model/media.ts JSON payload.",
 		);
 	}
 

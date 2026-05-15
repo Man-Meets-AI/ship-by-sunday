@@ -110,7 +110,8 @@ describe("canonical project definition schema", () => {
 		);
 
 		expect(parsedProjectDefinition.facts.design_references).toEqual([
-			"https://getdesign.md/vercel/design-md",
+			"apps/web/src/app/globals.css",
+			"apps/web/src/components/ui",
 		]);
 	});
 

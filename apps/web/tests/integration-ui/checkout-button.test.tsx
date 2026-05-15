@@ -43,7 +43,7 @@ describe("CheckoutButton interactions", () => {
 		);
 
 		const user = userEvent.setup();
-		render(<CheckoutButton label="Get instant access" />);
+		render(<CheckoutButton offerId="starter" label="Get instant access" />);
 
 		await user.click(screen.getByRole("button"));
 
@@ -52,10 +52,12 @@ describe("CheckoutButton interactions", () => {
 				"Content-Type": "application/json",
 			},
 			method: "POST",
+			body: JSON.stringify({ offerId: "starter" }),
 		});
 		expect(capturePostHogProductEventMock).toHaveBeenCalledWith({
 			event: "checkout_started",
 			properties: {
+				offer_id: "starter",
 				surface: "checkout_button",
 			},
 		});
@@ -78,7 +80,7 @@ describe("CheckoutButton interactions", () => {
 		);
 
 		const user = userEvent.setup();
-		render(<CheckoutButton label="Get instant access" />);
+		render(<CheckoutButton offerId="starter" label="Get instant access" />);
 
 		const button = screen.getByRole("button");
 		await user.click(button);
@@ -96,7 +98,7 @@ describe("CheckoutButton interactions", () => {
 		);
 
 		const user = userEvent.setup();
-		render(<CheckoutButton label="Get instant access" />);
+		render(<CheckoutButton offerId="starter" label="Get instant access" />);
 
 		const button = screen.getByRole("button");
 		await user.click(button);
@@ -117,7 +119,7 @@ describe("CheckoutButton interactions", () => {
 		);
 
 		const user = userEvent.setup();
-		render(<CheckoutButton label="Get instant access" />);
+		render(<CheckoutButton offerId="starter" label="Get instant access" />);
 
 		const button = screen.getByRole("button");
 		await user.click(button);
@@ -153,7 +155,7 @@ describe("CheckoutButton interactions", () => {
 		);
 
 		const user = userEvent.setup();
-		render(<CheckoutButton label="Get instant access" />);
+		render(<CheckoutButton offerId="starter" label="Get instant access" />);
 
 		await user.click(screen.getByRole("button"));
 
@@ -197,6 +199,7 @@ describe("CheckoutButton interactions", () => {
 		const user = userEvent.setup();
 		render(
 			<CheckoutButton
+				offerId="starter"
 				label="Get instant access"
 				onBeforeCheckout={onBeforeCheckout}
 			/>,
@@ -230,6 +233,7 @@ describe("CheckoutButton interactions", () => {
 		const user = userEvent.setup();
 		render(
 			<CheckoutButton
+				offerId="starter"
 				label="Get instant access"
 				onBeforeCheckout={onBeforeCheckout}
 			/>,

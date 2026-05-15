@@ -1,0 +1,312 @@
+---
+program_id: "t3-code-source-design-system-port"
+title: "T3 Code Source Design System Port"
+status: "complete"
+created_at: "2026-05-14"
+completed_at: "2026-05-15"
+summary: "Replace Ship by Sunday's current and generated web-facing visual systems and app implementation shape with the T3 Code app while keeping Ship by Sunday branding."
+post_build_recap: "Ship by Sunday's tracked app, public/protected/auth/checkout route surfaces, shared primitives, standalone Telegram widget, and generated customer codebase output now use the T3 Code visual contract with DM Sans, zinc semantic tokens, blue primary accents, compact radii, dense app chrome, and completed Program routing."
+read_when:
+  - "Planning or executing the T3 Code visual-system migration for Ship by Sunday."
+  - "Changing app UI, marketing pages, docs chrome, tutorials, worker surfaces, shadcn primitives, the Telegram widget, or generated codebase UI."
+  - "Deciding whether current Ship by Sunday design doctrine or the T3 Code source should win."
+---
+
+# T3 Code Source Design System Port
+
+This Program is the completed initiative document for replacing Ship by Sunday's current web-facing design system and browser-app implementation shape with the T3 Code app.
+
+Maintain this Program in accordance with `docs/programs/PROGRAMS.md`.
+
+## Purpose / Big Picture
+
+Ship by Sunday should stop blending its existing visual system and app structure with T3 Code. The target is to make `/Users/bazelrex/Developer/oss/t3code/apps/web` the source of truth for every web-facing Ship by Sunday UI surface: file shape, component organization, colors, typography, spacing rhythm, primitive styling, dark mode, light mode, shell chrome, dense operational surfaces, command/settings patterns, chat/composer treatment, and generated-codebase app output.
+
+This Program exists because the reset spans more than one implementation slice. It touches repo instructions, old design/frontend doctrine docs, `apps/web` file layout, `apps/web` global CSS and font loading, shared primitives, protected app shell, marketing pages, docs chrome, blog prose, worker dashboards, tutorials/course surfaces, checkout/auth surfaces, the standalone Telegram widget package, and generated codebase runtime/templates/docs.
+
+Ship by Sunday branding stays. The migration should not copy T3 Code's product name, wordmark, logos, copy identity, or app-specific domain language. It should adopt T3 Code's design system and interaction feel around Ship by Sunday's own brand and product language.
+
+Generated customer repositories were in scope for this Program. `packages/codebase-compiler`, `templates/starter-app`, generated customer repo templates, generated customer docs, and compiler design-preset output now default to a T3 Code-styled generated codebase contract.
+
+The guiding rule is simple: when the current Ship by Sunday design docs, frontend docs, implementation-folder conventions, or components conflict with T3 Code, T3 Code wins.
+
+## Program Inputs
+
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/research-pass-t3-code-and-current-ui.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/normalized-pass-t3-code-target.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/converged-decision-packet.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/dependency-graph.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/plan-split-recommendation.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/cross-repo-review.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-1.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-2.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-3.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-4.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-5.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-6.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-7.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-8.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-9.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-10.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-11.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/planning-brief-12.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md`
+- `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/current-planning-brief.txt`
+- T3 Code source app: `/Users/bazelrex/Developer/oss/t3code/apps/web`
+- Current web app: `apps/web`
+- Current widget package: `packages/telegram-chat-widget`
+- Generated codebase compiler: `packages/codebase-compiler`
+- Generated app template: `templates/starter-app`
+- Generated documentation mirrors: `docs/generated`
+- Retired doctrine and cleanup targets: `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and `docs/ship-by-sunday/design-pack/`
+
+## Current State
+
+T3 Code uses a CSS-first Tailwind v4 system with `base-mira`, `baseColor: zinc`, lucide icons, DM Sans, additive radius tokens, a blue primary accent, semantic `info/success/warning/destructive` tokens, class-based `.dark` mode, Base UI primitives, and a dense app shell built around a resizable sidebar and compact chat/workspace surfaces.
+
+T3 Code also uses a simpler browser-app source shape: plain directories such as `src/components`, `src/hooks`, `src/lib`, `src/routes`, `src/rpc`, `src/environments`, and `src/observability`, plus plain feature files and colocated `.logic.ts` and `.test.ts` files. It does not use Ship by Sunday's deep Next App Router private implementation folders as a general pattern.
+
+Ship by Sunday's tracked app now uses DM Sans, T3 Code-compatible semantic tokens, additive radius semantics, quiet borders, compact primitive recipes, and a T3 Code-style protected app shell. The tracked app no longer injects old generated design-system CSS into the root layout.
+
+Ship by Sunday still has some historical Next App Router underscore folders where deeper route rewrites would be separate behavior work, but the Program established the durable rule: Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` are useful framework organization, while avoidable `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata` implementation folders are migration targets for future touched areas.
+
+The standalone Telegram widget now exposes T3-compatible `--sbs-chat-*` token fallbacks for light and dark mode instead of a hardcoded dark-only shell. Generated codebase output now defaults to the `t3-code` design preset through `packages/codebase-compiler`, emits T3 Code source references and DM Sans/zinc/blue facts, and ships starter template globals, primitives, route chrome, marketing, dashboard, chat, billing, auth, and error surfaces aligned to that contract.
+
+The largest adaptation remains that T3 Code's source uses Base UI while Ship by Sunday kept Radix and Next.js where they are established runtime architecture. The completed Program copied the visual recipes and behavior shape onto the existing framework boundaries instead of forcing a dependency or router migration.
+
+## Progress
+
+- [x] 2026-05-14: Audited T3 Code's design source files, theme tokens, font stack, primitive system, app shell, chat composer, settings surfaces, and theme hook.
+- [x] 2026-05-14: Audited Ship by Sunday's current global CSS, font loading, generated design-system bridge, primitives, marketing/docs/blog routes, AppShell, worker dashboards, tutorials, and Telegram widget package.
+- [x] 2026-05-14: Created this active Program packet and first planning brief.
+- [x] 2026-05-14: Expanded scope to every available screen plus generated codebases while keeping Ship by Sunday branding.
+- [x] 2026-05-14: Hardened the research pass with exact source references for T3 Code tokens, primitives, theme behavior, Ship by Sunday overrides, app shell, docs theme island, Telegram widget CSS, and generated-codebase sources.
+- [x] 2026-05-14: Clarified that the Program includes T3 Code file/directory shape, not just visual styling. Next.js route groups may stay; underscore implementation folders are cleanup targets.
+- [x] 2026-05-14: Added `planning-brief-2.md` and `structure-map-t3-code-to-ship-by-sunday.md` to steer the next slice toward structure and doctrine retirement before token work.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md`, moving Worker Seal Team 6 Cal booking from route-local underscore folders to `apps/web/src/components/workerSealTeam6` and aligning app structure docs.
+- [x] 2026-05-14: Added `planning-brief-3.md` for the app foundation slice and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md`, making DM Sans, T3 Code light/dark tokens, additive radii, and removal of tracked-app generated-design CSS injection the `apps/web` foundation.
+- [x] 2026-05-14: Added `planning-brief-4.md` for the shared primitive slice and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-button-badge-primitives.md`, moving Button and Badge to T3 Code class recipes while preserving current Radix `asChild` call-site compatibility.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md`, moving Card, Alert, Skeleton, and Kbd to T3 Code display primitive recipes while preserving current call-site aliases.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`, moving Input and Textarea to T3 Code form-control wrappers with native compatibility escape hatches.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md`, moving Field, Label, Separator, Checkbox, Switch, and RadioGroup to T3 Code recipes while preserving Radix compatibility exports.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`, moving Select trigger, content, item, separator, scroll affordance, and T3-compatible helper recipes onto the current Radix Select API with EA-authenticated desktop Select browser proof and mobile protected-route proof on `/starter/generate-codebase`.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md`, adding a Radix-backed Popover wrapper and moving Tooltip to the T3 Code popup surface while preserving current Tooltip exports.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md`, moving Dialog and Sheet backdrop, viewport, popup, close-button, panel, and footer recipes to T3 Code surfaces while preserving current Radix call-site compatibility.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md`, moving DropdownMenu, NavigationMenu, and the app-shell command palette to T3 Code menu/command recipes while preserving Radix and cmdk compatibility.
+- [x] 2026-05-14: Repaired copied Base UI state selectors in completed primitive slices so Checkbox, Switch, RadioGroup, Field checked-state styling, NavigationMenu open styling, and Tooltip instant-open styling target the actual Radix `data-state` attributes, with focused tests strengthened to catch regressions.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-alert-dialog-toast-primitives.md`, moving AlertDialog and Sonner Toaster surfaces to T3 Code alert/toast recipes while preserving Radix and Sonner runtime compatibility.
+- [x] 2026-05-14: Completed `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`, moving ScrollArea, Collapsible, Toggle, ToggleGroup, Spinner, and Empty to T3 Code utility recipes while preserving Radix/shared runtime compatibility and deferring unused Sidebar to the protected app-shell slice.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`, moving protected `viewportMode="app"` onto a T3 Code-style Sidebar shell while preserving AppShell props, document-mode compatibility, workspace/codebase/lesson/local navigation, command/theme/user controls, billing attention, and mobile Sheet-backed navigation.
+- [x] 2026-05-15: Added `planning-brief-6.md` for the protected route-surface migration and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Applied Sidebar app-shell review fixes for mobile width CSS, mobile rail breakpoint alignment, final resize persistence, drag-click suppression, and stale planning-brief source metadata.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`, adding shared protected route-surface helpers and migrating Starter home, Workers existing-codebase setup, and settings route content to compact T3-style headers, panels, and summaries.
+- [x] 2026-05-15: Added `planning-brief-7.md` for the remaining protected Worker findings/runs, support/admin, and course/tutorial surface sweep and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`, migrating Worker findings, finding detail, runs, loops, privacy, and the Starter tutorial index onto shared protected route-surface helpers while preserving behavior-sensitive actions.
+- [x] 2026-05-15: Added `planning-brief-8.md` for the remaining protected app route closeout and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`, migrating Doctor Pass, paid app home, access recovery, codebase overview, mission intro, and lesson watch surfaces onto protected route headers, panels, and compact T3 Code typography.
+- [x] 2026-05-15: Added `planning-brief-9.md` for the public homepage, product landing page, docs, blog, and public support surface migration and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`, migrating the current Man Meets AI homepage, Starter, Workers, Worker Seal Team 6, blog chrome, and docs chrome onto T3 Code-style public route surfaces while preserving checkout, Cal.com, metadata, docs, and blog contracts.
+- [x] 2026-05-15: Added `planning-brief-10.md` for auth, checkout, and edge-surface migration and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`, migrating auth, checkout success framing, checkout cancel confirmation, checkout clear-pending, global not-found, and error boundary screens onto a shared T3 Code edge route surface while preserving Clerk, Stripe, access, metadata, and error reporting behavior.
+- [x] 2026-05-15: Added `planning-brief-11.md` for the Telegram widget visual migration and pointed `current-planning-brief.txt` at it.
+- [x] 2026-05-15: Added `planning-brief-12.md` for the final Program closeout, including generated customer codebase output, browser proof, validation, and retrospective.
+- [x] 2026-05-15: Completed `docs/exec-plans/completed/2026-05-15-t3-code-program-closeout.md`, migrating the Telegram widget CSS, generated design-preset defaults, starter template source, generated app overlays, and focused tests to the T3 Code contract.
+- [x] 2026-05-15: Captured closeout browser proof for the widget light desktop state, widget dark mobile state, and generated app light/dark desktop/mobile states under `codex-scripts/artifacts/t3-closeout/`.
+- [x] 2026-05-15: Updated repo routing docs and indexes so T3 Code visual and structure guidance points to this completed Program instead of the retired active migration lane.
+- [x] 2026-05-15: Completed this Program and moved it to `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/`.
+
+## Decision Log
+
+Decision: Treat T3 Code as the design source of truth.
+Rationale: The user explicitly prefers T3 Code for everything in the current product. Existing Ship by Sunday design doctrine should be treated as replacement inventory, not a constraint.
+
+Decision: Treat T3 Code as the browser-app structure source too.
+Rationale: The requested reset is not only visual. Ship by Sunday's underscore-heavy implementation folders keep the old codebase shape alive even if tokens change. T3 Code's plain module structure is the target where Next.js permits it.
+
+Decision: Keep useful Next.js route groups while cleaning up underscore implementation folders.
+Rationale: `(auth)`, `(marketing)`, and `(app)` are framework route organization. The disliked pattern is the internal `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata` implementation shape.
+
+Decision: Keep Ship by Sunday branding while adopting T3 Code's design system.
+Rationale: The user wants the T3 Code look and feel, not T3 Code's brand identity. Ship by Sunday names, logos, product language, and customer promises remain ours.
+
+Decision: Include generated codebases in this Program.
+Rationale: The same design reset should apply to generated customer apps. Generated codebase work is a later slice because it depends on stable current-app tokens, primitives, and docs, but it is not a separate excluded effort.
+
+Decision: Prefer a literal T3 Code primitive port over a token-only imitation.
+Rationale: T3 Code's look comes from Base UI primitive implementations, component class recipes, focus/hover geometry, dense sidebar chrome, and composer/card structure. Copying only color variables would leave Ship by Sunday's current UI shape intact.
+
+Decision: Keep Next.js and `next-themes` where they are app architecture, but adapt them to T3 Code's visual contract.
+Rationale: T3 Code is Vite/TanStack Router and includes desktop-window theme behavior. Ship by Sunday is a Next.js app. The visual source should be copied; framework-specific runtime plumbing should be adapted where needed.
+
+Decision: Remove or neutralize the current generated design-system CSS bridge in the tracked app if it overrides T3 Code tokens.
+Rationale: A runtime style block sourced from the old generated design system can silently undo the T3 Code palette, radius, and font decisions.
+
+Decision: Rebuild docs and marketing surfaces instead of trying to preserve their current editorial serif language.
+Rationale: The current public surfaces are part of the disliked visual system. They should inherit T3 Code density, typography, token usage, and product-tool feel.
+
+Decision: Retire `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and the old design-pack docs as doctrine.
+Rationale: Keeping those files as active doctrine steers agents back toward the old system. During the migration, they should be redirects or cleanup targets until references are removed.
+
+Decision: Treat auth, checkout, and billing-adjacent UI as risky even when the change is visual.
+Rationale: Those screens carry P0/P1 product flows. Visual rewrites must preserve route behavior, auth boundaries, and checkout recovery behavior.
+
+Decision: Close the Program with one final combined widget and generated-codebase ExecPlan.
+Rationale: After the app, primitive, route, auth, and checkout slices landed, the remaining acceptance criteria were coupled by proof and Program archival rather than independent product behavior. One closeout plan kept the final validation and retrospective coherent.
+
+Decision: Make `t3-code` the default generated design preset.
+Rationale: Generated customer repositories are part of the shipped UI contract. Keeping a different default would leave new downloaded apps on the retired visual system even though the tracked app had completed the migration.
+
+## Slice Ledger
+
+Active child ExecPlans:
+
+None.
+
+Completed child ExecPlans:
+
+- `docs/exec-plans/completed/2026-05-14-t3-code-structural-source-adoption.md`: retired old doctrine routing as active guidance, added the structural source map, preserved Next route groups, and proved one underscore implementation-folder migration by moving Worker Seal Team 6 Cal booking into plain component modules.
+- `docs/exec-plans/completed/2026-05-14-t3-code-app-foundation.md`: installed the tracked app foundation by loading DM Sans, copying T3 Code-compatible light and dark tokens, additive radius semantics, no-transition/noise/scrollbar base styles, and removing generated-design CSS injection from the Next root layout.
+- `docs/exec-plans/completed/2026-05-14-t3-code-button-badge-primitives.md`: copied T3 Code Button and Badge class recipes into the shared primitives while keeping existing variants, sizes, and `asChild` behavior compatible.
+- `docs/exec-plans/completed/2026-05-14-t3-code-display-primitives.md`: copied T3 Code Card, Alert, Skeleton, and Kbd recipes into the shared primitives while keeping `CardContent`, `Alert variant="destructive"`, className passthrough, and `KbdGroup` compatibility.
+- `docs/exec-plans/completed/2026-05-14-t3-code-input-textarea-primitives.md`: copied T3 Code Input and Textarea wrapper/control recipes into native compatibility primitives while keeping native props, refs, and explicit native field class escape hatches.
+- `docs/exec-plans/completed/2026-05-14-t3-code-form-scaffold-controls.md`: copied T3 Code Field, Label, Separator, Checkbox, Switch, and RadioGroup recipes onto the current Radix primitive surface while keeping existing export names and adding the T3-compatible `Radio` alias.
+- `docs/exec-plans/completed/2026-05-14-t3-code-select-primitive.md`: copied T3 Code Select trigger, popup, item, separator, and scroll-arrow recipes onto the current Radix Select surface while keeping existing export names and adding `SelectButton`, `SelectGroupLabel`, and `selectTriggerVariants`; the adapter maps Radix `data-state="open"` to T3 open-state styling and defaults content to Radix popper positioning; browser proof signed in as `ea@parkerrex.com`, opened Select on desktop, and confirmed the protected Starter codebase route on mobile.
+- `docs/exec-plans/completed/2026-05-14-t3-code-popover-tooltip-primitives.md`: added a shared Popover primitive and copied T3 Code Popover/Tooltip popup recipes onto the current Radix surface while keeping `TooltipContent`, adding `TooltipPopup` and `PopoverPopup`, and proving both popups on desktop and mobile through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-dialog-sheet-primitives.md`: copied T3 Code Dialog and Sheet backdrop, viewport, popup, panel, close-button, header, title, description, and footer recipes onto the current Radix surface while keeping `DialogContent`, `SheetContent`, `showCloseButton`, Sheet `side`, custom data attributes, and T3-style popup aliases; desktop and mobile browser proof passed through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-menu-command-primitives.md`: copied T3 Code menu and command popup recipes onto Radix DropdownMenu, Radix NavigationMenu, and a new shared cmdk-backed Command primitive while keeping current export names, adding honest `Menu*` aliases, and proving desktop/mobile render through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-alert-dialog-toast-primitives.md`: copied T3 Code AlertDialog modal recipes onto the current Radix AlertDialog surface and copied T3 Code toast surface recipes onto the existing Sonner Toaster while keeping current `AlertDialog*`, `Toaster`, and `sonner` toast invocation behavior; desktop and mobile browser proof passed through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-utility-primitives.md`: copied T3 Code utility recipes onto Radix-backed ScrollArea, Collapsible, Toggle, and ToggleGroup plus shared Spinner and Empty while keeping existing exports, adding `CollapsiblePanel`, `ToggleGroupSeparator`, ScrollArea fade/gutter/hide-scrollbar controls, and proving desktop/mobile render through a temporary local route.
+- `docs/exec-plans/completed/2026-05-14-t3-code-sidebar-app-shell.md`: copied T3 Code Sidebar behavior onto the current Radix-compatible Sidebar primitive, added desktop resize persistence and scroll-fade content, and moved protected `viewportMode="app"` AppShell rendering to `SidebarProvider`, `Sidebar`, `SidebarRail`, and `SidebarInset` while preserving document mode and current product navigation behavior.
+- `docs/exec-plans/completed/2026-05-15-t3-code-protected-route-surfaces.md`: added shared protected route-surface helpers and migrated Starter home, Workers existing-codebase setup, and settings route content to compact T3-style headers, panels, and summary rows while preserving protected access behavior, AppShell props, direct Starter template download, Workers setup mutations, and settings card anchors.
+- `docs/exec-plans/completed/2026-05-15-t3-code-remaining-protected-surfaces.md`: migrated Worker findings, finding detail, runs, loops, privacy, and the Starter tutorial index to the shared protected route-surface recipe while preserving filters, links, copy buttons, workflow approval behavior, privacy mutations, local nav, AppShell props, and tutorial hrefs.
+- `docs/exec-plans/completed/2026-05-15-t3-code-protected-app-route-closeout.md`: migrated Doctor Pass, paid app home, access recovery, codebase overview, mission intro, and lesson watch surfaces to shared protected route headers, panels, and dense typography while preserving protected access, AppShell props, approval/retry actions, local navigation, codebase authoring, mission progress, and lesson content behavior.
+- `docs/exec-plans/completed/2026-05-15-t3-code-public-surfaces.md`: added shared public route-surface helpers, moved the public site header into `apps/web/src/components/layout`, migrated the current public homepage, Starter, Workers, Worker Seal Team 6, blog shells, and docs chrome away from old serif/editorial surfaces, and preserved checkout CTAs, Cal.com booking, metadata, sitemap/robots, docs inventory, and blog route behavior.
+- `docs/exec-plans/completed/2026-05-15-t3-code-auth-checkout-edge-surfaces.md`: added shared edge route-surface helpers, migrated auth, checkout success framing, checkout cancel confirmation, checkout clear-pending, global not-found, and error boundary screens away from old serif/cinematic shells, and preserved Clerk passwordless sign-in, reset tasks, Stripe success sync, cancel recovery, direct access redirect, metadata, and error telemetry behavior.
+- `docs/exec-plans/completed/2026-05-15-t3-code-program-closeout.md`: migrated the standalone Telegram widget and generated customer app output to the T3 Code visual contract, added focused widget/compiler/generated-output tests, captured closeout browser proof, and completed this Program packet.
+
+Planned child slices:
+
+None. The required Program slices are complete.
+
+## Next Slice
+
+No required next slice remains inside this Program.
+
+Future UI work should treat this completed Program, `structure-map-t3-code-to-ship-by-sunday.md`, and current runtime code as the source of truth. Remaining underscore-folder cleanup should happen only when a touched route has a bounded behavior-preserving migration path.
+
+## Risks and Watchpoints
+
+- A token-only patch will not achieve the requested outcome. T3 Code's primitive implementations and shell structure are part of the source.
+- A visual-only patch will not achieve the requested outcome. T3 Code's directory and file shape are also part of the source.
+- Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` should not be removed merely because T3 Code is not a Next app.
+- Underscore implementation folders are the cleanup target. Do not add new `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, or `_metadata` folders in migrated areas.
+- The current generated design-system bridge can override copied tokens unless it is removed or changed for the tracked app.
+- T3 Code primitives use Base UI APIs such as `render`, while current call sites often assume Radix `asChild` and Radix export names.
+- Dark mode is currently split between global `next-themes`, docs-specific theme cookies/attributes, Prism/code styles, app-shell toggles, and widget CSS.
+- Auth, checkout, billing success, support/admin indicators, and protected app shell UI must preserve behavior while their visuals change.
+- The old `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and design-pack docs remain redirects, not doctrine. Do not add new rules there.
+- The Telegram widget is standalone package CSS and will not automatically inherit future app primitive changes.
+- Generated codebase work now depends on the `t3-code` preset and pinned starter template source. Keep compiler facts, template source, manifest digests, and tests in sync when changing that contract.
+
+## Outcomes & Retrospective
+
+This Program completed the T3 Code visual and structure migration without changing Ship by Sunday's brand identity. The source references remain `/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css`, `components.json`, the T3 Code UI primitive directory, app sidebar layout, chat/composer surfaces, settings layout, theme hook, and plain-module source shape.
+
+The tracked app moved to DM Sans, T3-compatible light and dark tokens, additive radii, compact primitive recipes, a T3-style protected sidebar shell, shared protected/public/edge route-surface helpers, migrated public marketing/docs/blog screens, protected dashboard/worker/tutorial/codebase screens, auth screens, checkout recovery screens, and global error/not-found surfaces. Ship by Sunday kept Next.js route groups, Radix-compatible public primitive APIs, Clerk, Convex, Stripe, `next-themes`, and existing business behavior where those were runtime architecture rather than visual doctrine.
+
+The old doctrine surfaces now redirect away from themselves: `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and `docs/ship-by-sunday/design-pack/` point to this completed Program and the structural map instead of serving as preserved design rules. Avoidable underscore implementation folders were reduced in several slices and are now documented as migration targets for future touched areas; some remain where removing them would be a separate route or data-flow refactor.
+
+The final closeout brought the standalone Telegram widget and generated customer repositories into scope. `packages/telegram-chat-widget` now styles launcher, panel, transcript, message, attachment, bug-report, composer, and error states from T3-compatible semantic fallbacks in light and dark mode. `packages/codebase-compiler` now defaults to `t3-code`, generated design facts name T3 Code/DM Sans/zinc/blue references, and `templates/starter-app/source` now ships T3-styled globals, local primitives, route chrome, marketing, app dashboard, chat, billing, auth, and error surfaces.
+
+The main lesson is that the migration was not a color-token swap. The result required copying the T3 Code component geometry, density, motion restraint, sidebar/workspace shape, and file-organization guidance while adapting those ideas to Ship by Sunday's existing Next.js and Radix runtime boundaries.
+
+## Validation and Acceptance
+
+This Program can move to completed only when:
+
+- `AGENTS.md`, `apps/web/AGENTS.md`, and docs routing point UI and structure work at this Program and T3 Code instead of old design/frontend doctrine.
+- `DESIGN.md`, `docs/DESIGN.md`, `docs/FRONTEND.md`, and design-pack guidance are retired, removed, or clearly marked as non-canonical cleanup targets.
+- A structural source map exists and distinguishes useful Next.js route groups from underscore implementation folders.
+- Avoidable `_components`, `_hooks`, `_lib`, `_server`, `_styles`, `_content`, `_fonts`, and `_metadata` implementation folders are migrated or intentionally deferred with reasons.
+- `apps/web` uses DM Sans and T3 Code token semantics for both light and dark mode.
+- The tracked app no longer injects old generated design-system CSS that overrides the T3 Code source contract.
+- Shared primitives used by app surfaces visibly match T3 Code button, card, input, badge, dialog, sheet, menu, sidebar, command, toast, tooltip, and form-control patterns or have documented equivalent adaptations.
+- Protected app shell, internal dashboard, codebase flow, worker setup/support/findings, settings/admin, tutorials/course, auth, checkout success, marketing/home/starter/workers/service pages, docs, blog, and public support surfaces have been migrated or explicitly deferred with reasons.
+- `packages/telegram-chat-widget` supports the T3 Code look in light and dark mode.
+- Generated customer codebases inherit the T3 Code visual system through compiler facts, starter templates, generated docs, and generated runtime UI.
+- Desktop and mobile browser proof exists for representative marketing, docs, app dashboard, worker, tutorial, auth/checkout, and Telegram widget states.
+- Generated-codebase proof exists for a representative downloaded app in light and dark mode.
+- Focused behavior tests cover any auth, checkout, support, or protected-route UI touched by visual rewrites.
+- `bun run format`, `bun lint`, `bun typecheck`, and the narrower app/package checks relevant to touched slices pass, or exact blockers are recorded in the owning ExecPlan.
+- Generated customer repositories and compiler output are migrated in this Program or explicitly deferred in the final retrospective with a new owner.
+
+Final closeout evidence:
+
+- `packages/telegram-chat-widget` focused gates passed: lint, format check, typecheck, and 19 tests across 5 files.
+- `packages/codebase-compiler` focused gates passed: lint, format check, typecheck, and 59 tests across 15 files.
+- Closeout docs and repo gates passed: `bun run format`, `bun run programs:lint`, `bun run plans:lint -- --plan docs/exec-plans/completed/2026-05-15-t3-code-program-closeout.md`, markdown lint for touched docs, `bun run lint`, `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun run typecheck`, and `git diff --check`.
+- Browser proof artifacts were captured in `codex-scripts/artifacts/t3-closeout/` for widget light desktop, widget dark mobile, and generated app light/dark desktop/mobile states.
+- The final closeout validation is recorded in `docs/exec-plans/completed/2026-05-15-t3-code-program-closeout.md`.
+
+## Artifacts and Notes
+
+Important T3 Code source references:
+
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/index.css`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/components.json`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ui`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/AppSidebarLayout.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/ChatView.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/chat/ChatComposer.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/components/settings/settingsLayout.tsx`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/hooks/useTheme.ts`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/routes`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/hooks`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/lib`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/rpc`
+- `/Users/bazelrex/Developer/oss/t3code/apps/web/src/environments`
+
+Important Ship by Sunday replacement surfaces:
+
+- `AGENTS.md`
+- `apps/web/AGENTS.md`
+- `DESIGN.md`
+- `docs/DESIGN.md`
+- `docs/FRONTEND.md`
+- `docs/ship-by-sunday/design-pack`
+- `apps/web/src/app/globals.css`
+- `apps/web/src/app/fonts.ts`
+- `apps/web/src/app/layout.tsx`
+- `apps/web/src/components/ui`
+- `apps/web/src/app/**/_components`
+- `apps/web/src/app/**/_hooks`
+- `apps/web/src/app/**/_lib`
+- `apps/web/src/app/**/_server`
+- `apps/web/src/app/**/_styles`
+- `apps/web/src/app/**/_content`
+- `apps/web/src/app/**/_fonts`
+- `apps/web/src/app/**/_metadata`
+- `apps/web/src/app/(app)/_components/app-shell`
+- `apps/web/src/app/(marketing)`
+- `apps/web/src/app/(marketing)/docs`
+- `apps/web/src/app/(app)/tutorials`
+- `apps/web/src/app/(app)/_components/existing-codebase-*`
+- `packages/telegram-chat-widget/src/styles/telegram-chat-widget.css`
+- `packages/codebase-compiler/src/design-system`
+- `packages/codebase-compiler/src/repo-generation`
+- `templates/starter-app/source`
+- `docs/generated`
+
+## Interfaces and Dependencies
+
+- Next.js App Router, `next-themes`, root layout, and global CSS loading in `apps/web`.
+- Next.js route groups remain a framework compatibility interface and are not themselves the structural cleanup target.
+- Tailwind CSS v4 CSS-first token definitions.
+- Shared UI primitives under `apps/web/src/components/ui`.
+- Clerk auth appearance and route protection surfaces.
+- Convex-backed protected app views that render worker, codebase, support, and course UI.
+- Telegram widget package exports and package CSS.
+- Codebase compiler design-system generation and starter app templates.
+- Retired design/frontend doctrine docs and design-pack docs that still need references removed or redirected.

@@ -62,7 +62,10 @@ Use local `bunx convex deploy --dry-run -y` for validation while preparing relea
 ## Key files
 
 - `schema.ts`: database schema and indexes
-- `access.ts`: product-access grants and access-read functions
+- `entitlements.ts`: product-access public and internal function registration
+- `entitlements/`: entitlement model, type definitions, and validators
+- `billing/validators.ts`: checkout and billing validation contracts
+- `migrations/legacyBillingReset.ts`: confirm-gated, dry-run-first legacy billing reset
 - `http.ts`: Convex HTTP routes, including the Stripe webhook
 - `course.ts`: lesson progress, mission, and lesson-state logic
 - `uploads.ts`: upload URL generation for lesson media fields
@@ -71,5 +74,5 @@ Use local `bunx convex deploy --dry-run -y` for validation while preparing relea
 ## Safeguards
 
 - Treat product access and lesson progress as production state.
-- Prefer adding tests around pure domain helpers in `lib/course/lesson/model/` before refactoring Convex behavior.
+- Prefer adding tests around pure domain helpers in `src/lib/course/lesson/model/` before refactoring Convex behavior.
 - If a change affects auth, purchase, or access gating, run `bun run check` before closing it.

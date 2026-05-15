@@ -1,4 +1,25 @@
+import {
+	DEFAULT_HOSTED_BILLING_PROOF_OFFER_ID,
+	parseHostedBillingProofOfferId,
+} from "../../../apps/web/scripts/lib/hosted-stripe-checkout-proof.mjs";
+
 const PRODUCTION_BILLING_PROOF_HOSTS = new Set(["www.man-meets-ai.com"]);
+
+function buildHostedBillingProofCommand({
+	baseUrl,
+	offerId,
+	scriptName,
+}) {
+	const command = ["bun", "run", "--cwd", "apps/web", scriptName, "--"];
+
+	if (baseUrl) {
+		command.push(`--base-url=${baseUrl}`);
+	}
+
+	command.push(`--offer=${offerId}`);
+
+	return command;
+}
 
 export function isProductionBillingTarget(urlString) {
 	try {
@@ -10,10 +31,12 @@ export function isProductionBillingTarget(urlString) {
 
 export function buildBillingIntegrationSteps({
 	authenticatedBrowserEnv,
+	billingProofOfferId = DEFAULT_HOSTED_BILLING_PROOF_OFFER_ID,
 	isLocalBillingTarget,
 	personaPrepareEnv,
 	targetUrl,
 }) {
+	const offerId = parseHostedBillingProofOfferId(billingProofOfferId);
 	const isProductionTarget = isProductionBillingTarget(targetUrl);
 	const isHostedDevTarget = !isLocalBillingTarget && !isProductionTarget;
 
@@ -62,13 +85,10 @@ export function buildBillingIntegrationSteps({
 			? [
 					{
 						label: "Run the hosted production billing proof",
-						command: [
-							"bun",
-							"run",
-							"--cwd",
-							"apps/web",
-							"stripe:hosted:verify",
-						],
+						command: buildHostedBillingProofCommand({
+							offerId,
+							scriptName: "stripe:hosted:verify",
+						}),
 						env: {
 							...authenticatedBrowserEnv,
 							PLAYWRIGHT_BASE_URL: targetUrl,
@@ -79,15 +99,11 @@ export function buildBillingIntegrationSteps({
 			: [
 					{
 						label: "Run the hosted dev card payment proof",
-						command: [
-							"bun",
-							"run",
-							"--cwd",
-							"apps/web",
-							"stripe:hosted:verify:dev-card",
-							"--",
-							`--base-url=${targetUrl}`,
-						],
+						command: buildHostedBillingProofCommand({
+							baseUrl: targetUrl,
+							offerId,
+							scriptName: "stripe:hosted:verify:dev-card",
+						}),
 						env: authenticatedBrowserEnv,
 						requireBrowserEvidence: true,
 					},

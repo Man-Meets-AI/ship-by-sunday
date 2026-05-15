@@ -1,38 +1,19 @@
 ---
-title: 'Design'
-summary: 'Cross-cutting visual and interaction doctrine for browser-facing surfaces in this repository.'
-docType: 'guide'
+title: 'Retired Design Route'
+summary: 'Pointer away from the old design doctrine after the T3 Code migration.'
+docType: 'redirect'
 status: 'active'
 read_when:
-  - 'You are making design or interaction decisions that should survive one feature branch.'
-  - 'You need the repo-wide design doctrine before changing a user-facing surface.'
+  - 'You followed an old link to docs/DESIGN.md.'
 ---
 
-# Design
+# Retired Design Route
 
-This file owns the cross-cutting visual and interaction doctrine for the repo. It should stay thinner than feature docs, but durable enough that design rules are not buried in chat history.
+This file is no longer a current doctrine surface.
 
-## Owns
+Use the completed T3 Code migration Program instead:
 
-- visual and interaction doctrine that should apply across more than one feature
-- routing to durable design notes
-- the distinction between design doctrine and frontend implementation rules
+- [program.md](programs/completed/2026-05-14-t3-code-source-design-system-port/program.md)
+- [structure-map-t3-code-to-ship-by-sunday.md](programs/completed/2026-05-14-t3-code-source-design-system-port/structure-map-t3-code-to-ship-by-sunday.md)
 
-## Does Not Own
-
-- component structure or code organization rules
-- product prioritization or requirements
-- one-off visual directions that are still specific to one thread
-
-## Current Stance
-
-- Prefer interfaces that feel intentional and legible over generic default scaffolds.
-- Use motion to explain state change or hierarchy, not as decoration.
-- Keep operator surfaces dense only when the density improves decision quality.
-- Promote recurring design rules into durable docs instead of hiding them in reviews or chat.
-- Use [docs/design-docs/ui-design-library.md](design-docs/ui-design-library.md) when auditing app UI font sizes, light/dark color roles, spacing, control sizes, or screenshot-grounded visual drift.
-
-## Next
-
-- Use [docs/design-docs/index.md](design-docs/index.md) for the current catalog of durable design notes.
-- Use [docs/FRONTEND.md](FRONTEND.md) for frontend implementation rules.
+The intended end state is to remove this redirect after repo references are migrated. Do not add new visual rules here.

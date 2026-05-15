@@ -35,15 +35,15 @@ This file is the canonical repo-wide architecture and ownership map. It explains
 
 ## App Structure Map
 
-Within `apps/web`, `app/` owns URL-addressable routes, route groups, route handlers, and private route UI. Route-local wrappers, controllers, view models, and redirect helpers belong under App Router private folders such as `_components`, `_hooks`, and `_lib`.
+Within `apps/web`, `src/app/` owns URL-addressable routes, route groups, route handlers, and thin route adapters. Next.js route groups such as `(auth)`, `(marketing)`, and `(app)` are framework organization and may stay when useful.
 
-`lib/` owns durable product domains and app-local logic that are reused across routes or need a stable product boundary. Current durable domains include codebase flow, course and lesson domain data, execute/ship support, workspace navigation, and observability.
+`src/lib/` owns durable product domains and app-local logic that are reused across routes or need a stable product boundary. Current durable domains include codebase flow, course and lesson domain data, execute/ship support, workspace navigation, and observability.
 
-Route-local product presentation lives under `app/` private folders. The homepage, blog, docs, workspace, checkout, and identity surfaces use route-owned `_components`, `_content`, `_hooks`, and `_lib` folders when the code only serves that route area.
+During the active T3 Code migration, historical route-local underscore implementation folders such as `_components`, `_content`, `_hooks`, `_lib`, `_server`, `_styles`, `_fonts`, and `_metadata` are migration inventory, not the preferred shape for new or migrated implementation. Move route-specific presentation and logic toward plain feature modules under `src/components`, `src/hooks`, or `src/lib` where framework constraints allow it.
 
-`platform/` owns environment, auth, billing, Convex, and Next.js platform adapters. `convex/` owns backend state, actions, and HTTP webhook routes. Browser-only route UI should not be imported from Convex code.
+`src/platform/` temporarily owns environment, auth, billing, Convex, and Next.js platform adapters until later Program slices move those helpers into named `src/lib/*` lanes. `convex/` owns backend state, actions, and HTTP webhook routes. Browser-only route UI should not be imported from Convex code.
 
-`components/ui` owns shared primitives and retained UI inventory. Feature-specific effects and route-specific UI belong with their feature or route owner instead of the shared primitive layer.
+`src/components/ui` owns shared primitives and retained UI inventory. Feature-specific effects and route-specific UI belong with their feature or route owner instead of the shared primitive layer.
 
 ## Entry Model
 

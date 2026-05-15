@@ -3,11 +3,11 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
+import type { WorkspaceFindingDocument } from "@/app/(app)/_lib/workspace-findings-read-model";
 import type {
 	WorkspacePrivacySetupState,
 	WorkspacePrivacySyncPreviewState,
-} from "@/app/(workspace)/_lib/workspace-support-read-model";
+} from "@/app/(app)/_lib/workspace-support-read-model";
 
 const {
 	markFindingsDeletedMock,
@@ -77,7 +77,7 @@ vi.mock("@/lib/observability/client-error-report", () => ({
 	reportClientError: reportClientErrorMock,
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -92,7 +92,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspacePrivacyPage } from "@/app/(workspace)/_components/existing-codebase-support/workspace-privacy-page";
+import { WorkspacePrivacyPage } from "@/app/(app)/_components/existing-codebase-support/workspace-privacy-page";
 
 function createSetupState(): WorkspacePrivacySetupState {
 	return {
@@ -264,7 +264,7 @@ describe("WorkspacePrivacyPage", () => {
 			],
 		});
 
-		render(
+		const { container } = render(
 			<WorkspacePrivacyPage
 				initialSetupState={createSetupState()}
 				initialSyncPreviewState={createSyncPreviewState()}
@@ -277,6 +277,16 @@ describe("WorkspacePrivacyPage", () => {
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-panel"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", { name: "Privacy controls" }),
 		).toBeTruthy();

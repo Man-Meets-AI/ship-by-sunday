@@ -45,7 +45,7 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
-		access: {
+		entitlements: {
 			viewerProductAccess: "viewerProductAccess",
 		},
 		codebase: {
@@ -269,6 +269,51 @@ describe("product access server helpers", () => {
 		});
 
 		expect(fetchQueryMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("claims a pending checkout even when the viewer already has another product", async () => {
+		getConvexServerSessionMock.mockResolvedValue({
+			userId: "user_123",
+			token: "token_123",
+		});
+		getPendingCheckoutSessionIdFromCookieMock.mockResolvedValue(
+			"cs_test_workers_pending_123",
+		);
+		fetchQueryMock
+			.mockResolvedValueOnce({
+				hasAccess: true,
+				clerkUserId: "user_123",
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials"],
+			})
+			.mockResolvedValueOnce({
+				hasAccess: true,
+				clerkUserId: "user_123",
+				status: "granted",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+			});
+		claimCheckoutSessionForViewerMock.mockResolvedValue({
+			kind: "validated",
+			sessionId: "cs_test_workers_pending_123",
+			claimResult: {
+				claim: "claimed",
+				grantResult: { granted: "inserted" },
+			},
+		});
+
+		const { getServerProductAccess } =
+			await import("@/platform/access/product-access");
+
+		await expect(getServerProductAccess()).resolves.toEqual({
+			hasAccess: true,
+			clerkUserId: "user_123",
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials", "worker"],
+		});
+		expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
+			"cs_test_workers_pending_123",
+		);
+		expect(fetchQueryMock).toHaveBeenCalledTimes(2);
 	});
 
 	it("claims a pending checkout from the fallback cookie before rendering the no-access shell", async () => {

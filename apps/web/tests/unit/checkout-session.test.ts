@@ -157,6 +157,8 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "sign_in_required",
 			sessionId: "cs_test_signed_out",
+			offerId: "starter",
+			checkoutEmail: undefined,
 		});
 	});
 
@@ -422,6 +424,7 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "wrong_account",
 			sessionId: "cs_test_wrong_account",
+			offerId: "starter",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "other@example.com",
 		});
@@ -441,6 +444,7 @@ describe("getCheckoutSessionState", () => {
 		await expect(getCheckoutSessionState("cs_test_pending")).resolves.toEqual({
 			kind: "payment_pending",
 			sessionId: "cs_test_pending",
+			offerId: "starter",
 			paymentStatus: "unpaid",
 		});
 	});
@@ -470,6 +474,7 @@ describe("getCheckoutSessionState", () => {
 			).resolves.toEqual({
 				kind: "validated",
 				sessionId: `cs_test_${paymentStatus}`,
+				offerId: "starter",
 				fulfillmentTrack: "generated_codebase",
 			});
 			expect(claimCheckoutSessionForViewerMock).toHaveBeenCalledWith(
@@ -507,6 +512,7 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "validated",
 			sessionId: "cs_test_existing_codebase",
+			offerId: "workers",
 			fulfillmentTrack: "existing_codebase_doctor",
 		});
 	});
@@ -539,6 +545,7 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "wrong_account",
 			sessionId: "cs_test_claim_wrong",
+			offerId: "starter",
 			checkoutEmail: "claim@example.com",
 			currentAccountEmail: "claim-current@example.com",
 		});
@@ -570,6 +577,7 @@ describe("getCheckoutSessionState", () => {
 		).resolves.toEqual({
 			kind: "sign_in_required",
 			sessionId: "cs_test_claim_sign_in",
+			offerId: "starter",
 			checkoutEmail: "buyer@example.com",
 			currentAccountEmail: "current@example.com",
 		});

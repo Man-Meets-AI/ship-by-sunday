@@ -11,6 +11,9 @@ const getServerProductAccessMock = vi.fn();
 const notFoundMock = vi.fn(() => {
 	throw new Error("NEXT_NOT_FOUND");
 });
+const redirectMock = vi.fn((href: string) => {
+	throw new Error(`NEXT_REDIRECT:${href}`);
+});
 
 function getWorkspaceLocalNavMarkup(markup: string) {
 	const localNavStart =
@@ -39,9 +42,10 @@ vi.mock("next/link", () => ({
 
 vi.mock("next/navigation", () => ({
 	notFound: () => notFoundMock(),
+	redirect: (href: string) => redirectMock(href),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -61,7 +65,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/execute-ship/bonus-lesson-view-tracker",
+	"@/app/(app)/_components/execute-ship/bonus-lesson-view-tracker",
 	() => ({
 		BonusLessonViewTracker: () => null,
 	}),
@@ -75,12 +79,9 @@ vi.mock("@/platform/access/product-access", () => ({
 	getServerProductAccess: getServerProductAccessMock,
 }));
 
-vi.mock(
-	"@/app/(workspace)/_components/access-required/access-required-page",
-	() => ({
-		AccessRequiredPage: () => <div>Access recovery</div>,
-	}),
-);
+vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
+	AccessRequiredPage: () => <div>Access recovery</div>,
+}));
 
 vi.mock("@/convex/_generated/api", () => ({
 	api: {
@@ -181,8 +182,10 @@ describe("workspace lesson route", () => {
 			clerkUserId: "user_123",
 			hasAccess: true,
 			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
 		});
 		notFoundMock.mockClear();
+		redirectMock.mockClear();
 		vi.resetModules();
 	});
 
@@ -194,7 +197,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(app)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -218,7 +221,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(app)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -266,7 +269,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(app)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -318,7 +321,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(app)/lesson/[lessonKey]/page");
 
 		const markup = renderToStaticMarkup(
 			await LessonRoutePage({
@@ -371,7 +374,7 @@ describe("workspace lesson route", () => {
 		});
 
 		const { default: LessonRoutePage } =
-			await import("@/app/(workspace)/lesson/[lessonKey]/page");
+			await import("@/app/(app)/lesson/[lessonKey]/page");
 
 		await expect(
 			LessonRoutePage({

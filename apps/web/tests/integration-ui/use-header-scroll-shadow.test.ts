@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { useHeaderScrollShadow } from "@/app/(workspace)/_hooks/app-shell/use-header-scroll-shadow";
+import { useHeaderScrollShadow } from "@/app/(app)/_hooks/app-shell/use-header-scroll-shadow";
 
 const MAIN_ID = "app-shell-main-test";
 

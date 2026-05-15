@@ -15,9 +15,15 @@ const getStripeModeLabelMock = vi.fn();
 const getStripeDashboardUrlMock = vi.fn();
 const getStripeProductDashboardUrlMock = vi.fn();
 const fetchActionMock = vi.fn();
+const fetchMutationMock = vi.fn();
+const fetchQueryMock = vi.fn();
+const getRateLimitedResponseMock = vi.fn();
+const recordBlockedSupportModeActionForRequestMock = vi.fn();
 
 vi.mock("convex/nextjs", () => ({
 	fetchAction: fetchActionMock,
+	fetchMutation: fetchMutationMock,
+	fetchQuery: fetchQueryMock,
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({
@@ -41,11 +47,21 @@ vi.mock("@/platform/next/app-url", () => ({
 	getAppBaseUrl: getAppBaseUrlMock,
 }));
 
+vi.mock("@/app/api/_lib/request-rate-limit", () => ({
+	getRateLimitedResponse: getRateLimitedResponseMock,
+}));
+
+vi.mock("@/platform/admin-impersonation/route-policy", () => ({
+	recordBlockedSupportModeActionForRequest:
+		recordBlockedSupportModeActionForRequestMock,
+}));
+
 const hostedCheckoutMetadata = {
 	metadataSchema: "mma_checkout_v1",
 	app: "man_meets_ai",
 	accessProduct: "paid_app_access",
 	purchaseIntentId: "purchase_intent_123",
+	offerId: "starter",
 	checkoutSurface: "hosted_checkout",
 } as const;
 
@@ -54,24 +70,20 @@ const expressCheckoutMetadata = {
 	checkoutSurface: "express_checkout",
 } as const;
 
-function createAuthState(userId: string | null) {
+function createAuthState(userId: string | null, token: string | null = null) {
 	return {
 		userId,
-		getToken: vi.fn().mockResolvedValue(null),
+		getToken: vi.fn().mockResolvedValue(token),
 	};
 }
 
-function createRequest(body?: unknown) {
+function createRequest(body: unknown = { offerId: "starter" }) {
 	return new Request("https://example.com/api/stripe/checkout", {
 		method: "POST",
-		...(body
-			? {
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(body),
-				}
-			: {}),
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(body),
 	});
 }
 
@@ -90,6 +102,10 @@ describe("POST /api/stripe/checkout", () => {
 		getStripeDashboardUrlMock.mockReset();
 		getStripeProductDashboardUrlMock.mockReset();
 		fetchActionMock.mockReset();
+		fetchMutationMock.mockReset();
+		fetchQueryMock.mockReset();
+		getRateLimitedResponseMock.mockReset();
+		recordBlockedSupportModeActionForRequestMock.mockReset();
 		fetchActionMock.mockImplementation(
 			async (_ref: unknown, args: Record<string, unknown>) => {
 				if ("checkoutSurface" in args) {
@@ -103,8 +119,18 @@ describe("POST /api/stripe/checkout", () => {
 				);
 			},
 		);
+		fetchQueryMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: false,
+			status: "no_access",
+			capabilities: [],
+		});
+		fetchMutationMock.mockResolvedValue({ kind: "not_impersonating" });
+		getRateLimitedResponseMock.mockReturnValue(null);
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(false);
 		process.env.CHECKOUT_FULFILLMENT_RETRY_SECRET =
 			"checkout_server_secret_123456789012345";
+		process.env.CLERK_SECRET_KEY = "clerk_secret_for_route_audit_tests";
 		getStripeModeLabelMock.mockReturnValue("test");
 		getStripeDashboardUrlMock.mockImplementation((path?: string) =>
 			path
@@ -115,12 +141,99 @@ describe("POST /api/stripe/checkout", () => {
 			"https://dashboard.stripe.com/test/products",
 		);
 		getStripePublishableKeyMock.mockReturnValue("pk_test_publishable");
-		getStripeCheckoutDiscountsMock.mockReturnValue([
-			{
-				promotion_code: "promo_50_off",
-			},
-		]);
+		getStripeCheckoutDiscountsMock.mockReturnValue(undefined);
 		vi.resetModules();
+	});
+
+	it("rejects missing or unsupported checkout offers before touching Stripe", async () => {
+		authMock.mockResolvedValue(createAuthState(null));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest({ offerId: "pro" }));
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			error: "A valid checkout offer is required.",
+			requestId: expect.any(String),
+		});
+		expect(getRateLimitedResponseMock).not.toHaveBeenCalled();
+		expect(recordBlockedSupportModeActionForRequestMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects malformed checkout offer payloads before touching Stripe", async () => {
+		authMock.mockResolvedValue(createAuthState(null));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(
+			new Request("https://example.com/api/stripe/checkout", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: "{",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({
+			error: "A valid checkout offer is required.",
+			requestId: expect.any(String),
+		});
+		expect(getRateLimitedResponseMock).not.toHaveBeenCalled();
+		expect(recordBlockedSupportModeActionForRequestMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+	});
+
+	it("returns the rate-limit response before support-mode or Stripe work", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		const rateLimitedResponse = Response.json(
+			{ error: "Too many checkout attempts." },
+			{ status: 429 },
+		);
+		getRateLimitedResponseMock.mockReturnValue(rateLimitedResponse);
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest());
+
+		expect(response).toBe(rateLimitedResponse);
+		expect(response.status).toBe(429);
+		expect(recordBlockedSupportModeActionForRequestMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+	});
+
+	it("blocks checkout while support mode is active", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		recordBlockedSupportModeActionForRequestMock.mockResolvedValue(true);
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest());
+
+		expect(response.status).toBe(403);
+		expect(await response.json()).toEqual({
+			error: "Checkout is unavailable during support mode.",
+			requestId: expect.any(String),
+		});
+		expect(recordBlockedSupportModeActionForRequestMock).toHaveBeenCalledWith(
+			expect.any(Request),
+			{
+				actionId: "stripe.checkout.createSession",
+				blockReason: "billing_action_blocked",
+			},
+		);
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
 	});
 
 	it("creates a guest checkout session when the viewer is signed out", async () => {
@@ -149,7 +262,7 @@ describe("POST /api/stripe/checkout", () => {
 			url: "https://checkout.stripe.com/pay/cs_guest_123",
 		});
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -164,6 +277,7 @@ describe("POST /api/stripe/checkout", () => {
 			expect.objectContaining({
 				client_reference_id: undefined,
 				customer_email: undefined,
+				allow_promotion_codes: true,
 				metadata: hostedCheckoutMetadata,
 				line_items: [
 					{
@@ -175,18 +289,126 @@ describe("POST /api/stripe/checkout", () => {
 						quantity: 1,
 					},
 				],
-				discounts: [{ promotion_code: "promo_50_off" }],
 				payment_intent_data: {
 					metadata: hostedCheckoutMetadata,
 				},
 			}),
 		);
+		expect(getStripeLineItemMock).toHaveBeenCalledWith("starter");
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 		expect(response.headers.get("set-cookie")).toContain(
 			"sbs_pending_checkout_session=cs_guest_123",
 		);
+	});
+
+	it("creates a Workers guest checkout session with Workers metadata", async () => {
+		authMock.mockResolvedValue(createAuthState(null));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		getStripeLineItemMock.mockReturnValue({
+			price_data: {
+				currency: "usd",
+				product_data: { name: "Ship by Sunday Workers" },
+				unit_amount: 60000,
+			},
+			quantity: 1,
+		});
+		assertManagedStripePriceMatchesProductConfigMock.mockResolvedValue(
+			undefined,
+		);
+		getStripeMock.mockReturnValue({
+			checkout: {
+				sessions: {
+					create: createSessionMock,
+				},
+			},
+		});
+		createSessionMock.mockResolvedValue({
+			id: "cs_workers_guest_123",
+			url: "https://checkout.stripe.com/pay/cs_workers_guest_123",
+		});
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest({ offerId: "workers" }));
+		const workersMetadata = {
+			...hostedCheckoutMetadata,
+			offerId: "workers",
+		};
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({
+			sessionId: "cs_workers_guest_123",
+			url: "https://checkout.stripe.com/pay/cs_workers_guest_123",
+		});
+		expect(createSessionMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				client_reference_id: undefined,
+				customer_email: undefined,
+				mode: "subscription",
+				metadata: workersMetadata,
+				line_items: [
+					{
+						price_data: {
+							currency: "usd",
+							product_data: { name: "Ship by Sunday Workers" },
+							recurring: {
+								interval: "month",
+							},
+							unit_amount: 60000,
+						},
+						quantity: 1,
+					},
+				],
+				subscription_data: {
+					metadata: workersMetadata,
+				},
+			}),
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"customer_creation",
+		);
+		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
+			"payment_intent_data",
+		);
+		expect(getStripeLineItemMock).toHaveBeenCalledWith("workers");
+		expect(
+			assertManagedStripePriceMatchesProductConfigMock,
+		).toHaveBeenCalledWith(expect.anything(), "workers");
+		expect(response.headers.get("set-cookie")).toContain(
+			"sbs_pending_checkout_session=cs_workers_guest_123",
+		);
+	});
+
+	it("blocks Workers checkout when the signed-in account already has Workers access", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123", "convex_token"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		fetchQueryMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["worker"],
+		});
+
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
+
+		const response = await POST(createRequest({ offerId: "workers" }));
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toEqual({
+			error: "Workers access is already active for this account.",
+			requestId: expect.any(String),
+		});
+		expect(fetchQueryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			{},
+			{ token: "convex_token" },
+		);
+		expect(currentUserMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+		expect(fetchActionMock).not.toHaveBeenCalled();
 	});
 
 	it("creates a checkout session with account metadata and ignores request intent", async () => {
@@ -220,7 +442,7 @@ describe("POST /api/stripe/checkout", () => {
 			url: "https://checkout.stripe.com/pay/cs_test_123",
 		});
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -237,7 +459,7 @@ describe("POST /api/stripe/checkout", () => {
 				cancel_url: "https://app.example.com/checkout/cancel",
 				client_reference_id: "user_123",
 				customer_email: "buyer@example.com",
-				discounts: [{ promotion_code: "promo_50_off" }],
+				allow_promotion_codes: true,
 				line_items: [
 					{
 						price_data: {
@@ -264,11 +486,12 @@ describe("POST /api/stripe/checkout", () => {
 			}),
 		);
 		expect(createSessionMock.mock.calls[0]?.[0]).not.toHaveProperty(
-			"allow_promotion_codes",
+			"discounts",
 		);
+		expect(getStripeLineItemMock).toHaveBeenCalledWith("starter");
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 	});
 
 	it("returns a server error when Stripe does not return a checkout URL", async () => {
@@ -295,7 +518,7 @@ describe("POST /api/stripe/checkout", () => {
 		});
 		createSessionMock.mockResolvedValue({ url: null });
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -308,7 +531,7 @@ describe("POST /api/stripe/checkout", () => {
 		expect(body.requestId).toBeTruthy();
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
 	});
 
 	it("returns a server error when the managed Stripe price fails validation", async () => {
@@ -336,7 +559,7 @@ describe("POST /api/stripe/checkout", () => {
 			),
 		);
 
-		const { POST } = await import("../../app/api/stripe/checkout/route");
+		const { POST } = await import("../../src/app/api/stripe/checkout/route");
 
 		const response = await POST(createRequest());
 
@@ -348,7 +571,38 @@ describe("POST /api/stripe/checkout", () => {
 		);
 		expect(
 			assertManagedStripePriceMatchesProductConfigMock,
-		).toHaveBeenCalledWith(expect.anything());
+		).toHaveBeenCalledWith(expect.anything(), "starter");
+	});
+
+	it("blocks express Workers checkout when the signed-in account already has Workers access", async () => {
+		authMock.mockResolvedValue(createAuthState("user_123", "convex_token"));
+		getAppBaseUrlMock.mockReturnValue("https://app.example.com");
+		fetchQueryMock.mockResolvedValue({
+			clerkUserId: "user_123",
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["worker"],
+		});
+
+		const { POST } =
+			await import("../../src/app/api/stripe/checkout/express/route");
+
+		const response = await POST(createRequest({ offerId: "workers" }));
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toEqual({
+			error: "Workers access is already active for this account.",
+			requestId: expect.any(String),
+		});
+		expect(fetchQueryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			{},
+			{ token: "convex_token" },
+		);
+		expect(currentUserMock).not.toHaveBeenCalled();
+		expect(getStripeMock).not.toHaveBeenCalled();
+		expect(createSessionMock).not.toHaveBeenCalled();
+		expect(fetchActionMock).not.toHaveBeenCalled();
 	});
 
 	it("creates an express checkout session with a client secret", async () => {
@@ -383,7 +637,7 @@ describe("POST /api/stripe/checkout", () => {
 		});
 
 		const { POST } =
-			await import("../../app/api/stripe/checkout/express/route");
+			await import("../../src/app/api/stripe/checkout/express/route");
 
 		const response = await POST(createRequest());
 
@@ -401,7 +655,7 @@ describe("POST /api/stripe/checkout", () => {
 				client_reference_id: "user_123",
 				customer_creation: "always",
 				customer_email: "buyer@example.com",
-				discounts: [{ promotion_code: "promo_50_off" }],
+				allow_promotion_codes: true,
 				mode: "payment",
 				metadata: expect.objectContaining({
 					...expressCheckoutMetadata,

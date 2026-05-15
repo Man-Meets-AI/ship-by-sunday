@@ -2,6 +2,7 @@
 .next.stale*
 apps/web/.next
 apps/web/.next.stale*
+apps/web/next-env.d.ts
 node_modules
 .DS_Store
 *.log
@@ -21,6 +22,7 @@ playwright-report
 apps/web/playwright-report
 test-results
 apps/web/test-results
+.screenshots/
 .codex-user-state
 codex-scripts/
 output/video-pipeline

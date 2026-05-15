@@ -1,29 +1,51 @@
 import { execFile } from "node:child_process";
-import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { chmod, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
+import {
+	chmod,
+	mkdir,
+	readFile,
+	realpath,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
 import { promisify } from "node:util";
 
+import { Effect, Layer } from "effect";
+
 import { runInstallCommand } from "../src/commands/install";
+import { BoundedProcessService } from "../src/core/bounded-process";
 import { SHIPBYSUNDAY_WORKER_CODEX_BLOCK_START } from "../src/core/codex-config-manager";
 import {
+	LocalRunnerHomeService,
 	RUNNER_HOME_ENV_VAR,
+	type RunnerCredential,
 	writeRunnerCredential,
 } from "../src/core/local-runner-home";
-import { readQueuedRunnerEvents } from "../src/core/runner-events";
+import {
+	readQueuedRunnerEvents,
+	RunnerEventService,
+	type RunnerEvent,
+} from "../src/core/runner-events";
+import { buildSkippedKickoff } from "../src/workflows/worker-foundations-install/kickoff";
+import {
+	runDogfoodChildPlanEffect,
+	runProofCommandsEffect,
+} from "../src/workflows/worker-foundations-install/proof";
 import {
 	runWorkerFoundationsInstall,
 	type WorkerInstallOptions,
-	type WorkerInstallResult,
 } from "../src/workflows/worker-foundations-install/workflow";
 import {
-	WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR,
-	WORKER_BUN_DOWNLOAD_URL_ENV_VAR,
 	WORKER_LICENSE_API_BASE_URL_ENV_VAR,
 	WORKER_LICENSE_OPEN_BROWSER_ENV_VAR,
 } from "../src/workflows/worker-foundations-install/manifest";
+import {
+	buildBlockedPlan,
+	finishAndMaybeSyncResultEffect,
+} from "../src/workflows/worker-foundations-install/result";
+import type { FinishResultInput } from "../src/workflows/worker-foundations-install/types";
 import {
 	createTemporaryDirectory,
 	initializeGitRepository,
@@ -54,7 +76,7 @@ describe("Worker Foundations install command", () => {
 			plan: { proofCommands: string[] };
 		};
 		expect(result.outcome).toBe("ready");
-		expect(result.plan.proofCommands).toContain("bun run docs:validate");
+		expect(result.plan.proofCommands).toContain("npm run docs:validate");
 		expect(output).not.toContain(repositoryRoot);
 		expect(output).not.toContain(workerHome);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
@@ -126,6 +148,500 @@ describe("Worker Foundations install command", () => {
 		} finally {
 			await runnerEventServer.close();
 		}
+	});
+
+	it("syncs Worker install events through injected Effect services", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const credential: RunnerCredential = {
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			runnerToken: "sbs_run_injected",
+			apiBaseUrl: "https://runner.example.test",
+			eventEndpoint: "/api/workspace/runner/events",
+			updatedAt: 1,
+		};
+		const credentialRequests: Array<{
+			repositoryRoot: string;
+			runnerHome: string;
+		}> = [];
+		const queuedEvents: RunnerEvent[] = [];
+		const flushRequests: Array<{
+			repositoryRoot: string;
+			runnerToken: string;
+		}> = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: (request) =>
+					Effect.sync(() => {
+						credentialRequests.push({
+							repositoryRoot: request.repositoryRoot,
+							runnerHome: request.runnerHome,
+						});
+						return credential;
+					}),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: (request) =>
+					Effect.sync(() => {
+						queuedEvents.push(request.event);
+					}),
+				readQueued: () => Effect.succeed([]),
+				flush: (request) =>
+					Effect.sync(() => {
+						flushRequests.push({
+							repositoryRoot: request.repositoryRoot,
+							runnerToken: request.credential.runnerToken,
+						});
+						return { delivered: 1, remaining: 0 };
+					}),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect({
+				outcome: "installed",
+				exitCode: 0,
+				summary: "Worker Foundations installed.",
+				context: {
+					env: { [RUNNER_HOME_ENV_VAR]: runnerHome },
+					now: 123,
+					options: workerInstallOptions({ repoPath: repositoryRoot }),
+					repositoryRoot,
+					workerHome: "/virtual/worker-home",
+					runId: "worker-install-injected",
+				},
+				plan: buildBlockedPlan({ packageManager: "npm", blockers: [] }),
+				proof: [{ command: "npm run docs:validate", status: "passed" }],
+				createdRefs: ["apps/worker/package.json"],
+				changedRefs: [],
+				branch: "worker-foundations/install",
+				commit: "0123456789abcdef",
+				localProofRef: "docs/worker/local-proof.json",
+				reportRef: "docs/worker/install-report.md",
+				kickoff: buildSkippedKickoff("disabled"),
+			}).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+		expect(credentialRequests).toEqual([{ repositoryRoot, runnerHome }]);
+		expect(queuedEvents).toHaveLength(1);
+		expect(queuedEvents[0]).toMatchObject({
+			eventType: "worker.install.completed",
+			projectId: credential.projectId,
+			runnerId: credential.runnerId,
+		});
+		expect(queuedEvents[0].payload).toMatchObject({
+			eventType: "worker.install.completed",
+			outcome: "installed",
+			status: "installed",
+			summary: "Worker Foundations installed.",
+			createdRefs: ["apps/worker/package.json"],
+			changedRefs: [],
+			proofCommandResults: [
+				{ commandLabel: "npm run docs:validate", status: "passed" },
+			],
+			reportRef: "docs/worker/install-report.md",
+			localProofRef: "docs/worker/local-proof.json",
+		});
+		expect(flushRequests).toEqual([
+			{ repositoryRoot, runnerToken: credential.runnerToken },
+		]);
+	});
+
+	it("runs Worker proof commands through an injected Effect process service", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const processRequests: Array<{
+			args: string[];
+			command: string;
+			cwd: string | undefined;
+			timeoutMs: number;
+			workerHome: string | undefined;
+		}> = [];
+		const boundedProcessLayer = Layer.succeed(
+			BoundedProcessService,
+			BoundedProcessService.of({
+				run: (request) =>
+					Effect.sync(() => {
+						processRequests.push({
+							args: request.args,
+							command: request.command,
+							cwd: request.cwd,
+							timeoutMs: request.timeoutMs,
+							workerHome: request.env.SHIPBYSUNDAY_WORKER_HOME,
+						});
+						const scriptName = request.args[1];
+						return {
+							succeeded: scriptName !== "plans:lint",
+							stdout: `ran ${scriptName}`,
+							stderr: "",
+							timedOut: false,
+							...(scriptName === "plans:lint" ? { exitCode: 7 } : {}),
+						};
+					}),
+			}),
+		);
+
+		const proof = await Effect.runPromise(
+			runProofCommandsEffect(
+				workerFinishContext({ repositoryRoot }),
+				"npm",
+			).pipe(Effect.provide(boundedProcessLayer)),
+		);
+
+		expect(proof).toEqual([
+			{ command: "npm run programs:lint", status: "passed" },
+			{ command: "npm run plans:lint", status: "failed" },
+		]);
+		expect(processRequests).toEqual([
+			{
+				command: "npm",
+				args: ["run", "programs:lint"],
+				cwd: repositoryRoot,
+				timeoutMs: 30_000,
+				workerHome: "/virtual/worker-home",
+			},
+			{
+				command: "npm",
+				args: ["run", "plans:lint"],
+				cwd: repositoryRoot,
+				timeoutMs: 30_000,
+				workerHome: "/virtual/worker-home",
+			},
+		]);
+	});
+
+	it("runs Worker dogfood child-plan proof through an injected Effect process service", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const processRequests: Array<{
+			args: string[];
+			command: string;
+			cwd: string | undefined;
+			timeoutMs: number;
+		}> = [];
+		const boundedProcessLayer = Layer.succeed(
+			BoundedProcessService,
+			BoundedProcessService.of({
+				run: (request) =>
+					Effect.sync(() => {
+						processRequests.push({
+							args: request.args,
+							command: request.command,
+							cwd: request.cwd,
+							timeoutMs: request.timeoutMs,
+						});
+						return {
+							succeeded: true,
+							stdout: "created child plan",
+							stderr: "",
+							timedOut: false,
+						};
+					}),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			runDogfoodChildPlanEffect(
+				workerFinishContext({ repositoryRoot }),
+				"npm",
+			).pipe(Effect.provide(boundedProcessLayer)),
+		);
+
+		expect(result).toMatchObject({
+			command:
+				"npm run program:write-child-plan -- --program-id worker-foundations-adoption --plan docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md --title Continue Worker Foundations Adoption --summary Continue from the installed Worker Foundations operating system.",
+			succeeded: true,
+			stdout: "created child plan",
+			timedOut: false,
+		});
+		expect(processRequests).toEqual([
+			{
+				command: "npm",
+				args: [
+					"run",
+					"program:write-child-plan",
+					"--",
+					"--program-id",
+					"worker-foundations-adoption",
+					"--plan",
+					"docs/exec-plans/active/2026-05-08-worker-foundations-first-plan.md",
+					"--title",
+					"Continue Worker Foundations Adoption",
+					"--summary",
+					"Continue from the installed Worker Foundations operating system.",
+				],
+				cwd: repositoryRoot,
+				timeoutMs: 30_000,
+			},
+		]);
+	});
+
+	it("swallows Worker install credential lookup failures after result construction", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const credentialRequests: Array<{
+			repositoryRoot: string;
+			runnerHome: string;
+		}> = [];
+		const queuedEvents: RunnerEvent[] = [];
+		const flushRequests: string[] = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: (request) =>
+					Effect.sync(() => {
+						credentialRequests.push({
+							repositoryRoot: request.repositoryRoot,
+							runnerHome: request.runnerHome,
+						});
+					}).pipe(
+						Effect.flatMap(() =>
+							Effect.fail(new Error("Runner credential lookup unavailable.")),
+						),
+					),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: (request) =>
+					Effect.sync(() => {
+						queuedEvents.push(request.event);
+					}),
+				readQueued: () => Effect.succeed([]),
+				flush: (request) =>
+					Effect.sync(() => {
+						flushRequests.push(request.repositoryRoot);
+						return { delivered: 0, remaining: 0 };
+					}),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect(
+				workerFinishResultInput({
+					context: workerFinishContext({ repositoryRoot, runnerHome }),
+				}),
+			).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+		expect(credentialRequests).toEqual([{ repositoryRoot, runnerHome }]);
+		expect(queuedEvents).toEqual([]);
+		expect(flushRequests).toEqual([]);
+	});
+
+	it("swallows Worker install event construction defects from stale credentials", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const unsafeCredential: RunnerCredential = {
+			projectId: "/tmp/workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			runnerToken: "sbs_run_stale",
+			apiBaseUrl: "https://runner.example.test",
+			eventEndpoint: "/api/workspace/runner/events",
+			updatedAt: 1,
+		};
+		const queuedEvents: RunnerEvent[] = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: () => Effect.succeed(unsafeCredential),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: (request) =>
+					Effect.sync(() => {
+						queuedEvents.push(request.event);
+					}),
+				readQueued: () => Effect.succeed([]),
+				flush: () => Effect.succeed({ delivered: 0, remaining: 0 }),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect(
+				workerFinishResultInput({
+					context: workerFinishContext({ repositoryRoot, runnerHome }),
+				}),
+			).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+		expect(queuedEvents).toEqual([]);
+	});
+
+	it("swallows Worker install event queue failures after result construction", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const credential: RunnerCredential = {
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			runnerToken: "sbs_run_queue_failure",
+			apiBaseUrl: "https://runner.example.test",
+			eventEndpoint: "/api/workspace/runner/events",
+			updatedAt: 1,
+		};
+		const flushRequests: string[] = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: () => Effect.succeed(credential),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: () => Effect.fail(new Error("Runner event queue unavailable.")),
+				readQueued: () => Effect.succeed([]),
+				flush: (request) =>
+					Effect.sync(() => {
+						flushRequests.push(request.repositoryRoot);
+					}).pipe(
+						Effect.flatMap(() =>
+							Effect.fail(new Error("Flush should not run.")),
+						),
+					),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect(
+				workerFinishResultInput({
+					context: workerFinishContext({ repositoryRoot, runnerHome }),
+				}),
+			).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+		expect(flushRequests).toEqual([]);
+	});
+
+	it("swallows Worker install event flush failures after queueing event", async () => {
+		const repositoryRoot = "/virtual/repository";
+		const runnerHome = "/virtual/runner-home";
+		const credential: RunnerCredential = {
+			projectId: "workspaceProjects_1",
+			runnerId: "workspaceRunnerBindings_1",
+			runnerToken: "sbs_run_flush_failure",
+			apiBaseUrl: "https://runner.example.test",
+			eventEndpoint: "/api/workspace/runner/events",
+			updatedAt: 1,
+		};
+		const queuedEvents: RunnerEvent[] = [];
+		const flushRequests: Array<{
+			repositoryRoot: string;
+			runnerToken: string;
+		}> = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: () => Effect.succeed(credential),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: (request) =>
+					Effect.sync(() => {
+						queuedEvents.push(request.event);
+					}),
+				readQueued: () => Effect.succeed([]),
+				flush: (request) =>
+					Effect.sync(() => {
+						flushRequests.push({
+							repositoryRoot: request.repositoryRoot,
+							runnerToken: request.credential.runnerToken,
+						});
+					}).pipe(
+						Effect.flatMap(() =>
+							Effect.fail(new Error("Runner event flush unavailable.")),
+						),
+					),
+			}),
+		);
+
+		const result = await Effect.runPromise(
+			finishAndMaybeSyncResultEffect(
+				workerFinishResultInput({
+					context: workerFinishContext({ repositoryRoot, runnerHome }),
+				}),
+			).pipe(
+				Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+			),
+		);
+
+		expect(result.outcome).toBe("installed");
+		expect(queuedEvents).toHaveLength(1);
+		expect(queuedEvents[0]).toMatchObject({
+			eventType: "worker.install.completed",
+			projectId: credential.projectId,
+			runnerId: credential.runnerId,
+		});
+		expect(flushRequests).toEqual([
+			{ repositoryRoot, runnerToken: credential.runnerToken },
+		]);
+	});
+
+	it("surfaces Worker install result construction failures before event sync", async () => {
+		const credentialRequests: string[] = [];
+		const localRunnerHomeLayer = Layer.succeed(
+			LocalRunnerHomeService,
+			LocalRunnerHomeService.of({
+				ensureHome: (request) => Effect.succeed(request.runnerHome),
+				readCredential: (request) =>
+					Effect.sync(() => {
+						credentialRequests.push(request.repositoryRoot);
+						return null;
+					}),
+				writeCredential: () => Effect.void,
+			}),
+		);
+		const runnerEventLayer = Layer.succeed(
+			RunnerEventService,
+			RunnerEventService.of({
+				queue: () => Effect.void,
+				readQueued: () => Effect.succeed([]),
+				flush: () => Effect.succeed({ delivered: 0, remaining: 0 }),
+			}),
+		);
+
+		await expect(
+			Effect.runPromise(
+				finishAndMaybeSyncResultEffect(
+					workerFinishResultInput({
+						createdRefs: ["/tmp/unsafe-local-ref"],
+					}),
+				).pipe(
+					Effect.provide(Layer.merge(localRunnerHomeLayer, runnerEventLayer)),
+				),
+			),
+		).rejects.toThrow("worker install result is not sync-safe");
+		expect(credentialRequests).toEqual([]);
 	});
 
 	it("does not sync Worker install events when runner credentials are absent", async () => {
@@ -319,26 +835,47 @@ describe("Worker Foundations install command", () => {
 		expect(result.outcome).toBe("installed");
 		expect(result.proof).toEqual(
 			expect.arrayContaining([
-				{ command: "bun run docs:validate", status: "passed" },
-				{ command: "bun run worker:test", status: "passed" },
+				{ command: "npm run docs:validate", status: "passed" },
+				{ command: "npm run worker:test", status: "passed" },
 			]),
 		);
 
 		const packageJson = JSON.parse(
 			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-		) as { scripts: Record<string, string> };
+		) as { packageManager: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBe("npm@11.12.1");
 		expect(packageJson.scripts["docs:validate"]).toBe(
 			"./scripts/run-worker.sh docs:validate",
+		);
+		expect(packageJson.scripts["execplan:build"]).toBe(
+			"./scripts/run-worker.sh execplan:build",
 		);
 		expect(packageJson.scripts["worker:test"]).toBe(
 			"./scripts/run-worker.sh test",
 		);
 		expect(
 			await readFile(
-				path.join(repositoryRoot, "apps/worker/src/worker-cli.ts"),
+				path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs"),
 				"utf8",
 			),
 		).toContain("program:write-child-plan");
+		const workerCliSource = await readFile(
+			path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs"),
+			"utf8",
+		);
+		expect(workerCliSource).toContain("ship-by-sunday@0.1.0");
+		expect(workerCliSource).toContain("cmd.exe");
+		expect(workerCliSource).toContain("isWindowsCommandScript");
+		const runWorkerShell = await readFile(
+			path.join(repositoryRoot, "scripts/run-worker.sh"),
+			"utf8",
+		);
+		expect(runWorkerShell).toContain(
+			'PATH="${PATH:+$PATH:}$NODE_DIR"; export PATH',
+		);
+		await expect(
+			readFile(path.join(repositoryRoot, "README.md"), "utf8"),
+		).resolves.toContain("SHIPBYSUNDAY_PACKAGE_SPEC");
 		const activeChildPlan = await readFile(
 			path.join(
 				repositoryRoot,
@@ -358,7 +895,7 @@ describe("Worker Foundations install command", () => {
 		);
 		await expect(
 			execFileAsync(
-				"bun",
+				"npm",
 				["run", "plans:lint", "--", "--plan", completedPlanRef],
 				{ cwd: repositoryRoot },
 			),
@@ -371,6 +908,126 @@ describe("Worker Foundations install command", () => {
 				"utf8",
 			),
 		).toContain("Outcome: `installed`");
+	});
+
+	it("forwards installed execplan:build to the autonomous runner", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const fakeRunnerBin = await createFakeShipBySundayRunnerBin();
+		await expect(
+			execFileAsync(
+				"./scripts/run-worker.sh",
+				[
+					"execplan:build",
+					"--program-id",
+					"worker-foundations-adoption",
+					"--max-slices",
+					"1",
+				],
+				{
+					cwd: repositoryRoot,
+					env: {
+						...process.env,
+						PATH: `${fakeRunnerBin.binDirectory}${path.delimiter}${process.env.PATH ?? ""}`,
+					},
+				},
+			),
+		).resolves.toMatchObject({ stderr: "", stdout: "" });
+
+		const forwardedRepositoryRoot = await realpath(repositoryRoot);
+		await expect(readFile(fakeRunnerBin.argsPath, "utf8")).resolves.toBe(
+			[
+				"execplan",
+				"build",
+				"--repo",
+				forwardedRepositoryRoot,
+				"--program-id",
+				"worker-foundations-adoption",
+				"--max-slices",
+				"1",
+				"",
+			].join("\n"),
+		);
+	});
+
+	it("falls back to package execution after npx-style installs", async () => {
+		const repositoryRoot = await createFixtureRepository();
+		const workerHome = await createWorkerHome();
+		vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+		await expect(
+			runInstallCommand(
+				[
+					"--repo",
+					repositoryRoot,
+					"--yes",
+					"--json",
+					"--no-kickoff",
+					"--no-commit",
+				],
+				{ ...process.env, SHIPBYSUNDAY_WORKER_HOME: workerHome },
+			),
+		).resolves.toBe(0);
+
+		const fakePackageRunnerBin = await createFakePackageRunnerBin();
+		await expect(
+			execFileAsync(
+				"npm",
+				[
+					"run",
+					"execplan:build",
+					"--",
+					"--program-id",
+					"worker-foundations-adoption",
+					"--max-slices",
+					"1",
+				],
+				{
+					cwd: repositoryRoot,
+					env: {
+						...process.env,
+						PATH: fakePackageRunnerBin.binDirectory,
+					},
+				},
+			),
+		).resolves.toMatchObject({ stderr: "", stdout: "" });
+
+		const forwardedRepositoryRoot = await realpath(repositoryRoot);
+		await expect(
+			readFile(fakePackageRunnerBin.npxArgsPath, "utf8"),
+		).resolves.toBe(
+			[
+				"--yes",
+				"--package",
+				"ship-by-sunday@0.1.0",
+				"ship-by-sunday",
+				"execplan",
+				"build",
+				"--repo",
+				forwardedRepositoryRoot,
+				"--program-id",
+				"worker-foundations-adoption",
+				"--max-slices",
+				"1",
+				"",
+			].join("\n"),
+		);
 	});
 
 	it("auto-commits tracked install files without staging ignored Worker state", async () => {
@@ -437,8 +1094,8 @@ describe("Worker Foundations install command", () => {
 			);
 			expect(syncedEvent.payload.proofCommandResults).toEqual(
 				expect.arrayContaining([
-					{ commandLabel: "bun run docs:validate", status: "passed" },
-					{ commandLabel: "bun run worker:test", status: "passed" },
+					{ commandLabel: "npm run docs:validate", status: "passed" },
+					{ commandLabel: "npm run worker:test", status: "passed" },
 				]),
 			);
 			expect(JSON.stringify(syncedEvent)).not.toContain(repositoryRoot);
@@ -471,7 +1128,7 @@ describe("Worker Foundations install command", () => {
 		}
 	});
 
-	it("does not write packageManager identity for Bun lockfile-owned roots", async () => {
+	it("cuts Bun lockfile-owned roots over to npm identity", async () => {
 		const repositoryRoot = await createFixtureRepository({
 			files: {
 				"bun.lock": "# existing owner lockfile\n",
@@ -505,18 +1162,18 @@ describe("Worker Foundations install command", () => {
 		const result = JSON.parse(output) as {
 			plan: { packageManager: string };
 		};
-		expect(result.plan.packageManager).toBe("bun");
+		expect(result.plan.packageManager).toBe("npm");
 		const packageJson = JSON.parse(
 			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-		) as { packageManager?: string; scripts: Record<string, string> };
-		expect(packageJson.packageManager).toBeUndefined();
+		) as { packageManager: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBe("npm@11.12.1");
 		expect(packageJson.scripts.dev).toBe("bun --version");
 		expect(await readFile(path.join(repositoryRoot, "bun.lock"), "utf8")).toBe(
 			"# existing owner lockfile\n",
 		);
-	});
+	}, 45_000);
 
-	it("does not write packageManager identity for legacy Bun lockfile-owned roots", async () => {
+	it("cuts legacy Bun lockfile-owned roots over to npm identity", async () => {
 		const repositoryRoot = await createFixtureRepository({
 			files: {
 				"bun.lockb": "legacy bun binary lock placeholder\n",
@@ -550,16 +1207,16 @@ describe("Worker Foundations install command", () => {
 		const result = JSON.parse(output) as {
 			plan: { packageManager: string };
 		};
-		expect(result.plan.packageManager).toBe("bun");
+		expect(result.plan.packageManager).toBe("npm");
 		const packageJson = JSON.parse(
 			await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-		) as { packageManager?: string; scripts: Record<string, string> };
-		expect(packageJson.packageManager).toBeUndefined();
+		) as { packageManager: string; scripts: Record<string, string> };
+		expect(packageJson.packageManager).toBe("npm@11.12.1");
 		expect(packageJson.scripts.dev).toBe("bun --version");
 		expect(await readFile(path.join(repositoryRoot, "bun.lockb"), "utf8")).toBe(
 			"legacy bun binary lock placeholder\n",
 		);
-	});
+	}, 45_000);
 
 	it("does not write packageManager identity for npm shrinkwrap-owned roots", async () => {
 		const repositoryRoot = await createFixtureRepository({
@@ -611,7 +1268,7 @@ describe("Worker Foundations install command", () => {
 		expect(packageJson.scripts.dev).toBe("node server.js");
 	});
 
-	it("blocks missing non-Bun package-manager commands before repo mutation", async () => {
+	it("blocks missing package-manager commands before repo mutation", async () => {
 		const repositoryRoot = await createFixtureRepository({
 			packageJson: {
 				name: "missing-pnpm-command",
@@ -695,302 +1352,39 @@ describe("Worker Foundations install command", () => {
 			"utf8",
 		);
 		expect(countWorkerManagedStarts(agents)).toBe(1);
-	});
+	}, 45_000);
 
-	it("provisions a Worker-managed Bun toolchain when Bun is not on PATH", async () => {
+	it("blocks before repo mutation when Node is not on PATH", async () => {
 		const repositoryRoot = await createFixtureRepository();
 		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
+		const pathWithoutNode = await createTemporaryDirectory(
+			"worker-no-node-path-",
 		);
-		const bunExecutable = findExecutableOnPath("bun");
 		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
 		await expect(
 			runInstallCommand(
-				[
-					"--repo",
-					repositoryRoot,
-					"--yes",
-					"--json",
-					"--no-kickoff",
-					"--no-commit",
-				],
+				["--repo", repositoryRoot, "--dry-run", "--json", "--no-kickoff"],
 				{
 					...process.env,
-					PATH: pathWithoutBun,
-					SHIPBYSUNDAY_WORKER_HOME: workerHome,
-					SHIPBYSUNDAY_WORKER_BUN: bunExecutable,
-				},
-			),
-		).resolves.toBe(0);
-
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-			plan: {
-				toolchain: {
-					runtime: string;
-					status: string;
-					origin: string;
-					targetRef: string;
-				};
-			};
-			proof: Array<{ command: string; status: string }>;
-		};
-		expect(result.outcome).toBe("installed");
-		expect(result.plan.toolchain).toEqual({
-			runtime: "bun",
-			status: "provisionable",
-			origin: "explicit-env",
-			targetRef: "worker-home/toolchains/bun/bin/bun",
-		});
-		expect(output).not.toContain(workerHome);
-		expect(existsSync(path.join(workerHome, "toolchains/bun/bin/bun"))).toBe(
-			true,
-		);
-		expect(result.proof).toEqual(
-			expect.arrayContaining([
-				{ command: "bun run docs:validate", status: "passed" },
-			]),
-		);
-	});
-
-	it("lets BUN override a stale Worker-managed Bun in the direct launcher", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const staleManagedBun = path.join(workerHome, "toolchains/bun/bin/bun");
-		await mkdir(path.dirname(staleManagedBun), { recursive: true });
-		await writeFile(staleManagedBun, "#!/bin/sh\necho 1.2.3\n");
-		await chmod(staleManagedBun, 0o755);
-		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		await expect(
-			runInstallCommand(
-				[
-					"--repo",
-					repositoryRoot,
-					"--yes",
-					"--json",
-					"--no-kickoff",
-					"--no-commit",
-				],
-				{
-					...process.env,
-					BUN: findExecutableOnPath("bun"),
+					PATH: pathWithoutNode,
 					SHIPBYSUNDAY_WORKER_HOME: workerHome,
 				},
 			),
-		).resolves.toBe(0);
+		).resolves.toBe(2);
 
 		const result = JSON.parse(logSpy.mock.calls.join("\n")) as {
 			outcome: string;
-			proof: Array<{ command: string; status: string }>;
+			plan: { blockers: Array<{ blockerId: string }> };
 		};
-		expect(result.outcome).toBe("installed");
-		expect(result.proof).toEqual(
+		expect(result.outcome).toBe("blocked");
+		expect(result.plan.blockers).toEqual(
 			expect.arrayContaining([
-				{ command: "bun run worker:test", status: "passed" },
+				expect.objectContaining({ blockerId: "worker-node-runtime" }),
 			]),
 		);
-	});
-
-	it("downloads a Worker-managed Bun toolchain when no local Bun source is usable", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunPayload = await readFile(findExecutableOnPath("bun"));
-		const bunDownloadServer = await createBunDownloadServer(bunPayload);
-		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		try {
-			await expect(
-				runInstallCommand(
-					[
-						"--repo",
-						repositoryRoot,
-						"--yes",
-						"--json",
-						"--no-kickoff",
-						"--no-commit",
-					],
-					{
-						...process.env,
-						PATH: pathWithoutBun,
-						SHIPBYSUNDAY_WORKER_HOME: workerHome,
-						[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunPayload),
-						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-					},
-				),
-			).resolves.toBe(0);
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-			plan: {
-				toolchain: {
-					origin: string;
-					status: string;
-				};
-			};
-			proof: Array<{ command: string; status: string }>;
-		};
-		expect(result.outcome).toBe("installed");
-		expect(result.plan.toolchain).toMatchObject({
-			origin: "download",
-			status: "provisionable",
-		});
-		expect(output).not.toContain(workerHome);
-		expect(output).not.toContain(bunDownloadServer.url);
-		expect(existsSync(path.join(workerHome, "toolchains/bun/bin/bun"))).toBe(
-			true,
-		);
-		expect(result.proof).toEqual(
-			expect.arrayContaining([
-				{ command: "bun run docs:validate", status: "passed" },
-			]),
-		);
-	});
-
-	it("fails before repo mutation when downloaded Bun does not run", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunPayload = Buffer.from("#!/bin/sh\necho 1.2.3\n");
-		const bunDownloadServer = await createBunDownloadServer(bunPayload);
-		const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
-		try {
-			await expect(
-				runInstallCommand(
-					[
-						"--repo",
-						repositoryRoot,
-						"--yes",
-						"--json",
-						"--no-kickoff",
-						"--no-commit",
-					],
-					{
-						...process.env,
-						PATH: pathWithoutBun,
-						SHIPBYSUNDAY_WORKER_HOME: workerHome,
-						[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunPayload),
-						[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-					},
-				),
-			).resolves.toBe(1);
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		const output = logSpy.mock.calls.join("\n");
-		const result = JSON.parse(output) as {
-			outcome: string;
-		};
-		expect(result.outcome).toBe("failed");
-		expect(output).not.toContain(bunDownloadServer.url);
 		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
-	});
-
-	it("rejects unsafe downloaded Bun zip entries before repo mutation", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunArchiveAssetName = currentBunArchiveAssetName();
-		const archiveRoot = bunArchiveAssetName.replace(/\.zip$/u, "");
-		const executableName = process.platform === "win32" ? "bun.exe" : "bun";
-		const bunArchive = createStoredZip([
-			{
-				name: `${archiveRoot}/`,
-				content: Buffer.alloc(0),
-				unixMode: 0o040755,
-			},
-			{
-				name: `${archiveRoot}/${executableName}`,
-				content: Buffer.from("#!/bin/sh\necho 1.3.5\n"),
-				unixMode: 0o100755,
-			},
-			{
-				name: "../escape",
-				content: Buffer.from("unsafe"),
-				unixMode: 0o100644,
-			},
-		]);
-		const bunDownloadServer = await createBunDownloadServer(bunArchive, {
-			contentType: "application/zip",
-			route: `/${bunArchiveAssetName}`,
-		});
-		let result: WorkerInstallResult | null = null;
-
-		try {
-			result = await runWorkerFoundationsInstall({
-				options: workerInstallOptions({
-					repoPath: repositoryRoot,
-				}),
-				env: {
-					...process.env,
-					PATH: pathWithoutBun,
-					SHIPBYSUNDAY_WORKER_HOME: workerHome,
-					[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: sha256(bunArchive),
-					[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-				},
-			});
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		if (!result)
-			throw new Error("Unsafe archive test did not produce a result.");
-		expect(result.outcome).toBe("failed");
-		expect(result.summary).toContain("unsafe entries");
-		expect(JSON.stringify(result.report)).not.toContain("escape");
-		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
-		expect(existsSync(path.join(repositoryRoot, "docs/worker"))).toBe(false);
-	});
-
-	it("fails before repo mutation when downloaded Bun checksum mismatches", async () => {
-		const repositoryRoot = await createFixtureRepository();
-		const workerHome = await createWorkerHome();
-		const pathWithoutBun = await createTemporaryDirectory(
-			"worker-no-bun-path-",
-		);
-		const bunPayload = await readFile(findExecutableOnPath("bun"));
-		const bunDownloadServer = await createBunDownloadServer(bunPayload);
-		let result: WorkerInstallResult | null = null;
-
-		try {
-			result = await runWorkerFoundationsInstall({
-				options: workerInstallOptions({
-					repoPath: repositoryRoot,
-				}),
-				env: {
-					...process.env,
-					PATH: pathWithoutBun,
-					SHIPBYSUNDAY_WORKER_HOME: workerHome,
-					[WORKER_BUN_DOWNLOAD_SHA256_ENV_VAR]: "0".repeat(64),
-					[WORKER_BUN_DOWNLOAD_URL_ENV_VAR]: bunDownloadServer.url,
-				},
-			});
-		} finally {
-			await bunDownloadServer.close();
-		}
-
-		if (!result) throw new Error("Checksum test did not produce a result.");
-		expect(result.outcome).toBe("failed");
-		expect(result.summary).toContain("integrity validation");
-		expect(JSON.stringify(result.report)).not.toContain(bunDownloadServer.url);
-		expect(existsSync(path.join(repositoryRoot, "apps/worker"))).toBe(false);
 	});
 
 	it("blocks unrecognized same-name scripts without leaking script bodies", async () => {
@@ -1447,7 +1841,7 @@ describe("Worker Foundations install command", () => {
 			),
 		).toBe("# Owner Worker Area\n");
 		expect(
-			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs")),
 		).toBe(false);
 	});
 
@@ -1477,7 +1871,7 @@ describe("Worker Foundations install command", () => {
 			await readFile(path.join(repositoryRoot, "apps/worker"), "utf8"),
 		).toBe("owner worker file\n");
 		expect(
-			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs")),
 		).toBe(false);
 	});
 
@@ -1506,7 +1900,7 @@ describe("Worker Foundations install command", () => {
 			true,
 		);
 		expect(
-			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.ts")),
+			existsSync(path.join(repositoryRoot, "apps/worker/src/worker-cli.mjs")),
 		).toBe(false);
 	});
 
@@ -1548,7 +1942,7 @@ describe("Worker Foundations install command", () => {
 				cwd: repositoryRoot,
 			}),
 		).rejects.toThrow();
-	});
+	}, 45_000);
 
 	it("starts foreground Codex kickoff after proof and commit", async () => {
 		const repositoryRoot = await createFixtureRepository();
@@ -1660,7 +2054,7 @@ async function createFixtureRepository({
 		({
 			name: "worker-install-fixture",
 			private: true,
-			packageManager: "bun@1.3.5",
+			packageManager: "npm@11.12.1",
 			scripts,
 		} as Record<string, unknown>);
 	await writeFile(
@@ -1717,6 +2111,44 @@ function workerInstallOptions(
 	};
 }
 
+function workerFinishContext({
+	repositoryRoot = "/virtual/repository",
+	runnerHome = "/virtual/runner-home",
+}: {
+	repositoryRoot?: string;
+	runnerHome?: string;
+} = {}): FinishResultInput["context"] {
+	return {
+		env: { [RUNNER_HOME_ENV_VAR]: runnerHome },
+		now: 123,
+		options: workerInstallOptions({ repoPath: repositoryRoot }),
+		repositoryRoot,
+		workerHome: "/virtual/worker-home",
+		runId: "worker-install-injected",
+	};
+}
+
+function workerFinishResultInput(
+	overrides: Partial<FinishResultInput> = {},
+): FinishResultInput {
+	return {
+		outcome: "installed",
+		exitCode: 0,
+		summary: "Worker Foundations installed.",
+		context: workerFinishContext(),
+		plan: buildBlockedPlan({ packageManager: "npm", blockers: [] }),
+		proof: [{ command: "npm run docs:validate", status: "passed" }],
+		createdRefs: ["apps/worker/package.json"],
+		changedRefs: [],
+		branch: "worker-foundations/install",
+		commit: "0123456789abcdef",
+		localProofRef: "docs/worker/local-proof.json",
+		reportRef: "docs/worker/install-report.md",
+		kickoff: buildSkippedKickoff("disabled"),
+		...overrides,
+	};
+}
+
 function mockInteractiveInstallInput(answer: string) {
 	const originalIsTty = process.stdin.isTTY;
 	const stdinOnceSpy = vi
@@ -1741,39 +2173,6 @@ function mockInteractiveInstallInput(answer: string) {
 			configurable: true,
 			value: originalIsTty,
 		});
-	};
-}
-
-async function createBunDownloadServer(
-	payload: Buffer,
-	options: { contentType?: string; route?: string } = {},
-) {
-	let requestCount = 0;
-	const route = options.route ?? "/bun";
-	const server = createServer(async (request, response) => {
-		await readRequestBody(request);
-		if (request.method === "GET" && request.url === route) {
-			requestCount += 1;
-			response.writeHead(200, {
-				"Content-Type": options.contentType ?? "application/octet-stream",
-			});
-			response.end(payload);
-			return;
-		}
-		response.writeHead(404);
-		response.end();
-	});
-	await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-	const address = server.address();
-	if (!address || typeof address === "string") {
-		throw new Error("Bun download test server did not expose a TCP port.");
-	}
-	return {
-		get requestCount() {
-			return requestCount;
-		},
-		url: `http://127.0.0.1:${address.port}${route}`,
-		close: () => new Promise<void>((resolve) => server.close(() => resolve())),
 	};
 }
 
@@ -1898,6 +2297,57 @@ async function commitFixtureFiles(repositoryRoot: string, refs: string[]) {
 	});
 }
 
+async function createFakeShipBySundayRunnerBin() {
+	const binDirectory = await createTemporaryDirectory("worker-runner-bin-");
+	const argsPath = path.join(binDirectory, "runner-args.txt");
+	const runnerPath = path.join(binDirectory, "ship-by-sunday");
+	await writeFile(
+		runnerPath,
+		[
+			"#!/bin/sh",
+			`printf '%s\\n' "$@" > ${shellQuote(argsPath)}`,
+			"exit 0",
+			"",
+		].join("\n"),
+	);
+	await chmod(runnerPath, 0o755);
+	return { argsPath, binDirectory };
+}
+
+async function createFakePackageRunnerBin() {
+	const binDirectory = await createTemporaryDirectory(
+		"worker-package-runner-bin-",
+	);
+	const npxArgsPath = path.join(binDirectory, "npx-args.txt");
+	await symlink(process.execPath, path.join(binDirectory, "node"));
+	await writeFile(
+		path.join(binDirectory, "npm"),
+		[
+			"#!/bin/sh",
+			'if [ "$1" = "run" ] && [ "$2" = "execplan:build" ]; then',
+			"  shift 2",
+			'  if [ "${1:-}" = "--" ]; then shift; fi',
+			'  exec ./scripts/run-worker.sh execplan:build "$@"',
+			"fi",
+			'echo "unexpected npm args: $*" >&2',
+			"exit 1",
+			"",
+		].join("\n"),
+	);
+	await writeFile(
+		path.join(binDirectory, "npx"),
+		[
+			"#!/bin/sh",
+			`printf '%s\\n' "$@" > ${shellQuote(npxArgsPath)}`,
+			"exit 0",
+			"",
+		].join("\n"),
+	);
+	await chmod(path.join(binDirectory, "npm"), 0o755);
+	await chmod(path.join(binDirectory, "npx"), 0o755);
+	return { binDirectory, npxArgsPath };
+}
+
 async function createSuccessfulCodexBin({
 	kickoffProbeFile,
 }: {
@@ -1957,112 +2407,6 @@ function shellQuote(value: string) {
 	return `'${value.replaceAll("'", "'\"'\"'")}'`;
 }
 
-function sha256(value: Buffer) {
-	return createHash("sha256").update(value).digest("hex");
-}
-
-function currentBunArchiveAssetName() {
-	if (process.platform === "darwin") {
-		if (process.arch === "arm64") return "bun-darwin-aarch64.zip";
-		if (process.arch === "x64") return "bun-darwin-x64.zip";
-	}
-	if (process.platform === "linux") {
-		if (process.arch === "arm64") return "bun-linux-aarch64.zip";
-		if (process.arch === "x64") return "bun-linux-x64.zip";
-	}
-	if (process.platform === "win32" && process.arch === "x64") {
-		return "bun-windows-x64.zip";
-	}
-	throw new Error(
-		`Unsupported Bun archive platform ${process.platform}/${process.arch}`,
-	);
-}
-
-function createStoredZip(
-	entries: Array<{ content: Buffer; name: string; unixMode: number }>,
-) {
-	const localFileParts: Buffer[] = [];
-	const centralDirectoryParts: Buffer[] = [];
-	let offset = 0;
-	for (const entry of entries) {
-		const name = Buffer.from(entry.name);
-		const crc = crc32(entry.content);
-		const localHeader = Buffer.alloc(30);
-		localHeader.writeUInt32LE(0x04034b50, 0);
-		localHeader.writeUInt16LE(20, 4);
-		localHeader.writeUInt16LE(0, 6);
-		localHeader.writeUInt16LE(0, 8);
-		localHeader.writeUInt16LE(0, 10);
-		localHeader.writeUInt16LE(0, 12);
-		localHeader.writeUInt32LE(crc, 14);
-		localHeader.writeUInt32LE(entry.content.length, 18);
-		localHeader.writeUInt32LE(entry.content.length, 22);
-		localHeader.writeUInt16LE(name.length, 26);
-		localHeader.writeUInt16LE(0, 28);
-		localFileParts.push(localHeader, name, entry.content);
-
-		const centralDirectoryHeader = Buffer.alloc(46);
-		centralDirectoryHeader.writeUInt32LE(0x02014b50, 0);
-		centralDirectoryHeader.writeUInt16LE((3 << 8) | 20, 4);
-		centralDirectoryHeader.writeUInt16LE(20, 6);
-		centralDirectoryHeader.writeUInt16LE(0, 8);
-		centralDirectoryHeader.writeUInt16LE(0, 10);
-		centralDirectoryHeader.writeUInt16LE(0, 12);
-		centralDirectoryHeader.writeUInt16LE(0, 14);
-		centralDirectoryHeader.writeUInt32LE(crc, 16);
-		centralDirectoryHeader.writeUInt32LE(entry.content.length, 20);
-		centralDirectoryHeader.writeUInt32LE(entry.content.length, 24);
-		centralDirectoryHeader.writeUInt16LE(name.length, 28);
-		centralDirectoryHeader.writeUInt16LE(0, 30);
-		centralDirectoryHeader.writeUInt16LE(0, 32);
-		centralDirectoryHeader.writeUInt16LE(0, 34);
-		centralDirectoryHeader.writeUInt16LE(0, 36);
-		centralDirectoryHeader.writeUInt32LE((entry.unixMode << 16) >>> 0, 38);
-		centralDirectoryHeader.writeUInt32LE(offset, 42);
-		centralDirectoryParts.push(centralDirectoryHeader, name);
-
-		offset += localHeader.length + name.length + entry.content.length;
-	}
-	const centralDirectory = Buffer.concat(centralDirectoryParts);
-	const localFiles = Buffer.concat(localFileParts);
-	const endOfCentralDirectory = Buffer.alloc(22);
-	endOfCentralDirectory.writeUInt32LE(0x06054b50, 0);
-	endOfCentralDirectory.writeUInt16LE(0, 4);
-	endOfCentralDirectory.writeUInt16LE(0, 6);
-	endOfCentralDirectory.writeUInt16LE(entries.length, 8);
-	endOfCentralDirectory.writeUInt16LE(entries.length, 10);
-	endOfCentralDirectory.writeUInt32LE(centralDirectory.length, 12);
-	endOfCentralDirectory.writeUInt32LE(localFiles.length, 16);
-	endOfCentralDirectory.writeUInt16LE(0, 20);
-	return Buffer.concat([localFiles, centralDirectory, endOfCentralDirectory]);
-}
-
-function crc32(value: Buffer) {
-	let crc = 0xffffffff;
-	for (const byte of value) {
-		crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ byte) & 0xff];
-	}
-	return (crc ^ 0xffffffff) >>> 0;
-}
-
-const CRC32_TABLE = Array.from({ length: 256 }, (_value, index) => {
-	let crc = index;
-	for (let bit = 0; bit < 8; bit += 1) {
-		crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
-	}
-	return crc >>> 0;
-});
-
 function countWorkerManagedStarts(content: string) {
 	return content.match(/<!-- shipbysunday-worker:start -->/gu)?.length ?? 0;
-}
-
-function findExecutableOnPath(executableName: string) {
-	for (const directory of (process.env.PATH ?? "").split(path.delimiter)) {
-		const candidatePath = path.join(directory, executableName);
-		if (existsSync(candidatePath)) {
-			return candidatePath;
-		}
-	}
-	throw new Error(`${executableName} was not found on PATH.`);
 }

@@ -4,6 +4,7 @@ const productionProofResultValues = new Set([
 	"cancelled",
 	"skipped",
 ]);
+const productionBillingProofOfferIds = new Set(["starter", "workers"]);
 
 function buildProofState({ notes = null, runId = null, status, url = null }) {
 	return { notes, runId, status, url };
@@ -18,6 +19,20 @@ function runMetadataFromSummary(summary) {
 		runId: typeof summary.runId === "string" ? summary.runId : null,
 		url: typeof summary.runUrl === "string" ? summary.runUrl : null,
 	};
+}
+
+function getBillingProofOfferIds(proof) {
+	if (Array.isArray(proof.billingProofOfferIds)) {
+		return proof.billingProofOfferIds;
+	}
+	if (typeof proof.billingProofOfferId === "string") {
+		return [proof.billingProofOfferId];
+	}
+	return [];
+}
+
+function formatBillingProofOfferIds(proof) {
+	return getBillingProofOfferIds(proof).join(", ");
 }
 
 function validateProductionReleaseProofSummaryShape(summary, expectedCommitSha) {
@@ -76,6 +91,28 @@ function validateProductionReleaseProofSummaryShape(summary, expectedCommitSha) 
 				`Production release proof summary proof.${key} must be one of ${Array.from(productionProofResultValues).join(", ")}.`,
 			);
 		}
+	}
+
+	const billingProofOfferIds = getBillingProofOfferIds(summary.proof);
+	if (summary.proof.billingIntegration === "success") {
+		if (
+			billingProofOfferIds.length === 0 ||
+			!billingProofOfferIds.every((offerId) =>
+				productionBillingProofOfferIds.has(offerId),
+			)
+		) {
+			issues.push(
+				`Production release proof summary proof.billingProofOfferIds must include only ${Array.from(productionBillingProofOfferIds).join(", ")} when billingIntegration is success.`,
+			);
+		}
+	} else if (
+		(summary.proof.billingProofOfferId !== null &&
+			summary.proof.billingProofOfferId !== undefined) ||
+		billingProofOfferIds.length > 0
+	) {
+		issues.push(
+			"Production release proof summary proof.billingProofOfferIds must be empty when billingIntegration is not success.",
+		);
 	}
 
 	return {
@@ -156,7 +193,7 @@ export function buildProofStatesFromProductionReleaseProofSummary(
 			...runMetadata,
 			status: billingPassed ? "passed" : "failed",
 			notes: billingPassed
-				? "Production proof classified the release as billing-sensitive and billing_integration passed."
+				? `Production proof classified the release as billing-sensitive and billing_integration passed for ${formatBillingProofOfferIds(summary.proof)}.`
 				: `Production proof classified the release as billing-sensitive, but billing_integration was ${summary.proof.billingIntegration}.`,
 		});
 	} else {

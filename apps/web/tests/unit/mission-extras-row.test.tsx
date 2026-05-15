@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 globalThis.React = React;
 
-import { MissionExtrasRow } from "@/app/(workspace)/_components/course/mission/components/mission/mission-extras-row";
+import { MissionExtrasRow } from "@/app/(app)/_components/course/mission/components/mission/mission-extras-row";
 
 describe("MissionExtrasRow", () => {
 	it("keeps the FULL TURBO bonus visible without repository access prompts", () => {

@@ -1,12 +1,16 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { Effect, Layer } from "effect";
 
 import {
 	applySbsCodexConfigPatch,
+	CodexConfigService,
 	applyShipbysundayWorkerCodexConfigPatch,
+	inspectCodexConfigEffect,
 	inspectCodexConfig,
 	inspectShipbysundayWorkerCodexConfig,
 	previewSbsCodexConfigPatch,
+	previewSbsCodexConfigPatchEffect,
 	previewShipbysundayWorkerCodexConfigPatch,
 	rollbackSbsCodexConfigPatch,
 	rollbackShipbysundayWorkerCodexConfigPatch,
@@ -16,6 +20,64 @@ import {
 import { createTemporaryDirectory } from "./test-utils";
 
 describe("codex config manager", () => {
+	it("supports injecting the Effect Codex config service", async () => {
+		const stubCodexConfigService = Layer.succeed(
+			CodexConfigService,
+			CodexConfigService.of({
+				inspectSbs: (request) =>
+					Effect.succeed({
+						configPath: path.join(request.env.CODEX_HOME ?? "", "config.toml"),
+						exists: true,
+						hasReadonlyProfile: true,
+						hasWorkspaceWriteProfile: false,
+						hasReadonlyPermissions: true,
+						hasWorkspaceWritePermissions: false,
+						hasExplicitUntrustedProject:
+							request.repositoryRoot === "/untrusted",
+					}),
+				inspectShipbysundayWorker: () =>
+					Effect.fail(new Error("unused in this test")),
+				previewSbsPatch: (request) =>
+					Effect.succeed({
+						configPath: path.join(request.env.CODEX_HOME ?? "", "config.toml"),
+						before: "",
+						after: "managed",
+						diff: "diff",
+						changed: true,
+					}),
+				previewShipbysundayWorkerPatch: () =>
+					Effect.fail(new Error("unused in this test")),
+				applySbsPatch: () => Effect.fail(new Error("unused in this test")),
+				applyShipbysundayWorkerPatch: () =>
+					Effect.fail(new Error("unused in this test")),
+				rollbackSbsPatch: () => Effect.fail(new Error("unused in this test")),
+				rollbackShipbysundayWorkerPatch: () =>
+					Effect.fail(new Error("unused in this test")),
+			}),
+		);
+
+		const inspection = await Effect.runPromise(
+			inspectCodexConfigEffect({
+				env: { CODEX_HOME: "/codex-home" },
+				repositoryRoot: "/untrusted",
+			}).pipe(Effect.provide(stubCodexConfigService)),
+		);
+		const preview = await Effect.runPromise(
+			previewSbsCodexConfigPatchEffect({
+				env: { CODEX_HOME: "/codex-home" },
+			}).pipe(Effect.provide(stubCodexConfigService)),
+		);
+
+		expect(inspection).toMatchObject({
+			configPath: path.join("/codex-home", "config.toml"),
+			hasExplicitUntrustedProject: true,
+		});
+		expect(preview).toMatchObject({
+			after: "managed",
+			changed: true,
+		});
+	});
+
 	it("previews and applies only the SBS managed block", async () => {
 		const codexHome = await createTemporaryDirectory("sbs-codex-config-");
 		const configPath = path.join(codexHome, "config.toml");

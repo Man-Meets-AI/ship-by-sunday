@@ -1,4 +1,4 @@
-import { getCompletionButtonLabel } from "@/app/(workspace)/_hooks/course/lesson/use-lesson-completion";
+import { getCompletionButtonLabel } from "@/app/(app)/_hooks/course/lesson/use-lesson-completion";
 import { getLessonById } from "@/lib/course/lesson/model";
 import {
 	formatHandoffLabelForLesson,

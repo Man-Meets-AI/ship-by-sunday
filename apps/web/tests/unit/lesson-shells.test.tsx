@@ -15,7 +15,7 @@ vi.mock("next/link", () => ({
 globalThis.React = React;
 
 import { getLessonById } from "@/lib/course/lesson/model";
-import { LessonShellWatch } from "@/app/(workspace)/_components/course/lesson/shells";
+import { LessonShellWatch } from "@/app/(app)/_components/course/lesson/shells";
 
 describe("LessonShellWatch", () => {
 	it("renders lesson 2.1 video in the watch shell", () => {
@@ -35,6 +35,8 @@ describe("LessonShellWatch", () => {
 		);
 
 		expect(markup).toContain(lesson.title);
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).toContain("<iframe");
 	});
 

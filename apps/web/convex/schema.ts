@@ -43,11 +43,32 @@ import {
 	workspaceRunnerEventFields,
 } from "./workspace/validators";
 import {
+	billingEmailDeliveryStatusValidator,
+	billingEmailKindValidator,
+	billingEmailRecipientKindValidator,
+	billingEntitlementCapabilityValidator,
+	billingEntitlementSourceValidator,
+	billingEntitlementStatusValidator,
+	billingProductKeyValidator,
+	billingProviderEventStatusValidator,
+	billingProviderValidator,
+	billingRefundAmountKindValidator,
+	billingRefundProductStateChangeKindValidator,
+	billingRefundStateValidator,
+	billingRefundStatusValidator,
 	checkoutBuyerStartingPointValidator,
 	checkoutCtaIdValidator,
 	checkoutFulfillmentTrackValidator,
-} from "./checkoutIntentValidators";
-import { productAccessCapabilityValidator } from "./access/validators";
+	checkoutOfferIdValidator,
+	starterLicenseTermStatusValidator,
+	workerSealTeam6BookingStatusValidator,
+	workerSealTeam6FulfillmentStatusValidator,
+	workerSealTeam6IntakeAnswerValidator,
+	workerSealTeam6PaymentStatusValidator,
+	workersBillingCadenceValidator,
+	workersSubscriptionStatusValidator,
+} from "./billing/validators";
+import { productAccessCapabilityValidator } from "./entitlements/validators";
 import {
 	impersonationAuditEventTypeValidator,
 	impersonationAuditResultValidator,
@@ -82,6 +103,9 @@ export default defineSchema({
 		stripeCheckoutSessionId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		capabilities: v.optional(v.array(productAccessCapabilityValidator)),
+		legacyWorkersAccessEndsAt: v.optional(v.number()),
+		offerIds: v.optional(v.array(checkoutOfferIdValidator)),
+		lastCheckoutOfferId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -100,6 +124,7 @@ export default defineSchema({
 			v.literal("hosted_checkout"),
 			v.literal("express_checkout"),
 		),
+		offerId: v.optional(checkoutOfferIdValidator),
 		stripeCheckoutSessionId: v.optional(v.string()),
 		status: v.union(
 			v.literal("created"),
@@ -121,6 +146,7 @@ export default defineSchema({
 		stripeCustomerId: v.optional(v.string()),
 		stripePaymentIntentId: v.optional(v.string()),
 		checkoutPurchaseIntentId: v.optional(v.id("checkoutPurchaseIntents")),
+		offerId: v.optional(checkoutOfferIdValidator),
 		buyerStartingPoint: v.optional(checkoutBuyerStartingPointValidator),
 		checkoutCtaId: v.optional(checkoutCtaIdValidator),
 		fulfillmentTrack: v.optional(checkoutFulfillmentTrackValidator),
@@ -165,6 +191,200 @@ export default defineSchema({
 			"eventType",
 		])
 		.index("by_status_and_updated_at", ["status", "updatedAt"]),
+	stripeCustomers: defineTable({
+		ownerClerkUserId: v.string(),
+		stripeCustomerId: v.string(),
+		email: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_owner_clerk_user_id", ["ownerClerkUserId"])
+		.index("by_stripe_customer_id", ["stripeCustomerId"]),
+	starterLicenseTerms: defineTable({
+		ownerClerkUserId: v.string(),
+		status: starterLicenseTermStatusValidator,
+		stripeCustomerId: v.optional(v.string()),
+		stripeCheckoutSessionId: v.string(),
+		stripePaymentIntentId: v.optional(v.string()),
+		purchasedAt: v.number(),
+		termStartAt: v.number(),
+		termEndAt: v.number(),
+		renewalOfLicenseTermId: v.optional(v.id("starterLicenseTerms")),
+		refundState: billingRefundStateValidator,
+		voidedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_owner_clerk_user_id_and_status_and_term_end_at", [
+			"ownerClerkUserId",
+			"status",
+			"termEndAt",
+		])
+		.index("by_stripe_customer_id", ["stripeCustomerId"])
+		.index("by_stripe_checkout_session_id", ["stripeCheckoutSessionId"])
+		.index("by_stripe_payment_intent_id", ["stripePaymentIntentId"]),
+	workersSubscriptions: defineTable({
+		ownerClerkUserId: v.string(),
+		stripeCustomerId: v.string(),
+		stripeSubscriptionId: v.string(),
+		stripePriceId: v.optional(v.string()),
+		stripeProductId: v.optional(v.string()),
+		cadence: workersBillingCadenceValidator,
+		status: workersSubscriptionStatusValidator,
+		cancelAtPeriodEnd: v.boolean(),
+		currentPeriodStartAt: v.optional(v.number()),
+		currentPeriodEndAt: v.optional(v.number()),
+		accessThroughAt: v.optional(v.number()),
+		latestInvoiceId: v.optional(v.string()),
+		latestInvoiceHostedUrl: v.optional(v.string()),
+		paymentRecoveryUrl: v.optional(v.string()),
+		failedPaymentStartedAt: v.optional(v.number()),
+		failedPaymentAttemptCount: v.optional(v.number()),
+		nextPaymentAttemptAt: v.optional(v.number()),
+		recoveredFromPastDueAt: v.optional(v.number()),
+		terminalFailureAt: v.optional(v.number()),
+		refundState: billingRefundStateValidator,
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_owner_clerk_user_id_and_status_and_current_period_end_at", [
+			"ownerClerkUserId",
+			"status",
+			"currentPeriodEndAt",
+		])
+		.index("by_owner_clerk_user_id_and_updated_at", [
+			"ownerClerkUserId",
+			"updatedAt",
+		])
+		.index("by_stripe_customer_id", ["stripeCustomerId"])
+		.index("by_stripe_subscription_id", ["stripeSubscriptionId"]),
+	productEntitlements: defineTable({
+		ownerClerkUserId: v.string(),
+		capability: billingEntitlementCapabilityValidator,
+		productKey: billingProductKeyValidator,
+		source: billingEntitlementSourceValidator,
+		sourceRecordId: v.string(),
+		status: billingEntitlementStatusValidator,
+		startsAt: v.optional(v.number()),
+		expiresAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_owner_clerk_user_id_and_capability_and_status", [
+			"ownerClerkUserId",
+			"capability",
+			"status",
+		])
+		.index("by_source_record_id", ["sourceRecordId"]),
+	billingRefunds: defineTable({
+		provider: billingProviderValidator,
+		providerRefundId: v.string(),
+		productKey: billingProductKeyValidator,
+		ownerClerkUserId: v.optional(v.string()),
+		stripeCustomerId: v.optional(v.string()),
+		stripePaymentIntentId: v.optional(v.string()),
+		stripeChargeId: v.optional(v.string()),
+		calBookingUid: v.optional(v.string()),
+		amount: v.number(),
+		currency: v.string(),
+		amountKind: billingRefundAmountKindValidator,
+		status: billingRefundStatusValidator,
+		productStateChange: v.boolean(),
+		productStateChangeKind: billingRefundProductStateChangeKindValidator,
+		reason: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_provider_and_provider_refund_id", [
+			"provider",
+			"providerRefundId",
+		])
+		.index("by_owner_clerk_user_id_and_created_at", [
+			"ownerClerkUserId",
+			"createdAt",
+		])
+		.index("by_product_key_and_status_and_updated_at", [
+			"productKey",
+			"status",
+			"updatedAt",
+		]),
+	processedStripeEvents: defineTable({
+		stripeEventId: v.string(),
+		eventType: v.string(),
+		status: billingProviderEventStatusValidator,
+		ownerClerkUserId: v.optional(v.string()),
+		stripeObjectId: v.optional(v.string()),
+		errorMessage: v.optional(v.string()),
+		receivedAt: v.number(),
+		processedAt: v.optional(v.number()),
+		updatedAt: v.number(),
+	}).index("by_stripe_event_id", ["stripeEventId"]),
+	processedCalEvents: defineTable({
+		calEventId: v.string(),
+		eventType: v.string(),
+		status: billingProviderEventStatusValidator,
+		ownerClerkUserId: v.optional(v.string()),
+		calBookingUid: v.optional(v.string()),
+		errorMessage: v.optional(v.string()),
+		receivedAt: v.number(),
+		processedAt: v.optional(v.number()),
+		updatedAt: v.number(),
+	}).index("by_cal_event_id", ["calEventId"]),
+	billingEmailDeliveries: defineTable({
+		idempotencyKey: v.string(),
+		emailKind: billingEmailKindValidator,
+		productKey: billingProductKeyValidator,
+		recipientKind: billingEmailRecipientKindValidator,
+		recipientEmail: v.optional(v.string()),
+		ownerClerkUserId: v.optional(v.string()),
+		providerMessageId: v.optional(v.string()),
+		status: billingEmailDeliveryStatusValidator,
+		skippedReason: v.optional(v.string()),
+		lastError: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+		sentAt: v.optional(v.number()),
+	})
+		.index("by_idempotency_key", ["idempotencyKey"])
+		.index("by_owner_clerk_user_id_and_email_kind_and_status", [
+			"ownerClerkUserId",
+			"emailKind",
+			"status",
+		])
+		.index("by_status_and_updated_at", ["status", "updatedAt"]),
+	workerSealTeam6Bookings: defineTable({
+		calBookingUid: v.string(),
+		calEventTypeId: v.optional(v.string()),
+		stripeCustomerId: v.optional(v.string()),
+		stripePaymentIntentId: v.optional(v.string()),
+		status: workerSealTeam6BookingStatusValidator,
+		paymentStatus: workerSealTeam6PaymentStatusValidator,
+		refundState: billingRefundStateValidator,
+		fulfillmentStatus: workerSealTeam6FulfillmentStatusValidator,
+		attendeeEmail: v.string(),
+		attendeeEmailNormalized: v.string(),
+		attendeeName: v.optional(v.string()),
+		attendeeTimeZone: v.optional(v.string()),
+		scheduledStartAt: v.optional(v.number()),
+		scheduledEndAt: v.optional(v.number()),
+		rescheduleUrl: v.optional(v.string()),
+		cancelUrl: v.optional(v.string()),
+		calBookingUrl: v.optional(v.string()),
+		intakeAnswers: v.optional(v.array(workerSealTeam6IntakeAnswerValidator)),
+		paidAt: v.optional(v.number()),
+		canceledAt: v.optional(v.number()),
+		fulfilledAt: v.optional(v.number()),
+		customerPrepEmailDeliveryId: v.optional(v.id("billingEmailDeliveries")),
+		opsEmailDeliveryId: v.optional(v.id("billingEmailDeliveries")),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_cal_booking_uid", ["calBookingUid"])
+		.index("by_attendee_email_normalized_and_scheduled_start_at", [
+			"attendeeEmailNormalized",
+			"scheduledStartAt",
+		])
+		.index("by_status_and_scheduled_start_at", ["status", "scheduledStartAt"]),
 	// Deprecated: retained temporarily for historical private starter repository
 	// invite records. No live app or operator path writes this table.
 	starterRepoAccess: defineTable({

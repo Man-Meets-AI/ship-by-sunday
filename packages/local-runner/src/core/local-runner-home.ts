@@ -11,8 +11,13 @@ import {
 } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { Context, Effect, Layer } from "effect";
 
 import type { JsonObject, JsonValue } from "./json-value";
+import {
+	normalizeLocalRunnerEffectError,
+	runLocalRunnerEffect,
+} from "../effect/runtime";
 
 export const RUNNER_HOME_ENV_VAR = "SBS_RUNNER_HOME";
 
@@ -30,6 +35,57 @@ type RunnerCredentialFile = {
 	credentials: Record<string, RunnerCredential>;
 };
 
+type EnsureLocalRunnerHomeRequest = {
+	runnerHome: string;
+};
+
+type ReadRunnerCredentialRequest = {
+	runnerHome: string;
+	repositoryRoot: string;
+};
+
+type WriteRunnerCredentialRequest = ReadRunnerCredentialRequest & {
+	credential: RunnerCredential;
+};
+
+export interface LocalRunnerHomeService {
+	readonly ensureHome: (
+		request: EnsureLocalRunnerHomeRequest,
+	) => Effect.Effect<string, Error>;
+	readonly readCredential: (
+		request: ReadRunnerCredentialRequest,
+	) => Effect.Effect<RunnerCredential | null, Error>;
+	readonly writeCredential: (
+		request: WriteRunnerCredentialRequest,
+	) => Effect.Effect<void, Error>;
+}
+
+export const LocalRunnerHomeService =
+	Context.GenericTag<LocalRunnerHomeService>(
+		"ship-by-sunday/LocalRunnerHomeService",
+	);
+
+export const NodeLocalRunnerHomeServiceLive = Layer.succeed(
+	LocalRunnerHomeService,
+	LocalRunnerHomeService.of({
+		ensureHome: (request) =>
+			Effect.tryPromise({
+				try: () => ensureLocalRunnerHomeNode(request),
+				catch: normalizeLocalRunnerEffectError,
+			}),
+		readCredential: (request) =>
+			Effect.tryPromise({
+				try: () => readRunnerCredentialNode(request),
+				catch: normalizeLocalRunnerEffectError,
+			}),
+		writeCredential: (request) =>
+			Effect.tryPromise({
+				try: () => writeRunnerCredentialNode(request),
+				catch: normalizeLocalRunnerEffectError,
+			}),
+	}),
+);
+
 export function resolveLocalRunnerHome(env: NodeJS.ProcessEnv = process.env) {
 	const configuredRunnerHome = env[RUNNER_HOME_ENV_VAR]?.trim();
 	if (configuredRunnerHome) {
@@ -42,6 +98,24 @@ export function resolveLocalRunnerHome(env: NodeJS.ProcessEnv = process.env) {
 export async function ensureLocalRunnerHome(
 	runnerHome = resolveLocalRunnerHome(),
 ) {
+	return await runLocalRunnerEffect(
+		ensureLocalRunnerHomeEffect(runnerHome).pipe(
+			Effect.provide(NodeLocalRunnerHomeServiceLive),
+		),
+	);
+}
+
+export function ensureLocalRunnerHomeEffect(
+	runnerHome = resolveLocalRunnerHome(),
+): Effect.Effect<string, Error, LocalRunnerHomeService> {
+	return Effect.flatMap(LocalRunnerHomeService, (service) =>
+		service.ensureHome({ runnerHome }),
+	);
+}
+
+async function ensureLocalRunnerHomeNode({
+	runnerHome,
+}: EnsureLocalRunnerHomeRequest) {
 	await mkdir(runnerHome, { recursive: true, mode: 0o700 });
 	await chmod(runnerHome, 0o700).catch(() => undefined);
 	return runnerHome;
@@ -126,6 +200,29 @@ export async function readRunnerCredential({
 	runnerHome?: string;
 	repositoryRoot: string;
 }) {
+	return await runLocalRunnerEffect(
+		readRunnerCredentialEffect({ runnerHome, repositoryRoot }).pipe(
+			Effect.provide(NodeLocalRunnerHomeServiceLive),
+		),
+	);
+}
+
+export function readRunnerCredentialEffect({
+	runnerHome = resolveLocalRunnerHome(),
+	repositoryRoot,
+}: {
+	runnerHome?: string;
+	repositoryRoot: string;
+}): Effect.Effect<RunnerCredential | null, Error, LocalRunnerHomeService> {
+	return Effect.flatMap(LocalRunnerHomeService, (service) =>
+		service.readCredential({ runnerHome, repositoryRoot }),
+	);
+}
+
+async function readRunnerCredentialNode({
+	runnerHome,
+	repositoryRoot,
+}: ReadRunnerCredentialRequest) {
 	const credentialFile = await readCredentialFile(runnerHome);
 	return (
 		credentialFile.credentials[createRepositoryCredentialKey(repositoryRoot)] ??
@@ -142,6 +239,34 @@ export async function writeRunnerCredential({
 	repositoryRoot: string;
 	credential: RunnerCredential;
 }) {
+	return await runLocalRunnerEffect(
+		writeRunnerCredentialEffect({
+			runnerHome,
+			repositoryRoot,
+			credential,
+		}).pipe(Effect.provide(NodeLocalRunnerHomeServiceLive)),
+	);
+}
+
+export function writeRunnerCredentialEffect({
+	runnerHome = resolveLocalRunnerHome(),
+	repositoryRoot,
+	credential,
+}: {
+	runnerHome?: string;
+	repositoryRoot: string;
+	credential: RunnerCredential;
+}): Effect.Effect<void, Error, LocalRunnerHomeService> {
+	return Effect.flatMap(LocalRunnerHomeService, (service) =>
+		service.writeCredential({ runnerHome, repositoryRoot, credential }),
+	);
+}
+
+async function writeRunnerCredentialNode({
+	runnerHome,
+	repositoryRoot,
+	credential,
+}: WriteRunnerCredentialRequest) {
 	await ensureLocalRunnerHome(runnerHome);
 	await withCredentialsFileLock(runnerHome, async () => {
 		const credentialFile = await readCredentialFile(runnerHome);

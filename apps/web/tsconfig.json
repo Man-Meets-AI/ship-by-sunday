@@ -19,7 +19,17 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"]
+			"@/app/*": ["./src/app/*"],
+			"@/components/*": ["./src/components/*"],
+			"@/config/*": ["./src/config/*"],
+			"@/content/*": ["./src/content/*"],
+			"@/convex/*": ["./convex/*"],
+			"@/data/*": ["./src/data/*"],
+			"@/hooks/*": ["./src/hooks/*"],
+			"@/lib/*": ["./src/lib/*"],
+			"@/platform/*": ["./src/platform/*"],
+			"@/scripts/*": ["./scripts/*"],
+			"@/*": ["./src/*", "./*"]
 		}
 	},
 	"include": [

@@ -1,7 +1,13 @@
 import { createCompleteProjectDefinition } from "../src";
-import { isExcludedSnapshotPath } from "../src/repo-generation/repo-download-source-contract";
+import {
+	isExcludedSnapshotPath,
+	starterSnapshotForbiddenFilePaths,
+	starterSnapshotForbiddenPathPrefixes,
+} from "../src/repo-generation/repo-download-source-contract";
 import {
 	buildRepoGenerationManifest,
+	buildRepoDownloadTraceExcludes,
+	buildRepoDownloadTraceIncludes,
 	materializeRepoSnapshot,
 	renderTemplateOverrides,
 } from "../src/server";
@@ -81,8 +87,41 @@ function generatedOperatingPackPathSet(
 		"docs/exec-plans/PLANS.md",
 		"docs/exec-plans/active/index.md",
 		"docs/exec-plans/completed/index.md",
-		operatingPackPaths.activeExecPlanPath,
+		...operatingPackPaths.activeExecPlanPaths,
 	]);
+}
+
+type GeneratedOperatingPlanId = ReturnType<
+	typeof buildOperatingPackPaths
+>["activeExecPlans"][number]["id"];
+
+function getGeneratedOperatingPlan(
+	operatingPackPaths: ReturnType<typeof buildOperatingPackPaths>,
+	id: GeneratedOperatingPlanId,
+) {
+	const plan = operatingPackPaths.activeExecPlans.find(
+		(candidate) => candidate.id === id,
+	);
+
+	if (!plan) {
+		throw new Error(`Missing generated operating plan in test: ${id}`);
+	}
+
+	return plan;
+}
+
+function expectNoForbiddenStarterSnapshotPaths(snapshotPaths: string[]) {
+	const forbiddenPaths = snapshotPaths.filter(
+		(path) =>
+			starterSnapshotForbiddenFilePaths.includes(
+				path as (typeof starterSnapshotForbiddenFilePaths)[number],
+			) ||
+			starterSnapshotForbiddenPathPrefixes.some((prefix) =>
+				path.startsWith(prefix),
+			),
+	);
+
+	expect(forbiddenPaths).toEqual([]);
 }
 
 describe("repo generation", () => {
@@ -95,15 +134,58 @@ describe("repo generation", () => {
 		expect(manifest.excludedPathSegments).toEqual(
 			expect.arrayContaining([".next", ".vercel", "coverage", "test-results"]),
 		);
+		expect(manifest.includedFiles).not.toContain("bun.lock");
 		expect(manifest.includedDirectories).toEqual(
-			expect.arrayContaining([
-				"apps/web/app",
-				"packages/codebase-compiler/src",
-			]),
+			expect.arrayContaining(["packages/codebase-compiler/src"]),
 		);
+		expect(manifest.includedDirectories).not.toContain("apps/web/app");
 		expect(manifest.includedDirectories).not.toContain("apps/web/tests");
 		expect(manifest.includedFiles).toEqual(
-			expect.arrayContaining(["bunfig.toml", "apps/web/.env.local.example"]),
+			expect.arrayContaining([
+				"bunfig.toml",
+				"apps/web/.env.local.example",
+				"apps/web/scripts/run-next-build-serialized.mjs",
+			]),
+		);
+	});
+
+	it("traces starter template source files without ignored artifacts", () => {
+		const includes = buildRepoDownloadTraceIncludes();
+
+		expect(includes).toContain(
+			"../../templates/starter-app/template-source.json",
+		);
+		expect(includes).toContain("../../templates/starter-app/source/src/**/*");
+		expect(includes).toContain(
+			"../../templates/starter-app/source/.env.local.example",
+		);
+		expect(includes).not.toContain("../../templates/starter-app/source/**/*");
+		expect(buildRepoDownloadTraceExcludes()).toEqual(
+			expect.arrayContaining([
+				"../../templates/starter-app/source/node_modules/**/*",
+				"../../templates/starter-app/source/**/node_modules/**/*",
+				"../../templates/starter-app/source/.next/**/*",
+			]),
+		);
+		expect(
+			includes.filter((tracePath) =>
+				[
+					"/node_modules/",
+					"/.next/",
+					"/.vercel/",
+					"/coverage/",
+					"/test-results/",
+				].some((fragment) => tracePath.includes(fragment)),
+			),
+		).toEqual([]);
+		expect(includes).not.toEqual(
+			expect.arrayContaining([
+				"../../templates/starter-app/source/.env.local",
+				"../../templates/starter-app/source/.env.preview",
+				"../../templates/starter-app/source/.env.production",
+				"../../templates/starter-app/source/next-env.d.ts",
+				"../../templates/starter-app/source/tsconfig.tsbuildinfo",
+			]),
 		);
 	});
 
@@ -130,8 +212,8 @@ describe("repo generation", () => {
 		const bootstrap = snapshotText(
 			overrides.find((file) => file.path === "bootstrap.sh"),
 		);
-		const docsIndex = snapshotText(
-			overrides.find((file) => file.path === "apps/web/content/docs/index.mdx"),
+		const startHere = snapshotText(
+			overrides.find((file) => file.path === "START-HERE.md"),
 		);
 
 		expect(bootstrap).toContain(
@@ -140,11 +222,11 @@ describe("repo generation", () => {
 		expect(bootstrap).toContain(
 			"Skipping shadcn preset apply because the generated preset code is invalid.",
 		);
-		expect(docsIndex).toContain(
+		expect(startHere).toContain(
 			"Bad $(touch owned) `&#123;mdx&#125;` &lt;script&gt;",
 		);
-		expect(docsIndex).not.toContain("{mdx}");
-		expect(docsIndex).not.toContain("<script>");
+		expect(startHere).not.toContain("{mdx}");
+		expect(startHere).not.toContain("<script>");
 	});
 
 	it("renders starter overrides for product config and home content", () => {
@@ -173,11 +255,8 @@ describe("repo generation", () => {
 				".agents/skills/starter-nextjs-in-this-repo/SKILL.md",
 				".agents/skills/starter-convex-in-this-repo/SKILL.md",
 				".agents/skills/external-skills.json",
-				"apps/web/content/docs/index.mdx",
 				"README.md",
 				"package.json",
-				"apps/web/config/product.ts",
-				"apps/web/app/_content/home-page.ts",
 			]),
 		);
 
@@ -207,6 +286,9 @@ describe("repo generation", () => {
 		expect(readmeOverride?.content).toContain(
 			"`apps/web/config/generated-design-system.ts` contains the generated runtime design system.",
 		);
+		expect(readmeOverride?.content).toContain(
+			"`apps/web/config/product.ts` contains the generated product config and questionnaire-derived homepage content.",
+		);
 		expect(onboardingOverride?.content).toContain(
 			"Set up Linear as your work tracker",
 		);
@@ -220,6 +302,8 @@ describe("repo generation", () => {
 		expect(onboardingOverride?.content).toContain("$starter-product-copy");
 		expect(onboardingOverride?.content).toContain("$starter-frontend-design");
 		expect(onboardingOverride?.content).toContain("$starter-docs-and-testing");
+		expect(onboardingOverride?.content).toContain("apps/web/config/product.ts");
+		expect(onboardingOverride?.content).not.toContain("_content");
 		expect(onboardingOverride?.content).toContain("Run core setup");
 		expect(onboardingOverride?.content).toContain("Run auth setup");
 		expect(onboardingOverride?.content).toContain("Run billing setup");
@@ -269,6 +353,7 @@ describe("repo generation", () => {
 		const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
 		const snapshotFiles = await materializeRepoSnapshot(projectDefinition);
 		const snapshotPaths = snapshotFiles.map((file) => file.path);
+		const uniqueSnapshotPathCount = new Set(snapshotPaths).size;
 
 		expect(snapshotPaths).toEqual(
 			expect.arrayContaining([
@@ -288,10 +373,29 @@ describe("repo generation", () => {
 				".agents/skills/starter-frontend-design/SKILL.md",
 				".agents/skills/starter-docs-and-testing/SKILL.md",
 				".agents/skills/external-skills.json",
-				"apps/web/content/docs/index.mdx",
+				"apps/web/src/app/globals.css",
+				"apps/web/src/app/layout.tsx",
+				"apps/web/src/app/(marketing)/page.tsx",
+				"apps/web/src/app/(auth)/layout.tsx",
+				"apps/web/src/app/(auth)/sign-in/[[...sign-in]]/page.tsx",
+				"apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
 				"apps/web/config/product.ts",
 				"apps/web/config/generated-design-system.ts",
-				"apps/web/app/_content/home-page.ts",
+				"apps/web/src/components/ui/button.tsx",
+				"apps/web/src/app/(app)/layout.tsx",
+				"apps/web/src/app/(app)/dashboard/page.tsx",
+				"apps/web/src/app/(app)/chat/page.tsx",
+				"apps/web/src/components/app/chat-workbench.tsx",
+				"apps/web/src/lib/chat/models.ts",
+				"apps/web/src/lib/chat/openai-stream.ts",
+				"apps/web/src/proxy.ts",
+				"apps/web/convex/chat.ts",
+				"apps/web/convex/schema.ts",
+				"apps/web/next.config.ts",
+				"apps/web/package.json",
+				"apps/web/README.md",
+				"apps/web/.env.local.example",
+				"apps/web/scripts/run-next-build-serialized.mjs",
 				"packages/codebase-presentation/package.json",
 				"packages/codebase-presentation/src/index.ts",
 				"packages/telegram-chat-widget/package.json",
@@ -302,6 +406,7 @@ describe("repo generation", () => {
 				"docs/build/docs/review.md",
 				"docs/build/docs/prompt.md",
 				"docs/facts/design-system.json",
+				"docs/facts/template-source.json",
 				"apps/web/.env.production.example",
 				"docs/testing/README.md",
 				".agents/README.md",
@@ -315,11 +420,23 @@ describe("repo generation", () => {
 				"docs/exec-plans/PLANS.md",
 				"docs/exec-plans/active/index.md",
 				"docs/exec-plans/completed/index.md",
-				operatingPackPaths.activeExecPlanPath,
+				...operatingPackPaths.activeExecPlanPaths,
 			]),
 		);
+		expect(uniqueSnapshotPathCount).toBe(snapshotPaths.length);
 		expect(snapshotPaths).not.toEqual(
 			expect.arrayContaining([
+				"apps/web/content/docs/index.mdx",
+				"apps/web/app/blog/page.tsx",
+				"apps/web/app/page.tsx",
+				"apps/web/app/layout.tsx",
+				"apps/web/app/api/codex/generate/route.ts",
+				"apps/web/app/api/workspace/runner/events/route.ts",
+				"apps/web/src/app/_content/home-page.ts",
+				"apps/web/src/app/api/billing/checkout/route.ts",
+				"apps/web/src/app/(app)/notes/page.tsx",
+				"apps/web/src/components/app/notes-workbench.tsx",
+				"apps/web/convex/notes.ts",
 				"docs/PLANS.md",
 				"docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
@@ -347,6 +464,91 @@ describe("repo generation", () => {
 					file.path === ".github/workflows/examples/basic-ci.example.yml",
 			),
 		);
+		const bunfig = snapshotText(
+			snapshotFiles.find((file) => file.path === "bunfig.toml"),
+		);
+		const appPackageJson = JSON.parse(
+			snapshotText(
+				snapshotFiles.find((file) => file.path === "apps/web/package.json"),
+			) || "{}",
+		) as {
+			scripts?: Record<string, string>;
+		};
+		const appScriptBody = Object.values(appPackageJson.scripts ?? {}).join(
+			"\n",
+		);
+		const appLocalEnvExample = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/.env.local.example"),
+		);
+		const appProductionEnvExample = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "apps/web/.env.production.example",
+			),
+		);
+		const productConfigSource = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/config/product.ts"),
+		);
+		const marketingPage = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "apps/web/src/app/(marketing)/page.tsx",
+			),
+		);
+		const generatedDesignSystem = JSON.parse(
+			snapshotText(
+				snapshotFiles.find(
+					(file) => file.path === "docs/facts/design-system.json",
+				),
+			) || "{}",
+		) as {
+			selection?: { presetLabel?: string };
+			preset?: {
+				font?: { label?: string };
+				baseColorLabel?: string;
+				tokens?: { light?: Record<string, string> };
+			};
+		};
+		const appReadme = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/README.md"),
+		);
+		const appProxy = snapshotText(
+			snapshotFiles.find((file) => file.path === "apps/web/src/proxy.ts"),
+		);
+		const templateSourceProvenance = JSON.parse(
+			snapshotText(
+				snapshotFiles.find(
+					(file) => file.path === "docs/facts/template-source.json",
+				),
+			) || "{}",
+		) as {
+			schemaVersion?: string;
+			templateId?: string;
+			templateVersion?: string;
+			materializedOutputRoot?: string;
+			generatedOverlaysWin?: boolean;
+			contentDigest?: string;
+			provenance?: Record<string, unknown>;
+		};
+		const appSnapshotText = snapshotFiles
+			.filter((file) => file.path.startsWith("apps/web/"))
+			.map(snapshotText)
+			.join("\n");
+		const browserReachableAppText = snapshotFiles
+			.filter(
+				(file) =>
+					file.path.startsWith("apps/web/src/app/") ||
+					file.path.startsWith("apps/web/src/components/"),
+			)
+			.map(snapshotText)
+			.join("\n");
+		const generatedGuidanceText = snapshotFiles
+			.filter(
+				(file) =>
+					file.path === "START-HERE.md" ||
+					file.path.startsWith(".agents/skills/") ||
+					file.path.startsWith("docs/exec-plans/active/"),
+			)
+			.map(snapshotText)
+			.join("\n");
 
 		expect(rootAgentGuide?.content).toContain("docs/build/docs/prompt.md");
 		expect(rootAgentGuide?.content).toContain("bun run agentic:check");
@@ -365,18 +567,145 @@ describe("repo generation", () => {
 		expect(linearWorkflowSkill?.content).toContain(
 			"Problem, Outcome, Acceptance Criteria, Validation, and Source",
 		);
-		expect(basicCiWorkflow).toContain("      - run: bun ci");
+		expect(basicCiWorkflow).toContain("      - run: bun install");
 		expect(basicCiWorkflow).toContain("      - run: bun run codebase:contract");
 		expect(basicCiWorkflow).toContain("      - run: bun run agentic:check");
-		expect(basicCiWorkflow).not.toContain("bun install");
+		expect(basicCiWorkflow).not.toContain("bun ci");
 		expect(basicCiWorkflow).not.toContain("bun run build");
 		expect(basicCiWorkflow).not.toContain("bun run lint");
+		expect(bunfig).toContain('linker = "hoisted"');
+		expect(bunfig).not.toContain("minimumReleaseAge");
+		expect(appPackageJson.scripts?.dev).toBe("next dev");
+		expect(appPackageJson.scripts?.typecheck).toBe(
+			"node scripts/run-next-build-serialized.mjs",
+		);
+		expect(appScriptBody).not.toContain("scripts/dev-stripe-listen-ready.mjs");
+		expect(appScriptBody).not.toContain("CODEX_APP_SERVER");
+		expect(appLocalEnvExample).toContain(
+			"NEXT_PUBLIC_APP_URL=http://localhost:3000",
+		);
+		expect(appLocalEnvExample).toContain("CONVEX_WEBHOOK_MUTATION_SECRET=");
+		expect(appLocalEnvExample).toContain("OPENAI_API_KEY=");
+		expect(appLocalEnvExample).toContain("STRIPE_PRICE_PRO_MONTHLY=");
+		expect(appLocalEnvExample).toContain("NEXT_PUBLIC_POSTHOG_KEY=");
+		expect(appLocalEnvExample).not.toContain("APP_BASE_URL=");
+		expect(appLocalEnvExample).not.toContain("STRIPE_STARTER_PRICE_ID=");
+		expect(appLocalEnvExample).not.toContain(
+			"CHECKOUT_FULFILLMENT_RETRY_SECRET=",
+		);
+		expect(appLocalEnvExample).not.toContain("NEXT_PUBLIC_POSTHOG_TOKEN=");
+		expect(appLocalEnvExample).not.toContain(
+			"NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com",
+		);
+		expect(appLocalEnvExample).not.toContain("STRIPE_WORKERS");
+		expect(appLocalEnvExample).not.toContain("CODEX_");
+		expect(appProductionEnvExample).toContain(
+			"NEXT_PUBLIC_APP_URL=https://your-domain.example",
+		);
+		expect(appProductionEnvExample).toContain("STRIPE_PRICE_PRO_MONTHLY=");
+		expect(appProductionEnvExample).toContain("OPENAI_API_KEY=");
+		expect(appProductionEnvExample).not.toContain("APP_BASE_URL=");
+		expect(appProductionEnvExample).not.toContain("STRIPE_STARTER_PRICE_ID=");
+		expect(appProductionEnvExample).not.toContain("STRIPE_WORKERS");
+		expect(appProductionEnvExample).not.toContain("CODEX_");
+		expect(productConfigSource).toContain("export const productConfig");
+		expect(productConfigSource).toContain("export const productContent");
+		expect(productConfigSource).toContain("coreFlow");
+		expect(productConfigSource).toContain("generatedProductContent");
+		expect(marketingPage).toContain(
+			'import { productConfig, productContent } from "@/config/product";',
+		);
+		expect(marketingPage).toContain("productContent.headline");
+		expect(marketingPage).toContain("bg-primary");
+		expect(marketingPage).not.toContain("radial-gradient");
+		expect(marketingPage).not.toContain("@/app/_content");
+		expect(generatedDesignSystem.selection?.presetLabel).toBe("T3 Code");
+		expect(generatedDesignSystem.preset?.font?.label).toBe("DM Sans");
+		expect(generatedDesignSystem.preset?.baseColorLabel).toBe("Zinc");
+		expect(generatedDesignSystem.preset?.tokens?.light?.["--primary"]).toBe(
+			"oklch(0.488 0.217 264)",
+		);
+		expect(appSnapshotText).not.toContain("Northstar");
+		expect(appSnapshotText).not.toContain("thienlnam");
+		expect(appSnapshotText).not.toContain(
+			"next-js-convex-clerk-stripe-template",
+		);
+		expect(appSnapshotText).not.toContain('action="/api/billing/checkout"');
+		expect(appSnapshotText).not.toContain('action="/api/billing/portal"');
+		expect(browserReachableAppText).not.toContain("process.env.OPENAI_API_KEY");
+		expect(generatedGuidanceText).not.toContain("apps/web/content/docs/");
+		expect(generatedGuidanceText).not.toContain(
+			"apps/web/convex/_generated/ai/guidelines.md",
+		);
+		expect(appReadme).toContain("No-Provider Contract");
+		expect(appReadme).toContain("T3 Code visual contract");
+		expect(appReadme).toContain("config/product.ts");
+		expect(appReadme).not.toContain("_content");
+		expect(appReadme).not.toContain("api/stripe/webhook");
+		expect(appProxy).toContain("const clerkProxyConfigured = Boolean(");
+		expect(appProxy).toContain("process.env.CLERK_SECRET_KEY");
+		expect(appProxy).toContain("return NextResponse.next();");
+		expect(appProxy).toContain("return clerkProxy(request, event);");
+		expect(appProxy).not.toContain("export default clerkMiddleware");
+		expect(templateSourceProvenance).toMatchObject({
+			schemaVersion: "generated-starter-template-source-provenance.v1",
+			templateId: "starter-app",
+			templateVersion: "2026-05-13-chat-starter",
+			materializedOutputRoot: "apps/web",
+			generatedOverlaysWin: true,
+			contentDigest:
+				"sha256-6681c4e9492ea7cb07634a9beb7d8c656b2dec556e939b8fe01c7f35fff79c0c",
+		});
+		expect(
+			Object.keys(templateSourceProvenance.provenance ?? {}),
+		).not.toContain("originPathHint");
 		expect(forbiddenPaths).toEqual([]);
+		expectNoForbiddenStarterSnapshotPaths(snapshotPaths);
+		expect(snapshotPaths).not.toEqual(
+			expect.arrayContaining([
+				"bun.lock",
+				"apps/web/content/docs/index.mdx",
+				"apps/web/app/workers/page.tsx",
+				"apps/web/app/blog/page.tsx",
+				"apps/web/app/page.tsx",
+				"apps/web/app/layout.tsx",
+				"apps/web/app/api/workspace/runner/events/route.ts",
+				"apps/web/app/api/codex/generate/route.ts",
+				"apps/web/src/app/_content/home-page.ts",
+				"apps/web/src/app/api/billing/checkout/route.ts",
+				"apps/web/src/app/(app)/notes/page.tsx",
+				"apps/web/src/components/app/notes-workbench.tsx",
+				"apps/web/convex/notes.ts",
+				"apps/web/convex/workspace.ts",
+				"apps/web/platform/codex/app-server.ts",
+				"packages/local-runner/src/index.ts",
+			]),
+		);
 	});
 
 	it("materializes an explicit generated operating pack with runnable script wiring", async () => {
 		const projectDefinition = createCompleteProjectDefinition();
 		const operatingPackPaths = buildOperatingPackPaths(projectDefinition);
+		const coreBootPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"core-boot",
+		);
+		const clerkPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"clerk-setup",
+		);
+		const convexPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"convex-setup",
+		);
+		const stripePlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"stripe-setup",
+		);
+		const firstProductPlan = getGeneratedOperatingPlan(
+			operatingPackPaths,
+			"first-product-slice",
+		);
 		const snapshotFiles = await materializeRepoSnapshot(projectDefinition);
 		const packageJson = JSON.parse(
 			snapshotText(
@@ -391,9 +720,22 @@ describe("repo generation", () => {
 				(file) => file.path === operatingPackPaths.activeProgramPath,
 			),
 		);
-		const execPlan = snapshotText(
+		const coreBootExecPlan = snapshotText(
+			snapshotFiles.find((file) => file.path === coreBootPlan.path),
+		);
+		const programLintScript = snapshotText(
 			snapshotFiles.find(
-				(file) => file.path === operatingPackPaths.activeExecPlanPath,
+				(file) => file.path === "scripts/agentic/check-programs.mjs",
+			),
+		);
+		const execPlansLintScript = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "scripts/agentic/check-exec-plans.mjs",
+			),
+		);
+		const codebaseContractScript = snapshotText(
+			snapshotFiles.find(
+				(file) => file.path === "scripts/agentic/check-codebase-contract.mjs",
 			),
 		);
 		const startHere = snapshotText(
@@ -423,10 +765,50 @@ describe("repo generation", () => {
 		}
 
 		expect(program).toContain("## Slice Ledger");
-		expect(program).toContain(operatingPackPaths.activeExecPlanPath);
-		expect(execPlan).toContain("### Test Commands");
-		expect(execPlan).toContain(operatingPackPaths.activeProgramPath);
+		expect(program).toContain(operatingPackPaths.nextExecPlanPath);
+		expect(program).toContain("Core Boot");
+		for (const plan of operatingPackPaths.activeExecPlans) {
+			expect(snapshotPaths.has(plan.path)).toBe(true);
+			expect(program).toContain(plan.path);
+			expect(programLintScript).toContain(plan.path);
+			expect(execPlansLintScript).toContain(plan.path);
+			expect(codebaseContractScript).toContain(plan.path);
+		}
+		expect(coreBootExecPlan).toContain("### Test Commands");
+		expect(coreBootExecPlan).toContain(operatingPackPaths.activeProgramPath);
+		expect(coreBootExecPlan).toContain("bun install");
+		expect(programLintScript).toContain("expectedActiveExecPlans");
+		expect(programLintScript).toContain("expectedNextExecPlanPath");
+		expect(programLintScript).toContain(operatingPackPaths.nextExecPlanPath);
+		expect(programLintScript).toContain(
+			operatingPackPaths.currentPlanningBriefPath,
+		);
+		expect(execPlansLintScript).toContain(
+			"planning_brief points at mutable current-planning-brief.txt",
+		);
+		expect(execPlansLintScript).toContain(operatingPackPaths.planningBriefPath);
+		expect(codebaseContractScript).toContain(
+			operatingPackPaths.activeProgramPath,
+		);
+		expect(codebaseContractScript).toContain(
+			operatingPackPaths.currentPlanningBriefPath,
+		);
+		expect(
+			snapshotText(snapshotFiles.find((file) => file.path === clerkPlan.path)),
+		).toContain(coreBootPlan.path);
+		expect(
+			snapshotText(snapshotFiles.find((file) => file.path === convexPlan.path)),
+		).toContain(clerkPlan.path);
+		expect(
+			snapshotText(snapshotFiles.find((file) => file.path === stripePlan.path)),
+		).toContain(convexPlan.path);
+		expect(
+			snapshotText(
+				snapshotFiles.find((file) => file.path === firstProductPlan.path),
+			),
+		).toContain(stripePlan.path);
 		expect(startHere).toContain("Check the generated operating pack");
+		expect(startHere).toContain("Core Boot ExecPlan");
 		expect(startHere).toContain("bun run agentic:check");
 	});
 

@@ -1,6 +1,10 @@
 import JSZip from "jszip";
 import { createCompleteProjectDefinition } from "../src";
-import { isExcludedSnapshotPath } from "../src/repo-generation/repo-download-source-contract";
+import {
+	isExcludedSnapshotPath,
+	starterSnapshotForbiddenFilePaths,
+	starterSnapshotForbiddenPathPrefixes,
+} from "../src/repo-generation/repo-download-source-contract";
 import { buildOperatingPackPaths } from "../src/repo-generation/render-starter-operating-pack";
 import { buildReviewDownloadZip } from "../src/server";
 
@@ -18,7 +22,7 @@ describe("review download zip", () => {
 			"docs/exec-plans/PLANS.md",
 			"docs/exec-plans/active/index.md",
 			"docs/exec-plans/completed/index.md",
-			operatingPackPaths.activeExecPlanPath,
+			...operatingPackPaths.activeExecPlanPaths,
 		]);
 		const buffer = await buildReviewDownloadZip(projectDefinition);
 		const zip = await JSZip.loadAsync(buffer);
@@ -29,6 +33,17 @@ describe("review download zip", () => {
 			}
 			const relativePath = entry.replace(/^ship-by-sunday-os\//, "");
 			return isExcludedSnapshotPath(relativePath, allowedGeneratedPaths);
+		});
+		const starterLeakageEntries = entries.filter((entry) => {
+			const relativePath = entry.replace(/^ship-by-sunday-os\//, "");
+			return (
+				starterSnapshotForbiddenFilePaths.includes(
+					relativePath as (typeof starterSnapshotForbiddenFilePaths)[number],
+				) ||
+				starterSnapshotForbiddenPathPrefixes.some((prefix) =>
+					relativePath.startsWith(prefix),
+				)
+			);
 		});
 
 		expect(entries).toEqual(
@@ -45,8 +60,22 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/.agents/skills/starter-auth-setup/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/starter-operating-pack/SKILL.md",
 				"ship-by-sunday-os/.agents/skills/external-skills.json",
-				"ship-by-sunday-os/apps/web/content/docs/index.mdx",
+				"ship-by-sunday-os/apps/web/src/app/globals.css",
+				"ship-by-sunday-os/apps/web/src/app/layout.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(marketing)/page.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(auth)/layout.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(auth)/sign-in/[[...sign-in]]/page.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(auth)/sign-up/[[...sign-up]]/page.tsx",
+				"ship-by-sunday-os/apps/web/src/components/ui/button.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(app)/layout.tsx",
+				"ship-by-sunday-os/apps/web/src/app/(app)/dashboard/page.tsx",
+				"ship-by-sunday-os/apps/web/convex/schema.ts",
+				"ship-by-sunday-os/apps/web/config/product.ts",
 				"ship-by-sunday-os/apps/web/config/generated-design-system.ts",
+				"ship-by-sunday-os/apps/web/next.config.ts",
+				"ship-by-sunday-os/apps/web/package.json",
+				"ship-by-sunday-os/apps/web/README.md",
+				"ship-by-sunday-os/apps/web/scripts/run-next-build-serialized.mjs",
 				"ship-by-sunday-os/packages/codebase-presentation/package.json",
 				"ship-by-sunday-os/packages/codebase-presentation/src/index.ts",
 				"ship-by-sunday-os/packages/telegram-chat-widget/package.json",
@@ -54,22 +83,35 @@ describe("review download zip", () => {
 				"ship-by-sunday-os/docs/index.md",
 				"ship-by-sunday-os/docs/build/docs/prompt.md",
 				"ship-by-sunday-os/docs/facts/design-system.json",
+				"ship-by-sunday-os/docs/facts/template-source.json",
 				"ship-by-sunday-os/apps/web/.env.production.example",
 				"ship-by-sunday-os/docs/testing/README.md",
 				"ship-by-sunday-os/docs/programs/PROGRAMS.md",
 				`ship-by-sunday-os/${operatingPackPaths.activeProgramPath}`,
 				"ship-by-sunday-os/docs/exec-plans/PLANS.md",
-				`ship-by-sunday-os/${operatingPackPaths.activeExecPlanPath}`,
+				...operatingPackPaths.activeExecPlanPaths.map(
+					(planPath) => `ship-by-sunday-os/${planPath}`,
+				),
 			]),
 		);
 		expect(entries).not.toEqual(
 			expect.arrayContaining([
+				"ship-by-sunday-os/apps/web/content/docs/index.mdx",
+				"ship-by-sunday-os/apps/web/app/blog/page.tsx",
+				"ship-by-sunday-os/apps/web/app/page.tsx",
+				"ship-by-sunday-os/apps/web/app/layout.tsx",
+				"ship-by-sunday-os/apps/web/app/api/codex/generate/route.ts",
+				"ship-by-sunday-os/apps/web/app/api/workspace/runner/events/route.ts",
+				"ship-by-sunday-os/apps/web/src/app/_content/home-page.ts",
+				"ship-by-sunday-os/apps/web/src/app/api/billing/checkout/route.ts",
 				"ship-by-sunday-os/docs/PLANS.md",
 				"ship-by-sunday-os/docs/exec-plans/completed/2026-05-02-reconcile-customer-agentic-source-contract.md",
 				"ship-by-sunday-os/docs/programs/active/2026-05-02-customer-agentic-operating-system/program.md",
 				"ship-by-sunday-os/docs/programs/completed/2026-05-02-customer-agentic-operating-system/program.md",
+				"ship-by-sunday-os/bun.lock",
 			]),
 		);
 		expect(forbiddenEntries).toEqual([]);
+		expect(starterLeakageEntries).toEqual([]);
 	});
 });

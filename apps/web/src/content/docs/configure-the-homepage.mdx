@@ -1,0 +1,57 @@
+---
+title: Configure the Homepage
+description: Change the current Man Meets AI public homepage without crossing the Starter and Workers product boundaries.
+---
+
+# Configure the Homepage
+
+The public homepage at `/` is now the Man Meets AI brand page. It is not the Starter sales page, not the Workers sales page, not the Worker Seal Team 6 service page, and not a checkout-first page.
+
+## Current public IA
+
+- `/`: Man Meets AI brand, media, founder, and routing page
+- `/starter`: public Starter offer page
+- `/workers`: public Workers offer page
+- `/worker-seal-team-6`: public Worker Seal Team 6 service page
+- `/blog`: public editorial index and posts
+- `/docs`: direct-link docs surface; do not promote it in primary public navigation
+
+## Files to read first
+
+When you change the public homepage or public marketing navigation, inspect these files:
+
+1. `src/app/(marketing)/page.tsx`
+2. `src/app/(marketing)/starter/page.tsx`
+3. `src/app/(marketing)/workers/page.tsx`
+4. `src/app/(marketing)/worker-seal-team-6/page.tsx`
+5. `src/components/layout/public-site-header.tsx`
+6. `src/config/product.ts`
+7. `src/app/robots.ts`
+8. `src/app/sitemap.ts`
+9. `tests/unit/public-metadata-routes.test.ts`
+
+The old generated-codebase homepage system under `src/app/_components/home-page/` still exists for compatibility and tests, but it is no longer the public `/` route contract.
+
+## Rules
+
+- Keep `/` informational. It should route visitors by intent: “I have an idea” goes to `/starter`; “I have a codebase” goes to `/workers`; direct, high-touch service interest goes to `/worker-seal-team-6`.
+- Do not put docs, tutorials, or generated-codebase links in the primary public nav.
+- Put checkout buttons on `/starter` and `/workers`, not on the Man Meets AI index.
+- Do not put an app-owned checkout button on `/worker-seal-team-6`. Worker Seal Team 6 booking is Cal.com-owned; the page embeds Cal.com when `NEXT_PUBLIC_WORKER_SEAL_TEAM_6_CAL_LINK` is configured, keeps the hosted Cal.com fallback link visible, and falls back to direct scheduling when the public link is unset.
+- Starter checkout must use offer id `starter` and route successful buyers to `/starter/home`.
+- Workers checkout must use offer id `workers` and route successful buyers to `/workers/setup`.
+- Keep `/workers` public. Only Worker operational routes such as `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/loops`, `/workers/runs`, and `/workers/privacy` are protected.
+
+## Validation
+
+For public route changes, run:
+
+```bash
+bun run --cwd apps/web test:unit -- tests/unit/public-metadata-routes.test.ts tests/unit/proxy-protected-routes.test.ts
+```
+
+For checkout CTA changes, also run:
+
+```bash
+bun run --cwd apps/web test:unit -- tests/unit/checkout-session-params.test.ts tests/unit/checkout-session.test.ts tests/unit/stripe-line-item.test.ts
+```

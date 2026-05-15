@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeToggleButton } from "@/app/_components/theme-toggle-button";
-import { DocsThemeToggle } from "@/app/docs/_components/docs-theme-toggle";
-import { DOCS_THEME_STORAGE_KEY } from "@/app/docs/_lib/theme-preferences";
+import { DocsThemeToggle } from "@/app/(marketing)/docs/_components/docs-theme-toggle";
+import { DOCS_THEME_STORAGE_KEY } from "@/app/(marketing)/docs/_lib/theme-preferences";
 
 vi.mock("next-themes", async () => {
 	const React = await vi.importActual<typeof import("react")>("react");

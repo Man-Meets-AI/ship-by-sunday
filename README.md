@@ -111,8 +111,8 @@ For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/s
 - Linear runbook: [docs/internal/linear.md](./docs/internal/linear.md)
 - Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
 - Release manifest: [release.json](./release.json)
-- Homepage contract: [apps/web/content/docs/configure-the-homepage.mdx](./apps/web/content/docs/configure-the-homepage.mdx)
-- Public docs index: [apps/web/content/docs/index.mdx](./apps/web/content/docs/index.mdx)
+- Homepage contract: [apps/web/src/content/docs/configure-the-homepage.mdx](./apps/web/src/content/docs/configure-the-homepage.mdx)
+- Public docs index: [apps/web/src/content/docs/index.mdx](./apps/web/src/content/docs/index.mdx)
 
 Relevant deeper reference docs:
 
@@ -158,4 +158,4 @@ If you want a lighter touch, say so explicitly. For example:
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 - Root agent instructions: [AGENTS.md](./AGENTS.md)
 
-If you are new to the repo, start with `README.md`, then `AGENTS.md`, then `docs/index.md`, then `DESIGN.md`, then `docs/release-workflow.md` or `apps/web/content/docs/local-qa.mdx` depending on whether you are shipping or debugging app-local tests.
+If you are new to the repo, start with `README.md`, then `AGENTS.md`, then `docs/index.md`, then `DESIGN.md`, then `docs/release-workflow.md` or `apps/web/src/content/docs/local-qa.mdx` depending on whether you are shipping or debugging app-local tests.

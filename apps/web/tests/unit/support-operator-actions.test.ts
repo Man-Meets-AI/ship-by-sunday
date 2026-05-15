@@ -139,10 +139,18 @@ describe("support operator actions", () => {
 		expect(
 			buildSupportOperatorActionEffect("send_pricing_link", threadContext)
 				.customerMessageText,
-		).toContain("https://www.man-meets-ai.com/#pricing");
+		).toContain("https://www.man-meets-ai.com/starter");
+		expect(
+			buildSupportOperatorActionEffect("send_pricing_link", threadContext)
+				.customerMessageText,
+		).toContain("https://www.man-meets-ai.com/workers");
 		expect(
 			buildSupportOperatorActionEffect("send_checkout_link", threadContext)
 				.customerMessageText,
-		).toContain("https://www.man-meets-ai.com/#pricing");
+		).toContain("https://www.man-meets-ai.com/starter");
+		expect(
+			buildSupportOperatorActionEffect("send_checkout_link", threadContext)
+				.customerMessageText,
+		).toContain("https://www.man-meets-ai.com/workers");
 	});
 });

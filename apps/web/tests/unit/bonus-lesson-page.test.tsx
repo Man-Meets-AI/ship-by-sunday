@@ -29,7 +29,7 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -49,19 +49,19 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 }));
 
 vi.mock(
-	"@/app/(workspace)/_components/execute-ship/bonus-lesson-view-tracker",
+	"@/app/(app)/_components/execute-ship/bonus-lesson-view-tracker",
 	() => ({
 		BonusLessonViewTracker: () => null,
 	}),
 );
 
-import { BonusLessonPage } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-page";
-import { BonusLessonFooter } from "@/app/(workspace)/_components/execute-ship/bonus-lesson-footer";
+import { BonusLessonPage } from "@/app/(app)/_components/execute-ship/bonus-lesson-page";
+import { BonusLessonFooter } from "@/app/(app)/_components/execute-ship/bonus-lesson-footer";
 
 const codebaseStageStatuses = deriveStageStatus(
 	createCompleteProjectDefinition().facts,
 ).stageStatuses;
-import { AppShellFooterRail } from "@/app/(workspace)/_components/app-shell/app-shell-footer-rail";
+import { AppShellFooterRail } from "@/app/(app)/_components/app-shell/app-shell-footer-rail";
 
 function getWorkspaceLocalNavMarkup(markup: string) {
 	const localNavStart =

@@ -18,7 +18,7 @@ vi.mock("@/platform/auth/clerk-middleware-bypass", () => ({
 	shouldBypassClerkProtection: () => shouldBypassClerkProtectionMock(),
 }));
 
-vi.mock("@/app/(identity)/_components/sign-in-page", () => ({
+vi.mock("@/app/(auth)/_components/sign-in-page", () => ({
 	SignInPage: (props: unknown) => {
 		signInPageMock(props);
 		return null;
@@ -30,7 +30,7 @@ vi.mock("@/platform/billing/checkout/checkout-session-recovery", () => ({
 		getValidatedPendingCheckoutEmailFromCookieMock(),
 }));
 
-import Page from "@/app/(identity)/sign-in/[[...sign-in]]/page";
+import Page from "@/app/(auth)/sign-in/[[...sign-in]]/page";
 
 describe("sign-in route", () => {
 	beforeEach(() => {
@@ -100,6 +100,34 @@ describe("sign-in route", () => {
 			isInitialEmailLocked: true,
 		});
 	});
+
+	it.each([
+		"/starter/home?welcome=checkout",
+		"/workers/setup?welcome=checkout",
+	])(
+		"locks the checkout email for offer-specific post-checkout sign-in to %s",
+		async (redirectUrl) => {
+			authMock.mockResolvedValue({
+				isAuthenticated: false,
+			});
+			getValidatedPendingCheckoutEmailFromCookieMock.mockResolvedValue(
+				"buyer@example.com",
+			);
+
+			const result = await Page({
+				searchParams: Promise.resolve({
+					redirect_url: redirectUrl,
+				}),
+			});
+
+			expect(redirectMock).not.toHaveBeenCalled();
+			expect(result).toBeTruthy();
+			expect((result as { props: unknown }).props).toMatchObject({
+				initialEmail: "buyer@example.com",
+				isInitialEmailLocked: true,
+			});
+		},
+	);
 
 	it("does not lock email for generic signed-out sign-in", async () => {
 		authMock.mockResolvedValue({

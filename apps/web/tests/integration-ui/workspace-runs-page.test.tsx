@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceRunHistoryState } from "@/app/(workspace)/_lib/workspace-support-read-model";
+import type { WorkspaceRunHistoryState } from "@/app/(app)/_lib/workspace-support-read-model";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -20,7 +20,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -35,7 +35,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceRunsPage } from "@/app/(workspace)/_components/existing-codebase-support/workspace-runs-page";
+import { WorkspaceRunsPage } from "@/app/(app)/_components/existing-codebase-support/workspace-runs-page";
 
 function createRunHistory(): WorkspaceRunHistoryState {
 	return {
@@ -95,13 +95,20 @@ describe("WorkspaceRunsPage", () => {
 			configurable: true,
 			value: { writeText: writeTextMock },
 		});
-		render(
+		const { container } = render(
 			<WorkspaceRunsPage
 				initialRunHistory={createRunHistory()}
 				now={Date.UTC(2026, 4, 4, 21, 30)}
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(screen.getByRole("heading", { name: "Run history" })).toBeTruthy();
 		expect(screen.getByRole("region", { name: "Runs summary" })).toBeTruthy();
 		expect(screen.getByText("Runs recorded")).toBeTruthy();

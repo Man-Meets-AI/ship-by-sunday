@@ -13,7 +13,6 @@ export const customerSafeRepoRootFilePaths = [
 	".gitignore",
 	".oxfmtrc.json",
 	".oxlintrc.json",
-	"bun.lock",
 	"bunfig.toml",
 	"package.json",
 ] as const;
@@ -21,34 +20,14 @@ export const customerSafeRepoRootFilePaths = [
 export const customerSafeAppFilePaths = [
 	"apps/web/.env.local.example",
 	"apps/web/.gitignore",
-	"apps/web/AGENTS.md",
 	"apps/web/components.json",
-	"apps/web/instrumentation-client.ts",
-	"apps/web/instrumentation.ts",
-	"apps/web/mdx-components.tsx",
-	"apps/web/next-env.d.ts",
-	"apps/web/next.config.ts",
 	"apps/web/package.json",
-	"apps/web/playwright.config.ts",
 	"apps/web/postcss.config.mjs",
-	"apps/web/proxy.ts",
+	"apps/web/scripts/run-next-build-serialized.mjs",
 	"apps/web/tsconfig.json",
-	"apps/web/vitest.config.ts",
 ] as const;
 
-export const customerSafeAppDirectoryPaths = [
-	"apps/web/app",
-	"apps/web/components",
-	"apps/web/config",
-	"apps/web/content",
-	"apps/web/convex",
-	"apps/web/data",
-	"apps/web/hooks",
-	"apps/web/lib",
-	"apps/web/platform",
-	"apps/web/public",
-	"apps/web/scripts",
-] as const;
+export const customerSafeAppDirectoryPaths = [] as const;
 
 export const customerSafeCodebaseCompilerFilePaths = [
 	"packages/codebase-compiler/package.json",
@@ -109,6 +88,17 @@ const excludedSnapshotPathFragments = [
 	"/test-results/",
 ] as const;
 
+export const starterSnapshotForbiddenPathPrefixes = [
+	"apps/web/app/",
+	"apps/web/convex/workspace/",
+	"apps/web/platform/codex/",
+	"packages/local-runner/",
+] as const;
+
+export const starterSnapshotForbiddenFilePaths = [
+	"apps/web/convex/workspace.ts",
+] as const;
+
 const excludedSnapshotPathSuffixes = [
 	"/CHANGELOG.md",
 	"/docs/release-workflow.md",
@@ -128,6 +118,17 @@ function isExcludedByPathSegment(relativePath: string) {
 	);
 }
 
+function isForbiddenStarterSnapshotPath(relativePath: string) {
+	return (
+		starterSnapshotForbiddenFilePaths.includes(
+			relativePath as (typeof starterSnapshotForbiddenFilePaths)[number],
+		) ||
+		starterSnapshotForbiddenPathPrefixes.some((prefix) =>
+			relativePath.startsWith(prefix),
+		)
+	);
+}
+
 export function isExcludedSnapshotPath(
 	relativePath: string,
 	allowedGeneratedPaths: ReadonlySet<string> = new Set(),
@@ -137,6 +138,7 @@ export function isExcludedSnapshotPath(
 	}
 
 	return (
+		isForbiddenStarterSnapshotPath(relativePath) ||
 		isExcludedByPathSegment(relativePath) ||
 		excludedSnapshotFileSuffixes.some(
 			(suffix) =>
@@ -165,7 +167,7 @@ function toAppTraceDirectoryGlob(repoRelativePath: string) {
 	return `./${repoRelativePath.slice(appRootPrefix.length)}/**/*`;
 }
 
-export function buildRepoDownloadTraceIncludes() {
+export function buildStaticRepoDownloadTraceIncludes() {
 	return [
 		...customerSafeAppFilePaths.map(toAppTraceFilePath),
 		...customerSafeAppDirectoryPaths.map(toAppTraceDirectoryGlob),
@@ -181,5 +183,5 @@ export function buildRepoDownloadTraceIncludes() {
 			toRepoTraceDirectoryGlob,
 		),
 		...codebaseCompilerTemplateSourceTracePaths,
-	] as const;
+	];
 }

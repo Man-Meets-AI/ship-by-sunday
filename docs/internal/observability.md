@@ -38,7 +38,7 @@ During migration, the Convex incident ledger stays in place for provider-specifi
 
 PostHog owns browser analytics, automatic pageviews, deliberate product events, same-origin client exceptions, Node.js Next.js runtime request errors, source-map upload, and masked session replay. The first deliberate product event is `checkout_started`, captured from the checkout button path.
 
-The old same-origin client-error endpoint at `apps/web/app/api/observability/client-error/route.ts` is intentionally retired and returns `410 Gone`. `apps/web/instrumentation-client.ts` initializes PostHog instead of installing custom `window.error` and `unhandledrejection` listeners. `apps/web/instrumentation.ts` sends generic `next_runtime` request errors to PostHog on the Node.js runtime instead of writing them to Convex.
+The old same-origin client-error endpoint at `apps/web/src/app/api/observability/client-error/route.ts` is intentionally retired and returns `410 Gone`. `apps/web/src/instrumentation-client.ts` initializes PostHog instead of installing custom `window.error` and `unhandledrejection` listeners. `apps/web/src/instrumentation.ts` sends generic `next_runtime` request errors to PostHog on the Node.js runtime instead of writing them to Convex.
 
 The remaining custom Convex path owns Clerk webhook incidents, Vercel webhook incidents, Stripe checkout and webhook failures, incident lifecycle status, Telegram delivery, and runtime-intake export.
 
@@ -106,7 +106,7 @@ Repo-local draft workflow instructions live at `.agents/skills/shared/posthog-li
 
 ### Runtime-Intake And Convex Retirement
 
-Runtime-intake remains repo-owned until a later slice proves a replacement or explicitly retires the contract. Do not delete `apps/web/scripts/export-runtime-intake.mjs`, `apps/web/lib/observability/runtime-intake.mjs`, `scripts/release/lib/engineering-intake-contract.mjs`, or the Convex incident query seams while runtime-intake still reads Convex incidents.
+Runtime-intake remains repo-owned until a later slice proves a replacement or explicitly retires the contract. Do not delete `apps/web/scripts/export-runtime-intake.mjs`, `apps/web/src/lib/observability/runtime-intake.mjs`, `scripts/release/lib/engineering-intake-contract.mjs`, or the Convex incident query seams while runtime-intake still reads Convex incidents.
 
 The retirement slice may delete or narrow Convex generic incident storage only after these are true:
 
@@ -140,20 +140,20 @@ This proof checks PostHog env presence and injected source-map chunk IDs without
 
 The observability entrypoints are small but distributed:
 
-- `apps/web/instrumentation-client.ts` initializes the PostHog browser SDK.
-- `apps/web/lib/observability/posthog-client.ts` owns browser analytics, exception capture, replay masking defaults, and deliberate product events.
-- `apps/web/instrumentation.ts` captures Node.js Next.js request errors through PostHog.
-- `apps/web/platform/observability/posthog-server.ts` owns lazy server-side PostHog capture and flushing.
+- `apps/web/src/instrumentation-client.ts` initializes the PostHog browser SDK.
+- `apps/web/src/lib/observability/posthog-client.ts` owns browser analytics, exception capture, replay masking defaults, and deliberate product events.
+- `apps/web/src/instrumentation.ts` captures Node.js Next.js request errors through PostHog.
+- `apps/web/src/platform/observability/posthog-server.ts` owns lazy server-side PostHog capture and flushing.
 - `apps/web/next.config.ts` wires PostHog source-map upload for production builds.
-- `apps/web/app/api/observability/client-error/route.ts` is a retired compatibility route that returns `410 Gone`; do not add new callers.
-- `apps/web/app/api/observability/clerk/route.ts` verifies Clerk webhooks, turns them into incidents with `buildClerkWebhookIncident`, and forwards them to Convex.
-- `apps/web/app/api/observability/vercel/route.ts` verifies the `x-vercel-signature` header, turns Vercel deploy events into incidents with `buildVercelWebhookIncident`, and forwards them to Convex.
-- `apps/web/app/api/observability/incidents/[incidentId]/status/route.ts` is the maintainer-only app route for incident control. It validates `acked`, `muted`, `resolved`, or `firing`, then calls `updateIncidentStatus`.
-- `apps/web/platform/observability/ingest-error-event.ts` is the shared Next.js client for provider-specific Convex ingest.
-- `apps/web/platform/observability/update-incident-status.ts` is the shared Next.js client for incident status updates.
-- `apps/web/platform/observability/request-id.ts` adds and propagates `x-request-id` so responses can be correlated across the app and Convex.
-- `apps/web/lib/observability/incident.ts` defines the incident types, status values, normalization rules, and defaults.
-- `apps/web/platform/observability/source-adapters/clerk-webhook.ts`, `apps/web/platform/observability/source-adapters/vercel-webhook.ts`, and `apps/web/platform/observability/source-adapters/stripe-failure.ts` translate source-specific events into the shared incident shape.
+- `apps/web/src/app/api/observability/client-error/route.ts` is a retired compatibility route that returns `410 Gone`; do not add new callers.
+- `apps/web/src/app/api/observability/clerk/route.ts` verifies Clerk webhooks, turns them into incidents with `buildClerkWebhookIncident`, and forwards them to Convex.
+- `apps/web/src/app/api/observability/vercel/route.ts` verifies the `x-vercel-signature` header, turns Vercel deploy events into incidents with `buildVercelWebhookIncident`, and forwards them to Convex.
+- `apps/web/src/app/api/observability/incidents/[incidentId]/status/route.ts` is the maintainer-only app route for incident control. It validates `acked`, `muted`, `resolved`, or `firing`, then calls `updateIncidentStatus`.
+- `apps/web/src/platform/observability/ingest-error-event.ts` is the shared Next.js client for provider-specific Convex ingest.
+- `apps/web/src/platform/observability/update-incident-status.ts` is the shared Next.js client for incident status updates.
+- `apps/web/src/platform/observability/request-id.ts` adds and propagates `x-request-id` so responses can be correlated across the app and Convex.
+- `apps/web/src/lib/observability/incident.ts` defines the incident types, status values, normalization rules, and defaults.
+- `apps/web/src/platform/observability/source-adapters/clerk-webhook.ts`, `apps/web/src/platform/observability/source-adapters/vercel-webhook.ts`, and `apps/web/src/platform/observability/source-adapters/stripe-failure.ts` translate source-specific events into the shared incident shape.
 - `apps/web/convex/http.ts` exposes `/stripe/webhook`, `/observability/events`, and `/observability/incidents/status` on the Convex HTTP-actions origin.
 - `apps/web/convex/observability.ts` and `apps/web/convex/observability/model.ts` store incidents, update status, and deliver Telegram notifications.
 
@@ -173,7 +173,7 @@ The observability path depends on these values:
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to deliver incident codebases to Telegram.
 - `NEXT_PUBLIC_POSTHOG_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `POSTHOG_PROJECT_ID`, and `POSTHOG_API_KEY` to run PostHog analytics, error tracking, replay, and source-map upload.
 
-The runtime helpers read these values from `apps/web/platform/env/server.ts` on the Next.js side and `apps/web/convex/env.ts` on the Convex side. If either side is missing the expected value, the route should fail early instead of pretending the transport is healthy.
+The runtime helpers read these values from `apps/web/src/platform/env/server.ts` on the Next.js side and `apps/web/convex/env.ts` on the Convex side. If either side is missing the expected value, the route should fail early instead of pretending the transport is healthy.
 
 ## Incident Ledger
 
@@ -274,7 +274,7 @@ If PostHog client or server exceptions stop appearing in PostHog, check these fi
 
 1. Confirm `NEXT_PUBLIC_POSTHOG_TOKEN` and `NEXT_PUBLIC_POSTHOG_HOST` are both present.
 2. Confirm `POSTHOG_PROJECT_ID` and the source-map-only `POSTHOG_API_KEY` are present for production builds.
-3. Confirm `apps/web/instrumentation-client.ts`, `apps/web/instrumentation.ts`, and `apps/web/next.config.ts` are present in the production bundle path.
+3. Confirm `apps/web/src/instrumentation-client.ts`, `apps/web/src/instrumentation.ts`, and `apps/web/next.config.ts` are present in the production bundle path.
 4. Run `bun run posthog:proof` after a production build and then confirm the uploaded symbol set in PostHog.
 
 If provider webhooks stop creating Convex incidents, check these in order:

@@ -9,14 +9,22 @@ import Stripe from "stripe";
 
 import {
 	assertHostedProofCheckoutSessionSafe,
+	buildHostedBillingProofCheckoutButtonSelector,
+	buildHostedBillingProofOfferSelectorHelp,
+	buildHostedBillingProofSuccessPathPattern,
 	buildHostedProofAccessDebugArgs,
 	buildHostedProofCheckoutSessionParams,
 	buildHostedProofCouponParams,
 	buildHostedProofSignInPath,
-	HOMEPAGE_CHECKOUT_PROOF_PATH,
+	getHostedBillingProofOffer,
+	getHostedBillingProofStripePriceId,
+	hostedProofAccessGrantMatchesOffer,
+	hostedProofCheckoutLineItemMatchesOffer,
+	isExpectedHostedProofCheckoutMetadata,
 	isHostedProofCheckoutSessionFulfilled,
 	isExpressCheckoutRouteUrl,
 	isLiveStripeSecretKey,
+	parseHostedBillingProofOfferId,
 	shouldAllowHostedProofCardEntry,
 } from "./lib/hosted-stripe-checkout-proof.mjs";
 import { buildResetProductAccessCommand } from "./lib/convex-product-access-grant.mjs";
@@ -31,16 +39,11 @@ const convexBinPath = path.join(
 const stripeSecretKey = normalizeStripeSecretKey(
 	process.env.STRIPE_SECRET_KEY ?? "",
 );
-const stripePriceId = normalizeStripeSecretKey(
-	process.env.STRIPE_PRICE_ID ?? "",
-);
 const releasePersonaLocalPath = path.resolve(
 	import.meta.dirname,
 	"../../..",
 	process.env.RELEASE_PERSONAS_LOCAL_FILE ?? "tmp/release-personas.local.json",
 );
-const expectedWebhookAccessSource = "stripe_webhook";
-const hostedCheckoutAppPathPattern = /\/home(\?|$)/;
 const hostedCheckoutProofIdentity = JSON.stringify({
 	tokenIdentifier: "release-proof:hosted-checkout-billing",
 	subject: "release-proof",
@@ -53,6 +56,9 @@ function normalizeStripeSecretKey(secretKey) {
 
 function parseArgs(argv) {
 	let baseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim() ?? "";
+	let offerId = parseHostedBillingProofOfferId(
+		process.env.QA_BILLING_PROOF_OFFER?.trim() || undefined,
+	);
 	let timeoutMs = 90_000;
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -65,6 +71,19 @@ function parseArgs(argv) {
 
 		if (current === "--base-url") {
 			baseUrl = argv[index + 1] ?? baseUrl;
+			index += 1;
+			continue;
+		}
+
+		if (current?.startsWith("--offer=")) {
+			offerId = parseHostedBillingProofOfferId(
+				current.slice("--offer=".length),
+			);
+			continue;
+		}
+
+		if (current === "--offer") {
+			offerId = parseHostedBillingProofOfferId(argv[index + 1]);
 			index += 1;
 			continue;
 		}
@@ -82,6 +101,7 @@ function parseArgs(argv) {
 
 	return {
 		baseUrl,
+		offerId,
 		timeoutMs,
 	};
 }
@@ -144,7 +164,7 @@ async function getProductAccessDebug({ clerkUserId, sessionId }) {
 			convexBinPath,
 			"run",
 			"--prod",
-			"access:getProductAccessDebug",
+			"entitlements:getProductAccessDebug",
 			JSON.stringify(
 				buildHostedProofAccessDebugArgs({
 					clerkUserId,
@@ -186,6 +206,7 @@ async function resetHostedProofProductAccess(clerkUserId) {
 async function createHostedProofCheckoutPurchaseIntent({
 	checkoutEmail,
 	clerkUserId,
+	offer,
 }) {
 	const result = await spawnCommand(
 		process.execPath,
@@ -199,6 +220,7 @@ async function createHostedProofCheckoutPurchaseIntent({
 			JSON.stringify({
 				checkoutEmail,
 				checkoutSurface: "hosted_checkout",
+				offerId: offer.id,
 				...(clerkUserId ? { clerkUserId } : {}),
 			}),
 		],
@@ -406,9 +428,13 @@ async function assertPasswordlessOtpCanSend(page, { email, signInUrl }) {
 		.waitFor({ state: "visible", timeout: 20_000 });
 }
 
-async function createAppCheckoutSession(page) {
-	return await page.evaluate(async () => {
+async function createAppCheckoutSession(page, { offer }) {
+	return await page.evaluate(async (offerId) => {
 		const response = await fetch("/api/stripe/checkout", {
+			body: JSON.stringify({ offerId }),
+			headers: {
+				"Content-Type": "application/json",
+			},
 			method: "POST",
 		});
 		const body = await response.json();
@@ -417,7 +443,7 @@ async function createAppCheckoutSession(page) {
 			sessionId: body.sessionId ?? null,
 			url: body.url ?? null,
 		};
-	});
+	}, offer.id);
 }
 
 async function expireAppCheckoutSession(stripe, sessionId) {
@@ -445,8 +471,49 @@ async function expireAppCheckoutSession(stripe, sessionId) {
 	};
 }
 
-async function verifyHomepageCheckoutContract(page, { baseUrl }) {
+async function inspectAppCheckoutSession(stripe, { offer, sessionId }) {
+	if (!sessionId) {
+		return {
+			amountMatches: false,
+			lineItem: null,
+			metadataMatches: false,
+			sessionMetadata: null,
+			status: "missing",
+		};
+	}
+
+	const [session, lineItems] = await Promise.all([
+		stripe.checkout.sessions.retrieve(sessionId),
+		stripe.checkout.sessions.listLineItems(sessionId, {
+			limit: 5,
+		}),
+	]);
+	const lineItem = lineItems.data[0] ?? null;
+
+	return {
+		amountMatches: hostedProofCheckoutLineItemMatchesOffer(lineItem, offer.id),
+		lineItem: lineItem
+			? {
+					amount_subtotal: lineItem.amount_subtotal,
+					currency: lineItem.currency,
+					description: lineItem.description,
+					price: lineItem.price?.id ?? null,
+				}
+			: null,
+		metadataMatches: isExpectedHostedProofCheckoutMetadata(
+			session.metadata,
+			offer.id,
+		),
+		sessionMetadata: session.metadata,
+		status: session.status,
+	};
+}
+
+async function verifyHomepageCheckoutContract(page, { baseUrl, offer }) {
 	const expressCheckoutRequests = [];
+	const checkoutButtonSelector = buildHostedBillingProofCheckoutButtonSelector(
+		offer.id,
+	);
 	const trackRequest = (request) => {
 		const requestUrl = request.url();
 
@@ -457,23 +524,13 @@ async function verifyHomepageCheckoutContract(page, { baseUrl }) {
 
 	page.on("request", trackRequest);
 	try {
-		await page.goto(new URL(HOMEPAGE_CHECKOUT_PROOF_PATH, baseUrl).toString(), {
+		await page.goto(new URL(offer.publicPath, baseUrl).toString(), {
 			waitUntil: "domcontentloaded",
 		});
-		await page
-			.locator(
-				[
-					"[data-testid='hero-primary-cta']",
-					"[data-testid='codebase-demo-checkout-cta']",
-					"[data-testid='codebase-demo-existing-checkout-cta']",
-					"[data-testid='pricing-primary-cta']",
-				].join(", "),
-			)
-			.first()
-			.waitFor({
-				state: "visible",
-				timeout: 20_000,
-			});
+		await page.locator(checkoutButtonSelector).first().waitFor({
+			state: "visible",
+			timeout: 20_000,
+		});
 		await page
 			.waitForLoadState("networkidle", { timeout: 10_000 })
 			.catch(() => null);
@@ -485,21 +542,16 @@ async function verifyHomepageCheckoutContract(page, { baseUrl }) {
 		expressCheckoutRequestCount: expressCheckoutRequests.length,
 		expressCheckoutRequests,
 		hostedCheckoutButtonCount: await page
-			.locator(
-				[
-					"[data-testid='hero-primary-cta']",
-					"[data-testid='codebase-demo-checkout-cta']",
-					"[data-testid='codebase-demo-existing-checkout-cta']",
-					"[data-testid='pricing-primary-cta']",
-				].join(", "),
-			)
+			.locator(checkoutButtonSelector)
 			.count(),
+		offerId: offer.id,
 		url: page.url(),
 	};
 }
 
 async function waitForAccessGrant({
 	clerkUserId,
+	offer,
 	requireConvexDebug,
 	sessionId,
 	timeoutMs,
@@ -521,8 +573,8 @@ async function waitForAccessGrant({
 			throw error;
 		}
 		if (
-			productAccess?.status === "granted" &&
-			productAccess?.stripeCheckoutSessionId === sessionId
+			productAccess?.stripeCheckoutSessionId === sessionId &&
+			hostedProofAccessGrantMatchesOffer(productAccess, offer.id)
 		) {
 			return productAccess;
 		}
@@ -533,11 +585,14 @@ async function waitForAccessGrant({
 	return productAccess;
 }
 
-async function waitForHostedCheckoutReturn(page) {
+async function waitForHostedCheckoutReturn(
+	page,
+	{ offer, successPathPattern },
+) {
 	await page.waitForURL(
 		(url) =>
 			/\/checkout\/success\?session_id=/.test(url.toString()) ||
-			hostedCheckoutAppPathPattern.test(url.toString()),
+			successPathPattern.test(url.toString()),
 		{
 			timeout: 120_000,
 			waitUntil: "commit",
@@ -548,14 +603,16 @@ async function waitForHostedCheckoutReturn(page) {
 		console.log("Reached /checkout/success");
 	}
 
-	if (!hostedCheckoutAppPathPattern.test(page.url())) {
-		await page.waitForURL(hostedCheckoutAppPathPattern, {
+	if (!successPathPattern.test(page.url())) {
+		await page.waitForURL(successPathPattern, {
 			timeout: 120_000,
 			waitUntil: "commit",
 		});
 	}
 
-	console.log(`Reached protected app home at ${page.url()}`);
+	console.log(
+		`Reached ${offer.label} protected app destination at ${page.url()}`,
+	);
 }
 
 async function isAccessRequiredScreenVisible(page) {
@@ -565,39 +622,49 @@ async function isAccessRequiredScreenVisible(page) {
 		.catch(() => false);
 }
 
-async function verifyAuthorizedAppAccess(page, { baseUrl, timeoutMs }) {
+async function isOfferAccessEvidenceVisible(page, offer) {
+	for (const evidenceText of offer.accessEvidenceText) {
+		if (
+			await page
+				.getByText(evidenceText)
+				.first()
+				.isVisible()
+				.catch(() => false)
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+async function verifyAuthorizedAppAccess(page, { baseUrl, offer, timeoutMs }) {
 	const verificationPage = await page.context().newPage();
 
 	try {
 		const deadline = Date.now() + timeoutMs;
 
 		while (Date.now() < deadline) {
-			await verificationPage.goto(`${baseUrl}/generate-codebase`, {
+			await verificationPage.goto(`${baseUrl}${offer.protectedAccessPath}`, {
 				waitUntil: "networkidle",
 			});
 
 			const accessRequiredVisible =
 				await isAccessRequiredScreenVisible(verificationPage);
-			const headingVisible = await verificationPage
-				.getByRole("heading", { name: "Codebase" })
-				.isVisible()
-				.catch(() => false);
-			const reviewButtonVisible = await verificationPage
-				.getByRole("button", { name: /Continue to Review/i })
-				.isVisible()
-				.catch(() => false);
-			const appHomeHeadingVisible = await verificationPage
-				.getByRole("heading", { name: "Home" })
-				.isVisible()
-				.catch(() => false);
+			const evidenceVisible = await isOfferAccessEvidenceVisible(
+				verificationPage,
+				offer,
+			);
+			const currentPathname = new URL(verificationPage.url()).pathname;
+			const reachedExpectedPath =
+				currentPathname === offer.protectedAccessPath ||
+				currentPathname.startsWith(`${offer.protectedAccessPath}/`);
 
-			if (
-				!accessRequiredVisible &&
-				(headingVisible || reviewButtonVisible || appHomeHeadingVisible)
-			) {
+			if (!accessRequiredVisible && (evidenceVisible || reachedExpectedPath)) {
 				return {
 					accessRequiredVisible,
 					authorized: true,
+					evidenceVisible,
 					url: verificationPage.url(),
 				};
 			}
@@ -609,6 +676,10 @@ async function verifyAuthorizedAppAccess(page, { baseUrl, timeoutMs }) {
 			accessRequiredVisible:
 				await isAccessRequiredScreenVisible(verificationPage),
 			authorized: false,
+			evidenceVisible: await isOfferAccessEvidenceVisible(
+				verificationPage,
+				offer,
+			),
 			url: verificationPage.url(),
 		};
 	} finally {
@@ -620,7 +691,13 @@ function printCheck(label, passed, detail) {
 	console.log(`- ${passed ? "PASS" : "FAIL"} ${label}: ${detail}`);
 }
 
-const { baseUrl, timeoutMs } = parseArgs(process.argv.slice(2));
+const { baseUrl, offerId, timeoutMs } = parseArgs(process.argv.slice(2));
+const proofOffer = getHostedBillingProofOffer(offerId);
+const expectedAccessSources = proofOffer.expectedAccessSources ?? [
+	proofOffer.expectedAccessSource,
+];
+const hostedCheckoutAppPathPattern =
+	buildHostedBillingProofSuccessPathPattern(offerId);
 Object.assign(
 	process.env,
 	withConvexDeploymentEnv({
@@ -640,12 +717,9 @@ if (!stripeSecretKey) {
 	throw new Error("Missing STRIPE_SECRET_KEY in environment.");
 }
 
+const stripePriceId = getHostedBillingProofStripePriceId(process.env, offerId);
 const isLiveStripeMode = isLiveStripeSecretKey(stripeSecretKey);
 const allowCardEntry = shouldAllowHostedProofCardEntry(isLiveStripeMode);
-
-if (!stripePriceId) {
-	throw new Error("Missing STRIPE_PRICE_ID in environment.");
-}
 
 const buyerCredentials = await loadQaBuyerCredentials();
 await clerkSetup({ dotenv: false });
@@ -653,7 +727,9 @@ const stripe = new Stripe(stripeSecretKey, {
 	apiVersion: "2026-02-25.clover",
 });
 const proofRunLabel = `prod-${Date.now()}`;
-console.log(`Preparing hosted billing proof ${proofRunLabel} for ${baseUrl}`);
+console.log(
+	`Preparing hosted ${proofOffer.label} billing proof ${proofRunLabel} for ${baseUrl}. Offer selector: --offer=${proofOffer.id} (${buildHostedBillingProofOfferSelectorHelp()})`,
+);
 const coupon = await stripe.coupons.create(
 	buildHostedProofCouponParams({
 		runLabel: proofRunLabel,
@@ -665,6 +741,88 @@ const context = await browser.newContext({
 	baseURL: baseUrl,
 });
 const page = await context.newPage();
+let directCheckoutSessionId = null;
+let directProofSubscriptionId = null;
+
+function getStripeObjectId(value) {
+	if (typeof value === "string") {
+		return value;
+	}
+
+	return typeof value?.id === "string" ? value.id : null;
+}
+
+function sleep(ms) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function cancelDirectProofSubscription(subscriptionId) {
+	if (!subscriptionId) {
+		return {
+			canceled: false,
+			status: "not_applicable",
+			subscriptionId: null,
+		};
+	}
+
+	const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+	if (subscription.status === "canceled") {
+		return {
+			canceled: true,
+			status: subscription.status,
+			subscriptionId,
+		};
+	}
+
+	const canceledSubscription = await stripe.subscriptions.cancel(
+		subscriptionId,
+		{
+			invoice_now: false,
+			prorate: false,
+		},
+	);
+
+	return {
+		canceled: canceledSubscription.status === "canceled",
+		status: canceledSubscription.status,
+		subscriptionId,
+	};
+}
+
+async function tryCaptureDirectProofSubscriptionId(checkoutSessionId) {
+	if (directProofSubscriptionId || !checkoutSessionId) {
+		return directProofSubscriptionId;
+	}
+
+	try {
+		const session = await stripe.checkout.sessions.retrieve(checkoutSessionId, {
+			expand: ["subscription"],
+		});
+		directProofSubscriptionId = getStripeObjectId(session.subscription);
+	} catch (error) {
+		console.warn(
+			`Unable to capture proof subscription for ${checkoutSessionId}: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
+
+	return directProofSubscriptionId;
+}
+
+async function waitForDirectProofSubscriptionId(checkoutSessionId) {
+	if (proofOffer.id !== "workers") {
+		return directProofSubscriptionId;
+	}
+
+	const deadline = Date.now() + 15_000;
+	while (!directProofSubscriptionId && Date.now() < deadline) {
+		await tryCaptureDirectProofSubscriptionId(checkoutSessionId);
+		if (!directProofSubscriptionId) {
+			await sleep(1_000);
+		}
+	}
+
+	return directProofSubscriptionId;
+}
 
 try {
 	const clerkUserId = await signInBuyer(page, {
@@ -677,11 +835,13 @@ try {
 	console.log(`Reset product access for ${clerkUserId}`);
 	const homepageCheckoutContract = await verifyHomepageCheckoutContract(page, {
 		baseUrl,
+		offer: proofOffer,
 	});
-	console.log("Verified homepage checkout contract");
+	console.log(`Verified ${proofOffer.label} checkout contract`);
 	const purchaseIntentId = await createHostedProofCheckoutPurchaseIntent({
 		checkoutEmail: buyerCredentials.email,
 		clerkUserId,
+		offer: proofOffer,
 	});
 	console.log(`Created checkout purchase intent ${purchaseIntentId}`);
 	const checkoutSession = await stripe.checkout.sessions.create(
@@ -690,10 +850,12 @@ try {
 			checkoutEmail: buyerCredentials.email,
 			clerkUserId,
 			couponId: coupon.id,
+			offerId: proofOffer.id,
 			purchaseIntentId,
 			priceId: stripePriceId,
 		}),
 	);
+	directCheckoutSessionId = checkoutSession.id;
 	await attachHostedProofCheckoutPurchaseIntent({
 		purchaseIntentId,
 		stripeCheckoutSessionId: checkoutSession.id,
@@ -706,10 +868,16 @@ try {
 		throw new Error("Stripe did not return a hosted checkout URL.");
 	}
 	console.log(`Created zero-cost Checkout Session ${checkoutSession.id}`);
-	const appCheckoutSession = await createAppCheckoutSession(page);
+	const appCheckoutSession = await createAppCheckoutSession(page, {
+		offer: proofOffer,
+	});
 	console.log(
 		`App checkout route smoke: ok=${appCheckoutSession.ok} session=${appCheckoutSession.sessionId ?? "missing"}`,
 	);
+	const appCheckoutSessionInspection = await inspectAppCheckoutSession(stripe, {
+		offer: proofOffer,
+		sessionId: appCheckoutSession.sessionId,
+	});
 	const appCheckoutSessionExpiry = await expireAppCheckoutSession(
 		stripe,
 		appCheckoutSession.sessionId,
@@ -723,27 +891,71 @@ try {
 	console.log("Opened hosted Stripe Checkout");
 	await submitHostedCheckout(page, { allowCardEntry });
 	console.log("Submitted hosted Stripe Checkout");
-	await waitForHostedCheckoutReturn(page);
+	await waitForDirectProofSubscriptionId(checkoutSession.id);
+	await waitForHostedCheckoutReturn(page, {
+		offer: proofOffer,
+		successPathPattern: hostedCheckoutAppPathPattern,
+	});
 
 	const finalSession = await stripe.checkout.sessions.retrieve(
 		checkoutSession.id,
 	);
+	directProofSubscriptionId = getStripeObjectId(finalSession.subscription);
+	const finalLineItems = await stripe.checkout.sessions.listLineItems(
+		checkoutSession.id,
+		{
+			limit: 5,
+		},
+	);
+	const directCheckoutLineItem = finalLineItems.data[0] ?? null;
+	const directSessionMetadataMatches = isExpectedHostedProofCheckoutMetadata(
+		finalSession.metadata,
+		proofOffer.id,
+	);
+	const directLineItemMatchesOffer = hostedProofCheckoutLineItemMatchesOffer(
+		directCheckoutLineItem,
+		proofOffer.id,
+	);
 	const productAccess = await waitForAccessGrant({
 		clerkUserId,
+		offer: proofOffer,
 		requireConvexDebug,
 		sessionId: checkoutSession.id,
 		timeoutMs: requireConvexDebug ? timeoutMs : 15_000,
 	});
 	const appVerification = await verifyAuthorizedAppAccess(page, {
 		baseUrl,
+		offer: proofOffer,
 		timeoutMs,
 	});
+	const directProofSubscriptionCleanup = await cancelDirectProofSubscription(
+		directProofSubscriptionId,
+	);
+	const productAccessMatchesOffer = productAccess
+		? productAccess.stripeCheckoutSessionId === checkoutSession.id &&
+			hostedProofAccessGrantMatchesOffer(productAccess, proofOffer.id)
+		: false;
 
 	console.log(`Checkout session: ${checkoutSession.id}`);
+	printCheck(
+		"Selected hosted billing proof offer",
+		proofOffer.id === offerId,
+		`${proofOffer.id}; expected amount=${proofOffer.expectedAmountCents}; expected destination=${proofOffer.successPath}`,
+	);
 	printCheck(
 		"Stripe session complete",
 		isHostedProofCheckoutSessionFulfilled(finalSession),
 		`status=${finalSession.status}, payment_status=${finalSession.payment_status}, amount_total=${finalSession.amount_total}`,
+	);
+	printCheck(
+		"Checkout line item amount",
+		directLineItemMatchesOffer,
+		`amount_subtotal=${directCheckoutLineItem?.amount_subtotal ?? "missing"}, expected=${proofOffer.expectedAmountCents}`,
+	);
+	printCheck(
+		"Checkout session metadata",
+		directSessionMetadataMatches,
+		`session_metadata=${JSON.stringify(finalSession.metadata)}`,
 	);
 	printCheck(
 		"App checkout route smoke",
@@ -751,6 +963,16 @@ try {
 			Boolean(appCheckoutSession.sessionId) &&
 			Boolean(appCheckoutSession.url),
 		`ok=${appCheckoutSession.ok}, session=${appCheckoutSession.sessionId ?? "missing"}`,
+	);
+	printCheck(
+		"App checkout route offer metadata",
+		appCheckoutSessionInspection.metadataMatches,
+		`session_metadata=${JSON.stringify(appCheckoutSessionInspection.sessionMetadata)}`,
+	);
+	printCheck(
+		"App checkout route line item amount",
+		appCheckoutSessionInspection.amountMatches,
+		`amount_subtotal=${appCheckoutSessionInspection.lineItem?.amount_subtotal ?? "missing"}, expected=${proofOffer.expectedAmountCents}`,
 	);
 	printCheck(
 		"App checkout route smoke cleanup",
@@ -775,12 +997,19 @@ try {
 		page.url(),
 	);
 	printCheck(
-		"App home reached",
+		`${proofOffer.label} destination reached`,
 		appVerification.authorized,
 		appVerification.accessRequiredVisible
 			? `access required at ${appVerification.url}`
-			: appVerification.url,
+			: `${appVerification.url}; evidence_visible=${appVerification.evidenceVisible}`,
 	);
+	if (directProofSubscriptionId) {
+		printCheck(
+			"Direct Workers proof subscription cleanup",
+			directProofSubscriptionCleanup.canceled,
+			`subscription=${directProofSubscriptionCleanup.subscriptionId}, status=${directProofSubscriptionCleanup.status}`,
+		);
+	}
 	if (productAccess) {
 		printCheck(
 			"Convex product access granted",
@@ -789,18 +1018,33 @@ try {
 		);
 		printCheck(
 			"Product access source",
-			productAccess.source === expectedWebhookAccessSource,
-			`source=${productAccess.source}`,
+			expectedAccessSources.includes(productAccess.source),
+			`source=${productAccess.source}; expected=${expectedAccessSources.join("|")}`,
 		);
 		printCheck(
 			"Session id linked",
 			productAccess.stripeCheckoutSessionId === checkoutSession.id,
 			productAccess.stripeCheckoutSessionId ?? "missing",
 		);
+		printCheck(
+			"Product access offer",
+			productAccess.lastCheckoutOfferId === proofOffer.id ||
+				productAccess.offerIds?.includes(proofOffer.id),
+			`lastCheckoutOfferId=${productAccess.lastCheckoutOfferId ?? "missing"}, offerIds=${JSON.stringify(productAccess.offerIds ?? [])}`,
+		);
+		printCheck(
+			"Product access capabilities",
+			proofOffer.expectedCapabilities.every((capability) =>
+				productAccess.capabilities?.includes(capability),
+			),
+			`capabilities=${JSON.stringify(productAccess.capabilities ?? [])}`,
+		);
 	} else if (requireConvexDebug) {
 		printCheck("Convex product access granted", false, "missing");
 		printCheck("Product access source", false, "missing");
 		printCheck("Session id linked", false, "missing");
+		printCheck("Product access offer", false, "missing");
+		printCheck("Product access capabilities", false, "missing");
 	} else {
 		console.log(
 			"- INFO Convex product access debug: unavailable in the local environment; browser proof reached the protected app successfully.",
@@ -814,13 +1058,18 @@ try {
 				checkoutUrl: checkoutSession.url,
 				couponId: coupon.id,
 				purchaseIntentId,
+				offer: proofOffer,
 				finalPageUrl: page.url(),
 				appCheckoutSession,
+				appCheckoutSessionInspection,
 				appCheckoutSessionExpiry,
 				clerkUserId,
+				directCheckoutLineItem,
 				homepageCheckoutContract,
 				productAccess,
+				productAccessMatchesOffer,
 				appVerification,
+				directProofSubscriptionCleanup,
 				sessionStatus: finalSession.status,
 				paymentStatus: finalSession.payment_status,
 			},
@@ -831,9 +1080,13 @@ try {
 
 	if (
 		!isHostedProofCheckoutSessionFulfilled(finalSession) ||
+		!directLineItemMatchesOffer ||
+		!directSessionMetadataMatches ||
 		!appCheckoutSession.ok ||
 		!appCheckoutSession.sessionId ||
 		!appCheckoutSession.url ||
+		!appCheckoutSessionInspection.metadataMatches ||
+		!appCheckoutSessionInspection.amountMatches ||
 		!(
 			appCheckoutSessionExpiry.expired ||
 			appCheckoutSessionExpiry.status !== "open"
@@ -841,14 +1094,24 @@ try {
 		homepageCheckoutContract.hostedCheckoutButtonCount <= 0 ||
 		homepageCheckoutContract.expressCheckoutRequestCount !== 0 ||
 		!appVerification.authorized ||
+		(!directProofSubscriptionCleanup.canceled &&
+			directProofSubscriptionCleanup.status !== "not_applicable") ||
+		(productAccess && !productAccessMatchesOffer) ||
 		(requireConvexDebug &&
 			(!productAccess ||
 				productAccess.status !== "granted" ||
-				productAccess.source !== expectedWebhookAccessSource ||
-				productAccess.stripeCheckoutSessionId !== checkoutSession.id))
+				!expectedAccessSources.includes(productAccess.source) ||
+				productAccess.stripeCheckoutSessionId !== checkoutSession.id ||
+				!hostedProofAccessGrantMatchesOffer(productAccess, proofOffer.id)))
 	) {
 		process.exitCode = 1;
 	}
 } finally {
+	await tryCaptureDirectProofSubscriptionId(directCheckoutSessionId);
+	if (directProofSubscriptionId) {
+		await cancelDirectProofSubscription(directProofSubscriptionId).catch(
+			() => null,
+		);
+	}
 	await browser.close();
 }

@@ -53,7 +53,7 @@ vi.mock("@/app/checkout/_components/checkout-button", () => ({
 
 globalThis.React = React;
 
-import { AccessRequiredPage } from "@/app/(workspace)/_components/access-required/access-required-page";
+import { AccessRequiredPage } from "@/app/(app)/_components/access-required/access-required-page";
 
 describe("AccessRequiredPage", () => {
 	beforeEach(() => {
@@ -115,7 +115,7 @@ describe("AccessRequiredPage", () => {
 		expect(markup).not.toContain("Recover access");
 		expect(markup).toContain('data-testid="access-required-buy-access"');
 		expect(markup).toContain("Buy access now");
-		expect(markup).toContain("Review pricing");
+		expect(markup).toContain("Review offer");
 	});
 
 	it("renders the session refresh state when the Clerk token is missing", () => {

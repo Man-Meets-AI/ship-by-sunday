@@ -3,8 +3,48 @@ import { defineConfig, defineProject } from "vitest/config";
 
 const alias = [
 	{
+		find: /^@\/app\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/app/$1"),
+	},
+	{
+		find: /^@\/components\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/components/$1"),
+	},
+	{
+		find: /^@\/config\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/config/$1"),
+	},
+	{
+		find: /^@\/content\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/content/$1"),
+	},
+	{
+		find: /^@\/convex\/(.*)$/,
+		replacement: path.resolve(__dirname, "convex/$1"),
+	},
+	{
+		find: /^@\/data\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/data/$1"),
+	},
+	{
+		find: /^@\/hooks\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/hooks/$1"),
+	},
+	{
+		find: /^@\/lib\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/lib/$1"),
+	},
+	{
+		find: /^@\/platform\/(.*)$/,
+		replacement: path.resolve(__dirname, "src/platform/$1"),
+	},
+	{
+		find: /^@\/scripts\/(.*)$/,
+		replacement: path.resolve(__dirname, "scripts/$1"),
+	},
+	{
 		find: "@",
-		replacement: path.resolve(__dirname, "."),
+		replacement: path.resolve(__dirname, "src"),
 	},
 	{
 		find: /^react\/jsx-runtime$/,
@@ -83,14 +123,14 @@ export default defineConfig({
 		coverage: {
 			provider: "v8",
 			include: [
-				"app/_components/{error-boundary-screen,not-found-screen}.tsx",
-				"lib/observability/**/*.{ts,tsx}",
-				"platform/observability/**/*.{ts,tsx}",
-				"app/api/codex/**/*.ts",
-				"app/api/stripe/checkout/route.ts",
-				"app/api/codex/_server/route-helpers.ts",
-				"platform/access/product-access.ts",
-				"platform/billing/checkout/checkout-session.ts",
+				"src/app/_components/{error-boundary-screen,not-found-screen}.tsx",
+				"src/lib/observability/**/*.{ts,tsx}",
+				"src/platform/observability/**/*.{ts,tsx}",
+				"src/app/api/codex/**/*.ts",
+				"src/app/api/stripe/checkout/route.ts",
+				"src/app/api/codex/_server/route-helpers.ts",
+				"src/platform/access/product-access.ts",
+				"src/platform/billing/checkout/checkout-session.ts",
 			],
 			thresholds: {
 				perFile: true,

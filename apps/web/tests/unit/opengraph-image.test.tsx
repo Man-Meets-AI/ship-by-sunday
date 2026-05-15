@@ -54,7 +54,7 @@ describe("opengraph image", () => {
 		expect(flattenedText).toContain(productConfig.promise);
 		expect(flattenedText).toContain(productConfig.checkoutPriceDisplay);
 		expect(flattenedText).toContain(productConfig.priceDisplay);
-		expect(flattenedText).toContain("Pilot Member pricing");
+		expect(flattenedText).toContain("$297 one-time");
 		expect(imageResponse.options).toEqual(size);
 	});
 });

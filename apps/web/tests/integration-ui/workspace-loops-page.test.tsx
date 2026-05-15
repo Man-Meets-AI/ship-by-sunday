@@ -2,8 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { WorkspaceFindingDocument } from "@/app/(workspace)/_lib/workspace-findings-read-model";
-import type { WorkspaceRunHistoryState } from "@/app/(workspace)/_lib/workspace-support-read-model";
+import type { WorkspaceFindingDocument } from "@/app/(app)/_lib/workspace-findings-read-model";
+import type { WorkspaceRunHistoryState } from "@/app/(app)/_lib/workspace-support-read-model";
 
 vi.mock("next/link", () => ({
 	default: ({
@@ -20,7 +20,7 @@ vi.mock("next/link", () => ({
 	),
 }));
 
-vi.mock("@/app/(workspace)/_components/app-shell", () => ({
+vi.mock("@/app/(app)/_components/app-shell", () => ({
 	AppShell: ({
 		children,
 		localNav,
@@ -35,7 +35,7 @@ vi.mock("@/app/(workspace)/_components/app-shell", () => ({
 	),
 }));
 
-import { WorkspaceLoopsPage } from "@/app/(workspace)/_components/existing-codebase-support/workspace-loops-page";
+import { WorkspaceLoopsPage } from "@/app/(app)/_components/existing-codebase-support/workspace-loops-page";
 
 function createFinding(
 	overrides: Partial<WorkspaceFindingDocument> = {},
@@ -90,7 +90,7 @@ function createRunHistory(): WorkspaceRunHistoryState {
 
 describe("WorkspaceLoopsPage", () => {
 	it("renders a finding-filtered catalog with review links and no run buttons", () => {
-		render(
+		const { container } = render(
 			<WorkspaceLoopsPage
 				initialFindings={[
 					createFinding(),
@@ -117,6 +117,16 @@ describe("WorkspaceLoopsPage", () => {
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-panel"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", { name: "Workflow catalog" }),
 		).toBeTruthy();
