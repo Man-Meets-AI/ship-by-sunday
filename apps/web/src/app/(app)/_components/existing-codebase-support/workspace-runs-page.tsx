@@ -10,6 +10,13 @@ import {
 	buildWorkspaceRunsModel,
 	type WorkspaceRunHistoryState,
 } from "@/app/(app)/_lib/workspace-support-read-model";
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRoutePage,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import { DoctorPassRuns, EmptyRuns } from "./workspace-runs-sections";
 import { WorkflowRuns } from "./workspace-workflow-runs-section";
 
@@ -40,23 +47,24 @@ export function WorkspaceRunsPage({
 				desktop: <WorkspaceLocalNavRail model={localNavModel} />,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 pb-12 pt-2 sm:px-4 lg:px-6">
-				<header className="grid gap-4 border-b border-border/60 pb-5 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.32fr)]">
-					<div className="min-w-0">
-						<p className="text-sm font-medium text-muted-foreground">Runs</p>
-						<h1 className="mt-2 font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-							Run history
-						</h1>
-						<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-							Review doctor-pass runs and approved workflow proof without queue
-							controls or PR handoff.
-						</p>
-					</div>
-					<WorkspaceOperatorSummaryCard
-						title="Runs summary"
-						rows={buildRunsSummaryRows(initialRunHistory, runsModel)}
-					/>
-				</header>
+			<ProtectedRoutePage>
+				<ProtectedRouteHeader
+					className="lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.32fr)]"
+					actionsClassName="w-full"
+					actions={
+						<WorkspaceOperatorSummaryCard
+							title="Runs summary"
+							rows={buildRunsSummaryRows(initialRunHistory, runsModel)}
+						/>
+					}
+				>
+					<ProtectedRouteEyebrow>Runs</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>Run history</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
+						Review doctor-pass runs and approved workflow proof without queue
+						controls or PR handoff.
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 
 				{runsModel.hasRuns ? (
 					<div className="grid gap-5">
@@ -66,7 +74,7 @@ export function WorkspaceRunsPage({
 				) : (
 					<EmptyRuns />
 				)}
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }

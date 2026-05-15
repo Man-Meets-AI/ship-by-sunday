@@ -1,6 +1,7 @@
 import { History } from "lucide-react";
 
 import type { WorkspaceRunsDoctorPassRow } from "@/app/(app)/_lib/workspace-support-read-model";
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { routeConfig } from "@/config/product";
 import {
 	WorkspaceSupportDenseText,
@@ -21,11 +22,11 @@ export function DoctorPassRuns({
 				</h2>
 			</div>
 			{rows.length === 0 ? (
-				<p className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+				<ProtectedRoutePanel className="px-4 py-3 text-sm text-muted-foreground">
 					Doctor-pass runs appear here after the local runner starts a pass.
-				</p>
+				</ProtectedRoutePanel>
 			) : (
-				<div className="overflow-hidden rounded-xl border border-border/60 bg-background">
+				<ProtectedRoutePanel>
 					<div className="hidden grid-cols-[minmax(9rem,0.9fr)_8rem_7rem_8rem_7rem_minmax(10rem,1fr)] gap-3 border-b border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground lg:grid">
 						<span>Run</span>
 						<span>Started</span>
@@ -39,7 +40,7 @@ export function DoctorPassRuns({
 							<DoctorPassRunRow key={row.id} row={row} />
 						))}
 					</div>
-				</div>
+				</ProtectedRoutePanel>
 			)}
 		</section>
 	);

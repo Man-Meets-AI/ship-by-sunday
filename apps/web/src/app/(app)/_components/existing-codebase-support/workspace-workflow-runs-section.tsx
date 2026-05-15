@@ -1,6 +1,7 @@
 import { FileJson, ShieldCheck } from "lucide-react";
 
 import type { WorkspaceRunsWorkflowRow } from "@/app/(app)/_lib/workspace-support-read-model";
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { WorkspaceSupportDenseText } from "./workspace-support-shared";
 
@@ -14,12 +15,12 @@ export function WorkflowRuns({ rows }: { rows: WorkspaceRunsWorkflowRow[] }) {
 				</h2>
 			</div>
 			{rows.length === 0 ? (
-				<p className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+				<ProtectedRoutePanel className="px-4 py-3 text-sm text-muted-foreground">
 					Approved workflow runs appear after a finding decision creates a
 					workflow packet.
-				</p>
+				</ProtectedRoutePanel>
 			) : (
-				<div className="overflow-hidden rounded-xl border border-border/60 bg-background">
+				<ProtectedRoutePanel>
 					<div className="hidden grid-cols-[minmax(10rem,1fr)_minmax(10rem,1fr)_8rem_8rem_8rem_8rem_8rem] gap-3 border-b border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground lg:grid">
 						<span>Workflow</span>
 						<span>Branch</span>
@@ -34,7 +35,7 @@ export function WorkflowRuns({ rows }: { rows: WorkspaceRunsWorkflowRow[] }) {
 							<WorkflowRunRow key={row.id} row={row} />
 						))}
 					</div>
-				</div>
+				</ProtectedRoutePanel>
 			)}
 		</section>
 	);

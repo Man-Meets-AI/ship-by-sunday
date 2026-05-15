@@ -5,6 +5,7 @@ import type {
 	WorkspaceLoopCatalogRow,
 	WorkspaceWorkflowPacketContractRow,
 } from "@/app/(app)/_lib/workspace-support-read-model";
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import {
@@ -25,7 +26,7 @@ export function WorkspaceLoopsCatalog({
 					Finding-filtered workflows
 				</h2>
 			</div>
-			<div className="overflow-hidden rounded-xl border border-border/60 bg-background">
+			<ProtectedRoutePanel>
 				<div className="hidden grid-cols-[minmax(10rem,1fr)_8rem_minmax(12rem,1.2fr)_8rem_minmax(11rem,1fr)_6rem_7rem_8rem] gap-3 border-b border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground lg:grid">
 					<span>Name</span>
 					<span>Category</span>
@@ -41,7 +42,7 @@ export function WorkspaceLoopsCatalog({
 						<LoopRow key={row.id} row={row} />
 					))}
 				</div>
-			</div>
+			</ProtectedRoutePanel>
 		</section>
 	);
 }
@@ -52,7 +53,7 @@ export function WorkflowPacketContractPanel({
 	rows: WorkspaceWorkflowPacketContractRow[];
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
+		<ProtectedRoutePanel className="p-5">
 			<div className="flex items-start gap-3">
 				<FileCheck2 className="mt-0.5 size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
@@ -83,7 +84,7 @@ export function WorkflowPacketContractPanel({
 					</div>
 				))}
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 

@@ -123,7 +123,7 @@ describe("WorkspaceFindingDetailPage", () => {
 			value: { writeText: writeTextMock },
 		});
 
-		render(
+		const { container } = render(
 			<WorkspaceFindingDetailPage
 				initialFindings={[createFinding()]}
 				findingRouteId="finding-source-truth-readiness"
@@ -133,6 +133,16 @@ describe("WorkspaceFindingDetailPage", () => {
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-panel"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", {
 				name: "Source truth needs the first workflow",

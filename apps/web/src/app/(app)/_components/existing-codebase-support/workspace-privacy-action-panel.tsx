@@ -1,5 +1,6 @@
 import { AlertTriangle, ShieldCheck, Trash2 } from "lucide-react";
 
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 
 export function PrivacyActionPanel({
@@ -20,7 +21,7 @@ export function PrivacyActionPanel({
 	onDeleteFindings: () => void;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<ProtectedRoutePanel className="p-4">
 			<div className="flex items-center gap-2">
 				<ShieldCheck className="size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
@@ -66,6 +67,6 @@ export function PrivacyActionPanel({
 			<p className="mt-3 text-sm leading-5 text-muted-foreground">
 				{localReportDeletionNote}
 			</p>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }

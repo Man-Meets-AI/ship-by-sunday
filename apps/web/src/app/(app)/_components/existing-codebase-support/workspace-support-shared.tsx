@@ -1,24 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
-
-export function WorkspaceSupportMetric({
-	label,
-	value,
-}: {
-	label: string;
-	value: number;
-}) {
-	return (
-		<div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-			<span className="text-muted-foreground">{label}</span>
-			<span className="min-w-0 truncate text-right font-mono text-xs font-medium text-foreground">
-				{value}
-			</span>
-		</div>
-	);
-}
 
 export function WorkspaceSupportDenseText({
 	label,
@@ -84,7 +68,7 @@ export function WorkspaceSupportEmptyState({
 	action: string;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
+		<ProtectedRoutePanel className="p-5">
 			<h2 className="text-base font-semibold text-foreground">{title}</h2>
 			<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
 				{description}
@@ -92,6 +76,6 @@ export function WorkspaceSupportEmptyState({
 			<Button asChild className="mt-4" size="sm">
 				<Link href={href}>{action}</Link>
 			</Button>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }

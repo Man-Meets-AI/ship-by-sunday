@@ -2,7 +2,7 @@
 title: "T3 Code Remaining Protected Surfaces Planning Brief 7"
 program_id: "t3-code-source-design-system-port"
 brief_version: 7
-status: "current"
+status: "superseded"
 summary: "Next slice for applying the protected route-surface recipe to remaining Worker findings/runs, support/admin, and course/tutorial app surfaces."
 read_when:
   - "Writing the next protected route-surface child ExecPlan after the Starter/Workers setup/settings pass."

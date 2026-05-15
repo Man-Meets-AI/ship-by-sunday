@@ -90,7 +90,7 @@ function createRunHistory(): WorkspaceRunHistoryState {
 
 describe("WorkspaceLoopsPage", () => {
 	it("renders a finding-filtered catalog with review links and no run buttons", () => {
-		render(
+		const { container } = render(
 			<WorkspaceLoopsPage
 				initialFindings={[
 					createFinding(),
@@ -117,6 +117,16 @@ describe("WorkspaceLoopsPage", () => {
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-panel"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", { name: "Workflow catalog" }),
 		).toBeTruthy();

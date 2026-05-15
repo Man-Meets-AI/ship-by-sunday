@@ -13,6 +13,13 @@ import {
 	type WorkspaceFindingsFilterState,
 } from "@/app/(app)/_lib/workspace-findings-read-model";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRoutePage,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { WorkspaceFindingsEmptyState } from "./workspace-findings-empty-state";
@@ -51,33 +58,32 @@ export function WorkspaceFindingsPage({
 				desktop: <WorkspaceLocalNavRail model={localNavModel} />,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 pb-12 pt-2 sm:px-4 lg:px-6">
-				<header className="grid gap-4 border-b border-border/60 pb-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.32fr)]">
-					<div className="min-w-0">
-						<p className="text-sm font-medium text-muted-foreground">
-							Findings
-						</p>
-						<h1 className="mt-2 font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-							Top 9 ledger
-						</h1>
-						<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-							Review approved doctor-pass findings, choose the first workflow,
-							and keep local evidence behind refs.
-						</p>
-					</div>
-					<div className="grid min-w-0 gap-2">
-						<WorkspaceOperatorSummaryCard
-							title="Findings summary"
-							rows={buildFindingsSummaryRows(ledgerModel)}
-						/>
-						<Button asChild variant="outline" size="sm" className="mt-2">
-							<Link href={routeConfig.workspaceDoctorPass}>
-								<RefreshCcw className="size-3.5" aria-hidden />
-								Run doctor pass again
-							</Link>
-						</Button>
-					</div>
-				</header>
+			<ProtectedRoutePage>
+				<ProtectedRouteHeader
+					className="lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.32fr)]"
+					actionsClassName="grid w-full gap-2"
+					actions={
+						<>
+							<WorkspaceOperatorSummaryCard
+								title="Findings summary"
+								rows={buildFindingsSummaryRows(ledgerModel)}
+							/>
+							<Button asChild variant="outline" size="sm" className="mt-2">
+								<Link href={routeConfig.workspaceDoctorPass}>
+									<RefreshCcw className="size-3.5" aria-hidden />
+									Run doctor pass again
+								</Link>
+							</Button>
+						</>
+					}
+				>
+					<ProtectedRouteEyebrow>Findings</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>Top 9 ledger</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
+						Review approved doctor-pass findings, choose the first workflow, and
+						keep local evidence behind refs.
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 
 				{ledgerModel.totalCount === 0 ? (
 					<WorkspaceFindingsEmptyState />
@@ -92,7 +98,7 @@ export function WorkspaceFindingsPage({
 						<WorkspaceFindingsLedger model={ledgerModel} />
 					</section>
 				)}
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }

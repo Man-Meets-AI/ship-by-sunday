@@ -20,6 +20,17 @@ import {
 } from "@/app/(app)/_lib/workspace-findings-read-model";
 import { showWorkspaceActionSuccessToast } from "@/app/(app)/_lib/workspace-action-feedback";
 import { buildExistingCodebaseWorkspaceLocalNavModel } from "@/app/(app)/_lib/workspace-setup-readiness-model";
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRoutePage,
+	ProtectedRoutePanel,
+	ProtectedRoutePanelBody,
+	ProtectedRoutePanelHeader,
+	ProtectedRoutePanelTitle,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { api } from "@/convex/_generated/api";
@@ -188,7 +199,7 @@ export function WorkspaceFindingDetailPage({
 				desktop: <WorkspaceLocalNavRail model={localNavModel} />,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 pb-12 pt-2 sm:px-4 lg:px-6">
+			<ProtectedRoutePage>
 				{detail ? (
 					<FindingDecisionContent
 						detail={detail}
@@ -203,7 +214,7 @@ export function WorkspaceFindingDetailPage({
 				) : (
 					<FindingUnavailable />
 				)}
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }
@@ -229,30 +240,23 @@ function FindingDecisionContent({
 }) {
 	return (
 		<>
-			<header className="border-b border-border/60 pb-5">
-				<div className="min-w-0">
-					<Button
-						asChild
-						variant="ghost"
-						size="sm"
-						className="-ml-2 mb-3 w-fit"
-					>
-						<Link href={routeConfig.workspaceFindings}>
-							<ArrowLeft className="size-3.5" aria-hidden />
-							Back to findings
-						</Link>
-					</Button>
-					<p className="text-sm font-medium text-muted-foreground">
-						Finding {detail.rankLabel}
-					</p>
-					<h1 className="mt-2 max-w-4xl break-words font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-						{detail.title}
-					</h1>
-					<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-						{detail.buyerImpact}
-					</p>
-				</div>
-			</header>
+			<ProtectedRouteHeader>
+				<Button asChild variant="ghost" size="sm" className="-ml-2 mb-3 w-fit">
+					<Link href={routeConfig.workspaceFindings}>
+						<ArrowLeft className="size-3.5" aria-hidden />
+						Back to findings
+					</Link>
+				</Button>
+				<ProtectedRouteEyebrow>
+					Finding {detail.rankLabel}
+				</ProtectedRouteEyebrow>
+				<ProtectedRouteTitle className="max-w-4xl break-words">
+					{detail.title}
+				</ProtectedRouteTitle>
+				<ProtectedRouteDescription>
+					{detail.buyerImpact}
+				</ProtectedRouteDescription>
+			</ProtectedRouteHeader>
 
 			<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 				<div className="grid min-w-0 gap-5">
@@ -382,10 +386,12 @@ function DecisionSection({
 	children: ReactNode;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<h2 className="text-base font-semibold text-foreground">{title}</h2>
-			<div className="mt-4">{children}</div>
-		</section>
+		<ProtectedRoutePanel>
+			<ProtectedRoutePanelHeader>
+				<ProtectedRoutePanelTitle>{title}</ProtectedRoutePanelTitle>
+			</ProtectedRoutePanelHeader>
+			<ProtectedRoutePanelBody>{children}</ProtectedRoutePanelBody>
+		</ProtectedRoutePanel>
 	);
 }
 
@@ -404,8 +410,8 @@ function KeyValueGrid({ items }: { items: Array<[string, string]> }) {
 
 function FindingUnavailable() {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
-			<h1 className="font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground">
+		<ProtectedRoutePanel className="p-5">
+			<h1 className="text-2xl font-semibold leading-tight text-foreground sm:text-3xl">
 				Finding unavailable
 			</h1>
 			<p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
@@ -414,7 +420,7 @@ function FindingUnavailable() {
 			<Button asChild className="mt-4" size="sm">
 				<Link href={routeConfig.workspaceFindings}>Back to findings</Link>
 			</Button>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 

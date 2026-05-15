@@ -101,6 +101,10 @@ describe("workspace tutorial routes", () => {
 
 		const markup = renderToStaticMarkup(await TutorialsPage());
 
+		expect(markup).toContain('data-slot="protected-route-page"');
+		expect(markup).toContain('data-slot="protected-route-header"');
+		expect(markup).toContain('data-slot="protected-route-panel"');
+		expect(markup).not.toContain("font-heading-serif");
 		expect(markup).toContain("Tutorial Videos");
 		expect(markup).toContain("29 videos");
 		expect(markup).toContain("/starter/lessons/build-kickoff");

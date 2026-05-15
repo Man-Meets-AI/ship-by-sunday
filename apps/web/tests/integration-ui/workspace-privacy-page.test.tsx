@@ -264,7 +264,7 @@ describe("WorkspacePrivacyPage", () => {
 			],
 		});
 
-		render(
+		const { container } = render(
 			<WorkspacePrivacyPage
 				initialSetupState={createSetupState()}
 				initialSyncPreviewState={createSyncPreviewState()}
@@ -277,6 +277,16 @@ describe("WorkspacePrivacyPage", () => {
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-panel"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(
 			screen.getByRole("heading", { name: "Privacy controls" }),
 		).toBeTruthy();

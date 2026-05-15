@@ -16,6 +16,13 @@ import type {
 	WorkspacePrivacySetupState,
 	WorkspacePrivacySyncPreviewState,
 } from "@/app/(app)/_lib/workspace-support-read-model";
+import {
+	ProtectedRouteDescription,
+	ProtectedRouteEyebrow,
+	ProtectedRouteHeader,
+	ProtectedRoutePage,
+	ProtectedRouteTitle,
+} from "@/components/app/protected-route-surface";
 import { PrivacyActionPanel } from "./workspace-privacy-action-panel";
 import {
 	PrivacySharingPanel,
@@ -68,23 +75,24 @@ export function WorkspacePrivacyPage({
 				desktop: <WorkspaceLocalNavRail model={localNavModel} />,
 			}}
 		>
-			<div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-3 pb-12 pt-2 sm:px-4 lg:px-6">
-				<header className="grid gap-4 border-b border-border/60 pb-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.34fr)]">
-					<div className="min-w-0">
-						<p className="text-sm font-medium text-muted-foreground">Privacy</p>
-						<h1 className="mt-2 font-heading-serif text-4xl leading-none tracking-[-0.04em] text-foreground sm:text-5xl">
-							Privacy controls
-						</h1>
-						<p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-							Verify runner pairing, sync boundaries, and hosted-state controls
-							before approving local evidence.
-						</p>
-					</div>
-					<WorkspaceOperatorSummaryCard
-						title="Privacy summary"
-						rows={buildPrivacySummaryRows(privacyModel)}
-					/>
-				</header>
+			<ProtectedRoutePage>
+				<ProtectedRouteHeader
+					className="lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.34fr)]"
+					actionsClassName="w-full"
+					actions={
+						<WorkspaceOperatorSummaryCard
+							title="Privacy summary"
+							rows={buildPrivacySummaryRows(privacyModel)}
+						/>
+					}
+				>
+					<ProtectedRouteEyebrow>Privacy</ProtectedRouteEyebrow>
+					<ProtectedRouteTitle>Privacy controls</ProtectedRouteTitle>
+					<ProtectedRouteDescription>
+						Verify runner pairing, sync boundaries, and hosted-state controls
+						before approving local evidence.
+					</ProtectedRouteDescription>
+				</ProtectedRouteHeader>
 
 				<div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,0.36fr)] lg:items-start">
 					<div className="grid gap-5">
@@ -114,7 +122,7 @@ export function WorkspacePrivacyPage({
 						/>
 					</aside>
 				</div>
-			</div>
+			</ProtectedRoutePage>
 		</AppShell>
 	);
 }

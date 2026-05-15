@@ -95,13 +95,20 @@ describe("WorkspaceRunsPage", () => {
 			configurable: true,
 			value: { writeText: writeTextMock },
 		});
-		render(
+		const { container } = render(
 			<WorkspaceRunsPage
 				initialRunHistory={createRunHistory()}
 				now={Date.UTC(2026, 4, 4, 21, 30)}
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(screen.getByRole("heading", { name: "Run history" })).toBeTruthy();
 		expect(screen.getByRole("region", { name: "Runs summary" })).toBeTruthy();
 		expect(screen.getByText("Runs recorded")).toBeTruthy();

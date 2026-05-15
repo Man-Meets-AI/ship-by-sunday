@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { FileSearch } from "lucide-react";
 
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 
 export function WorkspaceFindingsEmptyState() {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-5">
+		<ProtectedRoutePanel className="p-5">
 			<div className="flex items-start gap-3">
 				<FileSearch className="mt-0.5 size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
@@ -22,6 +23,6 @@ export function WorkspaceFindingsEmptyState() {
 					</Button>
 				</div>
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }

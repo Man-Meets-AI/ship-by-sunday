@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import type { WorkspaceFindingDetailModel } from "@/app/(app)/_lib/workspace-findings-read-model";
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 
@@ -68,7 +69,7 @@ export function WorkspaceSourceTruthApprovalSheet({
 
 	return (
 		<aside className="grid gap-5 lg:sticky lg:top-20">
-			<section className="rounded-xl border border-border/60 bg-background p-5">
+			<ProtectedRoutePanel className="p-5">
 				<h2 className="text-base font-semibold text-foreground">
 					Workflow approval
 				</h2>
@@ -141,7 +142,7 @@ export function WorkspaceSourceTruthApprovalSheet({
 						<CommandBlock command={fallbackCommand} />
 					</div>
 				) : null}
-			</section>
+			</ProtectedRoutePanel>
 		</aside>
 	);
 }

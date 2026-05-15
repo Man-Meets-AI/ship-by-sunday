@@ -4,6 +4,7 @@ import {
 	buildWorkspacePrivacyModel,
 	type WorkspacePrivacySharingRow,
 } from "@/app/(app)/_lib/workspace-support-read-model";
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { WorkspaceSupportFact } from "./workspace-support-shared";
 
 type WorkspacePrivacyModel = ReturnType<typeof buildWorkspacePrivacyModel>;
@@ -14,7 +15,7 @@ export function PrivacyStatusPanel({
 	privacyModel: WorkspacePrivacyModel;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<ProtectedRoutePanel className="p-4">
 			<div className="flex items-center justify-between gap-3">
 				<h2 className="text-base font-semibold text-foreground">
 					Execution boundary
@@ -41,7 +42,7 @@ export function PrivacyStatusPanel({
 					value={privacyModel.structuredFindingsCountLabel}
 				/>
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 
@@ -54,7 +55,7 @@ export function PrivacySharingPanel({
 	const syncRows = rows.filter((row) => row.statusLabel !== "Disabled");
 
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<ProtectedRoutePanel className="p-4">
 			<div className="flex items-center gap-2">
 				<EyeOff className="size-4 text-foreground" aria-hidden />
 				<div className="min-w-0">
@@ -75,7 +76,7 @@ export function PrivacySharingPanel({
 					rows={syncRows}
 				/>
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 
@@ -111,7 +112,7 @@ export function PrivacySyncPreviewPanel({
 	privacyModel: WorkspacePrivacyModel;
 }) {
 	return (
-		<section className="rounded-xl border border-border/60 bg-background p-4">
+		<ProtectedRoutePanel className="p-4">
 			<h2 className="text-base font-semibold text-foreground">
 				Last sync preview
 			</h2>
@@ -131,6 +132,6 @@ export function PrivacySyncPreviewPanel({
 					mono
 				/>
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }

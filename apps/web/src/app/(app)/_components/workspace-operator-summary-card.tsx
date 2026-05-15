@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Clipboard } from "lucide-react";
 
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,9 +23,10 @@ export function WorkspaceOperatorSummaryCard({
 	title?: string;
 }) {
 	return (
-		<section
+		<ProtectedRoutePanel
 			aria-label={title ?? "Workspace summary"}
-			className="grid min-w-0 gap-2 overflow-hidden rounded-xl border border-border/60 bg-background p-3 text-xs"
+			data-slot="protected-route-summary"
+			className="grid min-w-0 gap-2 p-3 text-xs"
 		>
 			{title ? (
 				<p className="border-b border-border/60 pb-2 font-medium text-foreground">
@@ -39,7 +41,7 @@ export function WorkspaceOperatorSummaryCard({
 					/>
 				))}
 			</div>
-		</section>
+		</ProtectedRoutePanel>
 	);
 }
 

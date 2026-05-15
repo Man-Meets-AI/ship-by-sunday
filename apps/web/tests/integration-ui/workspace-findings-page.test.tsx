@@ -72,7 +72,7 @@ describe("WorkspaceFindingsPage", () => {
 			configurable: true,
 			value: { writeText: writeTextMock },
 		});
-		render(
+		const { container } = render(
 			<WorkspaceFindingsPage
 				initialFindings={[
 					createFinding(),
@@ -89,6 +89,13 @@ describe("WorkspaceFindingsPage", () => {
 			/>,
 		);
 
+		expect(
+			container.querySelector('[data-slot="protected-route-page"]'),
+		).toBeTruthy();
+		expect(
+			container.querySelector('[data-slot="protected-route-header"]'),
+		).toBeTruthy();
+		expect(container.innerHTML).not.toContain("font-heading-serif");
 		expect(screen.getByRole("heading", { name: "Top 9 ledger" })).toBeTruthy();
 		expect(
 			screen.getByRole("region", { name: "Findings summary" }),

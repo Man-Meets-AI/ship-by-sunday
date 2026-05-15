@@ -5,6 +5,7 @@ import type {
 	WorkspaceFindingLedgerRow,
 	WorkspaceFindingsLedgerModel,
 } from "@/app/(app)/_lib/workspace-findings-read-model";
+import { ProtectedRoutePanel } from "@/components/app/protected-route-surface";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -15,14 +16,14 @@ export function WorkspaceFindingsLedger({
 }) {
 	if (model.rows.length === 0) {
 		return (
-			<div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-5 text-sm text-muted-foreground">
+			<ProtectedRoutePanel className="px-4 py-5 text-sm text-muted-foreground">
 				No findings match the active filters.
-			</div>
+			</ProtectedRoutePanel>
 		);
 	}
 
 	return (
-		<div className="overflow-hidden rounded-xl border border-border/60 bg-background">
+		<ProtectedRoutePanel>
 			<div className="hidden grid-cols-[3rem_minmax(10rem,1.2fr)_6.5rem_5.5rem_5.5rem_minmax(9rem,1fr)_6.5rem_minmax(8rem,0.8fr)_7rem_6rem_1.5rem] gap-2 border-b border-border/60 bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground lg:grid">
 				<span>Rank</span>
 				<span>Title</span>
@@ -41,7 +42,7 @@ export function WorkspaceFindingsLedger({
 					<FindingLedgerRow key={row.documentId} row={row} />
 				))}
 			</div>
-		</div>
+		</ProtectedRoutePanel>
 	);
 }
 
