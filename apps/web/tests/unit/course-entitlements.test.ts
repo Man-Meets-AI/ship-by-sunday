@@ -339,6 +339,51 @@ describe("convex/entitlements/model", () => {
 		).rejects.toThrow("Existing codebase access required");
 	});
 
+	it("keeps legacy product-split Starter access when stale Starter billing rows exist", async () => {
+		const now = Date.UTC(2026, 7, 16);
+		vi.spyOn(Date, "now").mockReturnValue(now);
+		const ctx = createAccessCtx({
+			productAccessGrant: createProductAccessGrant("granted", {
+				source: "stripe_checkout",
+				capabilities: ["generate_codebase", "tutorials", "worker"],
+				legacyWorkersAccessEndsAt: Date.UTC(2026, 7, 15),
+			}),
+			starterLicenseTerms: [
+				{
+					_id: "starterLicenseTerms_1",
+					ownerClerkUserId: clerkUserId,
+					status: "active",
+					stripeCheckoutSessionId: "cs_stale_starter",
+					purchasedAt: Date.UTC(2025, 0, 1),
+					termStartAt: Date.UTC(2025, 0, 1),
+					termEndAt: Date.UTC(2026, 0, 1),
+					refundState: "fully_refunded",
+					createdAt: 1,
+					updatedAt: 1,
+				},
+			],
+		});
+		ctx.auth.getUserIdentity.mockResolvedValue({
+			subject: clerkUserId,
+			tokenIdentifier: convexTokenIdentifier,
+		});
+
+		await expect(
+			moduleUnderTest.viewerProductAccessHandler(ctx as never),
+		).resolves.toMatchObject({
+			clerkUserId,
+			hasAccess: true,
+			status: "granted",
+			capabilities: ["generate_codebase", "tutorials"],
+		});
+		await expect(
+			moduleUnderTest.requireGeneratedCodebaseProductAccess(ctx as never),
+		).resolves.toBe(clerkUserId);
+		await expect(
+			moduleUnderTest.requireTutorialsProductAccess(ctx as never),
+		).resolves.toBe(clerkUserId);
+	});
+
 	it("keeps unexpired legacy Workers access even when billing has a canceled Workers row", async () => {
 		const now = Date.UTC(2026, 4, 15);
 		vi.spyOn(Date, "now").mockReturnValue(now);

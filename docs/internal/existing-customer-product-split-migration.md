@@ -117,6 +117,7 @@ Multi-product or unresolved access may still use `/home` as the recovery hub.
 Use hosted Convex dev first:
 
 ```bash
+cd apps/web
 WORKERS_END_MS="$(node -e 'const d = new Date(); d.setUTCMonth(d.getUTCMonth() + 3); console.log(d.getTime());')"
 node ../../node_modules/convex/bin/main.js run entitlements:grantLegacyProductSplitAccess \
   "{\"clerkUserId\":\"user_...\",\"legacyWorkersAccessEndsAt\":${WORKERS_END_MS}}"
@@ -125,6 +126,7 @@ node ../../node_modules/convex/bin/main.js run entitlements:grantLegacyProductSp
 After the same code is deployed to production Convex, use production:
 
 ```bash
+cd apps/web
 WORKERS_END_MS="$(node -e 'const d = new Date(); d.setUTCMonth(d.getUTCMonth() + 3); console.log(d.getTime());')"
 node ../../node_modules/convex/bin/main.js run --prod entitlements:grantLegacyProductSplitAccess \
   "{\"clerkUserId\":\"user_...\",\"legacyWorkersAccessEndsAt\":${WORKERS_END_MS}}"
@@ -133,6 +135,7 @@ node ../../node_modules/convex/bin/main.js run --prod entitlements:grantLegacyPr
 Verify the row through the debug boundary:
 
 ```bash
+cd apps/web
 node ../../node_modules/convex/bin/main.js run --prod entitlements:getProductAccessDebug \
   '{"clerkUserId":"user_..."}'
 ```

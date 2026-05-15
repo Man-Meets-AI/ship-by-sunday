@@ -192,6 +192,11 @@ async function getEffectiveProductSurfaceCapabilities(
 	const storedCapabilities = getStoredProductSurfaceCapabilities(accessGrant);
 	const hasActiveLegacyWorkersAccess =
 		hasUnexpiredLegacyWorkersAccess(accessGrant);
+	const hasLegacyProductSplitAccess = Boolean(
+		accessGrant.legacyWorkersAccessEndsAt,
+	);
+	const shouldUseStoredStarterCapabilities =
+		!billingAccessState.hasStarterBillingRecords || hasLegacyProductSplitAccess;
 	const shouldUseStoredWorkersCapability =
 		!billingAccessState.hasWorkersBillingRecords ||
 		hasActiveLegacyWorkersAccess;
@@ -199,11 +204,11 @@ async function getEffectiveProductSurfaceCapabilities(
 	if (billingAccessState.hasBillingRecords) {
 		return getUniqueProductSurfaceCapabilities([
 			...billingCapabilities,
-			...(billingAccessState.hasStarterBillingRecords
-				? []
-				: storedCapabilities.filter((capability) =>
+			...(shouldUseStoredStarterCapabilities
+				? storedCapabilities.filter((capability) =>
 						["generate_codebase", "tutorials"].includes(capability),
-					)),
+					)
+				: []),
 			...(shouldUseStoredWorkersCapability
 				? storedCapabilities.filter((capability) => capability === "worker")
 				: []),
