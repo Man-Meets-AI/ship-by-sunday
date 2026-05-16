@@ -50,8 +50,8 @@ const SUPPORT_TRANSCRIPT_PURGE_WRITE_LIMIT = 100;
 const SUPPORT_RATE_BUCKET_RETENTION_MS = 48 * 60 * 60 * 1_000;
 const SUPPORT_OPERATIONS_SNAPSHOT_LIMIT = 20;
 const SUPPORT_FIRST_MESSAGE_ACKNOWLEDGEMENTS = [
-	"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
-	"Parker usually catches these pretty quickly when he's near his phone.",
+	"Got it. This went straight to Parker's Telegram.",
+	"He'll reply here when he can.",
 ] as const;
 
 type SupportThreadId = GenericId<"supportThreads">;

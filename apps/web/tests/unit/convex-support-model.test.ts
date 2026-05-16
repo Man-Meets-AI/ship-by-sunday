@@ -378,13 +378,13 @@ describe("convex support model", () => {
 		]);
 		expect(insertedMessages.map((record) => record.document.body)).toEqual([
 			"Can this help me launch?",
-			"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
-			"Parker usually catches these pretty quickly when he's near his phone.",
+			"Got it. This went straight to Parker's Telegram.",
+			"He'll reply here when he can.",
 		]);
 		expect(state.state.messages.map((message) => message.body)).toEqual([
 			"Can this help me launch?",
-			"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
-			"Parker usually catches these pretty quickly when he's near his phone.",
+			"Got it. This went straight to Parker's Telegram.",
+			"He'll reply here when he can.",
 		]);
 	});
 

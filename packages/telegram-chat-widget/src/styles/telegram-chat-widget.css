@@ -611,14 +611,6 @@
 	white-space: pre-wrap;
 }
 
-.sbs-telegram-chat-system-message {
-	padding: 0 28px;
-	color: var(--sbs-chat-muted-foreground);
-	font-size: 12px;
-	line-height: 20px;
-	text-align: center;
-}
-
 .sbs-telegram-chat-message-attachment {
 	overflow: hidden;
 	margin-top: 8px;
