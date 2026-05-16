@@ -21,14 +21,16 @@ The public homepage at `/` is now the Man Meets AI brand page. It is not the Sta
 When you change the public homepage or public marketing navigation, inspect these files:
 
 1. `src/app/(marketing)/page.tsx`
-2. `src/app/(marketing)/starter/page.tsx`
-3. `src/app/(marketing)/workers/page.tsx`
-4. `src/app/(marketing)/worker-seal-team-6/page.tsx`
-5. `src/components/layout/public-site-header.tsx`
-6. `src/config/product.ts`
-7. `src/app/robots.ts`
-8. `src/app/sitemap.ts`
-9. `tests/unit/public-metadata-routes.test.ts`
+2. `src/app/(marketing)/layout.tsx`
+3. `src/app/(marketing)/starter/page.tsx`
+4. `src/app/(marketing)/workers/page.tsx`
+5. `src/app/(marketing)/worker-seal-team-6/page.tsx`
+6. `src/components/layout/public-site-header.tsx`
+7. `src/components/layout/public-support-widget.tsx`
+8. `src/config/product.ts`
+9. `src/app/robots.ts`
+10. `src/app/sitemap.ts`
+11. `tests/unit/public-metadata-routes.test.ts`
 
 The old generated-codebase homepage system under `src/app/_components/home-page/` still exists for compatibility and tests, but it is no longer the public `/` route contract.
 
@@ -41,6 +43,7 @@ The old generated-codebase homepage system under `src/app/_components/home-page/
 - Starter checkout must use offer id `starter` and route successful buyers to `/starter/home`.
 - Workers checkout must use offer id `workers` and route successful buyers to `/workers/setup`.
 - Keep `/workers` public. Only Worker operational routes such as `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/loops`, `/workers/runs`, and `/workers/privacy` are protected.
+- The public Telegram support widget is mounted once in the `(marketing)` layout. Do not remount it inside individual public pages, blog shells, or docs shells.
 
 ## Validation
 
