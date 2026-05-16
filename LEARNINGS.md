@@ -95,3 +95,6 @@
 
 - Fact: In the current local environment, `bun typecheck` runs the Next production build and the app's PostHog source-map hook can upload source maps when the PostHog token is already present in the environment.
   Verified by: `bun typecheck` logged `posthog_cli` source-map injection/upload during the `apps/web` build before TypeScript failed; rerunning with `DISABLE_POSTHOG_SOURCE_MAP_UPLOAD=1 bun typecheck` avoided the upload path and completed successfully.
+
+- Fact: `bun run --cwd apps/web format -- <paths>` still formats the whole app because the script is defined as `oxfmt ... .`; path arguments are appended after the dot and do not narrow the run.
+  Verified by: Running it with Starter-specific paths during the `/starter` preview work printed `Finished ... on 1057 files`.
