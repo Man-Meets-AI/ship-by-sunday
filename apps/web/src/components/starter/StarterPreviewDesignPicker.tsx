@@ -51,10 +51,10 @@ export function StarterPreviewDesignPicker({
 							data-testid={`codebase-demo-design-preset-${preset.id}`}
 							onClick={() => draft.selectDesignPreset(preset.id)}
 							className={cn(
-								"inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-sm transition-colors",
+								"inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-sm transition-colors",
 								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 								isSelected
-									? "border-foreground bg-foreground text-background"
+									? "border-primary bg-primary text-primary-foreground shadow-xs/5"
 									: "border-border/70 bg-background text-foreground hover:border-foreground/70 hover:bg-muted/40",
 							)}
 						>
@@ -66,7 +66,7 @@ export function StarterPreviewDesignPicker({
 			</div>
 			{selectedPreset ? (
 				<div
-					className="rounded-lg border border-border/70 bg-muted/15 p-2.5"
+					className="hidden rounded-lg border border-border/70 bg-card p-2.5 sm:block"
 					data-testid="starter-preview-selected-design"
 				>
 					<div className="flex items-start gap-3">

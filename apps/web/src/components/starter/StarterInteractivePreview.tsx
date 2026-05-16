@@ -61,53 +61,61 @@ export function StarterInteractivePreview({
 	}, []);
 
 	return (
-		<PublicRouteSection tone="muted" data-testid="starter-interactive-preview">
-			<PublicRouteContainer className="py-10 sm:py-12">
+		<PublicRouteSection
+			id="starter-workbench"
+			tone="muted"
+			data-testid="starter-interactive-preview"
+		>
+			<PublicRouteContainer className="py-8 sm:py-10">
 				<div className="overflow-hidden rounded-lg border border-border/70 bg-card text-card-foreground shadow-xs/5">
-					<div className="border-b border-border/60 bg-background/80 px-4 py-4 sm:px-5">
-						<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+					<div className="border-b border-border/60 bg-background/80 px-4 py-4 sm:px-5 lg:px-6">
+						<div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
 							<div className="flex min-w-0 items-start gap-3">
 								<PublicRouteIcon className="size-8 shrink-0">
 									<WandSparkles className="size-4" aria-hidden />
 								</PublicRouteIcon>
 								<div className="min-w-0">
-									<PublicRouteEyebrow>Starter preview</PublicRouteEyebrow>
+									<PublicRouteEyebrow>Starter workbench</PublicRouteEyebrow>
 									<h2 className="mt-1 text-xl font-semibold leading-tight text-foreground sm:text-2xl">
-										Make the brief before checkout.
+										Shape the brief before checkout.
 									</h2>
 									<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-										Edit the source facts Starter saves locally, then carry them
-										into the protected workspace after Stripe.
+										Turn the idea into source facts, a design and pricing pass,
+										and the repo handoff Starter unlocks after Stripe.
 									</p>
 								</div>
 							</div>
-							<div className="grid gap-2 text-xs sm:grid-cols-3 lg:min-w-[25rem]">
-								<WorkbenchStat label="Idea" value="Product facts" />
-								<WorkbenchStat label="Design" value="Visual DNA" />
-								<WorkbenchStat label="Repo" value="Post-checkout" />
+							<div className="grid grid-cols-3 gap-2 text-xs">
+								<WorkbenchStat label="Idea" value="Facts" />
+								<WorkbenchStat label="Preview" value="Design + price" />
+								<WorkbenchStat label="Repo" value="Unlocked" />
 							</div>
 						</div>
 					</div>
-					<div className="grid min-w-0 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-						<div className="order-2 min-w-0 space-y-4 bg-background p-4 sm:p-5 lg:order-1">
+					<div className="grid min-w-0 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+						<div className="order-2 min-w-0 bg-background p-3 sm:p-4 lg:order-1 lg:p-5">
 							<StarterPreviewControls
 								section={section}
 								draft={draft}
 								generatedPreviewSection={generatedPreviewSection}
 							/>
-							<StarterPreviewProgressRail
-								sections={previewSections}
-								progress={sidebarProgress}
-							/>
 						</div>
-						<div className="order-1 border-b border-border/60 bg-muted/20 p-4 sm:p-5 lg:order-2 lg:border-b-0 lg:border-l">
-							<StarterPreviewLivePanel
-								section={section}
-								draft={draft}
-								offerPriceDisplay={offerPriceDisplay}
-							/>
+						<div className="order-1 min-w-0 border-b border-border/60 bg-muted/20 p-3 sm:p-4 lg:order-2 lg:border-b-0 lg:border-l lg:p-5">
+							<div className="grid gap-3">
+								<StarterPreviewLivePanel
+									section={section}
+									draft={draft}
+									offerPriceDisplay={offerPriceDisplay}
+								/>
+								<div className="hidden sm:block">
+									<StarterPreviewProgressRail
+										sections={previewSections}
+										progress={sidebarProgress}
+									/>
+								</div>
+							</div>
 						</div>
-						<div className="order-3 border-t border-border/60 bg-background p-4 sm:p-5 lg:col-span-2">
+						<div className="order-3 border-t border-border/60 bg-background/80 p-3 sm:p-4 lg:col-span-2 lg:p-5">
 							<StarterPreviewCheckoutBar
 								label={section.cta.label}
 								lockedNote={section.cta.lockedNote}
@@ -133,11 +141,13 @@ function WorkbenchStat({
 	readonly value: string;
 }) {
 	return (
-		<div className="rounded-lg border border-border/70 bg-card px-3 py-2">
+		<div className="min-w-0 rounded-md border border-border/70 bg-card px-2.5 py-2">
 			<p className="text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
 				{label}
 			</p>
-			<p className="mt-0.5 truncate font-medium text-foreground">{value}</p>
+			<p className="mt-0.5 break-words font-medium leading-tight text-foreground">
+				{value}
+			</p>
 		</div>
 	);
 }

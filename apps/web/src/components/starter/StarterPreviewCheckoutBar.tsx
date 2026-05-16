@@ -28,7 +28,7 @@ export function StarterPreviewCheckoutBar({
 	return (
 		<div
 			className={cn(
-				"flex flex-col gap-4 rounded-lg border border-primary/20 bg-primary/5 p-4 text-card-foreground shadow-xs/5",
+				"flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3 text-card-foreground shadow-xs/5",
 				"sm:flex-row sm:items-center sm:justify-between",
 			)}
 		>
@@ -67,12 +67,12 @@ export function StarterPreviewCheckoutBar({
 					</div>
 				) : null}
 			</div>
-			<div className="shrink-0">
+			<div className="w-full shrink-0 sm:w-auto">
 				<CheckoutButton
 					offerId="starter"
 					label={label}
 					testId="starter-preview-checkout-cta"
-					className="h-10 px-5"
+					className="h-9 w-full px-5 sm:w-auto"
 					onBeforeCheckout={onBeforeCheckout}
 					onError={onError}
 					loadingLabels={CHECKOUT_LOADING_LABELS}

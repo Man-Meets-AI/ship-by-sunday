@@ -3,6 +3,8 @@
 import { LockKeyhole } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { cn } from "@/lib/utils";
+
 import { StarterPreviewDesignPicker } from "./StarterPreviewDesignPicker";
 import { StarterPreviewFoundationFields } from "./StarterPreviewFoundationFields";
 import { StarterPreviewPricingPicker } from "./StarterPreviewPricingPicker";
@@ -23,27 +25,32 @@ export function StarterPreviewControls({
 }) {
 	return (
 		<div
-			className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-xs/5"
+			className="overflow-hidden rounded-lg border border-border/70 bg-background/80 text-card-foreground shadow-xs/5"
 			data-testid="starter-preview-controls"
 		>
-			<div className="flex flex-col gap-2 border-b border-border/60 pb-3 sm:flex-row sm:items-start sm:justify-between">
+			<div className="flex items-start gap-3 border-b border-border/60 px-3 py-3 sm:justify-between sm:px-4">
 				<div>
 					<p className="text-sm font-semibold text-foreground">
 						Answer the first brief
 					</p>
 					<p className="mt-1 text-sm leading-6 text-muted-foreground">
-						Three answers become the source truth Starter carries forward.
+						Three answers become the source truth Starter carries into the
+						workspace.
 					</p>
 				</div>
-				<span className="w-fit rounded-full border border-border/70 bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+				<span className="mt-0.5 w-fit shrink-0 rounded-full border border-border/70 bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
 					2 min
 				</span>
 			</div>
-			<div className="grid gap-4 pt-4">
-				<PreviewControlGroup index={1} title="Product facts">
+			<div>
+				<PreviewControlGroup
+					index={1}
+					title="Product facts"
+					className="border-b border-border/60"
+				>
 					<StarterPreviewFoundationFields section={section} draft={draft} />
 				</PreviewControlGroup>
-				<div className="grid gap-4 lg:grid-cols-2">
+				<div className="grid border-b border-border/60 lg:grid-cols-2 lg:divide-x lg:divide-border/60">
 					<PreviewControlGroup index={2} title="Design DNA">
 						<StarterPreviewDesignPicker section={section} draft={draft} />
 					</PreviewControlGroup>
@@ -53,7 +60,7 @@ export function StarterPreviewControls({
 				</div>
 				{generatedPreviewSection ? (
 					<div
-						className="rounded-lg border border-dashed border-border/70 bg-muted/15 p-3"
+						className="hidden bg-muted/15 px-3 py-3 sm:block sm:px-4"
 						data-testid="codebase-demo-section-generated-preview"
 					>
 						<div className="flex items-start gap-3">
@@ -91,14 +98,16 @@ export function StarterPreviewControls({
 function PreviewControlGroup({
 	index,
 	title,
+	className,
 	children,
 }: {
 	readonly index: number;
 	readonly title: string;
+	readonly className?: string;
 	readonly children: ReactNode;
 }) {
 	return (
-		<section className="min-w-0">
+		<section className={cn("min-w-0 px-3 py-3 sm:px-4", className)}>
 			<div className="mb-3 flex items-center gap-2">
 				<span className="flex size-5 shrink-0 items-center justify-center rounded-md border border-border/70 font-mono text-[0.7rem] text-muted-foreground">
 					{index}

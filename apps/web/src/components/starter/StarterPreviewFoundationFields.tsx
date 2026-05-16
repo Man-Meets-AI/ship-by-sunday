@@ -86,7 +86,7 @@ function StarterPreviewField({
 		<label className={className}>
 			<span className="text-sm font-medium text-foreground">{label}</span>
 			<span className="mt-1 block">{children}</span>
-			<span className="mt-1 block text-xs leading-5 text-muted-foreground">
+			<span className="mt-1 block text-[11px] leading-4 text-muted-foreground">
 				{helper}
 			</span>
 		</label>

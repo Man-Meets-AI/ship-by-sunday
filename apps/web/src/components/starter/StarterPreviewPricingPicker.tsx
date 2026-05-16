@@ -53,7 +53,7 @@ export function StarterPreviewPricingPicker({
 							className={cn(
 								"rounded-md px-3 py-1 text-sm transition-colors",
 								isSelected
-									? "bg-foreground text-background"
+									? "bg-primary text-primary-foreground shadow-xs/5"
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>

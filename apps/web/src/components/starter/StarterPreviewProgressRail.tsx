@@ -23,7 +23,7 @@ export function StarterPreviewProgressRail({
 
 	return (
 		<nav
-			className="rounded-lg border border-border/70 bg-background/60 p-3"
+			className="rounded-lg border border-border/70 bg-background/80 p-3"
 			aria-label="Starter preview path"
 		>
 			<div className="flex items-center justify-between gap-3">
@@ -32,7 +32,7 @@ export function StarterPreviewProgressRail({
 				</p>
 				<Badge variant="outline">Starter</Badge>
 			</div>
-			<ol className="mt-3 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-1">
+			<ol className="mt-3 grid grid-cols-2 gap-1.5">
 				{sections.map((section, index) => {
 					const interactiveStatus =
 						section.status === "interactive"
@@ -46,7 +46,7 @@ export function StarterPreviewProgressRail({
 							className={cn(
 								"flex min-w-0 items-center gap-2 rounded-md border px-2.5 py-2 text-sm",
 								section.status === "interactive"
-									? "border-border/50 bg-muted/15 text-foreground"
+									? "border-primary/20 bg-primary/5 text-foreground"
 									: "border-dashed border-border/50 text-muted-foreground",
 							)}
 						>
@@ -88,7 +88,7 @@ function ProgressDot({
 			<span
 				data-testid={`codebase-demo-sidebar-progress-${sectionId}`}
 				data-progress="complete"
-				className="inline-flex size-4 items-center justify-center rounded-full bg-foreground text-background"
+				className="inline-flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground"
 				aria-label="Section complete"
 			>
 				<Check className="size-2.5" aria-hidden />
@@ -101,10 +101,10 @@ function ProgressDot({
 			<span
 				data-testid={`codebase-demo-sidebar-progress-${sectionId}`}
 				data-progress="started"
-				className="inline-flex size-3 items-center justify-center rounded-full border-2 border-foreground/70"
+				className="inline-flex size-3 items-center justify-center rounded-full border-2 border-primary/70"
 				aria-label="Section in progress"
 			>
-				<span className="size-1.5 rounded-full bg-foreground/70" aria-hidden />
+				<span className="size-1.5 rounded-full bg-primary/70" aria-hidden />
 			</span>
 		);
 	}
