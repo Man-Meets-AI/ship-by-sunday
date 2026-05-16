@@ -28,7 +28,7 @@ export function StarterPreviewCheckoutBar({
 	return (
 		<div
 			className={cn(
-				"flex flex-col gap-4 rounded-lg border border-border/70 bg-card p-5 text-card-foreground shadow-xs/5",
+				"flex flex-col gap-4 rounded-lg border border-primary/20 bg-primary/5 p-4 text-card-foreground shadow-xs/5",
 				"sm:flex-row sm:items-center sm:justify-between",
 			)}
 		>
@@ -72,7 +72,7 @@ export function StarterPreviewCheckoutBar({
 					offerId="starter"
 					label={label}
 					testId="starter-preview-checkout-cta"
-					className="h-11 px-5"
+					className="h-10 px-5"
 					onBeforeCheckout={onBeforeCheckout}
 					onError={onError}
 					loadingLabels={CHECKOUT_LOADING_LABELS}

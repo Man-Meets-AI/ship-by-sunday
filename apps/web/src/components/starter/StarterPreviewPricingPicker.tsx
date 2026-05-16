@@ -51,7 +51,7 @@ export function StarterPreviewPricingPicker({
 							data-testid={`codebase-demo-pricing-model-${option.value}`}
 							onClick={() => draft.setPricingModel(option.value)}
 							className={cn(
-								"rounded-md px-3 py-1.5 text-sm transition-colors",
+								"rounded-md px-3 py-1 text-sm transition-colors",
 								isSelected
 									? "bg-foreground text-background"
 									: "text-muted-foreground hover:text-foreground",
@@ -79,6 +79,7 @@ export function StarterPreviewPricingPicker({
 					<Input
 						data-testid="codebase-demo-pricing-input"
 						type="number"
+						size="sm"
 						inputMode="decimal"
 						min={0}
 						step={0.01}

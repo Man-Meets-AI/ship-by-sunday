@@ -44,40 +44,40 @@ export function StarterPreviewLivePanel({
 
 	return (
 		<aside
-			className="rounded-lg border border-border/70 bg-card text-card-foreground shadow-xs/5"
+			className="rounded-lg bg-foreground text-background shadow-xs/10"
 			data-testid="starter-preview-live-panel"
 		>
-			<div className="border-b border-border/60 p-4 sm:p-5">
+			<div className="border-b border-background/10 p-4">
 				<div className="flex items-start justify-between gap-4">
 					<div>
-						<p className="text-sm font-semibold text-foreground">
+						<p className="text-sm font-semibold text-background">
 							Starter source truth
 						</p>
-						<p className="mt-1 text-sm leading-6 text-muted-foreground">
+						<p className="mt-1 text-sm leading-6 text-background/65">
 							What your checkout hands to the workspace.
 						</p>
 					</div>
-					<div className="rounded-full border border-border/70 bg-background px-2.5 py-1 text-xs font-medium text-foreground">
+					<div className="rounded-full border border-background/15 bg-background/10 px-2.5 py-1 text-xs font-medium text-background">
 						{offerPriceDisplay}
 					</div>
 				</div>
 			</div>
-			<div className="space-y-4 p-4 sm:p-5">
+			<div className="space-y-4 p-4">
 				<div>
-					<p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+					<p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-background/55">
 						Idea
 					</p>
 					<h3
-						className="mt-2 text-2xl font-semibold leading-tight text-foreground"
+						className="mt-2 text-2xl font-semibold leading-tight text-background"
 						data-testid="starter-preview-live-product-name"
 					>
 						{productName}
 					</h3>
-					<p className="mt-2 text-sm leading-6 text-muted-foreground">
+					<p className="mt-2 text-sm leading-6 text-background/65">
 						{productSummary}
 					</p>
 				</div>
-				<div className="grid gap-3 sm:grid-cols-2">
+				<div className="divide-y divide-background/10 overflow-hidden rounded-lg border border-background/10 bg-background/8">
 					<LiveMetric label="Primary user" value={primaryUser} />
 					<LiveMetric
 						label="Pricing"
@@ -92,21 +92,21 @@ export function StarterPreviewLivePanel({
 						value={selectedPreset?.category ?? "Software"}
 					/>
 				</div>
-				<div className="rounded-lg border border-border/70 bg-background/70 p-3">
+				<div className="rounded-lg border border-background/10 bg-background/8 p-3">
 					<div className="flex items-start gap-3">
-						<FileCode2 className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+						<FileCode2 className="mt-0.5 size-4 shrink-0 text-background/60" />
 						<div className="min-w-0 flex-1">
-							<p className="text-sm font-medium text-foreground">
+							<p className="text-sm font-medium text-background">
 								Repo promise
 							</p>
-							<p className="mt-1 text-xs leading-5 text-muted-foreground">
+							<p className="mt-1 text-xs leading-5 text-background/65">
 								Source facts, Program, ExecPlans, template app, and guided
 								videos unlock after checkout.
 							</p>
 						</div>
 					</div>
 				</div>
-				<div className="flex items-center gap-2 rounded-lg border border-border/70 bg-muted/15 px-3 py-2 text-xs leading-5 text-muted-foreground">
+				<div className="flex items-center gap-2 rounded-lg border border-background/10 bg-background/8 px-3 py-2 text-xs leading-5 text-background/65">
 					<Database className="size-3.5 shrink-0" aria-hidden />
 					<span className="min-w-0 flex-1">
 						Saved locally before Stripe opens.
@@ -126,13 +126,11 @@ function LiveMetric({
 	readonly value: string;
 }) {
 	return (
-		<div className="min-w-0 rounded-lg border border-border/70 bg-muted/15 px-3 py-2">
-			<p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+		<div className="grid min-w-0 gap-1 px-3 py-2.5">
+			<p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-background/55">
 				{label}
 			</p>
-			<p className="mt-1 truncate text-sm font-medium text-foreground">
-				{value}
-			</p>
+			<p className="text-sm font-medium leading-5 text-background">{value}</p>
 		</div>
 	);
 }

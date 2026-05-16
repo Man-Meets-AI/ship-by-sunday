@@ -23,28 +23,27 @@ export function StarterPreviewControls({
 }) {
 	return (
 		<div
-			className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-xs/5 sm:p-5"
+			className="rounded-lg border border-border/70 bg-card p-4 text-card-foreground shadow-xs/5"
 			data-testid="starter-preview-controls"
 		>
-			<div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-start sm:justify-between">
+			<div className="flex flex-col gap-2 border-b border-border/60 pb-3 sm:flex-row sm:items-start sm:justify-between">
 				<div>
 					<p className="text-sm font-semibold text-foreground">
-						Build the first brief
+						Answer the first brief
 					</p>
 					<p className="mt-1 text-sm leading-6 text-muted-foreground">
-						Three answers become the source truth Starter carries into the
-						protected workspace.
+						Three answers become the source truth Starter carries forward.
 					</p>
 				</div>
 				<span className="w-fit rounded-full border border-border/70 bg-background px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
 					2 min
 				</span>
 			</div>
-			<div className="grid gap-5 pt-5">
+			<div className="grid gap-4 pt-4">
 				<PreviewControlGroup index={1} title="Product facts">
 					<StarterPreviewFoundationFields section={section} draft={draft} />
 				</PreviewControlGroup>
-				<div className="grid gap-5 lg:grid-cols-2">
+				<div className="grid gap-4 lg:grid-cols-2">
 					<PreviewControlGroup index={2} title="Design DNA">
 						<StarterPreviewDesignPicker section={section} draft={draft} />
 					</PreviewControlGroup>
@@ -101,7 +100,7 @@ function PreviewControlGroup({
 	return (
 		<section className="min-w-0">
 			<div className="mb-3 flex items-center gap-2">
-				<span className="flex size-6 shrink-0 items-center justify-center rounded-md border border-border/70 font-mono text-xs text-muted-foreground">
+				<span className="flex size-5 shrink-0 items-center justify-center rounded-md border border-border/70 font-mono text-[0.7rem] text-muted-foreground">
 					{index}
 				</span>
 				<h3 className="text-sm font-semibold text-foreground">{title}</h3>

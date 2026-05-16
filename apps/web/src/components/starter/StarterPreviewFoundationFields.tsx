@@ -31,6 +31,7 @@ export function StarterPreviewFoundationFields({
 					data-testid="codebase-demo-input-product_name"
 					value={draft.fields.product_name}
 					placeholder={productName.placeholder}
+					size="sm"
 					onChange={(event) =>
 						draft.setFoundationField("product_name", event.target.value)
 					}
@@ -44,6 +45,7 @@ export function StarterPreviewFoundationFields({
 					data-testid="codebase-demo-input-primary_user"
 					value={draft.fields.primary_user}
 					placeholder={primaryUser.placeholder}
+					size="sm"
 					onChange={(event) =>
 						draft.setFoundationField("primary_user", event.target.value)
 					}
@@ -62,6 +64,7 @@ export function StarterPreviewFoundationFields({
 						draft.setFoundationField("product_summary", event.target.value)
 					}
 					rows={2}
+					size="sm"
 				/>
 			</StarterPreviewField>
 		</div>

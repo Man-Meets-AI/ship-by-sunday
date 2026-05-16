@@ -26,7 +26,7 @@ export function StarterPreviewDesignPicker({
 		section.design.presets[0];
 
 	return (
-		<div className="space-y-3">
+		<div className="space-y-2.5">
 			<div>
 				<p className="text-sm font-medium text-foreground">
 					{section.design.label}
@@ -51,7 +51,7 @@ export function StarterPreviewDesignPicker({
 							data-testid={`codebase-demo-design-preset-${preset.id}`}
 							onClick={() => draft.selectDesignPreset(preset.id)}
 							className={cn(
-								"inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+								"inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-sm transition-colors",
 								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 								isSelected
 									? "border-foreground bg-foreground text-background"
@@ -66,12 +66,12 @@ export function StarterPreviewDesignPicker({
 			</div>
 			{selectedPreset ? (
 				<div
-					className="rounded-lg border border-border/70 bg-muted/15 p-3"
+					className="rounded-lg border border-border/70 bg-muted/15 p-2.5"
 					data-testid="starter-preview-selected-design"
 				>
 					<div className="flex items-start gap-3">
 						<div
-							className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background p-1.5"
+							className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background p-1.5"
 							data-testid={`codebase-demo-design-logo-${selectedPreset.id}`}
 						>
 							{/* biome-ignore lint/performance/noImgElement: small preset logo */}
