@@ -71,7 +71,7 @@ function createThreadState(messageText = "Can this help my SaaS?") {
 			{
 				id: "message_2",
 				source: "system",
-				body: "Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
+				body: "Got it. This went straight to Parker's Telegram.",
 				attachment: null,
 				createdAt: 2,
 				deliveryStatus: "not_required",
@@ -80,7 +80,7 @@ function createThreadState(messageText = "Can this help my SaaS?") {
 			{
 				id: "message_3",
 				source: "system",
-				body: "Parker usually catches these pretty quickly when he's near his phone.",
+				body: "He'll reply here when he can.",
 				attachment: null,
 				createdAt: 3,
 				deliveryStatus: "not_required",
@@ -160,15 +160,9 @@ describe("HomePageSupportWidget", () => {
 			expect(screen.getByText("Delivered to Parker")).toBeTruthy(),
 		);
 		expect(
-			screen.getByText(
-				"Howdy - lemme grab Parker. This goes straight to his phone, so bear with him a sec.",
-			),
-		).toBeTruthy();
-		expect(
-			screen.getByText(
-				"Parker usually catches these pretty quickly when he's near his phone.",
-			),
-		).toBeTruthy();
+			screen.queryByText("Got it. This went straight to Parker's Telegram."),
+		).toBeNull();
+		expect(screen.queryByText("He'll reply here when he can.")).toBeNull();
 		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/session", {
 			method: "GET",
 			headers: {

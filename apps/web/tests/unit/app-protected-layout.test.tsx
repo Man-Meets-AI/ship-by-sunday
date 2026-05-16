@@ -19,7 +19,9 @@ vi.mock("@/app/(app)/_components/access-required/access-required-page", () => ({
 vi.mock(
 	"@/app/(app)/_components/workspace-support/workspace-support-widget",
 	() => ({
-		WorkspaceSupportWidget: () => <div>Support widget</div>,
+		WorkspaceSupportWidget: () => (
+			<div data-testid="workspace-support-widget">Support widget</div>
+		),
 	}),
 );
 
@@ -47,6 +49,9 @@ describe("protected app layout", () => {
 		expect(getServerProductAccessMock).toHaveBeenCalledTimes(1);
 		expect(getServerAppShellBillingAttentionMock).toHaveBeenCalledTimes(1);
 		expect(markup).toContain("Protected content");
+		expect(
+			markup.match(/data-testid="workspace-support-widget"/g),
+		).toHaveLength(1);
 	});
 
 	it("does not load billing attention for blocked visitors", async () => {
@@ -67,5 +72,6 @@ describe("protected app layout", () => {
 		expect(getServerAppShellBillingAttentionMock).not.toHaveBeenCalled();
 		expect(markup).toContain("Access recovery");
 		expect(markup).not.toContain("Protected content");
+		expect(markup).not.toContain('data-testid="workspace-support-widget"');
 	});
 });

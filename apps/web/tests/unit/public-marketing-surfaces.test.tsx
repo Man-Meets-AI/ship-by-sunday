@@ -77,9 +77,36 @@ vi.mock("next-themes", () => ({
 	}),
 }));
 
+vi.mock("@/app/_components/support/support-widget", () => ({
+	SupportWidget: ({
+		analyticsSurface,
+		content,
+		entrySurface,
+		fallbackHref,
+		launcherMotion,
+	}: {
+		analyticsSurface: string;
+		content: { launcherLabel: string };
+		entrySurface: string;
+		fallbackHref: string;
+		launcherMotion: string;
+	}) => (
+		<div
+			data-analytics-surface={analyticsSurface}
+			data-entry-surface={entrySurface}
+			data-fallback-href={fallbackHref}
+			data-launcher-motion={launcherMotion}
+			data-testid="public-support-widget"
+		>
+			{content.launcherLabel}
+		</div>
+	),
+}));
+
 import BlogIndexRoute from "@/app/(marketing)/blog/[[...slug]]/page";
 import { BlogIndexPage } from "@/app/(marketing)/blog/_components/blog-index-page";
 import { BlogPostShell } from "@/app/(marketing)/blog/_components/blog-post-shell";
+import MarketingLayout from "@/app/(marketing)/layout";
 import HomePage from "@/app/(marketing)/page";
 import StarterPage from "@/app/(marketing)/starter/page";
 import WorkerSealTeam6Page from "@/app/(marketing)/worker-seal-team-6/page";
@@ -110,11 +137,25 @@ function expectPublicRouteSurface(markup: string) {
 	expect(markup).not.toContain("opacity-22");
 }
 
+function renderMarketingRoute(children: React.ReactNode) {
+	return renderToStaticMarkup(<MarketingLayout>{children}</MarketingLayout>);
+}
+
+function expectPublicSupportWidget(markup: string) {
+	expect(markup.match(/data-testid="public-support-widget"/g)).toHaveLength(1);
+	expect(markup).toContain('data-analytics-surface="homepage"');
+	expect(markup).toContain('data-entry-surface="homepage_support_widget"');
+	expect(markup).toContain('data-fallback-href="https://t.me/parkerrex"');
+	expect(markup).toContain('data-launcher-motion="squishy"');
+	expect(markup).toContain("Message Parker");
+}
+
 describe("public marketing surfaces", () => {
 	it("renders the Man Meets AI index as a T3 public route surface", () => {
-		const markup = renderToStaticMarkup(<HomePage />);
+		const markup = renderMarketingRoute(<HomePage />);
 
 		expectPublicRouteSurface(markup);
+		expectPublicSupportWidget(markup);
 		expect(markup).toContain('data-slot="public-route-header"');
 		expect(markup).toContain('<h3 data-slot="public-route-panel-title"');
 		expect(markup).toContain('href="/starter"');
@@ -124,19 +165,24 @@ describe("public marketing surfaces", () => {
 	});
 
 	it("preserves Starter checkout while using public route panels", () => {
-		const markup = renderToStaticMarkup(<StarterPage />);
+		const markup = renderMarketingRoute(<StarterPage />);
 
 		expectPublicRouteSurface(markup);
+		expectPublicSupportWidget(markup);
 		expect(markup).toContain('data-slot="public-route-panel"');
 		expect(markup).toContain('data-testid="starter-checkout-cta"');
-		expect(markup).toContain('data-offer-id="starter"');
+		expect(markup).toContain('data-testid="starter-interactive-preview"');
+		expect(markup).toContain('data-testid="starter-preview-checkout-cta"');
+		expect(markup.match(/data-offer-id="starter"/g)).toHaveLength(2);
 		expect(markup).toContain('href="/workers"');
+		expect(markup).not.toContain('data-testid="codebase-demo-codebase-branch"');
 	});
 
 	it("preserves Workers checkout while using public route panels", () => {
-		const markup = renderToStaticMarkup(<WorkersPage />);
+		const markup = renderMarketingRoute(<WorkersPage />);
 
 		expectPublicRouteSurface(markup);
+		expectPublicSupportWidget(markup);
 		expect(markup).toContain('data-slot="public-route-panel"');
 		expect(markup).toContain('data-testid="workers-checkout-cta"');
 		expect(markup).toContain('data-offer-id="workers"');
@@ -144,9 +190,10 @@ describe("public marketing surfaces", () => {
 	});
 
 	it("preserves Worker Seal Team 6 booking affordances", () => {
-		const markup = renderToStaticMarkup(<WorkerSealTeam6Page />);
+		const markup = renderMarketingRoute(<WorkerSealTeam6Page />);
 
 		expectPublicRouteSurface(markup);
+		expectPublicSupportWidget(markup);
 		expect(markup).toContain('href="#booking"');
 		expect(markup).toContain('data-testid="worker-seal-team-6-cal-booking"');
 		expect(markup).toContain('data-slot="public-route-list-panel"');
@@ -156,10 +203,10 @@ describe("public marketing surfaces", () => {
 	});
 
 	it("renders blog index and post shells without legacy editorial title classes", () => {
-		const indexMarkup = renderToStaticMarkup(
+		const indexMarkup = renderMarketingRoute(
 			<BlogIndexPage posts={[blogPost]} />,
 		);
-		const postMarkup = renderToStaticMarkup(
+		const postMarkup = renderMarketingRoute(
 			<BlogPostShell
 				post={blogPost}
 				toc={[{ depth: 2, id: "proof", label: "Proof" }]}
@@ -171,6 +218,8 @@ describe("public marketing surfaces", () => {
 
 		expectPublicRouteSurface(indexMarkup);
 		expectPublicRouteSurface(postMarkup);
+		expectPublicSupportWidget(indexMarkup);
+		expectPublicSupportWidget(postMarkup);
 		expect(indexMarkup).toContain('data-slot="public-route-header"');
 		expect(postMarkup).toContain('data-slot="public-route-header"');
 		expect(postMarkup).toContain('href="/blog/what-ship-by-sunday-does#proof"');
@@ -178,9 +227,19 @@ describe("public marketing surfaces", () => {
 
 	it("keeps the route module rendering the public blog index", async () => {
 		const route = await BlogIndexRoute({ params: Promise.resolve({}) });
-		const markup = renderToStaticMarkup(route);
+		const markup = renderMarketingRoute(route);
 
 		expectPublicRouteSurface(markup);
+		expectPublicSupportWidget(markup);
 		expect(markup).toContain("newest first");
+	});
+
+	it("mounts public support for direct-link docs children through the marketing layout", () => {
+		const markup = renderMarketingRoute(
+			<div className="sbs-docs-shell">Docs route child</div>,
+		);
+
+		expect(markup).toContain("Docs route child");
+		expectPublicSupportWidget(markup);
 	});
 });

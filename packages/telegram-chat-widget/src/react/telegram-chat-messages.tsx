@@ -24,6 +24,9 @@ export function TelegramChatTranscript({
 }) {
 	const transcriptEndRef = useRef<HTMLDivElement>(null);
 	const messages = threadState.messages;
+	const visibleMessages = messages.filter(
+		(message) => message.source !== "system",
+	);
 
 	useEffect(() => {
 		transcriptEndRef.current?.scrollIntoView({ block: "end" });
@@ -39,11 +42,11 @@ export function TelegramChatTranscript({
 			role="log"
 			aria-live="polite"
 		>
-			{messages.length === 0 ? (
+			{visibleMessages.length === 0 ? (
 				<AssistantIntroMessage content={content} />
 			) : (
 				<div className="sbs-telegram-chat-message-list">
-					{messages.map((message) => (
+					{visibleMessages.map((message) => (
 						<TelegramChatMessageBubble
 							key={message.id}
 							content={content}
@@ -82,9 +85,7 @@ function TelegramChatMessageBubble({
 	readonly message: TelegramChatMessage;
 }) {
 	if (message.source === "system") {
-		return (
-			<div className="sbs-telegram-chat-system-message">{message.body}</div>
-		);
+		return null;
 	}
 
 	const isVisitor = message.source === "visitor";

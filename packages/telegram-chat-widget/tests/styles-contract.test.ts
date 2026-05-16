@@ -43,4 +43,12 @@ describe("telegram chat widget styles", () => {
 			expect(widgetCss).not.toContain(oldShellColor);
 		}
 	});
+
+	it("does not style stored system acknowledgements as visible transcript clutter", () => {
+		expect(widgetCss).not.toContain(".sbs-telegram-chat-message-row--system");
+		expect(widgetCss).not.toContain(
+			".sbs-telegram-chat-message-bubble--system",
+		);
+		expect(widgetCss).not.toContain(".sbs-telegram-chat-system-message");
+	});
 });
