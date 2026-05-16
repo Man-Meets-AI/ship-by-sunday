@@ -51,16 +51,16 @@ describe("HomePagePrimaryCta", () => {
 	it("renders link targets as anchors without checkout wiring", () => {
 		render(
 			<HomePagePrimaryCta
-				target={{ kind: "link", href: routeConfig.docs }}
-				label="Read the docs"
-				testId="docs-cta"
+				target={{ kind: "link", href: routeConfig.blog }}
+				label="Read the blog"
+				testId="blog-cta"
 			/>,
 		);
 
-		const link = screen.getByRole("link", { name: "Read the docs" });
-		expect(link.getAttribute("href")).toBe(routeConfig.docs);
-		expect(link.getAttribute("data-testid")).toBe("docs-cta");
-		expect(screen.queryByRole("button", { name: "Read the docs" })).toBeNull();
+		const link = screen.getByRole("link", { name: "Read the blog" });
+		expect(link.getAttribute("href")).toBe(routeConfig.blog);
+		expect(link.getAttribute("data-testid")).toBe("blog-cta");
+		expect(screen.queryByRole("button", { name: "Read the blog" })).toBeNull();
 	});
 
 	it("forwards onBeforeCheckout to the CheckoutButton on the checkout branch", async () => {

@@ -2,9 +2,6 @@ import { apiRouteConfig } from "@/app/api/_lib/api-route-config";
 import { routeConfig } from "@/config/product";
 import { getLessonMapHref } from "@/lib/workspace-navigation/lesson-map-href";
 
-/** Coach resource ids — keep in sync with `coachResources` on lesson 3.2. */
-export const REPO_MAP_SETUP_GUIDE_LINK_ID = "repo_map_setup_guide" as const;
-
 export type RepoMapBadge = "required" | "nice" | "advanced";
 
 export type RepoMapEntry = {
@@ -85,5 +82,3 @@ export const REPO_CURATED_COMMANDS: CuratedCommandRow[] = [
 		command: "bun run stripe:dev:verify",
 	},
 ];
-
-export const REPO_DEPLOY_DOC_PATH = "/docs/deploy-to-vercel" as const;

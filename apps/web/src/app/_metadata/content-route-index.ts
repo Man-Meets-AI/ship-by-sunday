@@ -2,10 +2,7 @@ import { stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-	getDocsContentEntries,
-	getPublishedBlogContentEntries,
-} from "@/app/_content/public-content-inventory";
+import { getPublishedBlogContentEntries } from "@/app/_content/public-content-inventory";
 
 type PublicContentRoute = {
 	pathname: string;
@@ -37,11 +34,6 @@ function createPublicContentRoute(params: {
 		sourcePath: params.sourcePath,
 		lastModified: params.lastModified,
 	};
-}
-
-export async function getDocsSitemapRoutes() {
-	const entries = await getDocsContentEntries();
-	return entries.map(createPublicContentRoute);
 }
 
 export async function getPublishedBlogSitemapRoutes() {

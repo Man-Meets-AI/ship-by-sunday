@@ -1,12 +1,21 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
-import { buildDocsMetadata } from "@/app/(marketing)/docs/_lib/docs-metadata";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 
 vi.mock("server-only", () => ({}));
 
+const appRoot = path.resolve(import.meta.dirname, "../..");
+
 describe("public metadata routes", () => {
+	it("does not ship a public docs route tree", () => {
+		expect(existsSync(path.join(appRoot, "src/app/(marketing)/docs"))).toBe(
+			false,
+		);
+	});
+
 	it("publishes crawl rules for public pages while blocking account and workspace routes", () => {
 		const routeRules = robots();
 		const sitemapUrl = routeRules.sitemap?.[0];
@@ -38,7 +47,7 @@ describe("public metadata routes", () => {
 				"/api/",
 			]),
 		);
-		expect(publicRules?.disallow).not.toContain("/docs");
+		expect(publicRules?.allow).not.toContain("/docs");
 	});
 
 	it("builds sitemap entries from lightweight public content metadata", async () => {
@@ -61,21 +70,5 @@ describe("public metadata routes", () => {
 		expect(urls).toContain(
 			`${metadataBase}/blog/starter-and-workers-are-different-jobs`,
 		);
-	});
-
-	it("marks direct-link docs metadata as unindexed support material", () => {
-		const metadata = buildDocsMetadata({
-			mdxPath: ["local-setup"],
-			metadata: {
-				title: "Local Setup",
-				description: "Support docs for generated-codebase setup.",
-			},
-		});
-
-		expect(metadata.alternates?.canonical).toBe("/docs/local-setup");
-		expect(metadata.robots).toMatchObject({
-			index: false,
-			follow: false,
-		});
 	});
 });

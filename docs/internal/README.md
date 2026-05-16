@@ -18,7 +18,9 @@ The repo-wide first hop is [docs/index.md](../index.md). Use this lane after the
 - [linear.md](./linear.md)
 - [execution-surfaces.md](./execution-surfaces.md)
 - [observability.md](./observability.md)
+- [telegram-support-bot.md](./telegram-support-bot.md)
 - [update-channel.md](./update-channel.md)
+- [web-app-setup.md](./web-app-setup.md)
 - [workflow-packets.md](./workflow-packets.md)
 
 ## Review prompts

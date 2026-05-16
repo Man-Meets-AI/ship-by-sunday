@@ -48,7 +48,7 @@
 
 - Next.js code in `apps/web`: read the relevant guide in the installed `next` package's `dist/docs/` before changing App Router, rendering, route handlers, middleware, config, caching, metadata, or server/client boundaries. In this Bun workspace, Next.js is hoisted to `node_modules/next/dist/docs/` at the repo root. This version has breaking changes; do not rely on memory of older Next.js behavior.
 - User-facing UI or app structure: read `docs/programs/completed/2026-05-14-t3-code-source-design-system-port/program.md` before changing layout, styling, theming, motion, docs chrome, marketing presentation, component presentation, or route-local implementation structure.
-- Public homepage: read `apps/web/src/content/docs/configure-the-homepage.mdx` before editing homepage code or copy. Keep the homepage shell contract below intact.
+- Public homepage: read `docs/internal/web-app-setup.md` before editing homepage code or copy. Keep the homepage shell contract below intact.
 - Convex code: use hosted Convex dev only. Do not use Convex local mode. Before changing Convex code, read `apps/web/convex/_generated/ai/guidelines.md`.
 - Routes, auth, checkout, entitlement, browser proof, or release readiness: read `docs/release-workflow.md` before changing the surface or judging release confidence.
 - Codebase compiler output: read `packages/codebase-compiler/AGENTS.md` before changing compiler schema, canonical facts, generated artifacts, or customer repo output.

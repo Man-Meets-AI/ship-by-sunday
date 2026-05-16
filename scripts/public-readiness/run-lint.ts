@@ -19,7 +19,6 @@ const CURRENT_TRUTH_FILE_ROOTS = [
 	"README.md",
 	"apps/web/AGENTS.md",
 	"apps/web/convex/README.md",
-	"apps/web/src/content/docs/",
 	"docs/ARCHITECTURE.md",
 	"docs/DESIGN.md",
 	"docs/FRONTEND.md",

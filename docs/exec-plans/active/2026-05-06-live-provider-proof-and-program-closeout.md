@@ -30,7 +30,7 @@ Ship by Sunday now has a first-party support widget, Convex support state, Teleg
 - [x] 2026-05-06: Attempted Telegram webhook verification without exposing the bot token; blocked because `TELEGRAM_SUPPORT_BOT_TOKEN` is missing or empty in hosted Convex dev.
 - [x] 2026-05-07: Re-ran the hosted Convex dev env presence probe with secret values suppressed; all required support provider values are still missing or empty.
 - [x] 2026-05-07: Checked local shell readiness without printing values; `TELEGRAM_SUPPORT_BOT_TOKEN` and `NEXT_PUBLIC_CONVEX_SITE_URL` are missing or empty, so Telegram `getWebhookInfo` and live support-loop proof remain blocked.
-- [x] 2026-05-07: Added a presence-only readiness probe to `apps/web/content/docs/telegram-support-bot.mdx` so the next operator can verify setup without leaking provider values.
+- [x] 2026-05-07: Added a presence-only readiness probe to the support setup docs so the next operator can verify setup without leaking provider values; that setup contract now lives in `docs/internal/telegram-support-bot.md`.
 - [x] 2026-05-07: Re-ran provider readiness after bug fixes; hosted Convex dev and production both still have all required support provider values missing or empty. `apps/web/.env.local` has `NEXT_PUBLIC_CONVEX_SITE_URL`, but neither hosted Convex nor the local shell has a support bot token, so Telegram `getWebhookInfo` remains blocked.
 - [x] 2026-05-07: Configured hosted Convex dev support Telegram env from the existing Worker forum bot/group using `bunx convex env set`; generated fresh support webhook and admin recovery tokens without printing values. `OPENAI_API_KEY` remains missing.
 - [x] 2026-05-07: Registered the Worker forum bot webhook to the hosted Convex dev support endpoint. `getWebhookInfo` reports the support path, expected `message` and `callback_query` updates, zero pending updates, and no last error.
@@ -86,7 +86,7 @@ The support widget is rendered by `apps/web/app/_components/support/support-widg
 
 Convex owns support state. Public and internal support actions live in `apps/web/convex/support.ts`; pure data rules live in `apps/web/convex/support/model.ts`; Telegram provider calls live in `apps/web/convex/support/telegram.ts`; OpenAI Responses calls live in `apps/web/convex/support/aiDrafts.ts`; admin snapshot and retry actions live in `apps/web/convex/supportAdmin.ts`; cron registration lives in `apps/web/convex/crons.ts`; schema and indexes live in `apps/web/convex/schema.ts`.
 
-The support setup source of truth is `apps/web/content/docs/telegram-support-bot.mdx`. It names the required Convex env values, Telegram BotFather setup, private supergroup with topics, bot admin rights, webhook URL, `setWebhook.secret_token`, narrow `allowed_updates`, OpenAI key setup, manual retry, operations snapshot, and failure shapes. Do not use the observability Telegram bot variables for this support bot.
+The support setup source of truth is `docs/internal/telegram-support-bot.md`. It names the required Convex env values, Telegram BotFather setup, private supergroup with topics, bot admin rights, webhook URL, `setWebhook.secret_token`, narrow `allowed_updates`, OpenAI key setup, manual retry, operations snapshot, and failure shapes. Do not use the observability Telegram bot variables for this support bot.
 
 ### In Scope
 
@@ -106,7 +106,7 @@ Then exercise the live support loop if the environment is ready. Start or use th
 
 After that, prove operator actions. Tap one customer-visible action such as `Ask email` or `Pricing` and confirm the widget receives only the canned support message. Tap one AI-backed operator-only action such as `Draft reply` or `Summary` and confirm Telegram receives a private note while the widget does not receive generated output. Inspect the relevant Convex support action metadata through safe admin tooling or dashboard UI without copying generated text into this plan.
 
-Finally, update `apps/web/content/docs/telegram-support-bot.mdx`, `docs/programs/active/2026-05-06-telegram-support-bot/program.md`, and this ExecPlan. If live proof passes, fill the Program retrospective, move the Program folder to `docs/programs/completed/`, update active/completed Program indexes, and mark this plan complete. If proof is blocked, leave the Program active, record the exact missing setup and recovery commands, and keep this plan active with the next runnable step.
+Finally, update `docs/internal/telegram-support-bot.md`, `docs/programs/active/2026-05-06-telegram-support-bot/program.md`, and this ExecPlan. If live proof passes, fill the Program retrospective, move the Program folder to `docs/programs/completed/`, update active/completed Program indexes, and mark this plan complete. If proof is blocked, leave the Program active, record the exact missing setup and recovery commands, and keep this plan active with the next runnable step.
 
 ## Milestones
 
@@ -151,7 +151,7 @@ Run docs and Program validation before stopping:
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md docs/programs/active/2026-05-06-telegram-support-bot apps/web/content/docs/telegram-support-bot.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md docs/programs/active/2026-05-06-telegram-support-bot docs/internal/telegram-support-bot.md
     git diff --check
 
 ## Validation and Acceptance
@@ -166,7 +166,7 @@ Run these commands from `/Users/bazelrex/Developer/ship-by-sunday` when touching
 
     bun run plans:lint -- --plan docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md
     bun run programs:lint
-    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md docs/programs/active/2026-05-06-telegram-support-bot apps/web/content/docs/telegram-support-bot.mdx
+    bun run markdown:lint -- --paths docs/exec-plans/active/2026-05-06-live-provider-proof-and-program-closeout.md docs/programs/active/2026-05-06-telegram-support-bot docs/internal/telegram-support-bot.md
     git diff --check
 
 Run these additional commands if runtime proof helpers or support code change:
@@ -190,7 +190,7 @@ If a live visitor message creates a Convex message but Telegram delivery fails, 
 
 The prior support implementation was committed as `d34d6cc9` with message `feat: add telegram support bot`.
 
-The support setup and runbook live in `apps/web/content/docs/telegram-support-bot.mdx`.
+The support setup and runbook live in `docs/internal/telegram-support-bot.md`.
 
 Record provider readiness results here as short, secret-free lines. Use `present`, `missing`, `verified`, `blocked`, or `not attempted`; do not paste tokens, chat ids, operator ids, message bodies, generated AI output, visitor tokens, or transcript text.
 

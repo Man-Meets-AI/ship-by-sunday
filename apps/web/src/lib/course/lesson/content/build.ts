@@ -1,4 +1,3 @@
-import { routeConfig } from "@/config/product";
 import type { LessonSourceConfig } from "@/lib/course/lesson/model/contracts";
 import { createVideoLesson } from "@/lib/course/lesson/model/video-lesson-factory";
 import {
@@ -309,14 +308,6 @@ export const buildLessons = [
 			"Use Project map and Commands while you follow along in the editor.",
 		workbenchEmptyState:
 			"Open the Project map tab and mirror it in your file explorer.",
-		coachResources: [
-			{
-				id: "repo_map_setup_guide",
-				label: "Step-by-step setup guide",
-				href: `${routeConfig.docs}/local-setup`,
-				kind: "internal",
-			},
-		],
 	}),
 	createVideoLesson({
 		id: "3.3",

@@ -2,7 +2,6 @@ export type MarkdownMetadataFamily =
 	| "repo_doc"
 	| "exec_plan"
 	| "program_doc"
-	| "web_docs_page"
 	| "blog_post";
 
 export type FamilyRule = {
@@ -42,11 +41,6 @@ export const FAMILY_RULES: Record<
 		requiredKeys: ["title", "summary", "docType", "status", "read_when"],
 		requireH1TitleMatch: true,
 	},
-	web_docs_page: {
-		requiredKeys: ["title", "description"],
-		requireH1TitleMatch: true,
-		allowUnknownKeys: true,
-	},
 	blog_post: {
 		requiredKeys: [
 			"title",
@@ -85,13 +79,6 @@ export function resolveMarkdownMetadataFamily(
 
 	if (repoPath.endsWith(".md") && ROOT_DOC_PATHS.has(repoPath)) {
 		return "repo_doc";
-	}
-
-	if (
-		repoPath.endsWith(".mdx") &&
-		repoPath.startsWith("apps/web/src/content/docs/")
-	) {
-		return "web_docs_page";
 	}
 
 	if (
