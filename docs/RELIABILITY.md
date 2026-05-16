@@ -23,7 +23,7 @@ This file owns the repo-wide proof loop and the operational facts that let contr
 
 - the canonical ExecPlan contract, which lives in `docs/exec-plans/PLANS.md`
 - the canonical Program contract, which lives in `docs/programs/PROGRAMS.md`
-- app-specific setup details that belong in `apps/web/src/content/docs/*`
+- app-specific setup details that belong in `docs/internal/web-app-setup.md` or a nearby active app setup doc
 - live machine-local state
 
 ## Proof Loop
@@ -49,7 +49,7 @@ bun run programs:lint
 git diff --check
 ```
 
-`markdown:lint` currently validates the repo-owned frontmatter-backed docs families under the canonical `docs/` spine, `docs/programs/`, `docs/exec-plans/`, `apps/web/src/content/docs/`, and `apps/web/src/content/blog/`. `plans:lint` applies the stricter ExecPlan body contract from `docs/exec-plans/PLANS.md`. `programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
+`markdown:lint` currently validates the repo-owned frontmatter-backed docs families under the canonical `docs/` spine, `docs/programs/`, `docs/exec-plans/`, and `apps/web/src/content/blog/`. Public docs MDX under `apps/web/src/content/docs/` has been retired. `plans:lint` applies the stricter ExecPlan body contract from `docs/exec-plans/PLANS.md`. `programs:lint` validates Program docs, checked-in Program packet folders, versioned planning briefs, current-brief pointers, and Program prompt contracts.
 
 `bun run lint` includes the repo-wide unknown-boundary lint before app lint. Explicit TypeScript `unknown` belongs only in route handlers and DB-loading boundaries; validate there, then pass typed values through the rest of the source tree.
 
@@ -74,6 +74,6 @@ Use `bun run dev:core` only when you intentionally want the lighter no-Stripe pa
 ## Next
 
 - Use [docs/design-docs/scripts.md](design-docs/scripts.md) for the current command map.
-- Use [apps/web/src/content/docs/local-qa.mdx](../apps/web/src/content/docs/local-qa.mdx) for the app-local verification runbook.
+- Use [docs/internal/web-app-setup.md](internal/web-app-setup.md) for the app-local verification runbook.
 - Use [docs/programs/PROGRAMS.md](programs/PROGRAMS.md) for the canonical Program contract.
 - Use [docs/exec-plans/PLANS.md](exec-plans/PLANS.md) for the canonical ExecPlan contract.

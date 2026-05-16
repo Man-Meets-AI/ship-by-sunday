@@ -307,7 +307,6 @@ export const homePageContent = {
 		socialProofImage: productConfig.images.founderProof,
 	},
 	hero: {
-		docsLabel: marketingDisplayConfig.docsLabel,
 		loginLabel: marketingDisplayConfig.loginLabel,
 		promoBanner,
 		headlineLead: "Agent doctor",

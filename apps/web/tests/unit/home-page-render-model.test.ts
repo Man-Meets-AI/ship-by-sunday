@@ -107,7 +107,7 @@ describe("home page render model", () => {
 			},
 			heroPrimaryCta: {
 				kind: "link",
-				href: routeConfig.docs,
+				href: routeConfig.blog,
 			},
 			pricingPrimaryCta: {
 				kind: "link",
@@ -124,7 +124,7 @@ describe("home page render model", () => {
 		expect(renderModel.plansMd.isEnabled).toBe(false);
 		expect(renderModel.hero.primaryCtaTarget).toEqual({
 			kind: "link",
-			href: routeConfig.docs,
+			href: routeConfig.blog,
 		});
 		expect(renderModel.pricing.primaryCtaTarget).toEqual({
 			kind: "link",

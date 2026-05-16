@@ -70,7 +70,7 @@ describe("home page structured data", () => {
 				...starterConfig.homePage,
 				pricingPrimaryCta: {
 					kind: "link",
-					href: routeConfig.docs,
+					href: routeConfig.blog,
 				},
 			} satisfies StarterHomePageConfig,
 		});

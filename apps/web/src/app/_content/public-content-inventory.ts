@@ -11,24 +11,11 @@ import {
 	stripPublicContentHeadingFormatting,
 } from "@/app/_content/public-content-heading-ids";
 import blogNavigationMeta from "@/content/blog/_meta";
-import docsNavigationMeta from "@/content/docs/_meta";
-import troubleshootingNavigationMeta from "@/content/docs/troubleshooting/_meta";
 
 export type PublicContentHeading = {
 	id: string;
 	depth: 2 | 3 | 4;
 	text: string;
-};
-
-export type DocsContentEntry = {
-	kind: "docs";
-	segments: string[];
-	pathname: string;
-	sourcePath: string;
-	title: string;
-	description: string;
-	headings: PublicContentHeading[];
-	lastModified?: Date;
 };
 
 export type BlogContentEntry = {
@@ -51,67 +38,27 @@ export type BlogContentEntry = {
 	lastModified?: Date;
 };
 
-export type DocsNavigationEntry =
-	| {
-			kind: "page";
-			key: string;
-			title: string;
-			segments: string[];
-			pathname: string;
-			sourcePath: string;
-	  }
-	| {
-			kind: "section";
-			key: string;
-			title: string;
-			segments: string[];
-			children: DocsNavigationEntry[];
-	  }
-	| {
-			kind: "separator";
-			key: string;
-			title: string;
-	  };
-
 type FrontmatterValue = boolean | string;
 type Frontmatter = Record<string, FrontmatterValue>;
-type ContentKind = "blog" | "docs";
-type NavigationMetaValue =
-	| string
-	| {
-			title?: string;
-			type?: string;
-	  };
-type NavigationMeta = Record<string, NavigationMetaValue>;
 
 const webRoot = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
 	"../..",
 );
-const docsContentRoot = path.join(webRoot, "content/docs");
 const blogContentRoot = path.join(webRoot, "content/blog");
 
-const docsNavigationMetaByDirectory = new Map<string, NavigationMeta>([
-	[createSegmentsKey([]), docsNavigationMeta as NavigationMeta],
-	[
-		createSegmentsKey(["troubleshooting"]),
-		troubleshootingNavigationMeta as NavigationMeta,
-	],
-]);
-const blogNavigationMetaEntries = Object.entries(
-	blogNavigationMeta as NavigationMeta,
+const blogNavigationMetaOrder = new Map(
+	Object.keys(blogNavigationMeta as Record<string, { title?: string }>).map(
+		(key, index) => [key, index],
+	),
 );
 
-function createSegmentsKey(segments: string[]) {
-	return segments.join("/");
-}
-
-function createContentPathname(rootSegment: ContentKind, segments: string[]) {
+function createBlogPathname(segments: string[]) {
 	if (segments.length === 0) {
-		return `/${rootSegment}`;
+		return "/blog";
 	}
 
-	return `/${rootSegment}/${segments.join("/")}`;
+	return `/blog/${segments.join("/")}`;
 }
 
 async function getLastModified(sourcePath: string) {
@@ -307,29 +254,6 @@ function extractHeadings(rawContent: string) {
 	return headings;
 }
 
-async function createDocsContentEntry(
-	sourcePath: string,
-): Promise<DocsContentEntry> {
-	const rawContent = await readFile(sourcePath, "utf8");
-	const { content, frontmatter } = parseFrontmatter(sourcePath, rawContent);
-	const segments = getContentSegments(docsContentRoot, sourcePath);
-
-	return {
-		kind: "docs",
-		segments,
-		pathname: createContentPathname("docs", segments),
-		sourcePath,
-		title: requireFrontmatterString(frontmatter, "title", sourcePath),
-		description: requireFrontmatterString(
-			frontmatter,
-			"description",
-			sourcePath,
-		),
-		headings: extractHeadings(content),
-		lastModified: await getLastModified(sourcePath),
-	};
-}
-
 async function createBlogContentEntry(
 	sourcePath: string,
 ): Promise<BlogContentEntry> {
@@ -367,7 +291,7 @@ async function createBlogContentEntry(
 	return {
 		kind: "blog",
 		slug,
-		pathname: createContentPathname("blog", slug),
+		pathname: createBlogPathname(slug),
 		sourcePath,
 		title: requireFrontmatterString(frontmatter, "title", sourcePath),
 		description: requireFrontmatterString(
@@ -397,20 +321,6 @@ async function createBlogContentEntry(
 	};
 }
 
-function compareEntriesByPathname(
-	left: { pathname: string },
-	right: { pathname: string },
-) {
-	if (left.pathname === "/docs") {
-		return -1;
-	}
-	if (right.pathname === "/docs") {
-		return 1;
-	}
-
-	return left.pathname.localeCompare(right.pathname);
-}
-
 function sortBlogEntriesByPublishState(entries: BlogContentEntry[]) {
 	return [...entries].sort((leftEntry, rightEntry) => {
 		if (Boolean(leftEntry.featured) !== Boolean(rightEntry.featured)) {
@@ -424,29 +334,20 @@ function sortBlogEntriesByPublishState(entries: BlogContentEntry[]) {
 	});
 }
 
-const loadDocsContentEntries = cache(async () => {
-	const sourcePaths = await listMdxFiles(docsContentRoot);
-	const entries = await Promise.all(sourcePaths.map(createDocsContentEntry));
-
-	return entries.sort(compareEntriesByPathname);
-});
-
 const loadAllBlogContentEntries = cache(async () => {
 	const sourcePaths = await listMdxFiles(blogContentRoot);
 	const entries = await Promise.all(sourcePaths.map(createBlogContentEntry));
 
 	return entries.sort((leftEntry, rightEntry) => {
-		const leftMetaIndex = blogNavigationMetaEntries.findIndex(
-			([key]) => key === leftEntry.slug.join("/"),
-		);
-		const rightMetaIndex = blogNavigationMetaEntries.findIndex(
-			([key]) => key === rightEntry.slug.join("/"),
+		const leftMetaIndex = blogNavigationMetaOrder.get(leftEntry.slug.join("/"));
+		const rightMetaIndex = blogNavigationMetaOrder.get(
+			rightEntry.slug.join("/"),
 		);
 		if (leftMetaIndex !== rightMetaIndex) {
-			if (leftMetaIndex === -1) {
+			if (leftMetaIndex === undefined) {
 				return 1;
 			}
-			if (rightMetaIndex === -1) {
+			if (rightMetaIndex === undefined) {
 				return -1;
 			}
 
@@ -456,106 +357,6 @@ const loadAllBlogContentEntries = cache(async () => {
 		return leftEntry.pathname.localeCompare(rightEntry.pathname);
 	});
 });
-
-function getNavigationValueTitle(
-	value: NavigationMetaValue,
-	key: string,
-	sourceLabel: string,
-) {
-	if (typeof value === "string") {
-		return value;
-	}
-	if (typeof value.title === "string" && value.title.trim() !== "") {
-		return value.title;
-	}
-
-	throw new Error(
-		`Missing title for navigation key "${key}" in ${sourceLabel}.`,
-	);
-}
-
-function isNavigationSeparator(value: NavigationMetaValue) {
-	return typeof value !== "string" && value.type === "separator";
-}
-
-function createDocsNavigationEntriesForDirectory(params: {
-	contentBySegmentsKey: Map<string, DocsContentEntry>;
-	directorySegments: string[];
-	meta: NavigationMeta;
-	sourceLabel: string;
-}): DocsNavigationEntry[] {
-	return Object.entries(params.meta).map(([key, value]) => {
-		const title = getNavigationValueTitle(value, key, params.sourceLabel);
-		if (isNavigationSeparator(value)) {
-			return {
-				kind: "separator",
-				key,
-				title,
-			};
-		}
-
-		const segments =
-			key === "index"
-				? params.directorySegments
-				: [...params.directorySegments, key];
-		const contentEntry = params.contentBySegmentsKey.get(
-			createSegmentsKey(segments),
-		);
-		if (contentEntry) {
-			return {
-				kind: "page",
-				key,
-				title,
-				segments,
-				pathname: contentEntry.pathname,
-				sourcePath: contentEntry.sourcePath,
-			};
-		}
-
-		const childNavigationMeta = docsNavigationMetaByDirectory.get(
-			createSegmentsKey(segments),
-		);
-		if (childNavigationMeta) {
-			return {
-				kind: "section",
-				key,
-				title,
-				segments,
-				children: createDocsNavigationEntriesForDirectory({
-					contentBySegmentsKey: params.contentBySegmentsKey,
-					directorySegments: segments,
-					meta: childNavigationMeta,
-					sourceLabel: `docs/${segments.join("/")}/_meta.ts`,
-				}),
-			};
-		}
-
-		throw new Error(
-			`Navigation key "${key}" in ${params.sourceLabel} does not match a docs page or known section.`,
-		);
-	});
-}
-
-export async function getDocsContentEntries() {
-	return await loadDocsContentEntries();
-}
-
-export async function getDocsNavigationEntries() {
-	const docsContentEntries = await getDocsContentEntries();
-	const contentBySegmentsKey = new Map(
-		docsContentEntries.map((entry) => [
-			createSegmentsKey(entry.segments),
-			entry,
-		]),
-	);
-
-	return createDocsNavigationEntriesForDirectory({
-		contentBySegmentsKey,
-		directorySegments: [],
-		meta: docsNavigationMeta as NavigationMeta,
-		sourceLabel: "docs/_meta.ts",
-	});
-}
 
 export async function getAllBlogContentEntries() {
 	return await loadAllBlogContentEntries();

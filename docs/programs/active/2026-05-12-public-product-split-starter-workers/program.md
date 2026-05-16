@@ -34,7 +34,7 @@ This Program supersedes `docs/programs/active/2026-05-05-worker-generate-tutoria
 
 ## Current State
 
-The public root route is now the Man Meets AI brand/thesis page with paths into Starter and Workers. `/starter` is the public new-builder sales page, `/workers` is the public existing-repo Workers landing page, and `/blog` is a usable publishing surface. `/docs` remains direct-link reachable and noindexed, but it is not promoted as a public product path in the main IA.
+The public root route is now the Man Meets AI brand/thesis page with paths into Starter and Workers. `/starter` is the public new-builder sales page, `/workers` is the public existing-repo Workers landing page, and `/blog` is a usable publishing surface. This Program's earlier direct-link `/docs` stance has been superseded by `docs/programs/active/2026-05-16-public-docs-retirement/`, which retires public `/docs` and keeps setup truth in `docs/internal/`.
 
 The protected paid app lives under the pathless `apps/web/app/(protected)/` route group. Starter app work is under `/starter/home`, `/starter/lessons`, `/starter/lessons/[lessonKey]`, `/starter/generate-codebase`, and `/starter/generate-codebase/review`. Worker app work is under `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/findings/[findingId]`, `/workers/loops`, `/workers/runs`, and `/workers/privacy`. `/home` remains the protected multi-product and recovery hub; old `/generate-codebase` and `/tutorials` routes are unpromoted compatibility redirects into Starter.
 
@@ -150,7 +150,7 @@ Rationale: Starter-only users should forward to `/starter/home`; Worker-only use
 Date: 2026-05-13.
 
 Decision: The protected paid-app route group should be named `(protected)`, not `(workspace)`.
-Rationale: `(workspace)` describes a product workspace concept, but the folder is currently doing access-boundary work. The route group name should make the pay-guarded app area explicit for future agents without changing URLs. Public marketing routes such as `/starter`, `/workers`, `/blog`, and `/docs` should remain outside that group.
+Rationale: `(workspace)` describes a product workspace concept, but the folder is currently doing access-boundary work. The route group name should make the pay-guarded app area explicit for future agents without changing URLs. Public marketing routes such as `/starter`, `/workers`, and `/blog` should remain outside that group; `/docs` is governed by the later Public Docs Retirement Program.
 Date: 2026-05-13.
 
 Decision: Multi-product `/home` shows only Starter and Workers as product cards.
@@ -172,6 +172,10 @@ Date: 2026-05-12.
 Decision: `/docs` remains public but unpromoted for the first pass.
 Rationale: Direct docs links should keep working for generated-codebase support and generated repos, but docs should not appear in public nav, homepage CTAs, or product-sales paths.
 Date: 2026-05-13.
+
+Decision: Public `/docs` is superseded by the Public Docs Retirement Program.
+Rationale: The later 2026-05-16 product direction deletes public docs rather than keeping them direct-link reachable. Internal setup truth now belongs in `docs/internal/`.
+Date: 2026-05-16.
 
 Decision: Public navigation includes only Man Meets AI, Starter, Workers, Blog, and Sign in.
 Rationale: Docs, Tutorials, Generate Codebase, and Pricing should not appear as top-level public nav items. Pricing belongs on the relevant sales pages, and Tutorials/Generate Codebase belong inside Starter.
@@ -236,7 +240,7 @@ No required repo child slice remains inside this Program. External operator exec
 
 Do not reintroduce `/workers` as a protected app page. `/workers` is public marketing; protected Worker work belongs below explicit operational subroutes such as `/workers/setup`, `/workers/doctor-pass`, `/workers/findings`, `/workers/loops`, `/workers/runs`, and `/workers/privacy`.
 
-Do not confuse the `(workspace)` to `(protected)` folder rename with a URL change. Next route groups are pathless. The cleanup should move files and references only, keep public `/starter`, `/workers`, `/blog`, and `/docs` outside the protected group, and preserve route-guard behavior.
+Do not confuse the `(workspace)` to `(protected)` folder rename with a URL change. Next route groups are pathless. The cleanup should move files and references only, keep public `/starter`, `/workers`, and `/blog` outside the protected group, and preserve route-guard behavior. `/docs` is intentionally handled by the later Public Docs Retirement Program.
 
 Do not keep Tutorials as a top-level product card after deciding Starter owns videos. Existing protected tutorial routes may remain as internal implementation routes during migration, but the customer-facing IA should not market Tutorials as its own product.
 
@@ -254,16 +258,16 @@ This Program is active only because real customer-specific migrations happen out
 
 ## Validation and Acceptance
 
-Program-level acceptance requires the public site to expose `/` as Man Meets AI, a brand/thesis routing page with paths to `/starter` and `/workers`, `/starter` as the newbie Starter page, `/workers` as the existing-repo Workers page, and `/blog` as a usable publishing surface. Public navigation should include only Man Meets AI, Starter, Workers, Blog, and Sign in. `/docs` remains publicly reachable by direct link but must not be promoted as a primary public product path or sales CTA. Single-product paid customers should forward from `/home` into the matching product route, while multi-product, unresolved, and legacy users can use `/home` as a chooser or recovery state. Multi-product `/home` should show only Starter and Workers cards. Starter must support both guided-question customized repo generation with Program and ExecPlans, and direct template plus guided videos under `/starter/home`, `/starter/lessons`, `/starter/lessons/[lessonKey]`, and `/starter/generate-codebase`. Worker app setup, doctor pass, findings, loops, runs, and privacy should remain protected below specific Worker subroutes. Once the route-group cleanup lands, pay-guarded app routes should live under `apps/web/app/(protected)/` rather than `apps/web/app/(workspace)/`; public marketing and support routes should stay outside that group.
+Program-level acceptance requires the public site to expose `/` as Man Meets AI, a brand/thesis routing page with paths to `/starter` and `/workers`, `/starter` as the newbie Starter page, `/workers` as the existing-repo Workers page, and `/blog` as a usable publishing surface. Public navigation should include only Man Meets AI, Starter, Workers, Blog, and Sign in. `/docs` is no longer part of this Program's active acceptance because `docs/programs/active/2026-05-16-public-docs-retirement/` supersedes that route decision. Single-product paid customers should forward from `/home` into the matching product route, while multi-product, unresolved, and legacy users can use `/home` as a chooser or recovery state. Multi-product `/home` should show only Starter and Workers cards. Starter must support both guided-question customized repo generation with Program and ExecPlans, and direct template plus guided videos under `/starter/home`, `/starter/lessons`, `/starter/lessons/[lessonKey]`, and `/starter/generate-codebase`. Worker app setup, doctor pass, findings, loops, runs, and privacy should remain protected below specific Worker subroutes. Once the route-group cleanup lands, pay-guarded app routes should live under `apps/web/app/(protected)/` rather than `apps/web/app/(workspace)/`; public marketing and support routes should stay outside that group.
 
 Starter checkout must be app-backed at `$297`, grant the generator and videos, and route to `/starter/home`. Worker checkout must be app-backed at `$600`, grant only Worker access by default, route to `/workers/setup`, and communicate the bounded included scope: local runner setup, private doctor pass, top findings, one approved worker loop, and proof or blocked-proof report. Existing customers must remain recoverable through manual grants. The generated repo must be a template app, must not include Worker local-runner code, and must use intake answers to customize source truth, docs, Program, ExecPlans, and agent instructions for future loops.
 
 ## Artifacts and Notes
 
-The current `apps/web/content/docs/` material is mostly relevant to generated-codebase customers, so the docs cleanup should reduce promotion rather than delete the route by default. If later work makes docs protected or customer-scoped, that should be planned separately because it changes discoverability, sitemap, and customer setup behavior.
+The 2026-05-16 Public Docs Retirement Program supersedes the earlier docs-cleanup note. Public `/docs` is being deleted, and setup truth that future workers still need belongs in `docs/internal/`.
 
 The older Worker Generate Tutorials IA Program should not be used as the current product destination model. It remains relevant for code that already moved paid app routes and access toward `/home`, `/generate-codebase`, `/tutorials`, and `/workers`.
 
 ## Interfaces and Dependencies
 
-This Program depends on public routes under `apps/web/app/`, protected paid-app routes under `apps/web/app/(protected)/`, route protection in `apps/web/proxy.ts`, route and price constants in `apps/web/config/product.ts`, homepage content and render models under `apps/web/app/_content/` and `apps/web/app/_lib/`, paid-home models under the protected route group, checkout code under `apps/web/platform/billing/checkout/`, managed Stripe config under `apps/web/platform/billing/`, access code under `apps/web/platform/access/`, Convex access code under `apps/web/convex/entitlements/`, Starter lesson library code under the protected route group, blog content loading under `apps/web/app/blog/` and `apps/web/content/blog/`, docs content under `apps/web/content/docs/`, and generated repo code under `packages/codebase-compiler/src/repo-generation/`.
+This Program depends on public routes under `apps/web/app/`, protected paid-app routes under `apps/web/app/(protected)/`, route protection in `apps/web/proxy.ts`, route and price constants in `apps/web/config/product.ts`, homepage content and render models under `apps/web/app/_content/` and `apps/web/app/_lib/`, paid-home models under the protected route group, checkout code under `apps/web/platform/billing/checkout/`, managed Stripe config under `apps/web/platform/billing/`, access code under `apps/web/platform/access/`, Convex access code under `apps/web/convex/entitlements/`, Starter lesson library code under the protected route group, blog content loading under `apps/web/app/blog/` and `apps/web/content/blog/`, internal setup docs under `docs/internal/`, and generated repo code under `packages/codebase-compiler/src/repo-generation/`.

@@ -31,7 +31,6 @@ export const routeConfig = {
 	tutorials: "/starter/lessons",
 	workers: "/workers",
 	workerSealTeam6: "/worker-seal-team-6",
-	docs: "/docs",
 	blog: "/blog",
 	mission: "/mission",
 	artifacts: "/artifacts",
@@ -163,7 +162,6 @@ export const starterConfig = {
 			"https://www.youtube.com/playlist?list=PLO6IqfGPRUN1Bof9pACmGc955t4d0J6cM",
 	},
 	marketing: {
-		docsLabel: "Docs",
 		loginLabel: "Sign in",
 		primaryCtaLabel: "Start my AI build",
 		previewImageAlt: "Ship by Sunday system preview",
@@ -177,11 +175,6 @@ export const starterConfig = {
 		artifactsLabel: "Artifacts",
 		settingsLabel: "Settings",
 	},
-	docs: {
-		badgeLabel: "Docs",
-		description:
-			"Operational setup and troubleshooting docs for Ship by Sunday, covering local setup, auth, payments, the route map, and launch-critical recovery steps.",
-	},
 	blog: {
 		footerLabel: "Blog",
 		description:
@@ -192,7 +185,6 @@ export const starterConfig = {
 		} satisfies HomePageCtaTarget,
 	},
 	modules: {
-		docs: true,
 		course: true,
 		observability: true,
 		codex: true,

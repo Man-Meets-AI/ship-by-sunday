@@ -21,17 +21,9 @@ export const workspaceDisplayConfig = {
 } as const;
 
 export const marketingDisplayConfig = {
-	docsLabel: starterConfig.marketing.docsLabel,
 	loginLabel: starterConfig.marketing.loginLabel,
 	primaryCtaLabel: starterConfig.marketing.primaryCtaLabel,
 	previewImageAlt: starterConfig.marketing.previewImageAlt,
-} as const;
-
-export const docsDisplayConfig = {
-	siteName: `${productConfig.name} ${starterConfig.docs.badgeLabel}`,
-	badgeLabel: starterConfig.docs.badgeLabel,
-	description: starterConfig.docs.description,
-	starterHref: routeConfig.starter,
 } as const;
 
 export const blogDisplayConfig = {

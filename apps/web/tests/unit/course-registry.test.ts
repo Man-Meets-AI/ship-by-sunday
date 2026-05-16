@@ -379,7 +379,7 @@ describe("course registry", () => {
 		expect((repoMapLesson.workbenchFields ?? []).map((f) => f.id)).toEqual([]);
 		expect(
 			(repoMapLesson.content.coach.resources ?? []).map((r) => r.id),
-		).toEqual(["repo_map_setup_guide"]);
+		).toEqual([]);
 
 		const deployHandoffLesson = getLessonById("3.14");
 		expect(deployHandoffLesson).toBeTruthy();

@@ -59,18 +59,6 @@ function validateRepoDocMetadata(metadata: JsonObject, issues: string[]): void {
 	validateReadWhen(metadata.read_when, issues);
 }
 
-function validateWebDocsPageMetadata(
-	metadata: JsonObject,
-	issues: string[],
-): void {
-	if (!isNonEmptyString(metadata.title)) {
-		issues.push("Frontmatter title must be a non-empty string.");
-	}
-	if (!isNonEmptyString(metadata.description)) {
-		issues.push("Frontmatter description must be a non-empty string.");
-	}
-}
-
 function validateBlogPostMetadata(
 	metadata: JsonObject,
 	issues: string[],
@@ -140,9 +128,6 @@ function validateMetadataForFamily(
 	switch (family) {
 		case "repo_doc":
 			validateRepoDocMetadata(metadata, issues);
-			return;
-		case "web_docs_page":
-			validateWebDocsPageMetadata(metadata, issues);
 			return;
 		case "blog_post":
 			validateBlogPostMetadata(metadata, issues);
