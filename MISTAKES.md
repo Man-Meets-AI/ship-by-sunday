@@ -337,3 +337,9 @@
 - Mistake: I used `rg` against `.env*` files while checking whether provider credentials existed, which printed secret values instead of only key names or presence.
   Impact: Secret material was exposed in local command output during a read-only migration research pass; no provider state was changed.
   Corrective action: For future env checks, use a script that reports only boolean key presence and mode labels, never raw values.
+
+## 2026-05-16 Vercel Sensitive Env Default
+
+- Mistake: I added new production Vercel price/product IDs without accounting for the CLI default that makes Production and Preview variables sensitive.
+  Impact: `vercel env pull` returned those new values as empty strings, so the first production proof rerun still failed until I replaced the variables as pull-readable values.
+  Corrective action: For values this repo's proof runner must read through `vercel env pull`, explicitly use `vercel env add --no-sensitive` and verify the pulled file reports non-empty values.

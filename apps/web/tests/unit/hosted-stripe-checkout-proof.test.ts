@@ -161,6 +161,7 @@ describe("hosted Stripe checkout proof helpers", () => {
 			purchaseIntentId: "j123purchaseintent",
 		});
 		expect(session.mode).toBe("subscription");
+		expect(session.payment_method_collection).toBe("if_required");
 		expect(session.subscription_data.metadata).toEqual(session.metadata);
 		expect(session).not.toHaveProperty("payment_intent_data");
 		expect(session.line_items).toEqual([

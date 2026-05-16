@@ -311,6 +311,9 @@ export function buildHostedProofCheckoutSessionParams({
 		line_items: [{ price: priceId, quantity: 1 }],
 		metadata: checkoutMetadata,
 		mode: checkoutMode,
+		...(checkoutMode === "subscription"
+			? { payment_method_collection: "if_required" }
+			: {}),
 		...(checkoutMode === "payment"
 			? {
 					payment_intent_data: {
