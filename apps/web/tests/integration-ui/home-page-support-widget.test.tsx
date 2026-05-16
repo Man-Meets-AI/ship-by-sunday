@@ -160,9 +160,9 @@ describe("HomePageSupportWidget", () => {
 			expect(screen.getByText("Delivered to Parker")).toBeTruthy(),
 		);
 		expect(
-			screen.getByText("Got it. This went straight to Parker's Telegram."),
-		).toBeTruthy();
-		expect(screen.getByText("He'll reply here when he can.")).toBeTruthy();
+			screen.queryByText("Got it. This went straight to Parker's Telegram."),
+		).toBeNull();
+		expect(screen.queryByText("He'll reply here when he can.")).toBeNull();
 		expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/support/session", {
 			method: "GET",
 			headers: {

@@ -44,12 +44,11 @@ describe("telegram chat widget styles", () => {
 		}
 	});
 
-	it("renders system acknowledgements as compact inline notes", () => {
-		expect(widgetCss).toContain(".sbs-telegram-chat-system-message");
-		expect(widgetCss).toContain("align-self: flex-end;");
-		expect(widgetCss).toContain("text-align: left;");
-		expect(widgetCss).toContain(
-			".sbs-telegram-chat-system-message + .sbs-telegram-chat-system-message",
+	it("does not style stored system acknowledgements as visible transcript clutter", () => {
+		expect(widgetCss).not.toContain(".sbs-telegram-chat-message-row--system");
+		expect(widgetCss).not.toContain(
+			".sbs-telegram-chat-message-bubble--system",
 		);
+		expect(widgetCss).not.toContain(".sbs-telegram-chat-system-message");
 	});
 });

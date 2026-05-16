@@ -87,9 +87,9 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_SUPPORT_BOT_TOKEN/setWebhook
 
 Keep `allowed_updates` narrow. This bridge only accepts `message` replies and `callback_query` actions from the support topic inline keyboard.
 
-## Visitor acknowledgement
+## Visitor handoff
 
-On the first visitor message in a support thread, the website stores the visitor message and then shows two system acknowledgement messages:
+On the first visitor message in a support thread, Convex stores the visitor message and two internal system acknowledgement messages:
 
 ```text
 Got it. This went straight to Parker's Telegram.
@@ -97,7 +97,7 @@ Got it. This went straight to Parker's Telegram.
 He'll reply here when he can.
 ```
 
-These are `system` messages in Convex. They appear in the website widget only and are not sent to Telegram as visitor messages. They intentionally do not claim Parker is online and do not promise a response time.
+These are `system` messages in Convex. The website widget keeps the visible transcript clean and relies on the visitor bubble delivery label for the handoff state. The system acknowledgement records are not sent to Telegram as visitor messages, do not claim Parker is online, and do not promise a response time.
 
 ## Screenshots and bug reports
 
