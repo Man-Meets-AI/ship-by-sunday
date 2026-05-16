@@ -20,7 +20,7 @@ Keep this document current whenever external setup changes. External setup inclu
 Work from the repository root:
 
 ```bash
-cd /Users/bazelrex/Developer/ship-by-sunday
+cd <repo-root>
 bun install
 cp apps/web/.env.local.example apps/web/.env.local
 ```

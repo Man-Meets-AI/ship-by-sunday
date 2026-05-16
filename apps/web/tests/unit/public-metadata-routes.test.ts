@@ -7,11 +7,13 @@ import sitemap from "@/app/sitemap";
 
 vi.mock("server-only", () => ({}));
 
+const appRoot = path.resolve(import.meta.dirname, "../..");
+
 describe("public metadata routes", () => {
 	it("does not ship a public docs route tree", () => {
-		expect(
-			existsSync(path.join(process.cwd(), "src/app/(marketing)/docs")),
-		).toBe(false);
+		expect(existsSync(path.join(appRoot, "src/app/(marketing)/docs"))).toBe(
+			false,
+		);
 	});
 
 	it("publishes crawl rules for public pages while blocking account and workspace routes", () => {

@@ -102,9 +102,7 @@ Milestone 4 validates and records the outcome. At the end of this milestone, foc
 
 ## Concrete Steps
 
-Work from the repository root:
-
-    cd /Users/bazelrex/Developer/ship-by-sunday
+Work from the repository root.
 
 Search for stale public docs references before and after edits:
 
@@ -136,7 +134,7 @@ The observable public route contract is that `/docs` is not a routed product sur
 
 ### Test Commands
 
-Run these commands from `/Users/bazelrex/Developer/ship-by-sunday`:
+Run these commands from the repository root:
 
     bun run --cwd apps/web test:unit -- tests/unit/public-content-inventory.test.ts tests/unit/public-metadata-routes.test.ts tests/unit/blog-formatters.test.ts tests/unit/blog-structured-data.test.ts tests/unit/blog-page-paths.test.ts tests/unit/blog-metadata.test.ts tests/unit/blog-posts.test.ts tests/unit/home-page-render-model.test.ts tests/unit/home-page-structured-data.test.ts tests/unit/starter-selectors.test.ts tests/unit/public-marketing-surfaces.test.tsx
     bun run --cwd apps/web test:integration:ui -- tests/integration-ui/home-page-primary-cta.test.tsx
