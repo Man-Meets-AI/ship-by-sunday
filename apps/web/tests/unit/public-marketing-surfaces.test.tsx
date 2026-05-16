@@ -129,8 +129,11 @@ describe("public marketing surfaces", () => {
 		expectPublicRouteSurface(markup);
 		expect(markup).toContain('data-slot="public-route-panel"');
 		expect(markup).toContain('data-testid="starter-checkout-cta"');
-		expect(markup).toContain('data-offer-id="starter"');
+		expect(markup).toContain('data-testid="starter-interactive-preview"');
+		expect(markup).toContain('data-testid="starter-preview-checkout-cta"');
+		expect(markup.match(/data-offer-id="starter"/g)).toHaveLength(2);
 		expect(markup).toContain('href="/workers"');
+		expect(markup).not.toContain('data-testid="codebase-demo-codebase-branch"');
 	});
 
 	it("preserves Workers checkout while using public route panels", () => {

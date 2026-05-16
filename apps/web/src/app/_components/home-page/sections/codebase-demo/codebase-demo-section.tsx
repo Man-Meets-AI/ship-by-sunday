@@ -12,13 +12,10 @@ import {
 	type LeverageHeroOptionId,
 } from "./codebase-demo-leverage-hero";
 import { useCodebaseDemoStaggerDelays } from "./codebase-demo-motion";
-import {
-	CodebaseDemoSidebar,
-	type CodebaseDemoSidebarProgressEntry,
-} from "./codebase-demo-sidebar";
+import { CodebaseDemoSidebar } from "./codebase-demo-sidebar";
+import { buildCodebaseDemoSidebarProgress } from "./codebase-demo-sidebar-progress";
 import { CodebaseDemoTopBar } from "./codebase-demo-top-bar";
 import { ScrollReveal } from "../scroll-reveal";
-import type { HomePageCodebaseDraftFields } from "./home-page-codebase-draft-storage";
 import { useHomePageCodebaseDraft } from "./use-home-page-codebase-draft";
 
 type CodebaseDemoSection = HomePageContent["productPreviewSection"];
@@ -40,7 +37,7 @@ export function CodebaseDemoSectionBlock({
 	const cardStaggerDelays = useCodebaseDemoStaggerDelays(
 		section.sections.length,
 	);
-	const sidebarProgress = buildSidebarProgress(
+	const sidebarProgress = buildCodebaseDemoSidebarProgress(
 		draft.fields,
 		section.design.defaultPresetId,
 		section.pricing.defaultModel,
@@ -102,44 +99,4 @@ export function CodebaseDemoSectionBlock({
 			<div className="h-16 sm:hidden" aria-hidden="true" />
 		</section>
 	);
-}
-
-function buildSidebarProgress(
-	fields: HomePageCodebaseDraftFields,
-	defaultPresetId: string,
-	defaultPricingModel: string,
-	defaultPrice: string,
-): readonly CodebaseDemoSidebarProgressEntry[] {
-	const foundationValues = [
-		fields.product_name,
-		fields.product_summary,
-		fields.primary_user,
-	].map((value) => value.trim());
-	const filledFoundationCount = foundationValues.filter(
-		(value) => value.length > 0,
-	).length;
-	const foundationStatus =
-		filledFoundationCount === 0
-			? "empty"
-			: filledFoundationCount === foundationValues.length
-				? "complete"
-				: "started";
-
-	const designStatus =
-		fields.design_preset_id !== defaultPresetId ? "complete" : "empty";
-
-	const pricingValueChanged = fields.pricing.trim() !== defaultPrice;
-	const pricingModelChanged = fields.pricing_model !== defaultPricingModel;
-	const pricingHasUserValue = fields.pricing.trim().length > 0;
-	const pricingStatus = !pricingHasUserValue
-		? "empty"
-		: pricingValueChanged || pricingModelChanged
-			? "complete"
-			: "started";
-
-	return [
-		{ id: "foundation", status: foundationStatus },
-		{ id: "design", status: designStatus },
-		{ id: "pricing", status: pricingStatus },
-	];
 }

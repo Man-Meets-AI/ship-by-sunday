@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { CheckoutButton } from "@/app/checkout/_components/checkout-button";
+import { homePageContent } from "@/app/_content/home-page";
 import {
 	PublicRouteContainer,
 	PublicRouteDescription,
@@ -25,6 +26,7 @@ import {
 	PublicRouteTitle,
 } from "@/components/layout/public-route-surface";
 import { PublicSiteHeader } from "@/components/layout/public-site-header";
+import { StarterInteractivePreview } from "@/components/starter/StarterInteractivePreview";
 import { Button } from "@/components/ui/button";
 import { routeConfig } from "@/config/product";
 import { checkoutOffers } from "@/platform/billing/checkout/checkout-offers";
@@ -105,6 +107,10 @@ export default function StarterPage() {
 					</div>
 				</PublicRouteContainer>
 			</PublicRouteSection>
+			<StarterInteractivePreview
+				section={homePageContent.productPreviewSection}
+				offerPriceDisplay={starterOffer.priceDisplay}
+			/>
 			<PublicRouteSection tone="muted">
 				<PublicRouteContainer className="grid gap-8 py-14 lg:grid-cols-[0.8fr_1.2fr]">
 					<div>
