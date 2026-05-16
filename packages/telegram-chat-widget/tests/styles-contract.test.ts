@@ -43,4 +43,13 @@ describe("telegram chat widget styles", () => {
 			expect(widgetCss).not.toContain(oldShellColor);
 		}
 	});
+
+	it("renders system acknowledgements as compact inline notes", () => {
+		expect(widgetCss).toContain(".sbs-telegram-chat-system-message");
+		expect(widgetCss).toContain("align-self: flex-end;");
+		expect(widgetCss).toContain("text-align: left;");
+		expect(widgetCss).toContain(
+			".sbs-telegram-chat-system-message + .sbs-telegram-chat-system-message",
+		);
+	});
 });

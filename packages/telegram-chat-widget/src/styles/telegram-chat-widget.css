@@ -612,11 +612,26 @@
 }
 
 .sbs-telegram-chat-system-message {
-	padding: 0 28px;
-	color: var(--sbs-chat-muted-foreground);
+	width: fit-content;
+	max-width: min(22rem, 82%);
+	align-self: flex-end;
+	margin-inline-end: 4px;
+	border: 1px solid var(--sbs-chat-border);
+	border-radius: var(--sbs-chat-radius-lg);
+	background: color-mix(in srgb, var(--sbs-chat-muted) 76%, transparent);
+	color: color-mix(
+		in srgb,
+		var(--sbs-chat-muted-foreground) 88%,
+		var(--sbs-chat-foreground)
+	);
 	font-size: 12px;
-	line-height: 20px;
-	text-align: center;
+	line-height: 18px;
+	padding: 7px 10px;
+	text-align: left;
+}
+
+.sbs-telegram-chat-system-message + .sbs-telegram-chat-system-message {
+	margin-top: -6px;
 }
 
 .sbs-telegram-chat-message-attachment {
