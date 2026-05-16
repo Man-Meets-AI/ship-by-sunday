@@ -53,6 +53,7 @@ describe("StarterInteractivePreview", () => {
 		);
 
 		expect(screen.getByTestId("starter-interactive-preview")).toBeTruthy();
+		expect(screen.getByTestId("starter-preview-live-panel")).toBeTruthy();
 		expect(screen.queryByTestId("codebase-demo-codebase-branch")).toBeNull();
 		expect(
 			screen
@@ -74,6 +75,9 @@ describe("StarterInteractivePreview", () => {
 			screen.getByTestId("codebase-demo-input-product_name"),
 			"Telemetry Pro",
 		);
+		expect(
+			screen.getByTestId("starter-preview-live-product-name").textContent,
+		).toBe("Telemetry Pro");
 		await user.type(
 			screen.getByTestId("codebase-demo-input-product_summary"),
 			"Ops teams spot revenue leaks before renewal calls.",

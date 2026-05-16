@@ -3,11 +3,8 @@
 import { WandSparkles } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
-import { CodebaseDemoCard } from "@/app/_components/home-page/sections/codebase-demo/codebase-demo-card";
-import { CodebaseDemoSidebar } from "@/app/_components/home-page/sections/codebase-demo/codebase-demo-sidebar";
 import { buildCodebaseDemoSidebarProgress } from "@/app/_components/home-page/sections/codebase-demo/codebase-demo-sidebar-progress";
 import { useHomePageCodebaseDraft } from "@/app/_components/home-page/sections/codebase-demo/use-home-page-codebase-draft";
-import type { HomePageContent } from "@/app/_content/home-page";
 import {
 	PublicRouteContainer,
 	PublicRouteEyebrow,
@@ -16,10 +13,15 @@ import {
 	PublicRouteSectionTitle,
 } from "@/components/layout/public-route-surface";
 
+import { StarterPreviewControls } from "./StarterPreviewControls";
 import { StarterPreviewCheckoutBar } from "./StarterPreviewCheckoutBar";
-
-type StarterPreviewSection = HomePageContent["productPreviewSection"];
-type StarterPreviewSectionRow = StarterPreviewSection["sections"][number];
+import { StarterPreviewLivePanel } from "./StarterPreviewLivePanel";
+import { StarterPreviewPill } from "./StarterPreviewPill";
+import { StarterPreviewProgressRail } from "./StarterPreviewProgressRail";
+import type {
+	StarterPreviewSection,
+	StarterPreviewSectionRow,
+} from "./StarterPreviewTypes";
 
 const STARTER_PREVIEW_SECTION_IDS = [
 	"foundation",
@@ -45,6 +47,10 @@ export function StarterInteractivePreview({
 		() => section.sections.filter(isStarterPreviewSection),
 		[section.sections],
 	);
+	const generatedPreviewSection =
+		previewSections.find(
+			(sectionRow) => sectionRow.id === "generated-preview",
+		) ?? null;
 	const sidebarProgress = buildCodebaseDemoSidebarProgress(
 		draft.fields,
 		section.design.defaultPresetId,
@@ -58,44 +64,55 @@ export function StarterInteractivePreview({
 
 	return (
 		<PublicRouteSection tone="muted" data-testid="starter-interactive-preview">
-			<PublicRouteContainer className="grid min-w-0 gap-8 py-14 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-				<div className="min-w-0 lg:sticky lg:top-24">
-					<PublicRouteIcon>
-						<WandSparkles className="size-5" aria-hidden />
-					</PublicRouteIcon>
-					<PublicRouteEyebrow className="mt-5">
-						Starter preview
-					</PublicRouteEyebrow>
-					<PublicRouteSectionTitle>
-						Try the first three answers before checkout.
-					</PublicRouteSectionTitle>
-					<p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">
-						Shape the idea, pick the design direction, and set the first pricing
-						assumption. Starter saves the draft locally so the protected
-						workspace can pick up where this preview leaves off.
-					</p>
-					<div className="mt-5 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3 lg:grid-cols-1">
-						<StarterPreviewPill label="Idea" value="Product facts" />
-						<StarterPreviewPill label="Design" value="Visual DNA" />
-						<StarterPreviewPill label="Repo" value="Unlocked after checkout" />
+			<PublicRouteContainer className="grid min-w-0 gap-8 py-14">
+				<div className="grid min-w-0 gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+					<div className="min-w-0">
+						<PublicRouteIcon>
+							<WandSparkles className="size-5" aria-hidden />
+						</PublicRouteIcon>
+						<PublicRouteEyebrow className="mt-5">
+							Starter preview
+						</PublicRouteEyebrow>
+						<PublicRouteSectionTitle>
+							Turn the idea into repo-ready facts.
+						</PublicRouteSectionTitle>
+						<p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">
+							Shape the product, design direction, and pricing assumption in a
+							compact pass. Starter saves the draft locally so the protected
+							workspace can pick up where this preview leaves off.
+						</p>
+						<div className="mt-5 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
+							<StarterPreviewPill label="Idea" value="Product facts" />
+							<StarterPreviewPill label="Design" value="Visual DNA" />
+							<StarterPreviewPill
+								label="Repo"
+								value="Unlocked after checkout"
+							/>
+						</div>
 					</div>
-					<div className="mt-5">
-						<CodebaseDemoSidebar
+					<StarterPreviewLivePanel
+						section={section}
+						draft={draft}
+						offerPriceDisplay={offerPriceDisplay}
+					/>
+				</div>
+				<div className="grid min-w-0 gap-4 lg:grid-cols-[18rem_minmax(0,1fr)] lg:items-start">
+					<div className="min-w-0 lg:sticky lg:top-24">
+						<StarterPreviewProgressRail
 							sections={previewSections}
 							progress={sidebarProgress}
 						/>
 					</div>
-				</div>
-				<div className="min-w-0 space-y-4">
-					{previewSections.map((sectionRow, index) => (
-						<CodebaseDemoCard
-							key={sectionRow.id}
+					<div className="min-w-0 space-y-4">
+						<StarterPreviewControls
 							section={section}
-							sectionRow={sectionRow}
-							sectionNumber={index + 1}
 							draft={draft}
+							generatedPreviewSection={generatedPreviewSection}
 						/>
-					))}
+					</div>
+				</div>
+				<div className="grid min-w-0 lg:grid-cols-[18rem_minmax(0,1fr)]">
+					<div aria-hidden="true" />
 					<StarterPreviewCheckoutBar
 						label={section.cta.label}
 						lockedNote={section.cta.lockedNote}
@@ -113,23 +130,4 @@ export function StarterInteractivePreview({
 
 function isStarterPreviewSection(sectionRow: StarterPreviewSectionRow) {
 	return STARTER_PREVIEW_SECTION_IDS.some((id) => id === sectionRow.id);
-}
-
-function StarterPreviewPill({
-	label,
-	value,
-}: {
-	readonly label: string;
-	readonly value: string;
-}) {
-	return (
-		<div className="rounded-lg border border-border/70 bg-background/70 px-3 py-2">
-			<p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-				{label}
-			</p>
-			<p className="mt-1 text-sm font-medium leading-5 text-foreground">
-				{value}
-			</p>
-		</div>
-	);
 }

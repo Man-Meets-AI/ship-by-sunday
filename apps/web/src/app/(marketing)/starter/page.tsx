@@ -53,7 +53,7 @@ export default function StarterPage() {
 		<PublicRoutePage>
 			<PublicSiteHeader activeHref={routeConfig.starter} />
 			<PublicRouteSection>
-				<PublicRouteContainer className="grid min-h-[calc(88svh-4rem)] content-center gap-10 py-14 lg:grid-cols-[1.05fr_0.95fr]">
+				<PublicRouteContainer className="grid min-h-[calc(68svh-4rem)] content-center gap-10 py-14 lg:grid-cols-[1.05fr_0.95fr]">
 					<PublicRouteHeader>
 						<PublicRouteEyebrow>Starter</PublicRouteEyebrow>
 						<PublicRouteTitle>Ship your idea by Sunday.</PublicRouteTitle>
