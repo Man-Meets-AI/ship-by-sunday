@@ -29,17 +29,17 @@
 		"package:smoke": "jiti tests/package-smoke.ts"
 	},
 	"dependencies": {
-		"@effect/platform": "^0.96.1",
-		"@effect/platform-node": "^0.106.0",
-		"effect": "^3.21.2"
+		"@effect/platform": "^0.96.2",
+		"@effect/platform-node": "^0.107.0",
+		"effect": "^3.21.4"
 	},
 	"devDependencies": {
 		"@types/node": "25.5.0",
-		"esbuild": "0.27.0",
-		"jiti": "^2.6.1",
+		"esbuild": "0.28.1",
+		"jiti": "^2.7.0",
 		"oxfmt": "^0.46.0",
 		"oxlint": "^1.56.0",
-		"typescript": "5.9.3",
-		"vitest": "^4.1.0"
+		"typescript": "6.0.3",
+		"vitest": "^4.1.9"
 	}
 }
