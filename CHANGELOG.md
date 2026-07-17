@@ -2,7 +2,14 @@
 
 Release notes are published on the [GitHub Releases page](https://github.com/Man-Meets-AI/ship-by-sunday/releases).
 
-This file keeps the manifest-backed release-note source used by `release.json` and the tag-release workflow. The `release.json` `changelogHeading` must match the next release section before a protected tag is cut.
+This file keeps the manifest-backed release-note source used by `release.json`. The `release.json` `changelogHeading` must match the next release section before a protected tag is cut.
+
+## Unreleased
+
+### Changed
+
+- Removed repository-owned GitHub Actions workflows, the vendored Effect reference subtree, and committed Playwright/proof screenshots.
+- Refreshed workspace dependencies and the Bun lockfile.
 
 ## v0.4.0 - 2026-04-27
 

@@ -49,15 +49,10 @@ Deployment workflow: [docs/release-workflow.md](../../../docs/release-workflow.m
 
 ## Production workflow
 
-Production Convex deploys now come from GitHub Actions, not from a maintainer's local shell habit.
-
-- `.github/workflows/convex-production-deploy.yml` runs automatically on pushes to `main`
-- the same workflow supports `workflow_dispatch`, and manual runs default to `dry_run: true`
-- automatic push deploys stay paused until the GitHub repository variable `CONVEX_PRODUCTION_DEPLOY_ENABLED` is set to `true`
-- the workflow runs `bun install --frozen-lockfile` at the repo root and `bunx convex deploy` from `apps/web`
-- GitHub repository secret `CONVEX_DEPLOY_KEY` must contain a production-scoped deploy key from the Convex dashboard for the current production deployment.
-
-Use local `bunx convex deploy --dry-run -y` for validation while preparing release automation, land the workflow on `main`, run the GitHub-hosted dry-run there, and only then set `CONVEX_PRODUCTION_DEPLOY_ENABLED=true` so later `main` merges deploy automatically.
+This repository does not automatically deploy Convex. Before a production release,
+run `bunx convex deploy --dry-run -y` from `apps/web`, review the target deployment,
+then perform the production deploy through the approved operator environment. Confirm
+that Convex and Vercel both serve the intended `main` commit before publishing a tag.
 
 ## Key files
 

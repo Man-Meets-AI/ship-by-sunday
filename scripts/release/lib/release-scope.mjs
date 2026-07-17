@@ -1,6 +1,4 @@
 const exactBillingSensitivePaths = new Set([
-	".github/workflows/dev-staging-payment-proof.yml",
-	".github/workflows/production-release-proof.yml",
 	"apps/web/convex/entitlements.ts",
 	"apps/web/convex/checkoutClaims.ts",
 	"apps/web/convex/checkoutClaimsActions.ts",

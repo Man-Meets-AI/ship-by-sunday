@@ -18,9 +18,9 @@
 		"test": "vitest run --config vitest.config.ts"
 	},
 	"peerDependencies": {
-		"convex": "^1.37.0",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"convex": "^1.42.1",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7"
 	},
 	"peerDependenciesMeta": {
 		"convex": {
@@ -28,15 +28,15 @@
 		}
 	},
 	"dependencies": {
-		"lucide-react": "^1.11.0"
+		"lucide-react": "^1.24.0"
 	},
 	"devDependencies": {
-		"@types/node": "25.5.0",
-		"@types/react": "19.2.14",
+		"@types/node": "26.1.1",
+		"@types/react": "19.2.17",
 		"@types/react-dom": "19.2.3",
-		"oxfmt": "^0.46.0",
-		"oxlint": "^1.56.0",
+		"oxfmt": "^0.58.0",
+		"oxlint": "^1.73.0",
 		"typescript": "5.9.3",
-		"vitest": "^4.1.0"
+		"vitest": "^4.1.10"
 	}
 }

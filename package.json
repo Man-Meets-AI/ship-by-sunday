@@ -7,6 +7,9 @@
 		"apps/web",
 		"packages/*"
 	],
+	"devDependencies": {
+		"yaml": "^2.9.0"
+	},
 	"scripts": {
 		"dev": "bun run --cwd apps/web dev",
 		"dev:core": "bun run --cwd apps/web dev:core",

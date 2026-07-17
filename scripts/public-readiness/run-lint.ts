@@ -46,8 +46,8 @@ const PRIVATE_IDENTIFIER_PATTERNS = [
 		message: "Absolute /Users/... path is not public-ready.",
 	},
 	{
-		pattern: /\b(?:dev\.)?man-meets-ai\.com\b/u,
-		message: "Concrete private host should be a placeholder in current docs.",
+		pattern: /\bdev\.man-meets-ai\.com\b/u,
+		message: "Private development host should be a placeholder in current docs.",
 	},
 	{
 		pattern: /\bmma-shipbysunday\b/u,

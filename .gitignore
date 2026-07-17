@@ -20,6 +20,8 @@ apps/web/coverage
 packages/local-runner/dist/
 playwright-report
 apps/web/playwright-report
+output/playwright/
+docs/exec-plans/active/_evidence/
 test-results
 apps/web/test-results
 .screenshots/

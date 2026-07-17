@@ -18,14 +18,6 @@
 - `docs/openai/` and `docs/ship-by-sunday/` are source instruction packs. `docs/generated/` mirrors generated customer-facing output. Do not edit generated mirrors without also updating their source or the generation path.
 - Treat `docs/ship-by-sunday/` as background context unless a local `AGENTS.md`, Program packet, or current runtime code points there as the active contract.
 
-## Vendored Reference Repositories
-
-- `repos/effect/` is a squashed `git subtree` copy of the upstream Effect repository for local reference while migrating `packages/local-runner`.
-- Treat `repos/effect/` as read-only reference material. Do not edit files under it unless the task is explicitly to refresh the subtree from upstream.
-- Do not import runtime code from `repos/effect/`. Production code must use published packages such as `effect` and `@effect/platform-node` after they are added as dependencies.
-- When working on the Effect migration, inspect `repos/effect/AGENTS.md` and `repos/effect/LLMS.md` if present, then read only the relevant Effect source or docs needed for the slice.
-- Refresh the reference from a clean worktree with `git subtree pull --prefix=repos/effect https://github.com/Effect-TS/effect.git main --squash`.
-
 ## Default Workflow
 
 1. Inspect the relevant code, docs, and nearest instruction files before changing anything.
@@ -114,8 +106,7 @@ Do not re-hardwire checkout into hero or pricing, scatter section gating across 
 
 - `scripts/release/` owns release proof orchestration, release personas, release evidence, and hosted proof command wiring.
 - `release.json` owns the release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
-- `.github/workflows/release.yml` owns tag publication and release-evidence assembly for verified `main` commits.
-- The durable required CI contexts are `static` and `integration`.
+- This repository does not contain GitHub Actions workflows. Run the documented local checks before merge and verify Vercel and Convex deployment state explicitly after merge.
 - Do not invent alternate release-proof formats in a skill folder, PR comment, or one-off script.
 - Release evidence must name the target environment and must not mix local, preview, dev, and prod proof without saying so.
 

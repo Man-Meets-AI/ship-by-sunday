@@ -23,7 +23,7 @@ Useful defaults:
 - `bun typecheck`
 - focused unit, integration, compiler, release, or markdown checks for the touched surface
 
-Local git hooks are not repository enforcement. PR CI and the release proof workflows are the durable gates.
+Local git hooks are not repository enforcement. Run and report the relevant local checks before requesting review.
 
 ## Pull Request Notes
 

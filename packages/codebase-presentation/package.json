@@ -17,10 +17,10 @@
 		"@shipbysunday/codebase-compiler": "workspace:*"
 	},
 	"devDependencies": {
-		"@types/node": "25.5.0",
-		"oxfmt": "^0.41.0",
-		"oxlint": "^1.56.0",
+		"@types/node": "26.1.1",
+		"oxfmt": "^0.58.0",
+		"oxlint": "^1.73.0",
 		"typescript": "5.9.3",
-		"vitest": "^4.1.0"
+		"vitest": "^4.1.10"
 	}
 }

@@ -1,161 +1,134 @@
 # Ship by Sunday
 
-Ship by Sunday is an agent-ready, codebase-first SaaS starter for turning one product idea into durable design, marketing, build, and prompt handoff packs. The repo includes the public marketing site, protected codebase workspace, Stripe checkout flow, Clerk auth, Convex backend, codebase compiler, and the docs/runbook surfaces that support that contract.
+> Turn a rough product idea—or a codebase that has lost the plot—into an AI-ready system you can actually keep shipping.
 
-## Design system
+[Explore the live product](https://www.man-meets-ai.com) · [Read the architecture](./docs/ARCHITECTURE.md) · [See the design system](./DESIGN.md)
 
-The canonical visual source of truth is [`DESIGN.md`](DESIGN.md).
+![A product definition becoming design, marketing, and build context](./apps/web/public/agent-ready-packs-preview.svg)
 
-Use it before changing any user-facing UI. It documents the shared neutral app tokens, the Ship by Sunday brand accents, typography, component defaults, layout principles, and current design-system gaps.
+Ship by Sunday is a production-shaped SaaS and agentic development platform. It captures durable product context, compiles that context into an executable codebase, and gives AI workers enough structure to make bounded changes with proof.
 
-## What lives here
+It supports two starting points:
 
-- `apps/web/`: the main Next.js product, docs, protected workspace, checkout, and optional Codex runtime.
-- `packages/codebase-compiler/`: the generator behind the customer-facing Ship by Sunday Codebase, including the downloaded repo’s generated root `DESIGN.md`, machine-readable design snapshot, and starter-runtime design config.
-- `scripts/release/`: release proof orchestration, release personas, release evidence, and release workflow helpers.
-- `release.json`: the manifest-backed release identity contract for protected `vMAJOR.MINOR.PATCH` tags.
-- `docs/`: the canonical contributor and agent-facing docs spine, plus ExecPlans, prompts, references, and generated analyses.
+- **Starter** turns a new idea into product truth, an AI-ready starter codebase, a Program, and executable plans.
+- **Workers** diagnoses an existing web app locally, ranks its highest-leverage blockers, and runs approved worker loops without uploading the raw repository.
 
-The protected paid-app journey is codebase-first:
+This is not a prompt collection or a toy generator. It is an attempt to make AI-assisted product development feel less like restarting in a chat window and more like improving a product with a spine.
 
-`/home -> /generate-codebase -> /generate-codebase/review`
+## What makes it interesting
 
-The `/generate-codebase/review` contract exposes one download artifact, the `Ship by Sunday Codebase`, not separate design, marketing, or build downloads.
+| Surface | What it does |
+| --- | --- |
+| Product workspace | Guides founders from rough intent to a reviewable product definition and downloadable codebase. |
+| Codebase compiler | Converts structured product facts into design context, marketing direction, implementation plans, and agent instructions. |
+| Local runner | Inspects existing repositories on the user's machine and shares only approved, sync-safe findings. |
+| Worker loop | Turns larger initiatives into Programs and bounded ExecPlans, then returns proof or an honest blocked-proof report. |
+| Production SaaS | Connects Clerk authentication, Stripe billing, Convex data, Vercel hosting, and PostHog observability. |
 
-## Quick start
+The core loop is deliberately simple:
 
-1. Install dependencies:
+```text
+idea or existing repo
+        ↓
+product truth or local doctor pass
+        ↓
+Program → ExecPlans → approved worker loop
+        ↓
+diff + validation + proof + next recommendation
+```
+
+## Built with
+
+- **Next.js 16**, **React 19**, and **TypeScript**
+- **Convex** for the hosted backend and durable workflow state
+- **Clerk** for authentication and protected product access
+- **Stripe** for checkout, subscriptions, and entitlement handoff
+- **Tailwind CSS** and **shadcn/ui** for the interface system
+- **Effect** for typed orchestration in the local runner
+- **Vitest** and **Playwright** for unit, integration, and browser coverage
+- **Bun** workspaces for the monorepo toolchain
+
+## Repository map
+
+```text
+apps/web/                         Next.js product, API routes, and Convex backend
+packages/codebase-compiler/       Product-facts → agent-ready codebase compiler
+packages/codebase-presentation/   Review and presentation layer for generated output
+packages/local-runner/            Local-first diagnosis and worker orchestration
+packages/telegram-chat-widget/    Product support and async interaction surface
+templates/starter-app/            Generated starter application source
+docs/                             Architecture, product, reliability, and operating docs
+```
+
+The protected Starter journey is:
+
+```text
+/starter/home → /starter/generate-codebase → /starter/generate-codebase/review
+```
+
+The Workers journey lives under `/workers`, beginning with local setup and the private doctor pass.
+
+## Run it locally
+
+### 1. Install dependencies
 
 ```bash
 bun install
 ```
 
-2. Copy the tracked env template:
+### 2. Create the local environment file
 
 ```bash
 cp apps/web/.env.local.example apps/web/.env.local
 ```
 
-Set `APP_BASE_URL` to the canonical host you want Stripe to use for checkout success and cancel redirects. For local development, keep it on `http://localhost:3000`.
+Add development credentials for the providers you want to exercise. Set `APP_BASE_URL=http://localhost:3000` for local Stripe redirects.
 
-If you enable PostHog error tracking and source-map upload, set `NEXT_PUBLIC_POSTHOG_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `POSTHOG_PROJECT_ID`, and `POSTHOG_API_KEY` in `apps/web/.env.local` and in the Vercel project. `POSTHOG_API_KEY` should be a project-scoped PostHog personal API key with only the `Source map upload` scope. Use a separate OAuth login or separate `MCP Server` key for PostHog MCP.
-
-3. Connect the repo to your hosted Convex dev deployment:
+### 3. Connect a hosted Convex development deployment
 
 ```bash
 bun run dev:convex
 ```
 
-4. Start the normal local workflow:
+### 4. Start the app
 
-```bash
-bun run dev
-```
-
-`bun run dev` now means the full local buyer-flow environment: web, hosted Convex dev sync, and Stripe forwarding.
-
-If you want the lighter web-plus-Convex flow without Stripe forwarding, use:
+For the web app and hosted Convex workflow:
 
 ```bash
 bun run dev:core
 ```
 
-`bun run dev:web` is a compatibility alias to the same full-stack startup as `bun run dev`, so older muscle memory still lands on the normal local workflow.
-
-If you need to run one subsystem on purpose:
+For the complete buyer flow, including local Stripe forwarding:
 
 ```bash
-bun run dev:convex
-bun run dev:stripe
-bun run dev:full
-bun run --cwd apps/web dev:web:only
+bun run dev
 ```
 
-This repo does not support Convex local mode as a first-class workflow.
+The repository intentionally uses hosted Convex development rather than Convex local mode.
 
-## Common commands
+## Quality gates
 
 ```bash
-bun run format
-bun run typecheck
-bun run lint
 bun run format:check
+bun run lint
+bun run typecheck
 bun run test:unit
-bun run test:contracts
+bun run test:packages
 bun run test:integration
 bun run build
-bun run posthog:proof
-bun run markdown:lint -- --paths <repo-path-or-dir>
-bun run public-readiness:lint
-bun run plans:lint -- --plan docs/exec-plans/active/<plan-file>.md
-bun run check
 ```
 
-Run `bun run posthog:proof` after a production build when PostHog is enabled. The command checks required PostHog env presence and injected source-map chunk IDs without printing secret values; operators should still confirm the uploaded symbol set in PostHog.
+`bun run typecheck` exercises the production Next.js build as well as every TypeScript workspace. For the broad local verification path, run `bun run check`.
 
-Release operators also use:
+## Design and engineering notes
 
-```bash
-bun run release:manifest:check
-bun run release:notes:build
-bun run release:evidence:build
-bun run release:proof -- --proof=default_ship --dry-run
-```
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Product sense](./docs/PRODUCT_SENSE.md)
+- [Frontend conventions](./docs/FRONTEND.md)
+- [Reliability](./docs/RELIABILITY.md)
+- [Security](./docs/SECURITY.md)
+- [Design system](./DESIGN.md)
+- [Contributor guide](./CONTRIBUTING.md)
+- [Changelog](./CHANGELOG.md)
 
-For the full command map, use [docs/design-docs/scripts.md](./docs/design-docs/scripts.md).
-
-## Operations
-
-- Docs index: [docs/index.md](./docs/index.md)
-- Observability runbook: [docs/internal/observability.md](./docs/internal/observability.md)
-- Linear runbook: [docs/internal/linear.md](./docs/internal/linear.md)
-- Release workflow runbook: [docs/release-workflow.md](./docs/release-workflow.md)
-- Release manifest: [release.json](./release.json)
-- Homepage contract: [apps/web/src/content/docs/configure-the-homepage.mdx](./apps/web/src/content/docs/configure-the-homepage.mdx)
-- Public docs index: [apps/web/src/content/docs/index.mdx](./apps/web/src/content/docs/index.mdx)
-
-Relevant deeper reference docs:
-
-- [docs/design-docs/index.md](./docs/design-docs/index.md)
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
-- [docs/RELIABILITY.md](./docs/RELIABILITY.md)
-- [docs/SECURITY.md](./docs/SECURITY.md)
-- [docs/FRONTEND.md](./docs/FRONTEND.md)
-- [docs/DESIGN.md](./docs/DESIGN.md)
-- [docs/PRODUCT_SENSE.md](./docs/PRODUCT_SENSE.md)
-- [docs/QUALITY_SCORE.md](./docs/QUALITY_SCORE.md)
-
-## Asking Codex To Ship
-
-If you want Codex to take a change all the way through GitHub and production, say it directly.
-
-Good prompts:
-
-- `$land this`
-- `ship this to prod`
-- `take this to prod`
-- `land this end to end`
-- `shepherd this through dev and main`
-
-`$land` is the clearest phrasing because it tells Codex to use the repo's shipping skill and stay on the work until the relevant commit reaches `main` and the release proof surface is green.
-
-For this repo, that means:
-
-- feature branch from `main`
-- pull request into `main`
-- release manifest and tag evidence stay consistent with the merged `main` commit
-- and post-merge hosted proof verifies the exact production deployment from `main`
-
-If you want a lighter touch, say so explicitly. For example:
-
-- `open the PR but do not merge`
-- `prepare the PR and stop`
-- `ship this, but ask before the final merge`
-
-## Docs
-
-- Contributor guide: [CONTRIBUTING.md](./CONTRIBUTING.md)
-- Changelog: [CHANGELOG.md](./CHANGELOG.md)
-- Root agent instructions: [AGENTS.md](./AGENTS.md)
-
-If you are new to the repo, start with `README.md`, then `AGENTS.md`, then `docs/index.md`, then `DESIGN.md`, then `docs/release-workflow.md` or `apps/web/src/content/docs/local-qa.mdx` depending on whether you are shipping or debugging app-local tests.
+Ship by Sunday is built around one principle: **the first AI pass is never the finish line**. Product truth, execution plans, trust boundaries, and proof stay attached to the repository so the next change can begin with context instead of archaeology.

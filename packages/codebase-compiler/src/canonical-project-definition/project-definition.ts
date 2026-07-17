@@ -4,7 +4,6 @@ import {
 	canonicalProjectFactsDraftSchema,
 	type CanonicalProjectDefinition,
 	type CanonicalProjectDefinitionDraft,
-	type CanonicalProjectFacts,
 	type CanonicalProjectFactsDraft,
 } from "./schema";
 import { deriveCodebaseFacts } from "./derived-codebase-facts";

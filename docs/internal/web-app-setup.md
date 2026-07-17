@@ -85,7 +85,9 @@ CLERK_SECRET_KEY=
 CLERK_FRONTEND_API_URL=
 ```
 
-GitHub repository secrets and variables own release/deploy automation. `CONVEX_DEPLOY_KEY` belongs in GitHub repository secrets for `.github/workflows/convex-production-deploy.yml`, not in the Vercel project. Production release proof also expects `VERCEL_TOKEN` as a GitHub secret and `VERCEL_PROJECT_ID` plus `VERCEL_TEAM_ID` as repository variables when deployment metadata must be checked.
+The approved operator environment owns release/deploy credentials. Keep the production
+Convex deploy key and Vercel inspection token out of the repository and application
+runtime environments. Use them only for explicit deployment and release verification.
 
 ## Clerk And Convex Auth
 
@@ -278,7 +280,9 @@ Vercel checklist:
 - Use production Clerk and Stripe live values in production.
 - Keep PostHog MCP credentials out of Vercel app env.
 
-Convex production promotion happens from GitHub Actions on `main` through `.github/workflows/convex-production-deploy.yml`. Do not make Vercel responsible for production Convex deploys in this repo.
+Convex production promotion is an explicit operator action after the target `main`
+commit passes local verification. Do not make Vercel responsible for production Convex
+deploys in this repo.
 
 ## Route Map
 
@@ -403,7 +407,7 @@ After enabling PostHog source maps, run:
 bun run posthog:proof
 ```
 
-Success means payment, access, route protection, observability, and deployment provenance agree on the same release: the web app came from Vercel `main`, the backend came from the Convex production workflow on `main`, and both use the same production env values.
+Success means payment, access, route protection, observability, and deployment provenance agree on the same release: the web app came from Vercel `main`, the backend was explicitly promoted to Convex production, and both use the same production env values.
 
 ## Failure Shapes
 
